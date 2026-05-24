@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CommentData } from "@/utils/api/api";
 import { Icon } from "../ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
@@ -38,8 +38,9 @@ import { useCommentsContext } from "./CommentsContext";
 import Twemoji from "react-twemoji";
 import { useTwemoji } from "@/contexts/TwemojiContext";
 import { toast } from "sonner";
+import { CommentTextarea } from "./CommentTextarea";
 
-export function CommentItem({ comment }: { comment: CommentData }) {
+function CommentItemInner({ comment }: { comment: CommentData }) {
   const {
     userData,
     currentUserId,
@@ -49,15 +50,11 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     trade,
     editingCommentId,
     setEditingCommentId,
-    editContent,
-    setEditContent,
     updatingCommentId,
     replyingToId,
     setReplyingToId,
     replyingToReplyId,
     setReplyingToReplyId,
-    replyContent,
-    setReplyContent,
     expandedComments,
     expandedReplies,
     isSubmittingComment,
@@ -65,6 +62,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     isRateLimited,
     reactionBan,
     availableEmojis,
+    emojiStringMap,
     reactionPickerHoverOpenId,
     setReactionPickerHoverOpenId,
     handleReact,
@@ -81,6 +79,27 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     isTester,
   } = useCommentsContext();
   const { twemojiEnabled } = useTwemoji();
+
+  const isReplying = replyingToId === comment.id;
+  const [replyDraft, setReplyDraft] = useState("");
+  const [editDraft, setEditDraft] = useState("");
+
+  useEffect(() => {
+    if (!isReplying) {
+      setReplyDraft("");
+    }
+  }, [isReplying]);
+
+  useEffect(() => {
+    if (editingCommentId === comment.id) {
+      setEditDraft(sanitizeText(comment.content || ""));
+      return;
+    }
+    const reply = comment.replies?.find((r) => r.id === editingCommentId);
+    if (reply) {
+      setEditDraft(sanitizeText(reply.content || ""));
+    }
+  }, [editingCommentId, comment.id, comment.content, comment.replies]);
 
   const commentAuthorSettings = userData[comment.user_id]?.settings;
 
@@ -142,7 +161,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
 
   const replyForm =
     isLoggedIn && replyingToId === comment.id ? (
-      <div className="border-border-card bg-tertiary-bg focus-within:border-button-info overflow-hidden rounded-lg border transition-colors">
+      <div className="border-border-card bg-tertiary-bg focus-within:border-button-info rounded-lg border transition-colors">
         {replyTargetName && (
           <div className="text-secondary-text flex items-center gap-1 px-3 pt-2.5 text-xs">
             <span>Replying to</span>
@@ -151,9 +170,10 @@ export function CommentItem({ comment }: { comment: CommentData }) {
             </span>
           </div>
         )}
-        <textarea
-          value={replyContent}
-          onChange={(e) => setReplyContent(e.target.value)}
+        <CommentTextarea
+          value={replyDraft}
+          onChange={setReplyDraft}
+          emojiMap={emojiStringMap}
           id={`reply-textarea-${comment.id}`}
           rows={2}
           disabled={isBlocked}
@@ -167,12 +187,14 @@ export function CommentItem({ comment }: { comment: CommentData }) {
             if (e.key === "Escape") {
               setReplyingToId(null);
               setReplyingToReplyId(null);
-              setReplyContent("");
+              setReplyDraft("");
             }
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              if (replyContent.trim() && !isSubmittingComment && !isBlocked) {
-                void handleSubmitReply(comment.id);
+              if (replyDraft.trim() && !isSubmittingComment && !isBlocked) {
+                void handleSubmitReply(comment.id, replyDraft).then((ok) => {
+                  if (ok) setReplyDraft("");
+                });
               }
             }
           }}
@@ -185,17 +207,19 @@ export function CommentItem({ comment }: { comment: CommentData }) {
               onClick={() => {
                 setReplyingToId(null);
                 setReplyingToReplyId(null);
-                setReplyContent("");
+                setReplyDraft("");
               }}
             >
               Cancel
             </Button>
             <Button
               size="sm"
-              disabled={
-                !replyContent.trim() || isSubmittingComment || isBlocked
-              }
-              onClick={() => handleSubmitReply(comment.id)}
+              disabled={!replyDraft.trim() || isSubmittingComment || isBlocked}
+              onClick={() => {
+                void handleSubmitReply(comment.id, replyDraft).then((ok) => {
+                  if (ok) setReplyDraft("");
+                });
+              }}
             >
               {isSubmittingComment ? (
                 <>
@@ -228,7 +252,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                   onClick={() => {
                     setReplyingToId(null);
                     setReplyingToReplyId(null);
-                    setReplyContent("");
+                    setReplyDraft("");
                   }}
                 >
                   cancel
@@ -238,9 +262,15 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                   type="button"
                   className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={
-                    !replyContent.trim() || isSubmittingComment || isBlocked
+                    !replyDraft.trim() || isSubmittingComment || isBlocked
                   }
-                  onClick={() => void handleSubmitReply(comment.id)}
+                  onClick={() => {
+                    void handleSubmitReply(comment.id, replyDraft).then(
+                      (ok) => {
+                        if (ok) setReplyDraft("");
+                      },
+                    );
+                  }}
                 >
                   reply
                 </button>
@@ -382,13 +412,13 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                         if (replyingToId === comment.id) {
                           setReplyingToId(null);
                           setReplyingToReplyId(null);
-                          setReplyContent("");
+                          setReplyDraft("");
                         } else {
                           setEditingCommentId(null);
-                          setEditContent("");
+                          setEditDraft("");
                           setReplyingToId(comment.id);
                           setReplyingToReplyId(null);
-                          setReplyContent("");
+                          setReplyDraft("");
                         }
                       }}
                     >
@@ -557,10 +587,11 @@ export function CommentItem({ comment }: { comment: CommentData }) {
           {/* Content Section */}
           <div className="pb-2">
             {editingCommentId === comment.id ? (
-              <div className="border-border-card bg-tertiary-bg focus-within:border-button-info -ml-12 overflow-hidden rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
+              <div className="border-border-card bg-tertiary-bg focus-within:border-button-info -ml-12 rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
+                <CommentTextarea
+                  value={editDraft}
+                  onChange={setEditDraft}
+                  emojiMap={emojiStringMap}
                   disabled={updatingCommentId === comment.id}
                   id={`edit-textarea-${comment.id}`}
                   rows={3}
@@ -572,15 +603,19 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                   onKeyDown={(e) => {
                     if (e.key === "Escape") {
                       setEditingCommentId(null);
-                      setEditContent("");
+                      setEditDraft("");
                     }
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       if (
-                        editContent.trim() &&
+                        editDraft.trim() &&
                         updatingCommentId !== comment.id
                       ) {
-                        void handleEditComment(comment.id);
+                        void handleEditComment(comment.id, editDraft).then(
+                          (ok) => {
+                            if (ok) setEditDraft("");
+                          },
+                        );
                       }
                     }
                   }}
@@ -594,16 +629,22 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                       disabled={updatingCommentId === comment.id}
                       onClick={() => {
                         setEditingCommentId(null);
-                        setEditContent("");
+                        setEditDraft("");
                       }}
                     >
                       Cancel
                     </Button>
                     <Button
                       size="sm"
-                      onClick={() => handleEditComment(comment.id)}
+                      onClick={() => {
+                        void handleEditComment(comment.id, editDraft).then(
+                          (ok) => {
+                            if (ok) setEditDraft("");
+                          },
+                        );
+                      }}
                       disabled={
-                        !editContent.trim() || updatingCommentId === comment.id
+                        !editDraft.trim() || updatingCommentId === comment.id
                       }
                     >
                       {updatingCommentId === comment.id ? (
@@ -631,7 +672,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                           className="text-link cursor-pointer hover:underline"
                           onClick={() => {
                             setEditingCommentId(null);
-                            setEditContent("");
+                            setEditDraft("");
                           }}
                         >
                           cancel
@@ -641,10 +682,16 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                           type="button"
                           className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
                           disabled={
-                            !editContent.trim() ||
+                            !editDraft.trim() ||
                             updatingCommentId === comment.id
                           }
-                          onClick={() => void handleEditComment(comment.id)}
+                          onClick={() => {
+                            void handleEditComment(comment.id, editDraft).then(
+                              (ok) => {
+                                if (ok) setEditDraft("");
+                              },
+                            );
+                          }}
                         >
                           save
                         </button>
@@ -891,13 +938,13 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                       ) {
                                         setReplyingToId(null);
                                         setReplyingToReplyId(null);
-                                        setReplyContent("");
+                                        setReplyDraft("");
                                       } else {
                                         setEditingCommentId(null);
-                                        setEditContent("");
+                                        setEditDraft("");
                                         setReplyingToId(comment.id);
                                         setReplyingToReplyId(reply.id);
-                                        setReplyContent("");
+                                        setReplyDraft("");
                                       }
                                     }}
                                   >
@@ -1076,10 +1123,11 @@ export function CommentItem({ comment }: { comment: CommentData }) {
 
                         {/* Reply body or edit form */}
                         {editingCommentId === reply.id ? (
-                          <div className="border-border-card bg-form-input focus-within:border-button-info overflow-hidden rounded-lg border transition-colors">
-                            <textarea
-                              value={editContent}
-                              onChange={(e) => setEditContent(e.target.value)}
+                          <div className="border-border-card bg-form-input focus-within:border-button-info rounded-lg border transition-colors">
+                            <CommentTextarea
+                              value={editDraft}
+                              onChange={setEditDraft}
+                              emojiMap={emojiStringMap}
                               disabled={updatingCommentId === reply.id}
                               id={`edit-textarea-${reply.id}`}
                               rows={3}
@@ -1091,15 +1139,20 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                               onKeyDown={(e) => {
                                 if (e.key === "Escape") {
                                   setEditingCommentId(null);
-                                  setEditContent("");
+                                  setEditDraft("");
                                 }
                                 if (e.key === "Enter" && !e.shiftKey) {
                                   e.preventDefault();
                                   if (
-                                    editContent.trim() &&
+                                    editDraft.trim() &&
                                     updatingCommentId !== reply.id
                                   )
-                                    void handleEditComment(reply.id);
+                                    void handleEditComment(
+                                      reply.id,
+                                      editDraft,
+                                    ).then((ok) => {
+                                      if (ok) setEditDraft("");
+                                    });
                                 }
                               }}
                             />
@@ -1110,16 +1163,23 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                 disabled={updatingCommentId === reply.id}
                                 onClick={() => {
                                   setEditingCommentId(null);
-                                  setEditContent("");
+                                  setEditDraft("");
                                 }}
                               >
                                 Cancel
                               </Button>
                               <Button
                                 size="sm"
-                                onClick={() => handleEditComment(reply.id)}
+                                onClick={() => {
+                                  void handleEditComment(
+                                    reply.id,
+                                    editDraft,
+                                  ).then((ok) => {
+                                    if (ok) setEditDraft("");
+                                  });
+                                }}
                                 disabled={
-                                  !editContent.trim() ||
+                                  !editDraft.trim() ||
                                   updatingCommentId === reply.id
                                 }
                               >
@@ -1216,3 +1276,5 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     </div>
   );
 }
+
+export const CommentItem = React.memo(CommentItemInner);

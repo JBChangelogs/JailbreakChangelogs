@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "../ui/button";
 import { useCommentsContext } from "./CommentsContext";
+import { CommentTextarea } from "./CommentTextarea";
 
 export function CommentForm() {
   const {
@@ -11,17 +13,26 @@ export function CommentForm() {
     isBlocked,
     isCommentFormExpanded,
     setIsCommentFormExpanded,
-    newComment,
-    setNewComment,
     isSubmittingComment,
     handleSubmitComment,
     type,
     changelogId,
     setLoginModal,
+    emojiStringMap,
   } = useCommentsContext();
 
+  const [newComment, setNewComment] = useState("");
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const ok = await handleSubmitComment(newComment);
+    if (ok) {
+      setNewComment("");
+    }
+  };
+
   return (
-    <form id="new-comment-form" onSubmit={handleSubmitComment}>
+    <form id="new-comment-form" onSubmit={handleFormSubmit}>
       {!isCommentFormExpanded ? (
         /* Collapsed trigger */
         <button
@@ -40,11 +51,12 @@ export function CommentForm() {
         </button>
       ) : (
         /* Expanded state */
-        <div className="border-border-card bg-tertiary-bg focus-within:border-button-info overflow-hidden rounded-lg border transition-colors">
-          <textarea
+        <div className="border-border-card bg-tertiary-bg focus-within:border-button-info rounded-lg border transition-colors">
+          <CommentTextarea
             id="new-comment-textarea"
             value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
+            onChange={setNewComment}
+            emojiMap={emojiStringMap}
             placeholder="Write a comment..."
             rows={4}
             disabled={isBlocked}
@@ -61,7 +73,9 @@ export function CommentForm() {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 if (newComment.trim() && !isSubmittingComment && !isBlocked) {
-                  e.currentTarget.form?.requestSubmit();
+                  void handleFormSubmit(
+                    e as unknown as React.FormEvent<HTMLFormElement>,
+                  );
                 }
               }
             }}

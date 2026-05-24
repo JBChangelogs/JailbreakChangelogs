@@ -23,6 +23,10 @@ import {
   formatErrorTitle,
   handleCommentApiError,
 } from "./commentUtils";
+import {
+  transformEmojiShortcodes,
+  type EmojiStringMap,
+} from "@/utils/comments/emojiShortcodes";
 import type {
   ChangelogCommentsProps,
   ThreadedComment,
@@ -59,17 +63,14 @@ export function useCommentState(props: ChangelogCommentsProps) {
     useState<number>(0);
 
   // --- UI State (Comments) ---
-  const [newComment, setNewComment] = useState("");
   const [replyingToId, setReplyingToId] = useState<number | null>(null);
   const [replyingToReplyId, setReplyingToReplyId] = useState<number | null>(
     null,
   );
-  const [replyContent, setReplyContent] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [updatingCommentId, setUpdatingCommentId] = useState<number | null>(
     null,
   );
-  const [editContent, setEditContent] = useState("");
   const [expandedComments, setExpandedComments] = useState<Set<number>>(
     new Set(),
   );
@@ -117,7 +118,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
   // Controls whether the new comment form is expanded
   const [isCommentFormExpanded, setIsCommentFormExpanded] = useState(false);
 
-  // --- Reactions ---
+  // --- Reactions & :shortcode: emoji map ---
+  const [emojiStringMap, setEmojiStringMap] = useState<EmojiStringMap>({});
   const [availableEmojis, setAvailableEmojis] = useState<string[]>([]);
   const [reactionPickerHoverOpenId, setReactionPickerHoverOpenId] = useState<
     number | null
@@ -480,7 +482,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
   }, []);
 
   useEffect(() => {
-    fetch(`${PUBLIC_API_URL}/emojis`, {
+    fetch(`${PUBLIC_API_URL}/emojis/string`, {
       credentials: "include",
     })
       .then((r) => r.json())
@@ -489,13 +491,23 @@ export function useCommentState(props: ChangelogCommentsProps) {
           data &&
           typeof data === "object" &&
           "emojis" in data &&
-          Array.isArray((data as { emojis: unknown }).emojis)
+          typeof (data as { emojis: unknown }).emojis === "object" &&
+          (data as { emojis: unknown }).emojis !== null &&
+          !Array.isArray((data as { emojis: unknown }).emojis)
         ) {
-          setAvailableEmojis((data as { emojis: string[] }).emojis);
+          const map = (data as { emojis: EmojiStringMap }).emojis;
+          setEmojiStringMap(map);
+          setAvailableEmojis(Object.values(map));
         }
       })
       .catch(() => {});
   }, []);
+
+  const prepareCommentContent = useCallback(
+    (text: string) =>
+      cleanCommentText(transformEmojiShortcodes(text, emojiStringMap)),
+    [emojiStringMap],
+  );
 
   /**
    * Syncs the local state with the global AuthContext.
@@ -621,10 +633,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
    * Submits a new top-level comment.
    * Optimistically updates the UI before confirming with a silent refresh.
    */
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isLoggedIn || !newComment.trim() || isSubmittingComment) return;
+  const handleSubmitComment = async (content: string): Promise<boolean> => {
+    if (!isLoggedIn || !content.trim() || isSubmittingComment) return false;
 
+    const preparedContent = prepareCommentContent(content);
     setIsSubmittingComment(true);
 
     try {
@@ -638,7 +650,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         },
         credentials: "include",
         body: JSON.stringify({
-          content: cleanCommentText(newComment),
+          content: preparedContent,
           item_id: changelogId,
           item_type: type === "item" ? itemType : type,
         }),
@@ -650,7 +662,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
           setIsCommentFormExpanded(false);
           setBan(ban);
           showBanToast(ban);
-          return;
+          return false;
         }
         let errorData;
         try {
@@ -672,22 +684,22 @@ export function useCommentState(props: ChangelogCommentsProps) {
             seconds = Math.max(1, parseInt(retryHeader, 10));
           }
           triggerRateLimit(seconds);
-          return;
+          return false;
         }
 
         if (
           handleCommentLengthError(
             errorData,
             response.status,
-            newComment.length,
+            content.length,
             "Failed to post comment",
           )
         ) {
-          return;
+          return false;
         }
 
         if (handleCommentApiError(errorData, "Failed to post comment")) {
-          return;
+          return false;
         }
 
         // If error handler didn't handle it, show the message from API if available
@@ -695,7 +707,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         toast.error("Error", {
           description: errorMessage,
         });
-        return;
+        return false;
       }
 
       const addedCommentData = await response.json();
@@ -706,14 +718,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
         addedCommentData?.comment_id ||
         addedCommentData?.ID;
 
-      setNewComment("");
       setIsCommentFormExpanded(false);
 
       // Construct optimistic comment to ensure all fields are present
       const optimisticComment: CommentData = {
         id: realId || Date.now(),
         author: user?.username || "You",
-        content: cleanCommentText(newComment),
+        content: preparedContent,
         date: Math.floor(Date.now() / 1000).toString(),
         item_id: Number(changelogId),
         item_type: type === "item" ? itemType || type : type,
@@ -733,10 +744,12 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
       // Track comment post
       window.rybbit?.event("Comment Posted", { type });
+      return true;
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to post comment",
       );
+      return false;
     } finally {
       setIsSubmittingComment(false);
     }
@@ -745,16 +758,19 @@ export function useCommentState(props: ChangelogCommentsProps) {
   /**
    * Submits an edit for an existing comment.
    */
-  const handleEditComment = async (commentId: number) => {
-    if (!editContent.trim() || updatingCommentId === commentId) return;
+  const handleEditComment = async (
+    commentId: number,
+    content: string,
+  ): Promise<boolean> => {
+    if (!content.trim() || updatingCommentId === commentId) return false;
 
     // Find the original comment to compare content
     const originalComment =
       comments.find((c) => c.id === commentId) ??
       comments.flatMap((c) => c.replies ?? []).find((r) => r.id === commentId);
-    if (!originalComment) return;
+    if (!originalComment) return false;
 
-    const normalizedEditContent = cleanCommentText(editContent);
+    const normalizedEditContent = prepareCommentContent(content);
     const normalizedOriginalContent = cleanCommentText(originalComment.content);
 
     // Check if content has actually changed
@@ -762,7 +778,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       toast.error("No Changes Detected", {
         description: "Edit the comment before clicking update.",
       });
-      return;
+      return false;
     }
 
     try {
@@ -782,7 +798,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         if (ban) {
           setBan(ban);
           showBanToast(ban);
-          return;
+          return false;
         }
         let errorData;
         try {
@@ -804,22 +820,22 @@ export function useCommentState(props: ChangelogCommentsProps) {
             seconds = Math.max(1, parseInt(retryHeader, 10));
           }
           triggerRateLimit(seconds);
-          return;
+          return false;
         }
 
         if (
           handleCommentLengthError(
             errorData,
             response.status,
-            editContent.length,
+            content.length,
             "Failed to edit comment",
           )
         ) {
-          return;
+          return false;
         }
 
         if (handleCommentApiError(errorData, "Failed to edit comment")) {
-          return;
+          return false;
         }
 
         // If error handler didn't handle it, show the message from API if available
@@ -827,7 +843,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         toast.error("Error", {
           description: errorMessage,
         });
-        return;
+        return false;
       }
 
       const updatedCommentResponse = await response.json();
@@ -837,7 +853,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
       toast.success("Comment edited successfully.");
       setEditingCommentId(null);
-      setEditContent("");
 
       const applyEdit = (c: CommentData): CommentData => {
         if (c.id !== commentId) return c;
@@ -864,10 +879,12 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
       // Track comment edit
       window.rybbit?.event("Comment Edited", { type });
+      return true;
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to edit comment",
       );
+      return false;
     } finally {
       setUpdatingCommentId(null);
     }
@@ -971,9 +988,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
   /**
    * Submits a reply to an existing comment.
    */
-  const handleSubmitReply = async (parentId: number) => {
-    if (!isLoggedIn || !replyContent.trim() || isSubmittingComment) return;
+  const handleSubmitReply = async (
+    parentId: number,
+    content: string,
+  ): Promise<boolean> => {
+    if (!isLoggedIn || !content.trim() || isSubmittingComment) return false;
 
+    const preparedReplyContent = prepareCommentContent(content);
     setIsSubmittingComment(true);
 
     try {
@@ -984,7 +1005,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         headers: { ...submitReplyHeaders, "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          content: cleanCommentText(replyContent),
+          content: preparedReplyContent,
           item_id: changelogId,
           item_type: type === "item" ? itemType : type,
           parent_id: replyingToReplyId ?? parentId,
@@ -998,7 +1019,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
           setReplyingToReplyId(null);
           setBan(ban);
           showBanToast(ban);
-          return;
+          return false;
         }
         let errorData;
         try {
@@ -1020,22 +1041,22 @@ export function useCommentState(props: ChangelogCommentsProps) {
             seconds = Math.max(1, parseInt(retryHeader, 10));
           }
           triggerRateLimit(seconds);
-          return;
+          return false;
         }
 
         if (
           handleCommentLengthError(
             errorData,
             response.status,
-            replyContent.length,
+            content.length,
             "Failed to post reply",
           )
         ) {
-          return;
+          return false;
         }
 
         if (handleCommentApiError(errorData, "Failed to post reply")) {
-          return;
+          return false;
         }
 
         // If error handler didn't handle it, show the message from API if available
@@ -1043,7 +1064,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         toast.error("Error", {
           description: errorMessage,
         });
-        return;
+        return false;
       }
 
       const addedReplyData = await response.json();
@@ -1052,7 +1073,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
       const realId =
         addedReplyData?.id || addedReplyData?.comment_id || addedReplyData?.ID;
 
-      setReplyContent("");
       setReplyingToId(null);
       setReplyingToReplyId(null);
 
@@ -1060,7 +1080,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       const optimisticReply: CommentData = {
         id: realId || Date.now(),
         author: user?.username || "You",
-        content: cleanCommentText(replyContent),
+        content: preparedReplyContent,
         date: Math.floor(Date.now() / 1000).toString(),
         item_id: Number(changelogId),
         item_type: type === "item" ? itemType || type : type,
@@ -1082,8 +1102,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
       setExpandedReplies((prev) => new Set([...prev, parentId]));
 
       refreshCommentsFromServer(true, page);
+      return true;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to post reply");
+      return false;
     } finally {
       setIsSubmittingComment(false);
     }
@@ -1098,9 +1120,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     if (comment) {
       setReplyingToId(null);
       setReplyingToReplyId(null);
-      setReplyContent("");
       setEditingCommentId(commentId);
-      setEditContent(sanitizeText(comment.content || ""));
       // Delay focus until after the dropdown closes and returns focus to its trigger
       setTimeout(() => {
         const textarea = document.querySelector<HTMLTextAreaElement>(
@@ -1239,19 +1259,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
     isClient,
     isLoggedIn,
     currentUserId,
-    newComment,
-    setNewComment,
     replyingToId,
     setReplyingToId,
     replyingToReplyId,
     setReplyingToReplyId,
-    replyContent,
-    setReplyContent,
     editingCommentId,
     setEditingCommentId,
     updatingCommentId,
-    editContent,
-    setEditContent,
     expandedComments,
     expandedReplies,
     sortOrder,
@@ -1275,6 +1289,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     isCommentFormExpanded,
     setIsCommentFormExpanded,
     availableEmojis,
+    emojiStringMap,
     reactionPickerHoverOpenId,
     setReactionPickerHoverOpenId,
     reactionBreakdownOpenId,
