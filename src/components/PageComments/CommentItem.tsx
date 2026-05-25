@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { CommentData } from "@/utils/api/api";
 import { Icon } from "../ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
@@ -113,6 +119,35 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
   const isReplying = replyingToId === comment.id;
   const [replyDraft, setReplyDraft] = useState("");
   const [editDraft, setEditDraft] = useState("");
+  const [replyEmojiOpen, setReplyEmojiOpen] = useState(false);
+  const replyTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const replyCursorPosRef = useRef<number | null>(null);
+
+  const emojiEntries = useMemo(
+    () => Object.entries(emojiStringMap).slice(0, 120),
+    [emojiStringMap],
+  );
+
+  const insertReplyEmoji = useCallback(
+    (emoji: string, keepOpen = false) => {
+      const cursor = replyCursorPosRef.current ?? replyDraft.length;
+      const next =
+        replyDraft.slice(0, cursor) + emoji + replyDraft.slice(cursor);
+      setReplyDraft(next);
+      replyCursorPosRef.current = cursor + emoji.length;
+      if (!keepOpen) {
+        setReplyEmojiOpen(false);
+        requestAnimationFrame(() => {
+          const el = replyTextareaRef.current;
+          if (!el) return;
+          el.focus();
+          const pos = replyCursorPosRef.current ?? next.length;
+          el.setSelectionRange(pos, pos);
+        });
+      }
+    },
+    [replyDraft],
+  );
 
   useEffect(() => {
     if (!isReplying) {
@@ -201,6 +236,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
           </div>
         )}
         <CommentTextarea
+          ref={replyTextareaRef}
           value={replyDraft}
           onChange={setReplyDraft}
           emojiMap={emojiStringMap}
@@ -229,7 +265,64 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
             }
           }}
         />
-        <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
+        <div className="border-border-card flex items-center justify-between gap-2 border-t px-3 py-2">
+          <Popover open={replyEmojiOpen} onOpenChange={setReplyEmojiOpen}>
+            <Tooltip delayDuration={500}>
+              <TooltipTrigger asChild>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-secondary-text hover:text-primary-text h-7 w-7 p-0"
+                    disabled={isBlocked}
+                    onPointerDown={() => {
+                      replyCursorPosRef.current =
+                        replyTextareaRef.current?.selectionStart ?? null;
+                    }}
+                  >
+                    <Icon icon="heroicons:face-smile" className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Add an emoji</TooltipContent>
+            </Tooltip>
+            <PopoverContent
+              align="start"
+              side="bottom"
+              sideOffset={8}
+              className="w-72 p-0"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+              <div className="grid max-h-56 grid-cols-8 gap-px overflow-y-auto p-1.5">
+                {emojiEntries.map(([name, emoji]) => (
+                  <Tooltip key={name} delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={(e) => insertReplyEmoji(emoji, e.shiftKey)}
+                        className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-transparent text-lg transition-colors"
+                      >
+                        {twemojiEnabled ? (
+                          <Twemoji
+                            tag="span"
+                            options={{
+                              className: "twemoji pointer-events-none",
+                            }}
+                          >
+                            {emoji}
+                          </Twemoji>
+                        ) : (
+                          <span className="pointer-events-none">{emoji}</span>
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>:{name}:</TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
           <div className="flex items-center gap-2 lg:hidden">
             <Button
               size="sm"

@@ -282,6 +282,7 @@ export function ChatToolbarTextarea({
               "h-fit max-h-60 min-h-10 w-full @md/chat:text-base",
               "resize-none overflow-y-auto bg-transparent p-2 text-sm text-inherit shadow-none",
               "border-none placeholder:whitespace-nowrap focus:outline-none",
+              "disabled:cursor-not-allowed disabled:opacity-50",
               rightOverlay ? "pr-20" : "",
               className,
             )}

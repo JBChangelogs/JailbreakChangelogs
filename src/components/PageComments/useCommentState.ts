@@ -1167,14 +1167,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
       const sanitizedReason = sanitizeText(reason.trim());
       const { url: reportUrl, headers: reportHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/comments/report",
+        `/comments/${reportingCommentId}/report`,
       );
       const response = await fetch(reportUrl, {
         method: "POST",
         credentials: "include",
         headers: { ...reportHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
-          comment_id: reportingCommentId,
           reason: sanitizedReason,
         }),
       });

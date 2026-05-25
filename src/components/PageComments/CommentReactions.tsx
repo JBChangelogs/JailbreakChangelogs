@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { CommentReaction } from "@/utils/api/api";
 import {
@@ -45,13 +45,31 @@ export function CommentReactions({
 
   const isReactionBlocked = isRateLimited || !!reactionBan;
   const [tooltipResetKey, setTooltipResetKey] = useState(0);
+  const shiftPressedRef = useRef(false);
 
-  if (!reactions || reactions.length === 0) {
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Shift") shiftPressedRef.current = true;
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Shift") shiftPressedRef.current = false;
+    };
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, []);
+
+  const isPickerOpen = reactionPickerInlineOpenId === commentId;
+
+  if ((!reactions || reactions.length === 0) && !isPickerOpen) {
     if (!isLoggedIn || availableEmojis.length === 0) return null;
     return null;
   }
 
-  const sortedRxns = getStableReactionOrder(commentId, reactions);
+  const sortedRxns = getStableReactionOrder(commentId, reactions ?? []);
   const top5 = sortedRxns.slice(0, 5);
   const overflow = sortedRxns.slice(5);
 
@@ -145,6 +163,7 @@ export function CommentReactions({
             open={reactionPickerInlineOpenId === commentId}
             onOpenChange={(open) => {
               if (open && isReactionBlocked) return;
+              if (!open && shiftPressedRef.current) return;
               setReactionPickerInlineOpenId(open ? commentId : null);
             }}
           >
@@ -168,26 +187,46 @@ export function CommentReactions({
               </TooltipTrigger>
               <TooltipContent>Add a reaction</TooltipContent>
             </Tooltip>
-            <PopoverContent className="w-auto p-2" align="start">
+            <PopoverContent
+              className="w-auto p-2"
+              align="start"
+              onFocusOutside={(e) => {
+                if (shiftPressedRef.current) e.preventDefault();
+              }}
+              onInteractOutside={(e) => {
+                if (shiftPressedRef.current) e.preventDefault();
+              }}
+            >
               <div className="grid grid-cols-5 gap-1">
                 {availableEmojis.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    onClick={() => {
-                      void handleReact(commentId, emoji);
-                      setReactionPickerInlineOpenId(null);
-                    }}
-                    className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
-                  >
-                    {twemojiEnabled ? (
-                      <Twemoji tag="span" options={{ className: "twemoji" }}>
-                        {emoji}
-                      </Twemoji>
-                    ) : (
-                      emoji
-                    )}
-                  </button>
+                  <Tooltip key={emoji} delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          void handleReact(commentId, emoji);
+                          if (!e.shiftKey) {
+                            setReactionPickerInlineOpenId(null);
+                          }
+                        }}
+                        className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
+                      >
+                        {twemojiEnabled ? (
+                          <Twemoji
+                            tag="span"
+                            options={{
+                              className: "twemoji pointer-events-none",
+                            }}
+                          >
+                            {emoji}
+                          </Twemoji>
+                        ) : (
+                          <span className="pointer-events-none">{emoji}</span>
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{emoji}</TooltipContent>
+                  </Tooltip>
                 ))}
               </div>
             </PopoverContent>
