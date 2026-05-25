@@ -85,15 +85,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const handlePreferenceUpdate = (e: Event) => {
       const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
         .detail;
-      if (key === "theme" && (value === "light" || value === "dark")) {
-        setThemeState(value);
+      if (key === "theme" && AvailableThemes.includes(value as Theme)) {
+        setThemeState(value as Theme);
       }
     };
     const handlePreferences = (e: Event) => {
       const prefs = (e as CustomEvent<Record<string, unknown>>).detail;
       const incoming = prefs?.theme;
-      if (incoming === "light" || incoming === "dark") {
-        setThemeState(incoming);
+      if (AvailableThemes.includes(incoming as Theme)) {
+        setThemeState(incoming as Theme);
       }
     };
     window.addEventListener("realtimePreference", handlePreferenceUpdate);
