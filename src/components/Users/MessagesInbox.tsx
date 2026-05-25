@@ -808,6 +808,7 @@ export default function MessagesInbox() {
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [isProcessingBlockAction, setIsProcessingBlockAction] = useState(false);
   const [isMarkingOfferComplete, setIsMarkingOfferComplete] = useState(false);
+  const [isUnmessageable, setIsUnmessageable] = useState(false);
   const [blockedByMeByUserId, setBlockedByMeByUserId] = useState<
     Record<string, boolean>
   >({});
@@ -877,6 +878,7 @@ export default function MessagesInbox() {
     new Map(),
   );
   const selectedUserIdRef = useRef<string | null>(null);
+  const routeConversationIdRef = useRef<string | null>(null);
   const wsSendFallbackTimeoutsRef = useRef<Set<number>>(new Set());
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const prependScrollRestoreRef = useRef<{
@@ -1175,6 +1177,10 @@ export default function MessagesInbox() {
   useEffect(() => {
     selectedUserIdRef.current = selectedUserId;
   }, [selectedUserId]);
+
+  useEffect(() => {
+    routeConversationIdRef.current = routeConversationId;
+  }, [routeConversationId]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -1520,6 +1526,12 @@ export default function MessagesInbox() {
           if (prev && summaries.some((summary) => summary.user.id === prev)) {
             return prev;
           }
+          // Keep the selection if it matches the current route — ensureRouteConversationUser
+          // will add the user to conversations. Nulling it out here causes a null→restore
+          // cycle that makes every selectedUserId-dependent effect fire twice.
+          if (prev && prev === routeConversationIdRef.current) {
+            return prev;
+          }
           return null;
         });
       } catch (error) {
@@ -1767,6 +1779,7 @@ export default function MessagesInbox() {
   }, [isLoadingMessages, loadOlderMessages, selectedUserId]);
 
   useLayoutEffect(() => {
+    setIsUnmessageable(false);
     if (!selectedUserId || !isAuthenticated || !currentUserId) {
       setMessages([]);
       setIsLoadingMessages(false);
@@ -1828,6 +1841,66 @@ export default function MessagesInbox() {
       isCancelled = true;
     };
   }, [currentUserId, fetchMessagesPage, isAuthenticated, selectedUserId]);
+
+  useEffect(() => {
+    if (
+      !selectedUserId ||
+      !isAuthenticated ||
+      !currentUserId ||
+      !PUBLIC_API_URL
+    )
+      return;
+
+    let isCancelled = false;
+
+    const checkEligibility = async () => {
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/messages/${encodeURIComponent(selectedUserId)}`,
+        );
+        const response = await fetch(url, {
+          method: "HEAD",
+          credentials: "include",
+          headers,
+        });
+
+        if (isCancelled) return;
+
+        if (response.status === 403) {
+          setIsUnmessageable(true);
+          const systemContent = "You are not allowed to message this user.";
+          toast.error(systemContent);
+          const systemMessage: Message = {
+            id: `system-unmessageable-${selectedUserId}`,
+            senderId: "system",
+            receiverId: selectedUserId,
+            content: systemContent,
+            createdAt: Date.now(),
+            type: "system",
+          };
+          upsertLocalThreadMessage(selectedUserId, systemMessage);
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === systemMessage.id)) return prev;
+            return sortMessagesByCreatedAt([...prev, systemMessage]);
+          });
+        }
+      } catch (error) {
+        log.error("Error checking messaging eligibility:", error);
+      }
+    };
+
+    void checkEligibility();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    currentUserId,
+    isAuthenticated,
+    selectedUserId,
+    upsertLocalThreadMessage,
+  ]);
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) {
@@ -4166,7 +4239,7 @@ export default function MessagesInbox() {
                       placeholder={messagePlaceholder}
                       maxChars={MESSAGE_CHAR_LIMIT}
                       isSending={isSending}
-                      disabled={!!messageBan}
+                      disabled={!!messageBan || isUnmessageable}
                       onSend={(message) => void handleSendMessage(message)}
                     />
                   </div>
