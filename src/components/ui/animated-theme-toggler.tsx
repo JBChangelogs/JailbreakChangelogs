@@ -8,7 +8,7 @@ import {
   Theme,
   UIThemeNames,
 } from "@/contexts/ThemeContext";
-import { safeLocalStorage } from "@/utils/safeStorage";
+import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import {
   Tooltip,
   TooltipContent,
