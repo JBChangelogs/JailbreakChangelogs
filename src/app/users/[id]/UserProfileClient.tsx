@@ -246,7 +246,7 @@ interface UserProfileClientProps {
   additionalDataError?: string;
 }
 
-function accentToPageBg(hex: string, mode: "light" | "dark"): string {
+function accentToPageBg(hex: string, mode: "light" | "dark" | "og"): string {
   if (!hex || hex.length < 6) return mode === "light" ? "#c4b5fd" : "#1a1530";
   const r = parseInt(hex.slice(0, 2), 16) / 255;
   const g = parseInt(hex.slice(2, 4), 16) / 255;
