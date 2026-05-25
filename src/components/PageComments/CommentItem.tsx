@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { CommentData } from "@/utils/api/api";
 import { Icon } from "../ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
+import Image from "next/image";
 import {
   Tooltip,
   TooltipContent,
@@ -380,6 +381,25 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                         user={userData[comment.user_id]}
                         className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
                       />
+
+                      {userData[comment.user_id]?.premiumtype >= 1 &&
+                        userData[comment.user_id]?.premiumtype <= 3 && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Image
+                                src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${userData[comment.user_id].premiumtype}.svg`}
+                                alt={`Supporter Type ${userData[comment.user_id].premiumtype}`}
+                                width={16}
+                                height={16}
+                                className="shrink-0 cursor-pointer"
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Supporter Type{" "}
+                              {userData[comment.user_id].premiumtype}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
 
                       {/* Special OP badge for trade ad authors */}
                       {type === "tradev2" &&
@@ -886,6 +906,24 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       user={replyUser}
                                       className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
                                     />
+                                    {replyUser?.premiumtype >= 1 &&
+                                      replyUser?.premiumtype <= 3 && (
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Image
+                                              src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${replyUser.premiumtype}.svg`}
+                                              alt={`Supporter Type ${replyUser.premiumtype}`}
+                                              width={14}
+                                              height={14}
+                                              className="shrink-0 cursor-pointer"
+                                            />
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            Supporter Type{" "}
+                                            {replyUser.premiumtype}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      )}
                                     {replyToTargetName && replyToTarget && (
                                       <>
                                         <Icon

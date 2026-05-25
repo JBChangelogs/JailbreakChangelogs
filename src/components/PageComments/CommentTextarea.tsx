@@ -17,6 +17,8 @@ import {
   type EmojiStringMap,
 } from "@/utils/comments/emojiShortcodes";
 import { cn } from "@/lib/utils";
+import { useTwemoji } from "@/contexts/TwemojiContext";
+import Twemoji from "react-twemoji";
 
 const AUTOCOMPLETE_DEBOUNCE_MS = 120;
 
@@ -46,6 +48,7 @@ export const CommentTextarea = forwardRef<
   const [activeIndex, setActiveIndex] = useState(0);
   const [autocompleteContext, setAutocompleteContext] =
     useState<ReturnType<typeof getEmojiAutocompleteContext>>(null);
+  const { twemojiEnabled } = useTwemoji();
 
   useImperativeHandle(ref, () => textareaRef.current as HTMLTextAreaElement);
 
@@ -246,11 +249,15 @@ export const CommentTextarea = forwardRef<
                   onMouseEnter={() => setActiveIndex(index)}
                 >
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center text-lg leading-none">
-                    {emoji}
+                    {twemojiEnabled ? (
+                      <Twemoji tag="span" options={{ className: "twemoji" }}>
+                        {emoji}
+                      </Twemoji>
+                    ) : (
+                      emoji
+                    )}
                   </span>
-                  <span className="text-secondary-text font-mono text-xs">
-                    :{name}:
-                  </span>
+                  <span className="text-secondary-text text-xs">:{name}:</span>
                 </button>
               );
             })}

@@ -175,7 +175,9 @@ function transformEmojiShortcodesWithMode(
           state = "DEFAULT";
           const name = buffer.slice(1);
           result +=
-            mode === "api" ? `${buffer}:` : (emojiMap[name] ?? `${buffer}:`);
+            mode === "api"
+              ? `${buffer}:`
+              : (emojiMap[name.toLowerCase()] ?? `${buffer}:`);
           buffer = "";
         } else if (!VALID_EMOJI_CHARS.includes(c)) {
           result += buffer;
@@ -254,7 +256,7 @@ export function suggestEmojiShortcodes(
   const { buffer, inEmoji } = scanEmojiBuffer(text.slice(0, cursor));
   if (!inEmoji) return [];
 
-  const query = buffer.slice(1);
+  const query = buffer.slice(1).toLowerCase();
 
   const candidates = emojiNames.map((name) => ({
     name,
