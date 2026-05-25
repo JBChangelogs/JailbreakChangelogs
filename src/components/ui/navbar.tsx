@@ -604,7 +604,8 @@ export const NavbarModern = ({
   return (
     <div
       className={cn(
-        "bg-primary-bg/90 border-border-card border-b backdrop-blur-lg",
+        resolvedTheme === "og" ? "bg-primary-bg/100" : "bg-primary-bg/90",
+        "border-border-card border-b backdrop-blur-lg",
         className,
       )}
     >
@@ -636,7 +637,7 @@ export const NavbarModern = ({
                   }}
                   className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
                 >
-                  Updates
+                  {resolvedTheme === "og" ? "UPDATES" : "Updates"}
                   <Icon
                     icon="mdi:chevron-down"
                     className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
@@ -679,7 +680,7 @@ export const NavbarModern = ({
                   }}
                   className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
                 >
-                  Seasons
+                  {resolvedTheme === "og" ? "SEASONS" : "Seasons"}
                   <Icon
                     icon="mdi:chevron-down"
                     className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
@@ -734,7 +735,7 @@ export const NavbarModern = ({
                   }}
                   className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
                 >
-                  Trading
+                  {resolvedTheme === "og" ? "COMMUNITY" : "Community"}
                   <Icon
                     icon="mdi:chevron-down"
                     className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
@@ -820,7 +821,7 @@ export const NavbarModern = ({
                   }}
                   className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
                 >
-                  Community
+                  {resolvedTheme === "og" ? "COMMUNITY" : "Community"}
                   <Icon
                     icon="mdi:chevron-down"
                     className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"

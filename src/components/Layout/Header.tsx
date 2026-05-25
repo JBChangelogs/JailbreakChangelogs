@@ -626,7 +626,7 @@ export default function Header() {
 
       <div className="border-border-card border-t">
         <MobileNavSection
-          title="Updates"
+          title={resolvedTheme === "og" ? "UPDATES" : "Updates"}
           sectionIcon="material-symbols:article-rounded"
           open={openNavSection === "Updates"}
           onToggle={() => toggleNavSection("Updates")}
@@ -646,7 +646,7 @@ export default function Header() {
         </MobileNavSection>
 
         <MobileNavSection
-          title="Seasons"
+          title={resolvedTheme === "og" ? "SEASONS" : "Seasons"}
           sectionIcon="material-symbols:layers-rounded"
           open={openNavSection === "Seasons"}
           onToggle={() => toggleNavSection("Seasons")}
@@ -678,7 +678,7 @@ export default function Header() {
         </MobileNavSection>
 
         <MobileNavSection
-          title="Trading"
+          title={resolvedTheme === "og" ? "TRADING" : "Trading"}
           sectionIcon="material-symbols:price-check-rounded"
           open={openNavSection === "Trading"}
           onToggle={() => toggleNavSection("Trading")}
@@ -740,7 +740,7 @@ export default function Header() {
         </MobileNavSection>
 
         <MobileNavSection
-          title="Community"
+          title={resolvedTheme === "og" ? "COMMUNITY" : "Community"}
           sectionIcon="material-symbols:groups-rounded"
           open={openNavSection === "Community"}
           onToggle={() => toggleNavSection("Community")}
