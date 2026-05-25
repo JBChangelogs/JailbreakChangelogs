@@ -83,7 +83,7 @@ export default function ContributorsClient({
         {
           flag: "is_contributor",
           enabled: true,
-          description: "This user is a trusted tester for Jailbreak Changelogs",
+          description: "This user contributed to Jailbreak Changelogs",
         },
       ],
       link: "https://discord.com/invite/jailbreaktrading",
@@ -207,7 +207,7 @@ export default function ContributorsClient({
     <div className="bg-primary-bg">
       <div className="container mx-auto px-6 py-10">
         <h1 className="text-primary-text text-center text-2xl font-semibold lg:text-3xl">
-          Meet the <span className="text-button-info">team</span>
+          Meet the <span className="text-contributers-team">team</span>
         </h1>
 
         <p className="text-secondary-text mx-auto my-6 max-w-2xl text-center">

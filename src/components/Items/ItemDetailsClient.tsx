@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NavLogo from "../common/NavLogo";
+import { usePathname } from "next/navigation";
 
 const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
@@ -281,6 +283,13 @@ export default function ItemDetailsClient({
     itemMetadata?.season,
     metadataLevel,
   );
+  const pathname = usePathname();
+  const isCollabPage =
+    pathname === "/values" ||
+    pathname.startsWith("/item") ||
+    pathname.startsWith("/trading") ||
+    pathname.startsWith("/values/changelogs") ||
+    pathname.startsWith("/values/suggestions");
 
   return (
     <main className="min-h-screen">
@@ -409,13 +418,12 @@ export default function ItemDetailsClient({
             <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-0.5 shadow-lg">
               <div className="bg-tertiary-bg rounded-md p-4 text-center">
                 <div className="mb-3 flex justify-center">
-                  <Image
-                    src={`/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`}
-                    alt="Jailbreak Changelogs x Trading Core"
-                    width={220}
-                    height={48}
-                    className="h-12 w-auto"
-                  />
+                  <Link href="/" style={{ display: "block" }}>
+                    <NavLogo
+                      theme={resolvedTheme}
+                      isCollabPage={isCollabPage}
+                    />
+                  </Link>
                 </div>
                 <h3 className="text-primary-text mb-1 text-lg font-semibold">
                   Help make a better value list

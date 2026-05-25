@@ -735,7 +735,7 @@ export const NavbarModern = ({
                   }}
                   className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
                 >
-                  {resolvedTheme === "og" ? "COMMUNITY" : "Community"}
+                  {resolvedTheme === "og" ? "TRADING" : "Trading"}
                   <Icon
                     icon="mdi:chevron-down"
                     className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"

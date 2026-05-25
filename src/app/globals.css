@@ -1,5 +1,6 @@
 @layer theme, base, mui, components, utilities;
 @import "tailwindcss";
+@plugin "daisyui";
 @import "tw-animate-css";
 
 /* NitroPay CCPA link styling in footer */
@@ -244,14 +245,17 @@
   --header-height-mobile: 4rem; /* Mobile header height (64px) */
   --header-height-desktop: 3rem; /* Desktop header height (48px) */
   --header-height: 0px; /* Dynamic header height, set by JS */
+
+  /* Other */
+  --color-contributers-team: #0159B2; /* Contributers Page Team Text color */
 }
 
 
 /* OG THEME - Applied when .og class is present */
 .og {
   /* Background Colors - OG theme */
-  --color-primary-bg: #212a31; /* Main page background - White */
-  --color-secondary-bg: #2e3944; /* Card background - Very light gray */
+  --color-primary-bg: #2e3944; /* Main page background - White */
+  --color-secondary-bg: #212a31; /* Card background - Very light gray */
   --color-tertiary-bg: #222936; /* Elevated surfaces - Cool light gray */
   --color-quaternary-bg: #2b3343; /* Subtle backgrounds - Slightly darker gray */
   --color-surface-bg: #11141b; /* Surface backgrounds - White */
@@ -384,9 +388,9 @@
   --color-supporter-gold-border: #ffd700; /* Gold border for Supporter 3 */
 
   /* Supporter Card Backgrounds - Light theme */
-  --color-supporter-bronze-bg: #271e17; /* Subtle bronze tint for Supporter 1 */
-  --color-supporter-silver-bg: #1e232d; /* Subtle silver tint for Supporter 2 */
-  --color-supporter-gold-bg: #2a2618; /* Subtle gold tint for Supporter 3 */
+  --color-supporter-bronze-bg: #443428; /* Subtle bronze tint for Supporter 1 */
+  --color-supporter-silver-bg: #293246; /* Subtle silver tint for Supporter 2 */
+  --color-supporter-gold-bg: #493c0b; /* Subtle gold tint for Supporter 3 */
 
   /* Opacity Variations - Light theme */
   --color-overlay-light: rgba(22, 26, 35, 0.5); /* Light overlay - White */
@@ -395,6 +399,9 @@
 
   /* Hero Overlays - Light theme */
   --color-hero-overlay: rgba(0, 0, 0, 0.75); /* Hero overlay - Light mode (lighter) */
+
+  /* Other */
+  --color-contributers-team: #0a76e9; /* Contributers Page Team Text color */
 }
 
 /* LIGHT THEME - Applied when .light class is present */
@@ -647,6 +654,8 @@
     0%,
     0.5
   ); /* Hero overlay - Light mode (lighter) */
+  /* Other */
+  --color-contributers-team: #0159B9; /* Contributers Page Team Text color */
 }
 
 @layer base {
@@ -713,27 +722,36 @@
   z-index: 999;
 }
 
-/* Global custom scrollbar — webkit (Chrome, Edge, Safari) */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Custom Scrollbar Styles */
+/* Webkit browsers (Chrome, Safari, Edge) */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-::-webkit-scrollbar-track {
+.scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
+.scrollbar-thin::-webkit-scrollbar-thumb {
   background-color: var(--color-border-primary);
   border-radius: 4px;
+  border: 1px solid transparent;
+  background-clip: content-box;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-secondary);
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-focus);
 }
 
-::-webkit-scrollbar-corner {
+.scrollbar-thin::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* Firefox */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-primary) transparent;
 }
 
 .tabs {
@@ -928,16 +946,7 @@
 }
 
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-primary) transparent;
-}
-
-img.twemoji {
-  display: inline !important;
-  height: 1.1em !important;
-  width: 1.1em !important;
-  vertical-align: -0.15em;
-  margin: 0;
+  scrollbar-width: auto !important;
 }
 
 /* Make right-position toasts exit horizontally to the right instead of vertically. */
