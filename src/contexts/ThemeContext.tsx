@@ -70,7 +70,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedTheme = getInitialTheme();
-    setThemeState(savedTheme);
+    const timer = setTimeout(() => {
+      setThemeState(savedTheme);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
