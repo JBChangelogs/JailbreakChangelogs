@@ -43,7 +43,7 @@ export default function LoginModalView({
     onTabChange({} as SyntheticEvent, value === "roblox" ? 1 : 0);
   };
 
-  const isDark = resolvedTheme === "dark";
+  const isDark = resolvedTheme !== "light";
 
   return (
     <Dialog open={showLoginModal} onOpenChange={(open) => !open && onClose()}>
