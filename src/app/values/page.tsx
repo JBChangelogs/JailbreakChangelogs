@@ -4,6 +4,7 @@ import { fetchItems, fetchLastUpdated } from "@/utils/api/api";
 import ValuesClient from "@/components/Values/ValuesClient";
 import Loading from "./loading";
 import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
+import NitroValuesRightRailAd from "@/components/Ads/NitroValuesRightRailAd";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -16,6 +17,7 @@ export default async function ValuesPage() {
   return (
     <>
       <NitroValuesRailAd />
+      <NitroValuesRightRailAd />
       <main className="mb-8 min-h-screen">
         <div className="container mx-auto px-4">
           <Breadcrumb />

@@ -19,6 +19,7 @@ interface InventoryCheckerPageProps {
 }
 
 import NitroInventoryDetailRailAd from "@/components/Ads/NitroInventoryDetailRailAd";
+import NitroInventoryDetailRightRailAd from "@/components/Ads/NitroInventoryDetailRightRailAd";
 
 export default async function InventoryCheckerPage({
   params,
@@ -49,6 +50,7 @@ export default async function InventoryCheckerPage({
   return (
     <>
       <NitroInventoryDetailRailAd />
+      <NitroInventoryDetailRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

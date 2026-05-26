@@ -5,6 +5,7 @@ import Loading from "./loading";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CalculatorDescription from "@/components/Values/Calculator/CalculatorDescription";
 import NitroCalculatorRailAd from "@/components/Ads/NitroCalculatorRailAd";
+import NitroCalculatorRightRailAd from "@/components/Ads/NitroCalculatorRightRailAd";
 
 export const revalidate = 120; // Revalidate every 2 minutes
 
@@ -12,6 +13,7 @@ export default function CalculatorPage() {
   return (
     <>
       <NitroCalculatorRailAd />
+      <NitroCalculatorRightRailAd />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumb />
         <CalculatorDescription />
