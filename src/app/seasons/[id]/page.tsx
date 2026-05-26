@@ -1,6 +1,7 @@
 import { fetchComments } from "@/utils/api/api";
 import SeasonDetailsClient from "@/components/Seasons/SeasonDetailsClient";
 import NitroSeasonsRailAd from "@/components/Ads/NitroSeasonsRailAd";
+import NitroSeasonsRightRailAd from "@/components/Ads/NitroSeasonsRightRailAd";
 
 interface Props {
   params: Promise<{
@@ -15,6 +16,7 @@ export default async function SeasonDetailsPage({ params }: Props) {
   return (
     <>
       <NitroSeasonsRailAd />
+      <NitroSeasonsRightRailAd />
       <SeasonDetailsClient
         seasonId={id}
         initialComments={commentsData.comments}

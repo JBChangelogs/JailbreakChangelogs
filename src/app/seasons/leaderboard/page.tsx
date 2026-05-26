@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Icon } from "@iconify/react";
 import SeasonHeader from "@/components/Leaderboard/SeasonLeaderboardHeader";
 import NitroSeasonsLeaderboardRailAd from "@/components/Ads/NitroSeasonsLeaderboardRailAd";
+import NitroSeasonsLeaderboardRightRailAd from "@/components/Ads/NitroSeasonsLeaderboardRightRailAd";
 import { Season } from "@/types/seasons";
 import {
   PUBLIC_API_URL,
@@ -88,6 +89,7 @@ export default function SeasonLeaderboardPage() {
     return (
       <>
         <NitroSeasonsLeaderboardRailAd />
+        <NitroSeasonsLeaderboardRightRailAd />
         <SeasonLeaderboardLoading />
       </>
     );
@@ -97,6 +99,7 @@ export default function SeasonLeaderboardPage() {
     return (
       <>
         <NitroSeasonsLeaderboardRailAd />
+        <NitroSeasonsLeaderboardRightRailAd />
         <div className="min-h-screen">
           <div className="container mx-auto px-4 pb-16">
             <Breadcrumb />

@@ -16,6 +16,7 @@ import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 export const dynamic = "force-dynamic";
 
 import NitroOGRailAd from "@/components/Ads/NitroOGRailAd";
+import NitroOGRightRailAd from "@/components/Ads/NitroOGRightRailAd";
 
 export default async function OGFinderPage() {
   // Check for OG Finder maintenance mode
@@ -37,6 +38,7 @@ export default async function OGFinderPage() {
   return (
     <>
       <NitroOGRailAd />
+      <NitroOGRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 
