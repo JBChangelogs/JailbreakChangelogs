@@ -40,6 +40,24 @@ import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
 
+const parseTradeValue = (value: string | number | null | undefined): number => {
+  if (value === null || value === undefined) return 0;
+  const normalized = String(value).trim().toLowerCase().replace(/,/g, "");
+  if (!normalized || normalized === "n/a") return 0;
+  if (normalized.endsWith("m")) {
+    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000_000;
+  }
+  if (normalized.endsWith("k")) {
+    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000;
+  }
+  return parseFloat(normalized) || 0;
+};
+
+const formatTradeValue = (value: number): string => {
+  if (!Number.isFinite(value)) return "0";
+  return Math.round(value).toLocaleString();
+};
+
 const CUSTOM_TRADE_TYPES = [
   { id: "adds", label: "Adds" },
   { id: "overpays", label: "Overpays" },
@@ -74,6 +92,35 @@ type V2OfferTradeItem =
 
 const buildItemKey = (item: TradeItem): string =>
   `${getTradeItemIdentifier(item)}:${item.isDuped ? 1 : 0}:${item.isOG ? 1 : 0}`;
+
+const TradeTotalsPills = ({ items }: { items: TradeItem[] }) => {
+  const standardItems = items.filter((item) => !isCustomTradeItem(item));
+  if (standardItems.length === 0) return null;
+
+  const cashTotal = standardItems.reduce((sum, item) => {
+    if (item.isDuped) return sum;
+    return sum + parseTradeValue(item.cash_value);
+  }, 0);
+
+  const dupedTotal = standardItems.reduce((sum, item) => {
+    if (!item.isDuped) return sum;
+    return sum + parseTradeValue(item.duped_value);
+  }, 0);
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+      <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
+        Cash: {formatTradeValue(cashTotal)}
+      </span>
+      <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
+        Duped: {formatTradeValue(dupedTotal)}
+      </span>
+      <span className="border-border-card bg-quaternary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
+        Total: {formatTradeValue(cashTotal + dupedTotal)}
+      </span>
+    </div>
+  );
+};
 
 const normalizeInventoryEntry = (
   entry: unknown,
@@ -773,6 +820,7 @@ export function MakeOfferDialog({
                     disableInteraction={submitting}
                     variant="compact"
                   />
+                  <TradeTotalsPills items={offeringItems} />
                 </div>
                 <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                   <p className="text-secondary-text mb-3 text-sm font-medium">
@@ -789,6 +837,7 @@ export function MakeOfferDialog({
                     disableInteraction={submitting}
                     variant="compact"
                   />
+                  <TradeTotalsPills items={requestingItems} />
                 </div>
               </div>
 
