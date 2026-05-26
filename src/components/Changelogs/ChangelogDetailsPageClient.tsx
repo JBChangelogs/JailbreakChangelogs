@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import ChangelogDetailsClient from "@/components/Changelogs/ChangelogDetailsClient";
 import NitroChangelogRailAd from "@/components/Ads/NitroChangelogRailAd";
+import NitroChangelogRightRailAd from "@/components/Ads/NitroChangelogRightRailAd";
 import { Changelog, CommentData, PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { UserData } from "@/types/auth";
@@ -81,6 +82,7 @@ export default function ChangelogDetailsPageClient({
     return (
       <>
         <NitroChangelogRailAd />
+        <NitroChangelogRightRailAd />
         <ChangelogRouteLoading />
       </>
     );

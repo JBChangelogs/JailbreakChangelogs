@@ -12,6 +12,7 @@ import { Season } from "@/types/seasons";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import NitroSeasonsCalculatorRailAd from "@/components/Ads/NitroSeasonsCalculatorRailAd";
+import NitroSeasonsCalculatorRightRailAd from "@/components/Ads/NitroSeasonsCalculatorRightRailAd";
 
 export default function WillIMakeItPage() {
   const [season, setSeason] = useState<Season | null>(null);
@@ -55,6 +56,7 @@ export default function WillIMakeItPage() {
     return (
       <>
         <NitroSeasonsCalculatorRailAd />
+        <NitroSeasonsCalculatorRightRailAd />
         <WillIMakeItLoading />
       </>
     );
@@ -64,6 +66,7 @@ export default function WillIMakeItPage() {
     return (
       <>
         <NitroSeasonsCalculatorRailAd />
+        <NitroSeasonsCalculatorRightRailAd />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-primary-text text-xl">
             Error: {error || "Season data not available"}
@@ -76,6 +79,7 @@ export default function WillIMakeItPage() {
   return (
     <>
       <NitroSeasonsCalculatorRailAd />
+      <NitroSeasonsCalculatorRightRailAd />
       <div className="mb-8 min-h-screen">
         <div className="container mx-auto px-4">
           <Breadcrumb />

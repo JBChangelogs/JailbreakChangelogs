@@ -54,6 +54,7 @@ interface ChangelogGroup {
 }
 
 import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
+import NitroValuesChangelogsRightRailAd from "@/components/Ads/NitroValuesChangelogsRightRailAd";
 
 export default function ValuesChangelogPage() {
   const [changelogs, setChangelogs] = useState<ChangelogGroup[]>([]);
@@ -130,6 +131,7 @@ export default function ValuesChangelogPage() {
   return (
     <>
       <NitroValuesChangelogsRailAd />
+      <NitroValuesChangelogsRightRailAd />
       <ThemeProvider theme={darkTheme}>
         <main className="min-h-screen">
           <div className="container mx-auto mb-8 px-4 sm:px-6">

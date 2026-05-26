@@ -18,6 +18,7 @@ interface OGFinderUserPageProps {
 }
 
 import NitroOGDetailRailAd from "@/components/Ads/NitroOGDetailRailAd";
+import NitroOGDetailRightRailAd from "@/components/Ads/NitroOGDetailRightRailAd";
 
 export default async function OGFinderUserPage({
   params,
@@ -43,6 +44,7 @@ export default async function OGFinderUserPage({
   return (
     <>
       <NitroOGDetailRailAd />
+      <NitroOGDetailRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

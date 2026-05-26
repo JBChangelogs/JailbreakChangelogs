@@ -20,6 +20,7 @@ interface Props {
 }
 
 import NitroItemRailAd from "@/components/Ads/NitroItemRailAd";
+import NitroItemRightRailAd from "@/components/Ads/NitroItemRightRailAd";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -88,6 +89,7 @@ export default async function ItemDetailsPage({ params }: Props) {
   return (
     <>
       <NitroItemRailAd />
+      <NitroItemRightRailAd />
       <ItemDetailsClient
         item={item}
         initialFavoriteCount={null}
