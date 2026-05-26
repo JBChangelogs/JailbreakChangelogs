@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import ReportIssueModal from "./ReportIssueModal";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 export default function ReportIssueButton() {
   const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { isAuthenticated } = useAuthContext();
 
   const handleOpenModal = useCallback(() => {
@@ -19,9 +20,17 @@ export default function ReportIssueButton() {
     setIsOpen(true);
   }, [isAuthenticated]);
 
-  // Check URL parameter during render instead of in useEffect
-  const shouldOpenFromUrl =
-    searchParams.get("report-issue") === "true" && isAuthenticated;
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    if (searchParams.has("report-issue")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("report-issue");
+      const query = params.toString();
+      router.replace(query ? `?${query}` : window.location.pathname);
+    }
+  }, [searchParams, router]);
+
+  const shouldOpenFromUrl = searchParams.has("report-issue") && isAuthenticated;
 
   return (
     <>
@@ -33,7 +42,7 @@ export default function ReportIssueButton() {
       </button>
       <ReportIssueModal
         isOpen={isOpen || shouldOpenFromUrl}
-        onClose={() => setIsOpen(false)}
+        onClose={handleClose}
       />
     </>
   );
