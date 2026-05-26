@@ -435,8 +435,9 @@ export default function HyperchromeCalculatorModal({
                         </>
                       ) : (
                         <>
-                          You are already in the fastest pity environment
-                          (Big/Public servers).
+                          Big/Public servers don&apos;t speed up pity
+                          progression; they simply use a different pity scale
+                          than Small/Private servers.
                         </>
                       )}
                     </div>
@@ -449,7 +450,7 @@ export default function HyperchromeCalculatorModal({
                     >
                       {isSmallServer
                         ? "Switch to a Big Server (9+ Players) at that point to guarantee an instant level-up."
-                        : "Staying in Big/Public servers is the optimal path to your next guaranteed level-up."}
+                        : "However, Big/Public servers provide 1.5x luck for obtaining hyperchromes naturally (without relying on pity)."}
                     </div>
                   </div>
                 </div>
