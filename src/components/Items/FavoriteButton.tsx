@@ -2,6 +2,8 @@
 
 import { createLogger } from "@/services/logger";
 import { useState } from "react";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 const log = createLogger("UI");
 import { toast } from "sonner";
@@ -37,17 +39,16 @@ export default function FavoriteButton({
 
     try {
       const idString = String(itemId);
-      const response = await fetch(
-        `/api/favorites/${isFavorited ? "remove" : "add"}`,
-        {
-          method: isFavorited ? "DELETE" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.com",
-          },
-          body: JSON.stringify({ item_id: idString }),
-        },
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/favorites",
       );
+      const response = await fetch(url, {
+        method: isFavorited ? "DELETE" : "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ item_id: idString }),
+        credentials: "include",
+      });
 
       if (response.ok) {
         setIsFavorited(!isFavorited);

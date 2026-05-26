@@ -218,13 +218,11 @@ export interface DupeResult {
 }
 
 export interface FavoriteItem {
-  item_id: string;
   created_at: number;
-  author: string;
-  item?: {
+  item: {
     id: number;
-    name?: string;
-    type?: string;
+    name: string;
+    type: string;
     parent?: number;
     sub_name?: string;
     data?: {

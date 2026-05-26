@@ -4,7 +4,6 @@ import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
 
 const log = createLogger("UI");
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 
@@ -27,12 +26,34 @@ import {
   formatRelativeDate,
   formatCustomDate,
 } from "@/utils/helpers/timestamp";
-import { ItemDetails, FavoriteItem } from "@/types";
+import { FavoriteItem } from "@/types";
+import { fetchFavoritesData } from "@/app/users/[id]/actions";
 
-interface FavoriteWithDetails extends FavoriteItem {
-  details?: {
-    item: ItemDetails;
-  };
+function FavoriteCardSkeleton() {
+  return (
+    <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm">
+      <div className="mb-2 flex items-center">
+        <div className="bg-quaternary-bg mr-3 h-16 w-16 shrink-0 rounded-md md:h-18 md:w-32" />
+        <div className="min-w-0 flex-1">
+          <div className="bg-quaternary-bg mb-2 h-4 w-3/4 rounded" />
+          <div className="bg-quaternary-bg h-6 w-20 rounded-lg" />
+        </div>
+      </div>
+      <div className="bg-quaternary-bg mt-2 h-3 w-32 rounded" />
+    </div>
+  );
+}
+
+function FavoritesTabSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <FavoriteCardSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 interface FavoritesTabProps {
@@ -41,82 +62,36 @@ interface FavoritesTabProps {
   settings?: {
     hide_favorites?: boolean;
   };
-  favorites?: FavoriteItem[];
-  favoriteItemDetails?: Record<string, unknown>;
-  isLoadingAdditionalData?: boolean;
-  sharedItemDetails?: Record<string, unknown>;
 }
 
 export default function FavoritesTab({
   userId,
   currentUserId,
   settings,
-  favorites: serverFavorites = [],
-  favoriteItemDetails = {},
-  isLoadingAdditionalData = false,
-  sharedItemDetails = {},
 }: FavoritesTabProps) {
-  const [favorites, setFavorites] = useState<FavoriteWithDetails[]>([]);
-  const [loading, setLoading] = useState(
-    !serverFavorites.length && isLoadingAdditionalData,
-  );
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const favoritesPerPage = 9;
 
-  // Check if favorites should be hidden
   const shouldHideFavorites =
     settings?.hide_favorites === true && currentUserId !== userId;
 
   useEffect(() => {
-    const processFavorites = () => {
-      try {
-        setLoading(false);
-
-        // Don't show favorites if they should be hidden
-        if (shouldHideFavorites) {
-          setFavorites([]);
-          return;
-        }
-
-        if (Array.isArray(serverFavorites) && serverFavorites.length > 0) {
-          // Process server-side favorites with item details
-          // Use shared cache first, then fall back to favoriteItemDetails
-          const favoritesWithDetails = serverFavorites.map((favorite) => {
-            const itemDetails =
-              sharedItemDetails[favorite.item_id] ||
-              favoriteItemDetails[favorite.item_id];
-            return {
-              ...favorite,
-              details: itemDetails
-                ? { item: itemDetails as ItemDetails }
-                : undefined,
-            };
-          });
-
-          setFavorites(favoritesWithDetails);
-        } else {
-          setFavorites([]);
-        }
-      } catch (err) {
-        log.error("Error processing favorites", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to process favorites",
-        );
-      }
-    };
-
-    if (userId) {
-      processFavorites();
+    if (shouldHideFavorites) {
+      setLoading(false);
+      return;
     }
-  }, [
-    userId,
-    shouldHideFavorites,
-    serverFavorites,
-    favoriteItemDetails,
-    sharedItemDetails,
-  ]);
+    fetchFavoritesData(userId)
+      .then((data) => setFavorites(data))
+      .catch((err) => {
+        log.error("Error fetching favorites", err);
+        setError("Failed to load favorites");
+      })
+      .finally(() => setLoading(false));
+  }, [userId, shouldHideFavorites]);
 
   // Sort favorites based on selected order
   const sortedFavorites = [...favorites].sort((a, b) => {
@@ -143,63 +118,42 @@ export default function FavoritesTab({
   );
 
   // Render a favorite item
-  const renderFavorite = (favorite: FavoriteWithDetails) => {
-    // Handle sub-items (variants)
-    const isSubItem = favorite.item_id.includes("-");
+  const renderFavorite = (favorite: FavoriteItem) => {
+    const isSubItem = !!favorite.item?.data;
 
     let itemName = "";
     let itemType = "";
     let imageName = "";
     let itemUrl = "";
-    let isLoadingItem = false;
 
     if (isSubItem) {
-      // For sub-items, use the data directly from favorite.item
       const itemData = favorite.item;
       if (!itemData?.data) {
         return null;
       }
       itemName = `${itemData.data.name}${itemData.sub_name ? ` (${itemData.sub_name})` : ""}`;
       itemType = itemData.data.type;
-      // For sub-items, use the base name without the year for the image
       imageName = itemData.data.name;
-      // Create URL for sub-item
-      const baseName = itemData.data.name;
-      itemUrl = `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(baseName)}?variant=${itemData.sub_name}`;
+      itemUrl = `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(itemData.data.name)}?variant=${itemData.sub_name}`;
     } else {
-      // For regular items, use the details.item data
-      const itemData = favorite.details?.item;
+      const itemData = favorite.item;
       if (!itemData?.name || !itemData?.type) {
-        // Check if we're still loading additional data
-        if (isLoadingAdditionalData) {
-          isLoadingItem = true;
-          itemName = ""; // Will show skeleton
-          itemType = "Loading...";
-          imageName = "";
-          itemUrl = "#";
-        } else {
-          return null;
-        }
+        return null;
       } else {
         itemName = itemData.name;
         itemType = itemData.type;
         imageName = itemName;
-        // Create URL for regular item
-        const baseName = itemName;
-        itemUrl = `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(baseName)}`;
+        itemUrl = `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`;
       }
     }
 
-    // If we don't have a name or type and we're not loading, don't render the card
-    if (!itemName && !isLoadingItem) {
-      return null;
-    }
+    if (!itemName) return null;
 
     const isVideo = isVideoItem(imageName);
 
     return (
       <Link
-        key={`${favorite.item_id}-${favorite.created_at}`}
+        key={`${favorite.item?.id}-${favorite.created_at}`}
         href={itemUrl}
         className="group block"
       >
@@ -227,38 +181,26 @@ export default function FavoritesTab({
             </div>
             <div className="flex-1">
               <div className="flex items-start justify-between">
-                {isLoadingItem ? (
-                  <Skeleton className="w-4/5" style={{ height: 20 }} />
-                ) : (
-                  <span className="text-primary-text group-hover:text-link font-medium transition-colors">
-                    {itemName}
-                  </span>
-                )}
+                <span className="text-primary-text group-hover:text-link font-medium transition-colors">
+                  {itemName}
+                </span>
               </div>
               <div className="text-secondary-text text-xs">
                 {itemType && (
                   <div className="mb-1">
-                    {isLoadingItem ? (
-                      <Skeleton style={{ width: 80, height: 20 }} />
-                    ) : (
-                      <span
-                        className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-                        style={{
-                          borderColor: getCategoryColor(itemType),
-                        }}
-                      >
-                        {itemType}
-                      </span>
-                    )}
+                    <span
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                      style={{ borderColor: getCategoryColor(itemType) }}
+                    >
+                      {itemType}
+                    </span>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          <hr className="border-border my-2 border-t" />
-
-          <div className="flex items-center justify-start text-xs">
+          <div className="mt-2 flex items-center justify-start text-xs">
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="text-secondary-text cursor-help">
@@ -277,38 +219,9 @@ export default function FavoritesTab({
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h2 className="text-primary-text text-lg font-semibold">
-                Favorited Items
-              </h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="rounded-lg border p-3 shadow-sm">
-                <div className="mb-2 flex items-center">
-                  <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
-                    <Skeleton className="h-full w-full rounded-none" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <Skeleton style={{ width: 120, height: 24 }} />
-                    </div>
-                    <div className="text-secondary-text text-xs">
-                      <div className="mb-1">
-                        <Skeleton style={{ width: 80, height: 20 }} />
-                      </div>
-                      <Skeleton style={{ width: 140, height: 16 }} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+        <div className="bg-quaternary-bg mb-4 h-6 w-36 animate-pulse rounded" />
+        <FavoritesTabSkeleton />
       </div>
     );
   }

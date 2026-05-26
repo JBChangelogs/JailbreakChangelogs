@@ -18,11 +18,47 @@ interface Server {
 interface PrivateServersTabProps {
   servers: Server[];
   isOwnProfile: boolean;
+  isLoadingAdditionalData?: boolean;
+}
+
+function ServerCardSkeleton() {
+  return (
+    <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 sm:p-6">
+      <div className="mb-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <div className="bg-quaternary-bg h-5 w-5 rounded" />
+          <div className="bg-quaternary-bg h-4 w-20 rounded" />
+        </div>
+        <div className="flex gap-2">
+          <div className="bg-quaternary-bg h-8 w-8 rounded" />
+          <div className="bg-quaternary-bg h-8 w-24 rounded" />
+        </div>
+      </div>
+      <div className="space-y-3">
+        <div className="bg-quaternary-bg h-4 w-full rounded" />
+        <div className="bg-quaternary-bg h-4 w-4/5 rounded" />
+        <div className="bg-quaternary-bg h-16 w-full rounded" />
+      </div>
+    </div>
+  );
+}
+
+function PrivateServersTabSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <ServerCardSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
   servers,
   isOwnProfile,
+  isLoadingAdditionalData = false,
 }) => {
   const handleCopyLink = async (link: string) => {
     try {
@@ -32,6 +68,15 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
       toast.error("Failed to copy server link");
     }
   };
+
+  if (isLoadingAdditionalData) {
+    return (
+      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+        <div className="bg-quaternary-bg mb-4 h-6 w-36 animate-pulse rounded" />
+        <PrivateServersTabSkeleton />
+      </div>
+    );
+  }
 
   if (!servers || servers.length === 0) {
     return (

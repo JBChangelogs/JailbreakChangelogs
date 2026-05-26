@@ -28,7 +28,6 @@ import {
 } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { bangers } from "@/app/fonts";
-import { Spinner } from "@/components/ui/Spinner";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -435,10 +434,7 @@ export default function ProfileInventoryTab({
         <div className="flex items-center gap-3">
           <p className="text-secondary-text text-sm">
             {effectiveStatus === "loading" ? (
-              <span className="inline-flex items-center gap-2">
-                <Spinner className="h-4 w-4" />
-                <span>Loading inventory items...</span>
-              </span>
+              <span className="bg-quaternary-bg inline-block h-4 w-40 animate-pulse rounded" />
             ) : status === "loaded" ? (
               hasFilters ? (
                 `${filterLabel}${filteredItems.length} of ${totalCount}`
@@ -488,6 +484,23 @@ export default function ProfileInventoryTab({
     <div className="mt-6 px-4 pb-4 sm:px-6">
       {header}
 
+      {effectiveStatus === "loading" && (
+        <div className="animate-pulse">
+          <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="border-border-card bg-tertiary-bg flex min-h-100 flex-col rounded-lg border p-3"
+              >
+                <div className="bg-quaternary-bg mb-4 h-7 w-3/4 rounded" />
+                <div className="bg-quaternary-bg mb-3 h-5 w-20 rounded-lg" />
+                <div className="bg-quaternary-bg flex-1 rounded-lg" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {status === "loaded" && (
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-1 md:min-w-70">
@@ -497,7 +510,7 @@ export default function ProfileInventoryTab({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               maxLength={80}
-              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-11 w-full rounded-lg border px-3 pr-9 pl-9 text-sm transition-all duration-300 focus:outline-none"
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-11 w-full rounded-lg border px-3 pr-9 pl-9 text-sm transition-all duration-300 focus:outline-none"
             />
             <Icon
               icon="heroicons:magnifying-glass"
@@ -519,7 +532,7 @@ export default function ProfileInventoryTab({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="border-border-card bg-secondary-bg text-primary-text hover:bg-quaternary-bg inline-flex h-11 w-full items-center justify-between gap-2 rounded-lg border px-3 text-sm transition-all duration-200 focus:outline-none md:w-50 md:shrink-0 lg:w-55"
+                className="border-border-card bg-tertiary-bg text-primary-text hover:bg-quaternary-bg inline-flex h-11 w-full items-center justify-between gap-2 rounded-lg border px-3 text-sm transition-all duration-200 focus:outline-none md:w-50 md:shrink-0 lg:w-55"
                 aria-label="Filter by type"
               >
                 <span className="truncate">

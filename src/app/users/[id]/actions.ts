@@ -1,5 +1,6 @@
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");
@@ -30,11 +31,11 @@ async function fetchItemById(id: string) {
 
 export async function fetchFavoritesData(userId: string) {
   try {
-    const response = await fetchWithRetry(
-      `${PUBLIC_API_URL}/favorites/get?user=${userId}`,
-      undefined,
-      { maxRetries: 3, initialDelayMs: 800, timeoutMs: 10000 },
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      `/favorites/user/${userId}`,
     );
+    const response = await fetch(url, { headers, credentials: "include" });
 
     if (!response.ok) {
       if (response.status === 404) return [];
@@ -48,33 +49,6 @@ export async function fetchFavoritesData(userId: string) {
   } catch (error) {
     log.error("Failed to fetch favorites:", error);
     return [];
-  }
-}
-
-export async function fetchFavoriteItemDetails(
-  favorites: Array<{ item_id: string }>,
-) {
-  try {
-    if (!favorites || favorites.length === 0) return {};
-
-    const itemDetailsPromises = favorites.map(async (favorite) => {
-      try {
-        const itemDetails = await fetchItemById(favorite.item_id);
-        return { [favorite.item_id]: itemDetails ?? null };
-      } catch {
-        return { [favorite.item_id]: null };
-      }
-    });
-
-    const itemDetailsArray = await Promise.all(itemDetailsPromises);
-    const itemDetailsMap: Record<string, unknown> = {};
-    itemDetailsArray.forEach((details) =>
-      Object.assign(itemDetailsMap, details),
-    );
-    return itemDetailsMap;
-  } catch (error) {
-    log.error("Failed to fetch favorite item details:", error);
-    return {};
   }
 }
 

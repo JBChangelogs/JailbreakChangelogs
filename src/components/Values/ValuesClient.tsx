@@ -110,8 +110,8 @@ export default function ValuesClient({
         try {
           const favoritesData = await fetchUserFavorites(user.id);
           if (favoritesData !== null && Array.isArray(favoritesData)) {
-            const favoriteIds = favoritesData.map((fav: FavoriteItem) =>
-              parseInt(fav.item_id, 10),
+            const favoriteIds = favoritesData.map(
+              (fav: FavoriteItem) => fav.item.id,
             );
             setFavorites(favoriteIds);
           }

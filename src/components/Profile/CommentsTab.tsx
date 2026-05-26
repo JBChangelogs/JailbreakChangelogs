@@ -59,7 +59,7 @@ function ProfileCommentCardSkeleton() {
           <div className="bg-quaternary-bg mt-1.5 h-3.5 w-2/3 rounded" />
         </div>
       </div>
-      <hr className="border-border my-2 border-t" />
+      <div className="my-2" />
       <div className="bg-quaternary-bg h-3 w-28 rounded" />
     </div>
   );

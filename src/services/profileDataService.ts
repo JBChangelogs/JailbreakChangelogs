@@ -1,8 +1,4 @@
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import {
-  fetchFavoritesData,
-  fetchFavoriteItemDetails,
-} from "@/app/users/[id]/actions";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");
@@ -16,9 +12,6 @@ export interface ProfileDataResult {
   bioLastUpdated: number | null;
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   privateServers: any[];
-  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-  favorites: any[];
-  favoriteItemDetails: Record<string, unknown>;
   tradeAds: TradeAd[];
 }
 
@@ -38,7 +31,6 @@ export class ProfileDataService {
         followingResponse,
         bioResponse,
         serversResponse,
-        favoritesData,
       ] = await Promise.all([
         fetchWithRetry(
           `${PUBLIC_API_URL}/users/followers/get?user=${userId}`,
@@ -76,7 +68,6 @@ export class ProfileDataService {
             timeoutMs: 10000,
           },
         ).catch(() => null),
-        fetchFavoritesData(userId),
       ]);
 
       // Process responses
@@ -91,20 +82,12 @@ export class ProfileDataService {
         ? await serversResponse.json()
         : [];
 
-      // Fetch item details for favorites (only if we have favorites data)
-      const favoriteItemDetails =
-        Array.isArray(favoritesData) && favoritesData.length > 0
-          ? await fetchFavoriteItemDetails(favoritesData)
-          : {};
-
       return {
         followerCount: Array.isArray(followersData) ? followersData.length : 0,
         followingCount: Array.isArray(followingData) ? followingData.length : 0,
         bio: bioData?.description || null,
         bioLastUpdated: bioData?.last_updated || null,
         privateServers: Array.isArray(serversData) ? serversData : [],
-        favorites: Array.isArray(favoritesData) ? favoritesData : [],
-        favoriteItemDetails,
         tradeAds: [],
       };
     } catch (error) {
@@ -123,8 +106,6 @@ export class ProfileDataService {
       bio: null,
       bioLastUpdated: null,
       privateServers: [],
-      favorites: [],
-      favoriteItemDetails: {},
       tradeAds: [],
     };
   }

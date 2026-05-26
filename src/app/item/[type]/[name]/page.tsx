@@ -1,15 +1,10 @@
-import {
-  fetchItem,
-  fetchItemsByType,
-  fetchItemFavorites,
-  fetchItemHistory,
-} from "@/utils/api/api";
+import { fetchItem, fetchItemsByType, fetchItemHistory } from "@/utils/api/api";
 import ItemDetailsClient from "@/components/Items/ItemDetailsClient";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import ItemCommentsServer from "@/components/Items/SuspenseWrapper/ItemCommentsServer";
 import SimilarItems from "@/components/Items/SimilarItems";
-import FavoriteButtonServer from "@/components/Items/SuspenseWrapper/FavoriteButtonWrapper";
+import FavoriteButtonWrapper from "@/components/Items/SuspenseWrapper/FavoriteButtonWrapper";
 
 interface Props {
   params: Promise<{
@@ -31,7 +26,6 @@ export default async function ItemDetailsPage({ params }: Props) {
     notFound();
   }
 
-  const favoriteCountPromise = fetchItemFavorites(String(item.id));
   const similarItemsPromise = fetchItemsByType(item.type);
   const historyPromise = fetchItemHistory(String(item.id));
 
@@ -62,18 +56,7 @@ export default async function ItemDetailsPage({ params }: Props) {
     </Suspense>
   );
 
-  const favoriteButtonSlot = (
-    <Suspense
-      fallback={
-        <div className="bg-secondary-bg h-8 w-24 animate-pulse rounded-lg" />
-      }
-    >
-      <FavoriteButtonServer
-        itemId={item.id}
-        initialFavoriteCountPromise={favoriteCountPromise}
-      />
-    </Suspense>
-  );
+  const favoriteButtonSlot = <FavoriteButtonWrapper itemId={item.id} />;
 
   return (
     <>

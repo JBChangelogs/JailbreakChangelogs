@@ -53,23 +53,6 @@ interface Server {
   created_at: string;
 }
 
-interface FavoriteItem {
-  item_id: string;
-  created_at: number;
-  author: string;
-  item?: {
-    id: number;
-    name?: string;
-    type?: string;
-    parent?: number;
-    sub_name?: string;
-    data?: {
-      name: string;
-      type: string;
-    };
-  };
-}
-
 interface ProfileTabsProps {
   user: User | null;
   currentUserId: string | null;
@@ -78,8 +61,6 @@ interface ProfileTabsProps {
   onBioUpdate?: (newBio: string) => void;
   privateServers?: Server[];
   isLoadingAdditionalData?: boolean;
-  favorites?: FavoriteItem[];
-  favoriteItemDetails?: Record<string, unknown>;
   tradeAds?: TradeAd[];
 }
 
@@ -114,8 +95,6 @@ export default function ProfileTabs({
   onBioUpdate,
   privateServers = [],
   isLoadingAdditionalData = false,
-  favorites = [],
-  favoriteItemDetails = {},
   tradeAds = [],
 }: ProfileTabsProps) {
   "use memo";
@@ -140,19 +119,7 @@ export default function ProfileTabs({
     return Math.min(idx, hasRobloxConnection ? 5 : 3);
   }, [tabParam, hasRobloxConnection]);
 
-  // Create a shared cache of item details from both comments and favorites
-  const sharedItemDetails = (() => {
-    const cache: Record<string, unknown> = {};
-
-    // Add favorite item details to cache
-    Object.entries(favoriteItemDetails).forEach(([itemId, details]) => {
-      if (details) {
-        cache[itemId] = details;
-      }
-    });
-
-    return cache;
-  })();
+  const sharedItemDetails: Record<string, unknown> = {};
 
   const handleChange = (newValue: number) => {
     const names: Record<number, string | null> = {
@@ -199,16 +166,13 @@ export default function ProfileTabs({
           userId={user.id}
           currentUserId={currentUserId}
           settings={user.settings_v2}
-          favorites={favorites}
-          favoriteItemDetails={favoriteItemDetails}
-          isLoadingAdditionalData={isLoadingAdditionalData}
-          sharedItemDetails={sharedItemDetails}
         />
       </TabPanel>
       <TabPanel value={value} index={3}>
         <PrivateServersTab
           servers={privateServers}
           isOwnProfile={currentUserId === user.id}
+          isLoadingAdditionalData={isLoadingAdditionalData}
         />
       </TabPanel>
       {hasRobloxConnection && (

@@ -35,6 +35,8 @@ import {
   getCategoryColor,
 } from "@/utils/items/categoryIcons";
 import { Icon } from "@/components/ui/IconWrapper";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   Tooltip,
   TooltipContent,
@@ -168,18 +170,16 @@ export default function ItemCard({
     }
 
     try {
-      const response = await fetch(
-        `/api/favorites/${isFavorited ? "remove" : "add"}`,
-        {
-          method: isFavorited ? "DELETE" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            item_id: String(item.id),
-          }),
-        },
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/favorites",
       );
+      const response = await fetch(url, {
+        method: isFavorited ? "DELETE" : "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ item_id: String(item.id) }),
+        credentials: "include",
+      });
 
       if (response.ok) {
         onFavoriteChange(!isFavorited);

@@ -1,23 +1,27 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import FavoriteButton from "@/components/Items/FavoriteButton";
-import { fetchUserFavorites } from "@/utils/api/api";
+import { fetchUserFavorites, fetchItemFavorites } from "@/utils/api/api";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 interface Props {
   itemId: number;
-  initialFavoriteCountPromise: Promise<number | null>;
 }
 
-export default function FavoriteButtonServer({
-  itemId,
-  initialFavoriteCountPromise,
-}: Props) {
+export default function FavoriteButtonWrapper({ itemId }: Props) {
   const { user, isLoading: authLoading } = useAuthContext();
-  const initialFavoriteCount = use(initialFavoriteCountPromise);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favLoading, setFavLoading] = useState(true);
+  const [initialFavoriteCount, setInitialFavoriteCount] = useState(0);
+
+  useEffect(() => {
+    fetchItemFavorites(String(itemId)).then((data) => {
+      if (typeof data === "number") setInitialFavoriteCount(data);
+      else if (data && typeof data.count === "number")
+        setInitialFavoriteCount(data.count);
+    });
+  }, [itemId]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -28,15 +32,7 @@ export default function FavoriteButtonServer({
     fetchUserFavorites(user.id)
       .then((data) => {
         if (data !== null && Array.isArray(data)) {
-          setIsFavorited(
-            data.some((fav) => {
-              const id = String(fav.item_id);
-              if (id.includes("-")) {
-                return Number(id.split("-")[0]) === itemId;
-              }
-              return Number(id) === itemId;
-            }),
-          );
+          setIsFavorited(data.some((fav) => fav.item?.id === itemId));
         }
       })
       .catch(() => {})
@@ -54,7 +50,7 @@ export default function FavoriteButtonServer({
       itemId={itemId}
       isAuthenticated={!!user}
       initialIsFavorited={isFavorited}
-      initialCount={initialFavoriteCount || 0}
+      initialCount={initialFavoriteCount}
     />
   );
 }

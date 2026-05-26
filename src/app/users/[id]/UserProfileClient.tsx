@@ -209,23 +209,6 @@ interface User {
   } | null;
 }
 
-interface FavoriteItem {
-  item_id: string;
-  created_at: number;
-  author: string;
-  item?: {
-    id: number;
-    name?: string;
-    type?: string;
-    parent?: number;
-    sub_name?: string;
-    data?: {
-      name: string;
-      type: string;
-    };
-  };
-}
-
 interface UserProfileData {
   user: User;
   followerCount: number;
@@ -233,8 +216,6 @@ interface UserProfileData {
   bio: string | null;
   bioLastUpdated: number | null;
   privateServers: Server[];
-  favorites: FavoriteItem[];
-  favoriteItemDetails: Record<string, unknown>;
   tradeAds: TradeAd[];
 }
 
@@ -311,10 +292,6 @@ export default function UserProfileClient({
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
   const [privateServers] = useState<Server[]>(
     initialData?.privateServers || [],
-  );
-  const [favorites] = useState<FavoriteItem[]>(initialData?.favorites || []);
-  const [favoriteItemDetails] = useState<Record<string, unknown>>(
-    initialData?.favoriteItemDetails || {},
   );
   const [tradeAds] = useState<TradeAd[]>(initialData?.tradeAds || []);
   const [isReportDescriptionOpen, setIsReportDescriptionOpen] = useState(false);
@@ -1529,8 +1506,6 @@ export default function UserProfileClient({
               onBioUpdate={refreshBio}
               privateServers={privateServers}
               isLoadingAdditionalData={isLoadingAdditionalData}
-              favorites={favorites}
-              favoriteItemDetails={favoriteItemDetails}
               tradeAds={tradeAds}
             />
           </div>

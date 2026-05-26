@@ -25,6 +25,44 @@ interface TradeAdsProfileTabProps {
   currentUserId?: string | null;
 }
 
+function TradeAdCardSkeleton() {
+  return (
+    <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="bg-quaternary-bg h-5 w-40 rounded" />
+        <div className="bg-quaternary-bg h-4 w-24 rounded" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {[0, 1].map((i) => (
+          <div key={i} className="border-border-card rounded-xl border">
+            <div className="border-border-card border-b px-3 py-2">
+              <div className="bg-quaternary-bg h-4 w-16 rounded" />
+            </div>
+            <div className="divide-border-card divide-y">
+              {[0, 1, 2].map((j) => (
+                <div key={j} className="flex items-center gap-3 px-3 py-2">
+                  <div className="bg-quaternary-bg h-8 w-28 rounded" />
+                  <div className="bg-quaternary-bg h-4 flex-1 rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TradeAdsTabSkeleton() {
+  return (
+    <div className="animate-pulse space-y-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <TradeAdCardSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
+
 export default function TradeAdsProfileTab({
   user,
   tradeAds = [],
@@ -280,9 +318,7 @@ export default function TradeAdsProfileTab({
   return (
     <div className="mt-6 mb-8">
       {isLoadingAdditionalData || isFetchingTradeAds ? (
-        <div className="mx-auto max-w-lg p-6 text-center">
-          <p className="text-secondary-text text-sm">Loading trade ads...</p>
-        </div>
+        <TradeAdsTabSkeleton />
       ) : tradeAdsError ? (
         <div className="mx-auto max-w-lg p-8 text-center">
           <Icon
