@@ -20,6 +20,7 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 import NitroDupesRailAd from "@/components/Ads/NitroDupesRailAd";
+import NitroDupesRightRailAd from "@/components/Ads/NitroDupesRightRailAd";
 
 export default async function DupeFinderPage() {
   // Check for Dupe Finder maintenance mode
@@ -42,6 +43,7 @@ export default async function DupeFinderPage() {
   return (
     <>
       <NitroDupesRailAd />
+      <NitroDupesRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

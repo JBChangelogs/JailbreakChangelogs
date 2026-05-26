@@ -28,6 +28,7 @@ import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner
 import { Button } from "@/components/ui/button";
 import NitroRobberiesTopAd from "@/components/Ads/NitroRobberiesTopAd";
 import NitroRobberiesRailAd from "@/components/Ads/NitroRobberiesRailAd";
+import NitroRobberiesRightRailAd from "@/components/Ads/NitroRobberiesRightRailAd";
 import TotalRobberiesLoggedPolling from "@/components/RobberyTracker/TotalRobberiesLoggedPolling";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
@@ -1157,6 +1158,7 @@ function RobberyTrackerContent() {
   return (
     <>
       <NitroRobberiesRailAd />
+      <NitroRobberiesRightRailAd />
       <main className="text-primary-text min-h-screen">
         <div className="container mx-auto mb-8 px-4">
           <Breadcrumb />

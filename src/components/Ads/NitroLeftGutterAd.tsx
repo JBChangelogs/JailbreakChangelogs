@@ -19,6 +19,7 @@ interface NitroLeftGutterAdProps {
   adIdWide: string;
   smallSizes?: AdSize[];
   wideSizes?: AdSize[];
+  side?: "left" | "right";
 }
 
 const DEFAULT_SMALL_SIZES: AdSize[] = [["160", "600"]];
@@ -37,7 +38,10 @@ export default function NitroLeftGutterAd({
   adIdWide,
   smallSizes = DEFAULT_SMALL_SIZES,
   wideSizes = DEFAULT_WIDE_SIZES,
+  side = "left",
 }: NitroLeftGutterAdProps) {
+  const positionClass = side === "right" ? "right-2.5" : "left-2.5";
+  const reportPosition = side === "right" ? "bottom-right" : "bottom-left";
   const isSmallViewport = useMediaQuery(
     "(min-width: 1900px) and (max-width: 2149px)",
   );
@@ -103,7 +107,7 @@ export default function NitroLeftGutterAd({
             enabled: true,
             icon: true,
             wording: "Report Ad",
-            position: "bottom-left",
+            position: reportPosition,
           },
         }),
       )
@@ -131,7 +135,7 @@ export default function NitroLeftGutterAd({
             enabled: true,
             icon: true,
             wording: "Report Ad",
-            position: "bottom-left",
+            position: reportPosition,
           },
         }),
       )
@@ -165,6 +169,7 @@ export default function NitroLeftGutterAd({
     isWideViewport,
     smallSizes,
     wideSizes,
+    reportPosition,
   ]);
 
   const tier = premiumType ?? 0;
@@ -174,13 +179,17 @@ export default function NitroLeftGutterAd({
 
   return (
     <>
-      <div className="left-2.5z-2147483644 fixed top-1/2 hidden -translate-y-1/2 [@media(min-width:1900px)]:block [@media(min-width:2150px)]:hidden">
+      <div
+        className={`${positionClass} fixed top-1/2 z-2147483644 hidden -translate-y-1/2 [@media(min-width:1900px)]:block [@media(min-width:2150px)]:hidden`}
+      >
         <div
           id={adIdSmall}
           className="relative min-h-150 w-40 text-center text-[0px]"
         />
       </div>
-      <div className="fixed top-1/2 left-2.5 z-2147483644 hidden -translate-y-1/2 [@media(min-width:2150px)]:block">
+      <div
+        className={`${positionClass} fixed top-1/2 z-2147483644 hidden -translate-y-1/2 [@media(min-width:2150px)]:block`}
+      >
         <div
           id={adIdWide}
           className="relative min-h-150 w-75 text-center text-[0px]"

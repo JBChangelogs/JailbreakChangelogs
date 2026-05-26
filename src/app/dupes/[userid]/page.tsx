@@ -21,6 +21,7 @@ interface DupeFinderPageProps {
 }
 
 import NitroDupeDetailRailAd from "@/components/Ads/NitroDupeDetailRailAd";
+import NitroDupeDetailRightRailAd from "@/components/Ads/NitroDupeDetailRightRailAd";
 
 export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
   // Check for Dupe Finder maintenance mode
@@ -55,6 +56,7 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
   return (
     <>
       <NitroDupeDetailRailAd />
+      <NitroDupeDetailRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 
