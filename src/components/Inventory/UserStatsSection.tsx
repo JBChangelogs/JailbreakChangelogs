@@ -15,6 +15,7 @@ import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 import { Spinner } from "../ui/Spinner";
+import { toast } from "sonner";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { createLogger } from "@/services/logger";
@@ -274,6 +275,16 @@ export default function UserStatsSection({
       setIsLoadingQueuePosition(false);
     }
   }, [userId]);
+
+  const handleCopyTradeNote = async () => {
+    try {
+      if (!tradeNote) return;
+      await navigator.clipboard.writeText(tradeNote);
+      toast.success("Trade note copied to clipboard!", { duration: 3000 });
+    } catch (err) {
+      log.error("Failed to copy trade note", err);
+    }
+  };
 
   if (!currentData) {
     return (
@@ -719,7 +730,27 @@ export default function UserStatsSection({
             </div>
 
             <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap italic">
-              &quot;{tradeNote}&quot;
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="group cursor-pointer transition-opacity select-none hover:opacity-80"
+                    onClick={handleCopyTradeNote}
+                  >
+                    &quot;{tradeNote}&quot;
+                    <Icon
+                      icon="heroicons-outline:clipboard"
+                      className="text-secondary-text ml-1.5 inline h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"
+                      inline={true}
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                >
+                  <p>Click to copy</p>
+                </TooltipContent>
+              </Tooltip>
             </p>
           </div>
         ) : null;
