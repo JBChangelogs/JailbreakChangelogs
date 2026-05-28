@@ -43,6 +43,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useRouter } from "next/navigation";
 
 type TradeSide = "offering" | "requesting";
 type ItemCondition = "clean" | "duped" | "og";
@@ -63,6 +65,7 @@ interface TradeItemPickerV2Props {
   cardBackground?: "secondary" | "tertiary";
   activeSide?: TradeSide;
   onActiveSideChange?: (side: TradeSide) => void;
+  showOfferRequestButtons?: boolean;
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
@@ -133,6 +136,7 @@ export default function TradeItemPickerV2({
   cardBackground = "secondary",
   activeSide: activeSideProp,
   onActiveSideChange,
+  showOfferRequestButtons = false,
 }: TradeItemPickerV2Props) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -160,6 +164,12 @@ export default function TradeItemPickerV2({
     offering: {},
     requesting: {},
   });
+  const [unifiedItemConditions, setUnifiedItemConditions] = useState<
+    Record<string, ItemCondition>
+  >({});
+  const [pendingNavHref, setPendingNavHref] = useState<string | null>(null);
+  const [pendingNavName, setPendingNavName] = useState<string>("");
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
@@ -326,493 +336,616 @@ export default function TradeItemPickerV2({
       : "hover:bg-tertiary-bg";
 
   return (
-    <div data-component="trade-item-picker-v2">
-      <div className="mb-4">
-        <Tabs
-          value={activeSide}
-          onValueChange={(value) => setActiveSide(value as TradeSide)}
-        >
-          <TabsList fullWidth>
-            <TabsTrigger value="offering" fullWidth>
-              Add to Offering
-            </TabsTrigger>
-            <TabsTrigger value="requesting" fullWidth>
-              Add to Requesting
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      {customTypes.length > 0 && (
-        <>
-          <div className="mb-2 text-center">
-            <p className="text-secondary-text text-xs tracking-wider uppercase">
-              Custom Trade Tags
-            </p>
-            <p className="text-secondary-text/80 mt-1 text-sm">
-              Quick shortcuts like “Overpays”, “Adds”, or “Upgrades”. Hover to
-              learn what each tag means.
-            </p>
+    <>
+      <ConfirmDialog
+        isOpen={pendingNavHref !== null}
+        onClose={() => setPendingNavHref(null)}
+        title="Leave Calculator?"
+        message={`You're about to leave the calculator to view "${pendingNavName}". Your items will be saved and restored when you return.`}
+        confirmText="Leave Page"
+        confirmVariant="default"
+        onConfirm={() => {
+          if (pendingNavHref) router.push(pendingNavHref);
+        }}
+      />
+      <div data-component="trade-item-picker-v2">
+        {!showOfferRequestButtons && (
+          <div className="mb-4">
+            <Tabs
+              value={activeSide}
+              onValueChange={(value) => setActiveSide(value as TradeSide)}
+            >
+              <TabsList fullWidth>
+                <TabsTrigger value="offering" fullWidth>
+                  Add to Offering
+                </TabsTrigger>
+                <TabsTrigger value="requesting" fullWidth>
+                  Add to Requesting
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
+        )}
 
-          <div className="mb-4 flex flex-wrap justify-center gap-3 md:gap-4">
-            {customTypes.map((customType) => {
-              const selectedOnSide =
-                activeSide === "offering"
-                  ? selectedCustomBySide.offering.has(customType.id)
-                  : selectedCustomBySide.requesting.has(customType.id);
-              const description =
-                CUSTOM_TYPE_DESCRIPTIONS[customType.id] ??
-                "A custom trade tag used to describe your offer.";
+        {customTypes.length > 0 && (
+          <>
+            <div className="mt-4 mb-2 text-center">
+              <p className="text-secondary-text text-xs tracking-wider uppercase">
+                Custom Trade Tags
+              </p>
+              <p className="text-secondary-text/80 mt-1 text-sm">
+                Quick shortcuts like &ldquo;Overpays&rdquo;, &ldquo;Adds&rdquo;,
+                or &ldquo;Upgrades&rdquo;. Hover to learn what each tag means.
+              </p>
+            </div>
 
-              return (
-                <Tooltip key={customType.id}>
-                  <TooltipTrigger asChild>
-                    <span
-                      className={selectedOnSide ? "cursor-not-allowed" : ""}
-                    >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onAddCustomType(customType.id, activeSide)
-                        }
-                        disabled={selectedOnSide}
-                        className={`border-border-card bg-tertiary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
-                          selectedOnSide
-                            ? "cursor-not-allowed opacity-50"
-                            : "hover:bg-quaternary-bg cursor-pointer"
-                        }`}
-                        aria-label={customType.label}
+            <div className="mb-4 flex flex-wrap justify-center gap-3 md:gap-4">
+              {customTypes.map((customType) => {
+                const selectedOnSide =
+                  activeSide === "offering"
+                    ? selectedCustomBySide.offering.has(customType.id)
+                    : selectedCustomBySide.requesting.has(customType.id);
+                const description =
+                  CUSTOM_TYPE_DESCRIPTIONS[customType.id] ??
+                  "A custom trade tag used to describe your offer.";
+
+                return (
+                  <Tooltip key={customType.id}>
+                    <TooltipTrigger asChild>
+                      <span
+                        className={selectedOnSide ? "cursor-not-allowed" : ""}
                       >
-                        <div className="relative aspect-square w-full overflow-hidden rounded">
-                          <Image
-                            src={getTradeItemImagePath({
-                              id: customType.id,
-                              instanceId: customType.id,
-                              type: "Custom",
-                              name: customType.label,
-                            })}
-                            alt={customType.label}
-                            fill
-                            className="object-cover"
-                            onError={handleImageError}
-                          />
-                        </div>
-                      </button>
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="max-w-60">
-                      <p className="text-primary-text text-sm font-semibold">
-                        {customType.label}
-                      </p>
-                      <p className="text-secondary-text mt-1 text-xs">
-                        {description}
-                      </p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:gap-4">
-        <div className="w-full lg:w-1/3">
-          <div className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(event) => {
-                setSearchQuery(event.target.value);
-                setPage(1);
-              }}
-              placeholder="Search items by name or type..."
-              className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 min-h-14 w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
-            />
-            <Icon
-              icon="heroicons:magnifying-glass"
-              className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-                onClick={() => setSearchQuery("")}
-                aria-label="Clear search"
-              >
-                <Icon icon="heroicons:x-mark" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:flex-row lg:gap-4">
-          <div className="col-span-1 w-full lg:w-1/2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                  aria-label="Filter by category"
-                >
-                  <span className="truncate">{filterLabel}</span>
-                  <Icon
-                    icon="heroicons:chevron-down"
-                    className="text-secondary-text h-5 w-5"
-                    inline={true}
-                  />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="border-border-card bg-tertiary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-              >
-                <DropdownMenuRadioGroup
-                  value={filterSort}
-                  onValueChange={(val) => {
-                    setFilterSort(val as FilterSort);
-                    setPage(1);
-                  }}
-                >
-                  {availableFilterGroups.map((group, index) => (
-                    <Fragment key={group.label}>
-                      <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                        {group.label}
-                      </DropdownMenuLabel>
-                      {group.options.map((option) => (
-                        <DropdownMenuRadioItem
-                          key={option.value}
-                          value={option.value}
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onAddCustomType(customType.id, activeSide)
+                          }
+                          disabled={selectedOnSide}
+                          className={`border-border-card bg-tertiary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
+                            selectedOnSide
+                              ? "cursor-not-allowed opacity-50"
+                              : "hover:bg-quaternary-bg cursor-pointer"
+                          }`}
+                          aria-label={customType.label}
                         >
-                          {option.label}
-                        </DropdownMenuRadioItem>
-                      ))}
-                      {index !== availableFilterGroups.length - 1 && (
-                        <DropdownMenuSeparator className="bg-border-primary/60" />
-                      )}
-                    </Fragment>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="col-span-1 w-full lg:w-1/2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                  aria-label="Sort items"
-                >
-                  <span className="truncate">{sortLabel}</span>
-                  <Icon
-                    icon="heroicons:chevron-down"
-                    className="text-secondary-text h-5 w-5"
-                    inline={true}
-                  />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="border-border-card bg-tertiary-bg text-primary-text max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-              >
-                <DropdownMenuRadioGroup
-                  value={valueSort}
-                  onValueChange={(val) => {
-                    setValueSort(val as ValueSort);
-                    setPage(1);
-                  }}
-                >
-                  {valueSortGroups.map((group, index) => (
-                    <Fragment key={group.label}>
-                      <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                        {group.label}
-                      </DropdownMenuLabel>
-                      {group.options.map((option) => (
-                        <DropdownMenuRadioItem
-                          key={option.value}
-                          value={option.value}
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          {option.label}
-                        </DropdownMenuRadioItem>
-                      ))}
-                      {index !== valueSortGroups.length - 1 && (
-                        <DropdownMenuSeparator className="bg-border-primary/60" />
-                      )}
-                    </Fragment>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-secondary-text text-sm">
-          Total Tradable Items: {filteredItems.length}
-        </p>
-        <p className="text-secondary-text text-sm">
-          Click an item to add to{" "}
-          <span className="text-primary-text font-medium">
-            {activeSide === "offering" ? "Offering" : "Requesting"}
-          </span>
-        </p>
-      </div>
-
-      {totalPages > 1 && (
-        <div className="mb-4 flex justify-center">
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={(_, value) => setPage(value)}
-          />
-        </div>
-      )}
-
-      {filteredItems.length === 0 ? (
-        <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
-          <h3 className="text-secondary-text mb-2 text-base font-medium">
-            No items found
-          </h3>
-          <p className="text-secondary-text text-sm">
-            Try a different search term or adjust your filters.
-          </p>
-        </div>
-      ) : (
-        <div className={gridClassName}>
-          {pagedItems.map((item) => {
-            const itemKey = getTradeItemIdentifier(item);
-            const rawCondition =
-              itemConditionsBySide[activeSide]?.[itemKey] ||
-              (item.isDuped ? "duped" : item.isOG ? "og" : "clean");
-            const condition =
-              !allowOg && rawCondition === "og" ? "clean" : rawCondition;
-            const flags = getConditionFlags(condition);
-
-            const addToSide = () => {
-              const added = onSelect(
-                {
-                  ...item,
-                  base_name: item.base_name || item.name,
-                  isDuped: flags.duped,
-                  isOG: flags.og,
-                  side: activeSide,
-                },
-                activeSide,
-              );
-              if (added) {
-                const variantLabel =
-                  condition === "clean"
-                    ? ""
-                    : condition === "duped"
-                      ? " [Duped]"
-                      : " [OG]";
-                toast.success(
-                  `Added ${item.name}${variantLabel} to ${activeSide} items`,
-                );
-              }
-            };
-
-            /* oxlint-disable jsx-a11y/prefer-tag-over-role */
-            return (
-              <div
-                key={`${item.id}-${item.name}`}
-                role="button"
-                tabIndex={0}
-                className={`border-border-card ${itemCardBackgroundClassName} ${itemCardHoverClassName} w-full cursor-pointer rounded-lg border p-1.5 text-left transition-colors md:p-2`}
-                onClick={addToSide}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    addToSide();
-                  }
-                }}
-              >
-                {(() => {
-                  const itemHref = getTradeItemDetailHref(item);
-                  return (
-                    <div className="mb-2">
-                      {itemHref ? (
-                        <Link
-                          href={itemHref}
-                          prefetch={false}
-                          className="text-primary-text hover:text-link mb-1 block truncate text-xs font-medium transition-colors"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          {item.name}
-                        </Link>
-                      ) : (
-                        <p className="text-primary-text mb-1 truncate text-xs font-medium">
-                          {item.name}
+                          <div className="relative aspect-square w-full overflow-hidden rounded">
+                            <Image
+                              src={getTradeItemImagePath({
+                                id: customType.id,
+                                instanceId: customType.id,
+                                type: "Custom",
+                                name: customType.label,
+                              })}
+                              alt={customType.label}
+                              fill
+                              className="object-cover"
+                              onError={handleImageError}
+                            />
+                          </div>
+                        </button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="max-w-60">
+                        <p className="text-primary-text text-sm font-semibold">
+                          {customType.label}
                         </p>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setItemConditionsBySide((prev) => ({
-                              ...prev,
-                              [activeSide]: {
-                                ...prev[activeSide],
-                                [itemKey]: "clean",
-                              },
-                            }));
-                          }}
-                          className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
-                            condition === "clean"
-                              ? "bg-tertiary-bg border-border-focus text-primary-text"
-                              : "bg-tertiary-bg border-border-card text-secondary-text"
-                          }`}
-                        >
-                          Clean
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setItemConditionsBySide((prev) => ({
-                              ...prev,
-                              [activeSide]: {
-                                ...prev[activeSide],
-                                [itemKey]: "duped",
-                              },
-                            }));
-                          }}
-                          className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
-                            condition === "duped"
-                              ? "bg-tertiary-bg border-border-focus text-primary-text"
-                              : "bg-tertiary-bg border-border-card text-secondary-text"
-                          }`}
-                        >
-                          Duped
-                        </button>
-                        {allowOg && (
+                        <p className="text-secondary-text mt-1 text-xs">
+                          {description}
+                        </p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:gap-4">
+          <div className="w-full lg:w-1/3">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setPage(1);
+                }}
+                placeholder="Search items by name or type..."
+                className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 min-h-14 w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              />
+              <Icon
+                icon="heroicons:magnifying-glass"
+                className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Clear search"
+                >
+                  <Icon icon="heroicons:x-mark" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:flex-row lg:gap-4">
+            <div className="col-span-1 w-full lg:w-1/2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    aria-label="Filter by category"
+                  >
+                    <span className="truncate">{filterLabel}</span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="border-border-card bg-tertiary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={filterSort}
+                    onValueChange={(val) => {
+                      setFilterSort(val as FilterSort);
+                      setPage(1);
+                    }}
+                  >
+                    {availableFilterGroups.map((group, index) => (
+                      <Fragment key={group.label}>
+                        <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                          {group.label}
+                        </DropdownMenuLabel>
+                        {group.options.map((option) => (
+                          <DropdownMenuRadioItem
+                            key={option.value}
+                            value={option.value}
+                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          >
+                            {option.label}
+                          </DropdownMenuRadioItem>
+                        ))}
+                        {index !== availableFilterGroups.length - 1 && (
+                          <DropdownMenuSeparator className="bg-border-primary/60" />
+                        )}
+                      </Fragment>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="col-span-1 w-full lg:w-1/2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    aria-label="Sort items"
+                  >
+                    <span className="truncate">{sortLabel}</span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="border-border-card bg-tertiary-bg text-primary-text max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={valueSort}
+                    onValueChange={(val) => {
+                      setValueSort(val as ValueSort);
+                      setPage(1);
+                    }}
+                  >
+                    {valueSortGroups.map((group, index) => (
+                      <Fragment key={group.label}>
+                        <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                          {group.label}
+                        </DropdownMenuLabel>
+                        {group.options.map((option) => (
+                          <DropdownMenuRadioItem
+                            key={option.value}
+                            value={option.value}
+                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          >
+                            {option.label}
+                          </DropdownMenuRadioItem>
+                        ))}
+                        {index !== valueSortGroups.length - 1 && (
+                          <DropdownMenuSeparator className="bg-border-primary/60" />
+                        )}
+                      </Fragment>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-secondary-text text-sm">
+            Total Tradable Items: {filteredItems.length}
+          </p>
+          {showOfferRequestButtons ? (
+            <p className="text-secondary-text text-sm">
+              Use the{" "}
+              <span className="text-status-success font-medium">Offer</span>
+              {" / "}
+              <span className="text-status-error font-medium">
+                Request
+              </span>{" "}
+              buttons on each card
+            </p>
+          ) : (
+            <p className="text-secondary-text text-sm">
+              Click an item to add to{" "}
+              <span className="text-primary-text font-medium">
+                {activeSide === "offering" ? "Offering" : "Requesting"}
+              </span>
+            </p>
+          )}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="mb-4 flex justify-center">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(_, value) => setPage(value)}
+            />
+          </div>
+        )}
+
+        {filteredItems.length === 0 ? (
+          <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+            <h3 className="text-secondary-text mb-2 text-base font-medium">
+              No items found
+            </h3>
+            <p className="text-secondary-text text-sm">
+              Try a different search term or adjust your filters.
+            </p>
+          </div>
+        ) : (
+          <div className={gridClassName}>
+            {pagedItems.map((item) => {
+              const itemKey = getTradeItemIdentifier(item);
+              const rawCondition = showOfferRequestButtons
+                ? unifiedItemConditions[itemKey] ||
+                  (item.isDuped ? "duped" : item.isOG ? "og" : "clean")
+                : itemConditionsBySide[activeSide]?.[itemKey] ||
+                  (item.isDuped ? "duped" : item.isOG ? "og" : "clean");
+              const condition =
+                !allowOg && rawCondition === "og" ? "clean" : rawCondition;
+              const flags = getConditionFlags(condition);
+
+              const variantLabel =
+                condition === "clean"
+                  ? ""
+                  : condition === "duped"
+                    ? " [Duped]"
+                    : " [OG]";
+
+              const addToSide = () => {
+                const added = onSelect(
+                  {
+                    ...item,
+                    base_name: item.base_name || item.name,
+                    isDuped: flags.duped,
+                    isOG: flags.og,
+                    side: activeSide,
+                  },
+                  activeSide,
+                );
+                if (added) {
+                  toast.success(
+                    `Added ${item.name}${variantLabel} to ${activeSide} items`,
+                  );
+                }
+              };
+
+              const addToOfferingSide = (e: React.MouseEvent) => {
+                e.stopPropagation();
+                const added = onSelect(
+                  {
+                    ...item,
+                    base_name: item.base_name || item.name,
+                    isDuped: flags.duped,
+                    isOG: flags.og,
+                    side: "offering",
+                  },
+                  "offering",
+                );
+                if (added) {
+                  toast.success(
+                    `Added ${item.name}${variantLabel} to offering`,
+                  );
+                }
+              };
+
+              const addToRequestingSide = (e: React.MouseEvent) => {
+                e.stopPropagation();
+                const added = onSelect(
+                  {
+                    ...item,
+                    base_name: item.base_name || item.name,
+                    isDuped: flags.duped,
+                    isOG: flags.og,
+                    side: "requesting",
+                  },
+                  "requesting",
+                );
+                if (added) {
+                  toast.success(
+                    `Added ${item.name}${variantLabel} to requesting`,
+                  );
+                }
+              };
+
+              /* oxlint-disable jsx-a11y/prefer-tag-over-role */
+              return (
+                <div
+                  key={`${item.id}-${item.name}`}
+                  {...(!showOfferRequestButtons && {
+                    role: "button",
+                    tabIndex: 0,
+                    onClick: addToSide,
+                    onKeyDown: (event: React.KeyboardEvent) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        addToSide();
+                      }
+                    },
+                  })}
+                  className={`${item.isOG ? "border-[#FFD700] bg-[#FFD700]/10" : `border-border-card ${itemCardBackgroundClassName}`} ${!showOfferRequestButtons ? `${itemCardHoverClassName} cursor-pointer` : ""} w-full rounded-lg border p-1.5 text-left transition-colors md:p-2`}
+                >
+                  {(() => {
+                    const itemHref = getTradeItemDetailHref(item);
+                    return (
+                      <div className="mb-2">
+                        {itemHref ? (
+                          showOfferRequestButtons ? (
+                            <button
+                              type="button"
+                              className="text-primary-text hover:text-link mb-1 inline-block max-w-full cursor-pointer truncate text-left text-xs font-medium transition-colors"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setPendingNavName(item.name);
+                                setPendingNavHref(itemHref);
+                              }}
+                            >
+                              {item.name}
+                            </button>
+                          ) : (
+                            <Link
+                              href={itemHref}
+                              prefetch={false}
+                              className="text-primary-text hover:text-link mb-1 block truncate text-xs font-medium transition-colors"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {item.name}
+                            </Link>
+                          )
+                        ) : (
+                          <p className="text-primary-text mb-1 truncate text-xs font-medium">
+                            {item.name}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-1">
                           <button
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              setItemConditionsBySide((prev) => ({
-                                ...prev,
-                                [activeSide]: {
-                                  ...prev[activeSide],
-                                  [itemKey]: "og",
-                                },
-                              }));
+                              if (showOfferRequestButtons) {
+                                setUnifiedItemConditions((prev) => ({
+                                  ...prev,
+                                  [itemKey]: "clean",
+                                }));
+                              } else {
+                                setItemConditionsBySide((prev) => ({
+                                  ...prev,
+                                  [activeSide]: {
+                                    ...prev[activeSide],
+                                    [itemKey]: "clean",
+                                  },
+                                }));
+                              }
                             }}
                             className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
-                              condition === "og"
-                                ? "bg-tertiary-bg border-border-focus text-primary-text"
+                              condition === "clean"
+                                ? "bg-status-success border-status-success text-form-button-text"
                                 : "bg-tertiary-bg border-border-card text-secondary-text"
                             }`}
                           >
-                            OG
+                            Clean
                           </button>
-                        )}
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (showOfferRequestButtons) {
+                                setUnifiedItemConditions((prev) => ({
+                                  ...prev,
+                                  [itemKey]: "duped",
+                                }));
+                              } else {
+                                setItemConditionsBySide((prev) => ({
+                                  ...prev,
+                                  [activeSide]: {
+                                    ...prev[activeSide],
+                                    [itemKey]: "duped",
+                                  },
+                                }));
+                              }
+                            }}
+                            className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
+                              condition === "duped"
+                                ? "bg-status-error border-status-error text-form-button-text"
+                                : "bg-tertiary-bg border-border-card text-secondary-text"
+                            }`}
+                          >
+                            Duped
+                          </button>
+                          {allowOg && (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                if (showOfferRequestButtons) {
+                                  setUnifiedItemConditions((prev) => ({
+                                    ...prev,
+                                    [itemKey]: "og",
+                                  }));
+                                } else {
+                                  setItemConditionsBySide((prev) => ({
+                                    ...prev,
+                                    [activeSide]: {
+                                      ...prev[activeSide],
+                                      [itemKey]: "og",
+                                    },
+                                  }));
+                                }
+                              }}
+                              className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
+                                condition === "og"
+                                  ? "bg-button-info border-button-info text-form-button-text"
+                                  : "bg-tertiary-bg border-border-card text-secondary-text"
+                              }`}
+                            >
+                              OG
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <div className="bg-tertiary-bg relative mb-1.5 aspect-video w-full overflow-hidden rounded-lg">
+                    <Image
+                      src={getTradeItemImagePath(item, true)}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                      onError={handleImageError}
+                    />
+                    <div className="absolute top-1.5 right-1.5 z-10">
+                      <CategoryIconBadge
+                        type={item.type}
+                        isLimited={
+                          item.is_limited === 1 || item.data?.is_limited === 1
+                        }
+                        isSeasonal={
+                          item.is_seasonal === 1 || item.data?.is_seasonal === 1
+                        }
+                        withContainer={false}
+                        className="h-4 w-4 sm:h-5 sm:w-5"
+                      />
+                    </div>
+                  </div>
+                  {item.tradable === 1 && (
+                    <div className="text-secondary-text space-y-1 text-xs">
+                      <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                          Cash
+                        </span>
+                        <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                          {formatValue(
+                            item.cash_value ?? item.data?.cash_value,
+                            isMobile,
+                          )}
+                        </span>
+                      </div>
+                      <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                          Duped
+                        </span>
+                        <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                          {formatValue(
+                            item.duped_value ?? item.data?.duped_value,
+                            isMobile,
+                          )}
+                        </span>
+                      </div>
+                      <div className="bg-secondary-bg flex items-center justify-between gap-2 rounded-lg p-1.5">
+                        <span className="text-secondary-text shrink-0 text-xs font-medium whitespace-nowrap">
+                          Demand
+                        </span>
+                        {(() => {
+                          const d = item.demand ?? item.data?.demand ?? "N/A";
+                          return (
+                            <span
+                              className={`${getDemandColor(d)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
+                            >
+                              {d === "N/A" ? "Unknown" : d}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                      <div className="bg-secondary-bg flex items-center justify-between gap-2 rounded-lg p-1.5">
+                        <span className="text-secondary-text shrink-0 text-xs font-medium whitespace-nowrap">
+                          Trend
+                        </span>
+                        {(() => {
+                          const t = item.trend ?? item.data?.trend ?? "N/A";
+                          return (
+                            <span
+                              className={`${getTrendColor(t)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
+                            >
+                              {t === "N/A" ? "Unknown" : t}
+                            </span>
+                          );
+                        })()}
                       </div>
                     </div>
-                  );
-                })()}
-                <div className="bg-tertiary-bg relative mb-1.5 aspect-video w-full overflow-hidden rounded-lg">
-                  <Image
-                    src={getTradeItemImagePath(item, true)}
-                    alt={item.name}
-                    fill
-                    className="object-cover"
-                    onError={handleImageError}
-                  />
-                  <div className="absolute top-1.5 right-1.5 z-10">
-                    <CategoryIconBadge
-                      type={item.type}
-                      isLimited={
-                        item.is_limited === 1 || item.data?.is_limited === 1
-                      }
-                      isSeasonal={
-                        item.is_seasonal === 1 || item.data?.is_seasonal === 1
-                      }
-                      withContainer={false}
-                      className="h-4 w-4 sm:h-5 sm:w-5"
-                    />
-                  </div>
+                  )}
+                  {showOfferRequestButtons && (
+                    <div className="mt-2 grid grid-cols-2 gap-1.5">
+                      <button
+                        type="button"
+                        onClick={addToOfferingSide}
+                        className="bg-status-success text-form-button-text cursor-pointer rounded-lg py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+                      >
+                        Offer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={addToRequestingSide}
+                        className="bg-status-error text-form-button-text cursor-pointer rounded-lg py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+                      >
+                        Request
+                      </button>
+                    </div>
+                  )}
                 </div>
-                {item.tradable === 1 && (
-                  <div className="text-secondary-text space-y-1 text-xs">
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                        Cash
-                      </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                        {formatValue(
-                          item.cash_value ?? item.data?.cash_value,
-                          isMobile,
-                        )}
-                      </span>
-                    </div>
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                        Duped
-                      </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                        {formatValue(
-                          item.duped_value ?? item.data?.duped_value,
-                          isMobile,
-                        )}
-                      </span>
-                    </div>
-                    <div className="bg-secondary-bg flex items-center justify-between gap-2 rounded-lg p-1.5">
-                      <span className="text-secondary-text shrink-0 text-xs font-medium whitespace-nowrap">
-                        Demand
-                      </span>
-                      {(() => {
-                        const d = item.demand ?? item.data?.demand ?? "N/A";
-                        return (
-                          <span
-                            className={`${getDemandColor(d)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
-                          >
-                            {d === "N/A" ? "Unknown" : d}
-                          </span>
-                        );
-                      })()}
-                    </div>
-                    <div className="bg-secondary-bg flex items-center justify-between gap-2 rounded-lg p-1.5">
-                      <span className="text-secondary-text shrink-0 text-xs font-medium whitespace-nowrap">
-                        Trend
-                      </span>
-                      {(() => {
-                        const t = item.trend ?? item.data?.trend ?? "N/A";
-                        return (
-                          <span
-                            className={`${getTrendColor(t)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
-                          >
-                            {t === "N/A" ? "Unknown" : t}
-                          </span>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-            /* oxlint-enable jsx-a11y/prefer-tag-over-role */
-          })}
-        </div>
-      )}
+              );
+              /* oxlint-enable jsx-a11y/prefer-tag-over-role */
+            })}
+          </div>
+        )}
 
-      {totalPages > 1 && (
-        <div className="mt-2 mb-8 flex justify-center">
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={(_, value) => setPage(value)}
-          />
-        </div>
-      )}
-    </div>
+        {totalPages > 1 && (
+          <div className="mt-2 mb-8 flex justify-center">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(_, value) => setPage(value)}
+            />
+          </div>
+        )}
+      </div>
+    </>
   );
 }

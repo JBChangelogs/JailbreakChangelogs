@@ -231,17 +231,20 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
         const inventoryIds: number[] = [];
         const isDupedById = new Map<number, boolean>();
+        const isOGById = new Map<number, boolean>();
 
         const pushId = (entry: unknown, isDuped: boolean) => {
           if (!entry || typeof entry !== "object") return;
+          const e = entry as Record<string, unknown>;
           const id =
-            "id" in entry && typeof (entry as { id?: unknown }).id === "number"
-              ? (entry as { id: number }).id
-              : null;
+            "id" in e && typeof e.id === "number" ? (e.id as number) : null;
           if (id === null) return;
           if (!isDupedById.has(id)) inventoryIds.push(id);
           // If an item appears in both arrays, treat it as duped.
           isDupedById.set(id, isDupedById.get(id) || isDuped);
+          // Preserve OG status — only set true, never unset it.
+          if (e.is_original_owner === true) isOGById.set(id, true);
+          else if (!isOGById.has(id)) isOGById.set(id, false);
         };
 
         rawItems.forEach((entry) => pushId(entry, false));
@@ -258,6 +261,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             is_sub: false,
             side: undefined,
             isDuped: isDupedById.get(it.id) || false,
+            isOG: isOGById.get(it.id) || false,
           }));
 
         setInventoryItems(inventoryTradeItems);
@@ -869,6 +873,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     allowOg={false}
                     activeSide={pickerActiveSide}
                     onActiveSideChange={setPickerActiveSide}
+                    showOfferRequestButtons
                   />
                 ) : (
                   <div>
@@ -917,10 +922,43 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         </div>
                       </div>
                     ) : inventoryStatus === "loading" ? (
-                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                        <p className="text-secondary-text text-sm">
-                          Loading inventory items...
-                        </p>
+                      <div className="animate-pulse">
+                        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+                          {Array.from({ length: 14 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className="border-border-card bg-secondary-bg w-full rounded-lg border p-1.5 md:p-2"
+                            >
+                              {/* Name + badges */}
+                              <div className="mb-2">
+                                <div className="bg-tertiary-bg mb-1.5 h-3 w-3/4 rounded" />
+                                <div className="flex gap-1">
+                                  <div className="bg-tertiary-bg h-4 w-10 rounded" />
+                                  <div className="bg-tertiary-bg h-4 w-10 rounded" />
+                                </div>
+                              </div>
+                              {/* Image */}
+                              <div className="bg-tertiary-bg mb-1.5 aspect-video w-full rounded-lg" />
+                              {/* Value rows */}
+                              <div className="space-y-1">
+                                {Array.from({ length: 4 }).map((_, j) => (
+                                  <div
+                                    key={j}
+                                    className="bg-tertiary-bg flex items-center justify-between rounded-lg p-1.5"
+                                  >
+                                    <div className="bg-quaternary-bg h-3 w-10 rounded" />
+                                    <div className="bg-quaternary-bg h-5 w-14 rounded-lg" />
+                                  </div>
+                                ))}
+                              </div>
+                              {/* Offer/Request buttons */}
+                              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                                <div className="bg-tertiary-bg h-7 rounded-lg" />
+                                <div className="bg-tertiary-bg h-7 rounded-lg" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ) : inventoryStatus === "error" ? (
                       <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
@@ -944,6 +982,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         allowOg={false}
                         activeSide={pickerActiveSide}
                         onActiveSideChange={setPickerActiveSide}
+                        showOfferRequestButtons
                       />
                     )}
                   </div>
