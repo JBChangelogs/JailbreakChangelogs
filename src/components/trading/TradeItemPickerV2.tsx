@@ -44,6 +44,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { CustomTypeDialog } from "@/components/trading/CustomTypeDialog";
 import { useRouter } from "next/navigation";
 
 type TradeSide = "offering" | "requesting";
@@ -169,6 +170,8 @@ export default function TradeItemPickerV2({
   >({});
   const [pendingNavHref, setPendingNavHref] = useState<string | null>(null);
   const [pendingNavName, setPendingNavName] = useState<string>("");
+  const [pendingCustomType, setPendingCustomType] =
+    useState<CustomTypeOption | null>(null);
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
@@ -348,6 +351,24 @@ export default function TradeItemPickerV2({
           if (pendingNavHref) router.push(pendingNavHref);
         }}
       />
+      <CustomTypeDialog
+        isOpen={pendingCustomType !== null}
+        onClose={() => setPendingCustomType(null)}
+        customType={pendingCustomType}
+        onSelect={(side) => {
+          if (pendingCustomType) onAddCustomType(pendingCustomType.id, side);
+        }}
+        selectedOnOffering={
+          pendingCustomType
+            ? selectedCustomBySide.offering.has(pendingCustomType.id)
+            : false
+        }
+        selectedOnRequesting={
+          pendingCustomType
+            ? selectedCustomBySide.requesting.has(pendingCustomType.id)
+            : false
+        }
+      />
       <div data-component="trade-item-picker-v2">
         {!showOfferRequestButtons && (
           <div className="mb-4">
@@ -410,19 +431,20 @@ export default function TradeItemPickerV2({
                         >
                           <button
                             type="button"
-                            onClick={() =>
-                              !showOfferRequestButtons &&
-                              onAddCustomType(customType.id, activeSide)
-                            }
+                            onClick={() => {
+                              if (showOfferRequestButtons) {
+                                setPendingCustomType(customType);
+                              } else if (!selectedOnActiveSide) {
+                                onAddCustomType(customType.id, activeSide);
+                              }
+                            }}
                             disabled={
                               !showOfferRequestButtons && selectedOnActiveSide
                             }
                             className={`border-border-card bg-tertiary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
                               !showOfferRequestButtons && selectedOnActiveSide
                                 ? "cursor-not-allowed opacity-50"
-                                : showOfferRequestButtons
-                                  ? "cursor-default"
-                                  : "hover:bg-quaternary-bg cursor-pointer"
+                                : "hover:bg-quaternary-bg cursor-pointer"
                             }`}
                             aria-label={customType.label}
                           >
@@ -454,30 +476,6 @@ export default function TradeItemPickerV2({
                         </div>
                       </TooltipContent>
                     </Tooltip>
-                    {showOfferRequestButtons && (
-                      <div className="grid grid-cols-2 gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            onAddCustomType(customType.id, "offering")
-                          }
-                          disabled={selectedOnOffering}
-                          className={`bg-status-success text-form-button-text rounded-lg py-1.5 text-xs font-semibold transition-opacity ${selectedOnOffering ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:opacity-90"}`}
-                        >
-                          Offer
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            onAddCustomType(customType.id, "requesting")
-                          }
-                          disabled={selectedOnRequesting}
-                          className={`bg-status-error text-form-button-text rounded-lg py-1.5 text-xs font-semibold transition-opacity ${selectedOnRequesting ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:opacity-90"}`}
-                        >
-                          Request
-                        </button>
-                      </div>
-                    )}
                   </div>
                 );
               })}
