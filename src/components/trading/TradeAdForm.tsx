@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import { TradeItem } from "@/types/trading";
@@ -88,6 +94,7 @@ interface TradeFormDraft {
   offering: TradeItem[];
   requesting: TradeItem[];
   note?: string;
+  expiration?: number | null;
 }
 
 type V2CreateTradeItem =
@@ -139,6 +146,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const [tradeNote, setTradeNote] = useState("");
   const [userData, setUserData] = useState<UserData | null>(null);
   const didAutoFillSuggestedNoteRef = React.useRef(false);
+  const tradeAdSyncDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
   const {
     isAuthenticated,
@@ -158,8 +168,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
   // Drag and drop state
   const [activeItem, setActiveItem] = useState<TradeItem | null>(null);
-  const customTradeTypeSet: Set<string> = new Set(
-    CUSTOM_TRADE_TYPES.map((type) => type.id),
+  const customTradeTypeSet = useMemo<Set<string>>(
+    () => new Set(CUSTOM_TRADE_TYPES.map((type) => type.id)),
+    [],
   );
 
   const getTradeItemIdentifier = (item: TradeItem): string =>
@@ -294,11 +305,138 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       note: string = tradeNote,
     ) => {
       if (isAuthenticated) {
-        safeSetJSON("tradeAdFormItems", { offering, requesting, note });
+        safeSetJSON("tradeAdFormItems", {
+          offering,
+          requesting,
+          note,
+          expiration: expirationHours,
+        });
       }
     },
-    [isAuthenticated, tradeNote],
+    [isAuthenticated, tradeNote, expirationHours],
   );
+
+  useEffect(() => {
+    const handlePreference = (e: Event) => {
+      const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
+        .detail;
+      if (key !== "trade_ad_items" || typeof value !== "string" || !value)
+        return;
+      if (offeringItems.length > 0 || requestingItems.length > 0) return;
+
+      try {
+        const remote = JSON.parse(value) as {
+          offering?: {
+            id?: number;
+            instanceId?: string;
+            isDuped: boolean;
+            isOG: boolean;
+          }[];
+          requesting?: {
+            id?: number;
+            instanceId?: string;
+            isDuped: boolean;
+            isOG: boolean;
+          }[];
+          note?: string;
+          expiration?: number | null;
+        };
+        const byId = new Map(items.map((it) => [it.id, it]));
+        const rehydrate = (
+          compactItems: {
+            id?: number;
+            instanceId?: string;
+            isDuped: boolean;
+            isOG: boolean;
+          }[],
+          side: "offering" | "requesting",
+        ): TradeItem[] =>
+          (compactItems ?? [])
+            .map(({ id, instanceId, isDuped, isOG }) => {
+              if (instanceId && customTradeTypeSet.has(instanceId)) {
+                return createCustomTradeItem(instanceId, side);
+              }
+              if (id === undefined) return null;
+              const base = byId.get(id);
+              if (!base) return null;
+              return {
+                ...base,
+                isDuped,
+                isOG,
+                instanceId: Math.random().toString(36).substring(2, 11),
+              } as TradeItem;
+            })
+            .filter((it) => it !== null) as TradeItem[];
+
+        const hydOff = rehydrate(remote.offering ?? [], "offering");
+        const hydReq = rehydrate(remote.requesting ?? [], "requesting");
+        if (hydOff.length === 0 && hydReq.length === 0) return;
+        const remoteNote = remote.note ?? "";
+        const remoteExpiration = remote.expiration ?? null;
+        safeSetJSON("tradeAdFormItems", {
+          offering: hydOff,
+          requesting: hydReq,
+          note: remoteNote,
+          expiration: remoteExpiration,
+        });
+        setShowRestoreModal(true);
+      } catch {
+        // ignore malformed
+      }
+    };
+
+    const handlePreferenceDeleted = (e: Event) => {
+      const { key } = (e as CustomEvent<{ key: string }>).detail;
+      if (key !== "trade_ad_items") return;
+      setOfferingItems([]);
+      setRequestingItems([]);
+      setTradeNote("");
+      safeLocalStorage.removeItem("tradeAdFormItems");
+    };
+
+    window.addEventListener("realtimePreference", handlePreference);
+    window.addEventListener(
+      "realtimePreferenceDeleted",
+      handlePreferenceDeleted,
+    );
+    return () => {
+      window.removeEventListener("realtimePreference", handlePreference);
+      window.removeEventListener(
+        "realtimePreferenceDeleted",
+        handlePreferenceDeleted,
+      );
+    };
+  }, [items, offeringItems, requestingItems, customTradeTypeSet]);
+
+  const syncItemsToPreference = (
+    offering: TradeItem[],
+    requesting: TradeItem[],
+    noteOverride?: string,
+    expirationOverride?: number | null,
+  ) => {
+    if (tradeAdSyncDebounceRef.current)
+      clearTimeout(tradeAdSyncDebounceRef.current);
+    tradeAdSyncDebounceRef.current = setTimeout(() => {
+      const serializeItem = (it: TradeItem) =>
+        it.instanceId && customTradeTypeSet.has(String(it.instanceId))
+          ? { instanceId: it.instanceId, isDuped: false, isOG: false }
+          : { id: it.id, isDuped: it.isDuped || false, isOG: it.isOG || false };
+      const compact = {
+        offering: offering.map(serializeItem),
+        requesting: requesting.map(serializeItem),
+        note: noteOverride !== undefined ? noteOverride : tradeNote,
+        expiration:
+          expirationOverride !== undefined
+            ? expirationOverride
+            : expirationHours,
+      };
+      window.dispatchEvent(
+        new CustomEvent("sendRealtimePreference", {
+          detail: { key: "trade_ad_items", value: JSON.stringify(compact) },
+        }),
+      );
+    }, 1000);
+  };
 
   useEffect(() => {
     if (user) {
@@ -364,10 +502,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         note: "",
       });
       if (storedItems) {
-        const { offering = [], requesting = [], note = "" } = storedItems;
+        const {
+          offering = [],
+          requesting = [],
+          note = "",
+          expiration,
+        } = storedItems;
         setOfferingItems(offering || []);
         setRequestingItems(requesting || []);
         setTradeNote(note || "");
+        if (expiration != null) setExpirationHours(expiration);
       }
     } catch (error) {
       log.error("Failed to restore items from localStorage:", error);
@@ -383,6 +527,13 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     setTradeNote("");
     setShowRestoreModal(false);
     setShowClearConfirmModal(false);
+    if (tradeAdSyncDebounceRef.current)
+      clearTimeout(tradeAdSyncDebounceRef.current);
+    window.dispatchEvent(
+      new CustomEvent("sendRealtimePreference", {
+        detail: { key: "trade_ad_items", delete: true },
+      }),
+    );
   };
 
   const handleAddItem = (
@@ -404,10 +555,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       const newOfferingItems = [...offeringItems, item];
       setOfferingItems(newOfferingItems);
       saveItemsToLocalStorage(newOfferingItems, requestingItems, tradeNote);
+      syncItemsToPreference(newOfferingItems, requestingItems);
     } else {
       const newRequestingItems = [...requestingItems, item];
       setRequestingItems(newRequestingItems);
       saveItemsToLocalStorage(offeringItems, newRequestingItems, tradeNote);
+      syncItemsToPreference(offeringItems, newRequestingItems);
     }
     return true;
   };
@@ -477,6 +630,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         ];
         setOfferingItems(newOfferingItems);
         saveItemsToLocalStorage(newOfferingItems, requestingItems, tradeNote);
+        syncItemsToPreference(newOfferingItems, requestingItems);
       }
     } else {
       const index = requestingItems.findIndex(removePredicate);
@@ -487,6 +641,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         ];
         setRequestingItems(newRequestingItems);
         saveItemsToLocalStorage(offeringItems, newRequestingItems, tradeNote);
+        syncItemsToPreference(offeringItems, newRequestingItems);
       }
     }
   };
@@ -495,6 +650,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     setOfferingItems(requestingItems);
     setRequestingItems(offeringItems);
     saveItemsToLocalStorage(requestingItems, offeringItems, tradeNote);
+    syncItemsToPreference(requestingItems, offeringItems);
   };
 
   const handleClearSides = (event?: React.MouseEvent) => {
@@ -515,9 +671,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     if (targetSide === "offering") {
       setOfferingItems(sourceItems);
       saveItemsToLocalStorage(sourceItems, requestingItems, tradeNote);
+      syncItemsToPreference(sourceItems, requestingItems);
     } else {
       setRequestingItems(sourceItems);
       saveItemsToLocalStorage(offeringItems, sourceItems, tradeNote);
+      syncItemsToPreference(offeringItems, sourceItems);
     }
   };
 
@@ -859,6 +1017,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                       } else {
                         saveItemsToLocalStorage([], requestingItems, tradeNote);
                       }
+                      syncItemsToPreference([], requestingItems);
                       setShowClearConfirmModal(false);
                     }}
                     variant="outline"
@@ -874,6 +1033,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                       } else {
                         saveItemsToLocalStorage(offeringItems, [], tradeNote);
                       }
+                      syncItemsToPreference(offeringItems, []);
                       setShowClearConfirmModal(false);
                     }}
                     variant="outline"
@@ -959,6 +1119,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                                   )
                                 ) {
                                   setExpirationHours(hours);
+                                  saveItemsToLocalStorage(
+                                    offeringItems,
+                                    requestingItems,
+                                  );
+                                  syncItemsToPreference(
+                                    offeringItems,
+                                    requestingItems,
+                                    undefined,
+                                    hours,
+                                  );
                                 }
                               }}
                               className="accent-button-info h-4 w-4"
@@ -1015,6 +1185,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   requestingItems,
                   nextNote,
                 );
+                syncItemsToPreference(offeringItems, requestingItems, nextNote);
               }}
               rows={3}
               placeholder="Optional: add key details so others can quickly understand your trade."

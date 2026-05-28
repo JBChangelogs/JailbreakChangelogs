@@ -16,6 +16,7 @@ import {
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import {
+  deleteCachedPreference,
   setCachedPreference,
   updatePreferencesCache,
 } from "@/utils/preferences/realtimePreferencesCache";
@@ -161,11 +162,19 @@ export function useRealtimeNotificationsWebSocket(
   // Forward user-initiated preference changes to the server when WS is open
   useEffect(() => {
     const handleSendPreference = (e: Event) => {
-      const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
+      const {
+        key,
+        value,
+        delete: del,
+      } = (e as CustomEvent<{ key: string; value?: unknown; delete?: boolean }>)
         .detail;
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(
-          JSON.stringify({ action: "set_preference", key, value }),
+          JSON.stringify(
+            del
+              ? { action: "delete_preference", key }
+              : { action: "set_preference", key, value },
+          ),
         );
       }
     };
@@ -278,13 +287,31 @@ export function useRealtimeNotificationsWebSocket(
               typeof event.data === "string" ? event.data : String(event.data);
             const payload = parseRealtimeMessagePayload(rawPayload);
 
-            if (payload.action === "preference_updated" && payload.key) {
-              setCachedPreference(payload.key, payload.value);
-              window.dispatchEvent(
-                new CustomEvent("realtimePreference", {
-                  detail: { key: payload.key, value: payload.value },
-                }),
-              );
+            if (
+              payload.action === "preferences_update" &&
+              payload.data &&
+              typeof payload.data === "object"
+            ) {
+              const data = payload.data as {
+                action: string;
+                key?: string;
+                value?: unknown;
+              };
+              if (data.action === "set" && data.key) {
+                setCachedPreference(data.key, data.value);
+                window.dispatchEvent(
+                  new CustomEvent("realtimePreference", {
+                    detail: { key: data.key, value: data.value },
+                  }),
+                );
+              } else if (data.action === "delete" && data.key) {
+                deleteCachedPreference(data.key);
+                window.dispatchEvent(
+                  new CustomEvent("realtimePreferenceDeleted", {
+                    detail: { key: data.key },
+                  }),
+                );
+              }
               return;
             }
 
@@ -303,8 +330,6 @@ export function useRealtimeNotificationsWebSocket(
               return;
             }
 
-            if (payload.action === "preference_deleted") return;
-            if (payload.action === "preferences_cleared") return;
             if (payload.action === "pong") return;
 
             if (payload.action === "error" && payload.code) {

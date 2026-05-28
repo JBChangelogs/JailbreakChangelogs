@@ -381,61 +381,104 @@ export default function TradeItemPickerV2({
 
             <div className="mb-4 flex flex-wrap justify-center gap-3 md:gap-4">
               {customTypes.map((customType) => {
-                const selectedOnSide =
+                const selectedOnOffering = selectedCustomBySide.offering.has(
+                  customType.id,
+                );
+                const selectedOnRequesting =
+                  selectedCustomBySide.requesting.has(customType.id);
+                const selectedOnActiveSide =
                   activeSide === "offering"
-                    ? selectedCustomBySide.offering.has(customType.id)
-                    : selectedCustomBySide.requesting.has(customType.id);
+                    ? selectedOnOffering
+                    : selectedOnRequesting;
                 const description =
                   CUSTOM_TYPE_DESCRIPTIONS[customType.id] ??
                   "A custom trade tag used to describe your offer.";
 
                 return (
-                  <Tooltip key={customType.id}>
-                    <TooltipTrigger asChild>
-                      <span
-                        className={selectedOnSide ? "cursor-not-allowed" : ""}
-                      >
+                  <div
+                    key={customType.id}
+                    className="flex w-20 flex-col gap-1.5 md:w-24"
+                  >
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span
+                          className={
+                            !showOfferRequestButtons && selectedOnActiveSide
+                              ? "cursor-not-allowed"
+                              : ""
+                          }
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              !showOfferRequestButtons &&
+                              onAddCustomType(customType.id, activeSide)
+                            }
+                            disabled={
+                              !showOfferRequestButtons && selectedOnActiveSide
+                            }
+                            className={`border-border-card bg-tertiary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
+                              !showOfferRequestButtons && selectedOnActiveSide
+                                ? "cursor-not-allowed opacity-50"
+                                : showOfferRequestButtons
+                                  ? "cursor-default"
+                                  : "hover:bg-quaternary-bg cursor-pointer"
+                            }`}
+                            aria-label={customType.label}
+                          >
+                            <div className="relative aspect-square w-full overflow-hidden rounded">
+                              <Image
+                                src={getTradeItemImagePath({
+                                  id: customType.id,
+                                  instanceId: customType.id,
+                                  type: "Custom",
+                                  name: customType.label,
+                                })}
+                                alt={customType.label}
+                                fill
+                                className="object-cover"
+                                onError={handleImageError}
+                              />
+                            </div>
+                          </button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <div className="max-w-60">
+                          <p className="text-primary-text text-sm font-semibold">
+                            {customType.label}
+                          </p>
+                          <p className="text-secondary-text mt-1 text-xs">
+                            {description}
+                          </p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                    {showOfferRequestButtons && (
+                      <div className="grid grid-cols-2 gap-1.5">
                         <button
                           type="button"
                           onClick={() =>
-                            onAddCustomType(customType.id, activeSide)
+                            onAddCustomType(customType.id, "offering")
                           }
-                          disabled={selectedOnSide}
-                          className={`border-border-card bg-tertiary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
-                            selectedOnSide
-                              ? "cursor-not-allowed opacity-50"
-                              : "hover:bg-quaternary-bg cursor-pointer"
-                          }`}
-                          aria-label={customType.label}
+                          disabled={selectedOnOffering}
+                          className={`bg-status-success text-form-button-text rounded-lg py-1.5 text-xs font-semibold transition-opacity ${selectedOnOffering ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:opacity-90"}`}
                         >
-                          <div className="relative aspect-square w-full overflow-hidden rounded">
-                            <Image
-                              src={getTradeItemImagePath({
-                                id: customType.id,
-                                instanceId: customType.id,
-                                type: "Custom",
-                                name: customType.label,
-                              })}
-                              alt={customType.label}
-                              fill
-                              className="object-cover"
-                              onError={handleImageError}
-                            />
-                          </div>
+                          Offer
                         </button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="max-w-60">
-                        <p className="text-primary-text text-sm font-semibold">
-                          {customType.label}
-                        </p>
-                        <p className="text-secondary-text mt-1 text-xs">
-                          {description}
-                        </p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onAddCustomType(customType.id, "requesting")
+                          }
+                          disabled={selectedOnRequesting}
+                          className={`bg-status-error text-form-button-text rounded-lg py-1.5 text-xs font-semibold transition-opacity ${selectedOnRequesting ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:opacity-90"}`}
+                        >
+                          Request
+                        </button>
                       </div>
-                    </TooltipContent>
-                  </Tooltip>
+                    )}
+                  </div>
                 );
               })}
             </div>

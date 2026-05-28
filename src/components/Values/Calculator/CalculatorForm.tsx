@@ -488,11 +488,27 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       }
     };
 
+    const handlePreferenceDeleted = (e: Event) => {
+      const { key } = (e as CustomEvent<{ key: string }>).detail;
+      if (key !== "calculator_items") return;
+      setOfferingItems([]);
+      setRequestingItems([]);
+      safeLocalStorage.removeItem("calculatorItems");
+    };
+
     window.addEventListener("realtimePreference", handlePreference);
     window.addEventListener("realtimePreferences", handlePreferences);
+    window.addEventListener(
+      "realtimePreferenceDeleted",
+      handlePreferenceDeleted,
+    );
     return () => {
       window.removeEventListener("realtimePreference", handlePreference);
       window.removeEventListener("realtimePreferences", handlePreferences);
+      window.removeEventListener(
+        "realtimePreferenceDeleted",
+        handlePreferenceDeleted,
+      );
     };
   }, [initialItems]);
 
@@ -533,7 +549,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     if (calcSyncDebounceRef.current) clearTimeout(calcSyncDebounceRef.current);
     window.dispatchEvent(
       new CustomEvent("sendRealtimePreference", {
-        detail: { key: "calculator_items", value: "" },
+        detail: { key: "calculator_items", delete: true },
       }),
     );
   };
