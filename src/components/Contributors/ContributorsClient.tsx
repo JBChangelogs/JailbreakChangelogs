@@ -83,7 +83,7 @@ export default function ContributorsClient({
         {
           flag: "is_contributor",
           enabled: true,
-          description: "This user is a trusted tester for Jailbreak Changelogs",
+          description: "This user contributed to Jailbreak Changelogs",
         },
       ],
       link: "https://discord.com/invite/jailbreaktrading",
