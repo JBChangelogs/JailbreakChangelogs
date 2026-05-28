@@ -391,10 +391,10 @@ export default function TradeItemPickerV2({
         {customTypes.length > 0 && (
           <>
             <div className="mt-4 mb-2 text-center">
-              <p className="text-secondary-text text-xs tracking-wider uppercase">
+              <p className="text-primary-text text-xs tracking-wider uppercase">
                 Custom Trade Tags
               </p>
-              <p className="text-secondary-text/80 mt-1 text-sm">
+              <p className="text-primary-text mt-1 text-sm">
                 Quick shortcuts like &ldquo;Overpays&rdquo;, &ldquo;Adds&rdquo;,
                 or &ldquo;Upgrades&rdquo;. Hover to learn what each tag means.
               </p>
