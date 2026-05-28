@@ -322,7 +322,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         .detail;
       if (key !== "trade_ad_items" || typeof value !== "string" || !value)
         return;
-      if (offeringItems.length > 0 || requestingItems.length > 0) return;
 
       try {
         const remote = JSON.parse(value) as {
@@ -370,16 +369,21 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
         const hydOff = rehydrate(remote.offering ?? [], "offering");
         const hydReq = rehydrate(remote.requesting ?? [], "requesting");
-        if (hydOff.length === 0 && hydReq.length === 0) return;
         const remoteNote = remote.note ?? "";
         const remoteExpiration = remote.expiration ?? null;
+
+        // Apply silently — no modal. State setters don't call syncItemsToPreference so no loop.
+        setOfferingItems(hydOff);
+        setRequestingItems(hydReq);
+        setTradeNote(remoteNote);
+        setExpirationHours(remoteExpiration);
+        // Persist so a page reload can offer restore
         safeSetJSON("tradeAdFormItems", {
           offering: hydOff,
           requesting: hydReq,
           note: remoteNote,
           expiration: remoteExpiration,
         });
-        setShowRestoreModal(true);
       } catch {
         // ignore malformed
       }
@@ -391,6 +395,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       setOfferingItems([]);
       setRequestingItems([]);
       setTradeNote("");
+      setExpirationHours(null);
       safeLocalStorage.removeItem("tradeAdFormItems");
     };
 
@@ -406,7 +411,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         handlePreferenceDeleted,
       );
     };
-  }, [items, offeringItems, requestingItems, customTradeTypeSet]);
+  }, [items, customTradeTypeSet]);
 
   const syncItemsToPreference = (
     offering: TradeItem[],
@@ -525,6 +530,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     setOfferingItems([]);
     setRequestingItems([]);
     setTradeNote("");
+    setExpirationHours(null);
     setShowRestoreModal(false);
     setShowClearConfirmModal(false);
     if (tradeAdSyncDebounceRef.current)
