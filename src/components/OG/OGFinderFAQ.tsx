@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 
 const faqs = [
@@ -54,38 +54,60 @@ const faqs = [
 ];
 
 const OGFinderFAQ: React.FC = () => {
+  const [openQuestion, setOpenQuestion] = useState<string | null>(
+    faqs[0].question,
+  );
+
   return (
-    <div className="border-border-card bg-secondary-bg mt-8 rounded-lg border p-6">
+    <div className="mt-8">
       <h3 className="text-primary-text mb-4 text-xl font-semibold">
         Frequently Asked Questions
       </h3>
 
       <div className="space-y-2">
-        {faqs.map((faq, index) => (
-          <div
-            key={index}
-            className="border-border-card overflow-hidden rounded-lg border"
-          >
-            <details open={index === 0} className="group">
-              <summary className="bg-tertiary-bg hover:bg-quaternary-bg flex cursor-pointer list-none items-center justify-between px-4 py-3 transition-colors [&::-webkit-details-marker]:hidden">
-                <span className="text-primary-text font-semibold">
+        {faqs.map((faq) => {
+          const isOpen = openQuestion === faq.question;
+          return (
+            <div
+              key={faq.question}
+              className={`border-border-card overflow-hidden rounded-xl border transition-shadow ${
+                isOpen ? "shadow-sm" : ""
+              }`}
+            >
+              <button
+                onClick={() => setOpenQuestion(isOpen ? null : faq.question)}
+                className="bg-secondary-bg hover:bg-tertiary-bg flex w-full cursor-pointer items-center justify-between gap-3 px-5 py-4 text-left transition-colors"
+                aria-expanded={isOpen}
+              >
+                <span className="text-primary-text text-sm leading-snug font-semibold">
                   {faq.question}
                 </span>
                 <Icon
                   icon="heroicons-outline:chevron-down"
-                  className="text-secondary-text h-5 w-5 transition-transform group-open:rotate-180"
+                  className={`text-secondary-text h-4 w-4 shrink-0 transition-transform duration-200 ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
                 />
-              </summary>
-              <div className="bg-tertiary-bg px-4 pt-3 pb-4">
-                {typeof faq.answer === "string" ? (
-                  <p className="text-secondary-text">{faq.answer}</p>
-                ) : (
-                  <div className="text-secondary-text">{faq.answer}</div>
-                )}
+              </button>
+
+              <div
+                className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+                  isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="bg-tertiary-bg text-secondary-text border-border-card border-t px-5 py-4 text-sm leading-relaxed">
+                    {typeof faq.answer === "string" ? (
+                      <span dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                    ) : (
+                      faq.answer
+                    )}
+                  </div>
+                </div>
               </div>
-            </details>
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
