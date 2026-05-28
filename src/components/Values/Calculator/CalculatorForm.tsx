@@ -103,6 +103,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const calcSyncDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const offeringItemsRef = useRef<TradeItem[]>([]);
   const requestingItemsRef = useRef<TradeItem[]>([]);
+  // Prevents re-broadcasting when items are applied from a WS event (avoids sync loop)
+  const appliedFromWSRef = useRef(false);
+  // Skip the sync useEffect on the very first render (items start empty, nothing to sync)
+  const syncMountedRef = useRef(false);
 
   const robloxId = (user?.roblox_id ?? "").trim();
   const hasValidRobloxId = /^\d+$/.test(robloxId);
@@ -412,33 +416,41 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   };
 
   useEffect(() => {
+    // Skip the initial mount — items start empty, nothing to persist or broadcast
+    if (!syncMountedRef.current) {
+      syncMountedRef.current = true;
+      return;
+    }
+
+    const fromWS = appliedFromWSRef.current;
+    appliedFromWSRef.current = false;
+
     if (offeringItems.length > 0 || requestingItems.length > 0) {
       saveItemsToLocalStorage(offeringItems, requestingItems);
-      syncItemsToPreference(offeringItems, requestingItems);
+      if (!fromWS) syncItemsToPreference(offeringItems, requestingItems);
+    } else {
+      // All items cleared — remove localStorage and broadcast delete so other devices clear too
+      safeLocalStorage.removeItem("calculatorItems");
+      if (!fromWS) {
+        if (calcSyncDebounceRef.current)
+          clearTimeout(calcSyncDebounceRef.current);
+        calcSyncDebounceRef.current = setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("sendRealtimePreference", {
+              detail: { key: "calculator_items", delete: true },
+            }),
+          );
+        }, 1000);
+      }
     }
   }, [offeringItems, requestingItems]);
 
-  // Live sync: offer restore if a preference arrives while the calculator is empty
+  // Live sync: silently apply calculator_items preference from other devices
   useEffect(() => {
     const handlePreference = (e: Event) => {
       const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
         .detail;
       if (key !== "calculator_items" || typeof value !== "string" || !value)
-        return;
-      if (
-        offeringItemsRef.current.length > 0 ||
-        requestingItemsRef.current.length > 0
-      )
-        return;
-
-      const existing = safeGetJSON("calculatorItems", {
-        offering: [],
-        requesting: [],
-      });
-      if (
-        (existing?.offering?.length ?? 0) > 0 ||
-        (existing?.requesting?.length ?? 0) > 0
-      )
         return;
 
       try {
@@ -466,11 +478,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         const hydOff = rehydrate(remote.offering ?? []);
         const hydReq = rehydrate(remote.requesting ?? []);
         if (hydOff.length === 0 && hydReq.length === 0) return;
-        safeSetJSON("calculatorItems", {
-          offering: hydOff,
-          requesting: hydReq,
-        });
-        setShowRestoreModal(true);
+
+        // Mark as WS-sourced so the sync useEffect doesn't re-broadcast
+        appliedFromWSRef.current = true;
+        setOfferingItems(hydOff);
+        setRequestingItems(hydReq);
       } catch {
         // ignore malformed
       }
@@ -491,6 +503,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     const handlePreferenceDeleted = (e: Event) => {
       const { key } = (e as CustomEvent<{ key: string }>).detail;
       if (key !== "calculator_items") return;
+      // Mark as WS-sourced so the sync useEffect doesn't re-broadcast the delete
+      appliedFromWSRef.current = true;
       setOfferingItems([]);
       setRequestingItems([]);
       safeLocalStorage.removeItem("calculatorItems");
