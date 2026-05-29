@@ -1112,6 +1112,7 @@ export default function ValueSuggestionsPage() {
   // Voters modal state
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
+  const openVotersSuggestionIdRef = useRef<number | null>(null);
   const [activeVoters, setActiveVoters] = useState<{
     up: { created_at: number; user: SuggestionUser }[];
     down: { created_at: number; user: SuggestionUser }[];
@@ -1126,6 +1127,7 @@ export default function ValueSuggestionsPage() {
   ) => {
     e.stopPropagation();
     e.preventDefault();
+    openVotersSuggestionIdRef.current = suggestion.id;
     setActiveVoters({
       up: suggestion.votes.upvotes,
       down: suggestion.votes.downvotes,
@@ -1260,6 +1262,14 @@ export default function ValueSuggestionsPage() {
               : s,
           ),
         );
+        if (openVotersSuggestionIdRef.current === fresh.id) {
+          setActiveVoters({
+            up: fresh.votes.upvotes,
+            down: fresh.votes.downvotes,
+            upCount: fresh.upvotes,
+            downCount: fresh.downvotes,
+          });
+        }
       } else {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
@@ -2246,7 +2256,12 @@ export default function ValueSuggestionsPage() {
       {/* Voters Modal */}
       <Dialog
         open={votersOpen}
-        onOpenChange={(open) => !open && setVotersOpen(false)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setVotersOpen(false);
+            openVotersSuggestionIdRef.current = null;
+          }
+        }}
       >
         <DialogContent
           showClose
