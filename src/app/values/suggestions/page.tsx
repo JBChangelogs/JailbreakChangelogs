@@ -893,6 +893,7 @@ export default function ValueSuggestionsPage() {
   const [voteRateLimits, setVoteRateLimits] = useState<Map<number, number>>(
     new Map(),
   );
+  const recentOwnVotesRef = useRef<Set<number>>(new Set());
 
   // Edit reason modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -916,7 +917,9 @@ export default function ValueSuggestionsPage() {
         ? suggestion.votes.upvotes.some((v) => v.user.id === user?.id)
         : suggestion.votes.downvotes.some((v) => v.user.id === user?.id);
 
-    // Optimistic update
+    // Optimistic update — counts + list both update instantly for the voter.
+    // The WS echo for this vote is suppressed via recentOwnVotesRef so it
+    // doesn't double-update. Other clients still get counts via WS→silentRefreshVotes.
     setSuggestions((prev) =>
       prev.map((s) => {
         if (s.id !== suggestion.id) return s;
@@ -983,6 +986,8 @@ export default function ValueSuggestionsPage() {
       }),
     );
 
+    recentOwnVotesRef.current.add(suggestion.id);
+    setTimeout(() => recentOwnVotesRef.current.delete(suggestion.id), 5000);
     setVotingIds((prev) => new Set(prev).add(suggestion.id));
     try {
       const { url, headers } = buildApiFetchRequest(
@@ -1296,7 +1301,9 @@ export default function ValueSuggestionsPage() {
       if (e.detail?.action !== "refresh_suggestions") return;
       const type = e.detail?.type ?? "new";
       if (type === "vote" || type === "unvote") {
-        silentRefreshVotes(e.detail?.id);
+        const id = e.detail?.id;
+        if (id != null && recentOwnVotesRef.current.has(id)) return;
+        silentRefreshVotes(id);
         return;
       }
       if (type === "new") {
