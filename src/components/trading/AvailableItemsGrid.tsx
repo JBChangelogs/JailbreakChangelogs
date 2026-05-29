@@ -645,51 +645,53 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                 </div>
                                 {item.tradable === 1 && (
                                   <div className="text-secondary-text space-y-1 text-xs">
-                                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                        Cash
-                                      </span>
-                                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                                        {(() => {
-                                          if (
-                                            item.cash_value === null ||
-                                            item.cash_value === "N/A"
-                                          )
-                                            return "N/A";
-                                          return isMobile
-                                            ? item.cash_value
-                                            : formatFullValue(item.cash_value);
-                                        })()}
-                                      </span>
-                                    </div>
-                                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                        Duped
-                                      </span>
-                                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                                        {(() => {
-                                          if (
-                                            item.duped_value === null ||
-                                            item.duped_value === "N/A"
-                                          )
-                                            return "N/A";
-                                          return isMobile
-                                            ? item.duped_value
-                                            : formatFullValue(item.duped_value);
-                                        })()}
-                                      </span>
-                                    </div>
+                                    {!item.isDuped ? (
+                                      <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                          Cash
+                                        </span>
+                                        <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                                          {item.cash_value === null ||
+                                          item.cash_value === "N/A"
+                                            ? "N/A"
+                                            : isMobile
+                                              ? item.cash_value
+                                              : formatFullValue(
+                                                  item.cash_value,
+                                                )}
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                          Duped
+                                        </span>
+                                        <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                                          {item.duped_value === null ||
+                                          item.duped_value === "N/A"
+                                            ? "N/A"
+                                            : isMobile
+                                              ? item.duped_value
+                                              : formatFullValue(
+                                                  item.duped_value,
+                                                )}
+                                        </span>
+                                      </div>
+                                    )}
                                     <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
                                       <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                                         Demand
                                       </span>
                                       {(() => {
-                                        const d = item.demand ?? "N/A";
+                                        const d = item.isDuped
+                                          ? (item.duped_demand ?? "N/A")
+                                          : (item.demand ?? "N/A");
+                                        const dStr = d || "N/A";
                                         return (
                                           <span
-                                            className={`${getDemandColor(d)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold`}
+                                            className={`${getDemandColor(dStr)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold`}
                                           >
-                                            {d === "N/A" ? "Unknown" : d}
+                                            {dStr === "N/A" ? "Unknown" : dStr}
                                           </span>
                                         );
                                       })()}

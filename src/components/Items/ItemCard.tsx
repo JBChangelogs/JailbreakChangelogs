@@ -272,6 +272,10 @@ export default function ItemCard({
   const itemUrl = `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`;
   const demandLabel =
     currentItemData.demand === "N/A" ? "Unknown" : currentItemData.demand;
+  const dupedDemandLabel =
+    !currentItemData.duped_demand || currentItemData.duped_demand === "N/A"
+      ? "Unknown"
+      : currentItemData.duped_demand;
   const trendLabel =
     currentItemData.trend === null || currentItemData.trend === "N/A"
       ? "Unknown"
@@ -637,17 +641,27 @@ export default function ItemCard({
               </span>
             </div>
 
-            <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
-              <div className="flex items-center gap-1 sm:gap-2">
-                <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
+            <div className="border-border-card bg-tertiary-bg grid grid-cols-2 rounded-lg border">
+              <div className="flex items-center justify-between p-1 sm:p-2.5">
+                <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                   Demand
                 </span>
+                <span
+                  className={`${getDemandColor(currentItemData.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
+                >
+                  {demandLabel}
+                </span>
               </div>
-              <span
-                className={`${getDemandColor(currentItemData.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
-              >
-                {demandLabel}
-              </span>
+              <div className="border-border-card flex items-center justify-between border-l p-1 sm:p-2.5">
+                <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                  Duped
+                </span>
+                <span
+                  className={`${getDemandColor(dupedDemandLabel)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
+                >
+                  {dupedDemandLabel}
+                </span>
+              </div>
             </div>
 
             {isValuesPage && (

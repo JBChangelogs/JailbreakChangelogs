@@ -30,6 +30,7 @@ export interface TradeItem {
     duped_owners: string;
     notes: string;
     demand: string;
+    duped_demand?: string | null;
     trend?: string | null;
     description: string;
     health: number;
@@ -37,6 +38,7 @@ export interface TradeItem {
     last_updated: number;
   };
   demand?: string;
+  duped_demand?: string | null;
   isDuped?: boolean;
   isOG?: boolean;
   instanceId?: string;

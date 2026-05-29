@@ -959,39 +959,48 @@ export default function TradeItemPickerV2({
                   </div>
                   {item.tradable === 1 && (
                     <div className="text-secondary-text space-y-1 text-xs">
-                      <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                          Cash
-                        </span>
-                        <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                          {formatValue(
-                            item.cash_value ?? item.data?.cash_value,
-                            isMobile,
-                          )}
-                        </span>
-                      </div>
-                      <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                        <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                          Duped
-                        </span>
-                        <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                          {formatValue(
-                            item.duped_value ?? item.data?.duped_value,
-                            isMobile,
-                          )}
-                        </span>
-                      </div>
+                      {condition !== "duped" ? (
+                        <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                            Cash
+                          </span>
+                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                            {formatValue(
+                              item.cash_value ?? item.data?.cash_value,
+                              isMobile,
+                            )}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                            Duped
+                          </span>
+                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                            {formatValue(
+                              item.duped_value ?? item.data?.duped_value,
+                              isMobile,
+                            )}
+                          </span>
+                        </div>
+                      )}
                       <div className="bg-secondary-bg flex items-center justify-between gap-2 rounded-lg p-1.5">
                         <span className="text-secondary-text shrink-0 text-xs font-medium whitespace-nowrap">
                           Demand
                         </span>
                         {(() => {
-                          const d = item.demand ?? item.data?.demand ?? "N/A";
+                          const d =
+                            condition === "duped"
+                              ? (item.duped_demand ??
+                                item.data?.duped_demand ??
+                                "N/A")
+                              : (item.demand ?? item.data?.demand ?? "N/A");
+                          const dStr = d || "N/A";
                           return (
                             <span
-                              className={`${getDemandColor(d)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
+                              className={`${getDemandColor(dStr)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
                             >
-                              {d === "N/A" ? "Unknown" : d}
+                              {dStr === "N/A" ? "Unknown" : dStr}
                             </span>
                           );
                         })()}

@@ -12,6 +12,7 @@ interface ItemValuesProps {
   cashValue: string | null;
   dupedValue: string | null;
   demand: string;
+  dupedDemand?: string | null;
   trend?: string | null;
   notes: string;
   price: string;
@@ -24,6 +25,7 @@ export default function ItemValues({
   cashValue,
   dupedValue,
   demand,
+  dupedDemand,
   trend,
   notes,
   price,
@@ -154,17 +156,31 @@ export default function ItemValues({
         )}
 
         {/* Item Demand */}
-        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
-          <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
-              Item Demand
-            </h4>
+        <div className="border-border-card bg-tertiary-bg grid grid-cols-2 rounded-lg border">
+          <div className="p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
+                Demand
+              </h4>
+            </div>
+            <span
+              className={`${getDemandColor(!demand || demand === "N/A" ? "Unknown" : demand)} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold`}
+            >
+              {!demand || demand === "N/A" ? "Unknown" : demand}
+            </span>
           </div>
-          <span
-            className={`${getDemandColor(demand)} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold`}
-          >
-            {demand === "N/A" ? "Unknown" : demand}
-          </span>
+          <div className="border-border-card border-l p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
+                Duped Demand
+              </h4>
+            </div>
+            <span
+              className={`${getDemandColor(!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand)} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold`}
+            >
+              {!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand}
+            </span>
+          </div>
         </div>
 
         {/* Item Trend */}

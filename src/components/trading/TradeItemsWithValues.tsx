@@ -213,11 +213,18 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
               <span className="text-secondary-text text-xs font-medium">
                 Demand
               </span>
-              <span
-                className={`${getDemandColor(item.demand || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
-              >
-                {item.demand || "N/A"}
-              </span>
+              {(() => {
+                const d = item.isDuped
+                  ? item.duped_demand || "N/A"
+                  : item.demand || "N/A";
+                return (
+                  <span
+                    className={`${getDemandColor(d)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
+                  >
+                    {d === "N/A" ? "Unknown" : d}
+                  </span>
+                );
+              })()}
             </div>
 
             {/* Trend */}

@@ -310,10 +310,15 @@ export default function ItemSuggestionsTab({
               key={suggestion.id}
               className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border"
             >
-              {/* Votes — static display only; RE-ADD: make interactive (onClick handleVote, disabled/isVoting, userUpvoted/userDownvoted icons) */}
+              {/* Votes */}
               <div className="border-border-card flex flex-col border-b">
                 <div className="flex items-stretch">
-                  <div className="bg-button-success/10 flex flex-1 items-center justify-center gap-1.5 py-2.5">
+                  <button
+                    type="button"
+                    onClick={(e) => openVotersModal(suggestion, "up", e)}
+                    className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none"
+                    aria-label="View upvoters"
+                  >
                     <Icon
                       icon="material-symbols:thumb-up-outline-rounded"
                       className="text-button-success h-4 w-4"
@@ -322,9 +327,14 @@ export default function ItemSuggestionsTab({
                     <span className="text-button-success font-bold">
                       {suggestion.upvotes}
                     </span>
-                  </div>
+                  </button>
                   <div className="border-border-card border-l" />
-                  <div className="bg-button-danger/10 flex flex-1 items-center justify-center gap-1.5 py-2.5">
+                  <button
+                    type="button"
+                    onClick={(e) => openVotersModal(suggestion, "down", e)}
+                    className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none"
+                    aria-label="View downvoters"
+                  >
                     <Icon
                       icon="material-symbols:thumb-down-outline-rounded"
                       className="text-button-danger h-4 w-4"
@@ -333,7 +343,7 @@ export default function ItemSuggestionsTab({
                     <span className="text-button-danger font-bold">
                       {suggestion.downvotes}
                     </span>
-                  </div>
+                  </button>
                 </div>
                 {hasVoters && (
                   <button

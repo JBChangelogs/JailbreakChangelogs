@@ -101,6 +101,7 @@ export interface Item {
   duped_owners: DupedOwner[] | [];
   notes: string;
   demand: string;
+  duped_demand: string | null;
   trend: string | null;
   description: string;
   health: number;
@@ -130,6 +131,7 @@ export interface Item {
       duped_owners: string;
       notes: string;
       demand: string;
+      duped_demand: string | null;
       trend?: string | null;
       description: string;
       health: number;
@@ -188,6 +190,7 @@ export interface ItemDetails {
   duped_owners: DupedOwner[] | string;
   notes: string;
   demand: string;
+  duped_demand: string | null;
   trend: string;
   description: string;
   health: number;

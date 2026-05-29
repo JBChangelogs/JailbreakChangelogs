@@ -698,6 +698,7 @@ export default function ItemDetailsClient({
                   cashValue={currentItem.cash_value}
                   dupedValue={currentItem.duped_value}
                   demand={currentItem.demand}
+                  dupedDemand={currentItem.duped_demand}
                   trend={currentItem.trend}
                   notes={currentItem.notes}
                   price={currentItem.price}

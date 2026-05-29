@@ -13,6 +13,7 @@ interface TradeAdTooltipProps {
 
 export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
   const demand = item.demand ?? item.data?.demand ?? "N/A";
+  const dupedDemand = item.duped_demand ?? item.data?.duped_demand ?? "N/A";
   const trend = item.trend ?? item.data?.trend ?? null;
   const itemHref = getTradeItemDetailHref(item);
 
@@ -115,6 +116,16 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               className={`${getDemandColor(demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap`}
             >
               {demand === "N/A" ? "Unknown" : demand}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-secondary-text text-xs tracking-wider uppercase">
+              Duped Demand:
+            </span>
+            <span
+              className={`${getDemandColor(!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap`}
+            >
+              {!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand}
             </span>
           </div>
           <div className="flex items-center gap-2">
