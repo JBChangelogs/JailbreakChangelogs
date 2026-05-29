@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -183,7 +183,6 @@ export default function ValueSuggestionDetailPage() {
   }, [editRateLimitUntil]);
   const [reasonExpanded, setReasonExpanded] = useState(false);
   const [refreshType, setRefreshType] = useState<string | null>(null);
-  const recentOwnVotesRef = useRef(false);
 
   useEffect(() => {
     if (!id) return;
@@ -296,11 +295,6 @@ export default function ValueSuggestionDetailPage() {
       return next;
     });
 
-    recentOwnVotesRef.current = true;
-    setTimeout(() => {
-      recentOwnVotesRef.current = false;
-    }, 5000);
-
     setVoteLoading(true);
     try {
       const { url, headers } = buildApiFetchRequest(
@@ -403,7 +397,6 @@ export default function ValueSuggestionDetailPage() {
       if (e.detail?.action !== "refresh_suggestion") return;
       const type = e.detail?.type ?? "new";
       if (type === "vote" || type === "unvote") {
-        if (recentOwnVotesRef.current) return;
         silentRefreshVotes();
         return;
       }

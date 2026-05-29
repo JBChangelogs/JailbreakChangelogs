@@ -13,7 +13,7 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
-    title: `Value Suggestion #${id}`,
+    title: `Value Suggestion #${id} | Jailbreak Changelogs`,
     description: `View this community value suggestion on Jailbreak Changelogs.`,
     alternates: {
       canonical: `/values/suggestions/${id}`,
