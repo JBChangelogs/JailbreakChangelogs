@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -183,6 +183,7 @@ export default function ValueSuggestionDetailPage() {
   }, [editRateLimitUntil]);
   const [reasonExpanded, setReasonExpanded] = useState(false);
   const [refreshType, setRefreshType] = useState<string | null>(null);
+  const recentOwnVotesRef = useRef(false);
 
   useEffect(() => {
     if (!id) return;
@@ -245,6 +246,32 @@ export default function ValueSuggestionDetailPage() {
     setUserVote(hasUp ? "upvote" : hasDown ? "downvote" : null);
   }, [suggestion, user]);
 
+  const silentRefreshVotes = useCallback(async () => {
+    if (!id) return;
+    try {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/value-suggestions/${id}`,
+      );
+      const res = await fetch(url, { credentials: "include", headers });
+      if (!res.ok) return;
+      const fresh: Suggestion = await res.json();
+      setVoteCounts({ up: fresh.upvotes, down: fresh.downvotes });
+      setSuggestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              upvotes: fresh.upvotes,
+              downvotes: fresh.downvotes,
+              votes: fresh.votes,
+            }
+          : prev,
+      );
+    } catch {
+      // silently fail — stale counts are acceptable
+    }
+  }, [id]);
+
   const handleVote = async (type: "upvote" | "downvote") => {
     if (!isAuthenticated) {
       setLoginModal({ open: true });
@@ -268,6 +295,11 @@ export default function ValueSuggestionDetailPage() {
       }
       return next;
     });
+
+    recentOwnVotesRef.current = true;
+    setTimeout(() => {
+      recentOwnVotesRef.current = false;
+    }, 5000);
 
     setVoteLoading(true);
     try {
@@ -369,11 +401,17 @@ export default function ValueSuggestionDetailPage() {
     const handler = (event: Event) => {
       const e = event as CustomEvent<{ action?: string; type?: string }>;
       if (e.detail?.action !== "refresh_suggestion") return;
-      setRefreshType(e.detail?.type ?? "new");
+      const type = e.detail?.type ?? "new";
+      if (type === "vote" || type === "unvote") {
+        if (recentOwnVotesRef.current) return;
+        silentRefreshVotes();
+        return;
+      }
+      setRefreshType(type);
     };
     window.addEventListener("realtimeSuggestion", handler);
     return () => window.removeEventListener("realtimeSuggestion", handler);
-  }, []);
+  }, [silentRefreshVotes]);
 
   const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
@@ -523,13 +561,11 @@ export default function ValueSuggestionDetailPage() {
                 className="h-4 w-4"
                 inline
               />
-              {refreshType === "vote" || refreshType === "unvote"
-                ? "Vote counts updated — click to refresh"
-                : refreshType === "edit"
-                  ? "This suggestion was edited — click to refresh"
-                  : refreshType === "status"
-                    ? "Suggestion status changed — click to refresh"
-                    : "This suggestion was updated — click to refresh"}
+              {refreshType === "edit"
+                ? "This suggestion was edited — click to refresh"
+                : refreshType === "status"
+                  ? "Suggestion status changed — click to refresh"
+                  : "This suggestion was updated — click to refresh"}
             </button>
           </div>
         )}
