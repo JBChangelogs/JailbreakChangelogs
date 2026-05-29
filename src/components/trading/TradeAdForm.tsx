@@ -364,12 +364,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               if (id === undefined) return null;
               const base = byId.get(id);
               if (!base) return null;
-              return {
-                ...base,
-                isDuped,
-                isOG,
-                instanceId: Math.random().toString(36).substring(2, 11),
-              } as TradeItem;
+              return { ...base, isDuped, isOG } as TradeItem;
             })
             .filter((it) => it !== null) as TradeItem[];
 
