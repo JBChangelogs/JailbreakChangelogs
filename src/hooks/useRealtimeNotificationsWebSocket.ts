@@ -38,6 +38,7 @@ interface RealtimeNotificationMessage {
   key?: string;
   value?: unknown;
   type?: string;
+  id?: number | null;
   data?:
     | RealtimeNotificationContent
     | RealtimeDmMessageData
@@ -498,6 +499,7 @@ export function useRealtimeNotificationsWebSocket(
                   detail: {
                     action: "refresh_suggestions",
                     type: payload.type ?? "new",
+                    id: payload.id ?? null,
                   },
                 }),
               );

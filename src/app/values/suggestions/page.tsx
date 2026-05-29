@@ -1199,6 +1199,11 @@ export default function ValueSuggestionsPage() {
     new Set(suggestions.map((s) => s.field).filter(Boolean)),
   ).sort();
 
+  const pageRef = useRef(page);
+  useEffect(() => {
+    pageRef.current = page;
+  }, [page]);
+
   const fetchSuggestions = useCallback(async (p: number) => {
     setLoadingSuggestions(true);
     setSuggestionsError(null);
@@ -1228,15 +1233,72 @@ export default function ValueSuggestionsPage() {
     }
   }, []);
 
+  const silentRefreshVotes = useCallback(async (id?: number | null) => {
+    try {
+      if (id != null) {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL!,
+          `/value-suggestions/${id}`,
+        );
+        const res = await fetch(url, { credentials: "include", headers });
+        if (!res.ok) return;
+        const fresh: Suggestion = await res.json();
+        setSuggestions((prev) =>
+          prev.map((s) =>
+            s.id === fresh.id
+              ? {
+                  ...s,
+                  upvotes: fresh.upvotes,
+                  downvotes: fresh.downvotes,
+                  votes: fresh.votes,
+                }
+              : s,
+          ),
+        );
+      } else {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL!,
+          `/value-suggestions/recent?page=${pageRef.current}`,
+        );
+        const res = await fetch(url, { credentials: "include", headers });
+        if (!res.ok) return;
+        const data: SuggestionsResponse = await res.json();
+        const freshMap = new Map(data.items.map((s) => [s.id, s]));
+        setSuggestions((prev) =>
+          prev.map((s) => {
+            const fresh = freshMap.get(s.id);
+            if (!fresh) return s;
+            return {
+              ...s,
+              upvotes: fresh.upvotes,
+              downvotes: fresh.downvotes,
+              votes: fresh.votes,
+            };
+          }),
+        );
+      }
+    } catch {
+      // silently fail — stale counts are acceptable
+    }
+  }, []);
+
   useEffect(() => {
     fetchSuggestions(page);
   }, [fetchSuggestions, page]);
 
   useEffect(() => {
     const handler = (event: Event) => {
-      const e = event as CustomEvent<{ action?: string; type?: string }>;
+      const e = event as CustomEvent<{
+        action?: string;
+        type?: string;
+        id?: number | null;
+      }>;
       if (e.detail?.action !== "refresh_suggestions") return;
       const type = e.detail?.type ?? "new";
+      if (type === "vote" || type === "unvote") {
+        silentRefreshVotes(e.detail?.id);
+        return;
+      }
       if (type === "new") {
         setPendingNew((prev) => prev + 1);
       } else {
@@ -1245,7 +1307,7 @@ export default function ValueSuggestionsPage() {
     };
     window.addEventListener("realtimeSuggestions", handler);
     return () => window.removeEventListener("realtimeSuggestions", handler);
-  }, []);
+  }, [silentRefreshVotes]);
 
   useEffect(() => {
     const fetchItems = async () => {
