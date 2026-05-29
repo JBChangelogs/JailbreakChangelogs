@@ -19,7 +19,7 @@ export async function generateMetadata({
       canonical: `/values/suggestions/${id}`,
     },
     openGraph: {
-      title: `Value Suggestion #${id}`,
+      title: `Value Suggestion #${id} | Jailbreak Changelogs`,
       description: `View this community value suggestion on Jailbreak Changelogs.`,
       type: "website",
       url: `https://jailbreakchangelogs.com/values/suggestions/${id}`,
@@ -35,7 +35,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `Value Suggestion #${id}`,
+      title: `Value Suggestion #${id} | Jailbreak Changelogs`,
       description: `View this community value suggestion on Jailbreak Changelogs.`,
       images: [
         "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
