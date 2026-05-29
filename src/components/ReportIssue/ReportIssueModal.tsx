@@ -90,7 +90,7 @@ export default function ReportIssueModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="bg-secondary-bg max-w-[480px] rounded-lg p-0 backdrop-blur-none"
+        className="max-w-[480px] rounded-lg p-0"
         showClose
         aria-describedby={undefined}
       >

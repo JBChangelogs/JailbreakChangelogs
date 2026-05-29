@@ -33,7 +33,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   INVENTORY_API_SOURCE_HEADER,
   INVENTORY_API_URL,
+  PUBLIC_API_URL,
+  fetchUserFavorites,
 } from "@/utils/api/api";
+import type { FavoriteItem } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -147,7 +150,11 @@ export default function TradeAds({
   const [itemsInputMode, setItemsInputMode] = useState<"values" | "inventory">(
     "values",
   );
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
+  const [inventoryCopies, setInventoryCopies] = useState<
+    Record<number, number>
+  >({});
   const [inventoryStatus, setInventoryStatus] = useState<
     "idle" | "loading" | "loaded" | "error"
   >("idle");
@@ -332,10 +339,12 @@ export default function TradeAds({
         const inventoryIds: number[] = [];
         const isDupedById = new Map<number, boolean>();
         const isOgById = new Map<number, boolean>();
+        const countById = new Map<number, number>();
         const pushEntry = (entry: unknown, isDuped: boolean) => {
           const normalized = normalizeInventoryEntry(entry);
           const id = normalized.id;
           if (id === null) return;
+          countById.set(id, (countById.get(id) ?? 0) + 1);
           if (!isDupedById.has(id)) inventoryIds.push(id);
           isDupedById.set(id, isDupedById.get(id) || isDuped);
           isOgById.set(id, isOgById.get(id) || normalized.isOriginalOwner);
@@ -368,6 +377,7 @@ export default function TradeAds({
             : "";
         setInventoryTradeNote(tradeNoteCandidate || null);
         setInventoryItems(inventoryTradeItems);
+        setInventoryCopies(Object.fromEntries(countById));
         setInventoryStatus("loaded");
         didFinish = true;
       } catch (error) {
@@ -394,6 +404,55 @@ export default function TradeAds({
       if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
     };
   }, [shouldUseInventoryItems, canLoadInventory, robloxId, items]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    fetchUserFavorites(user.id).then((data) => {
+      if (Array.isArray(data)) {
+        setFavoriteIds((data as FavoriteItem[]).map((fav) => fav.item.id));
+      }
+    });
+  }, [user?.id]);
+
+  const handleToggleFavorite = async (itemId: number, isFavorited: boolean) => {
+    if (!isAuthenticated) {
+      toast.error(
+        "You must be logged in to favorite items. Please log in and try again.",
+      );
+      setLoginModal({ open: true });
+      return;
+    }
+    setFavoriteIds((prev) =>
+      isFavorited ? prev.filter((id) => id !== itemId) : [...prev, itemId],
+    );
+    try {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/favorites",
+      );
+      const response = await fetch(url, {
+        method: isFavorited ? "DELETE" : "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ item_id: String(itemId) }),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        setFavoriteIds((prev) =>
+          isFavorited ? [...prev, itemId] : prev.filter((id) => id !== itemId),
+        );
+        toast.error("Failed to update favorite status");
+      } else {
+        toast.success(
+          isFavorited ? "Removed from favorites" : "Added to favorites",
+        );
+      }
+    } catch {
+      setFavoriteIds((prev) =>
+        isFavorited ? [...prev, itemId] : prev.filter((id) => id !== itemId),
+      );
+      toast.error("Failed to update favorite status");
+    }
+  };
 
   const inventoryModeGate =
     shouldUseInventoryItems &&
@@ -937,7 +996,7 @@ export default function TradeAds({
 
   if (isTradeAdsLoading || (activeTab === "view" && isPageTransitionLoading)) {
     return (
-      <div className="mt-8">
+      <div className="mt-8 mb-8">
         <TradeAdTabs
           activeTab={activeTab}
           onTabChange={handleTabChange}
@@ -1074,6 +1133,11 @@ export default function TradeAds({
                 onItemsInputModeChange={setItemsInputMode}
                 inventoryStatus={inventoryStatus}
                 inventoryError={inventoryError}
+                inventoryCopies={
+                  shouldUseInventoryItems ? inventoryCopies : undefined
+                }
+                favoriteIds={favoriteIds}
+                onToggleFavorite={handleToggleFavorite}
               />
             </>
           )}
@@ -1568,7 +1632,7 @@ export default function TradeAds({
                 </div>
               )
             ) : (
-              <div className="space-y-4">
+              <div className="mb-8 space-y-4">
                 {currentPageItems.map((trade) => {
                   const enrichedTrade: TradeAd = {
                     ...trade,
@@ -1627,6 +1691,11 @@ export default function TradeAds({
               onItemsInputModeChange={setItemsInputMode}
               inventoryStatus={inventoryStatus}
               inventoryError={inventoryError}
+              inventoryCopies={
+                shouldUseInventoryItems ? inventoryCopies : undefined
+              }
+              favoriteIds={favoriteIds}
+              onToggleFavorite={handleToggleFavorite}
             />
           </>
         )}

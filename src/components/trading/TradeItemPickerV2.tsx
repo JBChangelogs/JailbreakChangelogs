@@ -67,6 +67,9 @@ interface TradeItemPickerV2Props {
   activeSide?: TradeSide;
   onActiveSideChange?: (side: TradeSide) => void;
   showOfferRequestButtons?: boolean;
+  inventoryCopies?: Record<number, number>;
+  favoriteIds?: number[];
+  onToggleFavorite?: (itemId: number, isFavorited: boolean) => void;
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
@@ -138,6 +141,9 @@ export default function TradeItemPickerV2({
   activeSide: activeSideProp,
   onActiveSideChange,
   showOfferRequestButtons = false,
+  inventoryCopies,
+  favoriteIds,
+  onToggleFavorite,
 }: TradeItemPickerV2Props) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -300,14 +306,21 @@ export default function TradeItemPickerV2({
       ? valueSort
       : "cash-desc";
 
-    return sortByValueSort(filteredByValue, selectedSort, {
+    const sorted = sortByValueSort(filteredByValue, selectedSort, {
       getCashValue: (item) => item.cash_value ?? "N/A",
       getDupedValue: (item) => item.duped_value ?? "N/A",
       getDemand: (item) => item.demand ?? item.data?.demand,
       getTrend: (item) => item.trend ?? item.data?.trend,
       fallbackSortForDemandTrend: "none",
     });
-  }, [items, searchQuery, filterSort, valueSort, validValueSorts]);
+
+    if (!favoriteIds?.length) return sorted;
+    const favSet = new Set(favoriteIds);
+    return [
+      ...sorted.filter((item) => favSet.has(item.id)),
+      ...sorted.filter((item) => !favSet.has(item.id)),
+    ];
+  }, [items, searchQuery, filterSort, valueSort, validValueSorts, favoriteIds]);
 
   const totalPages = Math.max(
     1,
@@ -758,34 +771,42 @@ export default function TradeItemPickerV2({
                     const itemHref = getTradeItemDetailHref(item);
                     return (
                       <div className="mb-2">
-                        {itemHref ? (
-                          showOfferRequestButtons ? (
-                            <button
-                              type="button"
-                              className="text-primary-text hover:text-link mb-1 inline-block max-w-full cursor-pointer truncate text-left text-xs font-medium transition-colors"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                setPendingNavName(item.name);
-                                setPendingNavHref(itemHref);
-                              }}
-                            >
-                              {item.name}
-                            </button>
+                        <div className="mb-1 flex min-w-0 items-center gap-1.5">
+                          {itemHref ? (
+                            showOfferRequestButtons ? (
+                              <button
+                                type="button"
+                                className="text-primary-text hover:text-link min-w-0 flex-1 cursor-pointer truncate text-left text-xs font-medium transition-colors"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  setPendingNavName(item.name);
+                                  setPendingNavHref(itemHref);
+                                }}
+                              >
+                                {item.name}
+                              </button>
+                            ) : (
+                              <Link
+                                href={itemHref}
+                                prefetch={false}
+                                className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-xs font-medium transition-colors"
+                                onClick={(event) => event.stopPropagation()}
+                              >
+                                {item.name}
+                              </Link>
+                            )
                           ) : (
-                            <Link
-                              href={itemHref}
-                              prefetch={false}
-                              className="text-primary-text hover:text-link mb-1 block truncate text-xs font-medium transition-colors"
-                              onClick={(event) => event.stopPropagation()}
-                            >
+                            <p className="text-primary-text min-w-0 flex-1 truncate text-xs font-medium">
                               {item.name}
-                            </Link>
-                          )
-                        ) : (
-                          <p className="text-primary-text mb-1 truncate text-xs font-medium">
-                            {item.name}
-                          </p>
-                        )}
+                            </p>
+                          )}
+                          {inventoryCopies &&
+                            (inventoryCopies[item.id] ?? 0) > 1 && (
+                              <span className="text-primary-text shrink-0 text-[10px] font-medium">
+                                ×{inventoryCopies[item.id]}
+                              </span>
+                            )}
+                        </div>
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
@@ -882,6 +903,46 @@ export default function TradeItemPickerV2({
                       className="object-cover"
                       onError={handleImageError}
                     />
+                    {onToggleFavorite &&
+                      (() => {
+                        const isFav = favoriteIds?.includes(item.id) ?? false;
+                        return (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onToggleFavorite(item.id, isFav);
+                                }}
+                                className="absolute top-1 left-1 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/50 transition-colors hover:bg-black/70"
+                                aria-label={
+                                  isFav
+                                    ? "Remove from favorites"
+                                    : "Add to favorites"
+                                }
+                              >
+                                <Icon
+                                  icon={
+                                    isFav ? "mdi:heart" : "mdi:heart-outline"
+                                  }
+                                  className="h-3.5 w-3.5"
+                                  style={
+                                    isFav
+                                      ? { color: "#ff5a79" }
+                                      : { color: "white" }
+                                  }
+                                />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {isFav
+                                ? "Remove from favorites"
+                                : "Add to favorites"}
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      })()}
                     <div className="absolute top-1.5 right-1.5 z-10">
                       <CategoryIconBadge
                         type={item.type}

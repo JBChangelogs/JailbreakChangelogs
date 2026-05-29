@@ -18,8 +18,12 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import {
   INVENTORY_API_SOURCE_HEADER,
   INVENTORY_API_URL,
+  PUBLIC_API_URL,
+  fetchUserFavorites,
 } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
+import type { FavoriteItem } from "@/types";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 
 // Import extracted components and utilities
@@ -93,7 +97,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const [requestingSimilarItemsRange, setRequestingSimilarItemsRange] =
     useState<number>(2_500_000);
 
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
+  const [inventoryCopies, setInventoryCopies] = useState<
+    Record<number, number>
+  >({});
   const [inventoryStatus, setInventoryStatus] = useState<
     "idle" | "loading" | "loaded" | "error"
   >("idle");
@@ -123,6 +131,55 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   useEffect(() => {
     requestingItemsRef.current = requestingItems;
   }, [requestingItems]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    fetchUserFavorites(user.id).then((data) => {
+      if (Array.isArray(data)) {
+        setFavoriteIds((data as FavoriteItem[]).map((fav) => fav.item.id));
+      }
+    });
+  }, [user?.id]);
+
+  const handleToggleFavorite = async (itemId: number, isFavorited: boolean) => {
+    if (!isAuthenticated) {
+      toast.error(
+        "You must be logged in to favorite items. Please log in and try again.",
+      );
+      setLoginModal({ open: true });
+      return;
+    }
+    setFavoriteIds((prev) =>
+      isFavorited ? prev.filter((id) => id !== itemId) : [...prev, itemId],
+    );
+    try {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/favorites",
+      );
+      const response = await fetch(url, {
+        method: isFavorited ? "DELETE" : "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ item_id: String(itemId) }),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        setFavoriteIds((prev) =>
+          isFavorited ? [...prev, itemId] : prev.filter((id) => id !== itemId),
+        );
+        toast.error("Failed to update favorite status");
+      } else {
+        toast.success(
+          isFavorited ? "Removed from favorites" : "Added to favorites",
+        );
+      }
+    } catch {
+      setFavoriteIds((prev) =>
+        isFavorited ? [...prev, itemId] : prev.filter((id) => id !== itemId),
+      );
+      toast.error("Failed to update favorite status");
+    }
+  };
 
   useEffect(() => {
     if (itemsInputMode !== "inventory") return;
@@ -236,6 +293,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         const inventoryIds: number[] = [];
         const isDupedById = new Map<number, boolean>();
         const isOGById = new Map<number, boolean>();
+        const countById = new Map<number, number>();
 
         const pushId = (entry: unknown, isDuped: boolean) => {
           if (!entry || typeof entry !== "object") return;
@@ -243,6 +301,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           const id =
             "id" in e && typeof e.id === "number" ? (e.id as number) : null;
           if (id === null) return;
+          countById.set(id, (countById.get(id) ?? 0) + 1);
           if (!isDupedById.has(id)) inventoryIds.push(id);
           // If an item appears in both arrays, treat it as duped.
           isDupedById.set(id, isDupedById.get(id) || isDuped);
@@ -269,6 +328,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           }));
 
         setInventoryItems(inventoryTradeItems);
+        setInventoryCopies(Object.fromEntries(countById));
         setInventoryStatus("loaded");
         lastFetchedInventoryUserIdRef.current = robloxId;
         didFinish = true;
@@ -904,6 +964,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     activeSide={pickerActiveSide}
                     onActiveSideChange={setPickerActiveSide}
                     showOfferRequestButtons
+                    favoriteIds={favoriteIds}
+                    onToggleFavorite={handleToggleFavorite}
                   />
                 ) : (
                   <div>
@@ -1013,6 +1075,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         activeSide={pickerActiveSide}
                         onActiveSideChange={setPickerActiveSide}
                         showOfferRequestButtons
+                        inventoryCopies={inventoryCopies}
+                        favoriteIds={favoriteIds}
+                        onToggleFavorite={handleToggleFavorite}
                       />
                     )}
                   </div>

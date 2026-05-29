@@ -63,6 +63,9 @@ interface TradeAdFormProps {
   onItemsInputModeChange?: (mode: "values" | "inventory") => void;
   inventoryStatus?: "idle" | "loading" | "loaded" | "error";
   inventoryError?: string | null;
+  inventoryCopies?: Record<number, number>;
+  favoriteIds?: number[];
+  onToggleFavorite?: (itemId: number, isFavorited: boolean) => void;
 }
 
 interface UserPremiumTier {
@@ -117,6 +120,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   onItemsInputModeChange,
   inventoryStatus = "idle",
   inventoryError = null,
+  inventoryCopies,
+  favoriteIds,
+  onToggleFavorite,
 }) => {
   const [loading, setLoading] = useState(true);
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
@@ -1548,6 +1554,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   activeSide={pickerActiveSide}
                   onActiveSideChange={setPickerActiveSide}
                   showOfferRequestButtons
+                  inventoryCopies={inventoryCopies}
+                  favoriteIds={favoriteIds}
+                  onToggleFavorite={onToggleFavorite}
                 />
               )}
           </div>

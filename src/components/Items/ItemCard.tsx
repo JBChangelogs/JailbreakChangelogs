@@ -28,7 +28,7 @@ import {
 } from "@/utils/items/itemUnlockPresentation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useIsAuthenticated } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { usePathname } from "next/navigation";
 import {
   CategoryIconBadge,
@@ -72,7 +72,7 @@ export default function ItemCard({
   const isValuesPage = pathname === "/values";
   const [itemMetadata, setItemMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
-  const isAuthenticated = useIsAuthenticated();
+  const { isAuthenticated, setLoginModal } = useAuthContext();
 
   useEffect(() => {
     const currentMediaRef = mediaRef.current;
@@ -166,6 +166,7 @@ export default function ItemCard({
       toast.error(
         "You must be logged in to favorite items. Please log in and try again.",
       );
+      setLoginModal({ open: true });
       return;
     }
 
@@ -348,30 +349,36 @@ export default function ItemCard({
                 <TooltipContent>{requirementsTooltipText}</TooltipContent>
               </Tooltip>
             )}
-          <button
-            onClick={handleFavoriteClick}
-            className={`bg-secondary-bg/80 border-border-card hover:border-border-focus absolute top-2 left-2 z-20 cursor-pointer rounded-full border p-1.5 transition-opacity ${
-              isHovered ? "opacity-100" : "opacity-0"
-            } hover:bg-secondary-bg`}
-            title={isFavorited ? "Remove from favorites" : "Add to favorites"}
-            data-rybbit-event={
-              isFavorited ? "Item Unfavorited" : "Item Favorited"
-            }
-            data-rybbit-prop-item-id={item.id}
-          >
-            {isFavorited ? (
-              <Icon
-                icon="mdi:heart"
-                className="h-4 w-4 sm:h-5 sm:w-5"
-                style={{ color: "#ff5a79" }}
-              />
-            ) : (
-              <Icon
-                icon="mdi:heart-outline"
-                className="text-primary-text h-4 w-4 sm:h-5 sm:w-5"
-              />
-            )}
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleFavoriteClick}
+                className={`bg-secondary-bg/80 border-border-card hover:border-border-focus absolute top-2 left-2 z-20 cursor-pointer rounded-full border p-1.5 transition-opacity ${
+                  isHovered ? "opacity-100" : "opacity-0"
+                } hover:bg-secondary-bg`}
+                data-rybbit-event={
+                  isFavorited ? "Item Unfavorited" : "Item Favorited"
+                }
+                data-rybbit-prop-item-id={item.id}
+              >
+                {isFavorited ? (
+                  <Icon
+                    icon="mdi:heart"
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                    style={{ color: "#ff5a79" }}
+                  />
+                ) : (
+                  <Icon
+                    icon="mdi:heart-outline"
+                    className="text-primary-text h-4 w-4 sm:h-5 sm:w-5"
+                  />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isFavorited ? "Remove from favorites" : "Add to favorites"}
+            </TooltipContent>
+          </Tooltip>
           {isHornItem(item.type) ? (
             <div className="relative h-full w-full">
               <Image
