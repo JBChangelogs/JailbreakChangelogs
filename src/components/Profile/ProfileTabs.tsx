@@ -10,7 +10,9 @@ import FavoritesTab from "./FavoritesTab";
 import TradeAdsProfileTab from "./TradeAdsProfileTab";
 import ProfileInventoryTab from "./ProfileInventoryTab";
 import PrivateServersTab from "./PrivateServersTab";
+import UserValueSuggestionsTab from "./UserValueSuggestionsTab";
 import { UserSettingsV2 } from "@/types/auth";
+import type { UserFlag } from "@/types/auth";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TradeAd } from "@/types/trading";
 
@@ -42,6 +44,7 @@ interface User {
   roblox_display_name?: string;
   roblox_avatar?: string;
   roblox_join_date?: number;
+  flags?: UserFlag[];
 }
 
 interface Server {
@@ -105,6 +108,19 @@ export default function ProfileTabs({
   });
 
   const hasRobloxConnection = Boolean(user?.roblox_id);
+  const hasVTFlag =
+    user?.flags?.some(
+      (f) => (f.flag === "is_vt" || f.flag === "is_vtm") && f.enabled !== false,
+    ) ?? false;
+  const hasValueSuggestionsTab = !hasVTFlag;
+  const suggestionsTabIdx = hasRobloxConnection ? 6 : 4;
+  const maxTabIdx = hasRobloxConnection
+    ? hasValueSuggestionsTab
+      ? 6
+      : 5
+    : hasValueSuggestionsTab
+      ? 4
+      : 3;
 
   const value = useMemo(() => {
     const map: Record<string, number> = {
@@ -114,10 +130,17 @@ export default function ProfileTabs({
       ...(hasRobloxConnection
         ? { "trade-ads": 4, roblox: 4, inventory: 5 }
         : {}),
+      ...(hasValueSuggestionsTab ? { suggestions: suggestionsTabIdx } : {}),
     };
     const idx = tabParam ? (map[tabParam] ?? 0) : 0;
-    return Math.min(idx, hasRobloxConnection ? 5 : 3);
-  }, [tabParam, hasRobloxConnection]);
+    return Math.min(idx, maxTabIdx);
+  }, [
+    tabParam,
+    hasRobloxConnection,
+    hasValueSuggestionsTab,
+    suggestionsTabIdx,
+    maxTabIdx,
+  ]);
 
   const sharedItemDetails: Record<string, unknown> = {};
 
@@ -127,9 +150,14 @@ export default function ProfileTabs({
       1: "comments",
       2: "favorites",
       3: "servers",
-      4: "trade-ads",
-      5: "inventory",
     };
+    if (hasRobloxConnection) {
+      names[4] = "trade-ads";
+      names[5] = "inventory";
+    }
+    if (hasValueSuggestionsTab) {
+      names[suggestionsTabIdx] = "suggestions";
+    }
     void setTabParam(names[newValue] ?? null);
   };
 
@@ -143,6 +171,7 @@ export default function ProfileTabs({
         value={value}
         onChange={(idx) => handleChange(idx)}
         hasRobloxConnection={hasRobloxConnection}
+        hasValueSuggestionsTab={hasValueSuggestionsTab}
       />
       <TabPanel value={value} index={0}>
         <AboutTab
@@ -194,6 +223,14 @@ export default function ProfileTabs({
           />
         </TabPanel>
       )}
+      {hasValueSuggestionsTab && (
+        <TabPanel value={value} index={suggestionsTabIdx}>
+          <UserValueSuggestionsTab
+            userId={user.id}
+            currentUserId={currentUserId}
+          />
+        </TabPanel>
+      )}
     </div>
   );
 }
@@ -202,10 +239,12 @@ function ProfileOverflowTabs({
   value,
   onChange,
   hasRobloxConnection,
+  hasValueSuggestionsTab,
 }: {
   value: number;
   onChange: (v: number) => void;
   hasRobloxConnection: boolean;
+  hasValueSuggestionsTab: boolean;
 }) {
   const labels = [
     "About",
@@ -213,6 +252,7 @@ function ProfileOverflowTabs({
     "Favorites",
     "Private Servers",
     ...(hasRobloxConnection ? ["Trade Ads", "Inventory"] : []),
+    ...(hasValueSuggestionsTab ? ["Value Suggestions"] : []),
   ];
 
   return (

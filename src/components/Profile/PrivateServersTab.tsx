@@ -1,5 +1,6 @@
 import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { formatProfileDate } from "@/utils/helpers/timestamp";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
@@ -81,20 +82,28 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
   if (!servers || servers.length === 0) {
     return (
       <div className="border-border-card rounded-t-none rounded-b-lg border p-8 text-center">
-        <Icon
-          icon="heroicons-outline:shield-check"
-          className="text-button-info mx-auto mb-4 h-12 w-12"
+        <Image
+          src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+          alt="No private servers"
+          width={160}
+          height={128}
+          className="mx-auto mb-4"
         />
-        <h3 className="text-primary-text mb-2 text-xl font-semibold">
+        <p className="text-primary-text mb-1 font-semibold">
           {isOwnProfile
-            ? "You have not submitted any private servers."
-            : "No private servers available."}
-        </h3>
-        {isOwnProfile && (
-          <Button asChild variant="default" size="sm" className="mt-4">
-            <Link href="/servers">Add Private Server</Link>
-          </Button>
-        )}
+            ? "You haven't submitted any private servers yet."
+            : "No Private Servers Yet"}
+        </p>
+        <p className="text-secondary-text mx-auto mb-6 max-w-sm text-sm leading-relaxed">
+          {isOwnProfile
+            ? "Share a private server link so others can join your session."
+            : "This user hasn't shared any private servers yet."}
+        </p>
+        <Button asChild variant="default" size="sm">
+          <Link href="/servers">
+            {isOwnProfile ? "Add Private Server" : "Browse Servers"}
+          </Link>
+        </Button>
       </div>
     );
   }

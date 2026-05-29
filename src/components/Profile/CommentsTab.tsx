@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 
 const log = createLogger("UI");
 import { Pagination } from "@/components/ui/Pagination";
+import Image from "next/image";
 import Comment from "../ProfileComments/Comments";
 import { fetchCommentDetails } from "@/app/users/[id]/actions";
 import { PUBLIC_API_URL } from "@/utils/api/api";
@@ -376,7 +377,23 @@ export default function CommentsTab({
         </div>
 
         {totalComments === 0 ? (
-          <p className="text-primary-text italic">No comments yet</p>
+          <div className="py-6 text-center">
+            <Image
+              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+              alt="No comments"
+              width={160}
+              height={128}
+              className="mx-auto mb-4"
+            />
+            <p className="text-primary-text mb-1 font-semibold">
+              No Comments Yet
+            </p>
+            <p className="text-secondary-text mx-auto max-w-sm text-sm leading-relaxed">
+              {currentUserId === userId
+                ? "You haven't made any comments yet."
+                : "This user hasn't made any comments yet."}
+            </p>
+          </div>
         ) : (
           <>
             <div className="space-y-4">

@@ -189,14 +189,14 @@ export default function ContributorsClient({
         <h1 className="text-primary-text group-hover:text-link mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
           {contrib.name}
         </h1>
-        <p className="text-secondary-text mt-2 capitalize opacity-80 transition-colors duration-300">
+        <div className="text-secondary-text mt-2 capitalize opacity-80 transition-colors duration-300">
           <UserBadges
             flags={contrib.flags as UserFlag[]}
             usernumber={NaN}
             size="md"
             noContainer
           />
-        </p>
+        </div>
       </a>
     </div>
   );

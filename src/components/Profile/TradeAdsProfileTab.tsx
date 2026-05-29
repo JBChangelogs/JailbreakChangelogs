@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import type { TradeAd } from "@/types/trading";
 import { useEffect, useMemo, useState } from "react";
@@ -331,21 +332,27 @@ export default function TradeAdsProfileTab({
           <p className="text-secondary-text text-sm">{tradeAdsError}</p>
         </div>
       ) : sortedTradeAds.length === 0 ? (
-        <div className="mx-auto max-w-lg p-8 text-center">
-          <Icon
-            icon="heroicons:arrows-right-left"
-            className="text-button-info mx-auto mb-4 h-12 w-12"
+        <div className="py-6 text-center">
+          <Image
+            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            alt="No trade ads"
+            width={160}
+            height={128}
+            className="mx-auto mb-4"
           />
-          <h3 className="text-primary-text mb-2 text-xl font-semibold">
+          <p className="text-primary-text mb-1 font-semibold">
+            {isOwnProfile ? "No Active Trade Ads" : "No Trade Ads Yet"}
+          </p>
+          <p className="text-secondary-text mx-auto mb-6 max-w-sm text-sm leading-relaxed">
             {isOwnProfile
-              ? "You have no active trade ads."
-              : "This user has no active trade ads."}
-          </h3>
-          {isOwnProfile && (
-            <Button asChild variant="default" size="sm" className="mt-4">
-              <Link href="/trading#create">Create Trade Ad</Link>
-            </Button>
-          )}
+              ? "You don't have any active trade ads."
+              : "This user hasn't posted any trade ads yet."}
+          </p>
+          <Button asChild variant="default" size="sm">
+            <Link href={isOwnProfile ? "/trading#create" : "/trading"}>
+              {isOwnProfile ? "Create Trade Ad" : "Browse Trade Ads"}
+            </Link>
+          </Button>
         </div>
       ) : (
         <>

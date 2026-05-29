@@ -280,25 +280,45 @@ export default function FavoritesTab({
               Favorited Items [{favorites.length}]
             </h2>
           </div>
-          <Button
-            onClick={() =>
-              setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
-            }
-            variant="default"
-            size="sm"
-            className="flex items-center gap-1"
-          >
-            {sortOrder === "newest" ? (
-              <Icon icon="heroicons-outline:arrow-down" className="h-4 w-4" />
-            ) : (
-              <Icon icon="heroicons-outline:arrow-up" className="h-4 w-4" />
-            )}
-            {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-          </Button>
+          {favorites.length > 0 && (
+            <Button
+              onClick={() =>
+                setSortOrder((prev) =>
+                  prev === "newest" ? "oldest" : "newest",
+                )
+              }
+              variant="default"
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              {sortOrder === "newest" ? (
+                <Icon icon="heroicons-outline:arrow-down" className="h-4 w-4" />
+              ) : (
+                <Icon icon="heroicons-outline:arrow-up" className="h-4 w-4" />
+              )}
+              {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+            </Button>
+          )}
         </div>
 
         {favorites.length === 0 ? (
-          <p className="text-primary-text italic">No favorites yet</p>
+          <div className="py-6 text-center">
+            <Image
+              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+              alt="No favorites"
+              width={160}
+              height={128}
+              className="mx-auto mb-4"
+            />
+            <p className="text-primary-text mb-1 font-semibold">
+              No Favorites Yet
+            </p>
+            <p className="text-secondary-text mx-auto max-w-sm text-sm leading-relaxed">
+              {currentUserId === userId
+                ? "You haven't favorited any items yet."
+                : "This user hasn't favorited any items yet."}
+            </p>
+          </div>
         ) : (
           <>
             <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -446,7 +446,7 @@ export default function ProfileInventoryTab({
             )}
           </p>
         </div>
-        <Button asChild size="sm" variant="secondary">
+        <Button asChild size="sm">
           <Link
             href={`/inventories/${encodeURIComponent(trimmedId)}`}
             prefetch={false}
@@ -576,14 +576,23 @@ export default function ProfileInventoryTab({
       )}
 
       {status === "loaded" && !hasItems && (
-        <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-          <Icon
-            icon="heroicons:cube"
-            className="text-secondary-text mx-auto mb-3 h-10 w-10"
+        <div className="py-6 text-center">
+          <Image
+            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            alt="No inventory items"
+            width={160}
+            height={128}
+            className="mx-auto mb-4"
           />
-          <p className="text-secondary-text text-sm">
-            No inventory items found.
+          <p className="text-primary-text mb-1 font-semibold">
+            No Inventory Items
           </p>
+          <p className="text-secondary-text mx-auto mb-6 max-w-sm text-sm leading-relaxed">
+            This user doesn&apos;t have any inventory items yet.
+          </p>
+          <Button asChild variant="default" size="sm">
+            <Link href="/inventories">Browse Inventories</Link>
+          </Button>
         </div>
       )}
 
