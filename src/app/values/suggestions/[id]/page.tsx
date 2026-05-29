@@ -13,6 +13,7 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { parseBan, showBanToast } from "@/utils/api/ban";
 import { BanBanner } from "@/components/ui/BanBanner";
+import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -166,8 +167,22 @@ export default function ValueSuggestionDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editReason, setEditReason] = useState("");
   const [editSaving, setEditSaving] = useState(false);
+  const [editRateLimitUntil, setEditRateLimitUntil] = useState<number | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!editRateLimitUntil) return;
+    const ms = editRateLimitUntil - Date.now();
+    if (ms <= 0) {
+      setEditRateLimitUntil(null);
+      return;
+    }
+    const t = setTimeout(() => setEditRateLimitUntil(null), ms);
+    return () => clearTimeout(t);
+  }, [editRateLimitUntil]);
   const [reasonExpanded, setReasonExpanded] = useState(false);
-  const [suggestionUpdated, setSuggestionUpdated] = useState(false);
+  const [refreshType, setRefreshType] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -324,6 +339,14 @@ export default function ValueSuggestionDetailPage() {
         }),
       });
       if (!res.ok) {
+        if (res.status === 429) {
+          const retryAfter = parseInt(
+            res.headers.get("Retry-After") ?? "60",
+            10,
+          );
+          setEditRateLimitUntil(Date.now() + retryAfter * 1000);
+          return;
+        }
         const data = await res.json().catch(() => ({}));
         toast.error(
           data?.message ?? data?.error ?? "Failed to update suggestion.",
@@ -344,9 +367,9 @@ export default function ValueSuggestionDetailPage() {
 
   useEffect(() => {
     const handler = (event: Event) => {
-      const e = event as CustomEvent<{ action?: string }>;
+      const e = event as CustomEvent<{ action?: string; type?: string }>;
       if (e.detail?.action !== "refresh_suggestion") return;
-      setSuggestionUpdated(true);
+      setRefreshType(e.detail?.type ?? "new");
     };
     window.addEventListener("realtimeSuggestion", handler);
     return () => window.removeEventListener("realtimeSuggestion", handler);
@@ -385,7 +408,7 @@ export default function ValueSuggestionDetailPage() {
           </div>
         )}
 
-        {suggestionUpdated && !loading && (
+        {refreshType !== null && !loading && (
           <div
             className="fixed left-1/2 z-[1500] -translate-x-1/2"
             style={{ top: "calc(var(--header-height, 64px) + 12px)" }}
@@ -402,7 +425,13 @@ export default function ValueSuggestionDetailPage() {
                 className="h-4 w-4"
                 inline
               />
-              This suggestion was updated — click to refresh
+              {refreshType === "vote" || refreshType === "unvote"
+                ? "Vote counts updated — click to refresh"
+                : refreshType === "edit"
+                  ? "This suggestion was edited — click to refresh"
+                  : refreshType === "status"
+                    ? "Suggestion status changed — click to refresh"
+                    : "This suggestion was updated — click to refresh"}
             </button>
           </div>
         )}
@@ -585,12 +614,18 @@ export default function ValueSuggestionDetailPage() {
                           rows={8}
                           className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
                         />
+                        <RateLimitBanner
+                          until={editRateLimitUntil}
+                          label="You're updating too fast."
+                        />
                         <div className="flex justify-end gap-2">
                           <button
                             type="button"
                             onClick={handleEditSave}
                             disabled={
-                              editSaving || editReason.trim().length < 350
+                              editSaving ||
+                              !!editRateLimitUntil ||
+                              editReason.trim().length < 350
                             }
                             className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                           >

@@ -37,6 +37,7 @@ interface RealtimeNotificationMessage {
   total_notifications?: number;
   key?: string;
   value?: unknown;
+  type?: string;
   data?:
     | RealtimeNotificationContent
     | RealtimeDmMessageData
@@ -494,7 +495,10 @@ export function useRealtimeNotificationsWebSocket(
             if (payload.action === "refresh_suggestions") {
               window.dispatchEvent(
                 new CustomEvent("realtimeSuggestions", {
-                  detail: { action: "refresh_suggestions" },
+                  detail: {
+                    action: "refresh_suggestions",
+                    type: payload.type ?? "new",
+                  },
                 }),
               );
               return;
@@ -503,7 +507,10 @@ export function useRealtimeNotificationsWebSocket(
             if (payload.action === "refresh_suggestion") {
               window.dispatchEvent(
                 new CustomEvent("realtimeSuggestion", {
-                  detail: { action: "refresh_suggestion" },
+                  detail: {
+                    action: "refresh_suggestion",
+                    type: payload.type ?? "new",
+                  },
                 }),
               );
               return;

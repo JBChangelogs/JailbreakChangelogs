@@ -876,7 +876,8 @@ export default function ValueSuggestionsPage() {
   const [total, setTotal] = useState(0);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
-  const [newSuggestionsCount, setNewSuggestionsCount] = useState(0);
+  const [pendingNew, setPendingNew] = useState(0);
+  const [pendingTypes, setPendingTypes] = useState<Set<string>>(new Set());
 
   // Items state (for form dropdown)
   const [items, setItems] = useState<Item[]>([]);
@@ -1201,7 +1202,8 @@ export default function ValueSuggestionsPage() {
   const fetchSuggestions = useCallback(async (p: number) => {
     setLoadingSuggestions(true);
     setSuggestionsError(null);
-    setNewSuggestionsCount(0);
+    setPendingNew(0);
+    setPendingTypes(new Set());
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
@@ -1232,9 +1234,14 @@ export default function ValueSuggestionsPage() {
 
   useEffect(() => {
     const handler = (event: Event) => {
-      const e = event as CustomEvent<{ action?: string }>;
+      const e = event as CustomEvent<{ action?: string; type?: string }>;
       if (e.detail?.action !== "refresh_suggestions") return;
-      setNewSuggestionsCount((prev) => prev + 1);
+      const type = e.detail?.type ?? "new";
+      if (type === "new") {
+        setPendingNew((prev) => prev + 1);
+      } else {
+        setPendingTypes((prev) => new Set([...prev, type]));
+      }
     };
     window.addEventListener("realtimeSuggestions", handler);
     return () => window.removeEventListener("realtimeSuggestions", handler);
@@ -1571,8 +1578,8 @@ export default function ValueSuggestionsPage() {
           </>
         )}
 
-        {/* New suggestions pill — fixed so it's visible anywhere on the page */}
-        {newSuggestionsCount > 0 && !loadingSuggestions && (
+        {/* Suggestions update pill — fixed so it's visible anywhere on the page */}
+        {(pendingNew > 0 || pendingTypes.size > 0) && !loadingSuggestions && (
           <div
             className="fixed left-1/2 z-[1500] -translate-x-1/2"
             style={{ top: "calc(var(--header-height, 64px) + 12px)" }}
@@ -1586,15 +1593,62 @@ export default function ValueSuggestionsPage() {
               }}
               className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
             >
-              <Icon
-                icon="material-symbols:arrow-upward-rounded"
-                className="h-4 w-4"
-                inline
-              />
-              {newSuggestionsCount === 1
-                ? "1 new suggestion"
-                : `${newSuggestionsCount} new suggestions`}{" "}
-              — click to load
+              {(() => {
+                const hasNew = pendingNew > 0;
+                const hasOther = pendingTypes.size > 0;
+
+                if (hasNew && !hasOther) {
+                  return (
+                    <>
+                      <Icon
+                        icon="material-symbols:arrow-upward-rounded"
+                        className="h-4 w-4"
+                        inline
+                      />
+                      {pendingNew === 1
+                        ? "1 new suggestion"
+                        : `${pendingNew} new suggestions`}{" "}
+                      — click to load
+                    </>
+                  );
+                }
+
+                let label: string;
+                if (hasNew && hasOther) {
+                  label = "New suggestions & updates — click to refresh";
+                } else if (
+                  pendingTypes.has("vote") ||
+                  pendingTypes.has("unvote")
+                ) {
+                  label =
+                    pendingTypes.size === 1
+                      ? "Vote counts updated — click to refresh"
+                      : "Suggestions updated — click to refresh";
+                } else if (pendingTypes.has("status")) {
+                  label =
+                    pendingTypes.size === 1
+                      ? "A suggestion status changed — click to refresh"
+                      : "Suggestions updated — click to refresh";
+                } else if (pendingTypes.has("edit")) {
+                  label =
+                    pendingTypes.size === 1
+                      ? "A suggestion was edited — click to refresh"
+                      : "Suggestions updated — click to refresh";
+                } else {
+                  label = "Suggestions updated — click to refresh";
+                }
+
+                return (
+                  <>
+                    <Icon
+                      icon="material-symbols:refresh-rounded"
+                      className="h-4 w-4"
+                      inline
+                    />
+                    {label}
+                  </>
+                );
+              })()}
             </button>
           </div>
         )}
