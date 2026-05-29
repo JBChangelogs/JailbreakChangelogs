@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, use, useId } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -79,6 +80,7 @@ const ItemValueChart = ({
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [valueChartType, setValueChartType] = useState<ChartType>("area");
   const [tradingChartType, setTradingChartType] = useState<ChartType>("area");
+  const isSmallScreen = useMediaQuery("(max-width: 639px)");
   const chartId = useId().replace(/:/g, "");
   const cashGradientId = `fill-cash-${chartId}`;
   const dupedGradientId = `fill-duped-${chartId}`;
@@ -652,14 +654,18 @@ const ItemValueChart = ({
                       <YAxis
                         tickLine={false}
                         axisLine={false}
-                        tickMargin={8}
-                        width={56}
+                        tickMargin={isSmallScreen ? 0 : 8}
+                        width={isSmallScreen ? 0 : 56}
                         domain={[valueAxisMin, valueAxisMax]}
                         ticks={valueAxisTicks}
-                        tick={{
-                          fill: "var(--color-secondary-text)",
-                          fontSize: 12,
-                        }}
+                        tick={
+                          isSmallScreen
+                            ? false
+                            : {
+                                fill: "var(--color-secondary-text)",
+                                fontSize: 12,
+                              }
+                        }
                         tickFormatter={(tickValue: number) =>
                           formatValueAxisTick(Number(tickValue))
                         }
@@ -794,14 +800,18 @@ const ItemValueChart = ({
                       <YAxis
                         tickLine={false}
                         axisLine={false}
-                        tickMargin={8}
-                        width={56}
+                        tickMargin={isSmallScreen ? 0 : 8}
+                        width={isSmallScreen ? 0 : 56}
                         domain={[valueAxisMin, valueAxisMax]}
                         ticks={valueAxisTicks}
-                        tick={{
-                          fill: "var(--color-secondary-text)",
-                          fontSize: 12,
-                        }}
+                        tick={
+                          isSmallScreen
+                            ? false
+                            : {
+                                fill: "var(--color-secondary-text)",
+                                fontSize: 12,
+                              }
+                        }
                         tickFormatter={(tickValue: number) =>
                           formatValueAxisTick(Number(tickValue))
                         }
@@ -1125,12 +1135,16 @@ const ItemValueChart = ({
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={8}
-                      width={72}
-                      tick={{
-                        fill: "var(--color-secondary-text)",
-                        fontSize: 12,
-                      }}
+                      tickMargin={isSmallScreen ? 0 : 8}
+                      width={isSmallScreen ? 0 : 72}
+                      tick={
+                        isSmallScreen
+                          ? false
+                          : {
+                              fill: "var(--color-secondary-text)",
+                              fontSize: 12,
+                            }
+                      }
                       tickFormatter={(tickValue: number) =>
                         Number(tickValue).toLocaleString()
                       }
@@ -1257,12 +1271,16 @@ const ItemValueChart = ({
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={8}
-                      width={72}
-                      tick={{
-                        fill: "var(--color-secondary-text)",
-                        fontSize: 12,
-                      }}
+                      tickMargin={isSmallScreen ? 0 : 8}
+                      width={isSmallScreen ? 0 : 72}
+                      tick={
+                        isSmallScreen
+                          ? false
+                          : {
+                              fill: "var(--color-secondary-text)",
+                              fontSize: 12,
+                            }
+                      }
                       tickFormatter={(tickValue: number) =>
                         Number(tickValue).toLocaleString()
                       }

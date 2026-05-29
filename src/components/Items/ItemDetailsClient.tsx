@@ -711,7 +711,7 @@ export default function ItemDetailsClient({
             {activeTab === 1 && (
               <div className="mb-8 space-y-6">
                 {/* Chart Sub-tabs */}
-                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-2 sm:p-4">
                   <Tabs
                     value={String(activeChartTab)}
                     onValueChange={(tabValue) =>

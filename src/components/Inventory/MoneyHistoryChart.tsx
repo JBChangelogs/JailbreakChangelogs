@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useId } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
@@ -52,6 +53,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [chartType] = useState<ChartType>("area");
   const [loading] = useState(false);
+  const isSmallScreen = useMediaQuery("(max-width: 639px)");
   const chartId = useId().replace(/:/g, "");
   const moneyGradientId = `fill-money-${chartId}`;
 
@@ -365,13 +367,17 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tickMargin={8}
-                  width={56}
+                  tickMargin={isSmallScreen ? 0 : 8}
+                  width={isSmallScreen ? 0 : 56}
                   domain={[moneyAxisMin, moneyAxisMax]}
-                  tick={{
-                    fill: "var(--color-secondary-text)",
-                    fontSize: 12,
-                  }}
+                  tick={
+                    isSmallScreen
+                      ? false
+                      : {
+                          fill: "var(--color-secondary-text)",
+                          fontSize: 12,
+                        }
+                  }
                   tickFormatter={(tickValue: number) =>
                     formatValue(Number(tickValue))
                   }
@@ -465,13 +471,17 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tickMargin={8}
-                  width={56}
+                  tickMargin={isSmallScreen ? 0 : 8}
+                  width={isSmallScreen ? 0 : 56}
                   domain={[moneyAxisMin, moneyAxisMax]}
-                  tick={{
-                    fill: "var(--color-secondary-text)",
-                    fontSize: 12,
-                  }}
+                  tick={
+                    isSmallScreen
+                      ? false
+                      : {
+                          fill: "var(--color-secondary-text)",
+                          fontSize: 12,
+                        }
+                  }
                   tickFormatter={(tickValue: number) =>
                     formatValue(Number(tickValue))
                   }

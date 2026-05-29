@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
@@ -57,6 +58,7 @@ const NetworthHistoryChart = ({
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [chartType] = useState<ChartType>("area");
   const [loading] = useState(false);
+  const isSmallScreen = useMediaQuery("(max-width: 639px)");
   const chartId = useId().replace(/:/g, "");
   const networthGradientId = `fill-networth-${chartId}`;
 
@@ -364,13 +366,17 @@ const NetworthHistoryChart = ({
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tickMargin={8}
-                  width={56}
+                  tickMargin={isSmallScreen ? 0 : 8}
+                  width={isSmallScreen ? 0 : 56}
                   domain={[networthAxisMin, networthAxisMax]}
-                  tick={{
-                    fill: "var(--color-secondary-text)",
-                    fontSize: 12,
-                  }}
+                  tick={
+                    isSmallScreen
+                      ? false
+                      : {
+                          fill: "var(--color-secondary-text)",
+                          fontSize: 12,
+                        }
+                  }
                   tickFormatter={(tickValue: number) =>
                     formatValue(Number(tickValue))
                   }
@@ -464,13 +470,17 @@ const NetworthHistoryChart = ({
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tickMargin={8}
-                  width={56}
+                  tickMargin={isSmallScreen ? 0 : 8}
+                  width={isSmallScreen ? 0 : 56}
                   domain={[networthAxisMin, networthAxisMax]}
-                  tick={{
-                    fill: "var(--color-secondary-text)",
-                    fontSize: 12,
-                  }}
+                  tick={
+                    isSmallScreen
+                      ? false
+                      : {
+                          fill: "var(--color-secondary-text)",
+                          fontSize: 12,
+                        }
+                  }
                   tickFormatter={(tickValue: number) =>
                     formatValue(Number(tickValue))
                   }
