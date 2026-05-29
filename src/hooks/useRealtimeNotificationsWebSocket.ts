@@ -39,6 +39,7 @@ interface RealtimeNotificationMessage {
   value?: unknown;
   type?: string;
   id?: number | null;
+  updates?: Array<{ id: number; type: string }>;
   data?:
     | RealtimeNotificationContent
     | RealtimeDmMessageData
@@ -494,15 +495,17 @@ export function useRealtimeNotificationsWebSocket(
             }
 
             if (payload.action === "refresh_suggestions") {
-              window.dispatchEvent(
-                new CustomEvent("realtimeSuggestions", {
-                  detail: {
-                    action: "refresh_suggestions",
-                    type: payload.type ?? "new",
-                    id: payload.id ?? null,
-                  },
-                }),
-              );
+              for (const update of payload.updates ?? []) {
+                window.dispatchEvent(
+                  new CustomEvent("realtimeSuggestions", {
+                    detail: {
+                      action: "refresh_suggestions",
+                      type: update.type,
+                      id: update.id,
+                    },
+                  }),
+                );
+              }
               return;
             }
 
