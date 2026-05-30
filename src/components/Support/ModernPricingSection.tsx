@@ -472,7 +472,8 @@ export default function ModernPricingSection() {
                 Need Help?
               </p>
               <p className="text-secondary-text mt-1 text-sm">
-                Didn&apos;t receive a code or need donation help? Join our{" "}
+                Didn&apos;t receive your supporter tier or need donation help?
+                Join our{" "}
                 <a
                   href="https://discord.jailbreakchangelogs.com"
                   target="_blank"

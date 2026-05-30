@@ -194,7 +194,9 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
           Failed to Load Changelogs
         </h3>
         <p className="text-secondary-text mb-4 text-sm">{error}</p>
-        <Button onClick={() => fetchChangelogs(page)}>Try Again</Button>
+        <Button onClick={() => fetchChangelogs(page)} size="sm">
+          Try Again
+        </Button>
       </div>
     );
   }
@@ -217,7 +219,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
           <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
             No value changes have been recorded for this item yet.
           </p>
-          <Button asChild>
+          <Button asChild variant="default" size="sm">
             <Link href="/values/changelogs">View All Changelogs</Link>
           </Button>
         </div>

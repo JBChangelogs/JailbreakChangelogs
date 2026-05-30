@@ -84,6 +84,19 @@ interface SuggestionsResponse {
   size: number;
 }
 
+interface UserSuggestionStats {
+  total_submitted: number;
+  total_accepted: number;
+  total_rejected: number;
+  total_expired: number;
+  acceptance_rate: number;
+  active_suggestions: number;
+  active_pending: number;
+  active_accepted: number;
+  active_rejected: number;
+  last_updated: number;
+}
+
 const fieldLabel = (field: string) =>
   field
     .split("_")
@@ -118,6 +131,7 @@ export default function UserValueSuggestionsTab({
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userStats, setUserStats] = useState<UserSuggestionStats | null>(null);
 
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
     new Set(),
@@ -178,6 +192,24 @@ export default function UserValueSuggestionsTab({
   useEffect(() => {
     fetchSuggestions(page);
   }, [fetchSuggestions, page]);
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL!,
+          `/value-suggestions/user/${userId}/stats`,
+        );
+        const res = await fetch(url, { credentials: "include", headers });
+        if (!res.ok) return;
+        const data = await res.json();
+        setUserStats(data.stats ?? null);
+      } catch {
+        // stats are non-critical
+      }
+    };
+    run();
+  }, [userId]);
 
   useEffect(() => {
     if (loading) return;
@@ -272,7 +304,9 @@ export default function UserValueSuggestionsTab({
           Value Suggestions
         </h2>
         <p className="text-status-error mb-4 text-sm">{error}</p>
-        <Button onClick={() => fetchSuggestions(page)}>Try Again</Button>
+        <Button onClick={() => fetchSuggestions(page)} size="sm">
+          Try Again
+        </Button>
       </div>
     );
   }
@@ -283,6 +317,38 @@ export default function UserValueSuggestionsTab({
         <h2 className="text-primary-text mb-3 text-lg font-semibold">
           Value Suggestions [0]
         </h2>
+        {userStats && (
+          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+              <p className="text-secondary-text mb-0.5 text-xs">Submitted</p>
+              <p className="text-primary-text text-lg font-bold">
+                {userStats.total_submitted}
+              </p>
+            </div>
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+              <p className="text-secondary-text mb-0.5 text-xs">Accepted</p>
+              <p className="text-button-success text-lg font-bold">
+                {userStats.total_accepted}
+              </p>
+            </div>
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+              <p className="text-secondary-text mb-0.5 text-xs">Rejected</p>
+              <p className="text-button-danger text-lg font-bold">
+                {userStats.total_rejected}
+              </p>
+            </div>
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+              <p className="text-secondary-text mb-0.5 text-xs">
+                Accepted Rate
+              </p>
+              <p
+                className={`text-lg font-bold ${userStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+              >
+                {userStats.acceptance_rate.toFixed(0)}%
+              </p>
+            </div>
+          </div>
+        )}
         <div className="py-6 text-center">
           <Image
             src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
@@ -299,7 +365,7 @@ export default function UserValueSuggestionsTab({
               ? "You haven't submitted any value suggestions yet."
               : "This user hasn't submitted any value suggestions yet."}
           </p>
-          <Button asChild>
+          <Button asChild variant="default" size="sm">
             <Link href="/values/suggestions">View All Suggestions</Link>
           </Button>
         </div>
@@ -319,6 +385,40 @@ export default function UserValueSuggestionsTab({
             <Link href="/values/suggestions">All Suggestions</Link>
           </Button>
         </div>
+
+        {/* Stats strip */}
+        {userStats && (
+          <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+              <p className="text-secondary-text mb-0.5 text-xs">Submitted</p>
+              <p className="text-primary-text text-lg font-bold">
+                {userStats.total_submitted}
+              </p>
+            </div>
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+              <p className="text-secondary-text mb-0.5 text-xs">Accepted</p>
+              <p className="text-button-success text-lg font-bold">
+                {userStats.total_accepted}
+              </p>
+            </div>
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+              <p className="text-secondary-text mb-0.5 text-xs">Rejected</p>
+              <p className="text-button-danger text-lg font-bold">
+                {userStats.total_rejected}
+              </p>
+            </div>
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+              <p className="text-secondary-text mb-0.5 text-xs">
+                Accepted Rate
+              </p>
+              <p
+                className={`text-lg font-bold ${userStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+              >
+                {userStats.acceptance_rate.toFixed(0)}%
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Suggestion cards */}
         <div className="space-y-3">

@@ -250,7 +250,9 @@ export default function ItemSuggestionsTab({
           Failed to Load Suggestions
         </h3>
         <p className="text-secondary-text mb-4 text-sm">{error}</p>
-        <Button onClick={() => fetchSuggestions(page)}>Try Again</Button>
+        <Button onClick={() => fetchSuggestions(page)} size="sm">
+          Try Again
+        </Button>
       </div>
     );
   }
@@ -276,7 +278,7 @@ export default function ItemSuggestionsTab({
             No value suggestions have been submitted for this item. Head to the
             suggestions page to submit one.
           </p>
-          <Button asChild>
+          <Button asChild variant="default" size="sm">
             <Link href="/values/suggestions">View All Suggestions</Link>
           </Button>
         </div>

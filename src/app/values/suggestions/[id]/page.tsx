@@ -53,6 +53,19 @@ interface UserSettings {
   hide_favorites?: boolean | number;
 }
 
+interface SuggesterStats {
+  total_submitted: number;
+  total_accepted: number;
+  total_rejected: number;
+  total_expired: number;
+  acceptance_rate: number;
+  active_suggestions: number;
+  active_pending: number;
+  active_accepted: number;
+  active_rejected: number;
+  last_updated: number;
+}
+
 interface SuggestionUser {
   id: string;
   username?: string;
@@ -145,6 +158,9 @@ export default function ValueSuggestionDetailPage() {
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [suggesterStats, setSuggesterStats] = useState<SuggesterStats | null>(
+    null,
+  );
   const [shouldShowNotFound, setShouldShowNotFound] = useState(false);
   const [routeError, setRouteError] = useState<Error | null>(null);
   const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
@@ -227,6 +243,26 @@ export default function ValueSuggestionDetailPage() {
     };
     run();
   }, [id]);
+
+  const suggesterId = suggestion?.user.id;
+  useEffect(() => {
+    if (!suggesterId) return;
+    const run = async () => {
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL!,
+          `/value-suggestions/user/${suggesterId}/stats`,
+        );
+        const res = await fetch(url, { credentials: "include", headers });
+        if (!res.ok) return;
+        const data = await res.json();
+        setSuggesterStats(data.stats ?? null);
+      } catch {
+        // stats are non-critical
+      }
+    };
+    run();
+  }, [suggesterId]);
 
   if (shouldShowNotFound) {
     notFound();
@@ -1079,6 +1115,57 @@ export default function ValueSuggestionDetailPage() {
                         </div>
                       )}
                     </div>
+                    {/* Suggester Stats */}
+                    {suggesterStats && (
+                      <div className="border-border-card bg-secondary-bg rounded-xl border">
+                        <div className="border-border-card border-b px-5 py-3.5">
+                          <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                            <Icon
+                              icon="material-symbols:bar-chart-4-bars-rounded"
+                              className="text-secondary-text h-4 w-4"
+                              inline
+                            />
+                            Suggester Stats
+                          </h2>
+                        </div>
+                        <div className="grid grid-cols-2 gap-px p-3">
+                          <div className="p-2">
+                            <p className="text-secondary-text mb-0.5 text-xs">
+                              Submitted
+                            </p>
+                            <p className="text-primary-text text-base font-bold">
+                              {suggesterStats.total_submitted}
+                            </p>
+                          </div>
+                          <div className="p-2">
+                            <p className="text-secondary-text mb-0.5 text-xs">
+                              Acceptance Rate
+                            </p>
+                            <p
+                              className={`text-base font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+                            >
+                              {suggesterStats.acceptance_rate.toFixed(0)}%
+                            </p>
+                          </div>
+                          <div className="p-2">
+                            <p className="text-secondary-text mb-0.5 text-xs">
+                              Accepted
+                            </p>
+                            <p className="text-button-success text-base font-bold">
+                              {suggesterStats.total_accepted}
+                            </p>
+                          </div>
+                          <div className="p-2">
+                            <p className="text-secondary-text mb-0.5 text-xs">
+                              Rejected
+                            </p>
+                            <p className="text-button-danger text-base font-bold">
+                              {suggesterStats.total_rejected}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </TabsContent>
                   <TabsContent value="discussion" className="mt-4">
                     <ChangelogComments
@@ -1101,7 +1188,7 @@ export default function ValueSuggestionDetailPage() {
                   />
                 </div>
 
-                {/* Sidebar — value change + votes */}
+                {/* Sidebar — value change + votes + suggester stats */}
                 <div className="space-y-5 lg:col-span-2">
                   {/* Value change */}
                   <div className="border-border-card bg-secondary-bg rounded-xl border">
@@ -1300,6 +1387,58 @@ export default function ValueSuggestionDetailPage() {
                       </div>
                     )}
                   </div>
+
+                  {/* Suggester Stats */}
+                  {suggesterStats && (
+                    <div className="border-border-card bg-secondary-bg rounded-xl border">
+                      <div className="border-border-card border-b px-5 py-3.5">
+                        <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                          <Icon
+                            icon="material-symbols:bar-chart-4-bars-rounded"
+                            className="text-secondary-text h-4 w-4"
+                            inline
+                          />
+                          Suggester Stats
+                        </h2>
+                      </div>
+                      <div className="grid grid-cols-2 gap-px p-3">
+                        <div className="p-2">
+                          <p className="text-secondary-text mb-0.5 text-xs">
+                            Submitted
+                          </p>
+                          <p className="text-primary-text text-base font-bold">
+                            {suggesterStats.total_submitted}
+                          </p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-secondary-text mb-0.5 text-xs">
+                            Acceptance Rate
+                          </p>
+                          <p
+                            className={`text-base font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+                          >
+                            {suggesterStats.acceptance_rate.toFixed(0)}%
+                          </p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-secondary-text mb-0.5 text-xs">
+                            Accepted
+                          </p>
+                          <p className="text-button-success text-base font-bold">
+                            {suggesterStats.total_accepted}
+                          </p>
+                        </div>
+                        <div className="p-2">
+                          <p className="text-secondary-text mb-0.5 text-xs">
+                            Rejected
+                          </p>
+                          <p className="text-button-danger text-base font-bold">
+                            {suggesterStats.total_rejected}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
