@@ -12,6 +12,7 @@ function LoginModalInner() {
       showLoginModal={controller.showLoginModal}
       tabValue={controller.tabValue}
       hasJbclToken={controller.hasJbclToken}
+      onlyRoblox={controller.onlyRoblox}
       resolvedTheme={controller.resolvedTheme}
       joinDiscord={controller.joinDiscord}
       onTabChange={controller.handleTabChange}

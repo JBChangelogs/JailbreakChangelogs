@@ -13,6 +13,7 @@ export interface LoginModalController {
   tabValue: number;
   joinDiscord: boolean;
   hasJbclToken: boolean;
+  onlyRoblox: boolean;
   resolvedTheme: string | undefined;
   showLoginModal: boolean;
   setJoinDiscord: (checked: boolean) => void;
@@ -24,7 +25,8 @@ export interface LoginModalController {
 
 export function useLoginModalController(): LoginModalController {
   const [joinDiscord, setJoinDiscord] = useState(false);
-  const { showLoginModal, loginModalTab, setLoginModal } = useAuthContext();
+  const { showLoginModal, loginModalTab, loginModalOnlyRoblox, setLoginModal } =
+    useAuthContext();
   const { resolvedTheme } = useTheme();
   const hasJbclToken =
     typeof document !== "undefined" &&
@@ -88,6 +90,7 @@ export function useLoginModalController(): LoginModalController {
     tabValue,
     joinDiscord,
     hasJbclToken,
+    onlyRoblox: loginModalOnlyRoblox,
     resolvedTheme,
     showLoginModal,
     setJoinDiscord,

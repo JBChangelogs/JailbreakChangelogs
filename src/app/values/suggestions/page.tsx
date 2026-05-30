@@ -1794,17 +1794,21 @@ export default function ValueSuggestionsPage() {
                   </Button>
                 ) : !user?.roblox_id ? (
                   <Button
-                    asChild
+                    onClick={() =>
+                      setLoginModal({
+                        open: true,
+                        tab: "roblox",
+                        onlyRoblox: true,
+                      })
+                    }
                     className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
                   >
-                    <Link href="/settings">
-                      <Icon
-                        icon="simple-icons:roblox"
-                        className="h-4 w-4"
-                        inline
-                      />
-                      Connect Roblox
-                    </Link>
+                    <Icon
+                      icon="simple-icons:roblox"
+                      className="h-4 w-4"
+                      inline
+                    />
+                    Connect Roblox
                   </Button>
                 ) : (
                   <Button

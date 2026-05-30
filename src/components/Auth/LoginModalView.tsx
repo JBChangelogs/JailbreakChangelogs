@@ -16,6 +16,7 @@ interface LoginModalViewProps {
   showLoginModal: boolean;
   tabValue: number;
   hasJbclToken: boolean;
+  onlyRoblox: boolean;
   resolvedTheme: string | undefined;
   joinDiscord: boolean;
   onTabChange: (_event: SyntheticEvent, newValue: number) => void;
@@ -29,6 +30,7 @@ export default function LoginModalView({
   showLoginModal,
   tabValue,
   hasJbclToken,
+  onlyRoblox,
   resolvedTheme,
   joinDiscord,
   onTabChange,
@@ -63,20 +65,22 @@ export default function LoginModalView({
             fullWidth
             className="border-border-primary mb-6 rounded-none border-b bg-transparent pb-0"
           >
-            <TabsTrigger value="discord" fullWidth className="pb-3">
-              <Image
-                src={
-                  isDark
-                    ? "/logos/discord/Discord_Logo.webp"
-                    : "/logos/discord/Discord_Logo_Dark.webp"
-                }
-                alt="Discord"
-                width={132}
-                height={36}
-                draggable={false}
-                className="h-auto w-[88px] max-[480px]:w-[72px] sm:w-[132px]"
-              />
-            </TabsTrigger>
+            {!onlyRoblox && (
+              <TabsTrigger value="discord" fullWidth className="pb-3">
+                <Image
+                  src={
+                    isDark
+                      ? "/logos/discord/Discord_Logo.webp"
+                      : "/logos/discord/Discord_Logo_Dark.webp"
+                  }
+                  alt="Discord"
+                  width={132}
+                  height={36}
+                  draggable={false}
+                  className="h-auto w-[88px] max-[480px]:w-[72px] sm:w-[132px]"
+                />
+              </TabsTrigger>
+            )}
             {hasJbclToken && (
               <TabsTrigger value="roblox" fullWidth className="pb-3">
                 <Image
@@ -95,67 +99,69 @@ export default function LoginModalView({
             )}
           </TabsList>
 
-          <TabsContent value="discord">
-            <div className="mb-8 flex flex-col items-center gap-6">
-              <p className="text-secondary-text text-center text-sm">
-                Jailbreak Changelogs connects with Discord to build your user
-                profile. We only collect your publicly available Discord
-                details. To use our trading features, you&apos;ll need to link
-                your Roblox account after signing in. Your data security is
-                important to us — there&apos;s no need to provide a password.
-              </p>
-            </div>
-            <div className="space-y-4 text-center">
-              <p className="text-primary-text mb-4 text-xs">
-                By continuing, you agree to our{" "}
-                <a
-                  href="/tos"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover underline"
-                >
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a
-                  href="/privacy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover underline"
-                >
-                  Privacy Policy
-                </a>
-                .
-              </p>
-              <div className="mb-4 flex justify-center">
-                <label
-                  htmlFor="join-discord"
-                  className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors select-none"
-                >
-                  <Checkbox
-                    id="join-discord"
-                    className="border-primary-text"
-                    checked={joinDiscord}
-                    onCheckedChange={(checked) =>
-                      onJoinDiscordChange(checked === true)
-                    }
-                  />
-                  <span className="text-primary-text text-sm">
-                    Join our Discord server
-                  </span>
-                </label>
+          {!onlyRoblox && (
+            <TabsContent value="discord">
+              <div className="mb-8 flex flex-col items-center gap-6">
+                <p className="text-secondary-text text-center text-sm">
+                  Jailbreak Changelogs connects with Discord to build your user
+                  profile. We only collect your publicly available Discord
+                  details. To use our trading features, you&apos;ll need to link
+                  your Roblox account after signing in. Your data security is
+                  important to us — there&apos;s no need to provide a password.
+                </p>
               </div>
-              <Button
-                onClick={onDiscordLogin}
-                variant="default"
-                size="lg"
-                className="w-full"
-                data-rybbit-event="Login with Discord"
-              >
-                Continue with Discord
-              </Button>
-            </div>
-          </TabsContent>
+              <div className="space-y-4 text-center">
+                <p className="text-primary-text mb-4 text-xs">
+                  By continuing, you agree to our{" "}
+                  <a
+                    href="/tos"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:text-link-hover underline"
+                  >
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:text-link-hover underline"
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </p>
+                <div className="mb-4 flex justify-center">
+                  <label
+                    htmlFor="join-discord"
+                    className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors select-none"
+                  >
+                    <Checkbox
+                      id="join-discord"
+                      className="border-primary-text"
+                      checked={joinDiscord}
+                      onCheckedChange={(checked) =>
+                        onJoinDiscordChange(checked === true)
+                      }
+                    />
+                    <span className="text-primary-text text-sm">
+                      Join our Discord server
+                    </span>
+                  </label>
+                </div>
+                <Button
+                  onClick={onDiscordLogin}
+                  variant="default"
+                  size="lg"
+                  className="w-full"
+                  data-rybbit-event="Login with Discord"
+                >
+                  Continue with Discord
+                </Button>
+              </div>
+            </TabsContent>
+          )}
 
           {hasJbclToken && (
             <TabsContent value="roblox">

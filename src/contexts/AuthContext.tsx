@@ -33,7 +33,9 @@ interface AuthContextType extends AuthState {
   setLoginModal: (config: {
     open: boolean;
     tab?: "discord" | "roblox";
+    onlyRoblox?: boolean;
   }) => void;
+  loginModalOnlyRoblox: boolean;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
   bans: Record<string, BanInfo>;
@@ -67,6 +69,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loginModalTab, setLoginModalTab] = useState<"discord" | "roblox">(
     "discord",
   );
+  const [loginModalOnlyRoblox, setLoginModalOnlyRoblox] = useState(false);
   const [bans, setBansMap] = useState<Record<string, BanInfo>>({});
   const setBan = useCallback((ban: BanInfo) => {
     if (ban.expiresAt > 0) {
@@ -349,10 +352,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const setLoginModal = useCallback(
-    ({ open, tab }: { open: boolean; tab?: "discord" | "roblox" }) => {
+    ({
+      open,
+      tab,
+      onlyRoblox,
+    }: {
+      open: boolean;
+      tab?: "discord" | "roblox";
+      onlyRoblox?: boolean;
+    }) => {
       if (tab) {
         setLoginModalTab(tab);
       }
+      setLoginModalOnlyRoblox(onlyRoblox ?? false);
       setShowLoginModal(open);
     },
     [],
@@ -362,6 +374,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     ...authState,
     logout: handleLogout,
     loginModalTab,
+    loginModalOnlyRoblox,
     setLoginModal,
     showLoginModal,
     setShowLoginModal,
