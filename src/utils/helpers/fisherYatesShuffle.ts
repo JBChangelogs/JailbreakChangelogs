@@ -6,7 +6,8 @@ export const TOTAL_BACKGROUND_IMAGES = 36;
 /**
  * Base URL for background images
  */
-export const BACKGROUNDS_BASE_URL = "/backgrounds/v2";
+export const BACKGROUNDS_BASE_URL =
+  "https://assets.jailbreakchangelogs.com/assets/backgrounds/v2";
 
 /**
  * Get a specific background image URL by index (1-based or 0-based mapped to 1-based)
