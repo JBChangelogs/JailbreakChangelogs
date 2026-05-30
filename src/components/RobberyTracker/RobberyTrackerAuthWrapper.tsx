@@ -3,7 +3,7 @@
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 

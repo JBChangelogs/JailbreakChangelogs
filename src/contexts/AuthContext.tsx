@@ -9,7 +9,8 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { AuthState, UserData } from "@/types/auth";
 import { logout as authLogout, trackLogoutSource } from "@/utils/auth/auth";
 import {

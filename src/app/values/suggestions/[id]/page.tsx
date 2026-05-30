@@ -128,6 +128,7 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
           premiumType={v.user.premiumtype ?? 0}
           size={10}
           showBadge={false}
+          bgClassName="bg-quaternary-bg"
         />
       </div>
       <div className="min-w-0 flex-1">
@@ -681,7 +682,7 @@ export default function ValueSuggestionDetailPage() {
                     <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
                       Suggested by
                     </p>
-                    <div className="mt-1 flex items-start gap-2">
+                    <div className="mt-1 flex items-start gap-2.5">
                       <UserAvatar
                         userId={suggestion.user.id}
                         avatarHash={null}
@@ -694,8 +695,9 @@ export default function ValueSuggestionDetailPage() {
                           suggestion.user.roblox_avatar ?? undefined
                         }
                         premiumType={suggestion.user.premiumtype ?? 0}
-                        size={5}
+                        size={9}
                         showBadge={false}
+                        bgClassName="bg-tertiary-bg"
                       />
                       <div className="min-w-0">
                         <Link

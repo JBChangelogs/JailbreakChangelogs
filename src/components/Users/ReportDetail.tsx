@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { PUBLIC_API_URL } from "@/utils/api/api";

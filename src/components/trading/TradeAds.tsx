@@ -8,7 +8,8 @@ import React, {
   useMemo,
 } from "react";
 import { useQueryState } from "nuqs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { TradeAd } from "@/types/trading";
 import { TradeItem } from "@/types/trading";
 import { TradeAdCard } from "./TradeAdCard";

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQueryState } from "nuqs";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";

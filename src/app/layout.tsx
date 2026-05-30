@@ -176,15 +176,8 @@ export default async function RootLayout({
                   <MaintenanceBypass>
                     <NextTopLoader
                       color="var(--color-button-info)"
-                      initialPosition={0.08}
-                      crawlSpeed={200}
-                      height={3}
-                      crawl={true}
                       showSpinner={false}
-                      easing="ease"
-                      speed={200}
                       shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                      zIndex={1600}
                     />
 
                     <AuthCheck />
@@ -325,15 +318,8 @@ export default async function RootLayout({
                 />
                 <NextTopLoader
                   color="var(--color-button-info)"
-                  initialPosition={0.08}
-                  crawlSpeed={200}
-                  height={3}
-                  crawl={true}
                   showSpinner={false}
-                  easing="ease"
-                  speed={200}
                   shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                  zIndex={1600}
                 />
 
                 <AuthCheck />

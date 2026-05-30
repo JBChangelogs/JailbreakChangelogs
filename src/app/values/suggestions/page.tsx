@@ -2148,6 +2148,7 @@ export default function ValueSuggestionsPage() {
                           premiumType={suggestion.user.premiumtype ?? 0}
                           size={6}
                           showBadge={false}
+                          bgClassName="bg-tertiary-bg"
                         />
                         <div className="min-w-0 flex-1">
                           <Link
@@ -2291,6 +2292,7 @@ export default function ValueSuggestionsPage() {
                                 premiumType={v.user.premiumtype ?? 0}
                                 size={10}
                                 showBadge={false}
+                                bgClassName="bg-quaternary-bg"
                               />
                             </div>
                             <div className="min-w-0 flex-1">

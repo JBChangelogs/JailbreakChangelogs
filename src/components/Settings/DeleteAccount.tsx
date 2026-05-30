@@ -1,7 +1,7 @@
 import { createLogger } from "@/services/logger";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { deleteAccount } from "@/services/settingsService";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";

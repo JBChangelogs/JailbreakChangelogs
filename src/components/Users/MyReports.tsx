@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
 import { PUBLIC_API_URL } from "@/utils/api/api";

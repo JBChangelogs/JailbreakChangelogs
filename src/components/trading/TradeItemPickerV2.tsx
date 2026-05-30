@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { CustomTypeDialog } from "@/components/trading/CustomTypeDialog";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 
 type TradeSide = "offering" | "requesting";
 type ItemCondition = "clean" | "duped" | "og";

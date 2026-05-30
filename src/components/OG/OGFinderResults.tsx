@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import Image from "next/image";
 import Link from "next/link";

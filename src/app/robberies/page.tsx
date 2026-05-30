@@ -8,7 +8,8 @@ import {
   useCallback,
   type CSSProperties,
 } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import {
   useRobberyTrackerWebSocket,

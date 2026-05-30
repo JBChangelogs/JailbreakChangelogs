@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import ReportIssueModal from "./ReportIssueModal";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";

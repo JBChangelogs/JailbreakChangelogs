@@ -22,6 +22,7 @@ interface UserAvatarProps {
   shape?: "circle" | "square";
   premiumType?: number;
   className?: string;
+  bgClassName?: string;
   onlineRingClassName?: string;
 }
 
@@ -110,6 +111,7 @@ const UserAvatarImpl = ({
   shape = "circle",
   premiumType,
   className,
+  bgClassName = "bg-primary-bg",
   onlineRingClassName,
 }: UserAvatarProps) => {
   const [imageError, setImageError] = useState(false);
@@ -174,7 +176,7 @@ const UserAvatarImpl = ({
         : finalShape === "square"
           ? "rounded-lg"
           : "rounded-full"
-  } bg-primary-bg shrink-0 overflow-hidden ${innerClassName || ""}`;
+  } ${bgClassName} shrink-0 overflow-hidden ${innerClassName || ""}`;
 
   if (!avatarSource) {
     return (

@@ -4,7 +4,7 @@ import { createLogger } from "@/services/logger";
 import { useEffect, useState } from "react";
 
 const log = createLogger("UI");
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonHeader from "@/components/Seasons/SeasonHeader";

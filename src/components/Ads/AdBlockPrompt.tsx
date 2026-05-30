@@ -2,7 +2,8 @@
 
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import Image from "next/image";
 
 import {

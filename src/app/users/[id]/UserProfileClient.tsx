@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import NextError from "next/error";
-import { notFound, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { UserAvatar } from "@/utils/ui/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
