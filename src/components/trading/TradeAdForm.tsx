@@ -1192,8 +1192,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   requestingItems,
                   nextNote,
                 );
-                syncItemsToPreference(offeringItems, requestingItems, nextNote);
               }}
+              onBlur={() =>
+                syncItemsToPreference(offeringItems, requestingItems)
+              }
               rows={3}
               placeholder="Optional: add key details so others can quickly understand your trade."
               className="bg-tertiary-bg border-border-card text-primary-text focus:ring-border-focus w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2"

@@ -893,7 +893,6 @@ export default function ValueSuggestionsPage() {
   const [voteRateLimits, setVoteRateLimits] = useState<Map<number, number>>(
     new Map(),
   );
-  const recentOwnVotesRef = useRef<Set<number>>(new Set());
 
   // Edit reason modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -912,82 +911,32 @@ export default function ValueSuggestionsPage() {
     }
     if (votingIds.has(suggestion.id)) return;
 
-    const removing =
-      type === "upvote"
-        ? suggestion.votes.upvotes.some((v) => v.user.id === user?.id)
-        : suggestion.votes.downvotes.some((v) => v.user.id === user?.id);
+    const wasUpvoted = suggestion.votes.upvotes.some(
+      (v) => v.user.id === user?.id,
+    );
+    const wasDownvoted = suggestion.votes.downvotes.some(
+      (v) => v.user.id === user?.id,
+    );
+    const removing = type === "upvote" ? wasUpvoted : wasDownvoted;
 
-    // Optimistic update — counts + list both update instantly for the voter.
-    // The WS echo for this vote is suppressed via recentOwnVotesRef so it
-    // doesn't double-update. Other clients still get counts via WS→silentRefreshVotes.
     setSuggestions((prev) =>
       prev.map((s) => {
         if (s.id !== suggestion.id) return s;
-        const wasUpvoted = s.votes.upvotes.some((v) => v.user.id === user?.id);
-        const wasDownvoted = s.votes.downvotes.some(
-          (v) => v.user.id === user?.id,
-        );
         let upvotes = s.upvotes;
         let downvotes = s.downvotes;
-        let upList = s.votes.upvotes;
-        let downList = s.votes.downvotes;
-
-        const userEntry = user
-          ? {
-              created_at: Math.floor(Date.now() / 1000),
-              user: {
-                id: user.id,
-                username: user.username,
-                global_name: user.global_name,
-                avatar: user.avatar,
-                custom_avatar: user.custom_avatar ?? null,
-                premiumtype: user.premiumtype ?? 0,
-                usernumber: user.usernumber ?? 0,
-                settings: user.settings,
-                roblox_id: user.roblox_id,
-                roblox_username: user.roblox_username,
-                roblox_display_name: user.roblox_display_name,
-                roblox_avatar: user.roblox_avatar,
-              },
-            }
-          : null;
-
         if (removing) {
-          if (type === "upvote") {
-            upvotes--;
-            upList = upList.filter((v) => v.user.id !== user?.id);
-          } else {
-            downvotes--;
-            downList = downList.filter((v) => v.user.id !== user?.id);
-          }
+          if (type === "upvote") upvotes--;
+          else downvotes--;
         } else {
-          if (wasUpvoted) {
-            upvotes--;
-            upList = upList.filter((v) => v.user.id !== user?.id);
-          }
-          if (wasDownvoted) {
-            downvotes--;
-            downList = downList.filter((v) => v.user.id !== user?.id);
-          }
-          if (type === "upvote") {
-            upvotes++;
-            if (userEntry) upList = [...upList, userEntry];
-          } else {
-            downvotes++;
-            if (userEntry) downList = [...downList, userEntry];
-          }
+          if (wasUpvoted) upvotes--;
+          if (wasDownvoted) downvotes--;
+          if (type === "upvote") upvotes++;
+          else downvotes++;
         }
-        return {
-          ...s,
-          upvotes,
-          downvotes,
-          votes: { upvotes: upList, downvotes: downList },
-        };
+        return { ...s, upvotes, downvotes };
       }),
     );
 
-    recentOwnVotesRef.current.add(suggestion.id);
-    setTimeout(() => recentOwnVotesRef.current.delete(suggestion.id), 5000);
     setVotingIds((prev) => new Set(prev).add(suggestion.id));
     try {
       const { url, headers } = buildApiFetchRequest(
@@ -1311,9 +1260,7 @@ export default function ValueSuggestionsPage() {
       if (e.detail?.action !== "refresh_suggestions") return;
       const type = e.detail?.type ?? "new";
       if (type === "vote" || type === "unvote") {
-        const id = e.detail?.id;
-        if (id != null && recentOwnVotesRef.current.has(id)) return;
-        silentRefreshVotes(id);
+        silentRefreshVotes(e.detail?.id);
         return;
       }
       if (type === "new") {
