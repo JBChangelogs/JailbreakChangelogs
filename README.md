@@ -110,4 +110,4 @@ For details, see the [LICENSE](./LICENSE) file in this repository.
 
 ---
 
-We hope this project enhances your Roblox Jailbreak experience <
+We hope this project enhances your Roblox Jailbreak experience <3
