@@ -54,6 +54,9 @@ import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { parseBan, showBanToast } from "@/utils/api/ban";
 import type { Item } from "@/types/index";
+import NitroValuesSuggestionsRailAd from "@/components/Ads/NitroValuesSuggestionsRailAd";
+import NitroValuesSuggestionsRightRailAd from "@/components/Ads/NitroValuesSuggestionsRightRailAd";
+import NitroValuesSuggestionsVideoPlayer from "@/components/Ads/NitroValuesSuggestionsVideoPlayer";
 
 interface SuggestionLimits {
   min_characters: number;
@@ -1375,970 +1378,987 @@ export default function ValueSuggestionsPage() {
   };
 
   return (
-    <main className="min-h-screen">
-      <div className="container mx-auto mb-8 px-4 sm:px-6">
-        <Breadcrumb />
+    <>
+      <NitroValuesSuggestionsRailAd />
+      <NitroValuesSuggestionsRightRailAd />
+      <main className="min-h-screen">
+        <div className="container mx-auto mb-8 px-4 sm:px-6">
+          <Breadcrumb />
 
-        {/* Header */}
-        <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="text-primary-text mb-1 text-2xl font-semibold">
-                Value Suggestions
-              </h1>
-              <p className="text-secondary-text text-sm">
-                Help keep item values accurate. Submit a suggestion with your
-                reasoning — the community votes, and our team reviews before
-                applying changes.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                <Button asChild variant="default" size="sm">
-                  <Link href="/values">Value List</Link>
-                </Button>
-                <Button asChild variant="default" size="sm">
-                  <Link href="/values/changelogs">Value Changelogs</Link>
-                </Button>
-              </div>
-            </div>
-            <div className="shrink-0">
-              {isAuthenticated ? (
-                <Button
-                  onClick={openForm}
-                  variant={showForm ? "destructive" : "default"}
-                  disabled={!!ban}
-                  className={`flex items-center gap-2 ${showForm ? "" : "bg-button-info hover:bg-button-info-hover text-form-button-text"} disabled:opacity-50`}
-                >
-                  <Icon
-                    icon={
-                      showForm
-                        ? "material-symbols:close-rounded"
-                        : "material-symbols:add-rounded"
-                    }
-                    className="h-4 w-4"
-                    inline
-                  />
-                  {showForm ? "Cancel" : "Submit Suggestion"}
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => setLoginModal({ open: true })}
-                  className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
-                >
-                  <Icon
-                    icon="material-symbols:login-rounded"
-                    className="h-4 w-4"
-                    inline
-                  />
-                  Login to Suggest
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Ban Banner */}
-        {ban && <BanBanner ban={ban} className="mb-4" />}
-
-        {/* Submit Form */}
-        {showForm && isAuthenticated && !ban && (
-          <SuggestionForm
-            items={items}
-            loadingItems={loadingItems}
-            limits={limits}
-            loadingLimits={loadingLimits}
-            onSubmit={handleFormSubmit}
-            onCancel={() => setShowForm(false)}
-          />
-        )}
-
-        {/* Title row */}
-        <div className="mb-4">
-          <h2 className="text-primary-text font-semibold">
-            {loadingSuggestions ? 0 : total} Recent Suggestions
-          </h2>
-        </div>
-
-        {/* Search + filter */}
-        {!loadingSuggestions && !suggestionsError && suggestions.length > 0 && (
-          <>
-            <div className="mb-4 flex flex-col gap-4 sm:flex-row">
-              {/* Search */}
-              <div className="relative w-full sm:flex-1">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search by item name..."
-                  value={search}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
-                    isSearchHighlighted
-                      ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
-                      : "focus:border-button-info"
-                  }`}
-                />
-                <Icon
-                  icon="heroicons:magnifying-glass"
-                  className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
-                />
-                {search && (
-                  <button
-                    onClick={() => handleSearchChange("")}
-                    className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-                    aria-label="Clear search"
-                  >
-                    <Icon icon="heroicons:x-mark" />
-                  </button>
-                )}
-              </div>
-
-              {/* Item type + field filters — grid so they're side by side on mobile too */}
-              <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
-                <div className="sm:w-48">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                      >
-                        <span className="truncate">
-                          {typeFilter === "All" ? "All Types" : typeFilter}
-                        </span>
-                        <Icon
-                          icon="heroicons:chevron-down"
-                          className="text-secondary-text h-5 w-5 shrink-0"
-                          inline
-                        />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+          {/* Header */}
+          <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+              <div className="flex-1">
+                <h1 className="text-primary-text mb-1 text-2xl font-semibold">
+                  Value Suggestions
+                </h1>
+                <p className="text-secondary-text text-sm">
+                  Help keep item values accurate. Submit a suggestion with your
+                  reasoning — the community votes, and our team reviews before
+                  applying changes.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Button asChild variant="default" size="sm">
+                    <Link href="/values">Value List</Link>
+                  </Button>
+                  <Button asChild variant="default" size="sm">
+                    <Link href="/values/changelogs">Value Changelogs</Link>
+                  </Button>
+                  {isAuthenticated ? (
+                    <Button
+                      onClick={openForm}
+                      variant={showForm ? "destructive" : "default"}
+                      disabled={!!ban}
+                      size="sm"
+                      className={`flex items-center gap-2 ${showForm ? "" : "bg-button-info hover:bg-button-info-hover text-form-button-text"} disabled:opacity-50`}
                     >
-                      <DropdownMenuRadioGroup
-                        value={typeFilter}
-                        onValueChange={handleTypeFilterChange}
-                      >
-                        <DropdownMenuRadioItem
-                          value="All"
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          All Types
-                        </DropdownMenuRadioItem>
-                        {suggestionItemTypes.map((type) => (
-                          <DropdownMenuRadioItem
-                            key={type}
-                            value={type}
-                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                          >
-                            {type}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                <div className="sm:w-48">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                      >
-                        <span className="truncate">
-                          {fieldFilter === "All"
-                            ? "All Fields"
-                            : fieldLabel(fieldFilter)}
-                        </span>
-                        <Icon
-                          icon="heroicons:chevron-down"
-                          className="text-secondary-text h-5 w-5 shrink-0"
-                          inline
-                        />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                    >
-                      <DropdownMenuRadioGroup
-                        value={fieldFilter}
-                        onValueChange={handleFieldFilterChange}
-                      >
-                        <DropdownMenuRadioItem
-                          value="All"
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          All Fields
-                        </DropdownMenuRadioItem>
-                        {suggestionFields.map((f) => (
-                          <DropdownMenuRadioItem
-                            key={f}
-                            value={f}
-                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                          >
-                            {fieldLabel(f)}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            </div>
-            <div className="text-secondary-text mt-2 mb-4 hidden items-center gap-1 text-xs lg:flex">
-              <Icon
-                icon="emojione:light-bulb"
-                className="text-sm text-yellow-500"
-              />
-              Helpful tip: Press{" "}
-              <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-                Ctrl
-              </kbd>
-              {" + "}
-              <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-                F
-              </kbd>{" "}
-              to quickly focus the search.
-            </div>
-          </>
-        )}
-
-        {/* Suggestions update pill — fixed so it's visible anywhere on the page */}
-        {(pendingNew > 0 || pendingTypes.size > 0) && !loadingSuggestions && (
-          <div
-            className="fixed left-1/2 z-[1500] -translate-x-1/2"
-            style={{ top: "calc(var(--header-height, 64px) + 12px)" }}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                fetchSuggestions(1);
-                setPage(1);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
-            >
-              {(() => {
-                const hasNew = pendingNew > 0;
-                const hasOther = pendingTypes.size > 0;
-
-                if (hasNew && !hasOther) {
-                  return (
-                    <>
                       <Icon
-                        icon="material-symbols:arrow-upward-rounded"
+                        icon={
+                          showForm
+                            ? "material-symbols:close-rounded"
+                            : "material-symbols:add-rounded"
+                        }
                         className="h-4 w-4"
                         inline
                       />
-                      {pendingNew === 1
-                        ? "1 new suggestion"
-                        : `${pendingNew} new suggestions`}{" "}
-                      — click to load
-                    </>
-                  );
-                }
-
-                let label: string;
-                if (hasNew && hasOther) {
-                  label = "New suggestions & updates — click to refresh";
-                } else if (
-                  pendingTypes.has("vote") ||
-                  pendingTypes.has("unvote")
-                ) {
-                  label =
-                    pendingTypes.size === 1
-                      ? "Vote counts updated — click to refresh"
-                      : "Suggestions updated — click to refresh";
-                } else if (pendingTypes.has("status")) {
-                  label =
-                    pendingTypes.size === 1
-                      ? "A suggestion status changed — click to refresh"
-                      : "Suggestions updated — click to refresh";
-                } else if (pendingTypes.has("edit")) {
-                  label =
-                    pendingTypes.size === 1
-                      ? "A suggestion was edited — click to refresh"
-                      : "Suggestions updated — click to refresh";
-                } else {
-                  label = "Suggestions updated — click to refresh";
-                }
-
-                return (
-                  <>
-                    <Icon
-                      icon="material-symbols:refresh-rounded"
-                      className="h-4 w-4"
-                      inline
-                    />
-                    {label}
-                  </>
-                );
-              })()}
-            </button>
-          </div>
-        )}
-
-        {/* Cards */}
-        {loadingSuggestions ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className="border-border-card bg-secondary-bg relative flex animate-pulse flex-col overflow-hidden rounded-xl border"
-              >
-                <div
-                  className="bg-tertiary-bg relative block w-full"
-                  style={{ aspectRatio: "16/9" }}
-                />
-                <div className="border-border-card relative z-10 flex flex-col border-t">
-                  <div className="flex items-stretch">
-                    <div className="bg-quaternary-bg flex flex-1 items-center justify-center gap-1.5 py-2.5">
-                      <div className="bg-quaternary-bg h-3 w-3 rounded-full" />
-                      <div className="bg-quaternary-bg h-4 w-6 rounded" />
-                    </div>
-                    <div className="border-border-card border-l" />
-                    <div className="bg-quaternary-bg flex flex-1 items-center justify-center gap-1.5 py-2.5">
-                      <div className="bg-quaternary-bg h-3 w-3 rounded-full" />
-                      <div className="bg-quaternary-bg h-4 w-6 rounded" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div className="relative z-10 min-w-0">
-                      <div className="bg-quaternary-bg mb-2 h-5 w-32 rounded" />
-                      <div className="flex flex-wrap gap-1.5">
-                        <div className="bg-quaternary-bg h-4 w-12 rounded" />
-                        <div className="bg-quaternary-bg h-4 w-16 rounded" />
-                        <div className="bg-quaternary-bg h-4 w-12 rounded" />
-                      </div>
-                    </div>
-                    <div className="bg-quaternary-bg h-4 w-4 rounded-full" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-3">
-                      <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
-                      <div className="bg-quaternary-bg h-5 w-16 rounded" />
-                    </div>
-                    <div className="p-3">
-                      <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
-                      <div className="bg-quaternary-bg h-5 w-16 rounded" />
-                    </div>
-                  </div>
-                  <div className="bg-quaternary-bg mb-1 h-3 w-full rounded" />
-                  <div className="bg-quaternary-bg mb-4 h-3 w-2/3 rounded" />
-                  <div className="mt-auto pt-1">
-                    <div className="bg-quaternary-bg mb-2 h-3 w-16 rounded" />
-                    <div className="flex items-start gap-2">
-                      <div className="bg-quaternary-bg h-6 w-6 rounded-full" />
-                      <div className="flex-1 space-y-2">
-                        <div className="bg-quaternary-bg h-3 w-24 rounded" />
-                        <div className="bg-quaternary-bg h-3 w-32 rounded" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : suggestionsError ? (
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-            <h3 className="text-primary-text mb-2 text-lg font-semibold">
-              Failed to load suggestions
-            </h3>
-            <p className="text-secondary-text mb-6 text-sm">
-              Something went wrong while fetching suggestions. You can try again
-              or return to the values page.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button
-                variant="secondary"
-                size="md"
-                onClick={() => fetchSuggestions(page)}
-                className="flex items-center gap-2"
-              >
-                <Icon icon="heroicons-outline:arrow-path" className="h-5 w-5" />
-                Try again
-              </Button>
-              <Button variant="default" size="md" asChild>
-                <Link href="/values">
-                  <Icon
-                    icon="heroicons-outline:arrow-left"
-                    className="h-5 w-5"
-                  />
-                  Back to values
-                </Link>
-              </Button>
-            </div>
-          </div>
-        ) : filteredSuggestions.length === 0 ? (
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-            <h3 className="text-primary-text mb-1 font-semibold">
-              {suggestions.length === 0
-                ? "No suggestions yet"
-                : search
-                  ? `No suggestions found matching "${search}"`
-                  : "No results"}
-            </h3>
-            <p className="text-secondary-text text-sm">
-              {suggestions.length === 0
-                ? "Be the first to submit a value suggestion."
-                : "Try adjusting your search or filter."}
-            </p>
-            {suggestions.length > 0 && (
-              <div className="mt-4 flex justify-center">
-                <Button onClick={handleClearAllFilters} variant="default">
-                  Clear All Filters
-                </Button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredSuggestions.map((suggestion) => {
-              const item = suggestion.item;
-              const categoryIcon = item ? getCategoryIcon(item.type) : null;
-
-              return (
-                <div
-                  key={suggestion.id}
-                  className="border-border-card bg-secondary-bg group hover:border-border-card/80 relative flex flex-col overflow-hidden rounded-xl border transition-colors"
-                >
-                  {/* Full-card link overlay — sits behind all interactive children */}
-                  <Link
-                    href={`/values/suggestions/${suggestion.id}`}
-                    prefetch={false}
-                    className="absolute inset-0 z-0"
-                    aria-label={`View suggestion #${suggestion.id}`}
-                  />
-
-                  {/* Image */}
-                  <Link
-                    href={`/values/suggestions/${suggestion.id}`}
-                    prefetch={false}
-                    className="bg-tertiary-bg relative block w-full overflow-hidden"
-                    style={{ aspectRatio: "16/9" }}
-                    tabIndex={-1}
-                    aria-hidden="true"
-                  >
-                    {item && isVideoItem(item.name) ? (
-                      <video
-                        src={getVideoPath(item.type, item.name)}
-                        className="h-full w-full object-cover"
-                        muted
-                        loop
-                      />
-                    ) : (
-                      <Image
-                        src={
-                          item
-                            ? getItemImagePath(item.type, item.name, true)
-                            : "/placeholder.png"
-                        }
-                        alt={item?.name ?? `Item #${suggestion.item_id}`}
-                        fill
-                        className="object-cover"
-                        onError={handleImageError}
-                      />
-                    )}
-                  </Link>
-
-                  {/* Votes */}
-                  {(() => {
-                    const userUpvoted = suggestion.votes.upvotes.some(
-                      (v) => v.user.id === user?.id,
-                    );
-                    const userDownvoted = suggestion.votes.downvotes.some(
-                      (v) => v.user.id === user?.id,
-                    );
-                    const isVoting =
-                      votingIds.has(suggestion.id) ||
-                      voteRateLimits.has(suggestion.id) ||
-                      !!ban;
-                    const hasVoters =
-                      suggestion.votes.upvotes.length > 0 ||
-                      suggestion.votes.downvotes.length > 0;
-                    return (
-                      <div className="border-border-card relative z-10 flex flex-col border-t">
-                        <div className="flex items-stretch">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={(e) =>
-                                  handleVote(suggestion, "upvote", e)
-                                }
-                                disabled={isVoting}
-                                className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                <Icon
-                                  icon={
-                                    userUpvoted
-                                      ? "material-symbols:thumb-up-rounded"
-                                      : "material-symbols:thumb-up-outline-rounded"
-                                  }
-                                  className="text-button-success h-4 w-4"
-                                  inline
-                                />
-                                <span className="text-button-success font-bold">
-                                  {suggestion.upvotes}
-                                </span>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {userUpvoted ? "Remove upvote" : "Upvote"}
-                            </TooltipContent>
-                          </Tooltip>
-                          <div className="border-border-card border-l" />
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={(e) =>
-                                  handleVote(suggestion, "downvote", e)
-                                }
-                                disabled={isVoting}
-                                className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                <Icon
-                                  icon={
-                                    userDownvoted
-                                      ? "material-symbols:thumb-down-rounded"
-                                      : "material-symbols:thumb-down-outline-rounded"
-                                  }
-                                  className="text-button-danger h-4 w-4"
-                                  inline
-                                />
-                                <span className="text-button-danger font-bold">
-                                  {suggestion.downvotes}
-                                </span>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {userDownvoted ? "Remove downvote" : "Downvote"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                        {voteRateLimits.has(suggestion.id) && (
-                          <VoteRateLimitBanner
-                            until={voteRateLimits.get(suggestion.id)!}
-                          />
-                        )}
-                        {hasVoters && (
-                          <button
-                            type="button"
-                            onClick={(e) =>
-                              openVotersModal(suggestion, "up", e)
-                            }
-                            className="border-border-card bg-tertiary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex w-full cursor-pointer items-center justify-center gap-1.5 border-t py-1.5 text-xs transition-colors focus:outline-none"
-                          >
-                            <Icon
-                              icon="material-symbols:group-outline-rounded"
-                              className="h-3.5 w-3.5"
-                              inline
-                            />
-                            View voters
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  {/* Card content */}
-                  <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
-                    {/* Item name + badges */}
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="relative z-10 min-w-0">
-                        {item ? (
-                          <Link
-                            href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
-                            prefetch={false}
-                            className="text-primary-text hover:text-link text-base font-bold wrap-break-word whitespace-normal transition-colors"
-                          >
-                            {item.name}
-                          </Link>
-                        ) : (
-                          <span className="text-primary-text text-base font-bold">
-                            Item #{suggestion.item_id}
-                          </span>
-                        )}
-                        <div className="mt-1.5 flex flex-wrap gap-1.5">
-                          {item && (
-                            <span
-                              className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
-                              style={{
-                                borderColor: getCategoryColor(item.type),
-                                backgroundColor: `${getCategoryColor(item.type)}22`,
-                              }}
-                            >
-                              {categoryIcon && (
-                                <categoryIcon.Icon
-                                  className="mr-1.5 h-3 w-3"
-                                  style={{ color: getCategoryColor(item.type) }}
-                                />
-                              )}
-                              {item.type}
-                            </span>
-                          )}
-                          <span
-                            className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
-                          >
-                            {fieldLabel(suggestion.field)}
-                          </span>
-                          <span
-                            className={`${badgeBase} capitalize ${
-                              statusColors[suggestion.status] ??
-                              "border-border-card bg-tertiary-bg/40 text-secondary-text"
-                            }`}
-                          >
-                            {suggestion.status}
-                          </span>
-                        </div>
-                      </div>
+                      {showForm ? "Cancel" : "Submit Suggestion"}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => setLoginModal({ open: true })}
+                      size="sm"
+                      className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
+                    >
                       <Icon
-                        icon="material-symbols:arrow-forward-rounded"
-                        className="text-tertiary-text group-hover:text-link relative z-10 mt-0.5 h-4 w-4 shrink-0 transition-colors"
+                        icon="material-symbols:login-rounded"
+                        className="h-4 w-4"
                         inline
                       />
+                      Login to Suggest
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <NitroValuesSuggestionsVideoPlayer className="w-full self-center lg:self-start" />
+            </div>
+          </div>
+
+          {/* Ban Banner */}
+          {ban && <BanBanner ban={ban} className="mb-4" />}
+
+          {/* Submit Form */}
+          {showForm && isAuthenticated && !ban && (
+            <SuggestionForm
+              items={items}
+              loadingItems={loadingItems}
+              limits={limits}
+              loadingLimits={loadingLimits}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setShowForm(false)}
+            />
+          )}
+
+          {/* Title row */}
+          <div className="mb-4">
+            <h2 className="text-primary-text font-semibold">
+              {loadingSuggestions ? 0 : total} Recent Suggestions
+            </h2>
+          </div>
+
+          {/* Search + filter */}
+          {!loadingSuggestions &&
+            !suggestionsError &&
+            suggestions.length > 0 && (
+              <>
+                <div className="mb-4 flex flex-col gap-4 sm:flex-row">
+                  {/* Search */}
+                  <div className="relative w-full sm:flex-1">
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Search by item name..."
+                      value={search}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
+                        isSearchHighlighted
+                          ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
+                          : "focus:border-button-info"
+                      }`}
+                    />
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+                    />
+                    {search && (
+                      <button
+                        onClick={() => handleSearchChange("")}
+                        className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                        aria-label="Clear search"
+                      >
+                        <Icon icon="heroicons:x-mark" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Item type + field filters — grid so they're side by side on mobile too */}
+                  <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
+                    <div className="sm:w-48">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                          >
+                            <span className="truncate">
+                              {typeFilter === "All" ? "All Types" : typeFilter}
+                            </span>
+                            <Icon
+                              icon="heroicons:chevron-down"
+                              className="text-secondary-text h-5 w-5 shrink-0"
+                              inline
+                            />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                        >
+                          <DropdownMenuRadioGroup
+                            value={typeFilter}
+                            onValueChange={handleTypeFilterChange}
+                          >
+                            <DropdownMenuRadioItem
+                              value="All"
+                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                            >
+                              All Types
+                            </DropdownMenuRadioItem>
+                            {suggestionItemTypes.map((type) => (
+                              <DropdownMenuRadioItem
+                                key={type}
+                                value={type}
+                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                              >
+                                {type}
+                              </DropdownMenuRadioItem>
+                            ))}
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
 
-                    {/* Value comparison */}
+                    <div className="sm:w-48">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                          >
+                            <span className="truncate">
+                              {fieldFilter === "All"
+                                ? "All Fields"
+                                : fieldLabel(fieldFilter)}
+                            </span>
+                            <Icon
+                              icon="heroicons:chevron-down"
+                              className="text-secondary-text h-5 w-5 shrink-0"
+                              inline
+                            />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                        >
+                          <DropdownMenuRadioGroup
+                            value={fieldFilter}
+                            onValueChange={handleFieldFilterChange}
+                          >
+                            <DropdownMenuRadioItem
+                              value="All"
+                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                            >
+                              All Fields
+                            </DropdownMenuRadioItem>
+                            {suggestionFields.map((f) => (
+                              <DropdownMenuRadioItem
+                                key={f}
+                                value={f}
+                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                              >
+                                {fieldLabel(f)}
+                              </DropdownMenuRadioItem>
+                            ))}
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-secondary-text mt-2 mb-4 hidden items-center gap-1 text-xs lg:flex">
+                  <Icon
+                    icon="emojione:light-bulb"
+                    className="text-sm text-yellow-500"
+                  />
+                  Helpful tip: Press{" "}
+                  <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+                    Ctrl
+                  </kbd>
+                  {" + "}
+                  <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+                    F
+                  </kbd>{" "}
+                  to quickly focus the search.
+                </div>
+              </>
+            )}
+
+          {/* Suggestions update pill — fixed so it's visible anywhere on the page */}
+          {(pendingNew > 0 || pendingTypes.size > 0) && !loadingSuggestions && (
+            <div
+              className="fixed left-1/2 z-[1500] -translate-x-1/2"
+              style={{ top: "calc(var(--header-height, 64px) + 12px)" }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  fetchSuggestions(1);
+                  setPage(1);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
+              >
+                {(() => {
+                  const hasNew = pendingNew > 0;
+                  const hasOther = pendingTypes.size > 0;
+
+                  if (hasNew && !hasOther) {
+                    return (
+                      <>
+                        <Icon
+                          icon="material-symbols:arrow-upward-rounded"
+                          className="h-4 w-4"
+                          inline
+                        />
+                        {pendingNew === 1
+                          ? "1 new suggestion"
+                          : `${pendingNew} new suggestions`}{" "}
+                        — click to load
+                      </>
+                    );
+                  }
+
+                  let label: string;
+                  if (hasNew && hasOther) {
+                    label = "New suggestions & updates — click to refresh";
+                  } else if (
+                    pendingTypes.has("vote") ||
+                    pendingTypes.has("unvote")
+                  ) {
+                    label =
+                      pendingTypes.size === 1
+                        ? "Vote counts updated — click to refresh"
+                        : "Suggestions updated — click to refresh";
+                  } else if (pendingTypes.has("status")) {
+                    label =
+                      pendingTypes.size === 1
+                        ? "A suggestion status changed — click to refresh"
+                        : "Suggestions updated — click to refresh";
+                  } else if (pendingTypes.has("edit")) {
+                    label =
+                      pendingTypes.size === 1
+                        ? "A suggestion was edited — click to refresh"
+                        : "Suggestions updated — click to refresh";
+                  } else {
+                    label = "Suggestions updated — click to refresh";
+                  }
+
+                  return (
+                    <>
+                      <Icon
+                        icon="material-symbols:refresh-rounded"
+                        className="h-4 w-4"
+                        inline
+                      />
+                      {label}
+                    </>
+                  );
+                })()}
+              </button>
+            </div>
+          )}
+
+          {/* Cards */}
+          {loadingSuggestions ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="border-border-card bg-secondary-bg relative flex animate-pulse flex-col overflow-hidden rounded-xl border"
+                >
+                  <div
+                    className="bg-tertiary-bg relative block w-full"
+                    style={{ aspectRatio: "16/9" }}
+                  />
+                  <div className="border-border-card relative z-10 flex flex-col border-t">
+                    <div className="flex items-stretch">
+                      <div className="bg-quaternary-bg flex flex-1 items-center justify-center gap-1.5 py-2.5">
+                        <div className="bg-quaternary-bg h-3 w-3 rounded-full" />
+                        <div className="bg-quaternary-bg h-4 w-6 rounded" />
+                      </div>
+                      <div className="border-border-card border-l" />
+                      <div className="bg-quaternary-bg flex flex-1 items-center justify-center gap-1.5 py-2.5">
+                        <div className="bg-quaternary-bg h-3 w-3 rounded-full" />
+                        <div className="bg-quaternary-bg h-4 w-6 rounded" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="relative z-10 min-w-0">
+                        <div className="bg-quaternary-bg mb-2 h-5 w-32 rounded" />
+                        <div className="flex flex-wrap gap-1.5">
+                          <div className="bg-quaternary-bg h-4 w-12 rounded" />
+                          <div className="bg-quaternary-bg h-4 w-16 rounded" />
+                          <div className="bg-quaternary-bg h-4 w-12 rounded" />
+                        </div>
+                      </div>
+                      <div className="bg-quaternary-bg h-4 w-4 rounded-full" />
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="min-w-0 p-3">
-                        <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                          <Icon
-                            icon="mdi:minus-circle"
-                            className="h-3.5 w-3.5"
-                            inline
-                          />
-                          Old
-                        </div>
-                        <div
-                          className="text-secondary-text line-clamp-2 text-lg font-bold line-through"
-                          style={{
-                            wordBreak: "normal",
-                            overflowWrap: "anywhere",
-                          }}
-                        >
-                          {formatFullValue(
-                            stripHtml(suggestion.current_value || "N/A"),
-                          )}
-                        </div>
+                      <div className="p-3">
+                        <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
+                        <div className="bg-quaternary-bg h-5 w-16 rounded" />
                       </div>
-                      <div className="min-w-0 p-3">
-                        <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                          <Icon
-                            icon="mdi:plus-circle"
-                            className="h-3.5 w-3.5"
-                            inline
-                          />
-                          New
-                        </div>
-                        <div
-                          className="text-primary-text line-clamp-2 text-lg font-bold"
-                          style={{
-                            wordBreak: "normal",
-                            overflowWrap: "anywhere",
-                          }}
-                        >
-                          {formatFullValue(
-                            stripHtml(suggestion.suggested_value),
-                          )}
+                      <div className="p-3">
+                        <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
+                        <div className="bg-quaternary-bg h-5 w-16 rounded" />
+                      </div>
+                    </div>
+                    <div className="bg-quaternary-bg mb-1 h-3 w-full rounded" />
+                    <div className="bg-quaternary-bg mb-4 h-3 w-2/3 rounded" />
+                    <div className="mt-auto pt-1">
+                      <div className="bg-quaternary-bg mb-2 h-3 w-16 rounded" />
+                      <div className="flex items-start gap-2">
+                        <div className="bg-quaternary-bg h-6 w-6 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <div className="bg-quaternary-bg h-3 w-24 rounded" />
+                          <div className="bg-quaternary-bg h-3 w-32 rounded" />
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : suggestionsError ? (
+            <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+              <h3 className="text-primary-text mb-2 text-lg font-semibold">
+                Failed to load suggestions
+              </h3>
+              <p className="text-secondary-text mb-6 text-sm">
+                Something went wrong while fetching suggestions. You can try
+                again or return to the values page.
+              </p>
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={() => fetchSuggestions(page)}
+                  className="flex items-center gap-2"
+                >
+                  <Icon
+                    icon="heroicons-outline:arrow-path"
+                    className="h-5 w-5"
+                  />
+                  Try again
+                </Button>
+                <Button variant="default" size="md" asChild>
+                  <Link href="/values">
+                    <Icon
+                      icon="heroicons-outline:arrow-left"
+                      className="h-5 w-5"
+                    />
+                    Back to values
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          ) : filteredSuggestions.length === 0 ? (
+            <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+              <h3 className="text-primary-text mb-1 font-semibold">
+                {suggestions.length === 0
+                  ? "No suggestions yet"
+                  : search
+                    ? `No suggestions found matching "${search}"`
+                    : "No results"}
+              </h3>
+              <p className="text-secondary-text text-sm">
+                {suggestions.length === 0
+                  ? "Be the first to submit a value suggestion."
+                  : "Try adjusting your search or filter."}
+              </p>
+              {suggestions.length > 0 && (
+                <div className="mt-4 flex justify-center">
+                  <Button onClick={handleClearAllFilters} variant="default">
+                    Clear All Filters
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredSuggestions.map((suggestion) => {
+                const item = suggestion.item;
+                const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
-                    {/* Reason */}
-                    <div className="text-secondary-text line-clamp-4 text-sm leading-relaxed break-words">
-                      {suggestion.reason?.trim() ? (
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            h1: ({ children }) => (
-                              <h1 className="text-primary-text text-sm font-bold">
-                                {children}
-                              </h1>
-                            ),
-                            h2: ({ children }) => (
-                              <h2 className="text-primary-text text-sm font-bold">
-                                {children}
-                              </h2>
-                            ),
-                            h3: ({ children }) => (
-                              <h3 className="text-primary-text text-sm font-semibold">
-                                {children}
-                              </h3>
-                            ),
-                            p: ({ children }) => <p>{children}</p>,
-                            ul: ({ children }) => (
-                              <ul className="list-inside list-disc">
-                                {children}
-                              </ul>
-                            ),
-                            ol: ({ children }) => (
-                              <ol className="list-inside list-decimal">
-                                {children}
-                              </ol>
-                            ),
-                            em: (props) => <em className="italic" {...props} />,
-                            strong: (props) => (
-                              <b
-                                className="text-primary-text font-semibold"
-                                {...props}
-                              />
-                            ),
-                          }}
-                        >
-                          {(() => {
-                            const withBold = suggestion.reason.replace(
-                              /(Common Trades?:?)/gi,
-                              "**$1**",
-                            );
-                            return withBold
-                              .split(/\n\n+/)
-                              .map((part) => part.replace(/\n/g, "\n\n"))
-                              .join("\n\n");
-                          })()}
-                        </ReactMarkdown>
+                return (
+                  <div
+                    key={suggestion.id}
+                    className="border-border-card bg-secondary-bg group hover:border-border-card/80 relative flex flex-col overflow-hidden rounded-xl border transition-colors"
+                  >
+                    {/* Full-card link overlay — sits behind all interactive children */}
+                    <Link
+                      href={`/values/suggestions/${suggestion.id}`}
+                      prefetch={false}
+                      className="absolute inset-0 z-0"
+                      aria-label={`View suggestion #${suggestion.id}`}
+                    />
+
+                    {/* Image */}
+                    <Link
+                      href={`/values/suggestions/${suggestion.id}`}
+                      prefetch={false}
+                      className="bg-tertiary-bg relative block w-full overflow-hidden"
+                      style={{ aspectRatio: "16/9" }}
+                      tabIndex={-1}
+                      aria-hidden="true"
+                    >
+                      {item && isVideoItem(item.name) ? (
+                        <video
+                          src={getVideoPath(item.type, item.name)}
+                          className="h-full w-full object-cover"
+                          muted
+                          loop
+                        />
                       ) : (
-                        <span>No reason provided.</span>
+                        <Image
+                          src={
+                            item
+                              ? getItemImagePath(item.type, item.name, true)
+                              : "/placeholder.png"
+                          }
+                          alt={item?.name ?? `Item #${suggestion.item_id}`}
+                          fill
+                          className="object-cover"
+                          onError={handleImageError}
+                        />
                       )}
-                    </div>
+                    </Link>
 
-                    {/* Footer */}
-                    <div className="relative z-10 mt-auto pt-1">
-                      <div className="mb-1.5 flex items-center justify-between">
-                        <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
-                          Suggested by
-                        </p>
-                        {isAuthenticated &&
-                          user?.id === suggestion.user.id &&
-                          suggestion.status === "pending" && (
+                    {/* Votes */}
+                    {(() => {
+                      const userUpvoted = suggestion.votes.upvotes.some(
+                        (v) => v.user.id === user?.id,
+                      );
+                      const userDownvoted = suggestion.votes.downvotes.some(
+                        (v) => v.user.id === user?.id,
+                      );
+                      const isVoting =
+                        votingIds.has(suggestion.id) ||
+                        voteRateLimits.has(suggestion.id) ||
+                        !!ban;
+                      const hasVoters =
+                        suggestion.votes.upvotes.length > 0 ||
+                        suggestion.votes.downvotes.length > 0;
+                      return (
+                        <div className="border-border-card relative z-10 flex flex-col border-t">
+                          <div className="flex items-stretch">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <button
                                   type="button"
-                                  onClick={(e) => openEditModal(suggestion, e)}
-                                  className="text-secondary-text hover:text-primary-text shrink-0 cursor-pointer rounded p-1 transition-colors"
+                                  onClick={(e) =>
+                                    handleVote(suggestion, "upvote", e)
+                                  }
+                                  disabled={isVoting}
+                                  className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   <Icon
-                                    icon="material-symbols:edit-outline-rounded"
-                                    className="h-4 w-4"
+                                    icon={
+                                      userUpvoted
+                                        ? "material-symbols:thumb-up-rounded"
+                                        : "material-symbols:thumb-up-outline-rounded"
+                                    }
+                                    className="text-button-success h-4 w-4"
                                     inline
                                   />
+                                  <span className="text-button-success font-bold">
+                                    {suggestion.upvotes}
+                                  </span>
                                 </button>
                               </TooltipTrigger>
-                              <TooltipContent>Update reason</TooltipContent>
+                              <TooltipContent>
+                                {userUpvoted ? "Remove upvote" : "Upvote"}
+                              </TooltipContent>
                             </Tooltip>
-                          )}
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <UserAvatar
-                          userId={suggestion.user.id}
-                          avatarHash={null}
-                          username={
-                            suggestion.user.roblox_username ??
-                            suggestion.user.username ??
-                            ""
-                          }
-                          forceAvatarUrl={
-                            suggestion.user.roblox_avatar ?? undefined
-                          }
-                          premiumType={suggestion.user.premiumtype ?? 0}
-                          size={6}
-                          showBadge={false}
-                          bgClassName="bg-tertiary-bg"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <Link
-                            href={`/users/${suggestion.user.id}`}
-                            prefetch={false}
-                            className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
-                          >
-                            {suggestion.user.roblox_display_name ||
-                              suggestion.user.roblox_username ||
-                              `User #${suggestion.user.id}`}
-                          </Link>
-                          <p className="text-secondary-text text-xs">
-                            Posted on {formatMessageDate(suggestion.created_at)}
-                            {suggestion.updated_at !== suggestion.created_at
-                              ? " (Edited)"
-                              : ""}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Pagination */}
-        {!loadingSuggestions && totalPages > 1 && (
-          <div className="mt-4 flex justify-center">
-            <Pagination
-              count={totalPages}
-              page={page}
-              onChange={(_, value) => {
-                setPage(value);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Edit Reason Modal */}
-      <EditReasonModal
-        open={editModalOpen}
-        onClose={closeEditModal}
-        suggestion={editTarget}
-        item={editTarget ? (editTarget.item ?? null) : null}
-        onSave={handleEditSave}
-        limits={limits}
-      />
-
-      {/* Voters Modal */}
-      <Dialog
-        open={votersOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setVotersOpen(false);
-            openVotersSuggestionIdRef.current = null;
-          }
-        }}
-      >
-        <DialogContent
-          showClose
-          className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
-          aria-describedby={undefined}
-        >
-          <DialogHeader className="px-6 pt-6 pb-2">
-            <DialogTitle className="text-primary-text text-left text-xl font-bold">
-              Voters
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="px-6 pt-4 pb-6">
-            <Tabs
-              value={votersTab}
-              onValueChange={(v) => setVotersTab(v as "up" | "down")}
-            >
-              <TabsList fullWidth className="mb-4">
-                <TabsTrigger value="up" fullWidth>
-                  <div className="flex flex-col items-center gap-1 py-1">
-                    <span className="text-base font-bold">Upvotes</span>
-                    <span className="text-xs font-semibold opacity-80">
-                      ({activeVoters?.upCount ?? 0})
-                    </span>
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger value="down" fullWidth>
-                  <div className="flex flex-col items-center gap-1 py-1">
-                    <span className="text-base font-bold">Downvotes</span>
-                    <span className="text-xs font-semibold opacity-80">
-                      ({activeVoters?.downCount ?? 0})
-                    </span>
-                  </div>
-                </TabsTrigger>
-              </TabsList>
-
-              {(["up", "down"] as const).map((tab) => {
-                const voters =
-                  tab === "up"
-                    ? (activeVoters?.up ?? [])
-                    : (activeVoters?.down ?? []);
-                const count =
-                  tab === "up"
-                    ? activeVoters?.upCount
-                    : activeVoters?.downCount;
-                return (
-                  <TabsContent key={tab} value={tab}>
-                    <div className="max-h-96 space-y-3 overflow-y-auto">
-                      {voters.length === 0 ? (
-                        <div className="text-secondary-text py-8 text-center">
-                          <p className="mb-1 font-semibold">
-                            {count === 0
-                              ? "No voters to display"
-                              : "Voter details not available"}
-                          </p>
-                          <p className="text-sm">
-                            {tab === "up"
-                              ? "This suggestion hasn't received any upvotes yet."
-                              : "This suggestion hasn't received any downvotes yet."}
-                          </p>
-                        </div>
-                      ) : (
-                        voters.map((v) => (
-                          <div
-                            key={v.user.id + v.created_at}
-                            className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
-                          >
-                            <div className="relative h-10 w-10 shrink-0">
-                              <UserAvatar
-                                userId={v.user.id}
-                                avatarHash={null}
-                                username={
-                                  v.user.roblox_username ??
-                                  v.user.username ??
-                                  ""
-                                }
-                                forceAvatarUrl={
-                                  v.user.roblox_avatar ?? undefined
-                                }
-                                premiumType={v.user.premiumtype ?? 0}
-                                size={10}
-                                showBadge={false}
-                                bgClassName="bg-quaternary-bg"
-                              />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="text-primary-text mb-1 text-base font-bold">
-                                <Link
-                                  href={`/users/${v.user.id}`}
-                                  prefetch={false}
-                                  className="text-link hover:text-link-hover transition-colors hover:underline"
-                                  onClick={() => setVotersOpen(false)}
+                            <div className="border-border-card border-l" />
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={(e) =>
+                                    handleVote(suggestion, "downvote", e)
+                                  }
+                                  disabled={isVoting}
+                                  className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                  {v.user.roblox_display_name ||
-                                    v.user.roblox_username ||
-                                    `User #${v.user.id}`}
-                                </Link>
-                              </div>
-                              <div className="text-tertiary-text text-sm font-medium">
-                                {new Date(
-                                  v.created_at * 1000,
-                                ).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </div>
-                            </div>
+                                  <Icon
+                                    icon={
+                                      userDownvoted
+                                        ? "material-symbols:thumb-down-rounded"
+                                        : "material-symbols:thumb-down-outline-rounded"
+                                    }
+                                    className="text-button-danger h-4 w-4"
+                                    inline
+                                  />
+                                  <span className="text-button-danger font-bold">
+                                    {suggestion.downvotes}
+                                  </span>
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {userDownvoted ? "Remove downvote" : "Downvote"}
+                              </TooltipContent>
+                            </Tooltip>
                           </div>
-                        ))
-                      )}
+                          {voteRateLimits.has(suggestion.id) && (
+                            <VoteRateLimitBanner
+                              until={voteRateLimits.get(suggestion.id)!}
+                            />
+                          )}
+                          {hasVoters && (
+                            <button
+                              type="button"
+                              onClick={(e) =>
+                                openVotersModal(suggestion, "up", e)
+                              }
+                              className="border-border-card bg-tertiary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex w-full cursor-pointer items-center justify-center gap-1.5 border-t py-1.5 text-xs transition-colors focus:outline-none"
+                            >
+                              <Icon
+                                icon="material-symbols:group-outline-rounded"
+                                className="h-3.5 w-3.5"
+                                inline
+                              />
+                              View voters
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Card content */}
+                    <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
+                      {/* Item name + badges */}
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="relative z-10 min-w-0">
+                          {item ? (
+                            <Link
+                              href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+                              prefetch={false}
+                              className="text-primary-text hover:text-link text-base font-bold wrap-break-word whitespace-normal transition-colors"
+                            >
+                              {item.name}
+                            </Link>
+                          ) : (
+                            <span className="text-primary-text text-base font-bold">
+                              Item #{suggestion.item_id}
+                            </span>
+                          )}
+                          <div className="mt-1.5 flex flex-wrap gap-1.5">
+                            {item && (
+                              <span
+                                className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
+                                style={{
+                                  borderColor: getCategoryColor(item.type),
+                                  backgroundColor: `${getCategoryColor(item.type)}22`,
+                                }}
+                              >
+                                {categoryIcon && (
+                                  <categoryIcon.Icon
+                                    className="mr-1.5 h-3 w-3"
+                                    style={{
+                                      color: getCategoryColor(item.type),
+                                    }}
+                                  />
+                                )}
+                                {item.type}
+                              </span>
+                            )}
+                            <span
+                              className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
+                            >
+                              {fieldLabel(suggestion.field)}
+                            </span>
+                            <span
+                              className={`${badgeBase} capitalize ${
+                                statusColors[suggestion.status] ??
+                                "border-border-card bg-tertiary-bg/40 text-secondary-text"
+                              }`}
+                            >
+                              {suggestion.status}
+                            </span>
+                          </div>
+                        </div>
+                        <Icon
+                          icon="material-symbols:arrow-forward-rounded"
+                          className="text-tertiary-text group-hover:text-link relative z-10 mt-0.5 h-4 w-4 shrink-0 transition-colors"
+                          inline
+                        />
+                      </div>
+
+                      {/* Value comparison */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="min-w-0 p-3">
+                          <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                            <Icon
+                              icon="mdi:minus-circle"
+                              className="h-3.5 w-3.5"
+                              inline
+                            />
+                            Old
+                          </div>
+                          <div
+                            className="text-secondary-text line-clamp-2 text-lg font-bold line-through"
+                            style={{
+                              wordBreak: "normal",
+                              overflowWrap: "anywhere",
+                            }}
+                          >
+                            {formatFullValue(
+                              stripHtml(suggestion.current_value || "N/A"),
+                            )}
+                          </div>
+                        </div>
+                        <div className="min-w-0 p-3">
+                          <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                            <Icon
+                              icon="mdi:plus-circle"
+                              className="h-3.5 w-3.5"
+                              inline
+                            />
+                            New
+                          </div>
+                          <div
+                            className="text-primary-text line-clamp-2 text-lg font-bold"
+                            style={{
+                              wordBreak: "normal",
+                              overflowWrap: "anywhere",
+                            }}
+                          >
+                            {formatFullValue(
+                              stripHtml(suggestion.suggested_value),
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Reason */}
+                      <div className="text-secondary-text line-clamp-4 text-sm leading-relaxed break-words">
+                        {suggestion.reason?.trim() ? (
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              h1: ({ children }) => (
+                                <h1 className="text-primary-text text-sm font-bold">
+                                  {children}
+                                </h1>
+                              ),
+                              h2: ({ children }) => (
+                                <h2 className="text-primary-text text-sm font-bold">
+                                  {children}
+                                </h2>
+                              ),
+                              h3: ({ children }) => (
+                                <h3 className="text-primary-text text-sm font-semibold">
+                                  {children}
+                                </h3>
+                              ),
+                              p: ({ children }) => <p>{children}</p>,
+                              ul: ({ children }) => (
+                                <ul className="list-inside list-disc">
+                                  {children}
+                                </ul>
+                              ),
+                              ol: ({ children }) => (
+                                <ol className="list-inside list-decimal">
+                                  {children}
+                                </ol>
+                              ),
+                              em: (props) => (
+                                <em className="italic" {...props} />
+                              ),
+                              strong: (props) => (
+                                <b
+                                  className="text-primary-text font-semibold"
+                                  {...props}
+                                />
+                              ),
+                            }}
+                          >
+                            {(() => {
+                              const withBold = suggestion.reason.replace(
+                                /(Common Trades?:?)/gi,
+                                "**$1**",
+                              );
+                              return withBold
+                                .split(/\n\n+/)
+                                .map((part) => part.replace(/\n/g, "\n\n"))
+                                .join("\n\n");
+                            })()}
+                          </ReactMarkdown>
+                        ) : (
+                          <span>No reason provided.</span>
+                        )}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="relative z-10 mt-auto pt-1">
+                        <div className="mb-1.5 flex items-center justify-between">
+                          <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
+                            Suggested by
+                          </p>
+                          {isAuthenticated &&
+                            user?.id === suggestion.user.id &&
+                            suggestion.status === "pending" && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    onClick={(e) =>
+                                      openEditModal(suggestion, e)
+                                    }
+                                    className="text-secondary-text hover:text-primary-text shrink-0 cursor-pointer rounded p-1 transition-colors"
+                                  >
+                                    <Icon
+                                      icon="material-symbols:edit-outline-rounded"
+                                      className="h-4 w-4"
+                                      inline
+                                    />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>Update reason</TooltipContent>
+                              </Tooltip>
+                            )}
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <UserAvatar
+                            userId={suggestion.user.id}
+                            avatarHash={null}
+                            username={
+                              suggestion.user.roblox_username ??
+                              suggestion.user.username ??
+                              ""
+                            }
+                            forceAvatarUrl={
+                              suggestion.user.roblox_avatar ?? undefined
+                            }
+                            premiumType={suggestion.user.premiumtype ?? 0}
+                            size={6}
+                            showBadge={false}
+                            bgClassName="bg-tertiary-bg"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <Link
+                              href={`/users/${suggestion.user.id}`}
+                              prefetch={false}
+                              className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
+                            >
+                              {suggestion.user.roblox_display_name ||
+                                suggestion.user.roblox_username ||
+                                `User #${suggestion.user.id}`}
+                            </Link>
+                            <p className="text-secondary-text text-xs">
+                              Posted on{" "}
+                              {formatMessageDate(suggestion.created_at)}
+                              {suggestion.updated_at !== suggestion.created_at
+                                ? " (Edited)"
+                                : ""}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </TabsContent>
+                  </div>
                 );
               })}
-            </Tabs>
+            </div>
+          )}
 
-            <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
-              <DialogClose asChild>
-                <Button variant="ghost" size="sm">
-                  Close
-                </Button>
-              </DialogClose>
-            </DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </main>
+          {/* Pagination */}
+          {!loadingSuggestions && totalPages > 1 && (
+            <div className="mt-4 flex justify-center">
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={(_, value) => {
+                  setPage(value);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Edit Reason Modal */}
+        <EditReasonModal
+          open={editModalOpen}
+          onClose={closeEditModal}
+          suggestion={editTarget}
+          item={editTarget ? (editTarget.item ?? null) : null}
+          onSave={handleEditSave}
+          limits={limits}
+        />
+
+        {/* Voters Modal */}
+        <Dialog
+          open={votersOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setVotersOpen(false);
+              openVotersSuggestionIdRef.current = null;
+            }
+          }}
+        >
+          <DialogContent
+            showClose
+            className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
+            aria-describedby={undefined}
+          >
+            <DialogHeader className="px-6 pt-6 pb-2">
+              <DialogTitle className="text-primary-text text-left text-xl font-bold">
+                Voters
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="px-6 pt-4 pb-6">
+              <Tabs
+                value={votersTab}
+                onValueChange={(v) => setVotersTab(v as "up" | "down")}
+              >
+                <TabsList fullWidth className="mb-4">
+                  <TabsTrigger value="up" fullWidth>
+                    <div className="flex flex-col items-center gap-1 py-1">
+                      <span className="text-base font-bold">Upvotes</span>
+                      <span className="text-xs font-semibold opacity-80">
+                        ({activeVoters?.upCount ?? 0})
+                      </span>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="down" fullWidth>
+                    <div className="flex flex-col items-center gap-1 py-1">
+                      <span className="text-base font-bold">Downvotes</span>
+                      <span className="text-xs font-semibold opacity-80">
+                        ({activeVoters?.downCount ?? 0})
+                      </span>
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
+
+                {(["up", "down"] as const).map((tab) => {
+                  const voters =
+                    tab === "up"
+                      ? (activeVoters?.up ?? [])
+                      : (activeVoters?.down ?? []);
+                  const count =
+                    tab === "up"
+                      ? activeVoters?.upCount
+                      : activeVoters?.downCount;
+                  return (
+                    <TabsContent key={tab} value={tab}>
+                      <div className="max-h-96 space-y-3 overflow-y-auto">
+                        {voters.length === 0 ? (
+                          <div className="text-secondary-text py-8 text-center">
+                            <p className="mb-1 font-semibold">
+                              {count === 0
+                                ? "No voters to display"
+                                : "Voter details not available"}
+                            </p>
+                            <p className="text-sm">
+                              {tab === "up"
+                                ? "This suggestion hasn't received any upvotes yet."
+                                : "This suggestion hasn't received any downvotes yet."}
+                            </p>
+                          </div>
+                        ) : (
+                          voters.map((v) => (
+                            <div
+                              key={v.user.id + v.created_at}
+                              className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                            >
+                              <div className="relative h-10 w-10 shrink-0">
+                                <UserAvatar
+                                  userId={v.user.id}
+                                  avatarHash={null}
+                                  username={
+                                    v.user.roblox_username ??
+                                    v.user.username ??
+                                    ""
+                                  }
+                                  forceAvatarUrl={
+                                    v.user.roblox_avatar ?? undefined
+                                  }
+                                  premiumType={v.user.premiumtype ?? 0}
+                                  size={10}
+                                  showBadge={false}
+                                  bgClassName="bg-quaternary-bg"
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-primary-text mb-1 text-base font-bold">
+                                  <Link
+                                    href={`/users/${v.user.id}`}
+                                    prefetch={false}
+                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                    onClick={() => setVotersOpen(false)}
+                                  >
+                                    {v.user.roblox_display_name ||
+                                      v.user.roblox_username ||
+                                      `User #${v.user.id}`}
+                                  </Link>
+                                </div>
+                                <div className="text-tertiary-text text-sm font-medium">
+                                  {new Date(
+                                    v.created_at * 1000,
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
+
+              <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
+                <DialogClose asChild>
+                  <Button variant="ghost" size="sm">
+                    Close
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </main>
+    </>
   );
 }

@@ -38,6 +38,9 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import type { Item } from "@/types/index";
+import NitroValuesSuggestionDetailRailAd from "@/components/Ads/NitroValuesSuggestionDetailRailAd";
+import NitroValuesSuggestionDetailRightRailAd from "@/components/Ads/NitroValuesSuggestionDetailRightRailAd";
+import NitroValuesSuggestionDetailVideoPlayer from "@/components/Ads/NitroValuesSuggestionDetailVideoPlayer";
 
 interface UserSettings {
   custom_avatar?: boolean;
@@ -446,87 +449,55 @@ export default function ValueSuggestionDetailPage() {
   const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
   return (
-    <main className="min-h-screen">
-      <div className="container mx-auto max-w-5xl px-4 pb-10 sm:px-6">
-        <Breadcrumb />
+    <>
+      <NitroValuesSuggestionDetailRailAd />
+      <NitroValuesSuggestionDetailRightRailAd />
+      <main className="min-h-screen">
+        <div className="container mx-auto px-4 pb-10 sm:px-6">
+          <Breadcrumb />
 
-        {ban && <BanBanner ban={ban} className="mb-5" />}
+          {ban && <BanBanner ban={ban} className="mb-5" />}
 
-        {loading && (
-          <div className="animate-pulse space-y-5">
-            {/* Hero */}
-            <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
-              <div className="flex flex-col sm:flex-row">
-                <div
-                  className="bg-tertiary-bg w-full shrink-0 sm:w-56"
-                  style={{ aspectRatio: "16/9" }}
-                />
-                <div className="flex flex-1 flex-col justify-center gap-4 p-5">
-                  <div className="bg-quaternary-bg h-7 w-48 rounded" />
-                  <div className="flex flex-wrap gap-1.5">
-                    <div className="bg-quaternary-bg h-6 w-16 rounded-lg" />
-                    <div className="bg-quaternary-bg h-6 w-20 rounded-lg" />
-                    <div className="bg-quaternary-bg h-6 w-16 rounded-lg" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="bg-quaternary-bg h-5 w-5 rounded-full" />
-                    <div className="bg-quaternary-bg h-4 w-28 rounded" />
+          {loading && (
+            <div className="animate-pulse space-y-5">
+              {/* Hero */}
+              <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
+                <div className="flex flex-col sm:flex-row">
+                  <div
+                    className="bg-tertiary-bg w-full shrink-0 sm:w-56"
+                    style={{ aspectRatio: "16/9" }}
+                  />
+                  <div className="flex flex-1 flex-col justify-center gap-4 p-5">
+                    <div className="bg-quaternary-bg h-7 w-48 rounded" />
+                    <div className="flex flex-wrap gap-1.5">
+                      <div className="bg-quaternary-bg h-6 w-16 rounded-lg" />
+                      <div className="bg-quaternary-bg h-6 w-20 rounded-lg" />
+                      <div className="bg-quaternary-bg h-6 w-16 rounded-lg" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="bg-quaternary-bg h-5 w-5 rounded-full" />
+                      <div className="bg-quaternary-bg h-4 w-28 rounded" />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Reason */}
-            <div className="border-border-card bg-secondary-bg rounded-xl border">
-              <div className="border-border-card border-b px-5 py-3.5">
-                <div className="bg-quaternary-bg h-4 w-16 rounded" />
-              </div>
-              <div className="space-y-2 p-5">
-                <div className="bg-quaternary-bg h-3 w-full rounded" />
-                <div className="bg-quaternary-bg h-3 w-full rounded" />
-                <div className="bg-quaternary-bg h-3 w-5/6 rounded" />
-                <div className="bg-quaternary-bg h-3 w-full rounded" />
-                <div className="bg-quaternary-bg h-3 w-3/4 rounded" />
-              </div>
-            </div>
-
-            {/* Mobile: stacked value + votes cards */}
-            <div className="space-y-5 lg:hidden">
+              {/* Reason */}
               <div className="border-border-card bg-secondary-bg rounded-xl border">
                 <div className="border-border-card border-b px-5 py-3.5">
-                  <div className="bg-quaternary-bg h-4 w-32 rounded" />
+                  <div className="bg-quaternary-bg h-4 w-16 rounded" />
                 </div>
-                <div className="grid grid-cols-2 gap-2 p-5">
-                  <div className="p-3">
-                    <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
-                    <div className="bg-quaternary-bg h-6 w-20 rounded" />
-                  </div>
-                  <div className="p-3">
-                    <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
-                    <div className="bg-quaternary-bg h-6 w-20 rounded" />
-                  </div>
+                <div className="space-y-2 p-5">
+                  <div className="bg-quaternary-bg h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg h-3 w-5/6 rounded" />
+                  <div className="bg-quaternary-bg h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg h-3 w-3/4 rounded" />
                 </div>
               </div>
-              <div className="border-border-card bg-secondary-bg rounded-xl border">
-                <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
-                  <div className="bg-quaternary-bg h-4 w-12 rounded" />
-                  <div className="flex gap-2">
-                    <div className="bg-quaternary-bg h-7 w-16 rounded-lg" />
-                    <div className="bg-quaternary-bg h-7 w-16 rounded-lg" />
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Desktop: 5-col grid */}
-            <div className="hidden lg:grid lg:grid-cols-5 lg:gap-5">
-              <div className="border-border-card bg-secondary-bg min-w-0 space-y-3 rounded-xl border p-5 lg:col-span-3">
-                <div className="bg-quaternary-bg h-4 w-24 rounded" />
-                <div className="bg-quaternary-bg h-3 w-full rounded" />
-                <div className="bg-quaternary-bg h-3 w-full rounded" />
-                <div className="bg-quaternary-bg h-3 w-2/3 rounded" />
-              </div>
-              <div className="space-y-5 lg:col-span-2">
+              {/* Mobile: stacked value + votes cards */}
+              <div className="space-y-5 lg:hidden">
                 <div className="border-border-card bg-secondary-bg rounded-xl border">
                   <div className="border-border-card border-b px-5 py-3.5">
                     <div className="bg-quaternary-bg h-4 w-32 rounded" />
@@ -552,368 +523,690 @@ export default function ValueSuggestionDetailPage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {error && !loading && (
-          <div className="border-border-card bg-secondary-bg rounded-xl border p-10 text-center">
-            <Icon
-              icon="material-symbols:error-outline-rounded"
-              className="text-button-danger mx-auto mb-3 h-12 w-12"
-              inline
-            />
-            <p className="text-primary-text font-semibold">{error}</p>
-            <Link
-              href="/values/suggestions"
-              prefetch={false}
-              className="text-link hover:text-link-hover mt-3 inline-block text-sm transition-colors"
-            >
-              Back to suggestions
-            </Link>
-          </div>
-        )}
-
-        {refreshType !== null && !loading && (
-          <div
-            className="fixed left-1/2 z-[1500] -translate-x-1/2"
-            style={{ top: "calc(var(--header-height, 64px) + 12px)" }}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                window.location.reload();
-              }}
-              className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
-            >
-              <Icon
-                icon="material-symbols:refresh-rounded"
-                className="h-4 w-4"
-                inline
-              />
-              {refreshType === "edit"
-                ? "This suggestion was edited — click to refresh"
-                : refreshType === "status"
-                  ? "Suggestion status changed — click to refresh"
-                  : "This suggestion was updated — click to refresh"}
-            </button>
-          </div>
-        )}
-
-        {!loading && suggestion && (
-          <div className="space-y-5">
-            {/* ── Hero ── */}
-            <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
-              <div className="flex flex-col sm:flex-row">
-                {/* Item image */}
-                <div
-                  className="bg-secondary-bg relative w-full shrink-0 sm:w-56"
-                  style={{ aspectRatio: "16/9" }}
-                >
-                  {item && isVideoItem(item.name) ? (
-                    <video
-                      src={getVideoPath(item.type, item.name)}
-                      className="h-full w-full object-cover"
-                      muted
-                      loop
-                      autoPlay
-                    />
-                  ) : (
-                    <Image
-                      src={
-                        item
-                          ? getItemImagePath(item.type, item.name, true)
-                          : "/placeholder.png"
-                      }
-                      alt={item?.name ?? `Item #${suggestion.item_id}`}
-                      fill
-                      className="object-cover"
-                      onError={handleImageError}
-                    />
-                  )}
+              {/* Desktop: 5-col grid */}
+              <div className="hidden lg:grid lg:grid-cols-5 lg:gap-5">
+                <div className="border-border-card bg-secondary-bg min-w-0 space-y-3 rounded-xl border p-5 lg:col-span-3">
+                  <div className="bg-quaternary-bg h-4 w-24 rounded" />
+                  <div className="bg-quaternary-bg h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg h-3 w-2/3 rounded" />
                 </div>
-
-                {/* Info */}
-                <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-5">
-                  <div>
-                    {item ? (
-                      <Link
-                        href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
-                        prefetch={false}
-                        className="text-primary-text hover:text-link text-2xl font-bold transition-colors"
-                      >
-                        {item.name}
-                      </Link>
-                    ) : (
-                      <span className="text-primary-text text-2xl font-bold">
-                        Item #{suggestion.item_id}
-                      </span>
-                    )}
+                <div className="space-y-5 lg:col-span-2">
+                  <div className="border-border-card bg-secondary-bg rounded-xl border">
+                    <div className="border-border-card border-b px-5 py-3.5">
+                      <div className="bg-quaternary-bg h-4 w-32 rounded" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 p-5">
+                      <div className="p-3">
+                        <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
+                        <div className="bg-quaternary-bg h-6 w-20 rounded" />
+                      </div>
+                      <div className="p-3">
+                        <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
+                        <div className="bg-quaternary-bg h-6 w-20 rounded" />
+                      </div>
+                    </div>
                   </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {item && (
-                      <span
-                        className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
-                        style={{ borderColor: getCategoryColor(item.type) }}
-                      >
-                        {categoryIcon && (
-                          <categoryIcon.Icon
-                            className="mr-1.5 h-3 w-3"
-                            style={{ color: getCategoryColor(item.type) }}
-                          />
-                        )}
-                        {item.type}
-                      </span>
-                    )}
-                    <span
-                      className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
-                    >
-                      {fieldLabel(suggestion.field)}
-                    </span>
-                    <span
-                      className={`${badgeBase} capitalize ${statusColors[suggestion.status] ?? "border-border-card bg-tertiary-bg/40 text-secondary-text"}`}
-                    >
-                      {suggestion.status}
-                    </span>
-                  </div>
-
-                  <div>
-                    <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
-                      Suggested by
-                    </p>
-                    <div className="mt-1 flex items-start gap-2.5">
-                      <UserAvatar
-                        userId={suggestion.user.id}
-                        avatarHash={null}
-                        username={
-                          suggestion.user.roblox_username ??
-                          suggestion.user.username ??
-                          ""
-                        }
-                        forceAvatarUrl={
-                          suggestion.user.roblox_avatar ?? undefined
-                        }
-                        premiumType={suggestion.user.premiumtype ?? 0}
-                        size={9}
-                        showBadge={false}
-                        bgClassName="bg-tertiary-bg"
-                      />
-                      <div className="min-w-0">
-                        <Link
-                          href={`/users/${suggestion.user.id}`}
-                          prefetch={false}
-                          className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
-                        >
-                          {suggestion.user.roblox_display_name ||
-                            suggestion.user.roblox_username ||
-                            `User #${suggestion.user.id}`}
-                        </Link>
-                        <p className="text-secondary-text mt-1 text-xs">
-                          Posted on {formatMessageDate(suggestion.created_at)}
-                          {suggestion.updated_at !== suggestion.created_at
-                            ? " (Edited)"
-                            : ""}
-                        </p>
+                  <div className="border-border-card bg-secondary-bg rounded-xl border">
+                    <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
+                      <div className="bg-quaternary-bg h-4 w-12 rounded" />
+                      <div className="flex gap-2">
+                        <div className="bg-quaternary-bg h-7 w-16 rounded-lg" />
+                        <div className="bg-quaternary-bg h-7 w-16 rounded-lg" />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* ── Content + Sidebar ── */}
+          {error && !loading && (
+            <div className="border-border-card bg-secondary-bg rounded-xl border p-10 text-center">
+              <Icon
+                icon="material-symbols:error-outline-rounded"
+                className="text-button-danger mx-auto mb-3 h-12 w-12"
+                inline
+              />
+              <p className="text-primary-text font-semibold">{error}</p>
+              <Link
+                href="/values/suggestions"
+                prefetch={false}
+                className="text-link hover:text-link-hover mt-3 inline-block text-sm transition-colors"
+              >
+                Back to suggestions
+              </Link>
+            </div>
+          )}
+
+          {refreshType !== null && !loading && (
+            <div
+              className="fixed left-1/2 z-[1500] -translate-x-1/2"
+              style={{ top: "calc(var(--header-height, 64px) + 12px)" }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.reload();
+                }}
+                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
+              >
+                <Icon
+                  icon="material-symbols:refresh-rounded"
+                  className="h-4 w-4"
+                  inline
+                />
+                {refreshType === "edit"
+                  ? "This suggestion was edited — click to refresh"
+                  : refreshType === "status"
+                    ? "Suggestion status changed — click to refresh"
+                    : "This suggestion was updated — click to refresh"}
+              </button>
+            </div>
+          )}
+
+          {!loading && suggestion && (
             <div className="space-y-5">
-              {/* Reason — always first on every screen */}
-              <div className="min-w-0 space-y-5">
-                {/* Reason */}
-                <div className="border-border-card bg-secondary-bg rounded-xl border">
-                  <div className="border-border-card flex items-center justify-between border-b px-5 py-3.5">
-                    <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                      <Icon
-                        icon="material-symbols:description-outline-rounded"
-                        className="text-secondary-text h-4 w-4"
-                        inline
+              {/* ── Hero ── */}
+              <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
+                <div className="flex flex-col sm:flex-row">
+                  {/* Item image */}
+                  <div
+                    className="bg-secondary-bg relative w-full shrink-0 sm:w-56"
+                    style={{ aspectRatio: "16/9" }}
+                  >
+                    {item && isVideoItem(item.name) ? (
+                      <video
+                        src={getVideoPath(item.type, item.name)}
+                        className="h-full w-full object-cover"
+                        muted
+                        loop
+                        autoPlay
                       />
-                      Reason
-                    </h2>
-                    {isAuthenticated &&
-                      user?.id === suggestion.user.id &&
-                      suggestion.status === "pending" && (
-                        <Button
-                          size="sm"
-                          variant={isEditing ? "destructive" : "default"}
-                          onClick={() => {
-                            if (isEditing) {
-                              setIsEditing(false);
-                            } else {
-                              setEditReason(suggestion.reason);
-                              setIsEditing(true);
-                            }
-                          }}
-                        >
-                          <Icon
-                            icon={
-                              isEditing
-                                ? "material-symbols:close-rounded"
-                                : "material-symbols:edit-outline-rounded"
-                            }
-                            className="h-3.5 w-3.5"
-                            inline
-                          />
-                          {isEditing ? "Cancel" : "Edit"}
-                        </Button>
-                      )}
+                    ) : (
+                      <Image
+                        src={
+                          item
+                            ? getItemImagePath(item.type, item.name, true)
+                            : "/placeholder.png"
+                        }
+                        alt={item?.name ?? `Item #${suggestion.item_id}`}
+                        fill
+                        className="object-cover"
+                        onError={handleImageError}
+                      />
+                    )}
                   </div>
-                  <div className="p-5">
-                    {isEditing ? (
-                      <div className="space-y-3">
-                        <div className="flex justify-end">
-                          <span className="text-secondary-text text-xs">
-                            {editReason.length} / 350 min
-                          </span>
-                        </div>
-                        <textarea
-                          value={editReason}
-                          onChange={(e) => setEditReason(e.target.value)}
-                          rows={8}
-                          className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
+
+                  {/* Info */}
+                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-5">
+                    <div>
+                      {item ? (
+                        <Link
+                          href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+                          prefetch={false}
+                          className="text-primary-text hover:text-link text-2xl font-bold transition-colors"
+                        >
+                          {item.name}
+                        </Link>
+                      ) : (
+                        <span className="text-primary-text text-2xl font-bold">
+                          Item #{suggestion.item_id}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {item && (
+                        <span
+                          className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
+                          style={{ borderColor: getCategoryColor(item.type) }}
+                        >
+                          {categoryIcon && (
+                            <categoryIcon.Icon
+                              className="mr-1.5 h-3 w-3"
+                              style={{ color: getCategoryColor(item.type) }}
+                            />
+                          )}
+                          {item.type}
+                        </span>
+                      )}
+                      <span
+                        className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
+                      >
+                        {fieldLabel(suggestion.field)}
+                      </span>
+                      <span
+                        className={`${badgeBase} capitalize ${statusColors[suggestion.status] ?? "border-border-card bg-tertiary-bg/40 text-secondary-text"}`}
+                      >
+                        {suggestion.status}
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
+                        Suggested by
+                      </p>
+                      <div className="mt-1 flex items-start gap-2.5">
+                        <UserAvatar
+                          userId={suggestion.user.id}
+                          avatarHash={null}
+                          username={
+                            suggestion.user.roblox_username ??
+                            suggestion.user.username ??
+                            ""
+                          }
+                          forceAvatarUrl={
+                            suggestion.user.roblox_avatar ?? undefined
+                          }
+                          premiumType={suggestion.user.premiumtype ?? 0}
+                          size={9}
+                          showBadge={false}
+                          bgClassName="bg-tertiary-bg"
                         />
-                        <RateLimitBanner
-                          until={editRateLimitUntil}
-                          label="You're updating too fast."
-                        />
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={handleEditSave}
-                            disabled={
-                              editSaving ||
-                              !!editRateLimitUntil ||
-                              editReason.trim().length < 350
-                            }
-                            className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                        <div className="min-w-0">
+                          <Link
+                            href={`/users/${suggestion.user.id}`}
+                            prefetch={false}
+                            className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
                           >
-                            {editSaving ? (
-                              <>
-                                <Spinner className="h-3.5 w-3.5" />
-                                Saving...
-                              </>
-                            ) : (
-                              "Save"
-                            )}
-                          </button>
+                            {suggestion.user.roblox_display_name ||
+                              suggestion.user.roblox_username ||
+                              `User #${suggestion.user.id}`}
+                          </Link>
+                          <p className="text-secondary-text mt-1 text-xs">
+                            Posted on {formatMessageDate(suggestion.created_at)}
+                            {suggestion.updated_at !== suggestion.created_at
+                              ? " (Edited)"
+                              : ""}
+                          </p>
                         </div>
                       </div>
-                    ) : suggestion.reason.trim() ? (
-                      (() => {
-                        const isLong =
-                          suggestion.reason.split("\n").length > 5 ||
-                          suggestion.reason.length > 400;
-                        const mdContent = (() => {
-                          const withBold = suggestion.reason.replace(
-                            /(Common Trades?:?)/gi,
-                            "**$1**",
-                          );
-                          return withBold
-                            .split(/\n\n+/)
-                            .map((part) => part.replace(/\n/g, "\n\n"))
-                            .join("\n\n");
-                        })();
-                        return (
-                          <div>
-                            <div
-                              className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
-                                isLong && !reasonExpanded ? "max-h-36" : ""
-                              }`}
-                            >
-                              <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                components={{
-                                  h1: ({ children }) => (
-                                    <h1 className="text-primary-text mt-3 mb-1.5 text-lg font-bold first:mt-0">
-                                      {children}
-                                    </h1>
-                                  ),
-                                  h2: ({ children }) => (
-                                    <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
-                                      {children}
-                                    </h2>
-                                  ),
-                                  h3: ({ children }) => (
-                                    <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
-                                      {children}
-                                    </h3>
-                                  ),
-                                  p: ({ children }) => (
-                                    <p className="mb-2 last:mb-0">{children}</p>
-                                  ),
-                                  ul: ({ children }) => (
-                                    <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
-                                      {children}
-                                    </ul>
-                                  ),
-                                  ol: ({ children }) => (
-                                    <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
-                                      {children}
-                                    </ol>
-                                  ),
-                                  em: (props) => (
-                                    <em className="italic" {...props} />
-                                  ),
-                                  strong: (props) => (
-                                    <b
-                                      className="text-primary-text font-semibold"
-                                      {...props}
-                                    />
-                                  ),
-                                }}
-                              >
-                                {mdContent}
-                              </ReactMarkdown>
-                            </div>
-                            {isLong && (
-                              <button
-                                type="button"
-                                onClick={() => setReasonExpanded((v) => !v)}
-                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
-                              >
-                                <Icon
-                                  icon={
-                                    reasonExpanded
-                                      ? "heroicons-outline:chevron-up"
-                                      : "heroicons-outline:chevron-down"
-                                  }
-                                  className="h-4 w-4"
-                                  inline
-                                />
-                                {reasonExpanded ? "Show Less" : "Read More"}
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })()
-                    ) : (
-                      <p className="text-secondary-text text-sm leading-relaxed">
-                        No reason provided.
-                      </p>
-                    )}
+                    </div>
+                  </div>
+
+                  {/* Video ad — 3rd column, desktop only */}
+                  <div className="flex items-center justify-center p-4 sm:w-96 sm:shrink-0">
+                    <NitroValuesSuggestionDetailVideoPlayer />
                   </div>
                 </div>
               </div>
 
-              {/* ── Mobile layout (< lg): tabs — Details | Discussion ── */}
-              <div className="lg:hidden">
-                <Tabs defaultValue="details">
-                  <TabsList fullWidth>
-                    <TabsTrigger value="details" fullWidth>
-                      Details
-                    </TabsTrigger>
-                    <TabsTrigger value="discussion" fullWidth>
-                      Discussion
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="details" className="mt-4 space-y-5">
+              {/* ── Content + Sidebar ── */}
+              <div className="space-y-5">
+                {/* Reason — always first on every screen */}
+                <div className="min-w-0 space-y-5">
+                  {/* Reason */}
+                  <div className="border-border-card bg-secondary-bg rounded-xl border">
+                    <div className="border-border-card flex items-center justify-between border-b px-5 py-3.5">
+                      <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                        <Icon
+                          icon="material-symbols:description-outline-rounded"
+                          className="text-secondary-text h-4 w-4"
+                          inline
+                        />
+                        Reason
+                      </h2>
+                      {isAuthenticated &&
+                        user?.id === suggestion.user.id &&
+                        suggestion.status === "pending" && (
+                          <Button
+                            size="sm"
+                            variant={isEditing ? "destructive" : "default"}
+                            onClick={() => {
+                              if (isEditing) {
+                                setIsEditing(false);
+                              } else {
+                                setEditReason(suggestion.reason);
+                                setIsEditing(true);
+                              }
+                            }}
+                          >
+                            <Icon
+                              icon={
+                                isEditing
+                                  ? "material-symbols:close-rounded"
+                                  : "material-symbols:edit-outline-rounded"
+                              }
+                              className="h-3.5 w-3.5"
+                              inline
+                            />
+                            {isEditing ? "Cancel" : "Edit"}
+                          </Button>
+                        )}
+                    </div>
+                    <div className="p-5">
+                      {isEditing ? (
+                        <div className="space-y-3">
+                          <div className="flex justify-end">
+                            <span className="text-secondary-text text-xs">
+                              {editReason.length} / 350 min
+                            </span>
+                          </div>
+                          <textarea
+                            value={editReason}
+                            onChange={(e) => setEditReason(e.target.value)}
+                            rows={8}
+                            className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
+                          />
+                          <RateLimitBanner
+                            until={editRateLimitUntil}
+                            label="You're updating too fast."
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={handleEditSave}
+                              disabled={
+                                editSaving ||
+                                !!editRateLimitUntil ||
+                                editReason.trim().length < 350
+                              }
+                              className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {editSaving ? (
+                                <>
+                                  <Spinner className="h-3.5 w-3.5" />
+                                  Saving...
+                                </>
+                              ) : (
+                                "Save"
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      ) : suggestion.reason.trim() ? (
+                        (() => {
+                          const isLong =
+                            suggestion.reason.split("\n").length > 5 ||
+                            suggestion.reason.length > 400;
+                          const mdContent = (() => {
+                            const withBold = suggestion.reason.replace(
+                              /(Common Trades?:?)/gi,
+                              "**$1**",
+                            );
+                            return withBold
+                              .split(/\n\n+/)
+                              .map((part) => part.replace(/\n/g, "\n\n"))
+                              .join("\n\n");
+                          })();
+                          return (
+                            <div>
+                              <div
+                                className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
+                                  isLong && !reasonExpanded ? "max-h-36" : ""
+                                }`}
+                              >
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  components={{
+                                    h1: ({ children }) => (
+                                      <h1 className="text-primary-text mt-3 mb-1.5 text-lg font-bold first:mt-0">
+                                        {children}
+                                      </h1>
+                                    ),
+                                    h2: ({ children }) => (
+                                      <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
+                                        {children}
+                                      </h2>
+                                    ),
+                                    h3: ({ children }) => (
+                                      <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
+                                        {children}
+                                      </h3>
+                                    ),
+                                    p: ({ children }) => (
+                                      <p className="mb-2 last:mb-0">
+                                        {children}
+                                      </p>
+                                    ),
+                                    ul: ({ children }) => (
+                                      <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
+                                        {children}
+                                      </ul>
+                                    ),
+                                    ol: ({ children }) => (
+                                      <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
+                                        {children}
+                                      </ol>
+                                    ),
+                                    em: (props) => (
+                                      <em className="italic" {...props} />
+                                    ),
+                                    strong: (props) => (
+                                      <b
+                                        className="text-primary-text font-semibold"
+                                        {...props}
+                                      />
+                                    ),
+                                  }}
+                                >
+                                  {mdContent}
+                                </ReactMarkdown>
+                              </div>
+                              {isLong && (
+                                <button
+                                  type="button"
+                                  onClick={() => setReasonExpanded((v) => !v)}
+                                  className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                >
+                                  <Icon
+                                    icon={
+                                      reasonExpanded
+                                        ? "heroicons-outline:chevron-up"
+                                        : "heroicons-outline:chevron-down"
+                                    }
+                                    className="h-4 w-4"
+                                    inline
+                                  />
+                                  {reasonExpanded ? "Show Less" : "Read More"}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        <p className="text-secondary-text text-sm leading-relaxed">
+                          No reason provided.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Mobile layout (< lg): tabs — Details | Discussion ── */}
+                <div className="lg:hidden">
+                  <Tabs defaultValue="details">
+                    <TabsList fullWidth>
+                      <TabsTrigger value="details" fullWidth>
+                        Details
+                      </TabsTrigger>
+                      <TabsTrigger value="discussion" fullWidth>
+                        Discussion
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="details" className="mt-4 space-y-5">
+                      {/* Value change */}
+                      <div className="border-border-card bg-secondary-bg rounded-xl border">
+                        <div className="border-border-card border-b px-5 py-3.5">
+                          <h2 className="text-primary-text flex items-center justify-center gap-2 text-sm font-semibold">
+                            <Icon
+                              icon="material-symbols:swap-vert-rounded"
+                              className="text-secondary-text h-4 w-4"
+                              inline
+                            />
+                            {fieldLabel(suggestion.field)} Suggestion
+                          </h2>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 p-5">
+                          <div className="min-w-0 p-3">
+                            <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                              <Icon
+                                icon="mdi:minus-circle"
+                                className="h-3.5 w-3.5"
+                                inline
+                              />
+                              Old
+                            </div>
+                            <div
+                              className="text-secondary-text text-lg font-bold line-through"
+                              style={{
+                                wordBreak: "normal",
+                                overflowWrap: "anywhere",
+                              }}
+                            >
+                              {formatFullValue(
+                                suggestion.current_value || "N/A",
+                              )}
+                            </div>
+                          </div>
+                          <div className="min-w-0 p-3">
+                            <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                              <Icon
+                                icon="mdi:plus-circle"
+                                className="h-3.5 w-3.5"
+                                inline
+                              />
+                              New
+                            </div>
+                            <div
+                              className="text-primary-text text-lg font-bold"
+                              style={{
+                                wordBreak: "normal",
+                                overflowWrap: "anywhere",
+                              }}
+                            >
+                              {formatFullValue(suggestion.suggested_value)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Votes */}
+                      <div className="border-border-card bg-secondary-bg rounded-xl border">
+                        <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
+                          <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                            <Icon
+                              icon="material-symbols:how-to-vote-outline-rounded"
+                              className="text-secondary-text h-4 w-4"
+                              inline
+                            />
+                            Votes
+                          </h2>
+                          <div className="flex items-center gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={() => handleVote("upvote")}
+                                  disabled={
+                                    voteLoading || !!voteRateLimit || !!ban
+                                  }
+                                  className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  <Icon
+                                    icon={
+                                      userVote === "upvote"
+                                        ? "material-symbols:thumb-up-rounded"
+                                        : "material-symbols:thumb-up-outline-rounded"
+                                    }
+                                    className="text-button-success h-4 w-4"
+                                    inline
+                                  />
+                                  <span className="text-button-success font-bold">
+                                    {voteCounts.up}
+                                  </span>
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {userVote === "upvote"
+                                  ? "Remove upvote"
+                                  : "Upvote"}
+                              </TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={() => handleVote("downvote")}
+                                  disabled={
+                                    voteLoading || !!voteRateLimit || !!ban
+                                  }
+                                  className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  <Icon
+                                    icon={
+                                      userVote === "downvote"
+                                        ? "material-symbols:thumb-down-rounded"
+                                        : "material-symbols:thumb-down-outline-rounded"
+                                    }
+                                    className="text-button-danger h-4 w-4"
+                                    inline
+                                  />
+                                  <span className="text-button-danger font-bold">
+                                    {voteCounts.down}
+                                  </span>
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {userVote === "downvote"
+                                  ? "Remove downvote"
+                                  : "Downvote"}
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
+                        {voteRateLimit && voteRateLimitSeconds > 0 && (
+                          <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
+                            <Icon
+                              icon="material-symbols:hourglass-empty-rounded"
+                              className="h-3.5 w-3.5 shrink-0"
+                              inline
+                            />
+                            Too fast — wait{" "}
+                            {voteRateLimitSeconds >= 60
+                              ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
+                              : `${voteRateLimitSeconds}s`}
+                          </div>
+                        )}
+                        {(suggestion.votes.upvotes.length > 0 ||
+                          suggestion.votes.downvotes.length > 0) && (
+                          <div className="p-5">
+                            <Tabs defaultValue="upvotes">
+                              <TabsList fullWidth className="mb-4">
+                                <TabsTrigger value="upvotes" fullWidth>
+                                  <span className="flex items-center gap-1.5">
+                                    <Icon
+                                      icon="material-symbols:thumb-up-outline-rounded"
+                                      className="text-button-success h-3.5 w-3.5"
+                                      inline
+                                    />
+                                    Upvotes ({suggestion.votes.upvotes.length})
+                                  </span>
+                                </TabsTrigger>
+                                <TabsTrigger value="downvotes" fullWidth>
+                                  <span className="flex items-center gap-1.5">
+                                    <Icon
+                                      icon="material-symbols:thumb-down-outline-rounded"
+                                      className="text-button-danger h-3.5 w-3.5"
+                                      inline
+                                    />
+                                    Downvotes (
+                                    {suggestion.votes.downvotes.length})
+                                  </span>
+                                </TabsTrigger>
+                              </TabsList>
+                              <TabsContent value="upvotes">
+                                {suggestion.votes.upvotes.length === 0 ? (
+                                  <p className="text-secondary-text py-4 text-center text-sm">
+                                    No upvotes yet.
+                                  </p>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {suggestion.votes.upvotes.map((v) => (
+                                      <VoterCard
+                                        key={v.user.id + v.created_at}
+                                        v={v}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
+                              </TabsContent>
+                              <TabsContent value="downvotes">
+                                {suggestion.votes.downvotes.length === 0 ? (
+                                  <p className="text-secondary-text py-4 text-center text-sm">
+                                    No downvotes yet.
+                                  </p>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {suggestion.votes.downvotes.map((v) => (
+                                      <VoterCard
+                                        key={v.user.id + v.created_at}
+                                        v={v}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
+                              </TabsContent>
+                            </Tabs>
+                          </div>
+                        )}
+                      </div>
+                      {/* Suggester Stats */}
+                      {suggesterStats && (
+                        <div className="border-border-card bg-secondary-bg rounded-xl border">
+                          <div className="border-border-card border-b px-5 py-3.5">
+                            <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                              <Icon
+                                icon="material-symbols:bar-chart-4-bars-rounded"
+                                className="text-secondary-text h-4 w-4"
+                                inline
+                              />
+                              Suggester Stats
+                            </h2>
+                          </div>
+                          <div className="grid grid-cols-2 gap-px p-3">
+                            <div className="p-2">
+                              <p className="text-secondary-text mb-0.5 text-xs">
+                                Submitted
+                              </p>
+                              <p className="text-primary-text text-base font-bold">
+                                {suggesterStats.total_submitted}
+                              </p>
+                            </div>
+                            <div className="p-2">
+                              <p className="text-secondary-text mb-0.5 text-xs">
+                                Acceptance Rate
+                              </p>
+                              <p
+                                className={`text-base font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+                              >
+                                {suggesterStats.acceptance_rate.toFixed(0)}%
+                              </p>
+                            </div>
+                            <div className="p-2">
+                              <p className="text-secondary-text mb-0.5 text-xs">
+                                Accepted
+                              </p>
+                              <p className="text-button-success text-base font-bold">
+                                {suggesterStats.total_accepted}
+                              </p>
+                            </div>
+                            <div className="p-2">
+                              <p className="text-secondary-text mb-0.5 text-xs">
+                                Rejected
+                              </p>
+                              <p className="text-button-danger text-base font-bold">
+                                {suggesterStats.total_rejected}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </TabsContent>
+                    <TabsContent value="discussion" className="mt-4">
+                      <ChangelogComments
+                        changelogId={suggestion.id}
+                        changelogTitle={`Value Suggestion #${suggestion.id}`}
+                        type="vsuggestion"
+                      />
+                    </TabsContent>
+                  </Tabs>
+                </div>
+
+                {/* ── Desktop layout (lg+): 3-col grid ── */}
+                <div className="hidden lg:grid lg:grid-cols-5 lg:gap-5">
+                  {/* Main — comments */}
+                  <div className="min-w-0 lg:col-span-3">
+                    <ChangelogComments
+                      changelogId={suggestion.id}
+                      changelogTitle={`Value Suggestion #${suggestion.id}`}
+                      type="vsuggestion"
+                    />
+                  </div>
+
+                  {/* Sidebar — value change + votes + suggester stats */}
+                  <div className="space-y-5 lg:col-span-2">
                     {/* Value change */}
                     <div className="border-border-card bg-secondary-bg rounded-xl border">
                       <div className="border-border-card border-b px-5 py-3.5">
@@ -967,6 +1260,7 @@ export default function ValueSuggestionDetailPage() {
                         </div>
                       </div>
                     </div>
+
                     {/* Votes */}
                     <div className="border-border-card bg-secondary-bg rounded-xl border">
                       <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
@@ -1117,6 +1411,7 @@ export default function ValueSuggestionDetailPage() {
                         </div>
                       )}
                     </div>
+
                     {/* Suggester Stats */}
                     {suggesterStats && (
                       <div className="border-border-card bg-secondary-bg rounded-xl border">
@@ -1168,285 +1463,13 @@ export default function ValueSuggestionDetailPage() {
                         </div>
                       </div>
                     )}
-                  </TabsContent>
-                  <TabsContent value="discussion" className="mt-4">
-                    <ChangelogComments
-                      changelogId={suggestion.id}
-                      changelogTitle={`Value Suggestion #${suggestion.id}`}
-                      type="vsuggestion"
-                    />
-                  </TabsContent>
-                </Tabs>
-              </div>
-
-              {/* ── Desktop layout (lg+): 3-col grid ── */}
-              <div className="hidden lg:grid lg:grid-cols-5 lg:gap-5">
-                {/* Main — comments */}
-                <div className="min-w-0 lg:col-span-3">
-                  <ChangelogComments
-                    changelogId={suggestion.id}
-                    changelogTitle={`Value Suggestion #${suggestion.id}`}
-                    type="vsuggestion"
-                  />
-                </div>
-
-                {/* Sidebar — value change + votes + suggester stats */}
-                <div className="space-y-5 lg:col-span-2">
-                  {/* Value change */}
-                  <div className="border-border-card bg-secondary-bg rounded-xl border">
-                    <div className="border-border-card border-b px-5 py-3.5">
-                      <h2 className="text-primary-text flex items-center justify-center gap-2 text-sm font-semibold">
-                        <Icon
-                          icon="material-symbols:swap-vert-rounded"
-                          className="text-secondary-text h-4 w-4"
-                          inline
-                        />
-                        {fieldLabel(suggestion.field)} Suggestion
-                      </h2>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 p-5">
-                      <div className="min-w-0 p-3">
-                        <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                          <Icon
-                            icon="mdi:minus-circle"
-                            className="h-3.5 w-3.5"
-                            inline
-                          />
-                          Old
-                        </div>
-                        <div
-                          className="text-secondary-text text-lg font-bold line-through"
-                          style={{
-                            wordBreak: "normal",
-                            overflowWrap: "anywhere",
-                          }}
-                        >
-                          {formatFullValue(suggestion.current_value || "N/A")}
-                        </div>
-                      </div>
-                      <div className="min-w-0 p-3">
-                        <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                          <Icon
-                            icon="mdi:plus-circle"
-                            className="h-3.5 w-3.5"
-                            inline
-                          />
-                          New
-                        </div>
-                        <div
-                          className="text-primary-text text-lg font-bold"
-                          style={{
-                            wordBreak: "normal",
-                            overflowWrap: "anywhere",
-                          }}
-                        >
-                          {formatFullValue(suggestion.suggested_value)}
-                        </div>
-                      </div>
-                    </div>
                   </div>
-
-                  {/* Votes */}
-                  <div className="border-border-card bg-secondary-bg rounded-xl border">
-                    <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
-                      <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                        <Icon
-                          icon="material-symbols:how-to-vote-outline-rounded"
-                          className="text-secondary-text h-4 w-4"
-                          inline
-                        />
-                        Votes
-                      </h2>
-                      <div className="flex items-center gap-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              onClick={() => handleVote("upvote")}
-                              disabled={voteLoading || !!voteRateLimit || !!ban}
-                              className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              <Icon
-                                icon={
-                                  userVote === "upvote"
-                                    ? "material-symbols:thumb-up-rounded"
-                                    : "material-symbols:thumb-up-outline-rounded"
-                                }
-                                className="text-button-success h-4 w-4"
-                                inline
-                              />
-                              <span className="text-button-success font-bold">
-                                {voteCounts.up}
-                              </span>
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {userVote === "upvote" ? "Remove upvote" : "Upvote"}
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              onClick={() => handleVote("downvote")}
-                              disabled={voteLoading || !!voteRateLimit || !!ban}
-                              className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              <Icon
-                                icon={
-                                  userVote === "downvote"
-                                    ? "material-symbols:thumb-down-rounded"
-                                    : "material-symbols:thumb-down-outline-rounded"
-                                }
-                                className="text-button-danger h-4 w-4"
-                                inline
-                              />
-                              <span className="text-button-danger font-bold">
-                                {voteCounts.down}
-                              </span>
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {userVote === "downvote"
-                              ? "Remove downvote"
-                              : "Downvote"}
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </div>
-                    {voteRateLimit && voteRateLimitSeconds > 0 && (
-                      <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
-                        <Icon
-                          icon="material-symbols:hourglass-empty-rounded"
-                          className="h-3.5 w-3.5 shrink-0"
-                          inline
-                        />
-                        Too fast — wait{" "}
-                        {voteRateLimitSeconds >= 60
-                          ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
-                          : `${voteRateLimitSeconds}s`}
-                      </div>
-                    )}
-                    {(suggestion.votes.upvotes.length > 0 ||
-                      suggestion.votes.downvotes.length > 0) && (
-                      <div className="p-5">
-                        <Tabs defaultValue="upvotes">
-                          <TabsList fullWidth className="mb-4">
-                            <TabsTrigger value="upvotes" fullWidth>
-                              <span className="flex items-center gap-1.5">
-                                <Icon
-                                  icon="material-symbols:thumb-up-outline-rounded"
-                                  className="text-button-success h-3.5 w-3.5"
-                                  inline
-                                />
-                                Upvotes ({suggestion.votes.upvotes.length})
-                              </span>
-                            </TabsTrigger>
-                            <TabsTrigger value="downvotes" fullWidth>
-                              <span className="flex items-center gap-1.5">
-                                <Icon
-                                  icon="material-symbols:thumb-down-outline-rounded"
-                                  className="text-button-danger h-3.5 w-3.5"
-                                  inline
-                                />
-                                Downvotes ({suggestion.votes.downvotes.length})
-                              </span>
-                            </TabsTrigger>
-                          </TabsList>
-                          <TabsContent value="upvotes">
-                            {suggestion.votes.upvotes.length === 0 ? (
-                              <p className="text-secondary-text py-4 text-center text-sm">
-                                No upvotes yet.
-                              </p>
-                            ) : (
-                              <div className="space-y-2">
-                                {suggestion.votes.upvotes.map((v) => (
-                                  <VoterCard
-                                    key={v.user.id + v.created_at}
-                                    v={v}
-                                  />
-                                ))}
-                              </div>
-                            )}
-                          </TabsContent>
-                          <TabsContent value="downvotes">
-                            {suggestion.votes.downvotes.length === 0 ? (
-                              <p className="text-secondary-text py-4 text-center text-sm">
-                                No downvotes yet.
-                              </p>
-                            ) : (
-                              <div className="space-y-2">
-                                {suggestion.votes.downvotes.map((v) => (
-                                  <VoterCard
-                                    key={v.user.id + v.created_at}
-                                    v={v}
-                                  />
-                                ))}
-                              </div>
-                            )}
-                          </TabsContent>
-                        </Tabs>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Suggester Stats */}
-                  {suggesterStats && (
-                    <div className="border-border-card bg-secondary-bg rounded-xl border">
-                      <div className="border-border-card border-b px-5 py-3.5">
-                        <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                          <Icon
-                            icon="material-symbols:bar-chart-4-bars-rounded"
-                            className="text-secondary-text h-4 w-4"
-                            inline
-                          />
-                          Suggester Stats
-                        </h2>
-                      </div>
-                      <div className="grid grid-cols-2 gap-px p-3">
-                        <div className="p-2">
-                          <p className="text-secondary-text mb-0.5 text-xs">
-                            Submitted
-                          </p>
-                          <p className="text-primary-text text-base font-bold">
-                            {suggesterStats.total_submitted}
-                          </p>
-                        </div>
-                        <div className="p-2">
-                          <p className="text-secondary-text mb-0.5 text-xs">
-                            Acceptance Rate
-                          </p>
-                          <p
-                            className={`text-base font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
-                          >
-                            {suggesterStats.acceptance_rate.toFixed(0)}%
-                          </p>
-                        </div>
-                        <div className="p-2">
-                          <p className="text-secondary-text mb-0.5 text-xs">
-                            Accepted
-                          </p>
-                          <p className="text-button-success text-base font-bold">
-                            {suggesterStats.total_accepted}
-                          </p>
-                        </div>
-                        <div className="p-2">
-                          <p className="text-secondary-text mb-0.5 text-xs">
-                            Rejected
-                          </p>
-                          <p className="text-button-danger text-base font-bold">
-                            {suggesterStats.total_rejected}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    </main>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
