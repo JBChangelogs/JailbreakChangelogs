@@ -641,7 +641,7 @@ export default function ItemCard({
               </span>
             </div>
 
-            <div className="border-border-card bg-tertiary-bg grid grid-cols-2 rounded-lg border">
+            <div className="border-border-card bg-tertiary-bg grid grid-cols-1 rounded-lg border md:grid-cols-2">
               <div className="flex items-center justify-between p-1 sm:p-2.5">
                 <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                   Demand
@@ -652,7 +652,7 @@ export default function ItemCard({
                   {demandLabel}
                 </span>
               </div>
-              <div className="border-border-card flex items-center justify-between border-l p-1 sm:p-2.5">
+              <div className="border-border-card flex items-center justify-between border-t p-1 sm:p-2.5 md:border-t-0 md:border-l">
                 <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                   Duped
                 </span>
