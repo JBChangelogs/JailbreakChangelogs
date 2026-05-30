@@ -140,11 +140,11 @@ export default async function RootLayout({
             <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
               <div className="mx-auto max-w-md p-8 text-center">
                 <Image
-                  src="/logos/JBCL_Short_Transparent.webp"
+                  src="/logos/JBCL_Long_Transparent.webp"
                   alt="Jailbreak Changelogs"
-                  width={96}
-                  height={96}
-                  className="mx-auto mb-6 h-24 w-24"
+                  width={213}
+                  height={48}
+                  className="mx-auto mb-6 h-24 w-auto"
                 />
                 <h1 className="text-primary-text mb-4 text-2xl font-bold">
                   JavaScript Required
@@ -284,10 +284,10 @@ export default async function RootLayout({
               <Image
                 src="/logos/JBCL_Long_Transparent.webp"
                 alt="Jailbreak Changelogs"
-                width={96}
-                height={96}
+                width={213}
+                height={48}
                 loading="eager"
-                className="mx-auto mb-6 h-24 w-24"
+                className="mx-auto mb-6 h-24 w-auto"
               />
               <h1 className="text-primary-text mb-4 text-2xl font-bold">
                 JavaScript Required
