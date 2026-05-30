@@ -999,24 +999,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       user={replyUser}
                                       className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
                                     />
-                                    {replyUser?.premiumtype >= 1 &&
-                                      replyUser?.premiumtype <= 3 && (
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Image
-                                              src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${replyUser.premiumtype}.svg`}
-                                              alt={`Supporter Type ${replyUser.premiumtype}`}
-                                              width={14}
-                                              height={14}
-                                              className="shrink-0 cursor-pointer"
-                                            />
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            Supporter Type{" "}
-                                            {replyUser.premiumtype}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      )}
                                     {replyToTargetName && replyToTarget && (
                                       <>
                                         <Icon

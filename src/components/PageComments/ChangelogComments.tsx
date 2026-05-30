@@ -54,6 +54,14 @@ function CommentsLayout() {
     closeModal,
   } = useCommentsContext();
 
+  const reportingComment = reportingCommentId
+    ? (filteredComments.find((c) => c.id === reportingCommentId) ??
+      filteredComments
+        .flatMap((c) => c.replies ?? [])
+        .find((r) => r.id === reportingCommentId) ??
+      null)
+    : null;
+
   return (
     <div className="space-y-2 sm:space-y-3">
       <div
@@ -170,16 +178,10 @@ function CommentsLayout() {
         onSubmit={handleReportSubmit}
         reportReason={reportReason}
         setReportReason={setReportReason}
-        commentContent={
-          reportingCommentId
-            ? filteredComments.find((c) => c.id === reportingCommentId)
-                ?.content || ""
-            : ""
-        }
+        commentContent={reportingComment?.content || ""}
         commentOwner={(() => {
-          if (!reportingCommentId) return "";
-          const rc = filteredComments.find((c) => c.id === reportingCommentId);
-          const ruid = rc?.user_id || "";
+          const ruid = reportingComment?.user_id || "";
+          if (!ruid) return "";
           const hidden =
             !userData[ruid]?.settings?.show_recent_comments &&
             currentUserId !== ruid;
@@ -194,17 +196,10 @@ function CommentsLayout() {
           return userData[ruid]?.username || "Unknown User";
         })()}
         commentId={reportingCommentId || 0}
-        commentUserId={
-          reportingCommentId
-            ? filteredComments.find((c) => c.id === reportingCommentId)
-                ?.user_id || ""
-            : ""
-        }
+        commentUserId={reportingComment?.user_id || ""}
         commentAvatar={(() => {
-          if (!reportingCommentId) return null;
-          const ruid =
-            filteredComments.find((c) => c.id === reportingCommentId)
-              ?.user_id || "";
+          const ruid = reportingComment?.user_id || "";
+          if (!ruid) return null;
           if (
             (type === "tradev2" || type === "inventory") &&
             userData[ruid]?.roblox_avatar
@@ -213,35 +208,13 @@ function CommentsLayout() {
           return userData[ruid]?.avatar ?? null;
         })()}
         commentCustomAvatar={
-          reportingCommentId
-            ? (userData[
-                filteredComments.find((c) => c.id === reportingCommentId)
-                  ?.user_id || ""
-              ]?.custom_avatar ?? null)
-            : null
+          userData[reportingComment?.user_id || ""]?.custom_avatar ?? null
         }
-        commentDate={
-          reportingCommentId
-            ? filteredComments.find((c) => c.id === reportingCommentId)?.date ||
-              ""
-            : ""
-        }
+        commentDate={reportingComment?.date || ""}
         commentPremiumType={
-          reportingCommentId
-            ? userData[
-                filteredComments.find((c) => c.id === reportingCommentId)
-                  ?.user_id || ""
-              ]?.premiumtype
-            : undefined
+          userData[reportingComment?.user_id || ""]?.premiumtype
         }
-        commentSettings={
-          reportingCommentId
-            ? userData[
-                filteredComments.find((c) => c.id === reportingCommentId)
-                  ?.user_id || ""
-              ]?.settings
-            : undefined
-        }
+        commentSettings={userData[reportingComment?.user_id || ""]?.settings}
       />
 
       {/* Supporter Modal */}

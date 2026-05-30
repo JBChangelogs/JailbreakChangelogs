@@ -5,16 +5,20 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 const log = createLogger("UI");
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
-import { safeGetJSON, safeSetJSON } from "@/utils/storage/safeStorage";
-import { UserData } from "@/types/auth";
+
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import Image from "next/image";
 
 interface RobloxConnectionProps {
   userData: {
     roblox_id?: string;
     roblox_username?: string;
+    roblox_display_name?: string;
+    roblox_avatar?: string;
+    premiumtype?: number;
   };
 }
 
@@ -35,16 +39,15 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         throw new Error("Missing public API URL configuration");
       }
 
-      const response = await fetch(
-        `${PUBLIC_API_URL}/oauth/roblox/disconnect`,
-        {
-          method: "DELETE",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        "/oauth/roblox/disconnect",
       );
+      const response = await fetch(url, {
+        method: "DELETE",
+        credentials: "include",
+        headers: { ...headers, "Content-Type": "application/json" },
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -63,25 +66,9 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         );
       }
 
-      // Update local storage
-      const storedUser = safeGetJSON<UserData>("user", null);
-      if (storedUser) {
-        const updatedUser = { ...storedUser };
-        // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (updatedUser as any).roblox_id;
-        // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (updatedUser as any).roblox_username;
-        safeSetJSON("user", updatedUser);
-
-        // Dispatch authStateChanged event to notify other components
-        window.dispatchEvent(
-          new CustomEvent("authStateChanged", { detail: updatedUser }),
-        );
-      }
-
-      toast.success("Successfully disconnected Roblox account", {
-        duration: 3000,
-      });
+      toast.success(
+        "Roblox account disconnected. Changes will be applied shortly.",
+      );
 
       handleClose();
     } catch (error) {
@@ -100,28 +87,46 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         <h3 className="text-primary-text mb-2 text-lg font-bold">
           Roblox Connection
         </h3>
-        <p className="text-primary-text">
-          {userData.roblox_username ? (
-            <>
-              Currently linked to{" "}
-              {userData.roblox_id ? (
-                <a
-                  href={`https://www.roblox.com/users/${userData.roblox_id}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"
-                >
-                  <Icon icon="akar-icons:link-out" className="h-4 w-4" />
-                  {userData.roblox_username}
-                </a>
-              ) : (
-                <span className="font-bold">{userData.roblox_username}</span>
+        {userData.roblox_username ? (
+          <a
+            href={
+              userData.roblox_id
+                ? `https://www.roblox.com/users/${userData.roblox_id}/profile`
+                : undefined
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border-border-card bg-tertiary-bg/50 hover:bg-tertiary-bg mt-3 flex items-center gap-3 rounded-lg border p-3 transition-colors"
+          >
+            {userData.roblox_avatar && (
+              <Image
+                src={userData.roblox_avatar}
+                alt={userData.roblox_username}
+                width={48}
+                height={48}
+                className={`bg-quaternary-bg ${userData.premiumtype === 3 ? "rounded-sm" : "rounded-full"}`}
+              />
+            )}
+            <div className="min-w-0 flex-1">
+              {userData.roblox_display_name && (
+                <p className="text-primary-text truncate font-semibold">
+                  {userData.roblox_display_name}
+                </p>
               )}
-            </>
-          ) : (
-            "Not connected"
-          )}
-        </p>
+              <p className="text-secondary-text truncate text-sm">
+                @{userData.roblox_username}
+              </p>
+            </div>
+            {userData.roblox_id && (
+              <Icon
+                icon="akar-icons:link-out"
+                className="text-link h-4 w-4 shrink-0"
+              />
+            )}
+          </a>
+        ) : (
+          <p className="text-secondary-text text-sm">Not connected</p>
+        )}
       </div>
 
       {userData.roblox_username ? (
@@ -162,39 +167,9 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         confirmVariant="destructive"
       >
         <>
-          <p className="text-primary-text mb-6">
+          <p className="text-primary-text">
             Are you sure you want to disconnect your Roblox account?
           </p>
-
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Icon
-                icon="heroicons:exclamation-triangle"
-                className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
-              />
-              <p className="text-primary-text text-sm">
-                Remove your Roblox profile from your account
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <Icon
-                icon="heroicons:exclamation-triangle"
-                className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
-              />
-              <p className="text-primary-text text-sm">
-                Disable trading features and delete all existing trade ads
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <Icon
-                icon="heroicons:exclamation-triangle"
-                className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
-              />
-              <p className="text-primary-text text-sm">
-                Require re-authentication to use Trading features again
-              </p>
-            </div>
-          </div>
 
           {error && (
             <div className="mt-4 rounded-md border border-red-500/20 bg-red-500/10 p-3">

@@ -1,66 +1,35 @@
 import { createLogger } from "@/services/logger";
 import { trackEvent } from "@/utils/analytics/rybbit";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { deleteAccount } from "@/services/settingsService";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const log = createLogger("UI");
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 export const DeleteAccount = () => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showFinalWarning, setShowFinalWarning] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const { logout } = useAuthContext();
-
-  useEffect(() => {
-    if (open && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [open, timeLeft]);
-
-  const handleOpen = () => {
-    setOpen(true);
-    setTimeLeft(10);
-    setShowFinalWarning(false);
-  };
 
   const handleClose = () => {
     setOpen(false);
     setError(null);
-    setShowFinalWarning(false);
-    setTimeLeft(10);
   };
 
   const handleDelete = async () => {
-    if (!showFinalWarning) {
-      setShowFinalWarning(true);
-      return;
-    }
-
+    setIsDeleting(true);
     try {
       trackEvent("Delete Account");
       await deleteAccount();
       await logout();
 
-      toast.success("Account successfully deleted", {
-        duration: 3000,
-      });
+      toast.success("Account successfully deleted", { duration: 3000 });
 
       setTimeout(() => {
         router.push("/");
@@ -70,6 +39,7 @@ export const DeleteAccount = () => {
       setError(
         error instanceof Error ? error.message : "Failed to delete account",
       );
+      setIsDeleting(false);
     }
   };
 
@@ -86,67 +56,32 @@ export const DeleteAccount = () => {
 
       <Button
         variant="destructive"
-        onClick={handleOpen}
+        onClick={() => setOpen(true)}
         className="font-semibold"
       >
         Delete Account
       </Button>
 
-      <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
-        <DialogContent showClose>
-          <DialogHeader>
-            <DialogTitle>Delete Account</DialogTitle>
-          </DialogHeader>
-
-          <div className="py-4">
-            {!showFinalWarning ? (
-              <>
-                <p className="text-primary-text mb-6">
-                  Are you sure you want to delete your account? This action is
-                  permanent and cannot be undone.
-                </p>
-
-                {error && (
-                  <div className="mt-2 rounded bg-red-100 p-2 text-red-800">
-                    {error}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="py-2 text-center">
-                <Icon
-                  icon="heroicons:exclamation-triangle"
-                  className="mx-auto mb-2 h-12 w-12"
-                  style={{ color: "var(--color-button-danger)" }}
-                />
-                <h6 className="text-button-danger mb-2 text-lg font-bold">
-                  Final Warning
-                </h6>
-                <p className="text-primary-text">
-                  This is your last chance to cancel. Once you click delete,
-                  your account will be permanently removed.
-                </p>
-              </div>
-            )}
+      <ConfirmDialog
+        isOpen={open}
+        onClose={handleClose}
+        onConfirm={handleDelete}
+        title="Delete Account"
+        confirmText={isDeleting ? "Deleting..." : "Delete Account"}
+        confirmVariant="destructive"
+        confirmDisabled={isDeleting}
+        closeOnConfirm={false}
+      >
+        <p className="text-primary-text">
+          Are you sure you want to delete your account? This action is permanent
+          and cannot be undone.
+        </p>
+        {error && (
+          <div className="mt-3 rounded-md border border-red-500/20 bg-red-500/10 p-3">
+            <p className="text-sm text-red-400">{error}</p>
           </div>
-
-          <DialogFooter>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleDelete}
-              disabled={!showFinalWarning && timeLeft > 0}
-              className="w-full sm:w-auto"
-            >
-              {!showFinalWarning
-                ? timeLeft > 0
-                  ? `Please wait ${timeLeft}s`
-                  : "Delete Account"
-                : "Confirm Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        )}
+      </ConfirmDialog>
     </div>
   );
 };

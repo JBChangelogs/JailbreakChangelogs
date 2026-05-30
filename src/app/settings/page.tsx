@@ -506,15 +506,6 @@ export default function SettingsPage() {
     try {
       await revertSupporterLevel(level);
 
-      const updatedUser: UserData = {
-        ...userData,
-        premiumtype: level,
-      };
-      safeSetJSON("user", updatedUser);
-      window.dispatchEvent(
-        new CustomEvent("authStateChanged", { detail: updatedUser }),
-      );
-
       setSupporterHistory((prev) => {
         const nextEntry = {
           level,
@@ -525,7 +516,7 @@ export default function SettingsPage() {
         return [...withoutSameLevel, nextEntry];
       });
 
-      toast.success("Supporter tier updated.");
+      toast.success("Supporter tier updated. Changes will be applied shortly.");
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -545,16 +536,7 @@ export default function SettingsPage() {
     try {
       await revertSupporterLevel(0);
 
-      const updatedUser: UserData = {
-        ...userData,
-        premiumtype: 0,
-      };
-      safeSetJSON("user", updatedUser);
-      window.dispatchEvent(
-        new CustomEvent("authStateChanged", { detail: updatedUser }),
-      );
-
-      toast.success("Supporter removed.");
+      toast.success("Supporter removed. Changes will be applied shortly.");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to remove supporter",
@@ -1309,13 +1291,12 @@ export default function SettingsPage() {
                       <CustomButton
                         type="button"
                         size="sm"
-                        variant="destructive"
                         onClick={handleRemoveSupporter}
                         disabled={revertingSupporterLevel !== null}
                       >
                         {revertingSupporterLevel === 0
-                          ? "Removing..."
-                          : "Remove"}
+                          ? "Downgrading..."
+                          : "Downgrade"}
                       </CustomButton>
                     </div>
                   </div>
