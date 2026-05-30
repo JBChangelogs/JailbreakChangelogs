@@ -1227,12 +1227,13 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       onClick={() =>
                                         handleReportClick(reply.id)
                                       }
+                                      className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
                                     >
                                       <Icon
                                         icon="heroicons-outline:flag"
                                         className="mr-2 h-4 w-4"
                                       />
-                                      Report
+                                      Report Comment
                                     </DropdownMenuItem>
                                   )}
                                 </DropdownMenuContent>

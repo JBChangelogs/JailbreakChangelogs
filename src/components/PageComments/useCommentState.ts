@@ -23,6 +23,7 @@ import {
   formatErrorTitle,
   handleCommentApiError,
 } from "./commentUtils";
+import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 import {
   prepareEmojiShortcodeContentForApi,
   prepareEmojiShortcodeDisplayContent,
@@ -78,7 +79,15 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const [expandedReplies, setExpandedReplies] = useState<Set<number>>(
     new Set(),
   );
-  const [sortOrder, setSortOrder] = useState("newest");
+  const sortPrefKey = `comments_sort_${type}`;
+  const [sortOrder, setSortOrder] = useState(
+    () =>
+      (typeof window !== "undefined"
+        ? (localStorage.getItem(`comments_sort_${type}`) ?? undefined)
+        : undefined) ??
+      (getCachedPreference(`comments_sort_${type}`) as string | undefined) ??
+      "newest",
+  );
   const [availableSorts, setAvailableSorts] = useState<string[]>([]);
 
   // --- UI State (Modals & Loading) ---
@@ -481,6 +490,32 @@ export function useCommentState(props: ChangelogCommentsProps) {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const handlePreference = (e: Event) => {
+      const { key, value } = (
+        e as CustomEvent<{ key: string; value?: unknown }>
+      ).detail;
+      if (key === sortPrefKey && typeof value === "string") {
+        localStorage.setItem(sortPrefKey, value);
+        setSortOrder(value);
+      }
+    };
+    const handlePreferences = (e: Event) => {
+      const prefs = (e as CustomEvent<Record<string, unknown>>).detail;
+      const incoming = prefs?.[sortPrefKey];
+      if (typeof incoming === "string") {
+        localStorage.setItem(sortPrefKey, incoming);
+        setSortOrder(incoming);
+      }
+    };
+    window.addEventListener("realtimePreference", handlePreference);
+    window.addEventListener("realtimePreferences", handlePreferences);
+    return () => {
+      window.removeEventListener("realtimePreference", handlePreference);
+      window.removeEventListener("realtimePreferences", handlePreferences);
+    };
+  }, [sortPrefKey]);
 
   useEffect(() => {
     fetch(`${PUBLIC_API_URL}/emojis/string`, {
@@ -971,9 +1006,15 @@ export function useCommentState(props: ChangelogCommentsProps) {
   }, [replyingToId]);
 
   const handleSortChange = (order: string) => {
+    localStorage.setItem(sortPrefKey, order);
     setSortOrder(order);
     setPage(1);
     void refreshCommentsFromServer(false, 1, order);
+    window.dispatchEvent(
+      new CustomEvent("sendRealtimePreference", {
+        detail: { key: sortPrefKey, value: order },
+      }),
+    );
   };
 
   const toggleReplies = (commentId: number) => {
