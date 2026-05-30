@@ -43,12 +43,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
     },
     {
-      url: `${BASE_URL}/redeem`,
-      lastModified: new Date().toISOString(),
-      priority: 0.7,
-      changeFrequency: "daily" as const,
-    },
-    {
       url: `${BASE_URL}/supporting`,
       lastModified: new Date().toISOString(),
       priority: 0.6,

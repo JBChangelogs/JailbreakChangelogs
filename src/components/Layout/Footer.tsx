@@ -66,12 +66,6 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                 FAQ
               </Link>
               <Link
-                href="/redeem"
-                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
-              >
-                Redeem Code
-              </Link>
-              <Link
                 href="/bot"
                 className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
@@ -259,7 +253,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                 aria-label="Support Us"
               >
                 <Icon
-                  icon="simple-icons:kofi"
+                  icon="heroicons:heart-solid"
                   className="text-primary-text h-6 w-6"
                   inline={true}
                 />

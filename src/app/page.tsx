@@ -572,8 +572,8 @@ export default async function Home() {
                   a lot. Supporters get perks on both the website and our
                   Discord. If you can&apos;t support directly, whitelisting us
                   in your ad blocker also helps, and that ad revenue goes back
-                  into improving our services. We accept Ko-fi donations, crypto
-                  donations, and Robux donations.
+                  into improving our services. We accept Discord supporter
+                  purchases, crypto donations, and Robux donations.
                 </p>
                 <p className="text-card-paragraph mt-2 text-sm italic">
                   ~{" "}

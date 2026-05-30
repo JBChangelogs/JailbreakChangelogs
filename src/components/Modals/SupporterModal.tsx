@@ -38,7 +38,6 @@ const SUPPORTER_TIERS = [
   {
     name: "Supporter I",
     price: "75R$",
-    priceAlt: "or $1 on Ko-fi",
     features: ["Post Comments up to 400 characters"],
     color: "border-[#CD7F32]",
     tierNumber: 1,
@@ -46,7 +45,6 @@ const SUPPORTER_TIERS = [
   {
     name: "Supporter II",
     price: "200R$",
-    priceAlt: "or $3 on Ko-fi",
     features: [
       "Post Comments up to 800 characters",
       `Upload and Use Custom Avatars (${getAllowedFileExtensions()})`,
@@ -59,7 +57,6 @@ const SUPPORTER_TIERS = [
   {
     name: "Supporter III",
     price: "400R$",
-    priceAlt: "or $5 on Ko-fi",
     features: [
       "Post Comments up to 2,000 characters",
       "Square Avatar Border",

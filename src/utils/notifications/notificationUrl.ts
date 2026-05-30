@@ -92,14 +92,5 @@ export function getNotificationActionLabel(
     return "View";
   }
 
-  if (urlInfo.isJailbreakChangelogs) {
-    return urlInfo.relativePath.startsWith("/redeem") ? "Redeem" : "View";
-  }
-
-  try {
-    const url = new URL(urlInfo.validatedExternalHref);
-    return url.pathname === "/redeem" ? "Redeem" : "View";
-  } catch {
-    return "View";
-  }
+  return "View";
 }

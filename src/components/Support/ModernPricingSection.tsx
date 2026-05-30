@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { toast } from "sonner";
 import { getAllowedFileExtensions } from "@/config/settings";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Icon } from "@/components/ui/IconWrapper";
-import ImageModal from "@/components/ui/ImageModal";
+import ChangelogMediaEmbed from "@/components/Changelogs/ChangelogMediaEmbed";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -17,6 +16,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { fetchSupporterGiftLevels } from "@/services/settingsService";
+import { SupporterLevel } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -104,6 +105,8 @@ export default function ModernPricingSection() {
   const BADGE_BASE_URL =
     "https://assets.jailbreakchangelogs.com/assets/website_icons";
   const [highlightedTier, setHighlightedTier] = useState<number | null>(null);
+  const [discordLevels, setDiscordLevels] = useState<SupporterLevel[]>([]);
+  const [discordLevelsLoading, setDiscordLevelsLoading] = useState(false);
   const [tabParam, setTabParam] = useQueryState("tab", {
     defaultValue: "",
     history: "push",
@@ -119,16 +122,15 @@ export default function ModernPricingSection() {
   const isYearly = tabParam === "roblox";
   const isOwner = user?.flags?.some((f) => f.flag === "is_owner");
 
-  // Dynamic image paths based on theme
-  const kofiImagePath =
+  const discordImagePath =
     resolvedTheme === "dark"
-      ? "/support/kofi/dark/kofi-dark.png"
-      : "/support/kofi/kofi-light.png";
+      ? "/support/discord/light-discord.png"
+      : "/support/discord/dark-discord.png";
 
   const robloxImagePath =
     resolvedTheme === "dark"
-      ? "/support/roblox/dark/roblox-dark.png"
-      : "/support/roblox/roblox-light.png";
+      ? "/support/roblox/light-roblox.png"
+      : "/support/roblox/dark-roblox.png";
 
   const copyToClipboard = async (address: string, cryptoType: string) => {
     try {
@@ -142,7 +144,7 @@ export default function ModernPricingSection() {
 
   const copyTierLink = async (tierNumber: number, tierName: string) => {
     const url = new URL(window.location.href);
-    const paymentMethodLabel = isYearly ? "Roblox" : "Ko-fi";
+    const paymentMethodLabel = isYearly ? "Roblox" : "Discord";
     if (isYearly) {
       url.searchParams.set("tab", "roblox");
     } else {
@@ -160,6 +162,17 @@ export default function ModernPricingSection() {
       toast.error(`Failed to copy ${tierName} link.`);
     }
   };
+
+  useEffect(() => {
+    if (isYearly || discordLevels.length > 0 || discordLevelsLoading) return;
+    setDiscordLevelsLoading(true);
+    fetchSupporterGiftLevels()
+      .then((levels) => setDiscordLevels(levels))
+      .catch((err) => log.error("Failed to fetch discord levels", err))
+      .finally(() => setDiscordLevelsLoading(false));
+  }, [isYearly, discordLevels.length, discordLevelsLoading]);
+
+  const discordSelfLevels = discordLevels.filter((l) => !l.is_gift);
 
   useEffect(() => {
     if (tierParam) {
@@ -225,15 +238,15 @@ export default function ModernPricingSection() {
         </div>
 
         <Tabs
-          value={isYearly ? "roblox" : "kofi"}
+          value={isYearly ? "roblox" : "discord"}
           onValueChange={(value) => {
             void setTabParam(value === "roblox" ? "roblox" : null);
           }}
           className="mt-6 w-full"
         >
           <TabsList fullWidth className="w-full">
-            <TabsTrigger value="kofi" fullWidth>
-              Ko-fi
+            <TabsTrigger value="discord" fullWidth>
+              Discord
             </TabsTrigger>
             <TabsTrigger value="roblox" fullWidth>
               Roblox
@@ -305,20 +318,7 @@ export default function ModernPricingSection() {
               <h4 className="text-primary-text mt-2 text-3xl font-semibold">
                 {tier.name === "Free" ? (
                   <div className="flex items-center gap-2">
-                    {isYearly ? (
-                      <>
-                        <Image
-                          src="/assets/icons/Robux_Icon.webp"
-                          alt="Robux"
-                          width={24}
-                          height={24}
-                          className="h-6 w-6 shrink-0 object-contain"
-                        />
-                        <span>0R$</span>
-                      </>
-                    ) : (
-                      <span>$0</span>
-                    )}
+                    <span>0</span>
                     <span className="text-secondary-text text-base font-normal">
                       {" "}
                       {isYearly ? "Robux" : "USD"}
@@ -326,14 +326,7 @@ export default function ModernPricingSection() {
                   </div>
                 ) : isYearly && tier.priceAlt ? (
                   <div className="flex items-center gap-2">
-                    <Image
-                      src="/assets/icons/Robux_Icon.webp"
-                      alt="Robux"
-                      width={24}
-                      height={24}
-                      className="h-6 w-6 shrink-0 object-contain"
-                    />
-                    <span>{tier.priceAlt.split(" ")[1]}</span>
+                    <span>{tier.priceAlt.split(" ")[1].replace("R$", "")}</span>
                     <span className="text-secondary-text text-base font-normal">
                       {" "}
                       Robux
@@ -341,7 +334,8 @@ export default function ModernPricingSection() {
                   </div>
                 ) : (
                   <>
-                    {tier.price}
+                    {discordSelfLevels.find((l) => l.level === tier.tierNumber)
+                      ?.price_str ?? "—"}
                     <span className="text-secondary-text text-base font-normal">
                       {" "}
                       USD
@@ -383,19 +377,33 @@ export default function ModernPricingSection() {
               {tier.name !== "Free" ? (
                 <Button
                   onClick={() => {
-                    const targetElement = document.getElementById(
-                      "important-information",
-                    );
-                    if (targetElement) {
-                      targetElement.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                      });
+                    if (isYearly) {
+                      const targetElement = document.getElementById(
+                        "important-information",
+                      );
+                      if (targetElement) {
+                        targetElement.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      }
+                    } else {
+                      const level = discordSelfLevels.find(
+                        (l) => l.level === tier.tierNumber,
+                      );
+                      if (level?.url) {
+                        window.open(level.url, "_blank", "noopener,noreferrer");
+                      }
                     }
                   }}
+                  disabled={!isYearly && discordLevelsLoading}
                   className="mt-10 w-full tracking-wide capitalize"
                 >
-                  {isYearly ? "Support with Robux" : "Support with Ko-fi"}
+                  {isYearly
+                    ? "Support with Robux"
+                    : discordLevelsLoading
+                      ? "Loading..."
+                      : "Support with Discord"}
                 </Button>
               ) : (
                 <div className="border-border-card bg-tertiary-bg text-primary-text mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
@@ -422,49 +430,28 @@ export default function ModernPricingSection() {
               </p>
               <p className="text-secondary-text mt-1 text-sm">
                 All supporter purchases are one-time and non-refundable. Once
-                you redeem your code, you keep the perks forever.
+                purchased, you keep the perks forever.
               </p>
             </div>
 
             <div className="bg-primary-bg/60 border-border-card rounded-lg border p-4">
               <p className="text-primary-text text-sm font-semibold">
-                Ko-fi Supporters
+                Discord Purchases
               </p>
               <p className="text-secondary-text mt-1 text-sm">
-                Buying a tier with{" "}
+                Supporter tiers are purchased directly through Discord. Click{" "}
+                <span className="text-primary-text font-semibold">
+                  &quot;Support with Discord&quot;
+                </span>{" "}
+                on any tier above to be taken to the purchase page. Need help?
+                Join our{" "}
                 <a
-                  href="https://ko-fi.com/jbchangelogs"
+                  href="https://discord.jailbreakchangelogs.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-link hover:text-link-hover font-semibold underline transition-colors"
                 >
-                  Ko-fi
-                </a>
-                ? Link your Discord account in{" "}
-                <a
-                  href="https://ko-fi.com/Discord/Settings"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
-                >
-                  Ko-fi Discord Settings
-                </a>{" "}
-                for automatic code delivery.
-              </p>
-              <p className="text-secondary-text mt-2 text-sm">
-                Prefer not to link accounts? Put your Discord user ID in
-                parentheses in your thank-you message, for example{" "}
-                <code className="bg-surface-bg rounded px-1">
-                  Hello there! (1019539798383398946)
-                </code>
-                .{" "}
-                <a
-                  href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
-                >
-                  Need help locating your Discord ID?
+                  Discord server
                 </a>
                 .
               </p>
@@ -475,13 +462,8 @@ export default function ModernPricingSection() {
                 After You Purchase
               </p>
               <p className="text-secondary-text mt-1 text-sm">
-                <Link
-                  href="/redeem"
-                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
-                >
-                  Redeem your code here
-                </Link>{" "}
-                to activate your supporter tier.
+                Your supporter tier is applied automatically after purchase — no
+                code or extra steps needed.
               </p>
             </div>
 
@@ -516,22 +498,21 @@ export default function ModernPricingSection() {
         <div className="support-methods-section mt-12 grid gap-8 md:grid-cols-3">
           <div className="border-border-card bg-secondary-bg flex flex-col items-center justify-center rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
-              Ko-fi Donations
+              Discord Purchases
             </h3>
             <p className="text-secondary-text mb-4 text-sm">
-              Pay with card/PayPal on Ko-fi for USD supporter purchases.
+              Pay with USD through Discord for supporter perks.
             </p>
             <div className="flex flex-1 items-center justify-center">
-              <ImageModal
-                src={kofiImagePath}
-                alt="Ko-fi Support QR Code"
-                width={240}
-                height={240}
-                className="mx-auto h-60 w-60"
+              <ChangelogMediaEmbed
+                type="image"
+                url={discordImagePath}
+                showUrl={false}
+                wrapperClassName="mx-auto h-60 w-60"
               />
             </div>
             <a
-              href="https://ko-fi.com/jailbreakchangelogs"
+              href="https://discord.com/discovery/applications/1281308669299920907/store"
               target="_blank"
               rel="noopener noreferrer"
               className="text-link hover:text-link-hover mt-4 inline-block text-sm underline"
@@ -548,12 +529,11 @@ export default function ModernPricingSection() {
               Pay with Robux through Roblox for supporter perks.
             </p>
             <div className="flex flex-1 items-center justify-center">
-              <ImageModal
-                src={robloxImagePath}
-                alt="Roblox Support QR Code"
-                width={240}
-                height={240}
-                className="mx-auto h-60 w-60"
+              <ChangelogMediaEmbed
+                type="image"
+                url={robloxImagePath}
+                showUrl={false}
+                wrapperClassName="mx-auto h-60 w-60"
               />
             </div>
             <a

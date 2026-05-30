@@ -92,7 +92,6 @@ const AdBlockPrompt = () => {
     canHideAds ||
     isDismissed ||
     pathname === "/supporting" ||
-    pathname === "/redeem" ||
     pathname === "/access-denied"
   ) {
     return null;

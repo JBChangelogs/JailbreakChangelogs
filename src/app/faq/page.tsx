@@ -140,7 +140,7 @@ const faqs: FAQ[] = [
   },
   {
     category: "website",
-    question: "Can I support the website in other ways than Ko-fi?",
+    question: "How can I support the website?",
     answer:
       'Yes! Visit our <a href="/supporting" class="text-link hover:text-link-hover underline">Supporting</a> page where you can contribute either through real USD donations or via Robux. The page also shows the different supporter tiers and the perks you\'ll receive for each. Full instructions for both payment options are included.',
   },

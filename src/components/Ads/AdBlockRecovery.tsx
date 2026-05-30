@@ -11,12 +11,7 @@ const AdBlockRecovery = () => {
   const tier = user?.premiumtype ?? 0;
   const canHideAds = canHideAdsForPremiumType(tier);
 
-  if (
-    isLoading ||
-    canHideAds ||
-    pathname === "/supporting" ||
-    pathname === "/redeem"
-  ) {
+  if (isLoading || canHideAds || pathname === "/supporting") {
     return null;
   }
 

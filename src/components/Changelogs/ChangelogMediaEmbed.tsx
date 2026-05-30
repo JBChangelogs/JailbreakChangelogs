@@ -1,26 +1,38 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 
 interface ChangelogMediaEmbedProps {
   type: "image" | "video" | "audio";
   url: string;
+  showUrl?: boolean;
+  wrapperClassName?: string;
 }
 
 const ChangelogMediaEmbed: React.FC<ChangelogMediaEmbedProps> = ({
   type,
   url,
+  showUrl = true,
+  wrapperClassName,
 }) => {
   const [lightbox, setLightbox] = useState(false);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) =>
+      e.key === "Escape" && setLightbox(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox]);
 
   switch (type) {
     case "image":
       return (
         <>
           <div
-            className="group relative my-4 w-full max-w-2xl cursor-zoom-in"
+            className={`group relative cursor-zoom-in ${wrapperClassName ?? "my-4 w-full max-w-2xl"}`}
             onClick={() => setLightbox(true)}
           >
             <Image
@@ -66,17 +78,18 @@ const ChangelogMediaEmbed: React.FC<ChangelogMediaEmbedProps> = ({
                 }}
                 className="rounded-lg"
                 unoptimized
-                onClick={(e) => e.stopPropagation()}
               />
-              <a
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full px-6 text-center font-mono text-xs break-all text-white/50 hover:text-white/80 hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {url}
-              </a>
+              {showUrl && (
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full px-6 text-center font-mono text-xs break-all text-white/50 hover:text-white/80 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {url}
+                </a>
+              )}
             </div>
           )}
         </>
