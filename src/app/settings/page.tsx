@@ -506,6 +506,15 @@ export default function SettingsPage() {
     try {
       await revertSupporterLevel(level);
 
+      const updatedUser: UserData = {
+        ...userData,
+        premiumtype: level,
+      };
+      safeSetJSON("user", updatedUser);
+      window.dispatchEvent(
+        new CustomEvent("authStateChanged", { detail: updatedUser }),
+      );
+
       setSupporterHistory((prev) => {
         const nextEntry = {
           level,
@@ -535,6 +544,15 @@ export default function SettingsPage() {
     setRevertingSupporterLevel(0);
     try {
       await revertSupporterLevel(0);
+
+      const updatedUser: UserData = {
+        ...userData,
+        premiumtype: 0,
+      };
+      safeSetJSON("user", updatedUser);
+      window.dispatchEvent(
+        new CustomEvent("authStateChanged", { detail: updatedUser }),
+      );
 
       toast.success("Supporter removed. Changes will be applied shortly.");
     } catch (error) {

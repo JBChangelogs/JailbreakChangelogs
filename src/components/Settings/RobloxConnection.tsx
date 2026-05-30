@@ -6,6 +6,8 @@ const log = createLogger("UI");
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 
+import { safeGetJSON, safeSetJSON } from "@/utils/storage/safeStorage";
+import { UserData } from "@/types/auth";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { PUBLIC_API_URL } from "@/utils/api/api";
@@ -63,6 +65,20 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
             (errorData as { message?: string; error?: string; detail?: string })
               .detail ??
             "Failed to disconnect Roblox account",
+        );
+      }
+
+      const storedUser = safeGetJSON<UserData>("user", null);
+      if (storedUser) {
+        const {
+          roblox_id: _id,
+          roblox_username: _username,
+          ...updatedUser
+        } = storedUser;
+        safeSetJSON("user", updatedUser as UserData);
+
+        window.dispatchEvent(
+          new CustomEvent("authStateChanged", { detail: updatedUser }),
         );
       }
 
