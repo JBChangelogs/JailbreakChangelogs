@@ -56,8 +56,6 @@ export const getDemandHexColor = (demand: string): string => {
       return "#2563eb";
     case "Very High":
       return "#9333ea";
-    case "Extremely High":
-      return "#db2777";
     default:
       return "#4b5563";
   }
@@ -103,16 +101,14 @@ export const getDemandColor = (demand: string): string => {
       return "bg-red-600 text-white";
     case "Low":
       return "bg-orange-700 text-white";
-    case "Medium":
-      return "bg-yellow-700 text-white";
-    case "Decent":
+    case "Below Average":
+      return "bg-orange-700 text-white";
+    case "Average":
       return "bg-green-700 text-white";
     case "High":
       return "bg-blue-600 text-white";
     case "Very High":
       return "bg-purple-600 text-white";
-    case "Extremely High":
-      return "bg-pink-600 text-white";
     default:
       return "bg-gray-600 text-white";
   }

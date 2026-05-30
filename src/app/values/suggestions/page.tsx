@@ -879,6 +879,7 @@ export default function ValueSuggestionsPage() {
   const [total, setTotal] = useState(0);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
+  const [noSuggestionsFound, setNoSuggestionsFound] = useState(false);
   const [pendingNew, setPendingNew] = useState(0);
   const [pendingTypes, setPendingTypes] = useState<Set<string>>(new Set());
 
@@ -1166,6 +1167,7 @@ export default function ValueSuggestionsPage() {
   const fetchSuggestions = useCallback(async (p: number) => {
     setLoadingSuggestions(true);
     setSuggestionsError(null);
+    setNoSuggestionsFound(false);
     setPendingNew(0);
     setPendingTypes(new Set());
     try {
@@ -1176,6 +1178,13 @@ export default function ValueSuggestionsPage() {
       const res = await fetch(url, { credentials: "include", headers });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
+        if (res.status === 404 && body?.error === "no_suggestions_found") {
+          setNoSuggestionsFound(true);
+          setSuggestions([]);
+          setTotalPages(1);
+          setTotal(0);
+          return;
+        }
         log.error("fetch suggestions failed", { status: res.status, body });
         throw new Error("Failed to fetch suggestions");
       }
@@ -1750,6 +1759,68 @@ export default function ValueSuggestionsPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : noSuggestionsFound ? (
+            <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+              <Image
+                src="/assets/images/404.svg"
+                alt="No suggestions found"
+                width={180}
+                height={180}
+                className="mx-auto mb-4"
+              />
+              <h3 className="text-primary-text mb-2 text-lg font-semibold">
+                No suggestions yet
+              </h3>
+              <p className="text-secondary-text mb-6 text-sm">
+                {!isAuthenticated
+                  ? "Log in to be the first to submit a value suggestion."
+                  : !user?.roblox_id
+                    ? "You need to connect your Roblox account before you can submit a suggestion."
+                    : "Be the first to suggest a value change."}
+              </p>
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                {!isAuthenticated ? (
+                  <Button
+                    onClick={() => setLoginModal({ open: true })}
+                    className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
+                  >
+                    <Icon
+                      icon="material-symbols:login-rounded"
+                      className="h-4 w-4"
+                      inline
+                    />
+                    Log In
+                  </Button>
+                ) : !user?.roblox_id ? (
+                  <Button
+                    asChild
+                    className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
+                  >
+                    <Link href="/settings">
+                      <Icon
+                        icon="simple-icons:roblox"
+                        className="h-4 w-4"
+                        inline
+                      />
+                      Connect Roblox
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={openForm}
+                    disabled={!!ban}
+                    className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Icon
+                      icon="material-symbols:add-rounded"
+                      className="h-4 w-4"
+                      inline
+                    />
+                    New Value Suggestion
+                  </Button>
+                )}
+              </div>
             </div>
           ) : suggestionsError ? (
             <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">

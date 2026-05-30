@@ -246,7 +246,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
       getTimesTraded: (item) => item.metadata?.TimesTraded ?? 0,
       getUniqueCirculation: (item) => item.metadata?.UniqueCirculation ?? 0,
       getDemandMultiple: (item) => item.metadata?.DemandMultiple ?? 0,
-      defaultDemand: "Close to none",
+      defaultDemand: "Close To None",
       normalizeLastUpdated: false,
       fallbackSortForDemandTrend: "none",
     },

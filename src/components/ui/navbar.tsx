@@ -1,6 +1,6 @@
 "use client";
 import { createLogger } from "@/services/logger";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const log = createLogger("UI");
 import Link from "next/link";
@@ -320,13 +320,18 @@ export const NavbarModern = ({
   className,
   unreadCount,
   setUnreadCount,
+  onUserMenuOpenChange,
 }: {
   className?: string;
   unreadCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
+  onUserMenuOpenChange?: (open: boolean) => void;
 }) => {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  useEffect(() => {
+    onUserMenuOpenChange?.(userMenuOpen);
+  }, [userMenuOpen, onUserMenuOpenChange]);
   const userMenuWrapperRef = React.useRef<HTMLDivElement>(null);
   const userMenuDropdownRef = React.useRef<HTMLDivElement>(null);
   const [utmModalOpen, setUtmModalOpen] = useState(false);
@@ -1289,7 +1294,7 @@ export const NavbarModern = ({
                   {userMenuOpen && (
                     <motion.div
                       ref={userMenuDropdownRef}
-                      className="border-border-card bg-primary-bg absolute right-0 z-1300 mt-2 w-72 overflow-hidden rounded-2xl border shadow-lg"
+                      className="border-border-card bg-primary-bg absolute right-0 z-[2147483647] mt-2 w-72 overflow-hidden rounded-2xl border shadow-lg"
                       initial={{ opacity: 0, scale: 0.92, y: 8 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.92, y: 8 }}

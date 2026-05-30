@@ -5,14 +5,13 @@ import { fetchItemUnlockMetadataById } from "@/utils/items/itemUnlockMetadata";
 const log = createLogger("UI");
 
 export const demandOrder = [
-  "Close to none",
+  "Close To None",
   "Very Low",
   "Low",
-  "Medium",
-  "Decent",
+  "Below Average",
+  "Average",
   "High",
   "Very High",
-  "Extremely High",
 ] as const;
 
 export const trendOrder = [
@@ -27,14 +26,13 @@ export const trendOrder = [
 ] as const;
 
 export const demandValueMap: Record<string, string> = {
-  "demand-close-to-none": "Close to none",
+  "demand-close-to-none": "Close To None",
   "demand-very-low": "Very Low",
   "demand-low": "Low",
-  "demand-medium": "Medium",
-  "demand-decent": "Decent",
+  "demand-below-average": "Below Average",
+  "demand-average": "Average",
   "demand-high": "High",
   "demand-very-high": "Very High",
-  "demand-extremely-high": "Extremely High",
 };
 
 export const trendValueMap: Record<string, string> = {
@@ -326,11 +324,10 @@ export const sortByValueSort = <T>(
     case "demand-close-to-none":
     case "demand-very-low":
     case "demand-low":
-    case "demand-medium":
-    case "demand-decent":
+    case "demand-below-average":
+    case "demand-average":
     case "demand-high":
     case "demand-very-high":
-    case "demand-extremely-high":
     case "trend-stable":
     case "trend-rising":
     case "trend-hyped":

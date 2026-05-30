@@ -61,6 +61,7 @@ import {
 import { searchUsers } from "@/utils/api/api";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { createLogger } from "@/services/logger";
+import SettingsLoading from "./loading";
 
 const log = createLogger("UI");
 
@@ -404,45 +405,7 @@ export default function SettingsPage() {
   }, [purchaseGiftLevels.length, purchaseGiftModalOpen]);
 
   if (loading || settingsLoading) {
-    return (
-      <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="settings-loading-layout">
-          {/* Sidebar Skeleton */}
-          <div className="settings-loading-sidebar">
-            <div className={`${cardClassName} p-4`}>
-              <div className="bg-tertiary-bg mx-2 mb-2 h-8 w-3/5 animate-pulse rounded-md" />
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="px-2 py-1.5">
-                  <div className="bg-tertiary-bg h-9 w-full animate-pulse rounded-md" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Content Skeleton */}
-          <div className="settings-loading-content">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className={`${cardClassName} mb-8 p-6`}>
-                <div className="mb-3 flex items-center gap-2">
-                  <div className="bg-tertiary-bg h-8 w-8 animate-pulse rounded-full" />
-                  <div className="bg-tertiary-bg h-10 w-2/5 animate-pulse rounded-md" />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  {[1, 2, 3].map((j) => (
-                    <div key={j}>
-                      <div className="bg-tertiary-bg mb-1 h-7 w-[30%] animate-pulse rounded-md" />
-                      <div className="bg-tertiary-bg mb-2 h-5 w-[80%] animate-pulse rounded-md" />
-                      <div className="bg-tertiary-bg h-6 w-11 animate-pulse rounded-lg" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <SettingsLoading />;
   }
 
   if (!userData || !settings) {

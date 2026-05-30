@@ -95,22 +95,20 @@ export default function TradingGuides({
 
   const getDemandHexColor = (demand: string): string => {
     switch (demand) {
-      case "Close to none":
+      case "Close To None":
         return "#4b5563";
       case "Very Low":
         return "#dc2626";
       case "Low":
         return "#b45309";
-      case "Medium":
+      case "Below Average":
         return "#b45309";
-      case "Decent":
+      case "Average":
         return "#15803d";
       case "High":
         return "#2563eb";
       case "Very High":
         return "#9333ea";
-      case "Extremely High":
-        return "#db2777";
       default:
         return "#4b5563";
     }
@@ -118,22 +116,20 @@ export default function TradingGuides({
 
   const getDemandValue = (demand: string): string => {
     switch (demand) {
-      case "Close to none":
+      case "Close To None":
         return "demand-close-to-none";
       case "Very Low":
         return "demand-very-low";
       case "Low":
         return "demand-low";
-      case "Medium":
-        return "demand-medium";
-      case "Decent":
-        return "demand-decent";
+      case "Below Average":
+        return "demand-below-average";
+      case "Average":
+        return "demand-average";
       case "High":
         return "demand-high";
       case "Very High":
         return "demand-very-high";
-      case "Extremely High":
-        return "demand-extremely-high";
       default:
         return "demand-close-to-none";
     }

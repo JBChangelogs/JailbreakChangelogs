@@ -425,6 +425,7 @@ export default function Header() {
 
   const desktopHeaderRef = useRef<HTMLDivElement>(null);
   const mobileHeaderRef = useRef<HTMLDivElement>(null);
+  const [desktopUserMenuOpen, setDesktopUserMenuOpen] = useState(false);
 
   useEffect(() => {
     let frameId: number;
@@ -801,7 +802,7 @@ export default function Header() {
       {/* Desktop navbar - hidden on mobile/tablet via CSS */}
       <div
         ref={desktopHeaderRef}
-        className="sticky top-0 z-1300 hidden xl:block"
+        className={`sticky top-0 hidden xl:block ${desktopUserMenuOpen ? "z-[2147483647]" : "z-1300"}`}
         style={{ viewTransitionName: "navbar" } as React.CSSProperties}
       >
         <OfflineDetector />
@@ -810,6 +811,7 @@ export default function Header() {
           <NavbarModern
             unreadCount={unreadCount}
             setUnreadCount={setUnreadCount}
+            onUserMenuOpenChange={setDesktopUserMenuOpen}
           />
         </div>
       </div>

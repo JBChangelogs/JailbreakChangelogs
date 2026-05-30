@@ -17,14 +17,12 @@ export const trendDescriptions: Record<string, string> = {
 };
 
 export const demandDescriptions: Record<string, string> = {
-  "Close to none":
+  "Close To None":
     "Nearly no interest from traders; typically very hard to trade.",
   "Very Low": "Minimal interest; trades usually require significant overpay.",
   Low: "Limited interest; often needs added value to move.",
-  Medium: "Average interest; trades can be inconsistent.",
-  Decent: "Good interest; generally trades without heavy overpay.",
+  "Below Average": "Below average interest; trades can be inconsistent.",
+  Average: "Average interest; generally trades without heavy overpay.",
   High: "Strong interest; usually trades quickly at solid value.",
   "Very High": "Very strong interest; often commands overpay due to demand.",
-  "Extremely High":
-    "Top-tier interest; highly sought after and typically overpays.",
 };

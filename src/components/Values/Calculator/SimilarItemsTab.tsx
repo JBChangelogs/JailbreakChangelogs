@@ -87,14 +87,13 @@ export const SimilarItemsTab: React.FC<SimilarItemsTabProps> = ({
 
   // Demand calculation
   const demandScale = [
-    "Close to none",
+    "Close To None",
     "Very Low",
     "Low",
-    "Medium",
-    "Decent",
+    "Below Average",
+    "Average",
     "High",
     "Very High",
-    "Extremely High",
   ];
 
   const selectedSideItems =

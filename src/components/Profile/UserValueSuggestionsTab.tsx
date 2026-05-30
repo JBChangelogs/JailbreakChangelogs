@@ -7,7 +7,12 @@ import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { formatMessageDate } from "@/utils/helpers/timestamp";
+import { formatMessageDate, formatCustomDate } from "@/utils/helpers/timestamp";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { formatFullValue } from "@/utils/trading/values";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import {
@@ -717,7 +722,17 @@ export default function UserValueSuggestionsTab({
                   {/* Date */}
                   <div className="border-border-card border-t pt-3">
                     <p className="text-secondary-text text-xs">
-                      Posted on {formatMessageDate(suggestion.created_at)}
+                      Posted on{" "}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-default">
+                            {formatMessageDate(suggestion.created_at)}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {formatCustomDate(suggestion.created_at)}
+                        </TooltipContent>
+                      </Tooltip>
                       {suggestion.updated_at !== suggestion.created_at
                         ? " (Edited)"
                         : ""}
