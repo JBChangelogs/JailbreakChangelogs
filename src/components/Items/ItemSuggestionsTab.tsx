@@ -15,6 +15,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createLogger } from "@/services/logger";
 // RE-ADD: voting — import { toast } from "sonner";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Tooltip,
@@ -256,23 +257,29 @@ export default function ItemSuggestionsTab({
 
   if (empty || suggestions.length === 0) {
     return (
-      <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-        <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-          <Icon
-            icon="material-symbols:lightbulb-outline-rounded"
-            className="text-button-info h-8 w-8"
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+        <h2 className="text-primary-text mb-3 text-lg font-semibold">
+          Item Suggestions [0]
+        </h2>
+        <div className="py-6 text-center">
+          <Image
+            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            alt="No suggestions"
+            width={160}
+            height={128}
+            className="mx-auto mb-4"
           />
+          <p className="text-primary-text mb-1 font-semibold">
+            No Suggestions Yet
+          </p>
+          <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
+            No value suggestions have been submitted for this item. Head to the
+            suggestions page to submit one.
+          </p>
+          <Button asChild>
+            <Link href="/values/suggestions">View All Suggestions</Link>
+          </Button>
         </div>
-        <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          No Suggestions Yet
-        </h3>
-        <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
-          No value suggestions have been submitted for this item. Head to the
-          suggestions page to submit one.
-        </p>
-        <Button asChild>
-          <Link href="/values/suggestions">View All Suggestions</Link>
-        </Button>
       </div>
     );
   }

@@ -117,28 +117,25 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   // Empty state (no dupes)
   if (!isLoadingDupes && !dupesError && dupedUsers.length === 0) {
     return (
-      <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-        <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-          <svg
-            className="text-button-info h-8 w-8"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
-          </svg>
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+        <h2 className="text-primary-text mb-3 text-lg font-semibold">
+          Dupers [0]
+        </h2>
+        <div className="py-6 text-center">
+          <Image
+            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            alt="No dupers"
+            width={160}
+            height={128}
+            className="mx-auto mb-4"
+          />
+          <p className="text-primary-text mb-1 font-semibold">
+            No Dupers Found
+          </p>
+          <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
+            No duped versions of this item have been detected.
+          </p>
         </div>
-        <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          No Dupers Found
-        </h3>
-        <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-          No duped versions of this item have been detected.
-        </p>
       </div>
     );
   }
@@ -178,25 +175,28 @@ export default function DupesTab({ itemId }: DupesTabProps) {
 
       {/* Empty State for Search */}
       {filteredDupes.length === 0 && searchTerm.trim() && (
-        <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-          <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-            <Icon
-              icon="heroicons:magnifying-glass"
-              className="text-button-info h-8 w-8"
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
+          <div className="py-6">
+            <Image
+              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+              alt="No results"
+              width={160}
+              height={128}
+              className="mx-auto mb-4"
             />
+            <p className="text-primary-text mb-1 font-semibold">
+              No Results Found
+            </p>
+            <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
+              No dupers found matching &quot;{searchTerm}&quot;
+            </p>
+            <button
+              onClick={() => setSearchTerm("")}
+              className="border-border-card bg-button-info text-primary-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+            >
+              Clear search
+            </button>
           </div>
-          <h3 className="text-primary-text mb-2 text-xl font-semibold">
-            No Results Found
-          </h3>
-          <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-            No dupers found matching &quot;{searchTerm}&quot;
-          </p>
-          <button
-            onClick={() => setSearchTerm("")}
-            className="border-border-card bg-button-info text-primary-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
-          >
-            Clear search
-          </button>
         </div>
       )}
 

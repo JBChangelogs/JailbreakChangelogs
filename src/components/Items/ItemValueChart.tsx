@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, use, useId } from "react";
+import Image from "next/image";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -116,25 +117,17 @@ const ItemValueChart = ({
 
   if (history.length === 0) {
     return (
-      <div className="bg-secondary-bg rounded-lg p-8 text-center">
-        <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-          <svg
-            className="text-button-info h-8 w-8"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
-          </svg>
-        </div>
-        <h3 className="text-primary-text mb-2 text-xl font-semibold">
+      <div className="py-6 text-center">
+        <Image
+          src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+          alt="No data"
+          width={160}
+          height={128}
+          className="mx-auto mb-4"
+        />
+        <p className="text-primary-text mb-1 font-semibold">
           No Data Available
-        </h3>
+        </p>
         <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
           This item doesn&apos;t have any recorded data yet. Charts will appear
           here once data becomes available.
@@ -979,25 +972,17 @@ const ItemValueChart = ({
               )}
             </>
           ) : (
-            <div className="bg-secondary-bg rounded-lg p-8 text-center">
-              <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-                <svg
-                  className="text-button-info h-8 w-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-primary-text mb-2 text-xl font-semibold">
+            <div className="py-6 text-center">
+              <Image
+                src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+                alt="No data"
+                width={160}
+                height={128}
+                className="mx-auto mb-4"
+              />
+              <p className="text-primary-text mb-1 font-semibold">
                 No Data Available
-              </h3>
+              </p>
               <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
                 This item doesn&apos;t have any recorded data yet. Charts will
                 appear here once data becomes available.
@@ -1447,25 +1432,17 @@ const ItemValueChart = ({
       {showOnlyTradingMetrics &&
         !hideTradingMetrics &&
         tradingData.length === 0 && (
-          <div className="bg-secondary-bg rounded-lg p-8 text-center">
-            <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-              <svg
-                className="text-button-info h-8 w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-primary-text mb-2 text-xl font-semibold">
+          <div className="py-6 text-center">
+            <Image
+              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+              alt="No data"
+              width={160}
+              height={128}
+              className="mx-auto mb-4"
+            />
+            <p className="text-primary-text mb-1 font-semibold">
               No Data Available
-            </h3>
+            </p>
             <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
               This item doesn&apos;t have any recorded data yet. Charts will
               appear here once data becomes available.

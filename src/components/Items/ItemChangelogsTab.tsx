@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import { Spinner } from "@/components/ui/Spinner";
@@ -200,31 +201,26 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
 
   if (empty || changelogs.length === 0) {
     return (
-      <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-        <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-          <svg
-            className="text-button-info h-8 w-8"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+        <h2 className="text-primary-text mb-3 text-lg font-semibold">
+          Item Changes [0]
+        </h2>
+        <div className="py-6 text-center">
+          <Image
+            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            alt="No changelogs"
+            width={160}
+            height={128}
+            className="mx-auto mb-4"
+          />
+          <p className="text-primary-text mb-1 font-semibold">No Changes Yet</p>
+          <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
+            No value changes have been recorded for this item yet.
+          </p>
+          <Button asChild>
+            <Link href="/values/changelogs">View All Changelogs</Link>
+          </Button>
         </div>
-        <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          No Changes Yet
-        </h3>
-        <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
-          No value changes have been recorded for this item yet.
-        </p>
-        <Button asChild>
-          <Link href="/values/changelogs">View All Changelogs</Link>
-        </Button>
       </div>
     );
   }
