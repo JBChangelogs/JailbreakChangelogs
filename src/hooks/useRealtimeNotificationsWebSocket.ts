@@ -130,7 +130,9 @@ export function useRealtimeNotificationsWebSocket(
   const handshakeRetryAttemptsRef = useRef(0);
   const reconnectOnFocusOnlyRef = useRef(false);
   const locationPathRef = useRef<string>(
-    typeof window !== "undefined" ? window.location?.pathname || "/" : "/",
+    typeof window !== "undefined"
+      ? (window.location?.pathname || "/") + (window.location?.search || "")
+      : "/",
   );
   const lastSentLocationRef = useRef<string>("");
 
@@ -149,7 +151,9 @@ export function useRealtimeNotificationsWebSocket(
   useEffect(() => {
     const nextPath =
       locationPath ??
-      (typeof window !== "undefined" ? window.location?.pathname : null) ??
+      (typeof window !== "undefined"
+        ? (window.location?.pathname ?? "") + (window.location?.search ?? "")
+        : null) ??
       "/";
     locationPathRef.current = nextPath;
 
