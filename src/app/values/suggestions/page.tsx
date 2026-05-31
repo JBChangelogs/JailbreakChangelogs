@@ -133,6 +133,14 @@ class RateLimitError extends Error {
   }
 }
 
+class ProfanityError extends Error {
+  flagged: { word: string; source: string }[];
+  constructor(flagged: { word: string; source: string }[]) {
+    super("profanity detected");
+    this.flagged = flagged;
+  }
+}
+
 const fieldLabel = (field: string) =>
   field
     .split("_")
@@ -169,6 +177,7 @@ function SuggestionForm({
     null,
   );
   const [reason, setReason] = useState("");
+  const [reasonError, setReasonError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showItemDropdown, setShowItemDropdown] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
@@ -222,6 +231,7 @@ function SuggestionForm({
     }
     setSubmitting(true);
     setSuggestedValueError(null);
+    setReasonError(null);
     try {
       await onSubmit({
         item: selectedItem.id,
@@ -234,11 +244,24 @@ function SuggestionForm({
       setSuggestedValue("");
       setSuggestedValueError(null);
       setReason("");
+      setReasonError(null);
       setField("cash_value");
       setRateLimitUntil(null);
     } catch (err: unknown) {
       if (err instanceof RateLimitError) {
         setRateLimitUntil(Date.now() + err.retryAfter * 1000);
+      } else if (err instanceof ProfanityError) {
+        const words = err.flagged.map((f) => f.word).join(", ");
+        toast.error("Profanity Detected", {
+          description: words
+            ? `Flagged: ${words}`
+            : "Please remove profanity from your reason.",
+        });
+        setReasonError(
+          words
+            ? `Flagged words: ${words}`
+            : "Please remove profanity from your reason.",
+        );
       } else if (typeof err === "object" && err !== null && "response" in err) {
         const responseErr = err as {
           response: { data: { field?: string; message?: string } };
@@ -611,11 +634,17 @@ function SuggestionForm({
           <textarea
             placeholder="Explain why this value should change. Include evidence, market observations, or trade history. Must be at least 350 characters."
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e) => {
+              setReason(e.target.value);
+              setReasonError(null);
+            }}
             required
             rows={5}
-            className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
+            className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none${reasonError ? " border-border-error!" : ""}`}
           />
+          {reasonError && (
+            <p className="text-form-error mt-1 text-xs">{reasonError}</p>
+          )}
         </div>
 
         <RateLimitBanner
@@ -677,6 +706,7 @@ function EditReasonModal({
   limits,
 }: EditReasonModalProps) {
   const [reason, setReason] = useState(suggestion?.reason ?? "");
+  const [reasonError, setReasonError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
   const minChars = limits?.min_characters ?? 350;
@@ -703,6 +733,7 @@ function EditReasonModal({
       return;
     }
     setSaving(true);
+    setReasonError(null);
     try {
       await onSave(reason.trim());
     } catch (err) {
@@ -710,6 +741,18 @@ function EditReasonModal({
         setRateLimitUntil(Date.now() + err.retryAfter * 1000);
         toast.error(
           "You're updating too fast. Please wait before trying again.",
+        );
+      } else if (err instanceof ProfanityError) {
+        const words = err.flagged.map((f) => f.word).join(", ");
+        toast.error("Profanity Detected", {
+          description: words
+            ? `Flagged: ${words}`
+            : "Please remove profanity from your reason.",
+        });
+        setReasonError(
+          words
+            ? `Flagged words: ${words}`
+            : "Please remove profanity from your reason.",
         );
       }
     } finally {
@@ -743,12 +786,20 @@ function EditReasonModal({
               {reason.length} / {minChars}–{maxChars}
             </span>
           </div>
-          <textarea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={8}
-            className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info mb-4 w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
-          />
+          <div className="mb-4">
+            <textarea
+              value={reason}
+              onChange={(e) => {
+                setReason(e.target.value);
+                setReasonError(null);
+              }}
+              rows={8}
+              className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none${reasonError ? " border-border-error!" : ""}`}
+            />
+            {reasonError && (
+              <p className="text-form-error mt-1 text-xs">{reasonError}</p>
+            )}
+          </div>
 
           <RateLimitBanner
             until={rateLimitUntil}
@@ -1049,6 +1100,9 @@ export default function ValueSuggestionsPage() {
         throw new RateLimitError(retryAfter);
       }
       const data = await res.json().catch(() => ({}));
+      if (data?.error === "profanity_detected") {
+        throw new ProfanityError(data.flagged || []);
+      }
       log.error("update suggestion failed", { status: res.status, body: data });
       toast.error(
         data?.message ?? data?.error ?? "Failed to update suggestion.",
@@ -1348,6 +1402,9 @@ export default function ValueSuggestionsPage() {
         );
         const retryAfter = parseInt(res.headers.get("retry-after") ?? "60", 10);
         throw new RateLimitError(retryAfter);
+      }
+      if (data?.error === "profanity_detected") {
+        throw new ProfanityError(data.flagged || []);
       }
       toast.error(
         data?.message ?? data?.error ?? "Failed to submit suggestion.",
