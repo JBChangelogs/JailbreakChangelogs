@@ -102,7 +102,7 @@ export default function TradingGuides({
       case "Low":
         return "#b45309";
       case "Below Average":
-        return "#b45309";
+        return "#f59e0b";
       case "Average":
         return "#facc15";
       case "Decent":
