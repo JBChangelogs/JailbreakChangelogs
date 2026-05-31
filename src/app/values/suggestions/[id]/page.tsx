@@ -41,6 +41,9 @@ import type { Item } from "@/types/index";
 import NitroValuesSuggestionDetailRailAd from "@/components/Ads/NitroValuesSuggestionDetailRailAd";
 import NitroValuesSuggestionDetailRightRailAd from "@/components/Ads/NitroValuesSuggestionDetailRightRailAd";
 import NitroValuesSuggestionDetailVideoPlayer from "@/components/Ads/NitroValuesSuggestionDetailVideoPlayer";
+import ItemValueChart, {
+  type ValueHistory,
+} from "@/components/Items/ItemValueChart";
 
 interface UserSettings {
   custom_avatar?: boolean;
@@ -210,6 +213,8 @@ export default function ValueSuggestionDetailPage() {
   const [reasonOverflows, setReasonOverflows] = useState(false);
   const reasonRef = useRef<HTMLDivElement | null>(null);
   const [refreshType, setRefreshType] = useState<string | null>(null);
+  const [itemHistory, setItemHistory] = useState<ValueHistory[] | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -480,6 +485,31 @@ export default function ValueSuggestionDetailPage() {
     window.addEventListener("realtimeSuggestion", handler);
     return () => window.removeEventListener("realtimeSuggestion", handler);
   }, [silentRefreshVotes]);
+
+  const isValueSuggestion =
+    suggestion?.field === "cash_value" || suggestion?.field === "duped_value";
+
+  useEffect(() => {
+    if (!item?.id || !isValueSuggestion) return;
+    const run = async () => {
+      setHistoryLoading(true);
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL!,
+          `/item/history?id=${item.id}`,
+        );
+        const res = await fetch(url, { credentials: "include", headers });
+        if (!res.ok) return;
+        const data = await res.json();
+        setItemHistory(Array.isArray(data) ? data : null);
+      } catch {
+        // non-critical
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+    run();
+  }, [item?.id, isValueSuggestion]);
 
   const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
@@ -962,6 +992,11 @@ export default function ValueSuggestionDetailPage() {
                       <TabsTrigger value="details" fullWidth>
                         Details
                       </TabsTrigger>
+                      {isValueSuggestion && (
+                        <TabsTrigger value="history" fullWidth>
+                          Value History
+                        </TabsTrigger>
+                      )}
                       <TabsTrigger value="discussion" fullWidth>
                         Discussion
                       </TabsTrigger>
@@ -1224,6 +1259,23 @@ export default function ValueSuggestionDetailPage() {
                         </div>
                       )}
                     </TabsContent>
+                    {isValueSuggestion && (
+                      <TabsContent value="history" className="mt-4">
+                        <div className="border-border-card bg-secondary-bg rounded-xl border">
+                          <div className="p-5">
+                            {historyLoading ? (
+                              <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
+                            ) : (
+                              <ItemValueChart
+                                historyData={itemHistory}
+                                showOnlyValueHistory
+                                hideTradingMetrics
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </TabsContent>
+                    )}
                     <TabsContent value="discussion" className="mt-4">
                       <ChangelogComments
                         changelogId={suggestion.id}
@@ -1502,6 +1554,33 @@ export default function ValueSuggestionDetailPage() {
                               {suggesterStats.total_rejected}
                             </p>
                           </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Value History Chart */}
+                    {isValueSuggestion && (
+                      <div className="border-border-card bg-secondary-bg rounded-xl border">
+                        <div className="border-border-card border-b px-5 py-3.5">
+                          <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                            <Icon
+                              icon="material-symbols:show-chart-rounded"
+                              className="text-secondary-text h-4 w-4"
+                              inline
+                            />
+                            Value History
+                          </h2>
+                        </div>
+                        <div className="p-5">
+                          {historyLoading ? (
+                            <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
+                          ) : (
+                            <ItemValueChart
+                              historyData={itemHistory}
+                              showOnlyValueHistory
+                              hideTradingMetrics
+                            />
+                          )}
                         </div>
                       </div>
                     )}
