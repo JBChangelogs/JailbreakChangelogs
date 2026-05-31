@@ -906,6 +906,86 @@ const parseValueInput = (
   return { valid: true };
 };
 
+const GUIDELINES_DISMISSED_KEY = "suggestion_guidelines_v1_dismissed";
+
+function SuggestionGuidelinesDialog({
+  open,
+  onConfirm,
+}: {
+  open: boolean;
+  onConfirm: () => void;
+}) {
+  const rules = [
+    "Not use any form of AI generated content to make any value suggestions (If found using AI, you will receive punishment for your actions).",
+    "Not be biased solely on your trading experiences, as other people might have different experiences while trading an item.",
+    "Add a meaningful, effort-filled reasoning towards your suggestion. Padding with repeated characters or filler text does not count and will likely result in your suggestion being ignored by the Value Team.",
+    "Troll suggesters may be banned from value suggesting at the sole discretion of Value Team managers, website owners, or website moderators.",
+    "No botting reactions with alt accounts because any form of manipulation is not allowed on this value list.",
+  ];
+
+  return (
+    <Dialog open={open}>
+      <DialogContent
+        showClose={false}
+        className="bg-secondary-bg max-w-lg rounded-lg p-0 backdrop-blur-none"
+        aria-describedby={undefined}
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text flex items-center justify-center gap-2 text-base font-bold">
+            <Icon
+              icon="material-symbols:announcement-outline-rounded"
+              className="h-5 w-5 shrink-0 text-yellow-400"
+              inline
+            />
+            Suggestion Guidelines
+          </DialogTitle>
+          <p className="text-secondary-text text-center text-xs">
+            Last updated: May 31, 2026
+          </p>
+        </DialogHeader>
+
+        <div className="space-y-4 px-6 pt-2 pb-6">
+          <div>
+            <p className="text-primary-text mb-2 text-sm font-semibold">
+              This should serve as a reminder towards making any form of
+              suggestions to:
+            </p>
+            <ul className="space-y-2">
+              {rules.map((rule, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <Icon
+                    icon="heroicons-outline:arrow-right"
+                    className="text-secondary-text mt-0.5 h-4 w-4 shrink-0"
+                    inline
+                  />
+                  <span className="text-secondary-text">{rule}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <p className="text-primary-text text-sm font-semibold">
+            We thank you for understanding, and hope to see more future
+            suggestions following these rules.
+          </p>
+
+          <div className="border-border-card flex items-center justify-end border-t pt-4">
+            <Button
+              onClick={onConfirm}
+              className="bg-button-info hover:bg-button-info-hover text-form-button-text"
+              size="sm"
+            >
+              I Understand
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-primary-text border-yellow-500/30",
   approved: "bg-green-500/20 text-primary-text border-green-500/30",
@@ -948,6 +1028,18 @@ export default function ValueSuggestionsPage() {
   const [voteRateLimits, setVoteRateLimits] = useState<Map<number, number>>(
     new Map(),
   );
+
+  // Guidelines dialog state
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
+
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      !localStorage.getItem(GUIDELINES_DISMISSED_KEY)
+    ) {
+      setGuidelinesOpen(true);
+    }
+  }, []);
 
   // Edit reason modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -1431,18 +1523,7 @@ export default function ValueSuggestionsPage() {
     setPage(1);
   };
 
-  const openForm = async () => {
-    if (showForm) {
-      setShowForm(false);
-      return;
-    }
-    if (user && !user.roblox_id) {
-      toast.info(
-        "You need to connect your Roblox account to submit value suggestions.",
-      );
-      setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
-      return;
-    }
+  const doOpenForm = async () => {
     setShowForm(true);
     if (limits) return;
     setLoadingLimits(true);
@@ -1461,6 +1542,27 @@ export default function ValueSuggestionsPage() {
     } finally {
       setLoadingLimits(false);
     }
+  };
+
+  const openForm = () => {
+    if (showForm) {
+      setShowForm(false);
+      return;
+    }
+    if (user && !user.roblox_id) {
+      toast.info(
+        "You need to connect your Roblox account to submit value suggestions.",
+      );
+      setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+      return;
+    }
+    doOpenForm();
+  };
+
+  const handleGuidelinesConfirm = () => {
+    localStorage.setItem(GUIDELINES_DISMISSED_KEY, "1");
+    setGuidelinesOpen(false);
+    toast.success("You have agreed to our suggestion guidelines.");
   };
 
   return (
@@ -1489,6 +1591,19 @@ export default function ValueSuggestionsPage() {
                   </Button>
                   <Button asChild variant="default" size="sm">
                     <Link href="/values/changelogs">Value Changelogs</Link>
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => setGuidelinesOpen(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Icon
+                      icon="material-symbols:info-outline-rounded"
+                      className="h-4 w-4"
+                      inline
+                    />
+                    Guidelines
                   </Button>
                   {isAuthenticated ? (
                     <Button
@@ -2366,6 +2481,12 @@ export default function ValueSuggestionsPage() {
             </div>
           )}
         </div>
+
+        {/* Guidelines Dialog */}
+        <SuggestionGuidelinesDialog
+          open={guidelinesOpen}
+          onConfirm={handleGuidelinesConfirm}
+        />
 
         {/* Edit Reason Modal */}
         <EditReasonModal

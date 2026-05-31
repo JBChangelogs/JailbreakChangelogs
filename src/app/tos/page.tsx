@@ -26,7 +26,7 @@ export default function TermsOfServicePage() {
           </h1>
         </div>
         <p className="text-primary-text mb-6 text-sm">
-          Last updated: March 25th, 2026
+          Last updated: May 31st, 2026
         </p>
 
         <div className="border-border-card bg-secondary-bg rounded-lg border p-6 transition-colors">
@@ -171,7 +171,54 @@ export default function TermsOfServicePage() {
 
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
-                7. Contact Information
+                7. Value Suggestions
+              </h2>
+              <p className="text-secondary-text mb-4">
+                By submitting a value suggestion on the{" "}
+                <Link
+                  href="/values/suggestions"
+                  className="text-link hover:text-link-hover hover:underline"
+                >
+                  Value Suggestions
+                </Link>{" "}
+                page, you agree to the following rules. Failure to follow these
+                rules may result in your suggestion being ignored or removed,
+                and repeated or egregious violations may result in a ban from
+                the value suggestion feature at the sole discretion of Value
+                Team managers, website owners, or website moderators.
+              </p>
+              <ul className="text-secondary-text list-inside list-disc space-y-2">
+                <li>
+                  Do not use any form of AI-generated content to make value
+                  suggestions. If found using AI, you will receive punishment
+                  for your actions.
+                </li>
+                <li>
+                  Do not be biased solely on your own trading experiences, as
+                  other players may have different experiences while trading an
+                  item.
+                </li>
+                <li>
+                  Provide meaningful, effort-filled reasoning to support your
+                  suggestion. Padding with repeated characters, periods, or
+                  filler text does not count and will likely result in your
+                  suggestion being ignored by the Value Team.
+                </li>
+                <li>
+                  Do not bot or manipulate reactions with alternate accounts.
+                  Any form of vote manipulation is strictly prohibited.
+                </li>
+                <li>
+                  Troll suggestions or bad-faith submissions may result in a
+                  permanent ban from value suggesting at the sole discretion of
+                  Value Team managers, website owners, or website moderators.
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-primary-text mb-4 text-xl font-semibold">
+                8. Contact Information
               </h2>
               <p className="text-secondary-text">
                 If you have any questions about these Terms of Service, please
