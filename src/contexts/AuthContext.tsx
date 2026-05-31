@@ -8,8 +8,9 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  Suspense,
 } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { AuthState, UserData } from "@/types/auth";
 import { logout as authLogout, trackLogoutSource } from "@/utils/auth/auth";
@@ -56,9 +57,25 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+function LocationTracker({
+  onLocationChange,
+}: {
+  onLocationChange: (path: string) => void;
+}) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const search = searchParams.toString();
+    onLocationChange(pathname + (search ? "?" + search : ""));
+  }, [pathname, searchParams, onLocationChange]);
+
+  return null;
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
-  const pathname = usePathname();
+  const [locationString, setLocationString] = useState<string>("/");
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
@@ -93,7 +110,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useRealtimeNotificationsWebSocket(
     (authState.isAuthenticated && !authState.isLoading) || !!getJbclToken(),
-    pathname,
+    locationString,
   );
 
   const initializeAuth = useCallback(async () => {
@@ -383,7 +400,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>
+      <Suspense fallback={null}>
+        <LocationTracker onLocationChange={setLocationString} />
+      </Suspense>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
