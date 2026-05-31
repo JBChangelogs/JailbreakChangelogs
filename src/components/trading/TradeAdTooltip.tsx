@@ -125,7 +125,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
             <span
               className={`${getDemandColor(!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap`}
             >
-              {!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand}
+              {!dupedDemand || dupedDemand === "N/A" ? "N/A" : dupedDemand}
             </span>
           </div>
           <div className="flex items-center gap-2">

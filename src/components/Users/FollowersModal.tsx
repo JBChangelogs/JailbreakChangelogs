@@ -235,7 +235,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     setLoadingFollow((prev) => ({ ...prev, [followerId]: true }));
     try {
       if (!currentUserId) {
-        toast.error("You need to be logged in to follow users");
+        toast.info("You need to be logged in to follow users");
         return;
       }
 

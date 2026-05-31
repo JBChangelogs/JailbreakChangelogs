@@ -62,7 +62,7 @@ export function useLoginModalController(): LoginModalController {
   const handleRobloxLogin = useCallback(async () => {
     const hasCookie = !!document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
     if (!hasCookie) {
-      toast.error("You must be logged in with Discord first", {
+      toast.info("You must be logged in with Discord first", {
         duration: 3000,
       });
       return;

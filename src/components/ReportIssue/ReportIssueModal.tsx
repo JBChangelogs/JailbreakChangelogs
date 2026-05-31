@@ -56,7 +56,7 @@ export default function ReportIssueModal({
 
     try {
       if (!isAuthenticated) {
-        toast.error("You must be logged in to report an issue");
+        toast.info("You must be logged in to report an issue");
         return;
       }
 

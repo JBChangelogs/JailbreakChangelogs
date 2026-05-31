@@ -723,7 +723,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     }
 
     if (!isAuthenticated) {
-      toast.error("You must be logged in to create a trade ad");
+      toast.info("You must be logged in to create a trade ad");
       return;
     }
 

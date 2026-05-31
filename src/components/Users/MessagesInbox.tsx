@@ -2333,7 +2333,7 @@ export default function MessagesInbox() {
   const handleSendMessage = async (rawMessage: string) => {
     if (!selectedUserId || !selectedUser) return;
     if (!currentUser) {
-      toast.error("You need to be logged in to send messages");
+      toast.info("You need to be logged in to send messages");
       return;
     }
 

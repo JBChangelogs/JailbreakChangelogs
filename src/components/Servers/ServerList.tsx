@@ -365,7 +365,7 @@ const ServerList: React.FC<{
     if (!serverToDelete) return;
     if (deletingServer) return;
     if (!isAuthenticated) {
-      toast.error("You must be logged in to delete a server.");
+      toast.info("You must be logged in to delete a server.");
       setDeleteModalOpen(false);
       setServerToDelete(null);
       return;

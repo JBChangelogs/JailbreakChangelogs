@@ -274,7 +274,7 @@ export default function ItemCard({
     currentItemData.demand === "N/A" ? "Unknown" : currentItemData.demand;
   const dupedDemandLabel =
     !currentItemData.duped_demand || currentItemData.duped_demand === "N/A"
-      ? "Unknown"
+      ? "N/A"
       : currentItemData.duped_demand;
   const trendLabel =
     currentItemData.trend === null || currentItemData.trend === "N/A"

@@ -38,7 +38,7 @@ const CommentTimestamp: React.FC<CommentTimestampProps> = ({
   return (
     <span className="text-secondary-text mt-0.5 block text-xs">
       {prefix}
-      <Tooltip>
+      <Tooltip delayDuration={500}>
         <TooltipTrigger asChild>
           <span className="inline-block w-fit cursor-help">
             {displayRelativeTime}

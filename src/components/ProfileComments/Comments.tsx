@@ -1,5 +1,5 @@
 import { createLogger } from "@/services/logger";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const log = createLogger("UI");
@@ -100,14 +100,19 @@ function ProfileReactionsDialog({
   const { twemojiEnabled } = useTwemoji();
   const [activeTab, setActiveTab] = useState(initialEmoji);
 
-  // Sync tab when dialog opens with a new emoji
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen) setActiveTab(initialEmoji);
-    else onClose();
-  };
+  useEffect(() => {
+    if (open) {
+      setActiveTab(initialEmoji || reactions[0]?.emoji || "");
+    }
+  }, [open, initialEmoji, reactions]);
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose();
+      }}
+    >
       <DialogContent
         className="bg-secondary-bg w-full max-w-md gap-0 overflow-hidden rounded-lg p-0 backdrop-blur-none"
         aria-describedby={undefined}
@@ -606,7 +611,7 @@ export default function Comment({
 
         <div className="mt-2 flex items-center justify-start text-xs">
           <div className="flex items-center gap-1">
-            <Tooltip>
+            <Tooltip delayDuration={500}>
               <TooltipTrigger asChild>
                 <span className="text-secondary-text cursor-help text-xs">
                   Posted {formattedDate}

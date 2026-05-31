@@ -47,7 +47,7 @@ export default function RobberyTrackerAuthWrapper({
       !hasRedirected.current
     ) {
       hasRedirected.current = true;
-      toast.error(redirectToastMessage, {
+      toast.info(redirectToastMessage, {
         duration: 4000,
       });
       setShowLoginModal(true);

@@ -178,7 +178,7 @@ export default function ItemValues({
             <span
               className={`${getDemandColor(!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand)} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold`}
             >
-              {!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand}
+              {!dupedDemand || dupedDemand === "N/A" ? "N/A" : dupedDemand}
             </span>
           </div>
         </div>

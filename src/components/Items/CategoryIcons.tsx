@@ -66,7 +66,7 @@ export default function CategoryIcons({
       iconColor: "#ffd700",
       onClick: () => {
         if (!isAuthenticated) {
-          toast.error("Please log in to view your favorites");
+          toast.info("Please log in to view your favorites");
           return;
         }
         handleCategoryClick("favorites");

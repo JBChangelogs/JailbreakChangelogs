@@ -961,6 +961,7 @@ export default function ValueSuggestionsPage() {
     e.stopPropagation();
     e.preventDefault();
     if (!isAuthenticated) {
+      toast.info("You need to be logged in to vote on value suggestions.");
       setLoginModal({ open: true });
       return;
     }
@@ -1038,6 +1039,11 @@ export default function ValueSuggestionsPage() {
             },
             retryAfter * 1000 + 500,
           );
+        } else if (res.status === 403) {
+          toast.info(
+            "You need to connect your Roblox account to vote on value suggestions.",
+          );
+          setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
         } else {
           log.error(`Vote failed ${res.status}`, data);
           toast.error(
@@ -1403,6 +1409,13 @@ export default function ValueSuggestionsPage() {
         const retryAfter = parseInt(res.headers.get("retry-after") ?? "60", 10);
         throw new RateLimitError(retryAfter);
       }
+      if (res.status === 403) {
+        toast.info(
+          "You need to connect your Roblox account to submit value suggestions.",
+        );
+        setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+        throw { response: { status: res.status, data } };
+      }
       if (data?.error === "profanity_detected") {
         throw new ProfanityError(data.flagged || []);
       }
@@ -1421,6 +1434,13 @@ export default function ValueSuggestionsPage() {
   const openForm = async () => {
     if (showForm) {
       setShowForm(false);
+      return;
+    }
+    if (user && !user.roblox_id) {
+      toast.info(
+        "You need to connect your Roblox account to submit value suggestions.",
+      );
+      setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
       return;
     }
     setShowForm(true);
@@ -1473,10 +1493,10 @@ export default function ValueSuggestionsPage() {
                   {isAuthenticated ? (
                     <Button
                       onClick={openForm}
-                      variant={showForm ? "destructive" : "default"}
+                      variant={showForm ? "destructive" : "success"}
                       disabled={!!ban}
                       size="sm"
-                      className={`flex items-center gap-2 ${showForm ? "" : "bg-button-info hover:bg-button-info-hover text-form-button-text"} disabled:opacity-50`}
+                      className="flex items-center gap-2 disabled:opacity-50"
                     >
                       <Icon
                         icon={
@@ -1491,7 +1511,12 @@ export default function ValueSuggestionsPage() {
                     </Button>
                   ) : (
                     <Button
-                      onClick={() => setLoginModal({ open: true })}
+                      onClick={() => {
+                        toast.info(
+                          "You need to be logged in to submit value suggestions.",
+                        );
+                        setLoginModal({ open: true });
+                      }}
                       size="sm"
                       className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
                     >

@@ -35,7 +35,7 @@ export default function FavoriteButton({
 
   const handleFavoriteClick = async () => {
     if (!isAuthenticated) {
-      toast.error(
+      toast.info(
         "You must be logged in to favorite items. Please log in and try again.",
       );
       setLoginModal({ open: true });

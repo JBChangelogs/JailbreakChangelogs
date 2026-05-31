@@ -221,7 +221,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
                   <span
                     className={`${getDemandColor(d)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
                   >
-                    {d === "N/A" ? "Unknown" : d}
+                    {d === "N/A" ? (item.isDuped ? "N/A" : "Unknown") : d}
                   </span>
                 );
               })()}

@@ -15,7 +15,7 @@ export default function ReportIssueButton() {
 
   const handleOpenModal = useCallback(() => {
     if (!isAuthenticated) {
-      toast.error("You must be logged in to report an issue");
+      toast.info("You must be logged in to report an issue");
       return;
     }
     setIsOpen(true);

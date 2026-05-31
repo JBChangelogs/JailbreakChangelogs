@@ -86,6 +86,7 @@ export const UserBadges = ({
   };
 
   const getFlagIconUrl = (f: string) => {
+    if (f === "is_badimo") return `${BADGE_BASE_URL}/Jailbreak.png`;
     const name = f.startsWith("is_") ? f.slice(3) : f;
     return `${BADGE_BASE_URL}/jbcl_${name}.svg`;
   };
@@ -135,6 +136,9 @@ export const UserBadges = ({
           height={badgeSize}
           className="cursor-pointer"
           onClick={handlePremiumClick}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
         />,
         `Supporter Type ${premiumType}`,
       ),
@@ -172,6 +176,9 @@ export const UserBadges = ({
           height={badgeSize}
           className="cursor-pointer"
           onClick={handleEarlyAdopterClick}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
         />,
         "Early Adopter",
       ),

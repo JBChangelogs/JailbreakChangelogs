@@ -1214,7 +1214,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
   const handleReportClick = (commentId: number) => {
     if (!isAuthenticated) {
-      toast.error("You must be logged in to report comments");
+      toast.info("You must be logged in to report comments");
       setLoginModal({ open: true });
       return;
     }

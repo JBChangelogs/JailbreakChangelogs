@@ -342,6 +342,7 @@ export default function ValueSuggestionDetailPage() {
 
   const handleVote = async (type: "upvote" | "downvote") => {
     if (!isAuthenticated) {
+      toast.info("You need to be logged in to vote on value suggestions.");
       setLoginModal({ open: true });
       return;
     }
@@ -397,6 +398,11 @@ export default function ValueSuggestionDetailPage() {
             10,
           );
           setVoteRateLimit(Date.now() + retryAfter * 1000);
+        } else if (res.status === 403) {
+          toast.info(
+            "You need to connect your Roblox account to vote on value suggestions.",
+          );
+          setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
         } else {
           toast.error(
             data?.message ?? data?.error ?? "Failed to register vote.",

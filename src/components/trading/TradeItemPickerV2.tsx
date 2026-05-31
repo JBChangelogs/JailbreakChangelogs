@@ -1000,7 +1000,11 @@ export default function TradeItemPickerV2({
                             <span
                               className={`${getDemandColor(dStr)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
                             >
-                              {dStr === "N/A" ? "Unknown" : dStr}
+                              {dStr === "N/A"
+                                ? condition === "duped"
+                                  ? "N/A"
+                                  : "Unknown"
+                                : dStr}
                             </span>
                           );
                         })()}

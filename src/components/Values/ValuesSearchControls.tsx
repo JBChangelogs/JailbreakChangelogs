@@ -227,7 +227,7 @@ export default function ValuesSearchControls({
                       onValueChange={(newValue) => {
                         const nextValue = newValue as FilterSort;
                         if (nextValue === "favorites" && !isAuthenticated) {
-                          toast.error("Please log in to view your favorites");
+                          toast.info("Please log in to view your favorites");
                           return;
                         }
                         setFilterSort(nextValue);

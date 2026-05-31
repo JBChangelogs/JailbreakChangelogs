@@ -691,7 +691,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                           <span
                                             className={`${getDemandColor(dStr)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold`}
                                           >
-                                            {dStr === "N/A" ? "Unknown" : dStr}
+                                            {dStr === "N/A"
+                                              ? item.isDuped
+                                                ? "N/A"
+                                                : "Unknown"
+                                              : dStr}
                                           </span>
                                         );
                                       })()}

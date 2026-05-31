@@ -629,13 +629,13 @@ export default function TradeDetailsClient({
     if (!isAuthenticated) {
       autoOfferHandledRef.current = true;
       if (pendingMakeOfferToastIdRef.current) {
-        toast.error("Please log in to make an offer.", {
+        toast.info("Please log in to make an offer.", {
           id: pendingMakeOfferToastIdRef.current,
           duration: 5000,
         });
         pendingMakeOfferToastIdRef.current = null;
       } else {
-        toast.error("Please log in to make an offer.");
+        toast.info("Please log in to make an offer.");
       }
       setLoginModal({ open: true });
       if (pathname) {
@@ -955,7 +955,7 @@ export default function TradeDetailsClient({
                       type="button"
                       onClick={() => {
                         if (!isAuthenticated) {
-                          toast.error("Please log in to make an offer.");
+                          toast.info("Please log in to make an offer.");
                           setLoginModal({ open: true });
                           return;
                         }

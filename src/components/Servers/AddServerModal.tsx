@@ -111,7 +111,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
   React.useEffect(() => {
     if (isOpen) {
       if (!isAuthenticated) {
-        toast.error("Please log in to add a server");
+        toast.info("Please log in to add a server");
         onClose();
         return;
       }

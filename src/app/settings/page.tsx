@@ -592,7 +592,7 @@ export default function SettingsPage() {
   };
   const handleRedeemForSelf = async (shareId: string) => {
     if (!userData?.id) {
-      toast.error("You must be logged in to redeem this gift.");
+      toast.info("You must be logged in to redeem this gift.");
       return;
     }
 

@@ -148,7 +148,7 @@ export default function OGNotificationSheet({
    */
   const toggleNotification = async (item: PartialItem) => {
     if (!user?.roblox_id) {
-      toast.error("Authentication required", {
+      toast.info("Authentication required", {
         description: "You must be logged in and have Roblox linked.",
       });
       return;

@@ -72,7 +72,7 @@ export default function AboutTab({
 
   const handleSaveBio = async () => {
     if (!isAuthenticated) {
-      toast.error("You need to be logged in to update your bio");
+      toast.info("You need to be logged in to update your bio");
       return;
     }
 
