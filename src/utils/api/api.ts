@@ -1370,6 +1370,28 @@ export function flattenComments(
   return { comments, userMap };
 }
 
+const VALID_COMMENT_TYPES = new Set([
+  "changelog",
+  "season",
+  "trade",
+  "inventory",
+]);
+
+const VALID_ITEM_TYPES = new Set([
+  "Vehicle",
+  "Spoiler",
+  "Rim",
+  "Body Color",
+  "HyperChrome",
+  "Texture",
+  "Tire Sticker",
+  "Tire Style",
+  "Drift",
+  "Furniture",
+  "Horn",
+  "Weapon Skin",
+]);
+
 export async function fetchComments(
   type: string,
   id: string,
@@ -1377,6 +1399,18 @@ export async function fetchComments(
 ) {
   try {
     const commentType = type === "item" ? itemType : type;
+    const isValidType =
+      type === "item"
+        ? itemType !== undefined && VALID_ITEM_TYPES.has(itemType)
+        : VALID_COMMENT_TYPES.has(type);
+    if (!isValidType) {
+      log.error("fetchComments: invalid comment type", { type, commentType });
+      return { comments: [], userMap: {} };
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+      log.error("fetchComments: invalid id", { id });
+      return { comments: [], userMap: {} };
+    }
     const response = await fetch(
       `${BASE_API_URL}/comments/${commentType}/${id}`,
       {
