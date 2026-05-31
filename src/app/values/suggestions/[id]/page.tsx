@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -119,6 +119,11 @@ const statusColors: Record<string, string> = {
 const badgeBase =
   "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
+const voterListClassName =
+  "max-h-96 space-y-2 overflow-y-auto scrollbar-thin pr-1";
+
+const MAX_REASON_LENGTH = 400;
+
 function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
   return (
     <div className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border px-4 py-3">
@@ -202,6 +207,8 @@ export default function ValueSuggestionDetailPage() {
     return () => clearTimeout(t);
   }, [editRateLimitUntil]);
   const [reasonExpanded, setReasonExpanded] = useState(false);
+  const [reasonOverflows, setReasonOverflows] = useState(false);
+  const reasonRef = useRef<HTMLDivElement | null>(null);
   const [refreshType, setRefreshType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -284,6 +291,28 @@ export default function ValueSuggestionDetailPage() {
     );
     setUserVote(hasUp ? "upvote" : hasDown ? "downvote" : null);
   }, [suggestion, user]);
+
+  useEffect(() => {
+    setReasonExpanded(false);
+  }, [suggestion?.id]);
+
+  useEffect(() => {
+    if (!suggestion?.reason.trim() || loading) {
+      setReasonOverflows(false);
+      return;
+    }
+    const el = reasonRef.current;
+    if (!el) return;
+
+    const checkOverflow = () => {
+      setReasonOverflows(el.scrollHeight > el.clientHeight);
+    };
+
+    checkOverflow();
+    const observer = new ResizeObserver(checkOverflow);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [suggestion?.reason, suggestion?.id, loading, reasonExpanded]);
 
   const silentRefreshVotes = useCallback(async () => {
     if (!id) return;
@@ -818,9 +847,9 @@ export default function ValueSuggestionDetailPage() {
                         </div>
                       ) : suggestion.reason.trim() ? (
                         (() => {
-                          const isLong =
+                          const isTruncated =
                             suggestion.reason.split("\n").length > 5 ||
-                            suggestion.reason.length > 400;
+                            suggestion.reason.length > MAX_REASON_LENGTH;
                           const mdContent = (() => {
                             const withBold = suggestion.reason.replace(
                               /(Common Trades?:?)/gi,
@@ -831,11 +860,16 @@ export default function ValueSuggestionDetailPage() {
                               .map((part) => part.replace(/\n/g, "\n\n"))
                               .join("\n\n");
                           })();
+                          const showReasonToggle =
+                            reasonOverflows || (reasonExpanded && isTruncated);
                           return (
                             <div>
                               <div
+                                ref={reasonRef}
                                 className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
-                                  isLong && !reasonExpanded ? "max-h-36" : ""
+                                  isTruncated && !reasonExpanded
+                                    ? "max-h-36"
+                                    : ""
                                 }`}
                               >
                                 <ReactMarkdown
@@ -885,7 +919,7 @@ export default function ValueSuggestionDetailPage() {
                                   {mdContent}
                                 </ReactMarkdown>
                               </div>
-                              {isLong && (
+                              {showReasonToggle && (
                                 <button
                                   type="button"
                                   onClick={() => setReasonExpanded((v) => !v)}
@@ -1102,7 +1136,7 @@ export default function ValueSuggestionDetailPage() {
                                     No upvotes yet.
                                   </p>
                                 ) : (
-                                  <div className="space-y-2">
+                                  <div className={voterListClassName}>
                                     {suggestion.votes.upvotes.map((v) => (
                                       <VoterCard
                                         key={v.user.id + v.created_at}
@@ -1118,7 +1152,7 @@ export default function ValueSuggestionDetailPage() {
                                     No downvotes yet.
                                   </p>
                                 ) : (
-                                  <div className="space-y-2">
+                                  <div className={voterListClassName}>
                                     {suggestion.votes.downvotes.map((v) => (
                                       <VoterCard
                                         key={v.user.id + v.created_at}
@@ -1381,7 +1415,7 @@ export default function ValueSuggestionDetailPage() {
                                   No upvotes yet.
                                 </p>
                               ) : (
-                                <div className="space-y-2">
+                                <div className={voterListClassName}>
                                   {suggestion.votes.upvotes.map((v) => (
                                     <VoterCard
                                       key={v.user.id + v.created_at}
@@ -1397,7 +1431,7 @@ export default function ValueSuggestionDetailPage() {
                                   No downvotes yet.
                                 </p>
                               ) : (
-                                <div className="space-y-2">
+                                <div className={voterListClassName}>
                                   {suggestion.votes.downvotes.map((v) => (
                                     <VoterCard
                                       key={v.user.id + v.created_at}
