@@ -20,12 +20,23 @@ export const metadata = {
     type: "website",
     siteName: "Jailbreak Changelogs",
     url: "https://jailbreakchangelogs.com/values/suggestions",
+    images: [
+      {
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
+        width: 2400,
+        height: 1260,
+        alt: "Value Suggestions Banner",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Value Suggestions | Jailbreak Changelogs",
     description:
       "Submit and vote on community value suggestions for Roblox Jailbreak items.",
+    images: [
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
+    ],
   },
 };
 
