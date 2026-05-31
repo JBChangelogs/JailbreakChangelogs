@@ -51,6 +51,7 @@ export interface ValueHistory {
 
 interface ItemValueChartProps {
   historyPromise?: Promise<ValueHistory[] | null>;
+  historyData?: ValueHistory[] | null;
   hideTradingMetrics?: boolean;
   showOnlyValueHistory?: boolean;
   showOnlyTradingMetrics?: boolean;
@@ -70,12 +71,15 @@ const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
 
 const ItemValueChart = ({
   historyPromise,
+  historyData: historyDataProp,
   hideTradingMetrics = false,
   showOnlyValueHistory = false,
   showOnlyTradingMetrics = false,
 }: ItemValueChartProps) => {
-  const historyData = historyPromise ? use(historyPromise) : null;
-  const history: ValueHistory[] = historyData || [];
+  const resolvedFromPromise = historyPromise ? use(historyPromise) : null;
+  const history: ValueHistory[] =
+    (historyDataProp !== undefined ? historyDataProp : resolvedFromPromise) ??
+    [];
   const loading = false;
 
   const [dateRange, setDateRange] = useState<DateRange>("all");
