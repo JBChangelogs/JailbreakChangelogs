@@ -36,6 +36,7 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import { Icon } from "@/components/ui/IconWrapper";
 import Twemoji from "react-twemoji";
 import { useTwemoji } from "@/contexts/TwemojiContext";
+import { TwemojiText } from "@/components/ui/TwemojiText";
 
 interface ReactionUser {
   id: string;
@@ -258,8 +259,14 @@ export default function Comment({
 
   const formatReactionTooltip = (r: CommentReaction): React.ReactNode => {
     const users = r.users ?? [];
-    if (users.length === 0)
-      return `${r.emoji} ${r.count} reaction${r.count !== 1 ? "s" : ""}`;
+    if (users.length === 0) {
+      return (
+        <span>
+          <TwemojiText tag="span">{r.emoji}</TwemojiText> {r.count} reaction
+          {r.count !== 1 ? "s" : ""}
+        </span>
+      );
+    }
     const MAX_NAMES = 3;
     const names = users.slice(0, MAX_NAMES).map((u) => u.username);
     const remaining = r.count - names.length;
@@ -271,7 +278,7 @@ export default function Comment({
           : names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
     return (
       <span>
-        {r.emoji} reacted by {nameStr}
+        <TwemojiText tag="span">{r.emoji}</TwemojiText> reacted by {nameStr}
         {remaining > 0 && (
           <>
             {" and "}

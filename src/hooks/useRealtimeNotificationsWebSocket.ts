@@ -8,10 +8,11 @@ import {
   parseNotificationUrl,
 } from "@/utils/notifications/notificationUrl";
 import { showDesktopNotification } from "@/utils/notifications/desktopNotifications";
+import { NotifDescription } from "@/components/notifications/NotifDescription";
+import { TwemojiText } from "@/components/ui/TwemojiText";
 import {
   formatNotifPlainText,
   normalizeNotificationText,
-  renderNotifDescription,
 } from "@/utils/notifications/notifMarkdown";
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
@@ -594,13 +595,11 @@ export function useRealtimeNotificationsWebSocket(
                   }
                 : undefined;
 
-            toast(notificationTitle, {
+            toast(React.createElement(TwemojiText, null, notificationTitle), {
               id: toastId,
-              description: React.createElement(
-                "div",
-                { className: "text-muted-foreground text-sm leading-relaxed" },
-                renderNotifDescription(normalizedDescription),
-              ),
+              description: React.createElement(NotifDescription, {
+                text: normalizedDescription,
+              }),
               action,
             });
 

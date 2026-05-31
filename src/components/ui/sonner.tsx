@@ -2,6 +2,7 @@
 
 import { useTheme } from "@/contexts/ThemeContext";
 import { Spinner } from "@/components/ui/Spinner";
+import { useSonnerTwemoji } from "@/hooks/useSonnerTwemoji";
 import { Toaster as Sonner } from "sonner";
 import type { CSSProperties } from "react";
 
@@ -51,6 +52,7 @@ function mergeToastClassNames(
 
 const Toaster = ({ toastOptions, style, icons, ...props }: ToasterProps) => {
   const { theme } = useTheme();
+  useSonnerTwemoji();
 
   return (
     <Sonner

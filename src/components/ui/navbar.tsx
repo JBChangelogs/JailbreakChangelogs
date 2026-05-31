@@ -35,7 +35,8 @@ import {
   getNotificationActionLabel,
   parseNotificationUrl,
 } from "@/utils/notifications/notificationUrl";
-import { renderNotifDescription } from "@/utils/notifications/notifMarkdown";
+import { NotifDescription } from "@/components/notifications/NotifDescription";
+import { TwemojiText } from "@/components/ui/TwemojiText";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -1153,12 +1154,18 @@ export const NavbarModern = ({
                             className="border-border-secondary hover:bg-secondary-bg block border-b px-4 py-3 transition-colors last:border-b-0"
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <p className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal">
+                              <TwemojiText
+                                tag="p"
+                                className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal"
+                              >
                                 {notif.title}
-                              </p>
+                              </TwemojiText>
                             </div>
                             <div className="text-secondary-text mt-1 text-xs wrap-break-word">
-                              {renderNotifDescription(notif.description)}
+                              <NotifDescription
+                                text={notif.description}
+                                className="text-secondary-text text-xs leading-relaxed"
+                              />
                             </div>
                             {shouldHideViewAction ? null : urlInfo.isWhitelisted ? (
                               urlInfo.isJailbreakChangelogs &&

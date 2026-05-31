@@ -65,7 +65,8 @@ import {
   getNotificationActionLabel,
   parseNotificationUrl,
 } from "@/utils/notifications/notificationUrl";
-import { renderNotifDescription } from "@/utils/notifications/notifMarkdown";
+import { NotifDescription } from "@/components/notifications/NotifDescription";
+import { TwemojiText } from "@/components/ui/TwemojiText";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
@@ -1046,14 +1047,18 @@ export default function Header() {
                                   >
                                     <div className="flex-1">
                                       <div className="flex items-start justify-between gap-2">
-                                        <p className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal">
+                                        <TwemojiText
+                                          tag="p"
+                                          className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal"
+                                        >
                                           {notif.title}
-                                        </p>
+                                        </TwemojiText>
                                       </div>
                                       <div className="text-secondary-text mt-1 text-xs wrap-break-word">
-                                        {renderNotifDescription(
-                                          notif.description,
-                                        )}
+                                        <NotifDescription
+                                          text={notif.description}
+                                          className="text-secondary-text text-xs leading-relaxed"
+                                        />
                                       </div>
                                       {shouldHideViewAction ? null : urlInfo.isWhitelisted ? (
                                         urlInfo.isJailbreakChangelogs &&
