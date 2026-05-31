@@ -378,15 +378,11 @@ export default function ModernPricingSection() {
                 <Button
                   onClick={() => {
                     if (isYearly) {
-                      const targetElement = document.getElementById(
-                        "important-information",
+                      window.open(
+                        "https://www.roblox.com/games/104188650191561/Support-Us",
+                        "_blank",
+                        "noopener,noreferrer",
                       );
-                      if (targetElement) {
-                        targetElement.scrollIntoView({
-                          behavior: "smooth",
-                          block: "start",
-                        });
-                      }
                     } else {
                       const level = discordSelfLevels.find(
                         (l) => l.level === tier.tierNumber,
