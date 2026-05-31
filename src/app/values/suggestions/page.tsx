@@ -53,6 +53,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { parseBan, showBanToast } from "@/utils/api/ban";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import type { Item } from "@/types/index";
 import NitroValuesSuggestionsRailAd from "@/components/Ads/NitroValuesSuggestionsRailAd";
 import NitroValuesSuggestionsRightRailAd from "@/components/Ads/NitroValuesSuggestionsRightRailAd";
@@ -1563,6 +1564,7 @@ export default function ValueSuggestionsPage() {
     localStorage.setItem(GUIDELINES_DISMISSED_KEY, "1");
     setGuidelinesOpen(false);
     toast.success("You have agreed to our suggestion guidelines.");
+    trackEvent("Suggestion Guidelines Accepted");
   };
 
   return (
@@ -2234,6 +2236,9 @@ export default function ValueSuggestionsPage() {
                       {/* Item name + badges */}
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="relative z-10 min-w-0">
+                          <p className="text-secondary-text mb-0.5 text-xs font-medium">
+                            #{suggestion.id}
+                          </p>
                           {item ? (
                             <Link
                               href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
