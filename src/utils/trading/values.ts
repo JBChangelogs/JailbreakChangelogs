@@ -843,40 +843,23 @@ const formatSinglePrice = (price: string): string => {
  * @returns Object with oldValue and difference, or null if no change found
  */
 export const getValueChange = (
-  recentChanges:
-    | Array<{
-        change_id: number;
-        changed_by: string;
-        changes: {
-          old: Record<string, string | number | null>;
-          new: Record<string, string | number | null>;
-        };
-        created_at: number;
-      }>
-    | null
-    | undefined,
+  recentChanges: import("@/types").RecentChange[] | null | undefined,
   valueType: "cash_value" | "duped_value",
 ): { oldValue: string; difference: number } | null => {
   if (!recentChanges || recentChanges.length === 0) return null;
 
-  // Find the most recent change for the specified value type
-  // The array is ordered from newest to oldest by created_at, so .find() gets the most recent
   const valueChange = recentChanges.find(
-    (change) =>
-      change.changes.old[valueType] !== undefined &&
-      change.changes.new[valueType] !== undefined,
+    (change) => change.field === valueType,
   );
 
   if (!valueChange) return null;
 
-  const oldValue = valueChange.changes.old[valueType];
-  const newValue = valueChange.changes.new[valueType];
+  const oldValue = valueChange.current_value;
+  const newValue = valueChange.suggested_value;
 
-  // Parse both values to numbers
   const oldNumeric = parseCashValue(String(oldValue));
   const newNumeric = parseCashValue(String(newValue));
 
-  // If either value is N/A or invalid, return null
   if (oldNumeric === -1 || newNumeric === -1) return null;
 
   const difference = newNumeric - oldNumeric;

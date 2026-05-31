@@ -6,7 +6,7 @@ import Loading from "./loading";
 import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
 import NitroValuesRightRailAd from "@/components/Ads/NitroValuesRightRailAd";
 
-export const revalidate = 300; // Revalidate every 5 minutes
+export const revalidate = 0;
 
 export default async function ValuesPage() {
   const itemsPromise = fetchItems();

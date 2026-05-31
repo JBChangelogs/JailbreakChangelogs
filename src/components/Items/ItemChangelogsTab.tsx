@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
@@ -107,6 +107,10 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
     new Set(),
   );
+  const [overflowingReasons, setOverflowingReasons] = useState<Set<number>>(
+    new Set(),
+  );
+  const reasonRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
@@ -161,6 +165,35 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
   useEffect(() => {
     fetchChangelogs(page);
   }, [fetchChangelogs, page]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const observers: ResizeObserver[] = [];
+
+    for (const [id, el] of reasonRefs.current.entries()) {
+      if (!el) continue;
+
+      const checkOverflow = () => {
+        const overflows = el.scrollHeight > el.clientHeight;
+        setOverflowingReasons((prev) => {
+          const has = prev.has(id);
+          if (overflows === has) return prev;
+          const next = new Set(prev);
+          if (overflows) next.add(id);
+          else next.delete(id);
+          return next;
+        });
+      };
+
+      checkOverflow();
+      const observer = new ResizeObserver(checkOverflow);
+      observer.observe(el);
+      observers.push(observer);
+    }
+
+    return () => observers.forEach((o) => o.disconnect());
+  }, [changelogs, loading, expandedReasons]);
 
   const openVotersModal = (
     changelog: ValueChangelog,
@@ -247,7 +280,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
             changelog.votes.downvotes.length > 0;
           const isExpanded = expandedReasons.has(changelog.id);
           const reasonText = changelog.reason ?? "";
-          const isTruncated =
+          const isTruncatable =
             reasonText.length > MAX_REASON_LENGTH ||
             reasonText.split("\n").length > 5;
 
@@ -363,8 +396,11 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                 {reasonText && (
                   <div>
                     <div
+                      ref={(el) => {
+                        reasonRefs.current.set(changelog.id, el);
+                      }}
                       className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
-                        isTruncated && !isExpanded ? "max-h-36" : ""
+                        isTruncatable && !isExpanded ? "max-h-36" : ""
                       }`}
                     >
                       <ReactMarkdown
@@ -419,7 +455,8 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                         })()}
                       </ReactMarkdown>
                     </div>
-                    {isTruncated && (
+                    {(overflowingReasons.has(changelog.id) ||
+                      (isExpanded && isTruncatable)) && (
                       <button
                         onClick={() =>
                           setExpandedReasons((prev) => {

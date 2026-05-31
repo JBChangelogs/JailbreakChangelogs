@@ -79,13 +79,13 @@ export interface DupedOwner {
 }
 
 export interface RecentChange {
-  change_id: number;
+  changelog_id: number;
+  suggestion_id: number;
   changed_by: string;
-  changes: {
-    old: Record<string, string | number | null>;
-    new: Record<string, string | number | null>;
-  };
   created_at: number;
+  field: string;
+  current_value: string;
+  suggested_value: string;
 }
 
 export interface Item {

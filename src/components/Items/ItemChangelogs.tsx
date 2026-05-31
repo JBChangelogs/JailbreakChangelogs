@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -122,14 +121,6 @@ type VoteLists = {
   downCount: number;
 };
 
-const truncateText = (text: string, maxLength: number) => {
-  if (text.length <= maxLength) return { text, isTruncated: false };
-  return {
-    text: text.slice(0, maxLength) + "...",
-    isTruncated: true,
-  };
-};
-
 const formatBooleanLikeValue = (value: ItemChangeValue | undefined): string => {
   if (value === undefined) return "";
   if (value === 1) return "True";
@@ -229,7 +220,6 @@ export default function ItemChangelogs({
   const loading = false;
   const error: string | null = null;
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const parentRef = useRef<HTMLDivElement>(null);
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
   const [activeVoters, setActiveVoters] = useState<VoteLists | null>(null);
@@ -239,6 +229,10 @@ export default function ItemChangelogs({
   const [expandedChanges, setExpandedChanges] = useState<Set<string>>(
     new Set(),
   );
+  const [overflowingReasons, setOverflowingReasons] = useState<Set<number>>(
+    new Set(),
+  );
+  const reasonRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
   const toggleChangeExpand = (
     changeId: number,
@@ -288,13 +282,34 @@ export default function ItemChangelogs({
     0,
   );
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const virtualizer = useVirtualizer({
-    count: displayableChanges.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 400,
-    overscan: 3,
-  });
+  useEffect(() => {
+    if (loading) return;
+
+    const observers: ResizeObserver[] = [];
+
+    for (const [id, el] of reasonRefs.current.entries()) {
+      if (!el) continue;
+
+      const checkOverflow = () => {
+        const overflows = el.scrollHeight > el.clientHeight;
+        setOverflowingReasons((prev) => {
+          const has = prev.has(id);
+          if (overflows === has) return prev;
+          const next = new Set(prev);
+          if (overflows) next.add(id);
+          else next.delete(id);
+          return next;
+        });
+      };
+
+      checkOverflow();
+      const observer = new ResizeObserver(checkOverflow);
+      observer.observe(el);
+      observers.push(observer);
+    }
+
+    return () => observers.forEach((o) => o.disconnect());
+  }, [displayableChanges, loading, expandedReasons]);
 
   const handleVotersClick = (
     tab: "up" | "down",
@@ -578,15 +593,8 @@ export default function ItemChangelogs({
         </div>
       </div>
 
-      {/* Virtualized changelogs container */}
-      <div
-        ref={parentRef}
-        className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[60rem] scrollbar-thin scrollbar-track-transparent overflow-y-auto"
-        style={{
-          scrollbarWidth: "thin",
-          scrollbarColor: "var(--color-border-primary) transparent",
-        }}
-      >
+      {/* Changelogs list */}
+      <div className="space-y-4">
         {displayableChanges.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="relative mb-6">
@@ -607,529 +615,480 @@ export default function ItemChangelogs({
             </p>
           </div>
         ) : (
-          <div
-            style={{
-              height: `${virtualizer.getTotalSize()}px`,
-              width: "100%",
-              position: "relative",
-            }}
-          >
-            {virtualizer.getVirtualItems().map((virtualItem) => {
-              const change = displayableChanges[virtualItem.index];
+          displayableChanges.map((change) => {
+            // Check if there are any meaningful changes (excluding last_updated)
+            const hasMeaningfulChanges = Object.entries(
+              change.changes.old,
+            ).some(([key, oldValue]) => {
+              if (key === "last_updated") return false;
+              const newValue = change.changes.new[key];
+              return oldValue !== newValue;
+            });
 
-              // Check if there are any meaningful changes (excluding last_updated)
-              const hasMeaningfulChanges = Object.entries(
-                change.changes.old,
-              ).some(([key, oldValue]) => {
-                if (key === "last_updated") return false;
-                const newValue = change.changes.new[key];
-                return oldValue !== newValue;
-              });
+            // Skip rendering if there are no meaningful changes and it's not a suggestion
+            if (!hasMeaningfulChanges && !change.suggestion_data) return null;
 
-              // Skip rendering if there are no meaningful changes and it's not a suggestion
-              if (!hasMeaningfulChanges && !change.suggestion_data) return null;
-
-              return (
-                <div
-                  key={`change-${change.change_id}`}
-                  data-index={virtualItem.index}
-                  ref={virtualizer.measureElement}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                >
-                  <div className="border-border-card bg-secondary-bg m-2 overflow-hidden rounded-lg border p-4 transition-colors">
-                    {change.suggestion_data && (
-                      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                            Suggestion #{change.suggestion_data.id}
-                          </span>
-                        </div>
-                        <div className="flex flex-col items-end gap-1"></div>
-                      </div>
-                    )}
-
-                    {change.suggestion_data && (
-                      <>
-                        <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
-                          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="flex items-center gap-3">
-                              {change.suggestion_data.metadata?.avatar_hash && (
-                                <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
-                                  <DefaultAvatar />
-                                  <Image
-                                    src={`https://cdn.discordapp.com/avatars/${change.suggestion_data.user_id}/${change.suggestion_data.metadata.avatar_hash}?size=128`}
-                                    alt={`${change.suggestion_data.suggestor_name}'s avatar`}
-                                    fill
-                                    className="object-cover"
-                                    onError={(e) => {
-                                      (
-                                        e as unknown as {
-                                          currentTarget: HTMLElement;
-                                        }
-                                      ).currentTarget.style.display = "none";
-                                    }}
-                                  />
-                                </div>
-                              )}
-                              <div className="flex flex-col">
-                                <span className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
-                                  Suggested by
-                                </span>
-                                <a
-                                  href={`https://discord.com/users/${change.suggestion_data.user_id}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-link hover:text-link-hover text-lg font-bold transition-colors hover:underline"
-                                >
-                                  {change.suggestion_data.suggestor_name}
-                                </a>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-center">
-                              <div className="border-border-card flex items-center justify-center overflow-hidden rounded-lg border">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleVotersClick(
-                                      "up",
-                                      change.suggestion_data,
-                                    )
-                                  }
-                                  className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
-                                  aria-label="View voters"
-                                >
-                                  <Icon
-                                    icon="material-symbols:thumb-up-rounded"
-                                    className="text-button-success h-5 w-5"
-                                    inline
-                                  />
-                                  <span className="text-button-success text-lg font-bold">
-                                    {change.suggestion_data.vote_data.upvotes}
-                                  </span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleVotersClick(
-                                      "down",
-                                      change.suggestion_data,
-                                    )
-                                  }
-                                  className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
-                                  aria-label="View voters"
-                                >
-                                  <Icon
-                                    icon="material-symbols:thumb-down-rounded"
-                                    className="text-button-danger h-5 w-5"
-                                    inline
-                                  />
-                                  <span className="text-button-danger text-lg font-bold">
-                                    {change.suggestion_data.vote_data.downvotes}
-                                  </span>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                          {change.suggestion_data?.data.reason && (
-                            <div className="text-secondary-text mb-4 text-sm leading-relaxed font-medium">
-                              {(() => {
-                                const reason =
-                                  change.suggestion_data.data.reason;
-                                const suggestionId = change.suggestion_data.id;
-                                const isExpanded =
-                                  expandedReasons.has(suggestionId);
-                                const { text, isTruncated } = truncateText(
-                                  reason,
-                                  MAX_REASON_LENGTH,
-                                );
-
-                                return (
-                                  <>
-                                    <ReactMarkdown
-                                      components={{
-                                        strong: (props) => (
-                                          <b
-                                            className="text-primary-text"
-                                            {...props}
-                                          />
-                                        ),
-                                      }}
-                                    >
-                                      {(() => {
-                                        const reasonText = isExpanded
-                                          ? reason
-                                          : text;
-                                        // Replace Common Trades with bold
-                                        const withBold = reasonText.replace(
-                                          /(Common Trades?:?)/gi,
-                                          "**$1**",
-                                        );
-                                        // Convert single newlines to double newlines, preserving existing double newlines
-                                        return withBold
-                                          .split(/\n\n+/)
-                                          .map((part) =>
-                                            part.replace(/\n/g, "\n\n"),
-                                          )
-                                          .join("\n\n");
-                                      })()}
-                                    </ReactMarkdown>
-                                    {isTruncated && (
-                                      <button
-                                        onClick={() =>
-                                          toggleReasonExpansion(suggestionId)
-                                        }
-                                        className="text-link hover:text-link-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
-                                      >
-                                        {isExpanded ? (
-                                          <>
-                                            <Icon
-                                              icon="heroicons-outline:chevron-up"
-                                              className="h-4 w-4"
-                                              inline={true}
-                                            />
-                                            Show Less
-                                          </>
-                                        ) : (
-                                          <>
-                                            <Icon
-                                              icon="heroicons-outline:chevron-down"
-                                              className="h-4 w-4"
-                                              inline={true}
-                                            />
-                                            Read More
-                                          </>
-                                        )}
-                                      </button>
-                                    )}
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          )}
-
-                          <div className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
-                            Suggested on{" "}
-                            {formatCustomDate(
-                              change.suggestion_data.created_at * 1000,
-                            )}
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    <div
-                      className={`${change.suggestion_data ? "mt-6" : "mt-0"} space-y-6`}
-                    >
-                      {Object.entries(change.changes.old).map(
-                        ([key, oldValue]) => {
-                          if (key === "last_updated") return null;
-                          const newValue = change.changes.new[key];
-                          const isNA = (v: unknown) =>
-                            v == null ||
-                            (typeof v === "string" &&
-                              v.trim().toUpperCase() === "N/A");
-                          // Hide rows where both sides are effectively N/A
-                          if (isNA(oldValue) && isNA(newValue)) return null;
-                          if (oldValue === newValue) return null;
-
-                          const formatValue = (
-                            k: string,
-                            v: unknown,
-                          ): {
-                            display: string;
-                            robloxId?: string;
-                            isCreator?: boolean;
-                            isBadimo?: boolean;
-                          } => {
-                            if (k === "cash_value" || k === "duped_value") {
-                              return { display: formatFullValue(String(v)) };
-                            }
-                            if (k === "price") {
-                              return { display: formatPrice(String(v)) };
-                            }
-                            if (k === "creator") {
-                              const creatorInfo = formatCreatorValue(
-                                v as ItemChangeValue | undefined,
-                              );
-                              return { ...creatorInfo, isCreator: true };
-                            }
-                            if (
-                              typeof v === "boolean" ||
-                              v === 1 ||
-                              v === 0 ||
-                              k.startsWith("is_")
-                            ) {
-                              return {
-                                display: formatBooleanLikeValue(
-                                  v as ItemChangeValue | undefined,
-                                ),
-                              };
-                            }
-                            const str =
-                              v === "" || v === null || v === undefined
-                                ? "N/A"
-                                : String(v);
-                            return { display: str };
-                          };
-
-                          return (
-                            <div key={key}>
-                              <div className="flex items-start gap-2 overflow-hidden">
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-primary-text mb-3 text-lg font-bold capitalize">
-                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                                      {formatSuggestionTypeLabel(
-                                        change.suggestion_data?.metadata
-                                          ?.suggestion_type,
-                                        key,
-                                      )}
-                                    </span>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-6">
-                                    <div className="min-w-0">
-                                      <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
-                                        <Icon
-                                          icon="mdi:minus-circle"
-                                          className="text-button-danger h-4 w-4"
-                                          inline={true}
-                                        />
-                                        {`OLD ${formatSuggestionTypeLabel(
-                                          change.suggestion_data?.metadata
-                                            ?.suggestion_type,
-                                          key,
-                                        ).toUpperCase()}`}
-                                      </div>
-                                      {(() => {
-                                        const formatted = formatValue(
-                                          key,
-                                          oldValue,
-                                        );
-                                        const displayValue = formatted.display;
-                                        const MAX_VISIBLE_CHARS = 200;
-                                        const isLong =
-                                          displayValue.length >
-                                          MAX_VISIBLE_CHARS;
-                                        const expandKey = `${change.change_id}-${key}-old`;
-                                        const isExpanded =
-                                          expandedChanges.has(expandKey);
-                                        const shouldTruncate =
-                                          isLong && !isExpanded;
-                                        const visibleContent = shouldTruncate
-                                          ? displayValue.slice(
-                                              0,
-                                              MAX_VISIBLE_CHARS,
-                                            ) + "..."
-                                          : displayValue;
-
-                                        return (
-                                          <>
-                                            <div
-                                              className="text-secondary-text overflow-hidden text-lg font-bold wrap-break-word line-through"
-                                              style={{
-                                                wordBreak: "normal",
-                                                overflowWrap: "anywhere",
-                                              }}
-                                            >
-                                              {formatted.isCreator ? (
-                                                formatted.isBadimo ? (
-                                                  <a
-                                                    href="https://www.roblox.com/communities/3059674/Badimo#!/about"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-link hover:text-link-hover transition-colors hover:underline"
-                                                  >
-                                                    {visibleContent}
-                                                  </a>
-                                                ) : formatted.robloxId ? (
-                                                  <a
-                                                    href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-link hover:text-link-hover transition-colors hover:underline"
-                                                  >
-                                                    {visibleContent}
-                                                  </a>
-                                                ) : (
-                                                  convertUrlsToLinks(
-                                                    visibleContent,
-                                                  )
-                                                )
-                                              ) : (
-                                                convertUrlsToLinks(
-                                                  visibleContent,
-                                                )
-                                              )}
-                                            </div>
-                                            {isLong && (
-                                              <button
-                                                onClick={() =>
-                                                  toggleChangeExpand(
-                                                    change.change_id,
-                                                    key,
-                                                    "old",
-                                                  )
-                                                }
-                                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
-                                              >
-                                                {isExpanded ? (
-                                                  <>
-                                                    <Icon
-                                                      icon="mdi:chevron-up"
-                                                      className="h-4 w-4"
-                                                      inline={true}
-                                                    />
-                                                    Show less
-                                                  </>
-                                                ) : (
-                                                  <>
-                                                    <Icon
-                                                      icon="mdi:chevron-down"
-                                                      className="h-4 w-4"
-                                                      inline={true}
-                                                    />
-                                                    Read more
-                                                  </>
-                                                )}
-                                              </button>
-                                            )}
-                                          </>
-                                        );
-                                      })()}
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
-                                        <Icon
-                                          icon="mdi:plus-circle"
-                                          className="text-button-success h-4 w-4"
-                                          inline={true}
-                                        />
-                                        {`NEW ${formatSuggestionTypeLabel(
-                                          change.suggestion_data?.metadata
-                                            ?.suggestion_type,
-                                          key,
-                                        ).toUpperCase()}`}
-                                      </div>
-                                      {(() => {
-                                        const formatted = formatValue(
-                                          key,
-                                          newValue,
-                                        );
-                                        const displayValue = formatted.display;
-                                        const MAX_VISIBLE_CHARS = 200;
-                                        const isLong =
-                                          displayValue.length >
-                                          MAX_VISIBLE_CHARS;
-                                        const expandKey = `${change.change_id}-${key}-new`;
-                                        const isExpanded =
-                                          expandedChanges.has(expandKey);
-                                        const shouldTruncate =
-                                          isLong && !isExpanded;
-                                        const visibleContent = shouldTruncate
-                                          ? displayValue.slice(
-                                              0,
-                                              MAX_VISIBLE_CHARS,
-                                            ) + "..."
-                                          : displayValue;
-
-                                        return (
-                                          <>
-                                            <div
-                                              className="text-primary-text overflow-hidden text-lg font-bold wrap-break-word"
-                                              style={{
-                                                wordBreak: "normal",
-                                                overflowWrap: "anywhere",
-                                              }}
-                                            >
-                                              {formatted.isCreator ? (
-                                                formatted.isBadimo ? (
-                                                  <a
-                                                    href="https://www.roblox.com/communities/3059674/Badimo#!/about"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-link hover:text-link-hover transition-colors hover:underline"
-                                                  >
-                                                    {visibleContent}
-                                                  </a>
-                                                ) : formatted.robloxId ? (
-                                                  <a
-                                                    href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-link hover:text-link-hover transition-colors hover:underline"
-                                                  >
-                                                    {visibleContent}
-                                                  </a>
-                                                ) : (
-                                                  convertUrlsToLinks(
-                                                    visibleContent,
-                                                  )
-                                                )
-                                              ) : (
-                                                convertUrlsToLinks(
-                                                  visibleContent,
-                                                )
-                                              )}
-                                            </div>
-                                            {isLong && (
-                                              <button
-                                                onClick={() =>
-                                                  toggleChangeExpand(
-                                                    change.change_id,
-                                                    key,
-                                                    "new",
-                                                  )
-                                                }
-                                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
-                                              >
-                                                {isExpanded ? (
-                                                  <>
-                                                    <Icon
-                                                      icon="mdi:chevron-up"
-                                                      className="h-4 w-4"
-                                                      inline={true}
-                                                    />
-                                                    Show less
-                                                  </>
-                                                ) : (
-                                                  <>
-                                                    <Icon
-                                                      icon="mdi:chevron-down"
-                                                      className="h-4 w-4"
-                                                      inline={true}
-                                                    />
-                                                    Read more
-                                                  </>
-                                                )}
-                                              </button>
-                                            )}
-                                          </>
-                                        );
-                                      })()}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        },
-                      )}
-                    </div>
-                    <div className="border-secondary-text mt-4 border-t pt-4">
-                      <span className="text-secondary-text text-sm">
-                        Changed on {formatCustomDate(change.created_at * 1000)}
+            return (
+              <div
+                key={`change-${change.change_id}`}
+                className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border p-4 transition-colors"
+              >
+                {change.suggestion_data && (
+                  <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                        Suggestion #{change.suggestion_data.id}
                       </span>
                     </div>
+                    <div className="flex flex-col items-end gap-1"></div>
                   </div>
+                )}
+
+                {change.suggestion_data && (
+                  <>
+                    <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
+                      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3">
+                          {change.suggestion_data.metadata?.avatar_hash && (
+                            <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                              <DefaultAvatar />
+                              <Image
+                                src={`https://cdn.discordapp.com/avatars/${change.suggestion_data.user_id}/${change.suggestion_data.metadata.avatar_hash}?size=128`}
+                                alt={`${change.suggestion_data.suggestor_name}'s avatar`}
+                                fill
+                                className="object-cover"
+                                onError={(e) => {
+                                  (
+                                    e as unknown as {
+                                      currentTarget: HTMLElement;
+                                    }
+                                  ).currentTarget.style.display = "none";
+                                }}
+                              />
+                            </div>
+                          )}
+                          <div className="flex flex-col">
+                            <span className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
+                              Suggested by
+                            </span>
+                            <a
+                              href={`https://discord.com/users/${change.suggestion_data.user_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-link hover:text-link-hover text-lg font-bold transition-colors hover:underline"
+                            >
+                              {change.suggestion_data.suggestor_name}
+                            </a>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <div className="border-border-card flex items-center justify-center overflow-hidden rounded-lg border">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleVotersClick("up", change.suggestion_data)
+                              }
+                              className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
+                              aria-label="View voters"
+                            >
+                              <Icon
+                                icon="material-symbols:thumb-up-rounded"
+                                className="text-button-success h-5 w-5"
+                                inline
+                              />
+                              <span className="text-button-success text-lg font-bold">
+                                {change.suggestion_data.vote_data.upvotes}
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleVotersClick(
+                                  "down",
+                                  change.suggestion_data,
+                                )
+                              }
+                              className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
+                              aria-label="View voters"
+                            >
+                              <Icon
+                                icon="material-symbols:thumb-down-rounded"
+                                className="text-button-danger h-5 w-5"
+                                inline
+                              />
+                              <span className="text-button-danger text-lg font-bold">
+                                {change.suggestion_data.vote_data.downvotes}
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      {change.suggestion_data?.data.reason &&
+                        (() => {
+                          const reason = change.suggestion_data.data.reason;
+                          const suggestionId = change.suggestion_data.id;
+                          const isExpanded = expandedReasons.has(suggestionId);
+                          const isTruncatable =
+                            reason.length > MAX_REASON_LENGTH ||
+                            reason.split("\n").length > 5;
+                          const withBold = reason.replace(
+                            /(Common Trades?:?)/gi,
+                            "**$1**",
+                          );
+                          const formatted = withBold
+                            .split(/\n\n+/)
+                            .map((part) => part.replace(/\n/g, "\n\n"))
+                            .join("\n\n");
+                          return (
+                            <div className="text-secondary-text mb-4 text-sm leading-relaxed font-medium">
+                              <div
+                                ref={(el) => {
+                                  if (change.suggestion_data) {
+                                    reasonRefs.current.set(
+                                      change.suggestion_data.id,
+                                      el,
+                                    );
+                                  }
+                                }}
+                                className={`overflow-hidden break-words transition-all duration-200 ${isTruncatable && !isExpanded ? "max-h-36" : ""}`}
+                              >
+                                <ReactMarkdown
+                                  components={{
+                                    strong: (props) => (
+                                      <b
+                                        className="text-primary-text"
+                                        {...props}
+                                      />
+                                    ),
+                                  }}
+                                >
+                                  {formatted}
+                                </ReactMarkdown>
+                              </div>
+                              {(overflowingReasons.has(suggestionId) ||
+                                (isExpanded && isTruncatable)) && (
+                                <button
+                                  onClick={() =>
+                                    toggleReasonExpansion(suggestionId)
+                                  }
+                                  className="text-link hover:text-link-hover mt-1 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <Icon
+                                        icon="heroicons-outline:chevron-up"
+                                        className="h-4 w-4"
+                                        inline={true}
+                                      />
+                                      Show Less
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Icon
+                                        icon="heroicons-outline:chevron-down"
+                                        className="h-4 w-4"
+                                        inline={true}
+                                      />
+                                      Read More
+                                    </>
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                      <div className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
+                        Suggested on{" "}
+                        {formatCustomDate(
+                          change.suggestion_data.created_at * 1000,
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div
+                  className={`${change.suggestion_data ? "mt-6" : "mt-0"} space-y-6`}
+                >
+                  {Object.entries(change.changes.old).map(([key, oldValue]) => {
+                    if (key === "last_updated") return null;
+                    const newValue = change.changes.new[key];
+                    const isNA = (v: unknown) =>
+                      v == null ||
+                      (typeof v === "string" &&
+                        v.trim().toUpperCase() === "N/A");
+                    // Hide rows where both sides are effectively N/A
+                    if (isNA(oldValue) && isNA(newValue)) return null;
+                    if (oldValue === newValue) return null;
+
+                    const formatValue = (
+                      k: string,
+                      v: unknown,
+                    ): {
+                      display: string;
+                      robloxId?: string;
+                      isCreator?: boolean;
+                      isBadimo?: boolean;
+                    } => {
+                      if (k === "cash_value" || k === "duped_value") {
+                        return { display: formatFullValue(String(v)) };
+                      }
+                      if (k === "price") {
+                        return { display: formatPrice(String(v)) };
+                      }
+                      if (k === "creator") {
+                        const creatorInfo = formatCreatorValue(
+                          v as ItemChangeValue | undefined,
+                        );
+                        return { ...creatorInfo, isCreator: true };
+                      }
+                      if (
+                        typeof v === "boolean" ||
+                        v === 1 ||
+                        v === 0 ||
+                        k.startsWith("is_")
+                      ) {
+                        return {
+                          display: formatBooleanLikeValue(
+                            v as ItemChangeValue | undefined,
+                          ),
+                        };
+                      }
+                      const str =
+                        v === "" || v === null || v === undefined
+                          ? "N/A"
+                          : String(v);
+                      return { display: str };
+                    };
+
+                    return (
+                      <div key={key}>
+                        <div className="flex items-start gap-2 overflow-hidden">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-primary-text mb-3 text-lg font-bold capitalize">
+                              <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                                {formatSuggestionTypeLabel(
+                                  change.suggestion_data?.metadata
+                                    ?.suggestion_type,
+                                  key,
+                                )}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                              <div className="min-w-0">
+                                <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                  <Icon
+                                    icon="mdi:minus-circle"
+                                    className="text-button-danger h-4 w-4"
+                                    inline={true}
+                                  />
+                                  {`OLD ${formatSuggestionTypeLabel(
+                                    change.suggestion_data?.metadata
+                                      ?.suggestion_type,
+                                    key,
+                                  ).toUpperCase()}`}
+                                </div>
+                                {(() => {
+                                  const formatted = formatValue(key, oldValue);
+                                  const displayValue = formatted.display;
+                                  const MAX_VISIBLE_CHARS = 200;
+                                  const isLong =
+                                    displayValue.length > MAX_VISIBLE_CHARS;
+                                  const expandKey = `${change.change_id}-${key}-old`;
+                                  const isExpanded =
+                                    expandedChanges.has(expandKey);
+                                  const shouldTruncate = isLong && !isExpanded;
+                                  const visibleContent = shouldTruncate
+                                    ? displayValue.slice(0, MAX_VISIBLE_CHARS) +
+                                      "..."
+                                    : displayValue;
+
+                                  return (
+                                    <>
+                                      <div
+                                        className="text-secondary-text overflow-hidden text-lg font-bold wrap-break-word line-through"
+                                        style={{
+                                          wordBreak: "normal",
+                                          overflowWrap: "anywhere",
+                                        }}
+                                      >
+                                        {formatted.isCreator ? (
+                                          formatted.isBadimo ? (
+                                            <a
+                                              href="https://www.roblox.com/communities/3059674/Badimo#!/about"
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-link hover:text-link-hover transition-colors hover:underline"
+                                            >
+                                              {visibleContent}
+                                            </a>
+                                          ) : formatted.robloxId ? (
+                                            <a
+                                              href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-link hover:text-link-hover transition-colors hover:underline"
+                                            >
+                                              {visibleContent}
+                                            </a>
+                                          ) : (
+                                            convertUrlsToLinks(visibleContent)
+                                          )
+                                        ) : (
+                                          convertUrlsToLinks(visibleContent)
+                                        )}
+                                      </div>
+                                      {isLong && (
+                                        <button
+                                          onClick={() =>
+                                            toggleChangeExpand(
+                                              change.change_id,
+                                              key,
+                                              "old",
+                                            )
+                                          }
+                                          className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                        >
+                                          {isExpanded ? (
+                                            <>
+                                              <Icon
+                                                icon="mdi:chevron-up"
+                                                className="h-4 w-4"
+                                                inline={true}
+                                              />
+                                              Show less
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Icon
+                                                icon="mdi:chevron-down"
+                                                className="h-4 w-4"
+                                                inline={true}
+                                              />
+                                              Read more
+                                            </>
+                                          )}
+                                        </button>
+                                      )}
+                                    </>
+                                  );
+                                })()}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                  <Icon
+                                    icon="mdi:plus-circle"
+                                    className="text-button-success h-4 w-4"
+                                    inline={true}
+                                  />
+                                  {`NEW ${formatSuggestionTypeLabel(
+                                    change.suggestion_data?.metadata
+                                      ?.suggestion_type,
+                                    key,
+                                  ).toUpperCase()}`}
+                                </div>
+                                {(() => {
+                                  const formatted = formatValue(key, newValue);
+                                  const displayValue = formatted.display;
+                                  const MAX_VISIBLE_CHARS = 200;
+                                  const isLong =
+                                    displayValue.length > MAX_VISIBLE_CHARS;
+                                  const expandKey = `${change.change_id}-${key}-new`;
+                                  const isExpanded =
+                                    expandedChanges.has(expandKey);
+                                  const shouldTruncate = isLong && !isExpanded;
+                                  const visibleContent = shouldTruncate
+                                    ? displayValue.slice(0, MAX_VISIBLE_CHARS) +
+                                      "..."
+                                    : displayValue;
+
+                                  return (
+                                    <>
+                                      <div
+                                        className="text-primary-text overflow-hidden text-lg font-bold wrap-break-word"
+                                        style={{
+                                          wordBreak: "normal",
+                                          overflowWrap: "anywhere",
+                                        }}
+                                      >
+                                        {formatted.isCreator ? (
+                                          formatted.isBadimo ? (
+                                            <a
+                                              href="https://www.roblox.com/communities/3059674/Badimo#!/about"
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-link hover:text-link-hover transition-colors hover:underline"
+                                            >
+                                              {visibleContent}
+                                            </a>
+                                          ) : formatted.robloxId ? (
+                                            <a
+                                              href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-link hover:text-link-hover transition-colors hover:underline"
+                                            >
+                                              {visibleContent}
+                                            </a>
+                                          ) : (
+                                            convertUrlsToLinks(visibleContent)
+                                          )
+                                        ) : (
+                                          convertUrlsToLinks(visibleContent)
+                                        )}
+                                      </div>
+                                      {isLong && (
+                                        <button
+                                          onClick={() =>
+                                            toggleChangeExpand(
+                                              change.change_id,
+                                              key,
+                                              "new",
+                                            )
+                                          }
+                                          className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                        >
+                                          {isExpanded ? (
+                                            <>
+                                              <Icon
+                                                icon="mdi:chevron-up"
+                                                className="h-4 w-4"
+                                                inline={true}
+                                              />
+                                              Show less
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Icon
+                                                icon="mdi:chevron-down"
+                                                className="h-4 w-4"
+                                                inline={true}
+                                              />
+                                              Read more
+                                            </>
+                                          )}
+                                        </button>
+                                      )}
+                                    </>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+                <div className="border-secondary-text mt-4 border-t pt-4">
+                  <span className="text-secondary-text text-sm">
+                    Changed on {formatCustomDate(change.created_at * 1000)}
+                  </span>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
     </div>

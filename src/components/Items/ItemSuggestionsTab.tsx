@@ -88,9 +88,10 @@ const fieldLabel = (field: string) =>
     .join(" ");
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-500/20 text-primary-text border-yellow-500/30",
-  approved: "bg-green-500/20 text-primary-text border-green-500/30",
-  rejected: "bg-red-500/20 text-primary-text border-red-500/30",
+  pending: "bg-status-warning/20 text-primary-text border-status-warning/30",
+  approved: "bg-status-success/20 text-primary-text border-status-success/30",
+  accepted: "bg-status-success/20 text-primary-text border-status-success/30",
+  rejected: "bg-status-error/20 text-primary-text border-status-error/30",
 };
 
 const badgeBase =
@@ -317,10 +318,16 @@ export default function ItemSuggestionsTab({
           return (
             <div
               key={suggestion.id}
-              className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border"
+              className="border-border-card bg-secondary-bg group hover:border-link hover:bg-tertiary-bg relative overflow-hidden rounded-xl border transition-colors"
             >
+              <Link
+                href={`/values/suggestions/${suggestion.id}`}
+                prefetch={false}
+                className="absolute inset-0 z-0"
+                aria-label={`View suggestion #${suggestion.id}`}
+              />
               {/* Votes */}
-              <div className="border-border-card flex flex-col border-b">
+              <div className="border-border-card relative z-10 flex flex-col border-b">
                 <div className="flex items-stretch">
                   <button
                     type="button"
@@ -377,7 +384,7 @@ export default function ItemSuggestionsTab({
                   <Link
                     href={`/values/suggestions/${suggestion.id}`}
                     prefetch={false}
-                    className="text-primary-text hover:text-link text-base font-bold transition-colors"
+                    className="text-primary-text group-hover:text-link text-base font-bold transition-colors"
                   >
                     Suggestion #{suggestion.id}
                   </Link>
@@ -511,7 +518,7 @@ export default function ItemSuggestionsTab({
                             return next;
                           })
                         }
-                        className="text-link hover:text-link-hover mt-1 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                        className="text-link hover:text-link-hover relative z-10 mt-1 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                       >
                         <Icon
                           icon={
@@ -533,7 +540,7 @@ export default function ItemSuggestionsTab({
                   <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
                     Suggested by
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="relative z-10 flex items-center gap-2">
                     <UserAvatar
                       userId={suggestion.user.id}
                       avatarHash={suggestion.user.avatar ?? null}
