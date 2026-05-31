@@ -489,6 +489,15 @@ export function useRealtimeNotificationsWebSocket(
               return;
             }
 
+            if (payload.action === "refresh_comments") {
+              window.dispatchEvent(
+                new CustomEvent("realtimeComments", {
+                  detail: { action: "refresh_comments" },
+                }),
+              );
+              return;
+            }
+
             if (payload.action === "refresh_trades") {
               window.dispatchEvent(
                 new CustomEvent("realtimeTrades", {

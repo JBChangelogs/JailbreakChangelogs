@@ -674,6 +674,29 @@ export function useCommentState(props: ChangelogCommentsProps) {
     return () => clearTimeout(timeoutId);
   }, [changelogId, refreshCommentsFromServer]);
 
+  // Silent refresh when the server broadcasts a comment change (page 1 only,
+  // skipped if the user is actively typing in any comment/reply/edit field)
+  useEffect(() => {
+    const handler = () => {
+      const isTyping =
+        isCommentFormExpanded ||
+        replyingToId !== null ||
+        editingCommentId !== null;
+      const sortAllowed = sortOrder === "newest" || sortOrder === "activity";
+      if (page === 1 && !isTyping && sortAllowed)
+        refreshCommentsFromServer(true, 1);
+    };
+    window.addEventListener("realtimeComments", handler);
+    return () => window.removeEventListener("realtimeComments", handler);
+  }, [
+    page,
+    isCommentFormExpanded,
+    replyingToId,
+    editingCommentId,
+    sortOrder,
+    refreshCommentsFromServer,
+  ]);
+
   /**
    * Submits a new top-level comment.
    * Optimistically updates the UI before confirming with a silent refresh.
