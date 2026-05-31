@@ -74,6 +74,19 @@ import type { UserData, UserFlag, UserSettingsV2 } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 import { parseBan, showBanToast, BanError } from "@/utils/api/ban";
 import { BanBanner } from "@/components/ui/BanBanner";
+import { useTwemoji } from "@/contexts/TwemojiContext";
+import Twemoji from "react-twemoji";
+import { CommentTextarea } from "@/components/PageComments/CommentTextarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const log = createLogger("UI");
 
@@ -769,6 +782,7 @@ export default function MessagesInbox() {
   } = useAuthContext();
   const messageBan = bans["communication"] ?? null;
   const emojiStringMap = useEmojiStringMap();
+  const { twemojiEnabled } = useTwemoji();
 
   const prepareMessageContentForApi = useCallback(
     (text: string) =>
@@ -791,6 +805,9 @@ export default function MessagesInbox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [editEmojiOpen, setEditEmojiOpen] = useState(false);
+  const editCursorPosRef = useRef<number | null>(null);
+  const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
     null,
@@ -892,6 +909,27 @@ export default function MessagesInbox() {
   const recentRealtimeEventKeysRef = useRef<Map<string, number>>(new Map());
   const localThreadMessagesByUserIdRef = useRef<Map<string, Message[]>>(
     new Map(),
+  );
+
+  const insertEditEmoji = useCallback(
+    (emoji: string, keepOpen = false) => {
+      const cursor = editCursorPosRef.current ?? editContent.length;
+      const next =
+        editContent.slice(0, cursor) + emoji + editContent.slice(cursor);
+      setEditContent(next);
+      editCursorPosRef.current = cursor + emoji.length;
+      if (!keepOpen) {
+        setEditEmojiOpen(false);
+        requestAnimationFrame(() => {
+          const el = editTextareaRef.current;
+          if (!el) return;
+          el.focus();
+          const pos = editCursorPosRef.current ?? next.length;
+          el.setSelectionRange(pos, pos);
+        });
+      }
+    },
+    [editContent],
   );
 
   const upsertLocalThreadMessage = useCallback(
@@ -3082,7 +3120,16 @@ export default function MessagesInbox() {
                         </div>
                         <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
                           <p className="text-secondary-text min-w-0 truncate text-xs">
-                            {formatMessageText(previewText)}
+                            {twemojiEnabled ? (
+                              <Twemoji
+                                tag="span"
+                                options={{ className: "twemoji" }}
+                              >
+                                {formatMessageText(previewText)}
+                              </Twemoji>
+                            ) : (
+                              formatMessageText(previewText)
+                            )}
                           </p>
                         </div>
                       </div>
@@ -4049,16 +4096,16 @@ export default function MessagesInbox() {
                                       </ChatEventTitle>
                                     ) : null}
                                     {editingMessageId === message.id ? (
-                                      <div className="mt-2 space-y-3">
-                                        <div className="space-y-2">
-                                          <textarea
+                                      <div className="mt-2 space-y-2">
+                                        <div className="border-border-card bg-tertiary-bg focus-within:border-button-info rounded border transition-colors">
+                                          <CommentTextarea
+                                            ref={editTextareaRef}
                                             value={editContent}
-                                            onChange={(e) =>
-                                              setEditContent(e.target.value)
-                                            }
+                                            onChange={setEditContent}
+                                            emojiMap={emojiStringMap}
                                             disabled={isSending}
                                             rows={3}
-                                            className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                                            className="text-primary-text placeholder-secondary-text w-full resize-y bg-transparent p-3 text-sm focus:outline-none disabled:opacity-60"
                                             autoCorrect="off"
                                             autoComplete="off"
                                             spellCheck="false"
@@ -4079,67 +4126,156 @@ export default function MessagesInbox() {
                                               }
                                             }}
                                           />
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <div className="flex items-center gap-2 lg:hidden">
-                                            <Button
-                                              size="sm"
-                                              className="h-8 px-4 text-xs"
-                                              onClick={() =>
-                                                void handleEditMessage(
-                                                  message.id,
-                                                )
-                                              }
-                                              disabled={
-                                                isSending || !editContent.trim()
-                                              }
+                                          <div className="border-border-card flex items-center justify-between gap-2 border-t px-3 py-2">
+                                            <Popover
+                                              open={editEmojiOpen}
+                                              onOpenChange={setEditEmojiOpen}
                                             >
-                                              {isSending ? (
-                                                <Spinner className="mr-1 h-3 w-3" />
-                                              ) : null}
-                                              Update
-                                            </Button>
-                                            <Button
-                                              size="sm"
-                                              variant="ghost"
-                                              className="text-secondary-text h-8 px-4 text-xs"
-                                              onClick={() => {
-                                                setEditingMessageId(null);
-                                                setEditContent("");
-                                              }}
-                                              disabled={isSending}
-                                            >
-                                              Cancel
-                                            </Button>
-                                          </div>
-                                          <div className="text-secondary-text hidden text-[11px] lg:block">
-                                            Esc to{" "}
-                                            <button
-                                              type="button"
-                                              className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-                                              onClick={() => {
-                                                setEditingMessageId(null);
-                                                setEditContent("");
-                                              }}
-                                              disabled={isSending}
-                                            >
-                                              cancel
-                                            </button>{" "}
-                                            • Enter to{" "}
-                                            <button
-                                              type="button"
-                                              className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-                                              onClick={() =>
-                                                void handleEditMessage(
-                                                  message.id,
-                                                )
-                                              }
-                                              disabled={
-                                                isSending || !editContent.trim()
-                                              }
-                                            >
-                                              save
-                                            </button>
+                                              <Tooltip delayDuration={500}>
+                                                <TooltipTrigger asChild>
+                                                  <PopoverTrigger asChild>
+                                                    <Button
+                                                      type="button"
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      className="text-secondary-text hover:text-primary-text h-7 w-7 p-0"
+                                                      disabled={isSending}
+                                                      onPointerDown={() => {
+                                                        editCursorPosRef.current =
+                                                          editTextareaRef
+                                                            .current
+                                                            ?.selectionStart ??
+                                                          null;
+                                                      }}
+                                                    >
+                                                      <Icon
+                                                        icon="heroicons:face-smile"
+                                                        className="h-4 w-4"
+                                                      />
+                                                    </Button>
+                                                  </PopoverTrigger>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                  Add an emoji
+                                                </TooltipContent>
+                                              </Tooltip>
+                                              <PopoverContent
+                                                align="start"
+                                                side="top"
+                                                sideOffset={8}
+                                                className="w-72 p-0"
+                                                onOpenAutoFocus={(e) =>
+                                                  e.preventDefault()
+                                                }
+                                              >
+                                                <div className="grid max-h-56 grid-cols-8 gap-px overflow-y-auto p-1.5">
+                                                  {Object.entries(
+                                                    emojiStringMap,
+                                                  )
+                                                    .slice(0, 120)
+                                                    .map(([name, emoji]) => (
+                                                      <Tooltip
+                                                        key={name}
+                                                        delayDuration={0}
+                                                      >
+                                                        <TooltipTrigger asChild>
+                                                          <button
+                                                            type="button"
+                                                            onClick={(e) =>
+                                                              insertEditEmoji(
+                                                                emoji,
+                                                                e.shiftKey,
+                                                              )
+                                                            }
+                                                            className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-transparent text-lg transition-colors"
+                                                          >
+                                                            {twemojiEnabled ? (
+                                                              <Twemoji
+                                                                tag="span"
+                                                                options={{
+                                                                  className:
+                                                                    "twemoji pointer-events-none",
+                                                                }}
+                                                              >
+                                                                {emoji}
+                                                              </Twemoji>
+                                                            ) : (
+                                                              <span className="pointer-events-none">
+                                                                {emoji}
+                                                              </span>
+                                                            )}
+                                                          </button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                          :{name}:
+                                                        </TooltipContent>
+                                                      </Tooltip>
+                                                    ))}
+                                                </div>
+                                              </PopoverContent>
+                                            </Popover>
+                                            <div className="flex items-center gap-2 lg:hidden">
+                                              <Button
+                                                size="sm"
+                                                className="h-8 px-4 text-xs"
+                                                onClick={() =>
+                                                  void handleEditMessage(
+                                                    message.id,
+                                                  )
+                                                }
+                                                disabled={
+                                                  isSending ||
+                                                  !editContent.trim()
+                                                }
+                                              >
+                                                {isSending ? (
+                                                  <Spinner className="mr-1 h-3 w-3" />
+                                                ) : null}
+                                                Update
+                                              </Button>
+                                              <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="text-secondary-text h-8 px-4 text-xs"
+                                                onClick={() => {
+                                                  setEditingMessageId(null);
+                                                  setEditContent("");
+                                                }}
+                                                disabled={isSending}
+                                              >
+                                                Cancel
+                                              </Button>
+                                            </div>
+                                            <div className="text-secondary-text hidden items-center gap-1 text-[11px] lg:flex">
+                                              Esc to{" "}
+                                              <button
+                                                type="button"
+                                                className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                                                onClick={() => {
+                                                  setEditingMessageId(null);
+                                                  setEditContent("");
+                                                }}
+                                                disabled={isSending}
+                                              >
+                                                cancel
+                                              </button>{" "}
+                                              • Enter to{" "}
+                                              <button
+                                                type="button"
+                                                className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                                                onClick={() =>
+                                                  void handleEditMessage(
+                                                    message.id,
+                                                  )
+                                                }
+                                                disabled={
+                                                  isSending ||
+                                                  !editContent.trim()
+                                                }
+                                              >
+                                                save
+                                              </button>
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
@@ -4156,8 +4292,21 @@ export default function MessagesInbox() {
                                                   : "text-primary-text",
                                             )}
                                           >
-                                            {formatMessageText(
-                                              message.content ?? "",
+                                            {twemojiEnabled ? (
+                                              <Twemoji
+                                                tag="span"
+                                                options={{
+                                                  className: "twemoji",
+                                                }}
+                                              >
+                                                {formatMessageText(
+                                                  message.content ?? "",
+                                                )}
+                                              </Twemoji>
+                                            ) : (
+                                              formatMessageText(
+                                                message.content ?? "",
+                                              )
                                             )}
                                             {message.updatedAt &&
                                               message.updatedAt !==
