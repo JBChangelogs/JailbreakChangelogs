@@ -92,6 +92,7 @@ export const SimilarItemsTab: React.FC<SimilarItemsTabProps> = ({
     "Low",
     "Below Average",
     "Average",
+    "Decent",
     "High",
     "Very High",
   ];

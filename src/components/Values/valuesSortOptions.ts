@@ -74,6 +74,7 @@ export const valueSortGroups: ValueSortGroup[] = [
       { value: "demand-low", label: "Low Demand" },
       { value: "demand-below-average", label: "Below Average Demand" },
       { value: "demand-average", label: "Average Demand" },
+      { value: "demand-decent", label: "Decent Demand" },
       { value: "demand-high", label: "High Demand" },
       { value: "demand-very-high", label: "Very High Demand" },
     ],

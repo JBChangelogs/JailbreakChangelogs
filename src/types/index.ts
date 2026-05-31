@@ -58,6 +58,7 @@ export type ValueSort =
   | "demand-low"
   | "demand-below-average"
   | "demand-average"
+  | "demand-decent"
   | "demand-high"
   | "demand-very-high"
   | "trend-stable"

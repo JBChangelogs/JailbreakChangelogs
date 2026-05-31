@@ -23,6 +23,7 @@ export const demandDescriptions: Record<string, string> = {
   Low: "Limited interest; often needs added value to move.",
   "Below Average": "Below average interest; trades can be inconsistent.",
   Average: "Average interest; generally trades without heavy overpay.",
+  Decent: "Above average interest; trades reliably with moderate pull power.",
   High: "Strong interest; usually trades quickly at solid value.",
   "Very High": "Very strong interest; often commands overpay due to demand.",
 };

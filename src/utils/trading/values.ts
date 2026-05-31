@@ -10,6 +10,7 @@ export const demandOrder = [
   "Low",
   "Below Average",
   "Average",
+  "Decent",
   "High",
   "Very High",
 ] as const;
@@ -31,6 +32,7 @@ export const demandValueMap: Record<string, string> = {
   "demand-low": "Low",
   "demand-below-average": "Below Average",
   "demand-average": "Average",
+  "demand-decent": "Decent",
   "demand-high": "High",
   "demand-very-high": "Very High",
 };
@@ -326,6 +328,7 @@ export const sortByValueSort = <T>(
     case "demand-low":
     case "demand-below-average":
     case "demand-average":
+    case "demand-decent":
     case "demand-high":
     case "demand-very-high":
     case "trend-stable":

@@ -105,6 +105,8 @@ export default function TradingGuides({
         return "#b45309";
       case "Average":
         return "#15803d";
+      case "Decent":
+        return "#16a34a";
       case "High":
         return "#2563eb";
       case "Very High":
@@ -126,6 +128,8 @@ export default function TradingGuides({
         return "demand-below-average";
       case "Average":
         return "demand-average";
+      case "Decent":
+        return "demand-decent";
       case "High":
         return "demand-high";
       case "Very High":
