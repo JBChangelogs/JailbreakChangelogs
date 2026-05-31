@@ -12,6 +12,8 @@ export const FEATURE_FLAGS = {
   SERVICE_AVAILABILITY_TICKER:
     process.env.NEXT_PUBLIC_SHOW_SERVICE_AVAILABILITY_TICKER === "true",
   NEWS_TICKER: process.env.NEXT_PUBLIC_SHOW_NEWS_TICKER === "true",
+  LIVE_EVENT_COUNTDOWN:
+    process.env.NEXT_PUBLIC_SHOW_LIVE_EVENT_COUNTDOWN === "true",
 } as const;
 
 export function isFeatureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {

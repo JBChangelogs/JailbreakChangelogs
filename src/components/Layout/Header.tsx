@@ -40,6 +40,7 @@ const AnimatedThemeToggler = dynamic(
 import { NavbarModern } from "@/components/ui/navbar";
 import ServiceAvailabilityTicker from "./ServiceAvailabilityTicker";
 import NewsTicker from "./NewsTicker";
+import EventCountdownBanner from "./EventCountdownBanner";
 import OfflineDetector from "../OfflineDetector";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -806,6 +807,7 @@ export default function Header() {
         style={{ viewTransitionName: "navbar" } as React.CSSProperties}
       >
         <OfflineDetector />
+        <EventCountdownBanner />
         <NewsTicker />
         <div className="relative z-10">
           <NavbarModern
@@ -824,6 +826,7 @@ export default function Header() {
       >
         <>
           <OfflineDetector />
+          <EventCountdownBanner />
           <NewsTicker />
           <div className="relative z-10">
             <div className="bg-primary-bg/75 border-border-card border-b backdrop-blur-lg">
