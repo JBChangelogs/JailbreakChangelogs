@@ -46,6 +46,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     itemType,
     trade,
     inventory,
+    suggestion,
     initialComments = [],
     initialUserMap = {},
   } = props;
@@ -1329,6 +1330,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     itemType,
     trade,
     inventory,
+    suggestion,
     comments,
     setComments,
     userData,

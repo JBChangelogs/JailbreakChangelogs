@@ -1229,6 +1229,7 @@ export default function ValueSuggestionDetailPage() {
                         changelogId={suggestion.id}
                         changelogTitle={`Value Suggestion #${suggestion.id}`}
                         type="vsuggestion"
+                        suggestion={{ suggester: suggestion.user.id }}
                       />
                     </TabsContent>
                   </Tabs>
@@ -1242,6 +1243,7 @@ export default function ValueSuggestionDetailPage() {
                       changelogId={suggestion.id}
                       changelogTitle={`Value Suggestion #${suggestion.id}`}
                       type="vsuggestion"
+                      suggestion={{ suggester: suggestion.user.id }}
                     />
                   </div>
 

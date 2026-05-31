@@ -21,6 +21,9 @@ export interface ChangelogCommentsProps {
   inventory?: {
     owner: string;
   };
+  suggestion?: {
+    suggester: string;
+  };
   initialComments?: CommentData[];
   initialUserMap?: Record<string, UserData>;
 }
