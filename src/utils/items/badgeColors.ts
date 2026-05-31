@@ -51,7 +51,7 @@ export const getDemandHexColor = (demand: string): string => {
     case "Below Average":
       return "#b45309";
     case "Average":
-      return "#15803d";
+      return "#facc15";
     case "Decent":
       return "#16a34a";
     case "High":
@@ -106,7 +106,7 @@ export const getDemandColor = (demand: string): string => {
     case "Below Average":
       return "bg-orange-700 text-white";
     case "Average":
-      return "bg-green-700 text-white";
+      return "bg-yellow-400 text-black";
     case "Decent":
       return "bg-green-600 text-white";
     case "High":
