@@ -149,12 +149,14 @@ export function useRealtimeNotificationsWebSocket(
   }, [isRealtimeNotificationsEnabled]);
 
   useEffect(() => {
+    const search =
+      typeof window !== "undefined" ? (window.location?.search ?? "") : "";
     const nextPath =
-      locationPath ??
-      (typeof window !== "undefined"
-        ? (window.location?.pathname ?? "") + (window.location?.search ?? "")
-        : null) ??
-      "/";
+      locationPath != null
+        ? locationPath + search
+        : typeof window !== "undefined"
+          ? (window.location?.pathname ?? "") + search
+          : "/";
     locationPathRef.current = nextPath;
 
     if (

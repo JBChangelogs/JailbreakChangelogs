@@ -9,7 +9,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { AuthState, UserData } from "@/types/auth";
 import { logout as authLogout, trackLogoutSource } from "@/utils/auth/auth";
@@ -59,9 +59,6 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const locationWithSearch =
-    searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname;
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
@@ -96,7 +93,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useRealtimeNotificationsWebSocket(
     (authState.isAuthenticated && !authState.isLoading) || !!getJbclToken(),
-    locationWithSearch,
+    pathname,
   );
 
   const initializeAuth = useCallback(async () => {
