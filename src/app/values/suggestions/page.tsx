@@ -1561,10 +1561,11 @@ export default function ValueSuggestionsPage() {
   };
 
   const handleGuidelinesConfirm = () => {
+    const isFirstTime = !localStorage.getItem(GUIDELINES_DISMISSED_KEY);
     localStorage.setItem(GUIDELINES_DISMISSED_KEY, "1");
     setGuidelinesOpen(false);
     toast.success("You have agreed to our suggestion guidelines.");
-    trackEvent("Suggestion Guidelines Accepted");
+    if (isFirstTime) trackEvent("Suggestion Guidelines Accepted");
   };
 
   return (
