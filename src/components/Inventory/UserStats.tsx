@@ -123,8 +123,15 @@ export default function UserStats({
       if (showOnlyNonOriginal && invItem.isOriginalOwner) return;
       const item = itemsMap.get(invItem.item_id.toString());
       if (!item) return;
-      if (showOnlyLimited && item.is_limited !== 1) return;
-      if (showOnlySeasonal && item.is_seasonal !== 1) return;
+      if (showOnlyLimited || showOnlySeasonal) {
+        const isLimited = item.is_limited === 1;
+        const isSeasonal = item.is_seasonal === 1;
+        if (
+          !(showOnlyLimited && isLimited) &&
+          !(showOnlySeasonal && isSeasonal)
+        )
+          return;
+      }
       itemCount++;
       inventoryValue += parseValue(item.cash_value);
     });
@@ -134,8 +141,15 @@ export default function UserStats({
       if (showOnlyNonOriginal && invItem.isOriginalOwner) return;
       const item = itemsMap.get(invItem.item_id.toString());
       if (!item) return;
-      if (showOnlyLimited && item.is_limited !== 1) return;
-      if (showOnlySeasonal && item.is_seasonal !== 1) return;
+      if (showOnlyLimited || showOnlySeasonal) {
+        const isLimited = item.is_limited === 1;
+        const isSeasonal = item.is_seasonal === 1;
+        if (
+          !(showOnlyLimited && isLimited) &&
+          !(showOnlySeasonal && isSeasonal)
+        )
+          return;
+      }
       itemCount++;
       dupedItemCount++;
       dupedValue += parseValue(item.duped_value);

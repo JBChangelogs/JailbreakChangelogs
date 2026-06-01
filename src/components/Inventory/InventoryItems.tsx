@@ -683,16 +683,14 @@ export default function InventoryItems({
           }
         }
 
-        // Filter by limited items
-        if (showOnlyLimited) {
-          if (itemData.is_limited !== 1) {
-            return false;
-          }
-        }
-
-        // Filter by seasonal items
-        if (showOnlySeasonal) {
-          if (itemData.is_seasonal !== 1) {
+        // Filter by limited/seasonal (OR logic when both are active)
+        if (showOnlyLimited || showOnlySeasonal) {
+          const isLimited = itemData.is_limited === 1;
+          const isSeasonal = itemData.is_seasonal === 1;
+          if (
+            !(showOnlyLimited && isLimited) &&
+            !(showOnlySeasonal && isSeasonal)
+          ) {
             return false;
           }
         }
@@ -905,16 +903,14 @@ export default function InventoryItems({
         }
       }
 
-      // Filter by limited items
-      if (showOnlyLimited) {
-        if (itemData.is_limited !== 1) {
-          return false;
-        }
-      }
-
-      // Filter by seasonal items
-      if (showOnlySeasonal) {
-        if (itemData.is_seasonal !== 1) {
+      // Filter by limited/seasonal (OR logic when both are active)
+      if (showOnlyLimited || showOnlySeasonal) {
+        const isLimited = itemData.is_limited === 1;
+        const isSeasonal = itemData.is_seasonal === 1;
+        if (
+          !(showOnlyLimited && isLimited) &&
+          !(showOnlySeasonal && isSeasonal)
+        ) {
           return false;
         }
       }
@@ -1178,8 +1174,14 @@ export default function InventoryItems({
                     : ""
               }${hideDuplicates ? " (Duplicates hidden)" : ""}${
                 showMissingItems ? " (Missing items)" : ""
-              }${showOnlyLimited ? " (Limited only)" : ""}${
-                showOnlySeasonal ? " (Seasonal only)" : ""
+              }${
+                showOnlyLimited && showOnlySeasonal
+                  ? " (Limited + Seasonal)"
+                  : showOnlyLimited
+                    ? " (Limited only)"
+                    : showOnlySeasonal
+                      ? " (Seasonal only)"
+                      : ""
               }${showOnlyTradable ? " (Tradable only)" : ""}${
                 showOnlyUntradable ? " (Untradable only)" : ""
               }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`

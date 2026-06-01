@@ -357,14 +357,7 @@ export default function InventoryFilters({
           Non-OG Only
         </Button>
         <Button
-          onClick={() => {
-            if (showOnlyLimited) {
-              onLimitedFilterToggle(false);
-            } else {
-              onLimitedFilterToggle(true);
-              onSeasonalFilterToggle(false);
-            }
-          }}
+          onClick={() => onLimitedFilterToggle(!showOnlyLimited)}
           size="sm"
           variant={showOnlyLimited ? "default" : "secondary"}
           className="w-fit"
@@ -378,14 +371,7 @@ export default function InventoryFilters({
           Limiteds Only
         </Button>
         <Button
-          onClick={() => {
-            if (showOnlySeasonal) {
-              onSeasonalFilterToggle(false);
-            } else {
-              onSeasonalFilterToggle(true);
-              onLimitedFilterToggle(false);
-            }
-          }}
+          onClick={() => onSeasonalFilterToggle(!showOnlySeasonal)}
           size="sm"
           variant={showOnlySeasonal ? "default" : "secondary"}
           className="w-fit"
@@ -404,128 +390,8 @@ export default function InventoryFilters({
       {showAdvancedFilters && (
         <div className="bg-tertiary-bg border-border-card rounded-lg border p-4">
           <div className="flex flex-col gap-4">
-            {/* Owner Type Radio Group */}
-            <div className="flex flex-col gap-2">
-              <span className="text-primary-text text-sm font-medium">
-                Owner Type:
-              </span>
-              <div className="flex flex-wrap gap-4">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="ownerType"
-                    checked={!showOnlyOriginal && !showOnlyNonOriginal}
-                    onChange={() => {
-                      onFilterToggle(false);
-                      onNonOriginalFilterToggle(false);
-                      window.rybbit?.event("Inventory Filter Owner Type Reset");
-                    }}
-                    className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
-                  />
-                  <span className="text-primary-text text-sm">All</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="ownerType"
-                    checked={showOnlyOriginal}
-                    onChange={() => {
-                      onFilterToggle(true);
-                      window.rybbit?.event("Inventory Filter Original Toggle", {
-                        active: true,
-                      });
-                    }}
-                    className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
-                  />
-                  <span className="text-primary-text text-sm">Original</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="ownerType"
-                    checked={showOnlyNonOriginal}
-                    onChange={() => {
-                      onNonOriginalFilterToggle(true);
-                      window.rybbit?.event(
-                        "Inventory Filter Non-Original Toggle",
-                        { active: true },
-                      );
-                    }}
-                    className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
-                  />
-                  <span className="text-primary-text text-sm">
-                    Non-Original
-                  </span>
-                </label>
-              </div>
-            </div>
-
             {/* Item Property Checkboxes */}
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <span className="text-primary-text text-sm font-medium">
-                  Item Type:
-                </span>
-                <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="itemType"
-                      checked={!showOnlyLimited && !showOnlySeasonal}
-                      onChange={() => {
-                        onLimitedFilterToggle(false);
-                        onSeasonalFilterToggle(false);
-                        window.rybbit?.event(
-                          "Inventory Filter Item Type Reset",
-                        );
-                      }}
-                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
-                    />
-                    <span className="text-primary-text text-sm">All</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="itemType"
-                      checked={showOnlyLimited}
-                      onChange={() => {
-                        onLimitedFilterToggle(true);
-                        onSeasonalFilterToggle(false);
-                        window.rybbit?.event(
-                          "Inventory Filter Limited Toggle",
-                          {
-                            active: true,
-                          },
-                        );
-                      }}
-                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
-                    />
-                    <span className="text-primary-text text-sm">
-                      Limited Only
-                    </span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="itemType"
-                      checked={showOnlySeasonal}
-                      onChange={() => {
-                        onLimitedFilterToggle(false);
-                        onSeasonalFilterToggle(true);
-                        window.rybbit?.event(
-                          "Inventory Filter Seasonal Toggle",
-                          { active: true },
-                        );
-                      }}
-                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
-                    />
-                    <span className="text-primary-text text-sm">
-                      Seasonal Only
-                    </span>
-                  </label>
-                </div>
-              </div>
-
               <div className="flex flex-col gap-2">
                 <span className="text-primary-text text-sm font-medium">
                   Tradability:
