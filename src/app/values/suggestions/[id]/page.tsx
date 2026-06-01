@@ -324,19 +324,19 @@ export default function ValueSuggestionDetailPage() {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
-        `/value-suggestions/${id}`,
+        `/value-suggestions/${id}/votes`,
       );
       const res = await fetch(url, { credentials: "include", headers });
       if (!res.ok) return;
-      const fresh: Suggestion = await res.json();
-      setVoteCounts({ up: fresh.upvotes, down: fresh.downvotes });
+      const fresh: Suggestion["votes"] = await res.json();
+      setVoteCounts({ up: fresh.upvotes.length, down: fresh.downvotes.length });
       setSuggestion((prev) =>
         prev
           ? {
               ...prev,
-              upvotes: fresh.upvotes,
-              downvotes: fresh.downvotes,
-              votes: fresh.votes,
+              upvotes: fresh.upvotes.length,
+              downvotes: fresh.downvotes.length,
+              votes: fresh,
             }
           : prev,
       );
@@ -367,7 +367,7 @@ export default function ValueSuggestionDetailPage() {
         if (prevVote) next[prevVote === "upvote" ? "up" : "down"] -= 1;
         next[type === "upvote" ? "up" : "down"] += 1;
       }
-      return next;
+      return { up: Math.max(0, next.up), down: Math.max(0, next.down) };
     });
 
     setVoteLoading(true);

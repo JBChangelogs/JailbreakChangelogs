@@ -1082,7 +1082,11 @@ export default function ValueSuggestionsPage() {
           if (type === "upvote") upvotes++;
           else downvotes++;
         }
-        return { ...s, upvotes, downvotes };
+        return {
+          ...s,
+          upvotes: Math.max(0, upvotes),
+          downvotes: Math.max(0, downvotes),
+        };
       }),
     );
 
@@ -1374,29 +1378,29 @@ export default function ValueSuggestionsPage() {
         if (id != null) {
           const { url, headers } = buildApiFetchRequest(
             PUBLIC_API_URL!,
-            `/value-suggestions/${id}`,
+            `/value-suggestions/${id}/votes`,
           );
           const res = await fetch(url, { credentials: "include", headers });
           if (!res.ok) return;
-          const fresh: Suggestion = await res.json();
+          const fresh: Suggestion["votes"] = await res.json();
           setSuggestions((prev) =>
             prev.map((s) =>
-              s.id === fresh.id
+              s.id === id
                 ? {
                     ...s,
-                    upvotes: fresh.upvotes,
-                    downvotes: fresh.downvotes,
-                    votes: fresh.votes,
+                    upvotes: fresh.upvotes.length,
+                    downvotes: fresh.downvotes.length,
+                    votes: fresh,
                   }
                 : s,
             ),
           );
-          if (openVotersSuggestionIdRef.current === fresh.id) {
+          if (openVotersSuggestionIdRef.current === id) {
             setActiveVoters({
-              up: fresh.votes.upvotes,
-              down: fresh.votes.downvotes,
-              upCount: fresh.upvotes,
-              downCount: fresh.downvotes,
+              up: fresh.upvotes,
+              down: fresh.downvotes,
+              upCount: fresh.upvotes.length,
+              downCount: fresh.downvotes.length,
             });
           }
         } else {
