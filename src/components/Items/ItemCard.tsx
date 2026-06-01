@@ -641,23 +641,23 @@ export default function ItemCard({
               </span>
             </div>
 
-            <div className="border-border-card bg-tertiary-bg grid grid-cols-1 rounded-lg border md:grid-cols-2">
-              <div className="flex items-center justify-between p-1 sm:p-2.5">
-                <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+            <div className="border-border-card bg-tertiary-bg grid grid-cols-2 rounded-lg border">
+              <div className="flex flex-col gap-1 p-1 sm:p-2.5">
+                <span className="text-secondary-text text-xs font-medium">
                   Demand
                 </span>
                 <span
-                  className={`${getDemandColor(currentItemData.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
+                  className={`${getDemandColor(currentItemData.demand)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
                 >
                   {demandLabel}
                 </span>
               </div>
-              <div className="border-border-card flex items-center justify-between border-t p-1 sm:p-2.5 md:border-t-0 md:border-l">
-                <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+              <div className="border-border-card flex flex-col gap-1 border-l p-1 sm:p-2.5">
+                <span className="text-secondary-text text-xs font-medium">
                   Duped
                 </span>
                 <span
-                  className={`${getDemandColor(dupedDemandLabel)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
+                  className={`${getDemandColor(dupedDemandLabel)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
                 >
                   {dupedDemandLabel}
                 </span>
