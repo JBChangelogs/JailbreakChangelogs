@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,8 @@ interface OGFiltersProps {
   sortOrder: string;
   setSortOrder: (order: string) => void;
   initialData: OGSearchData | null;
+  showOnlyLimited: boolean;
+  onLimitedFilterToggle: (checked: boolean) => void;
 }
 
 export default function OGFilters({
@@ -55,6 +58,8 @@ export default function OGFilters({
   sortOrder,
   setSortOrder,
   initialData,
+  showOnlyLimited,
+  onLimitedFilterToggle,
 }: OGFiltersProps) {
   const MAX_SEARCH_LENGTH = 50;
 
@@ -91,190 +96,205 @@ export default function OGFilters({
     : false;
 
   return (
-    <div className="flex w-full flex-col gap-4 sm:flex-row">
-      {/* Search Bar */}
-      <div className="relative w-full sm:w-1/3">
-        <input
-          type="text"
-          placeholder="Search items..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          maxLength={MAX_SEARCH_LENGTH}
-          className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-14 w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
-        />
-        <Icon
-          icon="heroicons:magnifying-glass"
-          className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
-        />
-        {searchTerm && (
-          <button
-            onClick={() => setSearchTerm("")}
-            className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-            aria-label="Clear search"
-          >
-            <Icon icon="heroicons:x-mark" />
-          </button>
-        )}
-      </div>
-
-      {/* Category Filter */}
-      <div className="w-full sm:w-1/3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+    <div className="flex flex-col gap-4">
+      <div className="flex w-full flex-col gap-4 sm:flex-row">
+        {/* Search Bar */}
+        <div className="relative w-full sm:w-1/3">
+          <input
+            type="text"
+            placeholder="Search items..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            maxLength={MAX_SEARCH_LENGTH}
+            className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-14 w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+          />
+          <Icon
+            icon="heroicons:magnifying-glass"
+            className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+          />
+          {searchTerm && (
             <button
-              type="button"
-              className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-              aria-label="Filter by category"
+              onClick={() => setSearchTerm("")}
+              className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+              aria-label="Clear search"
             >
-              <span className="truncate">
-                {selectedCategoryValue === "all"
-                  ? "All categories"
-                  : selectedCategoryValue}
-              </span>
-              <Icon
-                icon="heroicons:chevron-down"
-                className="text-secondary-text h-5 w-5"
-                inline={true}
-              />
+              <Icon icon="heroicons:x-mark" />
             </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="border-border-card bg-tertiary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-          >
-            <DropdownMenuRadioGroup
-              value={selectedCategoryValue}
-              onValueChange={(val) => {
-                if (val === "all") {
-                  setSelectedCategories([]);
-                } else {
-                  setSelectedCategories([val]);
-                }
-                window.rybbit?.event("OG Search Category Change", {
-                  category: val === "all" ? "All" : val,
-                });
-              }}
-            >
-              <DropdownMenuRadioItem
-                value="all"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+          )}
+        </div>
+
+        {/* Category Filter */}
+        <div className="w-full sm:w-1/3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                aria-label="Filter by category"
               >
-                All categories
-              </DropdownMenuRadioItem>
-              {availableCategories.map((category) => (
+                <span className="truncate">
+                  {selectedCategoryValue === "all"
+                    ? "All categories"
+                    : selectedCategoryValue}
+                </span>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className="text-secondary-text h-5 w-5"
+                  inline={true}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="border-border-card bg-tertiary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+            >
+              <DropdownMenuRadioGroup
+                value={selectedCategoryValue}
+                onValueChange={(val) => {
+                  if (val === "all") {
+                    setSelectedCategories([]);
+                  } else {
+                    setSelectedCategories([val]);
+                  }
+                  window.rybbit?.event("OG Search Category Change", {
+                    category: val === "all" ? "All" : val,
+                  });
+                }}
+              >
                 <DropdownMenuRadioItem
-                  key={category}
-                  value={category}
+                  value="all"
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
-                  {category}
+                  All categories
                 </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+                {availableCategories.map((category) => (
+                  <DropdownMenuRadioItem
+                    key={category}
+                    value={category}
+                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  >
+                    {category}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-      {/* Sort Filter */}
-      <div className="w-full sm:w-1/3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-              aria-label="Sort items"
+        {/* Sort Filter */}
+        <div className="w-full sm:w-1/3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                aria-label="Sort items"
+              >
+                <span className="truncate">
+                  {sortLabels[sortOrder] ?? "Sort"}
+                </span>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className="text-secondary-text h-5 w-5"
+                  inline={true}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="border-border-card bg-tertiary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
-              <span className="truncate">
-                {sortLabels[sortOrder] ?? "Sort"}
-              </span>
-              <Icon
-                icon="heroicons:chevron-down"
-                className="text-secondary-text h-5 w-5"
-                inline={true}
-              />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="border-border-card bg-tertiary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-          >
-            <DropdownMenuRadioGroup
-              value={sortOrder}
-              onValueChange={(val) => {
-                setSortOrder(val);
-                window.rybbit?.event("OG Search Sort Change", { sort: val });
-              }}
-            >
-              {hasDuplicates && (
+              <DropdownMenuRadioGroup
+                value={sortOrder}
+                onValueChange={(val) => {
+                  setSortOrder(val);
+                  window.rybbit?.event("OG Search Sort Change", { sort: val });
+                }}
+              >
+                {hasDuplicates && (
+                  <DropdownMenuRadioItem
+                    value="duplicates"
+                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  >
+                    Group Duplicates
+                  </DropdownMenuRadioItem>
+                )}
+                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                  Alphabetically
+                </DropdownMenuLabel>
                 <DropdownMenuRadioItem
-                  value="duplicates"
+                  value="alpha-asc"
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
-                  Group Duplicates
+                  Name (A to Z)
                 </DropdownMenuRadioItem>
-              )}
-              <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                Alphabetically
-              </DropdownMenuLabel>
-              <DropdownMenuRadioItem
-                value="alpha-asc"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Name (A to Z)
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem
-                value="alpha-desc"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Name (Z to A)
-              </DropdownMenuRadioItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                Date
-              </DropdownMenuLabel>
-              <DropdownMenuRadioItem
-                value="created-desc"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Logged On (Newest to Oldest)
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem
-                value="created-asc"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Logged On (Oldest to Newest)
-              </DropdownMenuRadioItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                Value
-              </DropdownMenuLabel>
-              <DropdownMenuRadioItem
-                value="cash-desc"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Cash Value (High to Low)
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem
-                value="cash-asc"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Cash Value (Low to High)
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem
-                value="duped-desc"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Dupe Value (High to Low)
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem
-                value="duped-asc"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Dupe Value (Low to High)
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <DropdownMenuRadioItem
+                  value="alpha-desc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Name (Z to A)
+                </DropdownMenuRadioItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                  Date
+                </DropdownMenuLabel>
+                <DropdownMenuRadioItem
+                  value="created-desc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Logged On (Newest to Oldest)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="created-asc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Logged On (Oldest to Newest)
+                </DropdownMenuRadioItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                  Value
+                </DropdownMenuLabel>
+                <DropdownMenuRadioItem
+                  value="cash-desc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Cash Value (High to Low)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="cash-asc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Cash Value (Low to High)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="duped-desc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Dupe Value (High to Low)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="duped-asc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Dupe Value (Low to High)
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Quick Filter Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          onClick={() => onLimitedFilterToggle(!showOnlyLimited)}
+          size="sm"
+          variant={showOnlyLimited ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon icon="heroicons:star" className="h-4 w-4" inline={true} />
+          Limiteds Only
+        </Button>
       </div>
     </div>
   );

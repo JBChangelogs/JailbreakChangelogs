@@ -77,6 +77,7 @@ export default function OGFinderResults({
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showOnlyLimited, setShowOnlyLimited] = useState(false);
   const [sortOrder, setSortOrder] = useState<
     | "alpha-asc"
     | "alpha-desc"
@@ -219,6 +220,12 @@ export default function OGFinderResults({
       const matchesCategory =
         selectedCategories.length === 0 ||
         selectedCategories.includes(item.categoryTitle);
+
+      if (showOnlyLimited) {
+        const itemKey = `${item.categoryTitle}-${item.title}`;
+        const itemData = itemsMap.get(itemKey);
+        if (!itemData || itemData.is_limited !== 1) return false;
+      }
 
       return matchesSearch && matchesCategory;
     });
@@ -543,7 +550,14 @@ export default function OGFinderResults({
             getUsername={getUsername}
             getUserAvatar={getUserAvatar}
             getHasVerifiedBadge={getHasVerifiedBadge}
-            originalItemsCount={initialData?.count || 0}
+            originalItemsCount={filteredAndSortedItems.length}
+            itemsLabel={
+              showOnlyLimited
+                ? "Limited Original Items"
+                : searchTerm || selectedCategories.length > 0
+                  ? "Filtered Items"
+                  : "Original Items"
+            }
           />
 
           {/* Items Grid */}
@@ -562,15 +576,17 @@ export default function OGFinderResults({
                   setSortOrder(order as typeof sortOrder)
                 }
                 initialData={initialData}
+                showOnlyLimited={showOnlyLimited}
+                onLimitedFilterToggle={setShowOnlyLimited}
               />
             </div>
             {/* Item Counter */}
             <div className="mb-4">
               <p className="text-secondary-text">
-                {searchTerm || selectedCategories.length > 0
+                {searchTerm || selectedCategories.length > 0 || showOnlyLimited
                   ? `Found ${filteredAndSortedItems.length} ${filteredAndSortedItems.length === 1 ? "item" : "items"}${
                       searchTerm ? ` matching "${searchTerm}"` : ""
-                    }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`
+                    }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}${showOnlyLimited ? " (Limited only)" : ""}`
                   : `Total Items: ${filteredAndSortedItems.length}`}
               </p>
             </div>
