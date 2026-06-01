@@ -89,9 +89,16 @@ export default function NitroValuesSuggestionDetailVideoPlayer({
   }
 
   return (
-    <div className={cn("w-full", className)}>
-      <div className="bg-secondary-background relative aspect-video w-full overflow-hidden rounded-lg">
-        <div id={SLOT_ID} ref={containerRef} className="h-full w-full" />
+    <div
+      className={cn(
+        "flex items-center justify-center p-4 sm:w-96 sm:shrink-0",
+        className,
+      )}
+    >
+      <div className="w-full">
+        <div className="bg-secondary-background relative aspect-video w-full overflow-hidden rounded-lg">
+          <div id={SLOT_ID} ref={containerRef} className="h-full w-full" />
+        </div>
       </div>
     </div>
   );

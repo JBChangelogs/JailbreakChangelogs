@@ -81,13 +81,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
     new Set(),
   );
   const sortPrefKey = `comments_sort_${type}`;
-  const [sortOrder, setSortOrder] = useState(
+  const [sortOrder, setSortOrder] = useState<string | null>(
     () =>
       (typeof window !== "undefined"
         ? (localStorage.getItem(`comments_sort_${type}`) ?? undefined)
         : undefined) ??
       (getCachedPreference(`comments_sort_${type}`) as string | undefined) ??
-      "newest",
+      null,
   );
   const [availableSorts, setAvailableSorts] = useState<string[]>([]);
 
@@ -485,8 +485,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
     fetch(`${PUBLIC_API_URL}/comments/sorts`)
       .then((r) => r.json())
       .then((data: unknown) => {
-        if (Array.isArray(data) && data.every((s) => typeof s === "string")) {
+        if (
+          Array.isArray(data) &&
+          data.every((s) => typeof s === "string") &&
+          data.length > 0
+        ) {
           setAvailableSorts(data as string[]);
+          setSortOrder((prev) => prev ?? (data as string[])[0]);
         }
       })
       .catch(() => {});
@@ -626,7 +631,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         const urlWithPage = new URL(commentsBaseUrl);
         urlWithPage.searchParams.set("page", String(targetPage));
         const effectiveSort = sort ?? sortOrder;
-        if (effectiveSort !== "newest") {
+        if (effectiveSort !== null) {
           urlWithPage.searchParams.set("sort", effectiveSort);
         }
 

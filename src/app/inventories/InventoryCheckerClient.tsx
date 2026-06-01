@@ -128,7 +128,10 @@ export default function InventoryCheckerClient({
     shallow: true,
   });
   const [mountedTabs, setMountedTabs] = useState<Set<number>>(new Set([0]));
-  const [showNonOgOnly, setShowNonOgOnly] = useState(false);
+  const [showOnlyOriginal, setShowOnlyOriginal] = useState(false);
+  const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(false);
+  const [showOnlyLimited, setShowOnlyLimited] = useState(false);
+  const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
   const [queuePosition, setQueuePosition] = useState<{
     position: number;
     delay: number;
@@ -1176,8 +1179,10 @@ export default function InventoryCheckerClient({
                 currentSeason={activeSeason}
                 seasonRateLimitMessage={seasonRateLimitMessage}
                 initialNetworthData={networthData}
-                showNonOgOnly={showNonOgOnly}
-                setShowNonOgOnly={setShowNonOgOnly}
+                showOnlyNonOriginal={showOnlyNonOriginal}
+                showOnlyOriginal={showOnlyOriginal}
+                showOnlyLimited={showOnlyLimited}
+                showOnlySeasonal={showOnlySeasonal}
                 scanWebSocket={scanWebSocket}
               />
 
@@ -1204,7 +1209,10 @@ export default function InventoryCheckerClient({
                       onItemClick={handleItemClick}
                       itemsData={itemsData}
                       isOwnInventory={isOwnInventory}
-                      showNonOgOnlyFromParent={showNonOgOnly}
+                      onShowOnlyOriginalChange={setShowOnlyOriginal}
+                      onShowOnlyNonOriginalChange={setShowOnlyNonOriginal}
+                      onShowOnlyLimitedChange={setShowOnlyLimited}
+                      onShowOnlySeasonalChange={setShowOnlySeasonal}
                     />
                   </div>
 

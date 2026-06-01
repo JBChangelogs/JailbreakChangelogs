@@ -14,7 +14,7 @@ const buttonVariants = cva(
         destructive:
           "bg-status-error! text-form-button-text! hover:bg-status-error/90! active:bg-status-error!",
         success:
-          "bg-status-success! text-form-button-text! hover:bg-status-success/90! active:bg-status-success!",
+          "bg-button-success! text-form-button-text! hover:bg-button-success-hover! active:bg-button-success!",
         outline:
           "border-2! border-primary-text! text-primary-text! hover:bg-button-info-hover! hover:text-form-button-text! active:bg-button-info-active! active:text-form-button-text!",
         heroOutline:

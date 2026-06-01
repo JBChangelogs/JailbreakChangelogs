@@ -288,10 +288,15 @@ function SuggestionForm({
         <div ref={itemSearchRef} className="relative">
           <label
             htmlFor="item-search"
-            className="text-secondary-text mb-1.5 block text-sm font-medium"
+            className="text-primary-text mb-1.5 block text-sm font-medium"
           >
             Item
           </label>
+          <div className="bg-button-info/10 border-border-card mb-2 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+            <span className="text-primary-text">
+              Only tradable items are shown in search results.
+            </span>
+          </div>
           {selectedItem ? (
             <button
               type="button"
@@ -334,25 +339,49 @@ function SuggestionForm({
             </button>
           ) : (
             <>
-              <input
-                id="item-search"
-                type="text"
-                placeholder={
-                  loadingItems ? "Loading items..." : "Search for an item..."
-                }
-                disabled={loadingItems}
-                value={itemSearch}
-                onChange={(e) => {
-                  setItemSearch(e.target.value);
-                  setShowItemDropdown(true);
-                }}
-                onFocus={() => setShowItemDropdown(true)}
-                className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none disabled:opacity-50"
-              />
+              <div className="relative">
+                <input
+                  id="item-search"
+                  type="text"
+                  placeholder={
+                    loadingItems ? "Loading items..." : "Search for an item..."
+                  }
+                  disabled={loadingItems}
+                  value={itemSearch}
+                  onChange={(e) => {
+                    setItemSearch(e.target.value);
+                    setShowItemDropdown(true);
+                  }}
+                  onFocus={() => setShowItemDropdown(true)}
+                  className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 pr-16 text-sm transition-colors outline-none disabled:opacity-50"
+                />
+                <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                  {itemSearch && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setItemSearch("");
+                        setShowItemDropdown(false);
+                      }}
+                      className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <Icon icon="heroicons:x-mark" className="h-4 w-4" />
+                    </button>
+                  )}
+                  {itemSearch && (
+                    <div className="border-primary-text h-4 border-l opacity-30" />
+                  )}
+                  <Icon
+                    icon="heroicons:magnifying-glass"
+                    className={`h-4 w-4 ${itemSearch ? "text-link" : "text-secondary-text"}`}
+                  />
+                </div>
+              </div>
               {showItemDropdown && itemSearch.length > 0 && (
                 <div className="border-border-card bg-secondary-bg absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border shadow-lg">
                   {filteredItems.length === 0 ? (
-                    <p className="text-secondary-text px-3 py-2 text-sm">
+                    <p className="text-secondary-text flex items-center px-3 py-6 text-sm">
                       No items found
                     </p>
                   ) : (
@@ -403,7 +432,7 @@ function SuggestionForm({
 
         {/* Field */}
         <div>
-          <p className="text-secondary-text mb-1.5 block text-sm font-medium">
+          <p className="text-primary-text mb-1.5 block text-sm font-medium">
             Field
           </p>
           <div className="flex flex-wrap gap-2">
@@ -505,7 +534,7 @@ function SuggestionForm({
 
         {/* Suggested value */}
         <div>
-          <label className="text-secondary-text mb-1.5 block text-sm font-medium">
+          <label className="text-primary-text mb-1.5 block text-sm font-medium">
             Suggested {fieldLabel(field)}
           </label>
           {field === "trend" ? (
@@ -623,7 +652,7 @@ function SuggestionForm({
         {/* Reason */}
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-secondary-text text-sm font-medium">
+            <label className="text-primary-text text-sm font-medium">
               Reason for Suggested {fieldLabel(field)}
             </label>
             <span
@@ -1082,7 +1111,11 @@ export default function ValueSuggestionsPage() {
           if (type === "upvote") upvotes++;
           else downvotes++;
         }
-        return { ...s, upvotes, downvotes };
+        return {
+          ...s,
+          upvotes: Math.max(0, upvotes),
+          downvotes: Math.max(0, downvotes),
+        };
       }),
     );
 
@@ -1244,6 +1277,15 @@ export default function ValueSuggestionsPage() {
     setVotersOpen(true);
   };
 
+  // Sort state
+  const [sort, setSort] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("vsuggestions_sort");
+    }
+    return null;
+  });
+  const [availableSorts, setAvailableSorts] = useState<string[]>([]);
+
   // Search + filter state
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
@@ -1317,103 +1359,129 @@ export default function ValueSuggestionsPage() {
     pageRef.current = page;
   }, [page]);
 
-  const fetchSuggestions = useCallback(async (p: number) => {
-    setLoadingSuggestions(true);
-    setSuggestionsError(null);
-    setNoSuggestionsFound(false);
-    setPendingNew(0);
-    setPendingTypes(new Set());
-    try {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL!,
-        `/value-suggestions/recent?page=${p}`,
-      );
-      const res = await fetch(url, { credentials: "include", headers });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        if (res.status === 404 && body?.error === "no_suggestions_found") {
-          setNoSuggestionsFound(true);
-          setSuggestions([]);
-          setTotalPages(1);
-          setTotal(0);
-          return;
-        }
-        log.error("fetch suggestions failed", { status: res.status, body });
-        throw new Error("Failed to fetch suggestions");
-      }
-      const data: SuggestionsResponse = await res.json();
-      setSuggestions(data.items ?? []);
-      setTotalPages(data.total_pages ?? 1);
-      setTotal(data.total ?? 0);
-    } catch (err) {
-      setSuggestionsError(
-        err instanceof Error ? err.message : "Failed to load suggestions",
-      );
-    } finally {
-      setLoadingSuggestions(false);
-    }
-  }, []);
-
-  const silentRefreshVotes = useCallback(async (id?: number | null) => {
-    try {
-      if (id != null) {
+  const fetchSuggestions = useCallback(
+    async (p: number) => {
+      setLoadingSuggestions(true);
+      setSuggestionsError(null);
+      setNoSuggestionsFound(false);
+      setPendingNew(0);
+      setPendingTypes(new Set());
+      try {
+        const qs = new URLSearchParams({ page: String(p) });
+        if (sort !== null) qs.set("sort", sort);
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/value-suggestions/${id}`,
+          `/value-suggestions/recent?${qs}`,
         );
         const res = await fetch(url, { credentials: "include", headers });
-        if (!res.ok) return;
-        const fresh: Suggestion = await res.json();
-        setSuggestions((prev) =>
-          prev.map((s) =>
-            s.id === fresh.id
-              ? {
-                  ...s,
-                  upvotes: fresh.upvotes,
-                  downvotes: fresh.downvotes,
-                  votes: fresh.votes,
-                }
-              : s,
-          ),
-        );
-        if (openVotersSuggestionIdRef.current === fresh.id) {
-          setActiveVoters({
-            up: fresh.votes.upvotes,
-            down: fresh.votes.downvotes,
-            upCount: fresh.upvotes,
-            downCount: fresh.downvotes,
-          });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          if (res.status === 404 && body?.error === "no_suggestions_found") {
+            setNoSuggestionsFound(true);
+            setSuggestions([]);
+            setTotalPages(1);
+            setTotal(0);
+            return;
+          }
+          log.error("fetch suggestions failed", { status: res.status, body });
+          throw new Error("Failed to fetch suggestions");
         }
-      } else {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/value-suggestions/recent?page=${pageRef.current}`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (!res.ok) return;
         const data: SuggestionsResponse = await res.json();
-        const freshMap = new Map(data.items.map((s) => [s.id, s]));
-        setSuggestions((prev) =>
-          prev.map((s) => {
-            const fresh = freshMap.get(s.id);
-            if (!fresh) return s;
-            return {
-              ...s,
-              upvotes: fresh.upvotes,
-              downvotes: fresh.downvotes,
-              votes: fresh.votes,
-            };
-          }),
+        setSuggestions(data.items ?? []);
+        setTotalPages(data.total_pages ?? 1);
+        setTotal(data.total ?? 0);
+      } catch (err) {
+        setSuggestionsError(
+          err instanceof Error ? err.message : "Failed to load suggestions",
         );
+      } finally {
+        setLoadingSuggestions(false);
       }
-    } catch {
-      // silently fail — stale counts are acceptable
-    }
-  }, []);
+    },
+    [sort],
+  );
+
+  const silentRefreshVotes = useCallback(
+    async (id?: number | null) => {
+      try {
+        if (id != null) {
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL!,
+            `/value-suggestions/${id}/votes`,
+          );
+          const res = await fetch(url, { credentials: "include", headers });
+          if (!res.ok) return;
+          const fresh: Suggestion["votes"] = await res.json();
+          setSuggestions((prev) =>
+            prev.map((s) =>
+              s.id === id
+                ? {
+                    ...s,
+                    upvotes: fresh.upvotes.length,
+                    downvotes: fresh.downvotes.length,
+                    votes: fresh,
+                  }
+                : s,
+            ),
+          );
+          if (openVotersSuggestionIdRef.current === id) {
+            setActiveVoters({
+              up: fresh.upvotes,
+              down: fresh.downvotes,
+              upCount: fresh.upvotes.length,
+              downCount: fresh.downvotes.length,
+            });
+          }
+        } else {
+          const silentQs = new URLSearchParams({
+            page: String(pageRef.current),
+          });
+          if (sort !== null) silentQs.set("sort", sort);
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL!,
+            `/value-suggestions/recent?${silentQs}`,
+          );
+          const res = await fetch(url, { credentials: "include", headers });
+          if (!res.ok) return;
+          const data: SuggestionsResponse = await res.json();
+          const freshMap = new Map(data.items.map((s) => [s.id, s]));
+          setSuggestions((prev) =>
+            prev.map((s) => {
+              const fresh = freshMap.get(s.id);
+              if (!fresh) return s;
+              return {
+                ...s,
+                upvotes: fresh.upvotes,
+                downvotes: fresh.downvotes,
+                votes: fresh.votes,
+              };
+            }),
+          );
+        }
+      } catch {
+        // silently fail — stale counts are acceptable
+      }
+    },
+    [sort],
+  );
 
   useEffect(() => {
     fetchSuggestions(page);
   }, [fetchSuggestions, page]);
+
+  useEffect(() => {
+    if (suggestions.length === 0) return;
+    if (typeFilter !== "All") {
+      const types = new Set(
+        suggestions.map((s) => s.item?.type).filter(Boolean),
+      );
+      if (!types.has(typeFilter)) setTypeFilter("All");
+    }
+    if (fieldFilter !== "All") {
+      const fields = new Set(suggestions.map((s) => s.field).filter(Boolean));
+      if (!fields.has(fieldFilter)) setFieldFilter("All");
+    }
+  }, [suggestions, typeFilter, fieldFilter]);
 
   useEffect(() => {
     const handler = (event: Event) => {
@@ -1461,6 +1529,61 @@ export default function ValueSuggestionsPage() {
     };
     fetchItems();
   }, []);
+
+  useEffect(() => {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL!,
+      "/value-suggestions/sorts",
+    );
+    fetch(url, { headers })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAvailableSorts(data as string[]);
+          setSort((prev) => prev ?? (data as string[])[0]);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const handlePreference = (e: Event) => {
+      const { key, value } = (
+        e as CustomEvent<{ key: string; value?: unknown }>
+      ).detail;
+      if (key === "vsuggestions_sort" && typeof value === "string") {
+        localStorage.setItem("vsuggestions_sort", value);
+        setSort(value);
+        setPage(1);
+      }
+    };
+    const handlePreferences = (e: Event) => {
+      const prefs = (e as CustomEvent<Record<string, unknown>>).detail;
+      const incoming = prefs?.["vsuggestions_sort"];
+      if (typeof incoming === "string") {
+        localStorage.setItem("vsuggestions_sort", incoming);
+        setSort(incoming);
+        setPage(1);
+      }
+    };
+    window.addEventListener("realtimePreference", handlePreference);
+    window.addEventListener("realtimePreferences", handlePreferences);
+    return () => {
+      window.removeEventListener("realtimePreference", handlePreference);
+      window.removeEventListener("realtimePreferences", handlePreferences);
+    };
+  }, []);
+
+  const handleSortChange = (value: string) => {
+    localStorage.setItem("vsuggestions_sort", value);
+    setSort(value);
+    setPage(1);
+    window.dispatchEvent(
+      new CustomEvent("sendRealtimePreference", {
+        detail: { key: "vsuggestions_sort", value },
+      }),
+    );
+  };
 
   const handleFormSubmit = async (payload: {
     item: number;
@@ -1635,8 +1758,8 @@ export default function ValueSuggestionsPage() {
                         );
                         setLoginModal({ open: true });
                       }}
+                      variant="success"
                       size="sm"
-                      className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
                     >
                       <Icon
                         icon="material-symbols:login-rounded"
@@ -1668,10 +1791,49 @@ export default function ValueSuggestionsPage() {
           )}
 
           {/* Title row */}
-          <div className="mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-primary-text font-semibold">
               {loadingSuggestions ? 0 : total} Recent Suggestions
             </h2>
+            {availableSorts.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="text-secondary-text flex items-center gap-1 text-xs">
+                    <span>Sorted by:</span>
+                    <button
+                      type="button"
+                      className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
+                    >
+                      {sort ? sort.charAt(0).toUpperCase() + sort.slice(1) : ""}
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="h-3.5 w-3.5 shrink-0"
+                        inline
+                      />
+                    </button>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="border-border-card bg-secondary-bg text-primary-text rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={sort ?? ""}
+                    onValueChange={handleSortChange}
+                  >
+                    {availableSorts.map((s) => (
+                      <DropdownMenuRadioItem
+                        key={s}
+                        value={s}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           {/* Search + filter */}

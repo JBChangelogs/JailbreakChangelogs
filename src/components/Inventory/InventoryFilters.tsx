@@ -319,15 +319,86 @@ export default function InventoryFilters({
         </div>
       </div>
 
-      {/* Advanced Filters Toggle Button */}
-      <Button
-        onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-        size="sm"
-        className="w-fit"
-      >
-        <Icon icon="rivet-icons:filter" className="h-4 w-4" inline={true} />
-        Filter
-      </Button>
+      {/* Quick Filter Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          size="sm"
+          variant="secondary"
+          className="w-fit"
+        >
+          <Icon icon="rivet-icons:filter" className="h-4 w-4" inline={true} />
+          Filter
+        </Button>
+        <Button
+          onClick={() => onFilterToggle(!showOnlyOriginal)}
+          size="sm"
+          variant={showOnlyOriginal ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon
+            icon="heroicons:shield-check"
+            className="h-4 w-4"
+            inline={true}
+          />
+          OG Only
+        </Button>
+        <Button
+          onClick={() => onNonOriginalFilterToggle(!showOnlyNonOriginal)}
+          size="sm"
+          variant={showOnlyNonOriginal ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon
+            icon="heroicons:shield-exclamation"
+            className="h-4 w-4"
+            inline={true}
+          />
+          Non-OG Only
+        </Button>
+        <Button
+          onClick={() => {
+            if (showOnlyLimited) {
+              onLimitedFilterToggle(false);
+            } else {
+              onLimitedFilterToggle(true);
+              onSeasonalFilterToggle(false);
+            }
+          }}
+          size="sm"
+          variant={showOnlyLimited ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon
+            icon="mdi:clock"
+            className="h-4 w-4"
+            style={{ color: "#ffd700" }}
+            inline={true}
+          />
+          Limiteds Only
+        </Button>
+        <Button
+          onClick={() => {
+            if (showOnlySeasonal) {
+              onSeasonalFilterToggle(false);
+            } else {
+              onSeasonalFilterToggle(true);
+              onLimitedFilterToggle(false);
+            }
+          }}
+          size="sm"
+          variant={showOnlySeasonal ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon
+            icon="noto-v1:snowflake"
+            className="h-4 w-4"
+            style={{ color: "#40c0e7" }}
+            inline={true}
+          />
+          Seasonal Only
+        </Button>
+      </div>
 
       {/* Advanced Filters Section */}
       {showAdvancedFilters && (

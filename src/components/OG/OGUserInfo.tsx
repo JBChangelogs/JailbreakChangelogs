@@ -23,6 +23,7 @@ interface OGUserInfoProps {
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge: (userId: string) => boolean;
   originalItemsCount: number;
+  itemsLabel?: string;
 }
 
 export default function OGUserInfo({
@@ -33,6 +34,7 @@ export default function OGUserInfo({
   getUserAvatar,
   getHasVerifiedBadge,
   originalItemsCount,
+  itemsLabel = "Original Items",
 }: OGUserInfoProps) {
   const [avatarError, setAvatarError] = useState(false);
 
@@ -136,7 +138,7 @@ export default function OGUserInfo({
         <div className="mt-4 flex flex-col items-center gap-4 sm:mt-0 sm:ml-auto sm:flex-col sm:items-end">
           {/* Original Items Found */}
           <div className="text-center sm:text-right">
-            <div className="text-secondary-text text-sm">Original Items</div>
+            <div className="text-secondary-text text-sm">{itemsLabel}</div>
             <div className="text-primary-text text-2xl font-bold">
               {(originalItemsCount || 0).toLocaleString()}
             </div>
