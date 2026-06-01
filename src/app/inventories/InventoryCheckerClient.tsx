@@ -129,6 +129,7 @@ export default function InventoryCheckerClient({
   });
   const [mountedTabs, setMountedTabs] = useState<Set<number>>(new Set([0]));
   const [showNonOgOnly, setShowNonOgOnly] = useState(false);
+  const [showOnlyLimited, setShowOnlyLimited] = useState(false);
   const [queuePosition, setQueuePosition] = useState<{
     position: number;
     delay: number;
@@ -1178,6 +1179,7 @@ export default function InventoryCheckerClient({
                 initialNetworthData={networthData}
                 showNonOgOnly={showNonOgOnly}
                 setShowNonOgOnly={setShowNonOgOnly}
+                showOnlyLimited={showOnlyLimited}
                 scanWebSocket={scanWebSocket}
               />
 
@@ -1205,6 +1207,7 @@ export default function InventoryCheckerClient({
                       itemsData={itemsData}
                       isOwnInventory={isOwnInventory}
                       showNonOgOnlyFromParent={showNonOgOnly}
+                      onShowOnlyLimitedChange={setShowOnlyLimited}
                     />
                   </div>
 

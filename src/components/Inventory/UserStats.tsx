@@ -19,6 +19,7 @@ interface UserStatsProps {
   initialNetworthData?: UserNetworthData[];
   showNonOgOnly: boolean;
   setShowNonOgOnly: (val: boolean) => void;
+  showOnlyLimited: boolean;
   scanWebSocket: UseScanWebSocketReturn;
 }
 
@@ -32,6 +33,7 @@ export default function UserStats({
   initialNetworthData = [],
   showNonOgOnly,
   setShowNonOgOnly,
+  showOnlyLimited,
   scanWebSocket,
 }: UserStatsProps) {
   // Helper functions
@@ -151,6 +153,62 @@ export default function UserStats({
 
   const totalDupedValue = nonOgStats.totalDupedValue;
 
+  const limitedStats = useMemo(() => {
+    if (!itemsData || itemsData.length === 0) {
+      return {
+        inventoryValue: 0,
+        networth: 0,
+        dupedValue: 0,
+        itemCount: 0,
+        dupedItemCount: 0,
+      };
+    }
+
+    const itemsMap = new Map(
+      itemsData.map((item) => [item.id.toString(), item]),
+    );
+    const parse = (val: string | null) => {
+      if (!val || val === "N/A") return 0;
+      const cleanVal = val.replace(/,/g, "").toLowerCase();
+      const num = parseFloat(cleanVal.replace(/[^0-9.]/g, ""));
+      if (isNaN(num)) return 0;
+      if (cleanVal.includes("k")) return num * 1000;
+      if (cleanVal.includes("m")) return num * 1000000;
+      if (cleanVal.includes("b")) return num * 1000000000;
+      return num;
+    };
+
+    let limitedInventoryValue = 0;
+    let limitedDupedValue = 0;
+    let limitedItemCount = 0;
+    let limitedDupedItemCount = 0;
+
+    initialData.data.forEach((invItem) => {
+      const item = itemsMap.get(invItem.item_id.toString());
+      if (item && item.is_limited === 1) {
+        limitedItemCount++;
+        limitedInventoryValue += parse(item.cash_value);
+      }
+    });
+
+    (initialData.duplicates || []).forEach((invItem) => {
+      const item = itemsMap.get(invItem.item_id.toString());
+      if (item && item.is_limited === 1) {
+        limitedItemCount++;
+        limitedDupedItemCount++;
+        limitedDupedValue += parse(item.duped_value);
+      }
+    });
+
+    return {
+      inventoryValue: limitedInventoryValue,
+      dupedValue: limitedDupedValue,
+      networth: limitedInventoryValue + limitedDupedValue,
+      itemCount: limitedItemCount,
+      dupedItemCount: limitedDupedItemCount,
+    };
+  }, [itemsData, initialData]);
+
   // Since we are deriving values directly from props, they are always available (or 0)
   // We can treat loading as false since there's no async operation here
   const isLoadingValues = false;
@@ -188,6 +246,8 @@ export default function UserStats({
         nonOgStats={nonOgStats}
         showNonOgOnly={showNonOgOnly}
         setShowNonOgOnly={setShowNonOgOnly}
+        limitedStats={limitedStats}
+        showOnlyLimited={showOnlyLimited}
         isLoadingValues={isLoadingValues}
         userId={initialData.user_id}
         hasDupedValue={

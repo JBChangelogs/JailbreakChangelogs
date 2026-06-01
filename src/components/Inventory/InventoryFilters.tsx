@@ -319,15 +319,34 @@ export default function InventoryFilters({
         </div>
       </div>
 
-      {/* Advanced Filters Toggle Button */}
-      <Button
-        onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-        size="sm"
-        className="w-fit"
-      >
-        <Icon icon="rivet-icons:filter" className="h-4 w-4" inline={true} />
-        Filter
-      </Button>
+      {/* Quick Filter Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          size="sm"
+          variant="secondary"
+          className="w-fit"
+        >
+          <Icon icon="rivet-icons:filter" className="h-4 w-4" inline={true} />
+          Filter
+        </Button>
+        <Button
+          onClick={() => {
+            if (showOnlyLimited) {
+              onLimitedFilterToggle(false);
+            } else {
+              onLimitedFilterToggle(true);
+              onSeasonalFilterToggle(false);
+            }
+          }}
+          size="sm"
+          variant={showOnlyLimited ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon icon="heroicons:star" className="h-4 w-4" inline={true} />
+          Limiteds Only
+        </Button>
+      </div>
 
       {/* Advanced Filters Section */}
       {showAdvancedFilters && (

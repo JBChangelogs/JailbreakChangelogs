@@ -23,6 +23,7 @@ interface InventoryItemsProps {
   itemsData?: Item[];
   isOwnInventory?: boolean;
   showNonOgOnlyFromParent?: boolean;
+  onShowOnlyLimitedChange?: (val: boolean) => void;
 }
 
 const parseNumericValue = (value: string | null): number => {
@@ -42,6 +43,7 @@ export default function InventoryItems({
   onItemClick,
   itemsData: propItemsData,
   showNonOgOnlyFromParent,
+  onShowOnlyLimitedChange,
 }: InventoryItemsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -195,6 +197,7 @@ export default function InventoryItems({
   const handleLimitedFilterToggle = (checked: boolean) => {
     setIsFiltering(true);
     setShowOnlyLimited(checked);
+    onShowOnlyLimitedChange?.(checked);
     setTimeout(() => {
       setIsFiltering(false);
     }, 300);
