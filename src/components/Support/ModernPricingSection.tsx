@@ -254,11 +254,11 @@ export default function ModernPricingSection() {
           </TabsList>
         </Tabs>
 
-        <div className="-mx-6 mt-12 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
           {supporterTiers.map((tier) => (
             <div
               key={tier.name}
-              className={`hover:bg-tertiary-bg transform rounded-lg px-6 py-4 transition-all duration-500 ${
+              className={`hover:bg-tertiary-bg relative transform rounded-lg transition-all duration-500 ${
                 tier.recommended
                   ? "border-button-info bg-secondary-bg border-2"
                   : "border-border-card bg-secondary-bg border"
@@ -273,139 +273,150 @@ export default function ModernPricingSection() {
                   : undefined
               }
             >
-              <div className="mb-2 flex items-center gap-2">
-                <p className="text-primary-text text-lg font-medium">
-                  {tier.name}
-                </p>
-                {tier.recommended && (
-                  <div className="bg-button-info rounded-full px-2 py-1 text-xs font-semibold text-white">
-                    Popular
-                  </div>
-                )}
-                {tier.name !== "Free" && tier.tierNumber && (
-                  <Image
-                    src={`${BADGE_BASE_URL}/jbcl_supporter_${tier.tierNumber}.svg`}
-                    alt={tier.name}
-                    width={24}
-                    height={24}
-                    className="object-contain"
-                  />
-                )}
-                {isOwner && tier.tierNumber ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          copyTierLink(tier.tierNumber!, tier.name)
-                        }
-                        className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                        aria-label={`Copy ${tier.name} link`}
-                      >
-                        <Icon icon="heroicons:link" className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                    >
-                      <p>Copy URL</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : null}
-              </div>
-
-              <h4 className="text-primary-text mt-2 text-3xl font-semibold">
-                {tier.name === "Free" ? (
-                  <div className="flex items-center gap-2">
-                    <span>0</span>
-                    <span className="text-secondary-text text-base font-normal">
-                      {" "}
-                      {isYearly ? "Robux" : "USD"}
-                    </span>
-                  </div>
-                ) : isYearly && tier.priceAlt ? (
-                  <div className="flex items-center gap-2">
-                    <span>{tier.priceAlt.split(" ")[1].replace("R$", "")}</span>
-                    <span className="text-secondary-text text-base font-normal">
-                      {" "}
-                      Robux
-                    </span>
-                  </div>
-                ) : (
-                  <>
-                    {discordSelfLevels.find((l) => l.level === tier.tierNumber)
-                      ?.price_str ?? "—"}
-                    <span className="text-secondary-text text-base font-normal">
-                      {" "}
-                      USD
-                    </span>
-                  </>
-                )}
-              </h4>
-
-              <p className="text-secondary-text mt-4">
-                {tier.name === "Free"
-                  ? "Free for all users, forever."
-                  : "Unlock exclusive features and support the creators."}
-              </p>
-
-              <div className="mt-8 space-y-4">
-                {tier.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="text-button-info h-5 w-5 shrink-0"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span
-                      className={`text-secondary-text mx-4 ${feature.startsWith("**") ? "text-primary-text font-bold" : ""}`}
-                    >
-                      {feature.replace(/\*\*/g, "")}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {tier.name !== "Free" ? (
-                <Button
-                  onClick={() => {
-                    if (isYearly) {
-                      window.open(
-                        "https://www.roblox.com/games/104188650191561/Support-Us",
-                        "_blank",
-                        "noopener,noreferrer",
-                      );
-                    } else {
-                      const level = discordSelfLevels.find(
-                        (l) => l.level === tier.tierNumber,
-                      );
-                      if (level?.url) {
-                        window.open(level.url, "_blank", "noopener,noreferrer");
-                      }
-                    }
-                  }}
-                  disabled={!isYearly && discordLevelsLoading}
-                  className="mt-10 w-full tracking-wide capitalize"
-                >
-                  {isYearly
-                    ? "Support with Robux"
-                    : discordLevelsLoading
-                      ? "Loading..."
-                      : "Support with Discord"}
-                </Button>
-              ) : (
-                <div className="border-border-card bg-tertiary-bg text-primary-text mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
-                  Already included
+              {tier.recommended && (
+                <div className="bg-button-info absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-5 py-2 text-xs font-semibold text-white">
+                  Popular
                 </div>
               )}
+              <div className="flex h-full flex-col p-6">
+                <div className="mb-2 flex items-center gap-2">
+                  <p className="text-primary-text text-lg font-medium">
+                    {tier.name}
+                  </p>
+                  {tier.name !== "Free" && tier.tierNumber && (
+                    <Image
+                      src={`${BADGE_BASE_URL}/jbcl_supporter_${tier.tierNumber}.svg`}
+                      alt={tier.name}
+                      width={24}
+                      height={24}
+                      className="object-contain"
+                    />
+                  )}
+                  {isOwner && tier.tierNumber ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            copyTierLink(tier.tierNumber!, tier.name)
+                          }
+                          className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                          aria-label={`Copy ${tier.name} link`}
+                        >
+                          <Icon icon="heroicons:link" className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                      >
+                        <p>Copy URL</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : null}
+                </div>
+
+                <h4 className="text-primary-text mt-2 text-3xl font-semibold">
+                  {tier.name === "Free" ? (
+                    <div className="flex items-center gap-2">
+                      <span>0</span>
+                      <span className="text-secondary-text text-base font-normal">
+                        {" "}
+                        {isYearly ? "Robux" : "USD"}
+                      </span>
+                    </div>
+                  ) : isYearly && tier.priceAlt ? (
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {tier.priceAlt.split(" ")[1].replace("R$", "")}
+                      </span>
+                      <span className="text-secondary-text text-base font-normal">
+                        {" "}
+                        Robux
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      {discordSelfLevels.find(
+                        (l) => l.level === tier.tierNumber,
+                      )?.price_str ?? "—"}
+                      <span className="text-secondary-text text-base font-normal">
+                        {" "}
+                        USD
+                      </span>
+                    </>
+                  )}
+                </h4>
+
+                <p className="text-secondary-text mt-4">
+                  {tier.name === "Free"
+                    ? "Free for all users, forever."
+                    : "Unlock exclusive features and support the creators."}
+                </p>
+
+                <div className="mt-8 space-y-3">
+                  {tier.features.map((feature, featureIndex) => (
+                    <div key={featureIndex} className="flex items-start">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="text-button-info mt-1 h-5 w-5 shrink-0"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span
+                        className={`text-secondary-text mx-4 ${feature.startsWith("**") ? "text-primary-text font-bold" : ""}`}
+                      >
+                        {feature.replace(/\*\*/g, "")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {tier.name !== "Free" ? (
+                  <div className="mt-auto">
+                    <Button
+                      onClick={() => {
+                        if (isYearly) {
+                          window.open(
+                            "https://www.roblox.com/games/104188650191561/Support-Us",
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
+                        } else {
+                          const level = discordSelfLevels.find(
+                            (l) => l.level === tier.tierNumber,
+                          );
+                          if (level?.url) {
+                            window.open(
+                              level.url,
+                              "_blank",
+                              "noopener,noreferrer",
+                            );
+                          }
+                        }
+                      }}
+                      disabled={!isYearly && discordLevelsLoading}
+                      className="mt-6 w-full tracking-wide capitalize"
+                    >
+                      {isYearly
+                        ? "Support with Robux"
+                        : discordLevelsLoading
+                          ? "Loading..."
+                          : "Support with Discord"}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="border-border-card bg-tertiary-bg text-primary-text mt-auto w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
+                    Already included
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -560,14 +571,31 @@ export default function ModernPricingSection() {
                   />
                   <span className="font-semibold">Litecoin (LTC)</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(CRYPTO_ADDRESSES.LTC, "LTC")}
-                  className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
-                  title="Copy Litecoin address"
-                >
-                  <code>{CRYPTO_ADDRESSES.LTC}</code>
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyToClipboard(CRYPTO_ADDRESSES.LTC, "LTC")
+                      }
+                      className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
+                    >
+                      <Icon
+                        icon="heroicons:clipboard"
+                        className="mr-1 inline h-4 w-4"
+                      />
+                      <code className="align-middle">
+                        {CRYPTO_ADDRESSES.LTC}
+                      </code>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                  >
+                    <p>Copy Litecoin address</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
 
               <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
@@ -579,14 +607,31 @@ export default function ModernPricingSection() {
                   />
                   <span className="font-semibold">Ethereum (ETH)</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(CRYPTO_ADDRESSES.ETH, "ETH")}
-                  className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
-                  title="Copy Ethereum address"
-                >
-                  <code>{CRYPTO_ADDRESSES.ETH}</code>
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyToClipboard(CRYPTO_ADDRESSES.ETH, "ETH")
+                      }
+                      className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
+                    >
+                      <Icon
+                        icon="heroicons:clipboard"
+                        className="mr-1 inline h-4 w-4"
+                      />
+                      <code className="align-middle">
+                        {CRYPTO_ADDRESSES.ETH}
+                      </code>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                  >
+                    <p>Copy Ethereum address</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
 
               <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
@@ -598,26 +643,43 @@ export default function ModernPricingSection() {
                   />
                   <span className="font-semibold">Bitcoin (BTC)</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(CRYPTO_ADDRESSES.BTC, "BTC")}
-                  className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
-                  title="Copy Bitcoin address"
-                >
-                  <code>{CRYPTO_ADDRESSES.BTC}</code>
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyToClipboard(CRYPTO_ADDRESSES.BTC, "BTC")
+                      }
+                      className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
+                    >
+                      <Icon
+                        icon="heroicons:clipboard"
+                        className="mr-1 inline h-4 w-4"
+                      />
+                      <code className="align-middle">
+                        {CRYPTO_ADDRESSES.BTC}
+                      </code>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                  >
+                    <p>Copy Bitcoin address</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>
         </div>
 
         {/* Long-term Sponsor Section */}
-        <div className="border-border-card bg-secondary-bg mt-12 rounded-lg border p-4">
+        <div className="border-border-card bg-secondary-bg mt-12 rounded-lg border p-6">
           <div className="text-center">
             <h3 className="text-primary-text mb-2 text-lg font-semibold">
               Want to become a long-term sponsor?
             </h3>
-            <p className="text-secondary-text mb-3 text-sm">
+            <p className="text-secondary-text text-sm">
               Reach out via email:{" "}
               <a
                 href="mailto:support@jailbreakchangelogs.com"
