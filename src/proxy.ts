@@ -87,9 +87,7 @@ function hasTestingAccess(user: ProxyUser | null): boolean {
   if (!user || !Array.isArray(user.flags)) return false;
   return user.flags.some(
     (flag) =>
-      (flag.flag === "is_owner" ||
-        flag.flag === "is_vt" ||
-        flag.flag === "is_vtm") &&
+      (flag.flag === "is_owner" || flag.flag === "is_tester") &&
       flag.enabled === true,
   );
 }
