@@ -13,7 +13,6 @@ import Image from "next/image";
 import ScanHistoryModal from "../Modals/ScanHistoryModal";
 import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
-import { Switch } from "../ui/switch";
 import { Spinner } from "../ui/Spinner";
 import { toast } from "sonner";
 
@@ -83,8 +82,15 @@ interface UserStatsSectionProps {
     itemCount: number;
     dupedItemCount: number;
   };
-  showNonOgOnly: boolean;
-  setShowNonOgOnly: (val: boolean) => void;
+  showOnlyNonOriginal: boolean;
+  showOnlyOriginal: boolean;
+  ogStats?: {
+    inventoryValue: number;
+    networth: number;
+    dupedValue: number;
+    itemCount: number;
+    dupedItemCount: number;
+  };
   limitedStats?: {
     inventoryValue: number;
     networth: number;
@@ -93,6 +99,14 @@ interface UserStatsSectionProps {
     dupedItemCount: number;
   };
   showOnlyLimited: boolean;
+  seasonalStats?: {
+    inventoryValue: number;
+    networth: number;
+    dupedValue: number;
+    itemCount: number;
+    dupedItemCount: number;
+  };
+  showOnlySeasonal: boolean;
   isLoadingValues: boolean;
   userId: string;
   hasDupedValue?: boolean;
@@ -162,10 +176,13 @@ export default function UserStatsSection({
   totalNetworth,
   totalDupedValue,
   nonOgStats,
-  showNonOgOnly,
-  setShowNonOgOnly,
+  showOnlyNonOriginal,
+  showOnlyOriginal,
+  ogStats,
   limitedStats,
   showOnlyLimited,
+  seasonalStats,
+  showOnlySeasonal,
   isLoadingValues,
   userId,
   hasDupedValue = false,
@@ -309,57 +326,59 @@ export default function UserStatsSection({
 
   return (
     <div className="space-y-4">
-      {/* Non-OG Toggle */}
-      {nonOgStats && (
-        <div className="flex items-center justify-end gap-2">
-          <label
-            className="text-secondary-text cursor-pointer text-sm font-medium select-none"
-            htmlFor="non-og-toggle"
-          >
-            Only Non-OG
-          </label>
-          <Switch
-            id="non-og-toggle"
-            checked={showNonOgOnly}
-            onCheckedChange={(checked) => {
-              const newValue = checked;
-              setShowNonOgOnly(newValue);
-              window.rybbit?.event("Inventory UserStats Non-OG Toggle", {
-                active: newValue,
-              });
-            }}
-          />
-        </div>
-      )}
-
       {/* Basic Stats */}
       <div
         className={`grid grid-cols-2 gap-4 ${(currentData.dupe_count ?? 0) > 0 ? "sm:grid-cols-3 lg:grid-cols-5" : "sm:grid-cols-4"}`}
       >
         <div className="text-center">
           <p className="text-secondary-text text-sm">
-            {showOnlyLimited ? "Limited Items" : "Total Items"}
+            {showOnlyOriginal
+              ? "OG Items"
+              : showOnlyLimited
+                ? "Limited Items"
+                : showOnlySeasonal
+                  ? "Seasonal Items"
+                  : showOnlyNonOriginal
+                    ? "Non-OG Items"
+                    : "Total Items"}
           </p>
           <Tooltip>
             <TooltipTrigger asChild>
               <p className="text-primary-text cursor-help text-2xl font-bold">
                 {formatNumber(
-                  showOnlyLimited
-                    ? limitedStats?.itemCount || 0
-                    : showNonOgOnly
-                      ? nonOgStats?.itemCount || 0
-                      : totalItemsCount,
+                  showOnlyOriginal
+                    ? ogStats?.itemCount || 0
+                    : showOnlyLimited
+                      ? limitedStats?.itemCount || 0
+                      : showOnlySeasonal
+                        ? seasonalStats?.itemCount || 0
+                        : showOnlyNonOriginal
+                          ? nonOgStats?.itemCount || 0
+                          : totalItemsCount,
                 )}
               </p>
             </TooltipTrigger>
             <TooltipContent side="top">
-              {showOnlyLimited ? "Limited items" : "Total items"}:{" "}
+              {showOnlyOriginal
+                ? "OG items"
+                : showOnlyLimited
+                  ? "Limited items"
+                  : showOnlySeasonal
+                    ? "Seasonal items"
+                    : showOnlyNonOriginal
+                      ? "Non-OG items"
+                      : "Total items"}
+              :{" "}
               {(
-                (showOnlyLimited
-                  ? limitedStats?.itemCount
-                  : showNonOgOnly
-                    ? nonOgStats?.itemCount
-                    : totalItemsCount) || 0
+                (showOnlyOriginal
+                  ? ogStats?.itemCount
+                  : showOnlyLimited
+                    ? limitedStats?.itemCount
+                    : showOnlySeasonal
+                      ? seasonalStats?.itemCount
+                      : showOnlyNonOriginal
+                        ? nonOgStats?.itemCount
+                        : totalItemsCount) || 0
               ).toLocaleString()}
             </TooltipContent>
           </Tooltip>
@@ -369,20 +388,20 @@ export default function UserStatsSection({
           <Tooltip>
             <TooltipTrigger asChild>
               <p className="text-primary-text cursor-help text-2xl font-bold">
-                {showNonOgOnly
-                  ? "0"
-                  : formatNumber(
-                      currentData.data.filter((item) => item.isOriginalOwner)
+                {formatNumber(
+                  showOnlyNonOriginal
+                    ? 0
+                    : currentData.data.filter((item) => item.isOriginalOwner)
                         .length +
                         (currentData.duplicates || []).filter(
                           (item) => item.isOriginalOwner,
                         ).length,
-                    )}
+                )}
               </p>
             </TooltipTrigger>
             <TooltipContent side="top">
               Original items:{" "}
-              {showNonOgOnly
+              {showOnlyNonOriginal
                 ? "0"
                 : (() => {
                     const regularOriginal = currentData.data.filter(
@@ -432,21 +451,29 @@ export default function UserStatsSection({
               <TooltipTrigger asChild>
                 <p className="text-primary-text cursor-help text-2xl font-bold">
                   {formatNumber(
-                    showOnlyLimited
-                      ? limitedStats?.dupedItemCount || 0
-                      : showNonOgOnly
-                        ? nonOgStats?.dupedItemCount || 0
-                        : duplicatesCount,
+                    showOnlyOriginal
+                      ? ogStats?.dupedItemCount || 0
+                      : showOnlyLimited
+                        ? limitedStats?.dupedItemCount || 0
+                        : showOnlySeasonal
+                          ? seasonalStats?.dupedItemCount || 0
+                          : showOnlyNonOriginal
+                            ? nonOgStats?.dupedItemCount || 0
+                            : duplicatesCount,
                   )}
                 </p>
               </TooltipTrigger>
               <TooltipContent side="top">
                 Duped items:{" "}
-                {(showOnlyLimited
-                  ? limitedStats?.dupedItemCount || 0
-                  : showNonOgOnly
-                    ? nonOgStats?.dupedItemCount || 0
-                    : duplicatesCount
+                {(showOnlyOriginal
+                  ? ogStats?.dupedItemCount || 0
+                  : showOnlyLimited
+                    ? limitedStats?.dupedItemCount || 0
+                    : showOnlySeasonal
+                      ? seasonalStats?.dupedItemCount || 0
+                      : showOnlyNonOriginal
+                        ? nonOgStats?.dupedItemCount || 0
+                        : duplicatesCount
                 ).toLocaleString()}
               </TooltipContent>
             </Tooltip>
@@ -483,11 +510,15 @@ export default function UserStatsSection({
         {/* Inventory Value */}
         <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
-            {showOnlyLimited
-              ? "Limiteds Inventory Value"
-              : showNonOgOnly
-                ? "Non-OG Inventory Value"
-                : "Total Inventory Value"}
+            {showOnlyOriginal
+              ? "OG Inventory Value"
+              : showOnlyLimited
+                ? "Limiteds Inventory Value"
+                : showOnlySeasonal
+                  ? "Seasonal Inventory Value"
+                  : showOnlyNonOriginal
+                    ? "Non-OG Inventory Value"
+                    : "Total Inventory Value"}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Icon
@@ -501,11 +532,15 @@ export default function UserStatsSection({
                 className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
               >
                 <p>
-                  {showOnlyLimited
-                    ? "Only counts clean limited items' cash value."
-                    : showNonOgOnly
-                      ? "Only counts clean non-OG items' cash value."
-                      : "Only counts clean items' cash value. Does not include cash value of duped items."}
+                  {showOnlyOriginal
+                    ? "Only counts clean OG items' cash value."
+                    : showOnlyLimited
+                      ? "Only counts clean limited items' cash value."
+                      : showOnlySeasonal
+                        ? "Only counts clean seasonal items' cash value."
+                        : showOnlyNonOriginal
+                          ? "Only counts clean non-OG items' cash value."
+                          : "Only counts clean items' cash value. Does not include cash value of duped items."}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -519,26 +554,38 @@ export default function UserStatsSection({
               <TooltipTrigger asChild>
                 <div className="text-primary-text cursor-help text-2xl font-bold">
                   {formatPreciseMoney(
-                    showOnlyLimited
-                      ? limitedStats?.inventoryValue || 0
-                      : showNonOgOnly
-                        ? nonOgStats?.inventoryValue || 0
-                        : totalCashValue,
+                    showOnlyOriginal
+                      ? ogStats?.inventoryValue || 0
+                      : showOnlyLimited
+                        ? limitedStats?.inventoryValue || 0
+                        : showOnlySeasonal
+                          ? seasonalStats?.inventoryValue || 0
+                          : showOnlyNonOriginal
+                            ? nonOgStats?.inventoryValue || 0
+                            : totalCashValue,
                   )}
                 </div>
               </TooltipTrigger>
               <TooltipContent side="top">
-                {showOnlyLimited
-                  ? "Limiteds inventory value"
-                  : showNonOgOnly
-                    ? "Non-OG inventory value"
-                    : "Total inventory value"}
+                {showOnlyOriginal
+                  ? "OG inventory value"
+                  : showOnlyLimited
+                    ? "Limiteds inventory value"
+                    : showOnlySeasonal
+                      ? "Seasonal inventory value"
+                      : showOnlyNonOriginal
+                        ? "Non-OG inventory value"
+                        : "Total inventory value"}
                 : $
-                {(showOnlyLimited
-                  ? limitedStats?.inventoryValue || 0
-                  : showNonOgOnly
-                    ? nonOgStats?.inventoryValue || 0
-                    : totalCashValue
+                {(showOnlyOriginal
+                  ? ogStats?.inventoryValue || 0
+                  : showOnlyLimited
+                    ? limitedStats?.inventoryValue || 0
+                    : showOnlySeasonal
+                      ? seasonalStats?.inventoryValue || 0
+                      : showOnlyNonOriginal
+                        ? nonOgStats?.inventoryValue || 0
+                        : totalCashValue
                 ).toLocaleString()}
               </TooltipContent>
             </Tooltip>
@@ -548,11 +595,15 @@ export default function UserStatsSection({
         {/* Total Networth */}
         <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
-            {showOnlyLimited
-              ? "Limiteds Networth"
-              : showNonOgOnly
-                ? "Non-OG Networth"
-                : "Total Networth"}
+            {showOnlyOriginal
+              ? "OG Networth"
+              : showOnlyLimited
+                ? "Limiteds Networth"
+                : showOnlySeasonal
+                  ? "Seasonal Networth"
+                  : showOnlyNonOriginal
+                    ? "Non-OG Networth"
+                    : "Total Networth"}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Icon
@@ -566,11 +617,15 @@ export default function UserStatsSection({
                 className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
               >
                 <p>
-                  {showOnlyLimited
-                    ? "Total cash value of all limited items, including duped limited items."
-                    : showNonOgOnly
-                      ? "Includes cash value of all non-OG items and your cash."
-                      : "Includes total cash value of all items, including duped items' cash value."}
+                  {showOnlyOriginal
+                    ? "Total cash value of all OG items, including duped OG items."
+                    : showOnlyLimited
+                      ? "Total cash value of all limited items, including duped limited items."
+                      : showOnlySeasonal
+                        ? "Total cash value of all seasonal items, including duped seasonal items."
+                        : showOnlyNonOriginal
+                          ? "Includes cash value of all non-OG items and your cash."
+                          : "Includes total cash value of all items, including duped items' cash value."}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -584,26 +639,38 @@ export default function UserStatsSection({
               <TooltipTrigger asChild>
                 <div className="text-primary-text cursor-help text-2xl font-bold">
                   {formatPreciseMoney(
-                    showOnlyLimited
-                      ? limitedStats?.networth || 0
-                      : showNonOgOnly
-                        ? nonOgStats?.networth || 0
-                        : totalNetworth,
+                    showOnlyOriginal
+                      ? ogStats?.networth || 0
+                      : showOnlyLimited
+                        ? limitedStats?.networth || 0
+                        : showOnlySeasonal
+                          ? seasonalStats?.networth || 0
+                          : showOnlyNonOriginal
+                            ? nonOgStats?.networth || 0
+                            : totalNetworth,
                   )}
                 </div>
               </TooltipTrigger>
               <TooltipContent side="top">
-                {showOnlyLimited
-                  ? "Limiteds networth"
-                  : showNonOgOnly
-                    ? "Non-OG networth"
-                    : "Total networth"}
+                {showOnlyOriginal
+                  ? "OG networth"
+                  : showOnlyLimited
+                    ? "Limiteds networth"
+                    : showOnlySeasonal
+                      ? "Seasonal networth"
+                      : showOnlyNonOriginal
+                        ? "Non-OG networth"
+                        : "Total networth"}
                 : $
-                {(showOnlyLimited
-                  ? limitedStats?.networth || 0
-                  : showNonOgOnly
-                    ? nonOgStats?.networth || 0
-                    : totalNetworth
+                {(showOnlyOriginal
+                  ? ogStats?.networth || 0
+                  : showOnlyLimited
+                    ? limitedStats?.networth || 0
+                    : showOnlySeasonal
+                      ? seasonalStats?.networth || 0
+                      : showOnlyNonOriginal
+                        ? nonOgStats?.networth || 0
+                        : totalNetworth
                 ).toLocaleString()}
               </TooltipContent>
             </Tooltip>
@@ -617,11 +684,15 @@ export default function UserStatsSection({
             currentData.duplicates.length > 0)) && (
           <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
             <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
-              {showOnlyLimited
-                ? "Limiteds Duped Value"
-                : showNonOgOnly
-                  ? "Non-OG Duped Value"
-                  : "Total Duped Value"}
+              {showOnlyOriginal
+                ? "OG Duped Value"
+                : showOnlyLimited
+                  ? "Limiteds Duped Value"
+                  : showOnlySeasonal
+                    ? "Seasonal Duped Value"
+                    : showOnlyNonOriginal
+                      ? "Non-OG Duped Value"
+                      : "Total Duped Value"}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Icon
@@ -635,11 +706,15 @@ export default function UserStatsSection({
                   className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
                 >
                   <p>
-                    {showOnlyLimited
-                      ? "Collective duped value of all duped limited items in this inventory."
-                      : showNonOgOnly
-                        ? "Collective duped value of all non-OG duped items in your inventory."
-                        : "Collective duped value of all duped items in your inventory."}
+                    {showOnlyOriginal
+                      ? "Collective duped value of all duped OG items in this inventory."
+                      : showOnlyLimited
+                        ? "Collective duped value of all duped limited items in this inventory."
+                        : showOnlySeasonal
+                          ? "Collective duped value of all duped seasonal items in this inventory."
+                          : showOnlyNonOriginal
+                            ? "Collective duped value of all non-OG duped items in your inventory."
+                            : "Collective duped value of all duped items in your inventory."}
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -653,26 +728,38 @@ export default function UserStatsSection({
                 <TooltipTrigger asChild>
                   <div className="text-primary-text cursor-help text-2xl font-bold">
                     {formatPreciseMoney(
-                      showOnlyLimited
-                        ? limitedStats?.dupedValue || 0
-                        : showNonOgOnly
-                          ? nonOgStats?.dupedValue || 0
-                          : totalDupedValue,
+                      showOnlyOriginal
+                        ? ogStats?.dupedValue || 0
+                        : showOnlyLimited
+                          ? limitedStats?.dupedValue || 0
+                          : showOnlySeasonal
+                            ? seasonalStats?.dupedValue || 0
+                            : showOnlyNonOriginal
+                              ? nonOgStats?.dupedValue || 0
+                              : totalDupedValue,
                     )}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  {showOnlyLimited
-                    ? "Limiteds duped value"
-                    : showNonOgOnly
-                      ? "Non-OG duped value"
-                      : "Total duped value"}
+                  {showOnlyOriginal
+                    ? "OG duped value"
+                    : showOnlyLimited
+                      ? "Limiteds duped value"
+                      : showOnlySeasonal
+                        ? "Seasonal duped value"
+                        : showOnlyNonOriginal
+                          ? "Non-OG duped value"
+                          : "Total duped value"}
                   :{" $"}
-                  {(showOnlyLimited
-                    ? limitedStats?.dupedValue || 0
-                    : showNonOgOnly
-                      ? nonOgStats?.dupedValue || 0
-                      : totalDupedValue
+                  {(showOnlyOriginal
+                    ? ogStats?.dupedValue || 0
+                    : showOnlyLimited
+                      ? limitedStats?.dupedValue || 0
+                      : showOnlySeasonal
+                        ? seasonalStats?.dupedValue || 0
+                        : showOnlyNonOriginal
+                          ? nonOgStats?.dupedValue || 0
+                          : totalDupedValue
                   ).toLocaleString()}
                 </TooltipContent>
               </Tooltip>

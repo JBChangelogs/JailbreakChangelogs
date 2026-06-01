@@ -22,8 +22,10 @@ interface InventoryItemsProps {
   onItemClick: (item: InventoryItem) => void;
   itemsData?: Item[];
   isOwnInventory?: boolean;
-  showNonOgOnlyFromParent?: boolean;
+  onShowOnlyOriginalChange?: (val: boolean) => void;
+  onShowOnlyNonOriginalChange?: (val: boolean) => void;
   onShowOnlyLimitedChange?: (val: boolean) => void;
+  onShowOnlySeasonalChange?: (val: boolean) => void;
 }
 
 const parseNumericValue = (value: string | null): number => {
@@ -42,15 +44,15 @@ export default function InventoryItems({
   robloxUsers,
   onItemClick,
   itemsData: propItemsData,
-  showNonOgOnlyFromParent,
+  onShowOnlyOriginalChange,
+  onShowOnlyNonOriginalChange,
   onShowOnlyLimitedChange,
+  onShowOnlySeasonalChange,
 }: InventoryItemsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showOnlyOriginal, setShowOnlyOriginal] = useState(false);
-  const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(
-    showNonOgOnlyFromParent || false,
-  );
+  const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(false);
   const [hideDuplicates, setHideDuplicates] = useState(false);
   const [showMissingItems, setShowMissingItems] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
@@ -58,21 +60,6 @@ export default function InventoryItems({
   const [showOnlyTradable, setShowOnlyTradable] = useState(false);
   const [showOnlyUntradable, setShowOnlyUntradable] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
-
-  // Sync with parent toggle - recommended pattern to avoid cascading renders
-  const [prevShowNonOgOnly, setPrevShowNonOgOnly] = useState(
-    showNonOgOnlyFromParent,
-  );
-  if (showNonOgOnlyFromParent !== prevShowNonOgOnly) {
-    setPrevShowNonOgOnly(showNonOgOnlyFromParent);
-    if (showNonOgOnlyFromParent) {
-      setShowOnlyNonOriginal(true);
-      setShowOnlyOriginal(false);
-      setShowMissingItems(false);
-    } else {
-      setShowOnlyNonOriginal(false);
-    }
-  }
 
   const [sortOrder, setSortOrder] = useState<
     | "alpha-asc"
@@ -144,8 +131,11 @@ export default function InventoryItems({
       setShowOnlyOriginal(true);
       setShowOnlyNonOriginal(false);
       setShowMissingItems(false);
+      onShowOnlyOriginalChange?.(true);
+      onShowOnlyNonOriginalChange?.(false);
     } else {
       setShowOnlyOriginal(false);
+      onShowOnlyOriginalChange?.(false);
     }
     setTimeout(() => {
       setIsFiltering(false);
@@ -158,8 +148,11 @@ export default function InventoryItems({
       setShowOnlyNonOriginal(true);
       setShowOnlyOriginal(false);
       setShowMissingItems(false);
+      onShowOnlyNonOriginalChange?.(true);
+      onShowOnlyOriginalChange?.(false);
     } else {
       setShowOnlyNonOriginal(false);
+      onShowOnlyNonOriginalChange?.(false);
     }
     setTimeout(() => {
       setIsFiltering(false);
@@ -206,6 +199,7 @@ export default function InventoryItems({
   const handleSeasonalFilterToggle = (checked: boolean) => {
     setIsFiltering(true);
     setShowOnlySeasonal(checked);
+    onShowOnlySeasonalChange?.(checked);
     setTimeout(() => {
       setIsFiltering(false);
     }, 300);

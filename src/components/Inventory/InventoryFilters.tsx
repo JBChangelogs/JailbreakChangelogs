@@ -331,6 +331,32 @@ export default function InventoryFilters({
           Filter
         </Button>
         <Button
+          onClick={() => onFilterToggle(!showOnlyOriginal)}
+          size="sm"
+          variant={showOnlyOriginal ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon
+            icon="heroicons:shield-check"
+            className="h-4 w-4"
+            inline={true}
+          />
+          OG Only
+        </Button>
+        <Button
+          onClick={() => onNonOriginalFilterToggle(!showOnlyNonOriginal)}
+          size="sm"
+          variant={showOnlyNonOriginal ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon
+            icon="heroicons:shield-exclamation"
+            className="h-4 w-4"
+            inline={true}
+          />
+          Non-OG Only
+        </Button>
+        <Button
           onClick={() => {
             if (showOnlyLimited) {
               onLimitedFilterToggle(false);
@@ -343,8 +369,34 @@ export default function InventoryFilters({
           variant={showOnlyLimited ? "default" : "secondary"}
           className="w-fit"
         >
-          <Icon icon="heroicons:star" className="h-4 w-4" inline={true} />
+          <Icon
+            icon="mdi:clock"
+            className="h-4 w-4"
+            style={{ color: "#ffd700" }}
+            inline={true}
+          />
           Limiteds Only
+        </Button>
+        <Button
+          onClick={() => {
+            if (showOnlySeasonal) {
+              onSeasonalFilterToggle(false);
+            } else {
+              onSeasonalFilterToggle(true);
+              onLimitedFilterToggle(false);
+            }
+          }}
+          size="sm"
+          variant={showOnlySeasonal ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon
+            icon="noto-v1:snowflake"
+            className="h-4 w-4"
+            style={{ color: "#40c0e7" }}
+            inline={true}
+          />
+          Seasonal Only
         </Button>
       </div>
 

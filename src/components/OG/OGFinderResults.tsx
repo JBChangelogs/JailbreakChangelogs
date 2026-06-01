@@ -78,6 +78,7 @@ export default function OGFinderResults({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
+  const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
   const [sortOrder, setSortOrder] = useState<
     | "alpha-asc"
     | "alpha-desc"
@@ -225,6 +226,12 @@ export default function OGFinderResults({
         const itemKey = `${item.categoryTitle}-${item.title}`;
         const itemData = itemsMap.get(itemKey);
         if (!itemData || itemData.is_limited !== 1) return false;
+      }
+
+      if (showOnlySeasonal) {
+        const itemKey = `${item.categoryTitle}-${item.title}`;
+        const itemData = itemsMap.get(itemKey);
+        if (!itemData || itemData.is_seasonal !== 1) return false;
       }
 
       return matchesSearch && matchesCategory;
@@ -554,9 +561,11 @@ export default function OGFinderResults({
             itemsLabel={
               showOnlyLimited
                 ? "Limited Original Items"
-                : searchTerm || selectedCategories.length > 0
-                  ? "Filtered Items"
-                  : "Original Items"
+                : showOnlySeasonal
+                  ? "Seasonal Original Items"
+                  : searchTerm || selectedCategories.length > 0
+                    ? "Filtered Items"
+                    : "Original Items"
             }
           />
 
@@ -578,15 +587,20 @@ export default function OGFinderResults({
                 initialData={initialData}
                 showOnlyLimited={showOnlyLimited}
                 onLimitedFilterToggle={setShowOnlyLimited}
+                showOnlySeasonal={showOnlySeasonal}
+                onSeasonalFilterToggle={setShowOnlySeasonal}
               />
             </div>
             {/* Item Counter */}
             <div className="mb-4">
               <p className="text-secondary-text">
-                {searchTerm || selectedCategories.length > 0 || showOnlyLimited
+                {searchTerm ||
+                selectedCategories.length > 0 ||
+                showOnlyLimited ||
+                showOnlySeasonal
                   ? `Found ${filteredAndSortedItems.length} ${filteredAndSortedItems.length === 1 ? "item" : "items"}${
                       searchTerm ? ` matching "${searchTerm}"` : ""
-                    }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}${showOnlyLimited ? " (Limited only)" : ""}`
+                    }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}`
                   : `Total Items: ${filteredAndSortedItems.length}`}
               </p>
             </div>
