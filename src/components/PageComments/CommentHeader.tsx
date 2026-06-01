@@ -67,7 +67,9 @@ export function CommentHeader() {
                 type="button"
                 className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
               >
-                {sortOrder.charAt(0).toUpperCase() + sortOrder.slice(1)}
+                {sortOrder
+                  ? sortOrder.charAt(0).toUpperCase() + sortOrder.slice(1)
+                  : ""}
                 <Icon
                   icon="heroicons:chevron-down"
                   className="h-3.5 w-3.5 shrink-0"
@@ -81,7 +83,7 @@ export function CommentHeader() {
             className="border-border-card bg-secondary-bg text-primary-text rounded-xl border p-1 shadow-lg"
           >
             <DropdownMenuRadioGroup
-              value={sortOrder}
+              value={sortOrder ?? ""}
               onValueChange={handleSortChange}
             >
               {availableSorts.map((s) => (

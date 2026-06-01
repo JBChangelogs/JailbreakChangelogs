@@ -1249,11 +1249,11 @@ export default function ValueSuggestionsPage() {
   };
 
   // Sort state
-  const [sort, setSort] = useState<string>(() => {
+  const [sort, setSort] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("vsuggestions_sort") ?? "newest";
+      return localStorage.getItem("vsuggestions_sort");
     }
-    return "newest";
+    return null;
   });
   const [availableSorts, setAvailableSorts] = useState<string[]>([]);
 
@@ -1339,7 +1339,7 @@ export default function ValueSuggestionsPage() {
       setPendingTypes(new Set());
       try {
         const qs = new URLSearchParams({ page: String(p) });
-        if (sort !== "newest") qs.set("sort", sort);
+        if (sort !== null) qs.set("sort", sort);
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
           `/value-suggestions/recent?${qs}`,
@@ -1407,7 +1407,7 @@ export default function ValueSuggestionsPage() {
           const silentQs = new URLSearchParams({
             page: String(pageRef.current),
           });
-          if (sort !== "newest") silentQs.set("sort", sort);
+          if (sort !== null) silentQs.set("sort", sort);
           const { url, headers } = buildApiFetchRequest(
             PUBLIC_API_URL!,
             `/value-suggestions/recent?${silentQs}`,
@@ -1495,7 +1495,10 @@ export default function ValueSuggestionsPage() {
     fetch(url, { headers })
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
-        if (Array.isArray(data)) setAvailableSorts(data as string[]);
+        if (Array.isArray(data) && data.length > 0) {
+          setAvailableSorts(data as string[]);
+          setSort((prev) => prev ?? (data as string[])[0]);
+        }
       })
       .catch(() => {});
   }, []);
@@ -1712,8 +1715,8 @@ export default function ValueSuggestionsPage() {
                         );
                         setLoginModal({ open: true });
                       }}
+                      variant="success"
                       size="sm"
-                      className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
                     >
                       <Icon
                         icon="material-symbols:login-rounded"
@@ -1758,7 +1761,7 @@ export default function ValueSuggestionsPage() {
                       type="button"
                       className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
                     >
-                      {sort.charAt(0).toUpperCase() + sort.slice(1)}
+                      {sort ? sort.charAt(0).toUpperCase() + sort.slice(1) : ""}
                       <Icon
                         icon="heroicons:chevron-down"
                         className="h-3.5 w-3.5 shrink-0"
@@ -1772,7 +1775,7 @@ export default function ValueSuggestionsPage() {
                   className="border-border-card bg-secondary-bg text-primary-text rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
-                    value={sort}
+                    value={sort ?? ""}
                     onValueChange={handleSortChange}
                   >
                     {availableSorts.map((s) => (
