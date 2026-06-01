@@ -1244,6 +1244,15 @@ export default function ValueSuggestionsPage() {
     setVotersOpen(true);
   };
 
+  // Sort state
+  const [sort, setSort] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("vsuggestions_sort") ?? "newest";
+    }
+    return "newest";
+  });
+  const [availableSorts, setAvailableSorts] = useState<string[]>([]);
+
   // Search + filter state
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
@@ -1317,99 +1326,111 @@ export default function ValueSuggestionsPage() {
     pageRef.current = page;
   }, [page]);
 
-  const fetchSuggestions = useCallback(async (p: number) => {
-    setLoadingSuggestions(true);
-    setSuggestionsError(null);
-    setNoSuggestionsFound(false);
-    setPendingNew(0);
-    setPendingTypes(new Set());
-    try {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL!,
-        `/value-suggestions/recent?page=${p}`,
-      );
-      const res = await fetch(url, { credentials: "include", headers });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        if (res.status === 404 && body?.error === "no_suggestions_found") {
-          setNoSuggestionsFound(true);
-          setSuggestions([]);
-          setTotalPages(1);
-          setTotal(0);
-          return;
-        }
-        log.error("fetch suggestions failed", { status: res.status, body });
-        throw new Error("Failed to fetch suggestions");
-      }
-      const data: SuggestionsResponse = await res.json();
-      setSuggestions(data.items ?? []);
-      setTotalPages(data.total_pages ?? 1);
-      setTotal(data.total ?? 0);
-    } catch (err) {
-      setSuggestionsError(
-        err instanceof Error ? err.message : "Failed to load suggestions",
-      );
-    } finally {
-      setLoadingSuggestions(false);
-    }
-  }, []);
-
-  const silentRefreshVotes = useCallback(async (id?: number | null) => {
-    try {
-      if (id != null) {
+  const fetchSuggestions = useCallback(
+    async (p: number) => {
+      setLoadingSuggestions(true);
+      setSuggestionsError(null);
+      setNoSuggestionsFound(false);
+      setPendingNew(0);
+      setPendingTypes(new Set());
+      try {
+        const qs = new URLSearchParams({ page: String(p) });
+        if (sort !== "newest") qs.set("sort", sort);
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/value-suggestions/${id}`,
+          `/value-suggestions/recent?${qs}`,
         );
         const res = await fetch(url, { credentials: "include", headers });
-        if (!res.ok) return;
-        const fresh: Suggestion = await res.json();
-        setSuggestions((prev) =>
-          prev.map((s) =>
-            s.id === fresh.id
-              ? {
-                  ...s,
-                  upvotes: fresh.upvotes,
-                  downvotes: fresh.downvotes,
-                  votes: fresh.votes,
-                }
-              : s,
-          ),
-        );
-        if (openVotersSuggestionIdRef.current === fresh.id) {
-          setActiveVoters({
-            up: fresh.votes.upvotes,
-            down: fresh.votes.downvotes,
-            upCount: fresh.upvotes,
-            downCount: fresh.downvotes,
-          });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          if (res.status === 404 && body?.error === "no_suggestions_found") {
+            setNoSuggestionsFound(true);
+            setSuggestions([]);
+            setTotalPages(1);
+            setTotal(0);
+            return;
+          }
+          log.error("fetch suggestions failed", { status: res.status, body });
+          throw new Error("Failed to fetch suggestions");
         }
-      } else {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/value-suggestions/recent?page=${pageRef.current}`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (!res.ok) return;
         const data: SuggestionsResponse = await res.json();
-        const freshMap = new Map(data.items.map((s) => [s.id, s]));
-        setSuggestions((prev) =>
-          prev.map((s) => {
-            const fresh = freshMap.get(s.id);
-            if (!fresh) return s;
-            return {
-              ...s,
-              upvotes: fresh.upvotes,
-              downvotes: fresh.downvotes,
-              votes: fresh.votes,
-            };
-          }),
+        setSuggestions(data.items ?? []);
+        setTotalPages(data.total_pages ?? 1);
+        setTotal(data.total ?? 0);
+      } catch (err) {
+        setSuggestionsError(
+          err instanceof Error ? err.message : "Failed to load suggestions",
         );
+      } finally {
+        setLoadingSuggestions(false);
       }
-    } catch {
-      // silently fail — stale counts are acceptable
-    }
-  }, []);
+    },
+    [sort],
+  );
+
+  const silentRefreshVotes = useCallback(
+    async (id?: number | null) => {
+      try {
+        if (id != null) {
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL!,
+            `/value-suggestions/${id}`,
+          );
+          const res = await fetch(url, { credentials: "include", headers });
+          if (!res.ok) return;
+          const fresh: Suggestion = await res.json();
+          setSuggestions((prev) =>
+            prev.map((s) =>
+              s.id === fresh.id
+                ? {
+                    ...s,
+                    upvotes: fresh.upvotes,
+                    downvotes: fresh.downvotes,
+                    votes: fresh.votes,
+                  }
+                : s,
+            ),
+          );
+          if (openVotersSuggestionIdRef.current === fresh.id) {
+            setActiveVoters({
+              up: fresh.votes.upvotes,
+              down: fresh.votes.downvotes,
+              upCount: fresh.upvotes,
+              downCount: fresh.downvotes,
+            });
+          }
+        } else {
+          const silentQs = new URLSearchParams({
+            page: String(pageRef.current),
+          });
+          if (sort !== "newest") silentQs.set("sort", sort);
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL!,
+            `/value-suggestions/recent?${silentQs}`,
+          );
+          const res = await fetch(url, { credentials: "include", headers });
+          if (!res.ok) return;
+          const data: SuggestionsResponse = await res.json();
+          const freshMap = new Map(data.items.map((s) => [s.id, s]));
+          setSuggestions((prev) =>
+            prev.map((s) => {
+              const fresh = freshMap.get(s.id);
+              if (!fresh) return s;
+              return {
+                ...s,
+                upvotes: fresh.upvotes,
+                downvotes: fresh.downvotes,
+                votes: fresh.votes,
+              };
+            }),
+          );
+        }
+      } catch {
+        // silently fail — stale counts are acceptable
+      }
+    },
+    [sort],
+  );
 
   useEffect(() => {
     fetchSuggestions(page);
@@ -1461,6 +1482,58 @@ export default function ValueSuggestionsPage() {
     };
     fetchItems();
   }, []);
+
+  useEffect(() => {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL!,
+      "/value-suggestions/sorts",
+    );
+    fetch(url, { headers })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        if (Array.isArray(data)) setAvailableSorts(data as string[]);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const handlePreference = (e: Event) => {
+      const { key, value } = (
+        e as CustomEvent<{ key: string; value?: unknown }>
+      ).detail;
+      if (key === "vsuggestions_sort" && typeof value === "string") {
+        localStorage.setItem("vsuggestions_sort", value);
+        setSort(value);
+        setPage(1);
+      }
+    };
+    const handlePreferences = (e: Event) => {
+      const prefs = (e as CustomEvent<Record<string, unknown>>).detail;
+      const incoming = prefs?.["vsuggestions_sort"];
+      if (typeof incoming === "string") {
+        localStorage.setItem("vsuggestions_sort", incoming);
+        setSort(incoming);
+        setPage(1);
+      }
+    };
+    window.addEventListener("realtimePreference", handlePreference);
+    window.addEventListener("realtimePreferences", handlePreferences);
+    return () => {
+      window.removeEventListener("realtimePreference", handlePreference);
+      window.removeEventListener("realtimePreferences", handlePreferences);
+    };
+  }, []);
+
+  const handleSortChange = (value: string) => {
+    localStorage.setItem("vsuggestions_sort", value);
+    setSort(value);
+    setPage(1);
+    window.dispatchEvent(
+      new CustomEvent("sendRealtimePreference", {
+        detail: { key: "vsuggestions_sort", value },
+      }),
+    );
+  };
 
   const handleFormSubmit = async (payload: {
     item: number;
@@ -1668,10 +1741,49 @@ export default function ValueSuggestionsPage() {
           )}
 
           {/* Title row */}
-          <div className="mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-primary-text font-semibold">
               {loadingSuggestions ? 0 : total} Recent Suggestions
             </h2>
+            {availableSorts.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="text-secondary-text flex items-center gap-1 text-xs">
+                    <span>Sorted by:</span>
+                    <button
+                      type="button"
+                      className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
+                    >
+                      {sort.charAt(0).toUpperCase() + sort.slice(1)}
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="h-3.5 w-3.5 shrink-0"
+                        inline
+                      />
+                    </button>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="border-border-card bg-secondary-bg text-primary-text rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={sort}
+                    onValueChange={handleSortChange}
+                  >
+                    {availableSorts.map((s) => (
+                      <DropdownMenuRadioItem
+                        key={s}
+                        value={s}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           {/* Search + filter */}
