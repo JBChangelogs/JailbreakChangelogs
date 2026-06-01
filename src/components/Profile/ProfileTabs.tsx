@@ -11,6 +11,7 @@ import TradeAdsProfileTab from "./TradeAdsProfileTab";
 import ProfileInventoryTab from "./ProfileInventoryTab";
 import PrivateServersTab from "./PrivateServersTab";
 import UserValueSuggestionsTab from "./UserValueSuggestionsTab";
+import UserBansTab from "./UserBansTab";
 import { UserSettingsV2 } from "@/types/auth";
 import type { UserFlag } from "@/types/auth";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -114,13 +115,19 @@ export default function ProfileTabs({
     ) ?? false;
   const hasValueSuggestionsTab = !hasVTFlag;
   const suggestionsTabIdx = hasRobloxConnection ? 6 : 4;
-  const maxTabIdx = hasRobloxConnection
+  const isOwnProfile = Boolean(
+    currentUserId && user && currentUserId === user.id,
+  );
+
+  const baseMaxTabIdx = hasRobloxConnection
     ? hasValueSuggestionsTab
       ? 6
       : 5
     : hasValueSuggestionsTab
       ? 4
       : 3;
+  const bansTabIdx = baseMaxTabIdx + 1;
+  const maxTabIdx = isOwnProfile ? bansTabIdx : baseMaxTabIdx;
 
   const value = useMemo(() => {
     const map: Record<string, number> = {
@@ -131,6 +138,7 @@ export default function ProfileTabs({
         ? { "trade-ads": 4, roblox: 4, inventory: 5 }
         : {}),
       ...(hasValueSuggestionsTab ? { suggestions: suggestionsTabIdx } : {}),
+      ...(isOwnProfile ? { bans: bansTabIdx } : {}),
     };
     const idx = tabParam ? (map[tabParam] ?? 0) : 0;
     return Math.min(idx, maxTabIdx);
@@ -139,6 +147,8 @@ export default function ProfileTabs({
     hasRobloxConnection,
     hasValueSuggestionsTab,
     suggestionsTabIdx,
+    isOwnProfile,
+    bansTabIdx,
     maxTabIdx,
   ]);
 
@@ -158,6 +168,9 @@ export default function ProfileTabs({
     if (hasValueSuggestionsTab) {
       names[suggestionsTabIdx] = "suggestions";
     }
+    if (isOwnProfile) {
+      names[bansTabIdx] = "bans";
+    }
     void setTabParam(names[newValue] ?? null);
   };
 
@@ -172,6 +185,7 @@ export default function ProfileTabs({
         onChange={(idx) => handleChange(idx)}
         hasRobloxConnection={hasRobloxConnection}
         hasValueSuggestionsTab={hasValueSuggestionsTab}
+        isOwnProfile={isOwnProfile}
       />
       <TabPanel value={value} index={0}>
         <AboutTab
@@ -231,6 +245,11 @@ export default function ProfileTabs({
           />
         </TabPanel>
       )}
+      {isOwnProfile && (
+        <TabPanel value={value} index={bansTabIdx}>
+          <UserBansTab />
+        </TabPanel>
+      )}
     </div>
   );
 }
@@ -240,11 +259,13 @@ function ProfileOverflowTabs({
   onChange,
   hasRobloxConnection,
   hasValueSuggestionsTab,
+  isOwnProfile,
 }: {
   value: number;
   onChange: (v: number) => void;
   hasRobloxConnection: boolean;
   hasValueSuggestionsTab: boolean;
+  isOwnProfile: boolean;
 }) {
   const labels = [
     "About",
@@ -253,6 +274,7 @@ function ProfileOverflowTabs({
     "Private Servers",
     ...(hasRobloxConnection ? ["Trade Ads", "Inventory"] : []),
     ...(hasValueSuggestionsTab ? ["Value Suggestions"] : []),
+    ...(isOwnProfile ? ["Bans"] : []),
   ];
 
   return (
