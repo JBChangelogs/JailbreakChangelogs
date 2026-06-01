@@ -510,6 +510,26 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             OP
                           </span>
                         )}
+                      {type === "vsuggestion" &&
+                        suggestion?.upvoterIds?.includes(comment.user_id) && (
+                          <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                            <Icon
+                              icon="material-symbols:thumb-up-rounded"
+                              className="h-3 w-3"
+                            />
+                            Upvoted
+                          </span>
+                        )}
+                      {type === "vsuggestion" &&
+                        suggestion?.downvoterIds?.includes(comment.user_id) && (
+                          <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                            <Icon
+                              icon="material-symbols:thumb-down-rounded"
+                              className="h-3 w-3"
+                            />
+                            Downvoted
+                          </span>
+                        )}
                     </>
                   )}
                 </div>

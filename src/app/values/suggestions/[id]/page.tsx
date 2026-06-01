@@ -1281,7 +1281,15 @@ export default function ValueSuggestionDetailPage() {
                         changelogId={suggestion.id}
                         changelogTitle={`Value Suggestion #${suggestion.id}`}
                         type="vsuggestion"
-                        suggestion={{ suggester: suggestion.user.id }}
+                        suggestion={{
+                          suggester: suggestion.user.id,
+                          upvoterIds: suggestion.votes.upvotes.map(
+                            (v) => v.user.id,
+                          ),
+                          downvoterIds: suggestion.votes.downvotes.map(
+                            (v) => v.user.id,
+                          ),
+                        }}
                       />
                     </TabsContent>
                   </Tabs>
@@ -1295,7 +1303,15 @@ export default function ValueSuggestionDetailPage() {
                       changelogId={suggestion.id}
                       changelogTitle={`Value Suggestion #${suggestion.id}`}
                       type="vsuggestion"
-                      suggestion={{ suggester: suggestion.user.id }}
+                      suggestion={{
+                        suggester: suggestion.user.id,
+                        upvoterIds: suggestion.votes.upvotes.map(
+                          (v) => v.user.id,
+                        ),
+                        downvoterIds: suggestion.votes.downvotes.map(
+                          (v) => v.user.id,
+                        ),
+                      }}
                     />
                   </div>
 

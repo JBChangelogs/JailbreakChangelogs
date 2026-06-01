@@ -23,6 +23,8 @@ export interface ChangelogCommentsProps {
   };
   suggestion?: {
     suggester: string;
+    upvoterIds?: string[];
+    downvoterIds?: string[];
   };
   initialComments?: CommentData[];
   initialUserMap?: Record<string, UserData>;

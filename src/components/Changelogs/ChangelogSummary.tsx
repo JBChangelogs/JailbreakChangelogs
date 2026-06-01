@@ -6,6 +6,7 @@ import { Spinner } from "../ui/Spinner";
 import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -113,6 +114,7 @@ export default function ChangelogSummary({
       }
 
       setHasGenerated(true);
+      trackEvent("Changelog Summary Generated", { changelog_id: changelogId });
     } catch (err) {
       console.error("Failed to generate summary:", err);
       toast.error("Failed to generate AI summary. Please try again.", {
