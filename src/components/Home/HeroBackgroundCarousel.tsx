@@ -73,8 +73,8 @@ export default function HeroBackgroundCarousel({
         sizes="100vw"
         quality={85}
         priority={isFirstRender && isActive}
-        fetchPriority={isFirstRender && isActive ? "high" : "auto"}
-        loading={isFirstRender && isActive ? "eager" : "lazy"}
+        fetchPriority={isActive ? "high" : "auto"}
+        loading={isActive ? "eager" : "lazy"}
         className={`object-cover transition-opacity duration-1000 ${
           isActive ? "z-10" : "z-0"
         } ${isFading ? "opacity-0" : "opacity-100"}`}

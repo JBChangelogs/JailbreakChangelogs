@@ -792,9 +792,7 @@ export default function ValueSuggestionDetailPage() {
                   </div>
 
                   {/* Video ad — 3rd column, desktop only */}
-                  <div className="flex items-center justify-center p-4 sm:w-96 sm:shrink-0">
-                    <NitroValuesSuggestionDetailVideoPlayer />
-                  </div>
+                  <NitroValuesSuggestionDetailVideoPlayer />
                 </div>
               </div>
 

@@ -270,7 +270,7 @@ export default function UserSearch() {
                   ? "text-secondary-text cursor-progress"
                   : !searchQuery.trim()
                     ? "text-secondary-text cursor-not-allowed opacity-50"
-                    : "hover:bg-button-info/10 text-button-info cursor-pointer"
+                    : "hover:bg-link/10 text-link cursor-pointer"
               }`}
               aria-label="Search"
             >

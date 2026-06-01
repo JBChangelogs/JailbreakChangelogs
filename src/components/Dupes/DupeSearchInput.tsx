@@ -106,7 +106,7 @@ export default function DupeSearchInput({
                 ? "text-secondary-text cursor-progress"
                 : !searchId.trim()
                   ? "text-secondary-text cursor-not-allowed opacity-50"
-                  : "hover:bg-button-info/10 text-button-info cursor-pointer"
+                  : "hover:bg-link/10 text-link cursor-pointer"
             }`}
             aria-label="Search"
           >

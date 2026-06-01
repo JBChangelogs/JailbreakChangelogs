@@ -288,10 +288,15 @@ function SuggestionForm({
         <div ref={itemSearchRef} className="relative">
           <label
             htmlFor="item-search"
-            className="text-secondary-text mb-1.5 block text-sm font-medium"
+            className="text-primary-text mb-1.5 block text-sm font-medium"
           >
             Item
           </label>
+          <div className="bg-button-info/10 border-border-card mb-2 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+            <span className="text-primary-text">
+              Only tradable items are shown in search results.
+            </span>
+          </div>
           {selectedItem ? (
             <button
               type="button"
@@ -334,25 +339,49 @@ function SuggestionForm({
             </button>
           ) : (
             <>
-              <input
-                id="item-search"
-                type="text"
-                placeholder={
-                  loadingItems ? "Loading items..." : "Search for an item..."
-                }
-                disabled={loadingItems}
-                value={itemSearch}
-                onChange={(e) => {
-                  setItemSearch(e.target.value);
-                  setShowItemDropdown(true);
-                }}
-                onFocus={() => setShowItemDropdown(true)}
-                className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none disabled:opacity-50"
-              />
+              <div className="relative">
+                <input
+                  id="item-search"
+                  type="text"
+                  placeholder={
+                    loadingItems ? "Loading items..." : "Search for an item..."
+                  }
+                  disabled={loadingItems}
+                  value={itemSearch}
+                  onChange={(e) => {
+                    setItemSearch(e.target.value);
+                    setShowItemDropdown(true);
+                  }}
+                  onFocus={() => setShowItemDropdown(true)}
+                  className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 pr-16 text-sm transition-colors outline-none disabled:opacity-50"
+                />
+                <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                  {itemSearch && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setItemSearch("");
+                        setShowItemDropdown(false);
+                      }}
+                      className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <Icon icon="heroicons:x-mark" className="h-4 w-4" />
+                    </button>
+                  )}
+                  {itemSearch && (
+                    <div className="border-primary-text h-4 border-l opacity-30" />
+                  )}
+                  <Icon
+                    icon="heroicons:magnifying-glass"
+                    className={`h-4 w-4 ${itemSearch ? "text-link" : "text-secondary-text"}`}
+                  />
+                </div>
+              </div>
               {showItemDropdown && itemSearch.length > 0 && (
                 <div className="border-border-card bg-secondary-bg absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border shadow-lg">
                   {filteredItems.length === 0 ? (
-                    <p className="text-secondary-text px-3 py-2 text-sm">
+                    <p className="text-secondary-text flex items-center px-3 py-6 text-sm">
                       No items found
                     </p>
                   ) : (
@@ -403,7 +432,7 @@ function SuggestionForm({
 
         {/* Field */}
         <div>
-          <p className="text-secondary-text mb-1.5 block text-sm font-medium">
+          <p className="text-primary-text mb-1.5 block text-sm font-medium">
             Field
           </p>
           <div className="flex flex-wrap gap-2">
@@ -505,7 +534,7 @@ function SuggestionForm({
 
         {/* Suggested value */}
         <div>
-          <label className="text-secondary-text mb-1.5 block text-sm font-medium">
+          <label className="text-primary-text mb-1.5 block text-sm font-medium">
             Suggested {fieldLabel(field)}
           </label>
           {field === "trend" ? (
@@ -623,7 +652,7 @@ function SuggestionForm({
         {/* Reason */}
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-secondary-text text-sm font-medium">
+            <label className="text-primary-text text-sm font-medium">
               Reason for Suggested {fieldLabel(field)}
             </label>
             <span
@@ -1439,6 +1468,20 @@ export default function ValueSuggestionsPage() {
   useEffect(() => {
     fetchSuggestions(page);
   }, [fetchSuggestions, page]);
+
+  useEffect(() => {
+    if (suggestions.length === 0) return;
+    if (typeFilter !== "All") {
+      const types = new Set(
+        suggestions.map((s) => s.item?.type).filter(Boolean),
+      );
+      if (!types.has(typeFilter)) setTypeFilter("All");
+    }
+    if (fieldFilter !== "All") {
+      const fields = new Set(suggestions.map((s) => s.field).filter(Boolean));
+      if (!fields.has(fieldFilter)) setFieldFilter("All");
+    }
+  }, [suggestions, typeFilter, fieldFilter]);
 
   useEffect(() => {
     const handler = (event: Event) => {
