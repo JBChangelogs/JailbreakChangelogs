@@ -274,7 +274,7 @@ export default function ModernPricingSection() {
               }
             >
               {tier.recommended && (
-                <div className="bg-button-info absolute top-[1/2] left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-5 py-2 text-xs font-semibold text-white">
+                <div className="bg-button-info absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-5 py-2 text-xs font-semibold text-white">
                   Popular
                 </div>
               )}
@@ -579,7 +579,6 @@ export default function ModernPricingSection() {
                         copyToClipboard(CRYPTO_ADDRESSES.LTC, "LTC")
                       }
                       className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
-                      title="Copy Litecoin address"
                     >
                       <Icon
                         icon="heroicons:clipboard"
@@ -652,7 +651,6 @@ export default function ModernPricingSection() {
                         copyToClipboard(CRYPTO_ADDRESSES.BTC, "BTC")
                       }
                       className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
-                      title="Copy Bitcoin address"
                     >
                       <Icon
                         icon="heroicons:clipboard"
