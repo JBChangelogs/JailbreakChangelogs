@@ -164,7 +164,7 @@ export default function ItemValues({
               </h4>
             </div>
             <span
-              className={`${getDemandColor(!demand || demand === "N/A" ? "Unknown" : demand)} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold`}
+              className={`${getDemandColor(!demand || demand === "N/A" ? "Unknown" : demand)} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold whitespace-nowrap`}
             >
               {!demand || demand === "N/A" ? "Unknown" : demand}
             </span>
@@ -176,7 +176,7 @@ export default function ItemValues({
               </h4>
             </div>
             <span
-              className={`${getDemandColor(!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand)} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold`}
+              className={`${getDemandColor(!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand)} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold whitespace-nowrap`}
             >
               {!dupedDemand || dupedDemand === "N/A" ? "N/A" : dupedDemand}
             </span>

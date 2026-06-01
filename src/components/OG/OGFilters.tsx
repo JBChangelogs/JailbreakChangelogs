@@ -291,7 +291,10 @@ export default function OGFilters({
       {/* Quick Filter Buttons */}
       <div className="flex flex-wrap gap-2">
         <Button
-          onClick={() => onLimitedFilterToggle(!showOnlyLimited)}
+          onClick={() => {
+            onLimitedFilterToggle(!showOnlyLimited);
+            if (!showOnlyLimited) onSeasonalFilterToggle(false);
+          }}
           size="sm"
           variant={showOnlyLimited ? "default" : "secondary"}
           className="w-fit"
@@ -305,7 +308,10 @@ export default function OGFilters({
           Limiteds Only
         </Button>
         <Button
-          onClick={() => onSeasonalFilterToggle(!showOnlySeasonal)}
+          onClick={() => {
+            onSeasonalFilterToggle(!showOnlySeasonal);
+            if (!showOnlySeasonal) onLimitedFilterToggle(false);
+          }}
           size="sm"
           variant={showOnlySeasonal ? "default" : "secondary"}
           className="w-fit"

@@ -316,7 +316,9 @@ export default function Header() {
     isLoading,
   } = useAuthContext();
   const { resolvedTheme } = useTheme();
-  const showAuth = !isLoading && isAuthenticated;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const showAuth = mounted && !isLoading && isAuthenticated;
   const userData = showAuth ? authUser : null;
   useEscapeLogin();
 
