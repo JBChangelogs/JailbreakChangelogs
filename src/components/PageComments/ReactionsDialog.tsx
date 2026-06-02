@@ -135,24 +135,30 @@ export function ReactionsDialog({
                       No reactions yet
                     </div>
                   ) : (
-                    panelUsers.map((reactUser) => {
+                    panelUsers.map((reactUser, idx) => {
                       const reactorData = userData[reactUser.id];
-                      const displayName = isRobloxContext
-                        ? reactorData?.roblox_display_name ||
-                          reactorData?.roblox_username ||
-                          reactorData?.username ||
-                          reactUser.username
-                        : reactorData?.username || reactUser.username;
+                      const isUnknownReactor = !reactUser.id;
+                      const displayName = isUnknownReactor
+                        ? "Unknown User"
+                        : isRobloxContext
+                          ? reactorData?.roblox_display_name ||
+                            reactorData?.roblox_username ||
+                            reactorData?.username ||
+                            reactUser.username ||
+                            "Unknown User"
+                          : reactorData?.username ||
+                            reactUser.username ||
+                            "Unknown User";
                       const isCurrentUser = reactUser.id === currentUserId;
 
                       return (
                         <div
-                          key={reactUser.id}
+                          key={reactUser.id ?? `unknown-${idx}`}
                           className="group flex items-center gap-3 rounded-md px-2 py-2"
                         >
                           <div className="shrink-0">
                             <UserAvatar
-                              userId={reactUser.id}
+                              userId={reactUser.id ?? ""}
                               avatarHash={
                                 reactorData?.avatar ?? reactUser.avatar ?? null
                               }
@@ -180,14 +186,20 @@ export function ReactionsDialog({
                             />
                           </div>
                           <div className="min-w-0 flex-1 truncate">
-                            <Link
-                              href={`/users/${reactUser.id}`}
-                              prefetch={false}
-                              onClick={() => setReactionBreakdownOpenId(null)}
-                              className="text-primary-text hover:text-link text-sm font-medium transition-colors"
-                            >
-                              {displayName}
-                            </Link>
+                            {isUnknownReactor ? (
+                              <span className="text-primary-text text-sm font-medium">
+                                {displayName}
+                              </span>
+                            ) : (
+                              <Link
+                                href={`/users/${reactUser.id}`}
+                                prefetch={false}
+                                onClick={() => setReactionBreakdownOpenId(null)}
+                                className="text-primary-text hover:text-link text-sm font-medium transition-colors"
+                              >
+                                {displayName}
+                              </Link>
+                            )}
                           </div>
                           {isLoggedIn && isCurrentUser && (
                             <Tooltip delayDuration={500}>

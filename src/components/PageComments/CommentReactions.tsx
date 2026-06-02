@@ -90,7 +90,9 @@ export function CommentReactions({
       );
     }
     const MAX_NAMES = 3;
-    const names = users.slice(0, MAX_NAMES).map((u) => u.username);
+    const names = users
+      .slice(0, MAX_NAMES)
+      .map((u) => u.username ?? "Unknown User");
     const remaining = r.count - names.length;
     const nameStr =
       names.length === 1

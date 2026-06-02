@@ -175,16 +175,21 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     isRobloxContext && userData[comment.user_id]?.roblox_avatar
       ? userData[comment.user_id].roblox_avatar
       : undefined;
-  const displayName = isRobloxContext
-    ? userData[comment.user_id]?.roblox_display_name ||
-      userData[comment.user_id]?.roblox_username ||
-      userData[comment.user_id]?.username ||
-      comment.author
-    : userData[comment.user_id]?.username || comment.author;
+  const isUnknownUser = !comment.user_id;
+  const displayName = isUnknownUser
+    ? "Unknown User"
+    : isRobloxContext
+      ? userData[comment.user_id]?.roblox_display_name ||
+        userData[comment.user_id]?.roblox_username ||
+        userData[comment.user_id]?.username ||
+        comment.author ||
+        "Unknown User"
+      : userData[comment.user_id]?.username || comment.author || "Unknown User";
 
   // Hide identity if show_recent_comments or profile_public is falsy
   // and the viewer is not the comment author
   const hideRecent =
+    !isUnknownUser &&
     (!commentAuthorSettings?.show_recent_comments ||
       !commentAuthorSettings?.profile_public) &&
     currentUserId !== comment.user_id;
@@ -931,16 +936,21 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                 : comment.replies.slice(0, 1)
               ).map((reply) => {
                 const replyUser = userData[reply.user_id];
+                const isUnknownReplyUser = !reply.user_id;
                 const replyHideRecent =
+                  !isUnknownReplyUser &&
                   (!replyUser?.settings?.show_recent_comments ||
                     !replyUser?.settings?.profile_public) &&
                   currentUserId !== reply.user_id;
-                const replyDisplayName = isRobloxContext
-                  ? replyUser?.roblox_display_name ||
-                    replyUser?.roblox_username ||
-                    replyUser?.username ||
-                    reply.author
-                  : replyUser?.username || reply.author;
+                const replyDisplayName = isUnknownReplyUser
+                  ? "Unknown User"
+                  : isRobloxContext
+                    ? replyUser?.roblox_display_name ||
+                      replyUser?.roblox_username ||
+                      replyUser?.username ||
+                      reply.author ||
+                      "Unknown User"
+                    : replyUser?.username || reply.author || "Unknown User";
                 const replyRobloxAvatarUrl =
                   isRobloxContext && replyUser?.roblox_avatar
                     ? replyUser.roblox_avatar

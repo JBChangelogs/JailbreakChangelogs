@@ -33,13 +33,13 @@ export const DefaultAvatar = ({
 }: {
   premiumType?: number;
   shape?: "circle" | "square";
-  name?: string;
+  name?: string | null;
 } = {}) => {
   const finalShape = premiumType === 3 ? "square" : shape;
 
   return (
     <BoringAvatar
-      name={name}
+      name={name ?? "?"}
       variant="beam"
       size="100%"
       square={finalShape === "square"}
