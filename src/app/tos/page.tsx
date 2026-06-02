@@ -26,7 +26,7 @@ export default function TermsOfServicePage() {
           </h1>
         </div>
         <p className="text-primary-text mb-6 text-sm">
-          Last updated: May 31st, 2026
+          Last updated: June 2nd, 2026
         </p>
 
         <div className="border-border-card bg-secondary-bg rounded-lg border p-6 transition-colors">

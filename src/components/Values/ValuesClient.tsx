@@ -177,7 +177,26 @@ export default function ValuesClient({
                   Hyperchrome Pity Calculator
                 </Link>
               </Button>
+              <Button asChild>
+                <Link href="/values/suggestions" prefetch={false}>
+                  Value Suggestions
+                </Link>
+              </Button>
             </div>
+
+            <Link
+              href="/values/suggestions"
+              prefetch={false}
+              className="border-border-card bg-tertiary-bg mb-4 flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors"
+            >
+              <p className="text-secondary-text text-sm">
+                Think a value is wrong?{" "}
+                <span className="text-link font-medium underline">
+                  Vote on community suggestions
+                </span>{" "}
+                to help keep the value list accurate.
+              </p>
+            </Link>
 
             {lastUpdated && (
               <p className="text-secondary-text mb-4 text-sm">
@@ -229,6 +248,24 @@ export default function ValuesClient({
         searchSectionRef={searchSectionRef}
         maxValueRange={DYNAMIC_MAX_VALUE}
       />
+
+      <Link
+        href="/values/suggestions"
+        prefetch={false}
+        className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg mb-4 flex items-center justify-between rounded-lg border px-4 py-2.5 transition-colors"
+      >
+        <p className="text-secondary-text text-sm">
+          Disagree with a value?{" "}
+          <span className="text-link font-medium underline">
+            Vote on community suggestions
+          </span>
+        </p>
+        <Icon
+          icon="heroicons:arrow-right"
+          className="text-secondary-text h-4 w-4 shrink-0"
+          inline={true}
+        />
+      </Link>
 
       <div className="grid grid-cols-1 gap-8">
         <div className="space-y-6">

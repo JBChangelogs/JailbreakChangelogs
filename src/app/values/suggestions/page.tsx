@@ -210,10 +210,24 @@ function SuggestionForm({
 
   const filteredItems = items.filter(
     (item) =>
-      item.tradable === 1 &&
+      (item.tradable === 1 || item.id === 587) &&
       (item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
         item.type.toLowerCase().includes(itemSearch.toLowerCase())),
   );
+
+  const isAutoCalcItem = selectedItem?.id === 587;
+  const effectiveValidFields = isAutoCalcItem
+    ? validFields.filter((f) => f !== "cash_value" && f !== "duped_value")
+    : validFields;
+
+  useEffect(() => {
+    if (isAutoCalcItem && (field === "cash_value" || field === "duped_value")) {
+      setField(effectiveValidFields[0] ?? "demand");
+      setSuggestedValue("");
+      setSuggestedValueError(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem?.id]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -391,56 +405,85 @@ function SuggestionForm({
                 </div>
               </div>
               {showItemDropdown && itemSearch.length > 0 && (
-                <div className="border-border-card bg-secondary-bg absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border shadow-lg">
-                  {filteredItems.length === 0 ? (
-                    <p className="text-secondary-text flex items-center px-3 py-6 text-sm">
-                      No items found
+                <div className="border-border-card bg-tertiary-bg absolute z-10 mt-1 w-full overflow-hidden rounded-lg border shadow-lg">
+                  <div className="border-border-card border-b px-3 py-1.5">
+                    <p className="text-secondary-text text-xs">
+                      Results matching &quot;{itemSearch}&quot;
                     </p>
-                  ) : (
-                    filteredItems.slice(0, 50).map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setItemSearch("");
-                          setShowItemDropdown(false);
-                        }}
-                        className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
-                      >
-                        <span className="text-primary-text min-w-0 flex-1 truncate">
-                          {item.name}
-                        </span>
-                        {(() => {
-                          const icon = getCategoryIcon(item.type);
-                          return (
-                            <span
-                              className={`${badgeBase} text-primary-text shrink-0`}
-                              style={{
-                                borderColor: getCategoryColor(item.type),
-                                backgroundColor: `${getCategoryColor(item.type)}22`,
-                              }}
-                            >
-                              {icon && (
-                                <icon.Icon
-                                  className="mr-1 h-3 w-3"
-                                  style={{
-                                    color: getCategoryColor(item.type),
-                                  }}
-                                />
-                              )}
-                              {item.type}
+                  </div>
+                  <div className="max-h-56 overflow-y-auto">
+                    {filteredItems.length === 0 ? (
+                      <p className="text-secondary-text flex items-center px-3 py-6 text-sm">
+                        No items found
+                      </p>
+                    ) : (
+                      <>
+                        {filteredItems.slice(0, 50).map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setItemSearch("");
+                              setShowItemDropdown(false);
+                            }}
+                            className="hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
+                          >
+                            <span className="text-primary-text min-w-0 flex-1 truncate">
+                              {item.name}
                             </span>
-                          );
-                        })()}
-                      </button>
-                    ))
-                  )}
+                            {(() => {
+                              const icon = getCategoryIcon(item.type);
+                              return (
+                                <span
+                                  className={`${badgeBase} text-primary-text shrink-0`}
+                                  style={{
+                                    borderColor: getCategoryColor(item.type),
+                                    backgroundColor: `${getCategoryColor(item.type)}22`,
+                                  }}
+                                >
+                                  {icon && (
+                                    <icon.Icon
+                                      className="mr-1 h-3 w-3"
+                                      style={{
+                                        color: getCategoryColor(item.type),
+                                      }}
+                                    />
+                                  )}
+                                  {item.type}
+                                </span>
+                              );
+                            })()}
+                          </button>
+                        ))}
+                        {filteredItems.length > 50 && (
+                          <div className="border-border-card border-t px-3 py-1.5">
+                            <p className="text-secondary-text text-xs">
+                              Showing 50 of {filteredItems.length} — refine your
+                              search
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
             </>
           )}
         </div>
+
+        {/* Auto-calc banner for item 587 */}
+        {isAutoCalcItem && (
+          <div className="border-link bg-tertiary-bg rounded-lg border px-3 py-2.5 text-sm">
+            <span className="text-primary-text">
+              <strong>Cash Value</strong> and <strong>Duped Value</strong> for
+              this item are automatically calculated as the sum of accepted
+              suggestions from other HyperChrome Level 5 items — they can&apos;t
+              be suggested directly. You can still suggest other fields below.
+            </span>
+          </div>
+        )}
 
         {/* Field */}
         <div>
@@ -453,7 +496,7 @@ function SuggestionForm({
                 Loading fields...
               </div>
             ) : (
-              validFields.map((f) => (
+              effectiveValidFields.map((f) => (
                 <button
                   key={f}
                   type="button"
@@ -996,7 +1039,7 @@ function SuggestionGuidelinesDialog({
             Suggestion Guidelines
           </DialogTitle>
           <p className="text-secondary-text text-center text-xs">
-            Last updated: May 31, 2026
+            Last updated: June 2, 2026
           </p>
         </DialogHeader>
 

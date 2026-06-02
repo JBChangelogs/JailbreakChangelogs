@@ -161,7 +161,7 @@ export default function ValuesSearchControls({
 
   return (
     <>
-      <div ref={searchSectionRef} className="mb-8">
+      <div ref={searchSectionRef} className="mb-4">
         <div className="flex flex-col gap-6">
           {/* Search and dropdowns row */}
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-4">

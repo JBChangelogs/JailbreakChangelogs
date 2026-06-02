@@ -680,7 +680,7 @@ export default function ItemCard({
             )}
           </div>
 
-          <div className="border-border-card text-secondary-text mt-auto border-t pt-1 text-[10px] sm:pt-2 sm:text-xs">
+          <div className="border-border-card text-secondary-text mt-auto flex flex-col gap-1 border-t pt-1 text-[10px] sm:flex-row sm:items-center sm:justify-between sm:pt-2 sm:text-xs">
             {currentItemData.last_updated ? (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -694,7 +694,17 @@ export default function ItemCard({
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <>Last updated: Never</>
+              <span>Last updated: Never</span>
+            )}
+            {isValuesPage && (
+              <Link
+                href="/values/suggestions"
+                prefetch={false}
+                onClick={(e) => e.stopPropagation()}
+                className="text-link hover:text-link-hover relative z-20 underline transition-colors"
+              >
+                Suggest a value
+              </Link>
             )}
           </div>
         </div>
