@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { createLogger } from "@/services/logger";
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 
 const log = createLogger("API");
 import DOMPurify from "dompurify";
@@ -1033,12 +1034,20 @@ export default function ValueSuggestionsPage() {
     useAuthContext();
   const ban = bans["value_suggestions"] ?? null;
 
+  const [{ query: urlQuery, page, sort }, setParams] = useQueryStates({
+    query: parseAsString.withDefault(""),
+    page: parseAsInteger.withDefault(1),
+    sort: parseAsString,
+  });
+  const [hasSearchText, setHasSearchText] = useState(!!urlQuery);
+  const initialSortRef = useRef(sort);
+
   // Suggestions list state
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
   const [noSuggestionsFound, setNoSuggestionsFound] = useState(false);
   const [pendingNew, setPendingNew] = useState(0);
@@ -1277,43 +1286,41 @@ export default function ValueSuggestionsPage() {
     setVotersOpen(true);
   };
 
-  // Sort state
-  const [sort, setSort] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("vsuggestions_sort");
-    }
-    return null;
-  });
   const [availableSorts, setAvailableSorts] = useState<string[]>([]);
-
-  // Search + filter state
-  const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
   const [fieldFilter, setFieldFilter] = useState("All");
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const value = searchInputRef.current?.value?.trim() ?? "";
+    void setParams({ query: value || null, page: null });
   };
 
   const handleTypeFilterChange = (value: string) => {
     setTypeFilter(value);
-    setPage(1);
+    void setParams({ page: null });
   };
 
   const handleFieldFilterChange = (value: string) => {
     setFieldFilter(value);
-    setPage(1);
+    void setParams({ page: null });
   };
 
   const handleClearAllFilters = () => {
-    setSearch("");
     setTypeFilter("All");
     setFieldFilter("All");
-    setPage(1);
+    if (searchInputRef.current) searchInputRef.current.value = "";
+    setHasSearchText(false);
+    void setParams({ query: null, page: null });
   };
+
+  // Keep input in sync when URL changes externally (back/forward navigation)
+  useEffect(() => {
+    if (searchInputRef.current) searchInputRef.current.value = urlQuery;
+    setHasSearchText(!!urlQuery);
+  }, [urlQuery]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -1336,14 +1343,9 @@ export default function ValueSuggestionsPage() {
 
   const filteredSuggestions = suggestions.filter((s) => {
     const item = s.item;
-    const matchesSearch =
-      !search ||
-      (item?.name ?? `Item #${s.item_id}`)
-        .toLowerCase()
-        .includes(search.toLowerCase());
     const matchesType = typeFilter === "All" || item?.type === typeFilter;
     const matchesField = fieldFilter === "All" || s.field === fieldFilter;
-    return matchesSearch && matchesType && matchesField;
+    return matchesType && matchesField;
   });
 
   const suggestionItemTypes = Array.from(
@@ -1354,6 +1356,7 @@ export default function ValueSuggestionsPage() {
     new Set(suggestions.map((s) => s.field).filter(Boolean)),
   ).sort();
 
+  const hasLoadedOnceRef = useRef(false);
   const pageRef = useRef(page);
   useEffect(() => {
     pageRef.current = page;
@@ -1361,23 +1364,32 @@ export default function ValueSuggestionsPage() {
 
   const fetchSuggestions = useCallback(
     async (p: number) => {
-      setLoadingSuggestions(true);
       setSuggestionsError(null);
       setNoSuggestionsFound(false);
       setPendingNew(0);
       setPendingTypes(new Set());
+      const isSearching = urlQuery.trim().length > 0;
+      if (hasLoadedOnceRef.current) {
+        setIsSearchLoading(true);
+      } else {
+        setLoadingSuggestions(true);
+      }
       try {
         const qs = new URLSearchParams({ page: String(p) });
         if (sort !== null) qs.set("sort", sort);
+        if (isSearching) qs.set("query", urlQuery.trim());
+        const endpoint = isSearching
+          ? `/value-suggestions/search?${qs}`
+          : `/value-suggestions/recent?${qs}`;
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/value-suggestions/recent?${qs}`,
+          endpoint,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
           if (res.status === 404 && body?.error === "no_suggestions_found") {
-            setNoSuggestionsFound(true);
+            if (!isSearching) setNoSuggestionsFound(true);
             setSuggestions([]);
             setTotalPages(1);
             setTotal(0);
@@ -1395,10 +1407,12 @@ export default function ValueSuggestionsPage() {
           err instanceof Error ? err.message : "Failed to load suggestions",
         );
       } finally {
+        hasLoadedOnceRef.current = true;
         setLoadingSuggestions(false);
+        setIsSearchLoading(false);
       }
     },
-    [sort],
+    [sort, urlQuery],
   );
 
   const silentRefreshVotes = useCallback(
@@ -1540,11 +1554,17 @@ export default function ValueSuggestionsPage() {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setAvailableSorts(data as string[]);
-          setSort((prev) => prev ?? (data as string[])[0]);
+          if (initialSortRef.current === null) {
+            const lsSort = localStorage.getItem("vsuggestions_sort");
+            void setParams(
+              { sort: lsSort ?? (data as string[])[0] },
+              { history: "replace" },
+            );
+          }
         }
       })
       .catch(() => {});
-  }, []);
+  }, [setParams]);
 
   useEffect(() => {
     const handlePreference = (e: Event) => {
@@ -1553,8 +1573,7 @@ export default function ValueSuggestionsPage() {
       ).detail;
       if (key === "vsuggestions_sort" && typeof value === "string") {
         localStorage.setItem("vsuggestions_sort", value);
-        setSort(value);
-        setPage(1);
+        void setParams({ sort: value, page: null });
       }
     };
     const handlePreferences = (e: Event) => {
@@ -1562,8 +1581,7 @@ export default function ValueSuggestionsPage() {
       const incoming = prefs?.["vsuggestions_sort"];
       if (typeof incoming === "string") {
         localStorage.setItem("vsuggestions_sort", incoming);
-        setSort(incoming);
-        setPage(1);
+        void setParams({ sort: incoming, page: null });
       }
     };
     window.addEventListener("realtimePreference", handlePreference);
@@ -1572,12 +1590,11 @@ export default function ValueSuggestionsPage() {
       window.removeEventListener("realtimePreference", handlePreference);
       window.removeEventListener("realtimePreferences", handlePreferences);
     };
-  }, []);
+  }, [setParams]);
 
   const handleSortChange = (value: string) => {
     localStorage.setItem("vsuggestions_sort", value);
-    setSort(value);
-    setPage(1);
+    void setParams({ sort: value, page: null });
     window.dispatchEvent(
       new CustomEvent("sendRealtimePreference", {
         detail: { key: "vsuggestions_sort", value },
@@ -1643,8 +1660,8 @@ export default function ValueSuggestionsPage() {
 
     toast.success("Suggestion submitted successfully!");
     setShowForm(false);
+    void setParams({ page: null });
     fetchSuggestions(1);
-    setPage(1);
   };
 
   const doOpenForm = async () => {
@@ -1793,7 +1810,12 @@ export default function ValueSuggestionsPage() {
           {/* Title row */}
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-primary-text font-semibold">
-              {loadingSuggestions ? 0 : total} Recent Suggestions
+              {loadingSuggestions ? 0 : total}{" "}
+              {urlQuery
+                ? total === 1
+                  ? "Search Result"
+                  : "Search Results"
+                : "Recent Suggestions"}
             </h2>
             {availableSorts.length > 0 && (
               <DropdownMenu>
@@ -1839,37 +1861,69 @@ export default function ValueSuggestionsPage() {
           {/* Search + filter */}
           {!loadingSuggestions &&
             !suggestionsError &&
-            suggestions.length > 0 && (
+            !noSuggestionsFound &&
+            (suggestions.length > 0 || urlQuery) && (
               <>
                 <div className="mb-4 flex flex-col gap-4 sm:flex-row">
                   {/* Search */}
-                  <div className="relative w-full sm:flex-1">
+                  <form
+                    onSubmit={handleSearchSubmit}
+                    className="relative w-full sm:flex-1"
+                  >
                     <input
                       ref={searchInputRef}
                       type="text"
-                      placeholder="Search by item name..."
-                      value={search}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
+                      placeholder="Search by item name, type, field, or reason..."
+                      defaultValue={urlQuery}
+                      onInput={(e) => setHasSearchText(!!e.currentTarget.value)}
+                      className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-16 transition-all duration-300 focus:outline-none ${
                         isSearchHighlighted
                           ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
                           : "focus:border-button-info"
                       }`}
                     />
-                    <Icon
-                      icon="heroicons:magnifying-glass"
-                      className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
-                    />
-                    {search && (
+                    <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                      {hasSearchText && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (searchInputRef.current)
+                              searchInputRef.current.value = "";
+                            setHasSearchText(false);
+                            void setParams({ query: null, page: null });
+                          }}
+                          className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                          aria-label="Clear search"
+                        >
+                          <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                        </button>
+                      )}
+                      {hasSearchText && (
+                        <div className="border-primary-text h-6 border-l opacity-30" />
+                      )}
                       <button
-                        onClick={() => handleSearchChange("")}
-                        className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-                        aria-label="Clear search"
+                        type="submit"
+                        disabled={isSearchLoading}
+                        className={`flex h-8 w-8 items-center justify-center rounded-md transition-all duration-200 ${
+                          isSearchLoading
+                            ? "text-secondary-text cursor-progress"
+                            : hasSearchText
+                              ? "hover:bg-link/10 text-link cursor-pointer"
+                              : "text-secondary-text cursor-default"
+                        }`}
+                        aria-label="Search"
                       >
-                        <Icon icon="heroicons:x-mark" />
+                        {isSearchLoading ? (
+                          <Spinner className="h-5 w-5" />
+                        ) : (
+                          <Icon
+                            icon="heroicons:magnifying-glass"
+                            className="h-5 w-5"
+                          />
+                        )}
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  </form>
 
                   {/* Item type + field filters — grid so they're side by side on mobile too */}
                   <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
@@ -1993,8 +2047,8 @@ export default function ValueSuggestionsPage() {
               <button
                 type="button"
                 onClick={() => {
+                  void setParams({ page: null });
                   fetchSuggestions(1);
-                  setPage(1);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
@@ -2226,8 +2280,8 @@ export default function ValueSuggestionsPage() {
               <h3 className="text-primary-text mb-1 font-semibold">
                 {suggestions.length === 0
                   ? "No suggestions yet"
-                  : search
-                    ? `No suggestions found matching "${search}"`
+                  : urlQuery
+                    ? `No suggestions found matching "${urlQuery}"`
                     : "No results"}
               </h3>
               <p className="text-secondary-text text-sm">
@@ -2642,7 +2696,7 @@ export default function ValueSuggestionsPage() {
                 count={totalPages}
                 page={page}
                 onChange={(_, value) => {
-                  setPage(value);
+                  void setParams({ page: value > 1 ? value : null });
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               />
