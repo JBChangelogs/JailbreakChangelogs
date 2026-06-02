@@ -1096,14 +1096,21 @@ const badgeBase =
   "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
 export default function ValueSuggestionsPage() {
-  const { isAuthenticated, user, setLoginModal, bans, setBan } =
-    useAuthContext();
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    user,
+    setLoginModal,
+    bans,
+    setBan,
+  } = useAuthContext();
   const ban = bans["value_suggestions"] ?? null;
 
-  const [{ query: urlQuery, page, sort }, setParams] = useQueryStates({
+  const [{ query: urlQuery, page, sort, submit }, setParams] = useQueryStates({
     query: parseAsString.withDefault(""),
     page: parseAsInteger.withDefault(1),
     sort: parseAsString,
+    submit: parseAsString,
   });
   const [hasSearchText, setHasSearchText] = useState(!!urlQuery);
   const initialSortRef = useRef(sort);
@@ -1127,6 +1134,23 @@ export default function ValueSuggestionsPage() {
   const [showForm, setShowForm] = useState(false);
   const [limits, setLimits] = useState<SuggestionLimits | null>(null);
   const [loadingLimits, setLoadingLimits] = useState(false);
+
+  const hasAutoOpenedFormRef = useRef(false);
+  useEffect(() => {
+    if (!submit || hasAutoOpenedFormRef.current || isAuthLoading) return;
+    hasAutoOpenedFormRef.current = true;
+    void setParams({ submit: null });
+    if (!isAuthenticated) {
+      setLoginModal({ open: true });
+      return;
+    }
+    if (user && !user.roblox_id) {
+      setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+      return;
+    }
+    void doOpenForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submit, isAuthLoading, isAuthenticated]);
 
   // Per-suggestion voting loading state
   const [votingIds, setVotingIds] = useState<Set<number>>(new Set());

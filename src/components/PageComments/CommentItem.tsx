@@ -170,7 +170,8 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
   const commentAuthorSettings = userData[comment.user_id]?.settings;
 
   // For trade/inventory contexts, prefer Roblox identity
-  const isRobloxContext = type === "tradev2" || type === "inventory";
+  const isRobloxContext =
+    type === "tradev2" || type === "inventory" || type === "vsuggestion";
   const robloxAvatarUrl =
     isRobloxContext && userData[comment.user_id]?.roblox_avatar
       ? userData[comment.user_id].roblox_avatar
@@ -453,6 +454,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                 showBadge={false}
                 settings={userData[comment.user_id]?.settings}
                 premiumType={userData[comment.user_id]?.premiumtype}
+                bgClassName="bg-tertiary-bg"
               />
             </div>
           )}
@@ -1014,6 +1016,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                               showBadge={false}
                               settings={replyUser?.settings}
                               premiumType={replyUser?.premiumtype}
+                              bgClassName="bg-tertiary-bg"
                             />
                           </div>
                         )}

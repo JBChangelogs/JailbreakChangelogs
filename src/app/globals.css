@@ -103,8 +103,8 @@
   --color-button-info-hover: hsl(210, 99%, 30%); /* Button hover states */
   --color-button-info-active: hsl(218, 60%, 32%); /* Button active states */
   --color-button-info-disabled: hsl(214, 8%, 25%); /* Disabled buttons */
-  --color-button-success: hsl(155, 61%, 44%); /* Success actions */
-  --color-button-success-hover: hsl(155, 55%, 38%); /* Success hover */
+  --color-button-success: hsl(155, 65%, 30%); /* Success actions */
+  --color-button-success-hover: hsl(155, 60%, 24%); /* Success hover */
   --color-button-danger: hsl(0, 81%, 62%); /* Error/destructive actions */
   --color-button-danger-hover: hsl(0, 75%, 55%); /* Danger hover */
   --color-button-secondary: hsl(214, 8%, 25%); /* Secondary buttons */
@@ -335,8 +335,8 @@
     8%,
     75%
   ); /* Disabled buttons - Light gray */
-  --color-button-success: hsl(155, 61%, 44%); /* Success actions */
-  --color-button-success-hover: hsl(155, 55%, 38%); /* Success hover */
+  --color-button-success: hsl(155, 65%, 30%); /* Success actions */
+  --color-button-success-hover: hsl(155, 60%, 24%); /* Success hover */
   --color-button-danger: hsl(0, 81%, 62%); /* Error/destructive actions */
   --color-button-danger-hover: hsl(0, 75%, 55%); /* Danger hover */
   --color-button-secondary: hsl(

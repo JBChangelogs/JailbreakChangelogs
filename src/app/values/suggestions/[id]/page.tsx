@@ -684,13 +684,13 @@ export default function ValueSuggestionDetailPage() {
                 <div className="flex flex-col sm:flex-row">
                   {/* Item image */}
                   <div
-                    className="bg-secondary-bg relative w-full shrink-0 sm:w-56"
+                    className="bg-secondary-bg relative w-full shrink-0 sm:w-56 lg:w-80"
                     style={{ aspectRatio: "16/9" }}
                   >
                     {item && isVideoItem(item.name) ? (
                       <video
                         src={getVideoPath(item.type, item.name)}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                         muted
                         loop
                         autoPlay
@@ -704,7 +704,7 @@ export default function ValueSuggestionDetailPage() {
                         }
                         alt={item?.name ?? `Item #${suggestion.item_id}`}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                         onError={handleImageError}
                       />
                     )}
@@ -794,6 +794,24 @@ export default function ValueSuggestionDetailPage() {
                           </p>
                         </div>
                       </div>
+                      <Button
+                        variant="success"
+                        size="sm"
+                        asChild
+                        className="mt-3 w-fit"
+                      >
+                        <Link
+                          href="/values/suggestions?submit=true"
+                          prefetch={false}
+                        >
+                          <Icon
+                            icon="material-symbols:add-rounded"
+                            className="h-4 w-4"
+                            inline
+                          />
+                          Submit a Suggestion
+                        </Link>
+                      </Button>
                     </div>
                   </div>
 
