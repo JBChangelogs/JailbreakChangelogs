@@ -143,6 +143,12 @@ class ProfanityError extends Error {
   }
 }
 
+class AccountAgeError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 const fieldLabel = (field: string) =>
   field
     .split("_")
@@ -183,6 +189,7 @@ function SuggestionForm({
   const [submitting, setSubmitting] = useState(false);
   const [showItemDropdown, setShowItemDropdown] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+  const [accountAgeError, setAccountAgeError] = useState<string | null>(null);
   const itemSearchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -249,9 +256,13 @@ function SuggestionForm({
       setReasonError(null);
       setField("cash_value");
       setRateLimitUntil(null);
+      setAccountAgeError(null);
     } catch (err: unknown) {
       if (err instanceof RateLimitError) {
         setRateLimitUntil(Date.now() + err.retryAfter * 1000);
+      } else if (err instanceof AccountAgeError) {
+        toast.error(err.message);
+        setAccountAgeError(err.message);
       } else if (err instanceof ProfanityError) {
         const words = err.flagged.map((f) => f.word).join(", ");
         toast.error("Profanity Detected", {
@@ -678,6 +689,17 @@ function SuggestionForm({
           )}
         </div>
 
+        {accountAgeError && (
+          <div className="border-border-error bg-button-danger/10 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
+            <Icon
+              icon="material-symbols:error-outline-rounded"
+              className="h-4 w-4 shrink-0 text-red-400"
+              inline
+            />
+            <span className="text-primary-text">{accountAgeError}</span>
+          </div>
+        )}
+
         <RateLimitBanner
           until={rateLimitUntil}
           label="You're submitting too fast."
@@ -952,6 +974,7 @@ function SuggestionGuidelinesDialog({
     "Add a meaningful, effort-filled reasoning towards your suggestion. Padding with repeated characters or filler text does not count and will likely result in your suggestion being ignored by the Value Team.",
     "Troll suggesters may be banned from value suggesting at the sole discretion of Value Team managers, website owners, or website moderators.",
     "No botting reactions with alt accounts because any form of manipulation is not allowed on this value list.",
+    "Your Roblox account must be at least 30 days old to submit or vote on value suggestions.",
   ];
 
   return (
@@ -1175,10 +1198,16 @@ export default function ValueSuggestionsPage() {
             retryAfter * 1000 + 500,
           );
         } else if (res.status === 403) {
-          toast.info(
-            "You need to connect your Roblox account to vote on value suggestions.",
-          );
-          setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+          if (data?.detail === "Forbidden") {
+            toast.info(
+              "You need to connect your Roblox account to vote on value suggestions.",
+            );
+            setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+          } else {
+            toast.error(
+              data?.message ?? data?.error ?? "Failed to register vote.",
+            );
+          }
         } else {
           log.error(`Vote failed ${res.status}`, data);
           toast.error(
@@ -1643,11 +1672,18 @@ export default function ValueSuggestionsPage() {
         throw new RateLimitError(retryAfter);
       }
       if (res.status === 403) {
-        toast.info(
-          "You need to connect your Roblox account to submit value suggestions.",
+        if (data?.detail === "Forbidden") {
+          toast.info(
+            "You need to connect your Roblox account to submit value suggestions.",
+          );
+          setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+          throw { response: { status: res.status, data } };
+        }
+        throw new AccountAgeError(
+          data?.message ??
+            data?.error ??
+            "You are not allowed to make suggestions.",
         );
-        setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
-        throw { response: { status: res.status, data } };
       }
       if (data?.error === "profanity_detected") {
         throw new ProfanityError(data.flagged || []);
@@ -1875,8 +1911,15 @@ export default function ValueSuggestionsPage() {
                       type="text"
                       placeholder="Search by item name, type, field, or reason..."
                       defaultValue={urlQuery}
-                      onInput={(e) => setHasSearchText(!!e.currentTarget.value)}
-                      className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-16 transition-all duration-300 focus:outline-none ${
+                      disabled={isSearchLoading}
+                      onInput={(e) => {
+                        const val = e.currentTarget.value;
+                        setHasSearchText(!!val);
+                        if (!val && urlQuery) {
+                          void setParams({ query: null, page: null });
+                        }
+                      }}
+                      className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-16 transition-all duration-300 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
                         isSearchHighlighted
                           ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
                           : "focus:border-button-info"
@@ -1886,13 +1929,14 @@ export default function ValueSuggestionsPage() {
                       {hasSearchText && (
                         <button
                           type="button"
+                          disabled={isSearchLoading}
                           onClick={() => {
                             if (searchInputRef.current)
                               searchInputRef.current.value = "";
                             setHasSearchText(false);
                             void setParams({ query: null, page: null });
                           }}
-                          className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                          className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                           aria-label="Clear search"
                         >
                           <Icon icon="heroicons:x-mark" className="h-5 w-5" />

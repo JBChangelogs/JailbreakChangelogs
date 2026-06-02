@@ -404,10 +404,16 @@ export default function ValueSuggestionDetailPage() {
           );
           setVoteRateLimit(Date.now() + retryAfter * 1000);
         } else if (res.status === 403) {
-          toast.info(
-            "You need to connect your Roblox account to vote on value suggestions.",
-          );
-          setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+          if (data?.detail === "Forbidden") {
+            toast.info(
+              "You need to connect your Roblox account to vote on value suggestions.",
+            );
+            setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+          } else {
+            toast.error(
+              data?.message ?? data?.error ?? "Failed to register vote.",
+            );
+          }
         } else {
           toast.error(
             data?.message ?? data?.error ?? "Failed to register vote.",

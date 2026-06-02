@@ -209,6 +209,10 @@ export default function TermsOfServicePage() {
                   Any form of vote manipulation is strictly prohibited.
                 </li>
                 <li>
+                  Your Roblox account must be at least 30 days old to submit or
+                  vote on value suggestions.
+                </li>
+                <li>
                   Troll suggestions or bad-faith submissions may result in a
                   permanent ban from value suggesting at the sole discretion of
                   Value Team managers, website owners, or website moderators.
