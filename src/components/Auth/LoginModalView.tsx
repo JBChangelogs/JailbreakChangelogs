@@ -23,7 +23,7 @@ interface LoginModalViewProps {
   onClose: () => void;
   onJoinDiscordChange: (checked: boolean) => void;
   onDiscordLogin: () => void;
-  onRobloxLogin: () => Promise<void>;
+  onRobloxLogin: () => void;
 }
 
 export default function LoginModalView({

@@ -27,15 +27,19 @@ interface RobloxConnectionProps {
 export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const { setLoginModal } = useAuthContext();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
+    if (isDisconnecting) return;
     setOpen(false);
     setError(null);
   };
 
   const handleDisconnect = async () => {
+    setIsDisconnecting(true);
+    const loadingToast = toast.loading("Disconnecting Roblox account...");
     try {
       if (!PUBLIC_API_URL) {
         throw new Error("Missing public API URL configuration");
@@ -73,6 +77,8 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         const {
           roblox_id: _id,
           roblox_username: _username,
+          roblox_display_name: _displayName,
+          roblox_avatar: _avatar,
           ...updatedUser
         } = storedUser;
         safeSetJSON("user", updatedUser as UserData);
@@ -82,18 +88,22 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         );
       }
 
+      toast.dismiss(loadingToast);
       toast.success(
         "Roblox account disconnected. Changes will be applied shortly.",
       );
 
       handleClose();
     } catch (error) {
+      toast.dismiss(loadingToast);
       log.error("Error disconnecting Roblox account", error);
       setError(
         error instanceof Error
           ? error.message
           : "Failed to disconnect Roblox account",
       );
+    } finally {
+      setIsDisconnecting(false);
     }
   };
 
@@ -146,7 +156,12 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       </div>
 
       {userData.roblox_username ? (
-        <Button onClick={handleOpen} size="md" className="text-sm uppercase">
+        <Button
+          onClick={handleOpen}
+          size="md"
+          className="text-sm uppercase"
+          disabled={isDisconnecting}
+        >
           Disconnect Roblox
         </Button>
       ) : (
@@ -179,8 +194,10 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         onClose={handleClose}
         onConfirm={handleDisconnect}
         title="Disconnect Roblox Account"
-        confirmText="Disconnect"
+        confirmText={isDisconnecting ? "Disconnecting..." : "Disconnect"}
         confirmVariant="destructive"
+        confirmDisabled={isDisconnecting}
+        closeOnConfirm={false}
       >
         <>
           <p className="text-primary-text">

@@ -1,9 +1,6 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
 import { useState, useCallback, type SyntheticEvent } from "react";
-
-const log = createLogger("AUTH");
 import { toast } from "sonner";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -20,7 +17,7 @@ export interface LoginModalController {
   handleTabChange: (_event: SyntheticEvent, newValue: number) => void;
   handleClose: () => void;
   handleDiscordLogin: () => void;
-  handleRobloxLogin: () => Promise<void>;
+  handleRobloxLogin: () => void;
 }
 
 export function useLoginModalController(): LoginModalController {
@@ -59,31 +56,25 @@ export function useLoginModalController(): LoginModalController {
     window.location.href = oauthRedirect;
   }, [joinDiscord]);
 
-  const handleRobloxLogin = useCallback(async () => {
-    const hasCookie = !!document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
-    if (!hasCookie) {
+  const handleRobloxLogin = useCallback(() => {
+    const tokenMatch = document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
+    if (!tokenMatch) {
       toast.info("You must be logged in with Discord first", {
         duration: 3000,
       });
       return;
     }
 
-    try {
-      const currentURL = new URL(window.location.href);
-      currentURL.searchParams.set("auth_flow", "roblox-link");
-      const oauthRedirect = `/api/oauth/roblox/redirect?redirect=${encodeURIComponent(currentURL.toString())}`;
+    const token = decodeURIComponent(tokenMatch[1]);
+    const currentURL = new URL(window.location.href);
+    currentURL.searchParams.set("auth_flow", "roblox-link");
+    const oauthRedirect = `${PUBLIC_API_URL}/oauth/roblox?redirect=${encodeURIComponent(currentURL.toString())}&owner=${encodeURIComponent(token)}`;
 
-      toast.loading("Redirecting to Roblox...", {
-        duration: 2000,
-      });
+    toast.loading("Redirecting to Roblox...", {
+      duration: 2000,
+    });
 
-      window.location.href = oauthRedirect;
-    } catch (error) {
-      log.error("Error initiating Roblox OAuth", error);
-      toast.error("Failed to start Roblox authentication", {
-        duration: 4000,
-      });
-    }
+    window.location.href = oauthRedirect;
   }, []);
 
   return {

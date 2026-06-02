@@ -127,9 +127,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
-      // Show cached user immediately so the navbar renders without a flash
+      // When returning from Roblox OAuth, skip cache so stale data isn't shown
+      const isReturnFromRobloxOAuth =
+        typeof window !== "undefined" &&
+        new URLSearchParams(window.location.search).get("auth_flow") ===
+          "roblox-link";
+
+      if (isReturnFromRobloxOAuth) {
+        // Clean up the param immediately so it only takes effect once
+        const url = new URL(window.location.href);
+        url.searchParams.delete("auth_flow");
+        window.history.replaceState({}, "", url.toString());
+        toast.info("Roblox account linked. Changes will be applied shortly.", {
+          duration: 5000,
+        });
+      }
+
+      // Show cached user immediately so the navbar renders without a flash,
+      // but skip this when we know the server data is about to differ (post-OAuth)
       const cachedUser = safeGetJSON<UserData>("user", null);
-      if (cachedUser) {
+      if (cachedUser && !isReturnFromRobloxOAuth) {
         setAuthState({
           isAuthenticated: true,
           user: cachedUser,
@@ -175,7 +192,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           });
         }
       } catch {
-        // Network error — keep showing cached user if we have one
+        // Network error — fall back to cached user if we have one
         if (!cachedUser) {
           setAuthState({
             isAuthenticated: false,
@@ -183,7 +200,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
             isLoading: false,
             error: null,
           });
+        } else if (isReturnFromRobloxOAuth) {
+          // Cache wasn't shown yet (we skipped it), fall back to it on network error
+          setAuthState({
+            isAuthenticated: true,
+            user: cachedUser,
+            isLoading: false,
+            error: null,
+          });
         }
+        // else: cachedUser was already set as state, no action needed
       }
     } catch (err) {
       log.error("Auth initialization error", err);
