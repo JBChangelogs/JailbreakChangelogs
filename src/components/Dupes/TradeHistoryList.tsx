@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 
 const log = createLogger("UI");
 import Image from "next/image";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { DupeFinderHistoryEntry } from "@/types";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
@@ -20,6 +21,27 @@ interface TradeHistoryListProps {
   history: DupeFinderHistoryEntry[];
   splitIndex?: number;
   usersData?: Record<string, RobloxUser>;
+}
+
+function TradeHistoryAvatar({
+  avatarUrl,
+  name,
+}: {
+  avatarUrl: string;
+  name: string;
+}) {
+  const [avatarError, setAvatarError] = useState(false);
+  if (avatarError) return <DefaultAvatar name={name} />;
+  return (
+    <Image
+      src={avatarUrl}
+      alt="User Avatar"
+      width={40}
+      height={40}
+      className="rounded-full"
+      onError={() => setAvatarError(true)}
+    />
+  );
 }
 
 export default function TradeHistoryList({
@@ -204,24 +226,9 @@ export default function TradeHistoryList({
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="shrink-0">
                   <div className="border-border-card bg-tertiary-bg relative h-10 w-10 overflow-hidden rounded-full border">
-                    <Image
-                      src={getUserAvatar(userId)}
-                      alt="User Avatar"
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = "none";
-                        const parent = target.parentElement;
-                        if (parent && !parent.querySelector("svg")) {
-                          const defaultAvatar = document.createElement("div");
-                          defaultAvatar.className =
-                            "flex h-full w-full items-center justify-center";
-                          defaultAvatar.innerHTML = `<svg class="h-6 w-6 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
-                          parent.appendChild(defaultAvatar);
-                        }
-                      }}
+                    <TradeHistoryAvatar
+                      avatarUrl={getUserAvatar(userId)}
+                      name={getDisplayName(userId)}
                     />
                   </div>
                 </div>

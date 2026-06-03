@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useOfficialBotsQuery } from "@/hooks/useOfficialBotsQuery";
+import { type OfficialBotUser } from "@/utils/api/api";
 import { Icon } from "./IconWrapper";
 import Image from "next/image";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 
 // Skeleton loader for official bots section
 function OfficialBotsSkeleton() {
@@ -59,6 +62,52 @@ function OfficialBotsSkeleton() {
 }
 
 // Component for official scan bots section
+function OfficialBotRow({ bot }: { bot: OfficialBotUser }) {
+  const [avatarError, setAvatarError] = useState(false);
+  const botId = String(bot.userId);
+  const displayName = bot.displayName || bot.username || `Bot ${botId}`;
+  const username = bot.username || botId;
+  const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botId}/avatar-headshot`;
+
+  return (
+    <div className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center">
+      <div className="flex items-center gap-3">
+        <div className="border-border-card bg-quaternary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full border">
+          {avatarError ? (
+            <DefaultAvatar name={displayName} />
+          ) : (
+            <Image
+              src={avatarUrl}
+              alt={`${displayName}'s avatar`}
+              width={40}
+              height={40}
+              className="h-full w-full object-cover"
+              onError={() => setAvatarError(true)}
+            />
+          )}
+        </div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <a
+              href={`https://www.roblox.com/users/${botId}/profile`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-text hover:text-link-hover font-medium wrap-break-word transition-colors"
+            >
+              {displayName}
+            </a>
+            <div className="text-secondary-text text-sm wrap-break-word">
+              @{username}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function OfficialBotsContent() {
   const { data, isLoading, error } = useOfficialBotsQuery();
 
@@ -100,64 +149,9 @@ function OfficialBotsContent() {
           </p>
         </div>
         <div className="max-h-80 space-y-3 overflow-y-auto">
-          {sortedBots.map((bot) => {
-            const botId = String(bot.userId);
-            const displayName =
-              bot.displayName || bot.username || `Bot ${botId}`;
-            const username = bot.username || botId;
-
-            // Generate avatar URL directly
-            const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botId}/avatar-headshot`;
-
-            return (
-              <div
-                key={botId}
-                className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
-              >
-                <div className="flex items-center gap-3">
-                  {/* Bot Avatar */}
-                  <div className="border-border-card bg-quaternary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full border">
-                    <Image
-                      src={avatarUrl}
-                      alt={`${displayName}'s avatar`}
-                      width={40}
-                      height={40}
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        const parent = e.currentTarget.parentElement;
-                        if (parent && !parent.querySelector("svg")) {
-                          const fallback = document.createElement("div");
-                          fallback.className =
-                            "flex h-full w-full items-center justify-center";
-                          fallback.innerHTML = `<svg class="h-6 w-6 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
-                          parent.appendChild(fallback);
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start gap-2">
-                    <div className="min-w-0 flex-1">
-                      <a
-                        href={`https://www.roblox.com/users/${botId}/profile`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-text hover:text-link-hover font-medium wrap-break-word transition-colors"
-                      >
-                        {displayName}
-                      </a>
-                      <div className="text-secondary-text text-sm wrap-break-word">
-                        @{username}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {sortedBots.map((bot) => (
+            <OfficialBotRow key={String(bot.userId)} bot={bot} />
+          ))}
         </div>
         <div className="bg-button-info/10 border-border-card mt-4 rounded-lg border p-4">
           <div className="relative z-10">

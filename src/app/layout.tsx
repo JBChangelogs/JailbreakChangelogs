@@ -12,7 +12,6 @@ import VersionInfoWrapper from "@/components/Layout/VersionInfoWrapper";
 import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
 import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
-import AuthCheck from "@/components/Auth/AuthCheck";
 import ThemeProvider from "@/components/ThemeProvider";
 import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
 import { TwemojiProvider } from "@/contexts/TwemojiContext";
@@ -180,7 +179,6 @@ export default async function RootLayout({
                       shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
                     />
 
-                    <AuthCheck />
                     <AuthProvider>
                       <RybbitIdentity />
                       <AdBlockRecovery />
@@ -322,7 +320,6 @@ export default async function RootLayout({
                   shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
                 />
 
-                <AuthCheck />
                 <AuthProvider>
                   <RybbitIdentity />
                   <AdBlockRecovery />

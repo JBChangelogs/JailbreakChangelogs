@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useAuthContext } from "@/contexts/AuthContext";
 import type { UserData, UserFlag } from "@/types/auth";
 
 function hasTestingAccess(user: UserData | null): boolean {
@@ -13,55 +14,14 @@ function hasTestingAccess(user: UserData | null): boolean {
 }
 
 export default function AccessDeniedAutoRedirect() {
+  const { user, isLoading } = useAuthContext();
+
   useEffect(() => {
-    let cancelled = false;
-    let retryTimeout: number | undefined;
-
-    const check = async (attempt: number) => {
-      const controller = new AbortController();
-      const timeoutId = window.setTimeout(() => controller.abort(), 6000);
-
-      try {
-        const response = await fetch("/api/session", {
-          cache: "no-store",
-          signal: controller.signal,
-          headers: {
-            "Cache-Control": "no-store",
-          },
-        });
-
-        if (!response.ok) return;
-
-        const data = (await response.json()) as { user: UserData | null };
-        if (cancelled) return;
-
-        if (hasTestingAccess(data.user)) {
-          window.location.replace("/");
-        }
-      } catch {
-        // ignore
-      } finally {
-        window.clearTimeout(timeoutId);
-      }
-
-      if (cancelled) return;
-      if (attempt >= 2) return;
-
-      retryTimeout = window.setTimeout(
-        () => {
-          void check(attempt + 1);
-        },
-        400 * Math.pow(2, attempt),
-      );
-    };
-
-    void check(0);
-
-    return () => {
-      cancelled = true;
-      if (retryTimeout) window.clearTimeout(retryTimeout);
-    };
-  }, []);
+    if (isLoading) return;
+    if (hasTestingAccess(user)) {
+      window.location.replace("/");
+    }
+  }, [user, isLoading]);
 
   return null;
 }

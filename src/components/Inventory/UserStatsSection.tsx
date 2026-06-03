@@ -8,6 +8,7 @@ import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { useRobloxUserDataQuery } from "@/hooks/useRobloxDataQuery";
 import { INVENTORY_API_URL } from "@/utils/api/api";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import XpProgressBar from "./XpProgressBar";
 import Image from "next/image";
 import ScanHistoryModal from "../Modals/ScanHistoryModal";
@@ -175,6 +176,7 @@ export default function UserStatsSection({
   const [isLoadingQueuePosition, setIsLoadingQueuePosition] = useState(false);
   const [queueError, setQueueError] = useState<string | null>(null);
   const [hasCheckedQueuePosition, setHasCheckedQueuePosition] = useState(false);
+  const [botAvatarError, setBotAvatarError] = useState(false);
   const createdRelativeTime = useRealTimeRelativeDate(
     currentData?.created_at || 0,
   );
@@ -810,21 +812,28 @@ export default function UserStatsSection({
                         {botUser ? (
                           <>
                             <div className="bg-quaternary-bg h-6 w-6 overflow-hidden rounded-full">
-                              <Image
-                                src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botUser.id}/avatar-headshot`}
-                                alt={
-                                  botUser.name ||
-                                  botUser.displayName ||
-                                  `Bot ${botUser.id} avatar`
-                                }
-                                width={24}
-                                height={24}
-                                className="h-full w-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.src =
-                                    "/assets/images/Placeholder.webp";
-                                }}
-                              />
+                              {botAvatarError ? (
+                                <DefaultAvatar
+                                  name={
+                                    botUser.name ||
+                                    botUser.displayName ||
+                                    String(botUser.id)
+                                  }
+                                />
+                              ) : (
+                                <Image
+                                  src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botUser.id}/avatar-headshot`}
+                                  alt={
+                                    botUser.name ||
+                                    botUser.displayName ||
+                                    `Bot ${botUser.id} avatar`
+                                  }
+                                  width={24}
+                                  height={24}
+                                  className="h-full w-full object-cover"
+                                  onError={() => setBotAvatarError(true)}
+                                />
+                              )}
                             </div>
                             <a
                               href={`https://www.roblox.com/users/${botUser.id}/profile`}

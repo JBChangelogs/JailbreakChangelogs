@@ -71,7 +71,6 @@ function isAllowedWithoutTesterRole(request: NextRequest): boolean {
   const { pathname, searchParams } = request.nextUrl;
 
   if (pathname === "/access-denied") return true;
-  if (pathname === "/api/session") return true;
   if (pathname === "/api/healthcheck") return true;
   if (pathname.startsWith("/api/auth/")) return true;
   if (pathname.startsWith("/api/oauth/")) return true;

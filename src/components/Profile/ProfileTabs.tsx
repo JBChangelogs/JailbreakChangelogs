@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import React from "react";
 import { useQueryState } from "nuqs";
+import React from "react";
 
 import AboutTab from "./AboutTab";
 import CommentsTab from "./CommentsTab";

@@ -11,6 +11,7 @@ import { type RobloxUser } from "@/types";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/helpers/timestamp";
 import Image from "next/image";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import RetryErrorDisplay from "./RetryErrorDisplay";
 import { Icon } from "@iconify/react";
@@ -293,23 +294,8 @@ export default function ConnectedBotsPolling() {
                     <div className="flex items-center gap-2">
                       <span className="text-secondary-text">Last Updated:</span>
                       <div className="border-border-card bg-tertiary-bg flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border">
-                        <Image
-                          src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${queueInfo.last_dequeue!.user_id}/avatar-headshot`}
-                          alt="Last processed user avatar"
-                          width={24}
-                          height={24}
-                          className="h-full w-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            const parent = e.currentTarget.parentElement;
-                            if (parent && !parent.querySelector("svg")) {
-                              const fallback = document.createElement("div");
-                              fallback.className =
-                                "flex h-full w-full items-center justify-center";
-                              fallback.innerHTML = `<svg class="h-4 w-4 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
-                              parent.appendChild(fallback);
-                            }
-                          }}
+                        <LastUpdatedAvatar
+                          userId={queueInfo.last_dequeue!.user_id}
                         />
                       </div>
                       <Link
@@ -418,6 +404,23 @@ export default function ConnectedBotsPolling() {
   );
 }
 
+function LastUpdatedAvatar({ userId }: { userId: string }) {
+  const [avatarError, setAvatarError] = useState(false);
+  const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+  return avatarError ? (
+    <DefaultAvatar name={userId} />
+  ) : (
+    <Image
+      src={avatarUrl}
+      alt="Last processed user avatar"
+      width={24}
+      height={24}
+      className="h-full w-full object-cover"
+      onError={() => setAvatarError(true)}
+    />
+  );
+}
+
 function BotStatusCard({
   bot,
   usersData,
@@ -426,6 +429,7 @@ function BotStatusCard({
   usersData: Record<string, RobloxUser> | null;
 }) {
   const [isJoining, setIsJoining] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const userData = usersData?.[bot.id];
   const displayName =
     userData?.displayName || userData?.name || `Bot ${bot.id}`;
@@ -454,24 +458,18 @@ function BotStatusCard({
           className="bg-quaternary-bg flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2"
           style={{ borderColor: "var(--color-status-success-vibrant)" }}
         >
-          <Image
-            src={avatarUrl}
-            alt={`${displayName} avatar`}
-            width={40}
-            height={40}
-            className="h-full w-full object-cover"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              const parent = e.currentTarget.parentElement;
-              if (parent && !parent.querySelector("svg")) {
-                const fallback = document.createElement("div");
-                fallback.className =
-                  "flex h-full w-full items-center justify-center";
-                fallback.innerHTML = `<svg class="h-6 w-6 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
-                parent.appendChild(fallback);
-              }
-            }}
-          />
+          {avatarError ? (
+            <DefaultAvatar name={displayName} />
+          ) : (
+            <Image
+              src={avatarUrl}
+              alt={`${displayName} avatar`}
+              width={40}
+              height={40}
+              className="h-full w-full object-cover"
+              onError={() => setAvatarError(true)}
+            />
+          )}
         </div>
 
         <div className="min-w-0 flex-1">

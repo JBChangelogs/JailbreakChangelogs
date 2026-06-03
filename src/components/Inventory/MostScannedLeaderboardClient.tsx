@@ -16,6 +16,29 @@ interface UserScan {
   upsert_count: number;
 }
 
+function LeaderboardAvatar({
+  avatarUrl,
+  displayName,
+}: {
+  avatarUrl: string;
+  displayName: string;
+}) {
+  const [avatarError, setAvatarError] = useState(false);
+  if (avatarError) {
+    return <DefaultAvatar name={displayName} />;
+  }
+  return (
+    <Image
+      src={avatarUrl}
+      alt={`${displayName}'s avatar`}
+      width={40}
+      height={40}
+      className="h-full w-full object-cover"
+      onError={() => setAvatarError(true)}
+    />
+  );
+}
+
 interface MostScannedLeaderboardClientProps {
   initialLeaderboard: UserScan[];
 }
@@ -289,30 +312,10 @@ export default function MostScannedLeaderboardClient({
 
                         {/* Avatar */}
                         <div className="bg-quaternary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                          {avatarUrl ? (
-                            <Image
-                              src={avatarUrl}
-                              alt={`${displayName}'s avatar`}
-                              width={40}
-                              height={40}
-                              className="h-full w-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                                const parent = e.currentTarget.parentElement;
-                                if (parent) {
-                                  const fallback =
-                                    document.createElement("div");
-                                  fallback.className =
-                                    "flex h-full w-full items-center justify-center";
-                                  parent.appendChild(fallback);
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center">
-                              <DefaultAvatar />
-                            </div>
-                          )}
+                          <LeaderboardAvatar
+                            avatarUrl={avatarUrl}
+                            displayName={displayName}
+                          />
                         </div>
                       </div>
 

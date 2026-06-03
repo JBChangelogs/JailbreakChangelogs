@@ -2,6 +2,7 @@
 
 import { createLogger } from "@/services/logger";
 import Image from "next/image";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 
 const log = createLogger("UI");
 import Link from "next/link";
@@ -70,6 +71,7 @@ export default function InventoryItemCard({
   const [itemUnlockMetadata, setItemUnlockMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
   const [isAvatarLoading, setIsAvatarLoading] = useState(true);
+  const [avatarError, setAvatarError] = useState(false);
   const isOriginalOwner = item.isOriginalOwner;
   const originalOwnerInfo = item.info.find(
     (info) => info.title === "Original Owner",
@@ -295,34 +297,35 @@ export default function InventoryItemCard({
             ) : originalOwnerInfo ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
-                  {isAvatarLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Spinner className="h-4 w-4" />
-                    </div>
+                  {avatarError ? (
+                    <DefaultAvatar
+                      name={getUserDisplay(
+                        isOriginalOwner ? userId : originalOwnerInfo.value,
+                      )}
+                    />
+                  ) : (
+                    <>
+                      {isAvatarLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Spinner className="h-4 w-4" />
+                        </div>
+                      )}
+                      <Image
+                        src={getUserAvatar(
+                          isOriginalOwner ? userId : originalOwnerInfo.value,
+                        )}
+                        alt="Owner Avatar"
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                        onLoad={() => setIsAvatarLoading(false)}
+                        onError={() => {
+                          setIsAvatarLoading(false);
+                          setAvatarError(true);
+                        }}
+                      />
+                    </>
                   )}
-                  <Image
-                    src={getUserAvatar(
-                      isOriginalOwner ? userId : originalOwnerInfo.value,
-                    )}
-                    alt="Owner Avatar"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                    onLoad={() => setIsAvatarLoading(false)}
-                    onError={(e) => {
-                      setIsAvatarLoading(false);
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = "none";
-                      const parent = target.parentElement;
-                      if (parent && !parent.querySelector("svg")) {
-                        const defaultAvatar = document.createElement("div");
-                        defaultAvatar.className =
-                          "flex h-full w-full items-center justify-center";
-                        defaultAvatar.innerHTML = `<svg class="h-5 w-5 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
-                        parent.appendChild(defaultAvatar);
-                      }
-                    }}
-                  />
                 </div>
                 <a
                   href={`https://www.roblox.com/users/${isOriginalOwner ? userId : originalOwnerInfo.value}/profile`}
