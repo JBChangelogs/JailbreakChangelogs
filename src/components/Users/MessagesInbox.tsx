@@ -2498,6 +2498,54 @@ export default function MessagesInbox() {
           return;
         }
 
+        if (parsedBody?.error === "profanity_detected") {
+          const flagged =
+            (parsedBody as { flagged?: { word: string }[] }).flagged ?? [];
+          const words = flagged.map((f) => f.word).join(", ");
+          const apiMessage =
+            parsedBody.message ?? "Profanity was found in the provided text";
+          toast.error("Profanity Detected", {
+            description: (
+              <span>
+                {apiMessage}
+                {words && (
+                  <>
+                    <br />
+                    Flagged: {words}
+                  </>
+                )}
+              </span>
+            ),
+          });
+          updateLocalThreadMessage(
+            targetUserId,
+            (m) => m.id === optimisticId,
+            (m) => ({ ...m, status: "failed" as const }),
+          );
+          setConversations((prev) =>
+            prev.map((conversation) =>
+              conversation.user.id === targetUserId &&
+              conversation.lastMessage?.id === optimisticId
+                ? {
+                    ...conversation,
+                    lastMessage: {
+                      ...conversation.lastMessage,
+                      status: "failed",
+                    },
+                  }
+                : conversation,
+            ),
+          );
+          if (selectedUserIdRef.current === targetUserId) {
+            setMessages((prev) =>
+              prev.map((item) =>
+                item.id === optimisticId ? { ...item, status: "failed" } : item,
+              ),
+            );
+          }
+          return;
+        }
+
         throw new Error(
           combinedTooLongMessage || apiErrorMessage || fallbackStatusMessage,
         );
@@ -2673,6 +2721,28 @@ export default function MessagesInbox() {
           setBan(ban);
           toast.dismiss(toastId);
           showBanToast(ban);
+          return;
+        }
+        if (parsedBody?.error === "profanity_detected") {
+          const flagged =
+            (parsedBody as { flagged?: { word: string }[] }).flagged ?? [];
+          const words = flagged.map((f) => f.word).join(", ");
+          const apiMessage =
+            parsedBody.message ?? "Profanity was found in the provided text";
+          toast.error("Profanity Detected", {
+            description: (
+              <span>
+                {apiMessage}
+                {words && (
+                  <>
+                    <br />
+                    Flagged: {words}
+                  </>
+                )}
+              </span>
+            ),
+            id: toastId,
+          });
           return;
         }
         const apiErrorMessage =

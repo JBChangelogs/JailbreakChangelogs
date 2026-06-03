@@ -137,9 +137,14 @@ class RateLimitError extends Error {
 
 class ProfanityError extends Error {
   flagged: { word: string; source: string }[];
-  constructor(flagged: { word: string; source: string }[]) {
+  apiMessage: string;
+  constructor(
+    flagged: { word: string; source: string }[],
+    apiMessage?: string,
+  ) {
     super("profanity detected");
     this.flagged = flagged;
+    this.apiMessage = apiMessage ?? "Profanity was found in the provided text";
   }
 }
 
@@ -280,9 +285,17 @@ function SuggestionForm({
       } else if (err instanceof ProfanityError) {
         const words = err.flagged.map((f) => f.word).join(", ");
         toast.error("Profanity Detected", {
-          description: words
-            ? `Flagged: ${words}`
-            : "Please remove profanity from your reason.",
+          description: (
+            <span>
+              {err.apiMessage}
+              {words && (
+                <>
+                  <br />
+                  Flagged: {words}
+                </>
+              )}
+            </span>
+          ),
         });
         setReasonError(
           words
@@ -841,9 +854,17 @@ function EditReasonModal({
       } else if (err instanceof ProfanityError) {
         const words = err.flagged.map((f) => f.word).join(", ");
         toast.error("Profanity Detected", {
-          description: words
-            ? `Flagged: ${words}`
-            : "Please remove profanity from your reason.",
+          description: (
+            <span>
+              {err.apiMessage}
+              {words && (
+                <>
+                  <br />
+                  Flagged: {words}
+                </>
+              )}
+            </span>
+          ),
         });
         setReasonError(
           words
@@ -1338,7 +1359,7 @@ export default function ValueSuggestionsPage() {
       }
       const data = await res.json().catch(() => ({}));
       if (data?.error === "profanity_detected") {
-        throw new ProfanityError(data.flagged || []);
+        throw new ProfanityError(data.flagged || [], data.message);
       }
       log.error("update suggestion failed", { status: res.status, body: data });
       toast.error(
@@ -1753,7 +1774,7 @@ export default function ValueSuggestionsPage() {
         );
       }
       if (data?.error === "profanity_detected") {
-        throw new ProfanityError(data.flagged || []);
+        throw new ProfanityError(data.flagged || [], data.message);
       }
       toast.error(
         data?.message ?? data?.error ?? "Failed to submit suggestion.",
