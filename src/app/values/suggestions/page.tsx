@@ -1968,7 +1968,7 @@ export default function ValueSuggestionsPage() {
             </div>
           </div>
 
-          {/* Top Suggestors Leaderboard */}
+          {/* Top Suggesters Leaderboard */}
           {(loadingLeaderboard || leaderboard.length > 0) && (
             <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
               <div className="mb-4 flex items-center gap-2">
@@ -1978,7 +1978,7 @@ export default function ValueSuggestionsPage() {
                   inline
                 />
                 <span className="text-primary-text text-lg font-semibold">
-                  Top Suggestors
+                  Top Suggesters
                   {!loadingLeaderboard && leaderboard.length > 0 && (
                     <span className="text-secondary-text ml-1 font-normal">
                       ({leaderboard.length})
