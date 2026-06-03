@@ -92,7 +92,14 @@ export function CommentReactions({
     const MAX_NAMES = 3;
     const names = users
       .slice(0, MAX_NAMES)
-      .map((u) => u.username ?? "Unknown User");
+      .map((u) =>
+        isRobloxContext
+          ? u.roblox_display_name ||
+            u.roblox_username ||
+            u.username ||
+            "Unknown User"
+          : (u.username ?? "Unknown User"),
+      );
     const remaining = r.count - names.length;
     const nameStr =
       names.length === 1

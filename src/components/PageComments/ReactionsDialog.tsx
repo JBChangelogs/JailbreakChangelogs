@@ -143,7 +143,6 @@ export function ReactionsDialog({
                         : isRobloxContext
                           ? reactorData?.roblox_display_name ||
                             reactorData?.roblox_username ||
-                            reactorData?.username ||
                             reactUser.username ||
                             "Unknown User"
                           : reactorData?.username ||
@@ -176,6 +175,7 @@ export function ReactionsDialog({
                                 reactorData?.premiumtype ??
                                 reactUser.premiumtype
                               }
+                              bgClassName="bg-tertiary-bg"
                               forceAvatarUrl={
                                 isRobloxContext
                                   ? reactorData?.roblox_avatar ||

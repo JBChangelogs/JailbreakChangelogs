@@ -23,6 +23,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -182,7 +189,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     : isRobloxContext
       ? userData[comment.user_id]?.roblox_display_name ||
         userData[comment.user_id]?.roblox_username ||
-        userData[comment.user_id]?.username ||
         comment.author ||
         "Unknown User"
       : userData[comment.user_id]?.username || comment.author || "Unknown User";
@@ -226,7 +232,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     ? isRobloxContext
       ? userData[replyTarget.user_id]?.roblox_display_name ||
         userData[replyTarget.user_id]?.roblox_username ||
-        userData[replyTarget.user_id]?.username ||
         replyTarget.author
       : userData[replyTarget.user_id]?.username || replyTarget.author
     : null;
@@ -417,424 +422,387 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
       key={comment.id}
       className="relative transition-all duration-200"
     >
-      <div className="flex gap-2 sm:gap-3">
-        <div className="flex w-10 shrink-0 items-start pt-1.5">
-          {hideRecent ? (
-            <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
-              <svg
-                className="text-secondary-text h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <div className="flex gap-2 sm:gap-3">
+            <div className="flex w-10 shrink-0 items-start pt-1.5">
+              {hideRecent ? (
+                <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
+                  <svg
+                    className="text-secondary-text h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+              ) : (
+                <div
+                  className={`${
+                    userData[comment.user_id]?.premiumtype === 3
+                      ? "rounded-sm"
+                      : "rounded-full"
+                  }`}
+                >
+                  <UserAvatar
+                    userId={comment.user_id}
+                    avatarHash={userData[comment.user_id]?.avatar}
+                    username={displayName}
+                    forceAvatarUrl={robloxAvatarUrl}
+                    size={10}
+                    cdnSize={512}
+                    custom_avatar={userData[comment.user_id]?.custom_avatar}
+                    showBadge={false}
+                    settings={userData[comment.user_id]?.settings}
+                    premiumType={userData[comment.user_id]?.premiumtype}
+                    bgClassName="bg-tertiary-bg"
+                  />
+                </div>
+              )}
             </div>
-          ) : (
-            <div
-              className={`${
-                userData[comment.user_id]?.premiumtype === 3
-                  ? "rounded-sm"
-                  : "rounded-full"
-              }`}
-            >
-              <UserAvatar
-                userId={comment.user_id}
-                avatarHash={userData[comment.user_id]?.avatar}
-                username={displayName}
-                forceAvatarUrl={robloxAvatarUrl}
-                size={10}
-                cdnSize={512}
-                custom_avatar={userData[comment.user_id]?.custom_avatar}
-                showBadge={false}
-                settings={userData[comment.user_id]?.settings}
-                premiumType={userData[comment.user_id]?.premiumtype}
-                bgClassName="bg-tertiary-bg"
-              />
-            </div>
-          )}
-        </div>
 
-        {/*
+            {/*
            Content Area
            Right side of the comment containing author info, timestamp, and text.
         */}
-        <div className="min-w-0 flex-1">
-          {/* Header Section (Author, Badge, timestamp, and actions) */}
-          <div className="flex items-start justify-between gap-2 pt-1.5 pb-1.5">
-            <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
-              <div className="flex min-w-0 flex-col">
-                <div className="flex flex-wrap items-center gap-2">
-                  {hideRecent ? (
-                    <span className="text-primary-text text-sm font-semibold">
-                      Hidden User
-                    </span>
-                  ) : (
-                    <>
-                      <CommentAuthorName
-                        userId={comment.user_id}
-                        name={displayName}
-                        user={userData[comment.user_id]}
-                        className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
-                      />
+            <div className="min-w-0 flex-1">
+              {/* Header Section (Author, Badge, timestamp, and actions) */}
+              <div className="flex items-start justify-between gap-2 pt-1.5 pb-1.5">
+                <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
+                  <div className="flex min-w-0 flex-col">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {hideRecent ? (
+                        <span className="text-primary-text text-sm font-semibold">
+                          Hidden User
+                        </span>
+                      ) : (
+                        <>
+                          <CommentAuthorName
+                            userId={comment.user_id}
+                            name={displayName}
+                            user={userData[comment.user_id]}
+                            className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
+                          />
 
-                      {userData[comment.user_id]?.premiumtype >= 1 &&
-                        userData[comment.user_id]?.premiumtype <= 3 && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Image
-                                src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${userData[comment.user_id].premiumtype}.svg`}
-                                alt={`Supporter Type ${userData[comment.user_id].premiumtype}`}
-                                width={16}
-                                height={16}
-                                className="shrink-0 cursor-pointer"
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              Supporter Type{" "}
-                              {userData[comment.user_id].premiumtype}
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
+                          {userData[comment.user_id]?.premiumtype >= 1 &&
+                            userData[comment.user_id]?.premiumtype <= 3 && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Image
+                                    src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${userData[comment.user_id].premiumtype}.svg`}
+                                    alt={`Supporter Type ${userData[comment.user_id].premiumtype}`}
+                                    width={16}
+                                    height={16}
+                                    className="shrink-0 cursor-pointer"
+                                  />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  Supporter Type{" "}
+                                  {userData[comment.user_id].premiumtype}
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
 
-                      {/* OP badge for trade ad authors and value suggestion submitters */}
-                      {type === "tradev2" &&
-                        trade &&
-                        comment.user_id === trade.author && (
-                          <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium">
-                            OP
-                          </span>
-                        )}
-                      {type === "vsuggestion" &&
-                        suggestion &&
-                        comment.user_id === suggestion.suggester && (
-                          <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
-                            OP
-                          </span>
-                        )}
-                      {type === "vsuggestion" &&
-                        suggestion?.upvoterIds?.includes(comment.user_id) && (
-                          <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                            <Icon
-                              icon="material-symbols:thumb-up-rounded"
-                              className="h-3 w-3"
-                            />
-                            <span className="hidden sm:inline">Upvoted</span>
-                          </span>
-                        )}
-                      {type === "vsuggestion" &&
-                        suggestion?.downvoterIds?.includes(comment.user_id) && (
-                          <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                            <Icon
-                              icon="material-symbols:thumb-down-rounded"
-                              className="h-3 w-3"
-                            />
-                            <span className="hidden sm:inline">Downvoted</span>
-                          </span>
-                        )}
-                    </>
-                  )}
+                          {/* OP badge for trade ad authors and value suggestion submitters */}
+                          {type === "tradev2" &&
+                            trade &&
+                            comment.user_id === trade.author && (
+                              <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium">
+                                OP
+                              </span>
+                            )}
+                          {type === "vsuggestion" &&
+                            suggestion &&
+                            comment.user_id === suggestion.suggester && (
+                              <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                                OP
+                              </span>
+                            )}
+                          {type === "vsuggestion" &&
+                            suggestion?.upvoterIds?.includes(
+                              comment.user_id,
+                            ) && (
+                              <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                <Icon
+                                  icon="material-symbols:thumb-up-rounded"
+                                  className="h-3 w-3"
+                                />
+                                <span className="hidden sm:inline">
+                                  Upvoted
+                                </span>
+                              </span>
+                            )}
+                          {type === "vsuggestion" &&
+                            suggestion?.downvoterIds?.includes(
+                              comment.user_id,
+                            ) && (
+                              <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                <Icon
+                                  icon="material-symbols:thumb-down-rounded"
+                                  className="h-3 w-3"
+                                />
+                                <span className="hidden sm:inline">
+                                  Downvoted
+                                </span>
+                              </span>
+                            )}
+                        </>
+                      )}
+                    </div>
+
+                    <CommentTimestamp
+                      date={comment.date}
+                      editedAt={comment.edited_at}
+                      commentId={comment.id}
+                    />
+                  </div>
                 </div>
 
-                <CommentTimestamp
-                  date={comment.date}
-                  editedAt={comment.edited_at}
-                  commentId={comment.id}
-                />
-              </div>
-            </div>
-
-            {/* Action Menu Dropdown (Edit, Delete, Report) */}
-            <div className="flex items-center gap-1">
-              {isLoggedIn && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200"
-                      onClick={() => {
-                        if (replyingToId === comment.id) {
-                          setReplyingToId(null);
-                          setReplyingToReplyId(null);
-                          setReplyDraft("");
-                        } else {
-                          setEditingCommentId(null);
-                          setEditDraft("");
-                          setReplyingToId(comment.id);
-                          setReplyingToReplyId(null);
-                          setReplyDraft("");
-                        }
-                      }}
-                    >
-                      <Icon
-                        icon="heroicons-outline:chat-bubble-left-right"
-                        className="h-4 w-4"
-                      />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Reply</TooltipContent>
-                </Tooltip>
-              )}
-              {isLoggedIn && availableEmojis.length > 0 && (
-                <Popover
-                  open={reactionPickerHoverOpenId === comment.id}
-                  onOpenChange={(open) => {
-                    if (open && (isRateLimited || !!reactionBan)) return;
-                    setReactionPickerHoverOpenId(open ? comment.id : null);
-                  }}
-                >
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <PopoverTrigger asChild>
+                {/* Action Menu Dropdown (Edit, Delete, Report) */}
+                <div className="flex items-center gap-1">
+                  {isLoggedIn && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
+                          className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200"
+                          onClick={() => {
+                            if (replyingToId === comment.id) {
+                              setReplyingToId(null);
+                              setReplyingToReplyId(null);
+                              setReplyDraft("");
+                            } else {
+                              setEditingCommentId(null);
+                              setEditDraft("");
+                              setReplyingToId(comment.id);
+                              setReplyingToReplyId(null);
+                              setReplyDraft("");
+                            }
+                          }}
                         >
                           <Icon
-                            icon="fluent:emoji-add-16-regular"
+                            icon="heroicons-outline:chat-bubble-left-right"
                             className="h-4 w-4"
                           />
                         </Button>
-                      </PopoverTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>Add a reaction</TooltipContent>
-                  </Tooltip>
-                  <PopoverContent className="w-auto p-2" align="end">
-                    <div className="grid grid-cols-5 gap-1">
-                      {availableEmojis.map((emoji) => (
-                        <button
-                          key={emoji}
-                          type="button"
-                          onClick={() => {
-                            void handleReact(comment.id, emoji);
-                            setReactionPickerHoverOpenId(null);
-                          }}
-                          className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
-                        >
-                          {twemojiEnabled ? (
-                            <Twemoji
-                              tag="span"
-                              options={{ className: "twemoji" }}
-                            >
-                              {emoji}
-                            </Twemoji>
-                          ) : (
-                            emoji
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              )}
-              {isLoggedIn && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200"
+                      </TooltipTrigger>
+                      <TooltipContent>Reply</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {isLoggedIn && availableEmojis.length > 0 && (
+                    <Popover
+                      open={reactionPickerHoverOpenId === comment.id}
+                      onOpenChange={(open) => {
+                        if (open && (isRateLimited || !!reactionBan)) return;
+                        setReactionPickerHoverOpenId(open ? comment.id : null);
+                      }}
                     >
-                      <Icon
-                        icon="heroicons:ellipsis-horizontal"
-                        className="h-4 w-4"
-                      />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    onCloseAutoFocus={(e) => {
-                      if (editingCommentId !== null) {
-                        e.preventDefault();
-                      }
-                    }}
-                  >
-                    {comment.reactions && comment.reactions.length > 0 && (
-                      <DropdownMenuItem
-                        onClick={() => {
-                          const sorted = getStableReactionOrder(
-                            comment.id,
-                            comment.reactions!,
-                          );
-                          setReactionBreakdownOpenId(comment.id);
-                          setBreakdownTab(sorted[0]?.emoji ?? "all");
-                        }}
-                      >
-                        <Icon
-                          icon="heroicons-outline:face-smile"
-                          className="mr-2 h-4 w-4"
-                        />
-                        View Reactions
-                      </DropdownMenuItem>
-                    )}
-                    {isTester && (
-                      <DropdownMenuItem
-                        onClick={() => {
-                          void navigator.clipboard
-                            .writeText(String(comment.id))
-                            .then(() => {
-                              toast.success(`Comment ID ${comment.id} copied`);
-                            });
-                        }}
-                      >
-                        <Icon
-                          icon="heroicons-outline:clipboard"
-                          className="mr-2 h-4 w-4"
-                        />
-                        Copy Comment ID
-                      </DropdownMenuItem>
-                    )}
-                    {currentUserId === comment.user_id ? (
-                      <>
-                        {/* Check if comment is still editable (within 1 hour) */}
-                        {isCommentEditable(comment.date) && (
-                          <DropdownMenuItem
-                            onClick={() => handleEditClick(comment.id)}
-                          >
-                            <Icon
-                              icon="heroicons-outline:pencil"
-                              className="mr-2 h-4 w-4"
-                            />
-                            Edit Comment
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteComment(comment.id)}
-                          className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
+                            >
+                              <Icon
+                                icon="fluent:emoji-add-16-regular"
+                                className="h-4 w-4"
+                              />
+                            </Button>
+                          </PopoverTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>Add a reaction</TooltipContent>
+                      </Tooltip>
+                      <PopoverContent className="w-auto p-2" align="end">
+                        <div className="grid grid-cols-5 gap-1">
+                          {availableEmojis.map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => {
+                                void handleReact(comment.id, emoji);
+                                setReactionPickerHoverOpenId(null);
+                              }}
+                              className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
+                            >
+                              {twemojiEnabled ? (
+                                <Twemoji
+                                  tag="span"
+                                  options={{ className: "twemoji" }}
+                                >
+                                  {emoji}
+                                </Twemoji>
+                              ) : (
+                                emoji
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                  {isLoggedIn && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200"
                         >
                           <Icon
-                            icon="heroicons-outline:trash"
-                            className="mr-2 h-4 w-4"
+                            icon="heroicons:ellipsis-horizontal"
+                            className="h-4 w-4"
                           />
-                          Delete Comment
-                        </DropdownMenuItem>
-                      </>
-                    ) : (
-                      <DropdownMenuItem
-                        onClick={() => handleReportClick(comment.id)}
-                        className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        onCloseAutoFocus={(e) => {
+                          if (editingCommentId !== null) {
+                            e.preventDefault();
+                          }
+                        }}
                       >
-                        <Icon
-                          icon="heroicons-outline:flag"
-                          className="mr-2 h-4 w-4"
-                        />
-                        Report Comment
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          </div>
+                        {comment.reactions && comment.reactions.length > 0 && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              const sorted = getStableReactionOrder(
+                                comment.id,
+                                comment.reactions!,
+                              );
+                              setReactionBreakdownOpenId(comment.id);
+                              setBreakdownTab(sorted[0]?.emoji ?? "all");
+                            }}
+                          >
+                            <Icon
+                              icon="heroicons-outline:face-smile"
+                              className="mr-2 h-4 w-4"
+                            />
+                            View Reactions
+                          </DropdownMenuItem>
+                        )}
+                        {isTester && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              void navigator.clipboard
+                                .writeText(String(comment.id))
+                                .then(() => {
+                                  toast.success(
+                                    `Comment ID ${comment.id} copied`,
+                                  );
+                                });
+                            }}
+                          >
+                            <Icon
+                              icon="heroicons-outline:clipboard"
+                              className="mr-2 h-4 w-4"
+                            />
+                            Copy Comment ID
+                          </DropdownMenuItem>
+                        )}
+                        {currentUserId === comment.user_id ? (
+                          <>
+                            {/* Check if comment is still editable (within 1 hour) */}
+                            {isCommentEditable(comment.date) && (
+                              <DropdownMenuItem
+                                onClick={() => handleEditClick(comment.id)}
+                              >
+                                <Icon
+                                  icon="heroicons-outline:pencil"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Edit Comment
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteComment(comment.id)}
+                              className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                            >
+                              <Icon
+                                icon="heroicons-outline:trash"
+                                className="mr-2 h-4 w-4"
+                              />
+                              Delete Comment
+                            </DropdownMenuItem>
+                          </>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => handleReportClick(comment.id)}
+                            className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
+                          >
+                            <Icon
+                              icon="heroicons-outline:flag"
+                              className="mr-2 h-4 w-4"
+                            />
+                            Report Comment
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              </div>
 
-          {/* Content Section */}
-          <div className="pb-2">
-            {editingCommentId === comment.id ? (
-              <div className="border-border-card bg-tertiary-bg focus-within:border-button-info -ml-12 rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
-                <CommentTextarea
-                  value={editDraft}
-                  onChange={setEditDraft}
-                  emojiMap={emojiStringMap}
-                  disabled={updatingCommentId === comment.id}
-                  id={`edit-textarea-${comment.id}`}
-                  rows={3}
-                  className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-50"
-                  autoCorrect="off"
-                  autoComplete="off"
-                  spellCheck="false"
-                  autoCapitalize="off"
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      setEditingCommentId(null);
-                      setEditDraft("");
-                    }
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      if (
-                        editDraft.trim() &&
-                        updatingCommentId !== comment.id
-                      ) {
-                        void handleEditComment(comment.id, editDraft).then(
-                          (ok) => {
-                            if (ok) setEditDraft("");
-                          },
-                        );
-                      }
-                    }
-                  }}
-                />
-                <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
-                  {/* Mobile: buttons */}
-                  <div className="flex items-center gap-2 lg:hidden">
-                    <Button
-                      size="sm"
-                      variant="ghost"
+              {/* Content Section */}
+              <div className="pb-2">
+                {editingCommentId === comment.id ? (
+                  <div className="border-border-card bg-tertiary-bg focus-within:border-button-info -ml-12 rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
+                    <CommentTextarea
+                      value={editDraft}
+                      onChange={setEditDraft}
+                      emojiMap={emojiStringMap}
                       disabled={updatingCommentId === comment.id}
-                      onClick={() => {
-                        setEditingCommentId(null);
-                        setEditDraft("");
+                      id={`edit-textarea-${comment.id}`}
+                      rows={3}
+                      className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-50"
+                      autoCorrect="off"
+                      autoComplete="off"
+                      spellCheck="false"
+                      autoCapitalize="off"
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") {
+                          setEditingCommentId(null);
+                          setEditDraft("");
+                        }
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          if (
+                            editDraft.trim() &&
+                            updatingCommentId !== comment.id
+                          ) {
+                            void handleEditComment(comment.id, editDraft).then(
+                              (ok) => {
+                                if (ok) setEditDraft("");
+                              },
+                            );
+                          }
+                        }
                       }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        void handleEditComment(comment.id, editDraft).then(
-                          (ok) => {
-                            if (ok) setEditDraft("");
-                          },
-                        );
-                      }}
-                      disabled={
-                        !editDraft.trim() || updatingCommentId === comment.id
-                      }
-                    >
-                      {updatingCommentId === comment.id ? (
-                        <>
-                          <Spinner className="h-3.5 w-3.5" />
-                          Updating...
-                        </>
-                      ) : (
-                        "Update"
-                      )}
-                    </Button>
-                  </div>
-                  {/* Desktop: keyboard hints */}
-                  <div className="text-secondary-text hidden items-center gap-1.5 text-[11px] lg:flex">
-                    {updatingCommentId === comment.id ? (
-                      <>
-                        <Spinner className="h-3 w-3" />
-                        <span>Updating...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Esc to </span>
-                        <button
-                          type="button"
-                          className="text-link cursor-pointer hover:underline"
+                    />
+                    <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
+                      {/* Mobile: buttons */}
+                      <div className="flex items-center gap-2 lg:hidden">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={updatingCommentId === comment.id}
                           onClick={() => {
                             setEditingCommentId(null);
                             setEditDraft("");
                           }}
                         >
-                          cancel
-                        </button>
-                        <span> • Enter to </span>
-                        <button
-                          type="button"
-                          className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-                          disabled={
-                            !editDraft.trim() ||
-                            updatingCommentId === comment.id
-                          }
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
                           onClick={() => {
                             void handleEditComment(comment.id, editDraft).then(
                               (ok) => {
@@ -842,92 +810,233 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                               },
                             );
                           }}
+                          disabled={
+                            !editDraft.trim() ||
+                            updatingCommentId === comment.id
+                          }
                         >
-                          save
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <>
-                  {false && (
-                    <div className="hidden">
-                      <span></span>
-                    </div>
-                  )}
-                  <div className="prose prose-sm max-w-none">
-                    {isClient ? (
-                      twemojiEnabled ? (
-                        <Twemoji options={{ className: "twemoji" }}>
-                          <p
-                            className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                            dangerouslySetInnerHTML={{
-                              __html: convertUrlsToLinksHTML(
-                                processMentions(sanitizeHTML(visibleContent)),
-                              ),
-                            }}
-                          />
-                        </Twemoji>
-                      ) : (
-                        <p
-                          className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                          dangerouslySetInnerHTML={{
-                            __html: convertUrlsToLinksHTML(
-                              processMentions(sanitizeHTML(visibleContent)),
-                            ),
-                          }}
-                        />
-                      )
-                    ) : (
-                      <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
-                        {visibleContent}
-                      </p>
-                    )}
-
-                    {shouldTruncate && (
-                      <Button
-                        variant="link"
-                        onClick={() => toggleCommentExpand(comment.id)}
-                        className="mt-2 h-auto p-0 font-medium"
-                      >
-                        {isExpanded ? (
+                          {updatingCommentId === comment.id ? (
+                            <>
+                              <Spinner className="h-3.5 w-3.5" />
+                              Updating...
+                            </>
+                          ) : (
+                            "Update"
+                          )}
+                        </Button>
+                      </div>
+                      {/* Desktop: keyboard hints */}
+                      <div className="text-secondary-text hidden items-center gap-1.5 text-[11px] lg:flex">
+                        {updatingCommentId === comment.id ? (
                           <>
-                            <Icon
-                              icon="mdi:chevron-up"
-                              className="h-4 w-4"
-                              inline={true}
-                            />
-                            Show less
+                            <Spinner className="h-3 w-3" />
+                            <span>Updating...</span>
                           </>
                         ) : (
                           <>
-                            <Icon
-                              icon="mdi:chevron-down"
-                              className="h-4 w-4"
-                              inline={true}
-                            />
-                            Read more
+                            <span>Esc to </span>
+                            <button
+                              type="button"
+                              className="text-link cursor-pointer hover:underline"
+                              onClick={() => {
+                                setEditingCommentId(null);
+                                setEditDraft("");
+                              }}
+                            >
+                              cancel
+                            </button>
+                            <span> • Enter to </span>
+                            <button
+                              type="button"
+                              className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                              disabled={
+                                !editDraft.trim() ||
+                                updatingCommentId === comment.id
+                              }
+                              onClick={() => {
+                                void handleEditComment(
+                                  comment.id,
+                                  editDraft,
+                                ).then((ok) => {
+                                  if (ok) setEditDraft("");
+                                });
+                              }}
+                            >
+                              save
+                            </button>
                           </>
                         )}
-                      </Button>
-                    )}
+                      </div>
+                    </div>
                   </div>
-                </>
-              </div>
-            )}
-          </div>
+                ) : (
+                  <div>
+                    <>
+                      {false && (
+                        <div className="hidden">
+                          <span></span>
+                        </div>
+                      )}
+                      <div className="prose prose-sm max-w-none">
+                        {isClient ? (
+                          twemojiEnabled ? (
+                            <Twemoji options={{ className: "twemoji" }}>
+                              <p
+                                className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                                dangerouslySetInnerHTML={{
+                                  __html: convertUrlsToLinksHTML(
+                                    processMentions(
+                                      sanitizeHTML(visibleContent),
+                                    ),
+                                  ),
+                                }}
+                              />
+                            </Twemoji>
+                          ) : (
+                            <p
+                              className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                              dangerouslySetInnerHTML={{
+                                __html: convertUrlsToLinksHTML(
+                                  processMentions(sanitizeHTML(visibleContent)),
+                                ),
+                              }}
+                            />
+                          )
+                        ) : (
+                          <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
+                            {visibleContent}
+                          </p>
+                        )}
 
-          {/* Reactions */}
-          <CommentReactions
-            commentId={comment.id}
-            reactions={comment.reactions}
-            isRobloxContext={isRobloxContext}
-          />
-        </div>
-      </div>
+                        {shouldTruncate && (
+                          <Button
+                            variant="link"
+                            onClick={() => toggleCommentExpand(comment.id)}
+                            className="mt-2 h-auto p-0 font-medium"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <Icon
+                                  icon="mdi:chevron-up"
+                                  className="h-4 w-4"
+                                  inline={true}
+                                />
+                                Show less
+                              </>
+                            ) : (
+                              <>
+                                <Icon
+                                  icon="mdi:chevron-down"
+                                  className="h-4 w-4"
+                                  inline={true}
+                                />
+                                Read more
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </>
+                  </div>
+                )}
+              </div>
+
+              {/* Reactions */}
+              <CommentReactions
+                commentId={comment.id}
+                reactions={comment.reactions}
+                isRobloxContext={isRobloxContext}
+              />
+            </div>
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          {isLoggedIn && (
+            <ContextMenuItem
+              onClick={() => {
+                if (replyingToId === comment.id) {
+                  setReplyingToId(null);
+                  setReplyingToReplyId(null);
+                } else {
+                  setEditingCommentId(null);
+                  setReplyingToId(comment.id);
+                  setReplyingToReplyId(null);
+                }
+              }}
+            >
+              <Icon
+                icon="heroicons-outline:chat-bubble-left-right"
+                className="h-4 w-4"
+              />
+              Reply
+            </ContextMenuItem>
+          )}
+          {comment.reactions && comment.reactions.length > 0 && (
+            <ContextMenuItem
+              onClick={() => {
+                const sorted = getStableReactionOrder(
+                  comment.id,
+                  comment.reactions!,
+                );
+                setReactionBreakdownOpenId(comment.id);
+                setBreakdownTab(sorted[0]?.emoji ?? "all");
+              }}
+            >
+              <Icon icon="heroicons-outline:face-smile" className="h-4 w-4" />
+              View Reactions
+            </ContextMenuItem>
+          )}
+          {isTester && (
+            <ContextMenuItem
+              onClick={() => {
+                void navigator.clipboard
+                  .writeText(String(comment.id))
+                  .then(() => {
+                    toast.success(`Comment ID ${comment.id} copied`);
+                  });
+              }}
+            >
+              <Icon icon="heroicons-outline:clipboard" className="h-4 w-4" />
+              Copy Comment ID
+            </ContextMenuItem>
+          )}
+          {isLoggedIn && (
+            <>
+              <ContextMenuSeparator />
+              {currentUserId === comment.user_id ? (
+                <>
+                  {isCommentEditable(comment.date) && (
+                    <ContextMenuItem
+                      onClick={() => handleEditClick(comment.id)}
+                    >
+                      <Icon
+                        icon="heroicons-outline:pencil"
+                        className="h-4 w-4"
+                      />
+                      Edit Comment
+                    </ContextMenuItem>
+                  )}
+                  <ContextMenuItem
+                    onClick={() => handleDeleteComment(comment.id)}
+                    className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                  >
+                    <Icon icon="heroicons-outline:trash" className="h-4 w-4" />
+                    Delete Comment
+                  </ContextMenuItem>
+                </>
+              ) : (
+                <ContextMenuItem
+                  onClick={() => handleReportClick(comment.id)}
+                  className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                >
+                  <Icon icon="heroicons-outline:flag" className="h-4 w-4" />
+                  Report Comment
+                </ContextMenuItem>
+              )}
+            </>
+          )}
+        </ContextMenuContent>
+      </ContextMenu>
 
       <div className="ml-12 sm:ml-[3.25rem]">
         {replyCount > 0 && comment.replies && (
@@ -949,7 +1058,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                   : isRobloxContext
                     ? replyUser?.roblox_display_name ||
                       replyUser?.roblox_username ||
-                      replyUser?.username ||
                       reply.author ||
                       "Unknown User"
                     : replyUser?.username || reply.author || "Unknown User";
@@ -967,7 +1075,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                   ? isRobloxContext
                     ? userData[replyToTarget.user_id]?.roblox_display_name ||
                       userData[replyToTarget.user_id]?.roblox_username ||
-                      userData[replyToTarget.user_id]?.username ||
                       replyToTarget.author
                     : userData[replyToTarget.user_id]?.username ||
                       replyToTarget.author
@@ -975,114 +1082,76 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
 
                 return (
                   <React.Fragment key={reply.id}>
-                    <div
-                      id={`comment-${reply.id}`}
-                      className="flex gap-2 sm:gap-3"
-                    >
-                      {/* Reply avatar */}
-                      <div className="flex w-8 shrink-0 items-start pt-1">
-                        {replyHideRecent ? (
-                          <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-8 w-8 items-center justify-center rounded-full border ring-1">
-                            <svg
-                              className="text-secondary-text h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                              />
-                            </svg>
-                          </div>
-                        ) : (
-                          <div
-                            className={
-                              replyUser?.premiumtype === 3
-                                ? "rounded-sm"
-                                : "rounded-full"
-                            }
-                          >
-                            <UserAvatar
-                              userId={reply.user_id}
-                              avatarHash={replyUser?.avatar ?? null}
-                              username={replyDisplayName}
-                              forceAvatarUrl={replyRobloxAvatarUrl}
-                              size={8}
-                              cdnSize={256}
-                              custom_avatar={replyUser?.custom_avatar}
-                              showBadge={false}
-                              settings={replyUser?.settings}
-                              premiumType={replyUser?.premiumtype}
-                              bgClassName="bg-tertiary-bg"
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Reply content */}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2 pb-1">
-                          <div className="flex min-w-0 flex-col">
+                    <ContextMenu>
+                      <ContextMenuTrigger asChild>
+                        <div
+                          id={`comment-${reply.id}`}
+                          className="flex gap-2 sm:gap-3"
+                        >
+                          {/* Reply avatar */}
+                          <div className="flex w-8 shrink-0 items-start pt-1">
                             {replyHideRecent ? (
-                              <span className="text-primary-text text-sm font-semibold">
-                                Hidden User
-                              </span>
+                              <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-8 w-8 items-center justify-center rounded-full border ring-1">
+                                <svg
+                                  className="text-secondary-text h-4 w-4"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                  />
+                                </svg>
+                              </div>
                             ) : (
-                              <>
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                  <div className="flex items-center gap-1">
-                                    <CommentAuthorName
-                                      userId={reply.user_id}
-                                      name={replyDisplayName}
-                                      user={replyUser}
-                                      className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
-                                    />
-                                    {type === "vsuggestion" &&
-                                      suggestion?.upvoterIds?.includes(
-                                        reply.user_id,
-                                      ) && (
-                                        <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                          <Icon
-                                            icon="material-symbols:thumb-up-rounded"
-                                            className="h-3 w-3"
-                                          />
-                                          <span className="hidden sm:inline">
-                                            Upvoted
-                                          </span>
-                                        </span>
-                                      )}
-                                    {type === "vsuggestion" &&
-                                      suggestion?.downvoterIds?.includes(
-                                        reply.user_id,
-                                      ) && (
-                                        <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                          <Icon
-                                            icon="material-symbols:thumb-down-rounded"
-                                            className="h-3 w-3"
-                                          />
-                                          <span className="hidden sm:inline">
-                                            Downvoted
-                                          </span>
-                                        </span>
-                                      )}
-                                    {replyToTargetName && replyToTarget && (
-                                      <>
-                                        <Icon
-                                          icon="material-symbols:arrow-right"
-                                          className="text-secondary-text h-4 w-4 shrink-0"
-                                        />
+                              <div
+                                className={
+                                  replyUser?.premiumtype === 3
+                                    ? "rounded-sm"
+                                    : "rounded-full"
+                                }
+                              >
+                                <UserAvatar
+                                  userId={reply.user_id}
+                                  avatarHash={replyUser?.avatar ?? null}
+                                  username={replyDisplayName}
+                                  forceAvatarUrl={replyRobloxAvatarUrl}
+                                  size={8}
+                                  cdnSize={256}
+                                  custom_avatar={replyUser?.custom_avatar}
+                                  showBadge={false}
+                                  settings={replyUser?.settings}
+                                  premiumType={replyUser?.premiumtype}
+                                  bgClassName="bg-tertiary-bg"
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Reply content */}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2 pb-1">
+                              <div className="flex min-w-0 flex-col">
+                                {replyHideRecent ? (
+                                  <span className="text-primary-text text-sm font-semibold">
+                                    Hidden User
+                                  </span>
+                                ) : (
+                                  <>
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                      <div className="flex items-center gap-1">
                                         <CommentAuthorName
-                                          userId={replyToTarget.user_id}
-                                          name={replyToTargetName}
-                                          user={userData[replyToTarget.user_id]}
-                                          className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                          userId={reply.user_id}
+                                          name={replyDisplayName}
+                                          user={replyUser}
+                                          className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
                                         />
                                         {type === "vsuggestion" &&
                                           suggestion?.upvoterIds?.includes(
-                                            replyToTarget.user_id,
+                                            reply.user_id,
                                           ) && (
                                             <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
                                               <Icon
@@ -1096,7 +1165,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                           )}
                                         {type === "vsuggestion" &&
                                           suggestion?.downvoterIds?.includes(
-                                            replyToTarget.user_id,
+                                            reply.user_id,
                                           ) && (
                                             <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
                                               <Icon
@@ -1108,337 +1177,496 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                               </span>
                                             </span>
                                           )}
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                                <CommentTimestamp
-                                  date={reply.date}
-                                  editedAt={reply.edited_at}
-                                  commentId={reply.id}
-                                />
-                              </>
-                            )}
-                          </div>
-
-                          {/* Reply action menu */}
-                          {isLoggedIn && (
-                            <div className="flex items-center gap-1">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200"
-                                    onClick={() => {
-                                      if (
-                                        replyingToId === comment.id &&
-                                        replyingToReplyId === reply.id
-                                      ) {
-                                        setReplyingToId(null);
-                                        setReplyingToReplyId(null);
-                                        setReplyDraft("");
-                                      } else {
-                                        setEditingCommentId(null);
-                                        setEditDraft("");
-                                        setReplyingToId(comment.id);
-                                        setReplyingToReplyId(reply.id);
-                                        setReplyDraft("");
-                                      }
-                                    }}
-                                  >
-                                    <Icon
-                                      icon="heroicons-outline:chat-bubble-left-right"
-                                      className="h-3.5 w-3.5"
+                                        {replyToTargetName && replyToTarget && (
+                                          <>
+                                            <Icon
+                                              icon="material-symbols:arrow-right"
+                                              className="text-secondary-text h-4 w-4 shrink-0"
+                                            />
+                                            <CommentAuthorName
+                                              userId={replyToTarget.user_id}
+                                              name={replyToTargetName}
+                                              user={
+                                                userData[replyToTarget.user_id]
+                                              }
+                                              className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                            />
+                                            {type === "vsuggestion" &&
+                                              suggestion?.upvoterIds?.includes(
+                                                replyToTarget.user_id,
+                                              ) && (
+                                                <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                                  <Icon
+                                                    icon="material-symbols:thumb-up-rounded"
+                                                    className="h-3 w-3"
+                                                  />
+                                                  <span className="hidden sm:inline">
+                                                    Upvoted
+                                                  </span>
+                                                </span>
+                                              )}
+                                            {type === "vsuggestion" &&
+                                              suggestion?.downvoterIds?.includes(
+                                                replyToTarget.user_id,
+                                              ) && (
+                                                <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                                  <Icon
+                                                    icon="material-symbols:thumb-down-rounded"
+                                                    className="h-3 w-3"
+                                                  />
+                                                  <span className="hidden sm:inline">
+                                                    Downvoted
+                                                  </span>
+                                                </span>
+                                              )}
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <CommentTimestamp
+                                      date={reply.date}
+                                      editedAt={reply.edited_at}
+                                      commentId={reply.id}
                                     />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Reply</TooltipContent>
-                              </Tooltip>
-                              {availableEmojis.length > 0 && (
-                                <Popover
-                                  open={reactionPickerHoverOpenId === reply.id}
-                                  onOpenChange={(open) => {
-                                    if (
-                                      open &&
-                                      (isRateLimited || !!reactionBan)
-                                    )
-                                      return;
-                                    setReactionPickerHoverOpenId(
-                                      open ? reply.id : null,
-                                    );
-                                  }}
-                                >
+                                  </>
+                                )}
+                              </div>
+
+                              {/* Reply action menu */}
+                              {isLoggedIn && (
+                                <div className="flex items-center gap-1">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <PopoverTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
-                                        >
-                                          <Icon
-                                            icon="fluent:emoji-add-16-regular"
-                                            className="h-3.5 w-3.5"
-                                          />
-                                        </Button>
-                                      </PopoverTrigger>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      Add a reaction
-                                    </TooltipContent>
-                                  </Tooltip>
-                                  <PopoverContent
-                                    className="w-auto p-2"
-                                    align="end"
-                                  >
-                                    <div className="grid grid-cols-5 gap-1">
-                                      {availableEmojis.map((emoji) => (
-                                        <button
-                                          key={emoji}
-                                          type="button"
-                                          onClick={() => {
-                                            void handleReact(reply.id, emoji);
-                                            setReactionPickerHoverOpenId(null);
-                                          }}
-                                          className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
-                                        >
-                                          {twemojiEnabled ? (
-                                            <Twemoji
-                                              tag="span"
-                                              options={{ className: "twemoji" }}
-                                            >
-                                              {emoji}
-                                            </Twemoji>
-                                          ) : (
-                                            emoji
-                                          )}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
-                              )}
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200"
-                                  >
-                                    <Icon
-                                      icon="heroicons:ellipsis-horizontal"
-                                      className="h-4 w-4"
-                                    />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  {reply.reactions &&
-                                    reply.reactions.length > 0 && (
-                                      <DropdownMenuItem
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200"
                                         onClick={() => {
-                                          const sorted = getStableReactionOrder(
-                                            reply.id,
-                                            reply.reactions!,
-                                          );
-                                          setReactionBreakdownOpenId(reply.id);
-                                          setBreakdownTab(
-                                            sorted[0]?.emoji ?? "all",
-                                          );
+                                          if (
+                                            replyingToId === comment.id &&
+                                            replyingToReplyId === reply.id
+                                          ) {
+                                            setReplyingToId(null);
+                                            setReplyingToReplyId(null);
+                                            setReplyDraft("");
+                                          } else {
+                                            setEditingCommentId(null);
+                                            setEditDraft("");
+                                            setReplyingToId(comment.id);
+                                            setReplyingToReplyId(reply.id);
+                                            setReplyDraft("");
+                                          }
                                         }}
                                       >
                                         <Icon
-                                          icon="heroicons-outline:face-smile"
-                                          className="mr-2 h-4 w-4"
+                                          icon="heroicons-outline:chat-bubble-left-right"
+                                          className="h-3.5 w-3.5"
                                         />
-                                        View Reactions
-                                      </DropdownMenuItem>
-                                    )}
-                                  {isTester && (
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        void navigator.clipboard
-                                          .writeText(String(reply.id))
-                                          .then(() => {
-                                            toast.success(
-                                              `Comment ID ${reply.id} copied`,
-                                            );
-                                          });
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Reply</TooltipContent>
+                                  </Tooltip>
+                                  {availableEmojis.length > 0 && (
+                                    <Popover
+                                      open={
+                                        reactionPickerHoverOpenId === reply.id
+                                      }
+                                      onOpenChange={(open) => {
+                                        if (
+                                          open &&
+                                          (isRateLimited || !!reactionBan)
+                                        )
+                                          return;
+                                        setReactionPickerHoverOpenId(
+                                          open ? reply.id : null,
+                                        );
                                       }}
                                     >
-                                      <Icon
-                                        icon="heroicons-outline:clipboard"
-                                        className="mr-2 h-4 w-4"
-                                      />
-                                      Copy Comment ID
-                                    </DropdownMenuItem>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <PopoverTrigger asChild>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
+                                            >
+                                              <Icon
+                                                icon="fluent:emoji-add-16-regular"
+                                                className="h-3.5 w-3.5"
+                                              />
+                                            </Button>
+                                          </PopoverTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          Add a reaction
+                                        </TooltipContent>
+                                      </Tooltip>
+                                      <PopoverContent
+                                        className="w-auto p-2"
+                                        align="end"
+                                      >
+                                        <div className="grid grid-cols-5 gap-1">
+                                          {availableEmojis.map((emoji) => (
+                                            <button
+                                              key={emoji}
+                                              type="button"
+                                              onClick={() => {
+                                                void handleReact(
+                                                  reply.id,
+                                                  emoji,
+                                                );
+                                                setReactionPickerHoverOpenId(
+                                                  null,
+                                                );
+                                              }}
+                                              className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
+                                            >
+                                              {twemojiEnabled ? (
+                                                <Twemoji
+                                                  tag="span"
+                                                  options={{
+                                                    className: "twemoji",
+                                                  }}
+                                                >
+                                                  {emoji}
+                                                </Twemoji>
+                                              ) : (
+                                                emoji
+                                              )}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      </PopoverContent>
+                                    </Popover>
                                   )}
-                                  {currentUserId === reply.user_id ? (
-                                    <>
-                                      {isCommentEditable(reply.date) && (
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleEditClick(reply.id)
-                                          }
-                                        >
-                                          <Icon
-                                            icon="heroicons-outline:pencil"
-                                            className="mr-2 h-4 w-4"
-                                          />
-                                          Edit
-                                        </DropdownMenuItem>
-                                      )}
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleDeleteComment(reply.id)
-                                        }
-                                        className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200"
                                       >
                                         <Icon
-                                          icon="heroicons-outline:trash"
-                                          className="mr-2 h-4 w-4"
+                                          icon="heroicons:ellipsis-horizontal"
+                                          className="h-4 w-4"
                                         />
-                                        Delete
-                                      </DropdownMenuItem>
-                                    </>
-                                  ) : (
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleReportClick(reply.id)
-                                      }
-                                      className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
-                                    >
-                                      <Icon
-                                        icon="heroicons-outline:flag"
-                                        className="mr-2 h-4 w-4"
-                                      />
-                                      Report Comment
-                                    </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      {reply.reactions &&
+                                        reply.reactions.length > 0 && (
+                                          <DropdownMenuItem
+                                            onClick={() => {
+                                              const sorted =
+                                                getStableReactionOrder(
+                                                  reply.id,
+                                                  reply.reactions!,
+                                                );
+                                              setReactionBreakdownOpenId(
+                                                reply.id,
+                                              );
+                                              setBreakdownTab(
+                                                sorted[0]?.emoji ?? "all",
+                                              );
+                                            }}
+                                          >
+                                            <Icon
+                                              icon="heroicons-outline:face-smile"
+                                              className="mr-2 h-4 w-4"
+                                            />
+                                            View Reactions
+                                          </DropdownMenuItem>
+                                        )}
+                                      {isTester && (
+                                        <DropdownMenuItem
+                                          onClick={() => {
+                                            void navigator.clipboard
+                                              .writeText(String(reply.id))
+                                              .then(() => {
+                                                toast.success(
+                                                  `Comment ID ${reply.id} copied`,
+                                                );
+                                              });
+                                          }}
+                                        >
+                                          <Icon
+                                            icon="heroicons-outline:clipboard"
+                                            className="mr-2 h-4 w-4"
+                                          />
+                                          Copy Comment ID
+                                        </DropdownMenuItem>
+                                      )}
+                                      {currentUserId === reply.user_id ? (
+                                        <>
+                                          {isCommentEditable(reply.date) && (
+                                            <DropdownMenuItem
+                                              onClick={() =>
+                                                handleEditClick(reply.id)
+                                              }
+                                            >
+                                              <Icon
+                                                icon="heroicons-outline:pencil"
+                                                className="mr-2 h-4 w-4"
+                                              />
+                                              Edit
+                                            </DropdownMenuItem>
+                                          )}
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleDeleteComment(reply.id)
+                                            }
+                                            className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                                          >
+                                            <Icon
+                                              icon="heroicons-outline:trash"
+                                              className="mr-2 h-4 w-4"
+                                            />
+                                            Delete
+                                          </DropdownMenuItem>
+                                        </>
+                                      ) : (
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            handleReportClick(reply.id)
+                                          }
+                                          className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
+                                        >
+                                          <Icon
+                                            icon="heroicons-outline:flag"
+                                            className="mr-2 h-4 w-4"
+                                          />
+                                          Report Comment
+                                        </DropdownMenuItem>
+                                      )}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
 
-                        {/* Reply body or edit form */}
-                        {editingCommentId === reply.id ? (
-                          <div className="border-border-card bg-form-input focus-within:border-button-info rounded-lg border transition-colors">
-                            <CommentTextarea
-                              value={editDraft}
-                              onChange={setEditDraft}
-                              emojiMap={emojiStringMap}
-                              disabled={updatingCommentId === reply.id}
-                              id={`edit-textarea-${reply.id}`}
-                              rows={3}
-                              className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-50"
-                              autoCorrect="off"
-                              autoComplete="off"
-                              spellCheck="false"
-                              autoCapitalize="off"
-                              onKeyDown={(e) => {
-                                if (e.key === "Escape") {
-                                  setEditingCommentId(null);
-                                  setEditDraft("");
-                                }
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                  e.preventDefault();
-                                  if (
-                                    editDraft.trim() &&
-                                    updatingCommentId !== reply.id
-                                  )
-                                    void handleEditComment(
-                                      reply.id,
-                                      editDraft,
-                                    ).then((ok) => {
-                                      if (ok) setEditDraft("");
-                                    });
-                                }
-                              }}
-                            />
-                            <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                disabled={updatingCommentId === reply.id}
-                                onClick={() => {
-                                  setEditingCommentId(null);
-                                  setEditDraft("");
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  void handleEditComment(
-                                    reply.id,
-                                    editDraft,
-                                  ).then((ok) => {
-                                    if (ok) setEditDraft("");
-                                  });
-                                }}
-                                disabled={
-                                  !editDraft.trim() ||
-                                  updatingCommentId === reply.id
-                                }
-                              >
-                                {updatingCommentId === reply.id ? (
-                                  <>
-                                    <Spinner className="h-3.5 w-3.5" />{" "}
-                                    Updating...
-                                  </>
-                                ) : (
-                                  "Update"
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                        ) : isClient ? (
-                          twemojiEnabled ? (
-                            <Twemoji options={{ className: "twemoji" }}>
-                              <p
-                                className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                                dangerouslySetInnerHTML={{
-                                  __html: convertUrlsToLinksHTML(
-                                    processMentions(
-                                      sanitizeHTML(
-                                        sanitizeText(reply.content || ""),
+                            {/* Reply body or edit form */}
+                            {editingCommentId === reply.id ? (
+                              <div className="border-border-card bg-form-input focus-within:border-button-info rounded-lg border transition-colors">
+                                <CommentTextarea
+                                  value={editDraft}
+                                  onChange={setEditDraft}
+                                  emojiMap={emojiStringMap}
+                                  disabled={updatingCommentId === reply.id}
+                                  id={`edit-textarea-${reply.id}`}
+                                  rows={3}
+                                  className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-50"
+                                  autoCorrect="off"
+                                  autoComplete="off"
+                                  spellCheck="false"
+                                  autoCapitalize="off"
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Escape") {
+                                      setEditingCommentId(null);
+                                      setEditDraft("");
+                                    }
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                      e.preventDefault();
+                                      if (
+                                        editDraft.trim() &&
+                                        updatingCommentId !== reply.id
+                                      )
+                                        void handleEditComment(
+                                          reply.id,
+                                          editDraft,
+                                        ).then((ok) => {
+                                          if (ok) setEditDraft("");
+                                        });
+                                    }
+                                  }}
+                                />
+                                <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    disabled={updatingCommentId === reply.id}
+                                    onClick={() => {
+                                      setEditingCommentId(null);
+                                      setEditDraft("");
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      void handleEditComment(
+                                        reply.id,
+                                        editDraft,
+                                      ).then((ok) => {
+                                        if (ok) setEditDraft("");
+                                      });
+                                    }}
+                                    disabled={
+                                      !editDraft.trim() ||
+                                      updatingCommentId === reply.id
+                                    }
+                                  >
+                                    {updatingCommentId === reply.id ? (
+                                      <>
+                                        <Spinner className="h-3.5 w-3.5" />{" "}
+                                        Updating...
+                                      </>
+                                    ) : (
+                                      "Update"
+                                    )}
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : isClient ? (
+                              twemojiEnabled ? (
+                                <Twemoji options={{ className: "twemoji" }}>
+                                  <p
+                                    className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                                    dangerouslySetInnerHTML={{
+                                      __html: convertUrlsToLinksHTML(
+                                        processMentions(
+                                          sanitizeHTML(
+                                            sanitizeText(reply.content || ""),
+                                          ),
+                                        ),
+                                      ),
+                                    }}
+                                  />
+                                </Twemoji>
+                              ) : (
+                                <p
+                                  className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                                  dangerouslySetInnerHTML={{
+                                    __html: convertUrlsToLinksHTML(
+                                      processMentions(
+                                        sanitizeHTML(
+                                          sanitizeText(reply.content || ""),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                }}
-                              />
-                            </Twemoji>
-                          ) : (
-                            <p
-                              className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                              dangerouslySetInnerHTML={{
-                                __html: convertUrlsToLinksHTML(
-                                  processMentions(
-                                    sanitizeHTML(
-                                      sanitizeText(reply.content || ""),
-                                    ),
-                                  ),
-                                ),
-                              }}
-                            />
-                          )
-                        ) : (
-                          <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
-                            {sanitizeText(reply.content || "")}
-                          </p>
-                        )}
+                                  }}
+                                />
+                              )
+                            ) : (
+                              <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
+                                {sanitizeText(reply.content || "")}
+                              </p>
+                            )}
 
-                        {/* Reply Reactions */}
-                        <CommentReactions
-                          commentId={reply.id}
-                          reactions={reply.reactions}
-                          isRobloxContext={isRobloxContext}
-                          compact
-                        />
-                      </div>
-                    </div>
+                            {/* Reply Reactions */}
+                            <CommentReactions
+                              commentId={reply.id}
+                              reactions={reply.reactions}
+                              isRobloxContext={isRobloxContext}
+                              compact
+                            />
+                          </div>
+                        </div>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent>
+                        {isLoggedIn && (
+                          <ContextMenuItem
+                            onClick={() => {
+                              if (
+                                replyingToId === comment.id &&
+                                replyingToReplyId === reply.id
+                              ) {
+                                setReplyingToId(null);
+                                setReplyingToReplyId(null);
+                              } else {
+                                setEditingCommentId(null);
+                                setReplyingToId(comment.id);
+                                setReplyingToReplyId(reply.id);
+                              }
+                            }}
+                          >
+                            <Icon
+                              icon="heroicons-outline:chat-bubble-left-right"
+                              className="h-4 w-4"
+                            />
+                            Reply
+                          </ContextMenuItem>
+                        )}
+                        {reply.reactions && reply.reactions.length > 0 && (
+                          <ContextMenuItem
+                            onClick={() => {
+                              const sorted = getStableReactionOrder(
+                                reply.id,
+                                reply.reactions!,
+                              );
+                              setReactionBreakdownOpenId(reply.id);
+                              setBreakdownTab(sorted[0]?.emoji ?? "all");
+                            }}
+                          >
+                            <Icon
+                              icon="heroicons-outline:face-smile"
+                              className="h-4 w-4"
+                            />
+                            View Reactions
+                          </ContextMenuItem>
+                        )}
+                        {isTester && (
+                          <ContextMenuItem
+                            onClick={() => {
+                              void navigator.clipboard
+                                .writeText(String(reply.id))
+                                .then(() => {
+                                  toast.success(
+                                    `Comment ID ${reply.id} copied`,
+                                  );
+                                });
+                            }}
+                          >
+                            <Icon
+                              icon="heroicons-outline:clipboard"
+                              className="h-4 w-4"
+                            />
+                            Copy Comment ID
+                          </ContextMenuItem>
+                        )}
+                        {isLoggedIn && (
+                          <>
+                            <ContextMenuSeparator />
+                            {currentUserId === reply.user_id ? (
+                              <>
+                                {isCommentEditable(reply.date) && (
+                                  <ContextMenuItem
+                                    onClick={() => handleEditClick(reply.id)}
+                                  >
+                                    <Icon
+                                      icon="heroicons-outline:pencil"
+                                      className="h-4 w-4"
+                                    />
+                                    Edit Comment
+                                  </ContextMenuItem>
+                                )}
+                                <ContextMenuItem
+                                  onClick={() => handleDeleteComment(reply.id)}
+                                  className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                                >
+                                  <Icon
+                                    icon="heroicons-outline:trash"
+                                    className="h-4 w-4"
+                                  />
+                                  Delete Comment
+                                </ContextMenuItem>
+                              </>
+                            ) : (
+                              <ContextMenuItem
+                                onClick={() => handleReportClick(reply.id)}
+                                className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                              >
+                                <Icon
+                                  icon="heroicons-outline:flag"
+                                  className="h-4 w-4"
+                                />
+                                Report Comment
+                              </ContextMenuItem>
+                            )}
+                          </>
+                        )}
+                      </ContextMenuContent>
+                    </ContextMenu>
                     {replyingToReplyId === reply.id && replyForm}
                   </React.Fragment>
                 );
