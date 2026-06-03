@@ -40,13 +40,6 @@ async function InventoryDataFetcher({
       const userData = await fetchRobloxUserByUsername(robloxId);
       if (userData && userData.id) {
         actualRobloxId = userData.id.toString();
-
-        // Fetch comments for the resolved ID if we don't have initial comments
-        if (!initialComments || initialComments.length === 0) {
-          const commentsData = await fetchComments("inventory", actualRobloxId);
-          initialComments = commentsData.comments;
-          initialCommentUserMap = commentsData.userMap;
-        }
       } else {
         const truncatedUsername =
           robloxId.length > 50 ? `${robloxId.substring(0, 47)}...` : robloxId;

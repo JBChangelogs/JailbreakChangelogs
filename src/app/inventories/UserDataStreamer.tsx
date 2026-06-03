@@ -71,17 +71,15 @@ async function UserDataFetcher({
     robloxId,
   );
 
-  // Fetch user data using the shared service (without connection data)
-  const userDataResult = await UserDataService.fetchUserData(userIds, {
-    maxUsers: 1, // Only fetching main user
-    includeUserConnection: false,
-    includeDupeData: true,
-    context: "INVENTORY",
-  });
-
-  // Fetch connection data directly for the main user (like OG finder does)
-  const userConnectionData = await fetchUserByRobloxId(robloxId).catch(
-    (error) => {
+  // Fetch user data and connection data in parallel
+  const [userDataResult, userConnectionData] = await Promise.all([
+    UserDataService.fetchUserData(userIds, {
+      maxUsers: 1, // Only fetching main user
+      includeUserConnection: false,
+      includeDupeData: true,
+      context: "INVENTORY",
+    }),
+    fetchUserByRobloxId(robloxId).catch((error) => {
       if (
         !(error instanceof Error) ||
         !error.message.startsWith("PRIVATE_PROFILE:")
@@ -89,8 +87,8 @@ async function UserDataFetcher({
         log.error("Failed to fetch user connection data", error);
       }
       return null;
-    },
-  );
+    }),
+  ]);
 
   return (
     <InventoryCheckerClient

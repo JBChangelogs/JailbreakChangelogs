@@ -192,7 +192,6 @@ export default function InventoryCheckerClient({
           try {
             const datesRes = await fetch(
               "https://assets.jailbreakchangelogs.com/assets/json/season_dates.json",
-              { cache: "no-store" },
             );
             if (datesRes.ok) {
               const seasonDates = (await datesRes.json()) as {
@@ -244,7 +243,7 @@ export default function InventoryCheckerClient({
     };
 
     void loadSeason();
-  }, [initialData, initialData?.updated_at, externalIsLoading]);
+  }, [initialData, externalIsLoading]);
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
@@ -286,7 +285,7 @@ export default function InventoryCheckerClient({
 
     const userIds = new Set<string>();
 
-    if (robloxId) userIds.add(robloxId);
+    // robloxId is already in initialRobloxUsers from the server — skip to avoid a redundant batch fetch
 
     const addOwners = (item: { info?: { title: string; value: string }[] }) => {
       item.info?.forEach((info) => {
@@ -321,16 +320,15 @@ export default function InventoryCheckerClient({
   // Function to handle data refresh
 
   // Calculate if there are duplicates (needed for hash navigation)
-  const hasDuplicates = currentData
-    ? (() => {
-        const itemCounts = new Map<string, number>();
-        currentData.data.forEach((item) => {
-          const key = `${item.categoryTitle}-${item.title}`;
-          itemCounts.set(key, (itemCounts.get(key) || 0) + 1);
-        });
-        return Array.from(itemCounts.values()).some((count) => count > 1);
-      })()
-    : false;
+  const hasDuplicates = useMemo(() => {
+    if (!currentData) return false;
+    const itemCounts = new Map<string, number>();
+    currentData.data.forEach((item) => {
+      const key = `${item.categoryTitle}-${item.title}`;
+      itemCounts.set(key, (itemCounts.get(key) || 0) + 1);
+    });
+    return Array.from(itemCounts.values()).some((count) => count > 1);
+  }, [currentData]);
 
   // Check if there are duped items from the API
   const hasDupedItems = Boolean(
