@@ -15,7 +15,10 @@ import {
   ENABLE_WS_SCAN,
   INVENTORY_API_URL,
   PUBLIC_API_URL,
+  MaxStreamsError,
 } from "@/utils/api/api";
+import { toast } from "sonner";
+import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { RobloxUser, Item } from "@/types";
@@ -112,6 +115,7 @@ export default function InventoryCheckerClient({
     originalSearchTerm || robloxId || "",
   );
   const [internalIsLoading, setInternalIsLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState(false);
   const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
@@ -148,6 +152,7 @@ export default function InventoryCheckerClient({
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const scanWebSocket = useScanWebSocket(robloxId || "");
   const { modalState, openModal, closeModal } = useSupporterModal();
+  const { getId: getRobloxId } = useUsernameToId();
   const [showScanModal, setShowScanModal] = useState(false);
 
   const [activeSeason, setActiveSeason] = useState<Season | null>(
@@ -307,7 +312,10 @@ export default function InventoryCheckerClient({
   }, [currentData, robloxId, isInventoryNotFoundError]);
 
   // Fetch all user data in batches and merge with initial data
-  const { robloxUsers: batchedUsers } = useBatchUserData(allUserIds);
+  // Disable during loading states — fallback renders mount/unmount quickly and would fire wasted requests
+  const { robloxUsers: batchedUsers } = useBatchUserData(allUserIds, {
+    enabled: !externalIsLoading,
+  });
 
   const mergedRobloxUsers = useMemo(
     () => Object.assign({}, initialRobloxUsers, batchedUsers),
@@ -647,16 +655,43 @@ export default function InventoryCheckerClient({
 
   // Items data is now passed as props from server-side, no need to fetch
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
 
-    // Track inventory search with search term
     trackEvent("Inventory Search", { searchTerm: input });
+    setSearchError(null);
+
+    const isUsername = !/^\d+$/.test(input);
+    if (!isUsername) {
+      setInternalIsLoading(true);
+      router.push(`/inventories/${input}`);
+      return;
+    }
 
     setInternalIsLoading(true);
-    router.push(`/inventories/${input}`);
+    try {
+      const resolvedId = await getRobloxId(input);
+      if (resolvedId) {
+        router.push(`/inventories/${resolvedId}`);
+      } else {
+        setInternalIsLoading(false);
+        const truncated =
+          input.length > 50 ? `${input.substring(0, 47)}...` : input;
+        const msg = `Username "${truncated}" not found. Please check the spelling and try again.`;
+        toast.error(msg);
+        setSearchError(msg);
+      }
+    } catch (err) {
+      setInternalIsLoading(false);
+      const msg =
+        err instanceof MaxStreamsError
+          ? "Unable to search by username at this time. Please use the Roblox ID instead."
+          : "Server error while looking up username. Please try searching by Roblox ID instead.";
+      toast.error(msg);
+      setSearchError(msg);
+    }
   };
 
   const handleItemClick = useCallback((item: InventoryItem) => {
@@ -679,6 +714,15 @@ export default function InventoryCheckerClient({
         isLoading={isLoading}
         externalIsLoading={externalIsLoading || false}
       />
+      {searchError && (
+        <div className="text-primary-text border-button-danger/30 bg-button-danger/10 -mt-4 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
+          <Icon
+            icon="heroicons:exclamation-circle"
+            className="h-4 w-4 shrink-0"
+          />
+          {searchError}
+        </div>
+      )}
       <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
         <Icon icon="emojione:light-bulb" className="text-sm text-yellow-500" />
         Helpful tip: Press{" "}

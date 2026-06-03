@@ -44,7 +44,7 @@ export function useBatchUserData(
 
   // Fetch all user IDs in a single batch for V2 API
   const batches = useMemo(() => {
-    // V2 API supports fetching all users at once
+    if (userIds.length === 0) return [];
     return [userIds];
   }, [userIds]);
 

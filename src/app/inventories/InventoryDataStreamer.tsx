@@ -54,14 +54,7 @@ async function InventoryDataFetcher({
       if (error instanceof MaxStreamsError) {
         usernameError = `Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.`;
       } else {
-        // Check if it's a 502 error specifically for the username lookup
-        const isServerError =
-          error instanceof Error &&
-          error.message.includes("Failed to fetch user: 502");
-
-        usernameError = isServerError
-          ? `Server error while searching for "${truncatedUsername}". Please try searching by Roblox ID instead, or try again later.`
-          : `Failed to find user "${truncatedUsername}". Please check the spelling and try again, or try searching by Roblox ID instead.`;
+        usernameError = `Server error while searching for "${truncatedUsername}". Please try searching by Roblox ID instead, or try again later.`;
       }
     }
   }

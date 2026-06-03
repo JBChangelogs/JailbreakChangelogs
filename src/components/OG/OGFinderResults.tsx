@@ -3,6 +3,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { trackEvent } from "@/utils/analytics/rybbit";
+import { toast } from "sonner";
+import { MaxStreamsError } from "@/utils/api/api";
+import { useUsernameToId } from "@/hooks/useUsernameToId";
 import Image from "next/image";
 import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
@@ -66,6 +69,7 @@ export default function OGFinderResults({
   originalSearchTerm,
 }: OGFinderResultsProps) {
   const router = useRouter();
+  const { getId: getRobloxId } = useUsernameToId();
 
   // State management
   const [searchId, setSearchId] = useState(
@@ -76,6 +80,7 @@ export default function OGFinderResults({
     setSearchId(originalSearchTerm || robloxId || "");
   }, [originalSearchTerm, robloxId]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
@@ -164,11 +169,43 @@ export default function OGFinderResults({
   };
 
   // Handle search
-  const handleSearch = (searchValue: string) => {
-    if (!searchValue.trim()) return;
+  const handleSearch = async (searchValue: string) => {
+    const input = searchValue.trim();
+    if (!input) return;
+
+    trackEvent("OG Search", { searchTerm: input });
+
+    setSearchError(null);
+
+    const isUsername = !/^\d+$/.test(input);
+    if (!isUsername) {
+      setIsLoading(true);
+      router.push(`/og/${input}`);
+      return;
+    }
 
     setIsLoading(true);
-    router.push(`/og/${searchValue.trim()}`);
+    try {
+      const resolvedId = await getRobloxId(input);
+      if (resolvedId) {
+        router.push(`/og/${resolvedId}`);
+      } else {
+        setIsLoading(false);
+        const truncated =
+          input.length > 50 ? `${input.substring(0, 47)}...` : input;
+        const msg = `Username "${truncated}" not found. Please check the spelling and try again.`;
+        toast.error(msg);
+        setSearchError(msg);
+      }
+    } catch (err) {
+      setIsLoading(false);
+      const msg =
+        err instanceof MaxStreamsError
+          ? "Unable to search by username at this time. Please use the Roblox ID instead."
+          : "Server error while looking up username. Please try searching by Roblox ID instead.";
+      toast.error(msg);
+      setSearchError(msg);
+    }
   };
 
   // Filter and sort logic
@@ -412,6 +449,15 @@ export default function OGFinderResults({
             isLoading={isLoading}
             externalIsLoading={false}
           />
+          {searchError && (
+            <div className="text-primary-text border-button-danger/30 bg-button-danger/10 mt-2 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
+              <Icon
+                icon="heroicons:exclamation-circle"
+                className="h-4 w-4 shrink-0"
+              />
+              {searchError}
+            </div>
+          )}
         </div>
         <Button
           onClick={() => {
