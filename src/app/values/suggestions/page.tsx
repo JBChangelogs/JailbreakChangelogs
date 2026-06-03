@@ -127,6 +127,15 @@ interface SuggestionsResponse {
   size: number;
 }
 
+interface LeaderboardEntry {
+  total_submitted: number;
+  total_accepted: number;
+  total_rejected: number;
+  total_expired: number;
+  acceptance_rate: number;
+  user: SuggestionUser;
+}
+
 class RateLimitError extends Error {
   retryAfter: number;
   constructor(retryAfter: number) {
@@ -1153,6 +1162,7 @@ export default function ValueSuggestionsPage() {
 
   // Form state
   const [showForm, setShowForm] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
   const [limits, setLimits] = useState<SuggestionLimits | null>(null);
   const [loadingLimits, setLoadingLimits] = useState(false);
 
@@ -1384,6 +1394,9 @@ export default function ValueSuggestionsPage() {
     upCount: number;
     downCount: number;
   } | null>(null);
+
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
 
   const openVotersModal = (
     suggestion: Suggestion,
@@ -1684,6 +1697,25 @@ export default function ValueSuggestionsPage() {
   }, [setParams]);
 
   useEffect(() => {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL!,
+      "/value-suggestions/stats/leaderboard",
+    );
+    fetch(url, { headers })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        const entries = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.leaderboard)
+            ? data.leaderboard
+            : [];
+        setLeaderboard(entries as LeaderboardEntry[]);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingLeaderboard(false));
+  }, []);
+
+  useEffect(() => {
     const handlePreference = (e: Event) => {
       const { key, value } = (
         e as CustomEvent<{ key: string; value?: unknown }>
@@ -1824,6 +1856,26 @@ export default function ValueSuggestionsPage() {
     doOpenForm();
   };
 
+  useEffect(() => {
+    if (!showForm) return;
+    const id = setTimeout(() => {
+      if (!formRef.current) return;
+      const headerHeight =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--header-height",
+          ),
+        ) || 64;
+      const top =
+        formRef.current.getBoundingClientRect().top +
+        window.scrollY -
+        headerHeight -
+        16;
+      window.scrollTo({ top, behavior: "smooth" });
+    }, 50);
+    return () => clearTimeout(id);
+  }, [showForm]);
+
   const handleGuidelinesConfirm = () => {
     const isFirstTime = !localStorage.getItem(GUIDELINES_DISMISSED_KEY);
     localStorage.setItem(GUIDELINES_DISMISSED_KEY, "1");
@@ -1916,20 +1968,160 @@ export default function ValueSuggestionsPage() {
             </div>
           </div>
 
+          {/* Top Suggestors Leaderboard */}
+          {(loadingLeaderboard || leaderboard.length > 0) && (
+            <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
+              <div className="mb-4 flex items-center gap-2">
+                <Icon
+                  icon="material-symbols:trophy-rounded"
+                  className="h-5 w-5 shrink-0 text-yellow-400"
+                  inline
+                />
+                <span className="text-primary-text text-lg font-semibold">
+                  Top Suggestors
+                  {!loadingLeaderboard && leaderboard.length > 0 && (
+                    <span className="text-secondary-text ml-1 font-normal">
+                      ({leaderboard.length})
+                    </span>
+                  )}
+                </span>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {loadingLeaderboard
+                  ? Array.from({ length: 5 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="border-border-card bg-tertiary-bg flex min-w-[170px] shrink-0 animate-pulse flex-col items-center gap-3 rounded-lg border p-4"
+                      >
+                        <div className="bg-quaternary-bg h-3 w-6 rounded" />
+                        <div className="bg-quaternary-bg h-14 w-14 rounded-full" />
+                        <div className="bg-quaternary-bg h-3 w-20 rounded" />
+                        <div className="bg-quaternary-bg h-5 w-20 rounded-full" />
+                        <div className="bg-quaternary-bg h-3 w-full rounded" />
+                        <div className="bg-quaternary-bg h-3 w-full rounded" />
+                      </div>
+                    ))
+                  : leaderboard.map((entry, i) => {
+                      const displayName =
+                        entry.user.roblox_display_name ||
+                        entry.user.roblox_username ||
+                        "Unknown";
+                      const rate =
+                        entry.acceptance_rate % 1 === 0
+                          ? String(entry.acceptance_rate)
+                          : entry.acceptance_rate.toFixed(1);
+                      const podiumCardStyle =
+                        i === 0
+                          ? {
+                              background:
+                                "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
+                              borderColor: "hsl(45, 100%, 50%, 0.5)",
+                            }
+                          : i === 1
+                            ? {
+                                background:
+                                  "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
+                                borderColor: "hsl(0, 0%, 75%, 0.5)",
+                              }
+                            : i === 2
+                              ? {
+                                  background:
+                                    "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
+                                  borderColor: "hsl(30, 100%, 50%, 0.5)",
+                                }
+                              : undefined;
+                      const podiumBadgeStyle =
+                        i === 0
+                          ? {
+                              background:
+                                "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
+                            }
+                          : i === 1
+                            ? {
+                                background:
+                                  "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
+                              }
+                            : i === 2
+                              ? {
+                                  background:
+                                    "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
+                                }
+                              : undefined;
+                      return (
+                        <Link
+                          key={entry.user.id}
+                          href={`/users/${entry.user.id}`}
+                          prefetch={false}
+                          className="border-border-card bg-tertiary-bg hover:border-link group flex min-w-[170px] shrink-0 flex-col items-center gap-2.5 rounded-lg border p-4 transition-colors"
+                          style={podiumCardStyle}
+                        >
+                          <span
+                            className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${i <= 2 ? "text-black" : "text-primary-text"}`}
+                            style={podiumBadgeStyle}
+                          >
+                            #{i + 1}
+                          </span>
+                          <UserAvatar
+                            userId={entry.user.id!}
+                            avatarHash={entry.user.avatar ?? null}
+                            username={displayName}
+                            forceAvatarUrl={entry.user.roblox_avatar}
+                            size={14}
+                            cdnSize={256}
+                            custom_avatar={
+                              entry.user.custom_avatar ?? undefined
+                            }
+                            showBadge={false}
+                            premiumType={entry.user.premiumtype}
+                            bgClassName="bg-tertiary-bg"
+                          />
+                          <span className="text-primary-text group-hover:text-link w-full truncate text-center text-sm font-semibold transition-colors">
+                            {displayName}
+                          </span>
+                          <span className="bg-button-success text-form-button-text rounded-lg px-2.5 py-1 text-xs font-medium">
+                            {entry.total_accepted} accepted
+                          </span>
+                          <div className="w-full space-y-1 text-xs">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-secondary-text">
+                                Acceptance Rate:
+                              </span>
+                              <span className="text-primary-text font-medium">
+                                {rate}%
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-secondary-text">
+                                Total Submitted:
+                              </span>
+                              <span className="text-primary-text font-medium">
+                                {entry.total_submitted}
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+              </div>
+            </div>
+          )}
+
           {/* Ban Banner */}
           {ban && <BanBanner ban={ban} className="mb-4" />}
 
           {/* Submit Form */}
-          {showForm && isAuthenticated && !ban && (
-            <SuggestionForm
-              items={items}
-              loadingItems={loadingItems}
-              limits={limits}
-              loadingLimits={loadingLimits}
-              onSubmit={handleFormSubmit}
-              onCancel={() => setShowForm(false)}
-            />
-          )}
+          <div ref={formRef}>
+            {showForm && isAuthenticated && !ban && (
+              <SuggestionForm
+                items={items}
+                loadingItems={loadingItems}
+                limits={limits}
+                loadingLimits={loadingLimits}
+                onSubmit={handleFormSubmit}
+                onCancel={() => setShowForm(false)}
+              />
+            )}
+          </div>
 
           {/* Title row */}
           <div className="mb-4 flex items-center justify-between">

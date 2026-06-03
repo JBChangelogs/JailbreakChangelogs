@@ -1040,6 +1040,34 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       user={replyUser}
                                       className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
                                     />
+                                    {type === "vsuggestion" &&
+                                      suggestion?.upvoterIds?.includes(
+                                        reply.user_id,
+                                      ) && (
+                                        <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                          <Icon
+                                            icon="material-symbols:thumb-up-rounded"
+                                            className="h-3 w-3"
+                                          />
+                                          <span className="hidden sm:inline">
+                                            Upvoted
+                                          </span>
+                                        </span>
+                                      )}
+                                    {type === "vsuggestion" &&
+                                      suggestion?.downvoterIds?.includes(
+                                        reply.user_id,
+                                      ) && (
+                                        <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                          <Icon
+                                            icon="material-symbols:thumb-down-rounded"
+                                            className="h-3 w-3"
+                                          />
+                                          <span className="hidden sm:inline">
+                                            Downvoted
+                                          </span>
+                                        </span>
+                                      )}
                                     {replyToTargetName && replyToTarget && (
                                       <>
                                         <Icon
@@ -1052,37 +1080,37 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                           user={userData[replyToTarget.user_id]}
                                           className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
                                         />
+                                        {type === "vsuggestion" &&
+                                          suggestion?.upvoterIds?.includes(
+                                            replyToTarget.user_id,
+                                          ) && (
+                                            <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                              <Icon
+                                                icon="material-symbols:thumb-up-rounded"
+                                                className="h-3 w-3"
+                                              />
+                                              <span className="hidden sm:inline">
+                                                Upvoted
+                                              </span>
+                                            </span>
+                                          )}
+                                        {type === "vsuggestion" &&
+                                          suggestion?.downvoterIds?.includes(
+                                            replyToTarget.user_id,
+                                          ) && (
+                                            <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                              <Icon
+                                                icon="material-symbols:thumb-down-rounded"
+                                                className="h-3 w-3"
+                                              />
+                                              <span className="hidden sm:inline">
+                                                Downvoted
+                                              </span>
+                                            </span>
+                                          )}
                                       </>
                                     )}
                                   </div>
-                                  {type === "vsuggestion" &&
-                                    suggestion?.upvoterIds?.includes(
-                                      reply.user_id,
-                                    ) && (
-                                      <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                        <Icon
-                                          icon="material-symbols:thumb-up-rounded"
-                                          className="h-3 w-3"
-                                        />
-                                        <span className="hidden sm:inline">
-                                          Upvoted
-                                        </span>
-                                      </span>
-                                    )}
-                                  {type === "vsuggestion" &&
-                                    suggestion?.downvoterIds?.includes(
-                                      reply.user_id,
-                                    ) && (
-                                      <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                        <Icon
-                                          icon="material-symbols:thumb-down-rounded"
-                                          className="h-3 w-3"
-                                        />
-                                        <span className="hidden sm:inline">
-                                          Downvoted
-                                        </span>
-                                      </span>
-                                    )}
                                 </div>
                                 <CommentTimestamp
                                   date={reply.date}
