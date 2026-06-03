@@ -244,7 +244,7 @@ export default function MostScannedLeaderboardClient({
                       className={`mb-3 flex flex-col gap-3 rounded-lg border p-3 transition-colors sm:flex-row sm:items-center ${
                         index <= 2
                           ? ""
-                          : "border-border-card bg-primary-bg hover:border-border-focus"
+                          : "border-border-card bg-tertiary-bg hover:border-border-focus"
                       }`}
                       style={{
                         ...(index === 0 && {
@@ -288,7 +288,7 @@ export default function MostScannedLeaderboardClient({
                         </div>
 
                         {/* Avatar */}
-                        <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                        <div className="bg-quaternary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
                           {avatarUrl ? (
                             <Image
                               src={avatarUrl}

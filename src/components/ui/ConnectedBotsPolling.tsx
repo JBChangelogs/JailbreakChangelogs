@@ -451,7 +451,7 @@ function BotStatusCard({
     <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
       <div className="flex items-start gap-3">
         <div
-          className="bg-tertiary-bg flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2"
+          className="bg-quaternary-bg flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2"
           style={{ borderColor: "var(--color-status-success-vibrant)" }}
         >
           <Image

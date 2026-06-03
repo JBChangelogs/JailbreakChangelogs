@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { Spinner } from "@/components/ui/Spinner";
 import {
   getItemImagePath,
   isVideoItem,
@@ -83,6 +85,7 @@ export default function OGItemCard({
   duplicateCount = 1,
   duplicateOrder = 1,
 }: OGItemCardProps) {
+  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const isOriginalOwner = item.isOriginalOwner;
   const isDuplicate = duplicateCount > 1;
   const displayedSeason =
@@ -277,14 +280,21 @@ export default function OGItemCard({
           <div className="text-secondary-text text-sm">CURRENT OWNER</div>
           <div className="text-xl font-bold">
             <div className="flex items-center justify-center gap-2">
-              <div className="border-border-card bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+              <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+                {isAvatarLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Spinner className="h-4 w-4" />
+                  </div>
+                )}
                 <Image
                   src={getUserAvatar(item.user_id)}
                   alt="Owner Avatar"
                   width={32}
                   height={32}
                   className="rounded-full"
+                  onLoad={() => setIsAvatarLoading(false)}
                   onError={(e) => {
+                    setIsAvatarLoading(false);
                     const target = e.target as HTMLImageElement;
                     target.style.display = "none";
                     const parent = target.parentElement;
@@ -324,7 +334,7 @@ export default function OGItemCard({
       </div>
 
       {/* Season and Level badges - always show container for consistent layout */}
-      <div className="border-secondary-text mt-3 flex min-h-10 justify-center gap-2 border-t pt-3">
+      <div className="mt-3 flex min-h-10 justify-center gap-2 pt-3">
         {(typeof displayedSeason === "number" || hasDisplayedLevel) && (
           <Tooltip>
             <TooltipTrigger asChild>

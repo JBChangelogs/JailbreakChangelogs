@@ -809,7 +809,7 @@ export default function UserStatsSection({
                       <div className="flex items-center gap-2">
                         {botUser ? (
                           <>
-                            <div className="h-6 w-6 overflow-hidden rounded-full bg-gray-200">
+                            <div className="bg-quaternary-bg h-6 w-6 overflow-hidden rounded-full">
                               <Image
                                 src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botUser.id}/avatar-headshot`}
                                 alt={

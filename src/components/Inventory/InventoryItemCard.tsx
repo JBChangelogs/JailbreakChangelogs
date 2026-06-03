@@ -18,6 +18,7 @@ import {
 } from "@/utils/ui/images";
 import { getCategoryIcon, getCategoryColor } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
+import { Spinner } from "@/components/ui/Spinner";
 import { formatFullValue } from "@/utils/trading/values";
 import {
   fetchItemUnlockMetadataById,
@@ -68,6 +69,7 @@ export default function InventoryItemCard({
 }: InventoryItemCardProps) {
   const [itemUnlockMetadata, setItemUnlockMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
+  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const isOriginalOwner = item.isOriginalOwner;
   const originalOwnerInfo = item.info.find(
     (info) => info.title === "Original Owner",
@@ -292,7 +294,12 @@ export default function InventoryItemCard({
               <span className="text-primary-text text-xl font-bold">???</span>
             ) : originalOwnerInfo ? (
               <div className="flex items-center justify-center gap-2">
-                <div className="border-border-card bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+                <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+                  {isAvatarLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Spinner className="h-4 w-4" />
+                    </div>
+                  )}
                   <Image
                     src={getUserAvatar(
                       isOriginalOwner ? userId : originalOwnerInfo.value,
@@ -301,7 +308,9 @@ export default function InventoryItemCard({
                     width={32}
                     height={32}
                     className="rounded-full"
+                    onLoad={() => setIsAvatarLoading(false)}
                     onError={(e) => {
+                      setIsAvatarLoading(false);
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
                       const parent = target.parentElement;
@@ -355,7 +364,7 @@ export default function InventoryItemCard({
       </div>
 
       {/* Season and Level badges or Duped Warning */}
-      <div className="border-secondary-text mt-3 min-h-10 border-t pt-3">
+      <div className="mt-3 min-h-10 pt-3">
         {isDupedItem ? (
           <div className="flex flex-col items-center gap-1 text-center text-xs">
             <span className="text-secondary-text">This item may be duped.</span>

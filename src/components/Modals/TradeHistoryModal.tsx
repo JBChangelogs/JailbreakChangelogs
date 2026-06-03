@@ -18,6 +18,7 @@ import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { RobloxUser } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface TradeHistoryEntry {
   UserId: number;
@@ -196,6 +197,40 @@ export default function TradeHistoryModal({
     return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
   };
 
+  const TradeAvatarImage = ({ userId }: { userId: string }) => {
+    const [isLoading, setIsLoading] = useState(true);
+    return (
+      <div className="bg-quaternary-bg relative h-10 w-10 overflow-hidden rounded-full">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Spinner className="h-5 w-5" />
+          </div>
+        )}
+        <Image
+          src={getUserAvatar(userId)}
+          alt="User Avatar"
+          width={40}
+          height={40}
+          className="rounded-full"
+          onLoad={() => setIsLoading(false)}
+          onError={(e) => {
+            setIsLoading(false);
+            const target = e.target as HTMLImageElement;
+            target.style.display = "none";
+            const parent = target.parentElement;
+            if (parent && !parent.querySelector("svg")) {
+              const defaultAvatar = document.createElement("div");
+              defaultAvatar.className =
+                "flex h-full w-full items-center justify-center";
+              defaultAvatar.innerHTML = `<svg class="h-6 w-6 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
+              parent.appendChild(defaultAvatar);
+            }
+          }}
+        />
+      </div>
+    );
+  };
+
   if (!item) return null;
 
   return (
@@ -315,28 +350,7 @@ export default function TradeHistoryModal({
                     >
                       <div className="flex min-w-0 flex-1 items-center gap-3">
                         <div className="shrink-0">
-                          <div className="bg-tertiary-bg relative h-10 w-10 overflow-hidden rounded-full">
-                            <Image
-                              src={getUserAvatar(userId)}
-                              alt="User Avatar"
-                              width={40}
-                              height={40}
-                              className="rounded-full"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = "none";
-                                const parent = target.parentElement;
-                                if (parent && !parent.querySelector("svg")) {
-                                  const defaultAvatar =
-                                    document.createElement("div");
-                                  defaultAvatar.className =
-                                    "flex h-full w-full items-center justify-center";
-                                  defaultAvatar.innerHTML = `<svg class="h-6 w-6 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
-                                  parent.appendChild(defaultAvatar);
-                                }
-                              }}
-                            />
-                          </div>
+                          <TradeAvatarImage userId={userId} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <a

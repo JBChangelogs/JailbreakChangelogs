@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { Spinner } from "@/components/ui/Spinner";
 import { DupeFinderItem, Item } from "@/types";
 import { formatCurrencyValue } from "@/utils/trading/currency";
 import {
@@ -55,6 +57,7 @@ export default function DupeItemCard({
   ownerLabel = "ORIGINAL OWNER",
   isDupedItem = false,
 }: DupeItemCardProps) {
+  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const dupedValue = getDupedValueForItem(itemData, item);
   const displayedSeason =
     typeof item.season === "number" ? item.season : undefined;
@@ -260,14 +263,21 @@ export default function DupeItemCard({
           <div className="text-secondary-text text-sm">{ownerLabel}</div>
           <div className="text-xl font-bold">
             <div className="flex items-center justify-center gap-2">
-              <div className="border-border-card bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+              <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+                {isAvatarLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Spinner className="h-4 w-4" />
+                  </div>
+                )}
                 <Image
                   src={getUserAvatar(robloxId)}
                   alt="Original Owner Avatar"
                   width={32}
                   height={32}
                   className="rounded-full"
+                  onLoad={() => setIsAvatarLoading(false)}
                   onError={(e) => {
+                    setIsAvatarLoading(false);
                     const target = e.target as HTMLImageElement;
                     target.style.display = "none";
                     const parent = target.parentElement;
@@ -302,7 +312,7 @@ export default function DupeItemCard({
       </div>
 
       {/* Season and Level badges - centered like other cards */}
-      <div className="border-secondary-text mt-3 flex min-h-10 items-center justify-center gap-2 border-t pt-3">
+      <div className="mt-3 flex min-h-10 items-center justify-center gap-2 pt-3">
         {(typeof displayedSeason === "number" || hasDisplayedLevel) && (
           <Tooltip>
             <TooltipTrigger asChild>

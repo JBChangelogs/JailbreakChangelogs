@@ -9,6 +9,7 @@ import { RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { DefaultAvatar } from "@/utils/ui/avatar";
+import { Spinner } from "@/components/ui/Spinner";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -95,6 +96,7 @@ export default function OGFinderResults({
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
 
   // Extract all unique user IDs from OG data
   const allUserIds = useMemo(() => {
@@ -469,7 +471,12 @@ export default function OGFinderResults({
             <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
               {/* Profile header */}
               <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
-                <div className="bg-tertiary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                  {isAvatarLoading && !avatarError && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Spinner className="h-5 w-5" />
+                    </div>
+                  )}
                   {!avatarError ? (
                     <Image
                       src={getUserAvatar(robloxId)}
@@ -477,7 +484,11 @@ export default function OGFinderResults({
                       fill
                       className="object-cover"
                       unoptimized
-                      onError={() => setAvatarError(true)}
+                      onLoad={() => setIsAvatarLoading(false)}
+                      onError={() => {
+                        setAvatarError(true);
+                        setIsAvatarLoading(false);
+                      }}
                     />
                   ) : (
                     <DefaultAvatar />

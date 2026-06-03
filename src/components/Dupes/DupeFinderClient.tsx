@@ -7,6 +7,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { DefaultAvatar } from "@/utils/ui/avatar";
+import { Spinner } from "@/components/ui/Spinner";
 import DupeFinderResults from "./DupeFinderResults";
 import DupeSearchInput from "./DupeSearchInput";
 import DupeFinderFAQ from "./DupeFinderFAQ";
@@ -44,6 +45,7 @@ export default function DupeFinderClient({
   originalSearchTerm,
 }: DupeFinderClientProps) {
   const [avatarError, setAvatarError] = useState(false);
+  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
 
   // Fetch user info for the error/empty states
   const { robloxUsers: batchedUsers } = useBatchUserData(
@@ -109,7 +111,12 @@ export default function DupeFinderClient({
           <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
             {/* Profile header */}
             <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
-              <div className="bg-tertiary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+              <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                {isAvatarLoading && !avatarError && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Spinner className="h-5 w-5" />
+                  </div>
+                )}
                 {!avatarError ? (
                   <Image
                     src={getUserAvatar(robloxId)}
@@ -117,7 +124,11 @@ export default function DupeFinderClient({
                     fill
                     className="object-cover"
                     unoptimized
-                    onError={() => setAvatarError(true)}
+                    onLoad={() => setIsAvatarLoading(false)}
+                    onError={() => {
+                      setAvatarError(true);
+                      setIsAvatarLoading(false);
+                    }}
                   />
                 ) : (
                   <DefaultAvatar />

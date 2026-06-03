@@ -113,6 +113,7 @@ export default function InventoryCheckerClient({
   );
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const forceShowErrorHandledRef = useRef<boolean>(false);
@@ -714,7 +715,12 @@ export default function InventoryCheckerClient({
                 <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
                   {/* Profile header */}
                   <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
-                    <div className="bg-tertiary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                    <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                      {isAvatarLoading && !avatarError && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Spinner className="h-5 w-5" />
+                        </div>
+                      )}
                       {!avatarError ? (
                         <Image
                           src={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
@@ -722,7 +728,11 @@ export default function InventoryCheckerClient({
                           fill
                           className="object-cover"
                           unoptimized
-                          onError={() => setAvatarError(true)}
+                          onLoad={() => setIsAvatarLoading(false)}
+                          onError={() => {
+                            setAvatarError(true);
+                            setIsAvatarLoading(false);
+                          }}
                         />
                       ) : (
                         <DefaultAvatar />
