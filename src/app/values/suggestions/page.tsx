@@ -1701,7 +1701,7 @@ export default function ValueSuggestionsPage() {
       PUBLIC_API_URL!,
       "/value-suggestions/stats/leaderboard",
     );
-    fetch(url, { headers })
+    fetch(url, { credentials: "include", headers })
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
         const entries = Array.isArray(data)
