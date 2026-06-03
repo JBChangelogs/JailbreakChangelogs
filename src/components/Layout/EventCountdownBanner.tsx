@@ -33,13 +33,13 @@ function pad(n: number): string {
   return n.toString().padStart(2, "0");
 }
 
-const strokeStyle: React.CSSProperties = {
+const strokeStyle = {
   color: "#ef4444",
   textShadow:
     "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 4px rgba(0,0,0,0.6)",
   fontWeight: 900,
   letterSpacing: "0.03em",
-};
+} as const;
 
 export default function EventCountdownBanner() {
   const shouldShow = isFeatureEnabled("LIVE_EVENT_COUNTDOWN");
@@ -75,22 +75,14 @@ export default function EventCountdownBanner() {
 
   const parts: string[] = [];
   if (!isLive) {
-    if (timeLeft.days > 0)
-      parts.push(`${timeLeft.days} day${timeLeft.days !== 1 ? "s" : ""}`);
-    if (timeLeft.hours > 0)
-      parts.push(
-        `${pad(timeLeft.hours)} hour${timeLeft.hours !== 1 ? "s" : ""}`,
-      );
-    parts.push(
-      `${pad(timeLeft.minutes)} minute${timeLeft.minutes !== 1 ? "s" : ""}`,
-    );
-    parts.push(
-      `${pad(timeLeft.seconds)} second${timeLeft.seconds !== 1 ? "s" : ""}`,
-    );
+    if (timeLeft.days > 0) parts.push(`${timeLeft.days} days`);
+    if (timeLeft.hours > 0) parts.push(`${pad(timeLeft.hours)} hours`);
+    parts.push(`${pad(timeLeft.minutes)} minutes`);
+    parts.push(`${pad(timeLeft.seconds)} seconds`);
   }
 
   return (
-    <div className="relative border-b border-red-900/40 bg-zinc-950">
+    <div className="relative border-b border-red-900/40 bg-zinc-900">
       <div className="px-10 py-2">
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center">
           <span
@@ -101,36 +93,42 @@ export default function EventCountdownBanner() {
           </span>
 
           {isLive ? (
-            <span className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5">
-              <span className="text-xs font-semibold" style={strokeStyle}>
+            <>
+              <span
+                className="text-xs font-semibold whitespace-nowrap"
+                style={strokeStyle}
+              >
                 Enjoy the 2026 Live Event & Update!
               </span>
               <a
                 href={EVENT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs font-semibold text-white underline transition-opacity hover:opacity-85"
+                className="text-xs font-semibold whitespace-nowrap text-white underline transition-opacity hover:opacity-85"
               >
                 Sign Up
               </a>
-            </span>
+            </>
           ) : (
-            <span className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5">
-              <span className="text-xs font-semibold text-zinc-300">
+            <>
+              <span className="text-xs font-semibold whitespace-nowrap text-zinc-300">
                 2026 LIVE EVENT & UPDATE
               </span>
-              <span className="text-xs" style={strokeStyle}>
+              <span
+                className="text-xs whitespace-nowrap tabular-nums"
+                style={strokeStyle}
+              >
                 {parts.join(", ")}
               </span>
               <a
                 href={EVENT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs font-semibold text-white underline transition-opacity hover:opacity-85"
+                className="text-xs font-semibold whitespace-nowrap text-white underline transition-opacity hover:opacity-85"
               >
                 Sign Up
               </a>
-            </span>
+            </>
           )}
         </div>
       </div>
