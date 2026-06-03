@@ -1991,7 +1991,7 @@ export default function ValueSuggestionsPage() {
                   ? Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className="border-border-card bg-tertiary-bg flex min-w-[170px] shrink-0 animate-pulse flex-col items-center gap-3 rounded-lg border p-4"
+                        className="border-border-card bg-tertiary-bg flex aspect-square w-56 shrink-0 animate-pulse flex-col items-center gap-1.5 rounded-lg border p-3"
                       >
                         <div className="bg-quaternary-bg h-3 w-6 rounded" />
                         <div className="bg-quaternary-bg h-14 w-14 rounded-full" />
@@ -2052,7 +2052,7 @@ export default function ValueSuggestionsPage() {
                           key={entry.user.id}
                           href={`/users/${entry.user.id}`}
                           prefetch={false}
-                          className="border-border-card bg-tertiary-bg hover:border-link group flex min-w-[170px] shrink-0 flex-col items-center gap-2.5 rounded-lg border p-4 transition-colors"
+                          className="border-border-card bg-tertiary-bg hover:border-link group flex aspect-square w-56 shrink-0 flex-col items-center gap-1.5 rounded-lg border p-3 transition-colors"
                           style={podiumCardStyle}
                         >
                           <span
@@ -2073,10 +2073,30 @@ export default function ValueSuggestionsPage() {
                             }
                             showBadge={false}
                             premiumType={entry.user.premiumtype}
-                            bgClassName="bg-tertiary-bg"
+                            bgClassName="bg-quaternary-bg"
                           />
-                          <span className="text-primary-text group-hover:text-link w-full truncate text-center text-sm font-semibold transition-colors">
-                            {displayName}
+                          <span className="flex w-full items-center justify-center gap-1 text-sm font-semibold">
+                            <span className="text-primary-text group-hover:text-link truncate transition-colors">
+                              {displayName}
+                            </span>
+                            {entry.user.premiumtype !== undefined &&
+                              entry.user.premiumtype >= 1 &&
+                              entry.user.premiumtype <= 3 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Image
+                                      src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${entry.user.premiumtype}.svg`}
+                                      alt={`Supporter Type ${entry.user.premiumtype}`}
+                                      width={16}
+                                      height={16}
+                                      className="shrink-0 cursor-pointer"
+                                    />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    Supporter Type {entry.user.premiumtype}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
                           </span>
                           <span className="bg-button-success text-form-button-text rounded-lg px-2.5 py-1 text-xs font-medium">
                             {entry.total_accepted} accepted
