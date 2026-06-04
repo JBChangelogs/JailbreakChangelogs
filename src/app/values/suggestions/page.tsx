@@ -1048,7 +1048,7 @@ function SuggestionGuidelinesDialog({
     "Troll suggesters may be banned from value suggesting at the sole discretion of Value Team managers, website owners, or website moderators.",
     "No botting reactions with alt accounts because any form of manipulation is not allowed on this value list.",
     "Your Roblox account must be at least 30 days old to submit or vote on value suggestions.",
-    "If you are suggesting a value change, you must add atleast 2 common trades at the end of your reasoning.",
+    "If you are suggesting a value change, you must add at least 2 common trades at the end of your reasoning.",
     "You are not allowed to make duplicate suggestions (e.g. suggesting the same change multiple times).",
   ];
 
