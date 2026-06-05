@@ -547,7 +547,7 @@ export default function ValueSuggestionDetailPage() {
 
           {ban && <BanBanner ban={ban} className="mb-5" />}
 
-          {loading && (
+          {(loading || (suggestion?.is_vt === 1 && isAuthLoading)) && (
             <div className="animate-pulse space-y-5">
               {/* Hero */}
               <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
@@ -695,367 +695,689 @@ export default function ValueSuggestionDetailPage() {
             </div>
           )}
 
-          {!loading && suggestion && (
-            <div className="space-y-5">
-              {/* ── Hero ── */}
-              <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
-                <div className="flex flex-col sm:flex-row">
-                  {/* Item image */}
-                  <div
-                    className="bg-secondary-bg relative w-full shrink-0 sm:w-56 lg:w-80"
-                    style={{ aspectRatio: "16/9" }}
-                  >
-                    {item && isVideoItem(item.name) ? (
-                      <video
-                        src={getVideoPath(item.type, item.name)}
-                        className="h-full w-full object-contain"
-                        muted
-                        loop
-                        autoPlay
-                      />
-                    ) : (
-                      <Image
-                        src={
-                          item
-                            ? getItemImagePath(item.type, item.name, true)
-                            : "/placeholder.png"
-                        }
-                        alt={item?.name ?? `Item #${suggestion.item_id}`}
-                        fill
-                        className="object-contain"
-                        onError={handleImageError}
-                      />
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-5">
-                    <div>
-                      {item ? (
-                        <Link
-                          href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
-                          prefetch={false}
-                          className="text-primary-text hover:text-link text-2xl font-bold transition-colors"
-                        >
-                          {item.name}
-                        </Link>
-                      ) : (
-                        <span className="text-primary-text text-2xl font-bold">
-                          Item #{suggestion.item_id}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {item && (
-                        <span
-                          className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
-                          style={{ borderColor: getCategoryColor(item.type) }}
-                        >
-                          {categoryIcon && (
-                            <categoryIcon.Icon
-                              className="mr-1.5 h-3 w-3"
-                              style={{ color: getCategoryColor(item.type) }}
-                            />
-                          )}
-                          {item.type}
-                        </span>
-                      )}
-                      <span
-                        className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
-                      >
-                        {fieldLabel(suggestion.field)}
-                      </span>
-                      <span
-                        className={`${badgeBase} capitalize ${statusColors[suggestion.status] ?? "border-border-card bg-tertiary-bg/40 text-secondary-text"}`}
-                      >
-                        {suggestion.status}
-                      </span>
-                      {suggestion.is_vt === 1 && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Image
-                              src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
-                              alt="Value Team"
-                              width={20}
-                              height={20}
-                              className="shrink-0"
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent>Value Team Suggestion</TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
-
-                    <div>
-                      <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
-                        Suggested by
-                      </p>
-                      <div className="mt-1 flex items-start gap-2.5">
-                        <UserAvatar
-                          userId={suggestion.user.id}
-                          avatarHash={null}
-                          username={
-                            suggestion.user.roblox_username ??
-                            suggestion.user.username ??
-                            ""
-                          }
-                          forceAvatarUrl={
-                            suggestion.user.roblox_avatar ?? undefined
-                          }
-                          premiumType={suggestion.user.premiumtype ?? 0}
-                          size={9}
-                          showBadge={false}
-                          bgClassName="bg-tertiary-bg"
-                        />
-                        <div className="min-w-0">
-                          <Link
-                            href={`/users/${suggestion.user.id}`}
-                            prefetch={false}
-                            className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
-                          >
-                            {suggestion.user.roblox_display_name ||
-                              suggestion.user.roblox_username ||
-                              `User #${suggestion.user.id}`}
-                          </Link>
-                          <p className="text-secondary-text mt-1 text-xs">
-                            Posted on {formatMessageDate(suggestion.created_at)}
-                            {suggestion.updated_at !== suggestion.created_at
-                              ? " (Edited)"
-                              : ""}
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="success"
-                        size="sm"
-                        asChild
-                        className="mt-3 w-fit"
-                      >
-                        <Link
-                          href="/values/suggestions?submit=true"
-                          prefetch={false}
-                        >
-                          <Icon
-                            icon="material-symbols:add-rounded"
-                            className="h-4 w-4"
-                            inline
-                          />
-                          Submit a Suggestion
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Video ad — 3rd column, desktop only */}
-                  <NitroValuesSuggestionDetailVideoPlayer />
-                </div>
-              </div>
-
-              {/* ── Content + Sidebar ── */}
+          {!loading &&
+            !(suggestion?.is_vt === 1 && isAuthLoading) &&
+            suggestion && (
               <div className="space-y-5">
-                {/* Reason — always first on every screen */}
-                <div className="min-w-0 space-y-5">
-                  {/* Reason */}
-                  <div className="border-border-card bg-secondary-bg rounded-xl border">
-                    <div className="border-border-card flex items-center justify-between border-b px-5 py-3.5">
-                      <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                        <Icon
-                          icon="material-symbols:description-outline-rounded"
-                          className="text-secondary-text h-4 w-4"
-                          inline
+                {/* ── Hero ── */}
+                <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
+                  <div className="flex flex-col sm:flex-row">
+                    {/* Item image */}
+                    <div
+                      className="bg-secondary-bg relative w-full shrink-0 sm:w-56 lg:w-80"
+                      style={{ aspectRatio: "16/9" }}
+                    >
+                      {item && isVideoItem(item.name) ? (
+                        <video
+                          src={getVideoPath(item.type, item.name)}
+                          className="h-full w-full object-contain"
+                          muted
+                          loop
+                          autoPlay
                         />
-                        Reason
-                      </h2>
-                      {isAuthenticated &&
-                        user?.id === suggestion.user.id &&
-                        suggestion.status === "pending" && (
-                          <Button
-                            size="sm"
-                            variant={isEditing ? "destructive" : "default"}
-                            onClick={() => {
-                              if (isEditing) {
-                                setIsEditing(false);
-                              } else {
-                                setEditReason(suggestion.reason);
-                                setIsEditing(true);
-                              }
-                            }}
+                      ) : (
+                        <Image
+                          src={
+                            item
+                              ? getItemImagePath(item.type, item.name, true)
+                              : "/placeholder.png"
+                          }
+                          alt={item?.name ?? `Item #${suggestion.item_id}`}
+                          fill
+                          className="object-contain"
+                          onError={handleImageError}
+                        />
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-5">
+                      <div>
+                        {item ? (
+                          <Link
+                            href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+                            prefetch={false}
+                            className="text-primary-text hover:text-link text-2xl font-bold transition-colors"
+                          >
+                            {item.name}
+                          </Link>
+                        ) : (
+                          <span className="text-primary-text text-2xl font-bold">
+                            Item #{suggestion.item_id}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {item && (
+                          <span
+                            className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
+                            style={{ borderColor: getCategoryColor(item.type) }}
+                          >
+                            {categoryIcon && (
+                              <categoryIcon.Icon
+                                className="mr-1.5 h-3 w-3"
+                                style={{ color: getCategoryColor(item.type) }}
+                              />
+                            )}
+                            {item.type}
+                          </span>
+                        )}
+                        <span
+                          className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
+                        >
+                          {fieldLabel(suggestion.field)}
+                        </span>
+                        <span
+                          className={`${badgeBase} capitalize ${statusColors[suggestion.status] ?? "border-border-card bg-tertiary-bg/40 text-secondary-text"}`}
+                        >
+                          {suggestion.status}
+                        </span>
+                        {suggestion.is_vt === 1 && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Image
+                                src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
+                                alt="Value Team"
+                                width={20}
+                                height={20}
+                                className="shrink-0"
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Value Team Suggestion
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+
+                      <div>
+                        <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
+                          Suggested by
+                        </p>
+                        <div className="mt-1 flex items-start gap-2.5">
+                          <UserAvatar
+                            userId={suggestion.user.id}
+                            avatarHash={null}
+                            username={
+                              suggestion.user.roblox_username ??
+                              suggestion.user.username ??
+                              ""
+                            }
+                            forceAvatarUrl={
+                              suggestion.user.roblox_avatar ?? undefined
+                            }
+                            premiumType={suggestion.user.premiumtype ?? 0}
+                            size={9}
+                            showBadge={false}
+                            bgClassName="bg-tertiary-bg"
+                          />
+                          <div className="min-w-0">
+                            <Link
+                              href={`/users/${suggestion.user.id}`}
+                              prefetch={false}
+                              className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
+                            >
+                              {suggestion.user.roblox_display_name ||
+                                suggestion.user.roblox_username ||
+                                `User #${suggestion.user.id}`}
+                            </Link>
+                            <p className="text-secondary-text mt-1 text-xs">
+                              Posted on{" "}
+                              {formatMessageDate(suggestion.created_at)}
+                              {suggestion.updated_at !== suggestion.created_at
+                                ? " (Edited)"
+                                : ""}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="success"
+                          size="sm"
+                          asChild
+                          className="mt-3 w-fit"
+                        >
+                          <Link
+                            href="/values/suggestions?submit=true"
+                            prefetch={false}
                           >
                             <Icon
-                              icon={
-                                isEditing
-                                  ? "material-symbols:close-rounded"
-                                  : "material-symbols:edit-outline-rounded"
-                              }
-                              className="h-3.5 w-3.5"
+                              icon="material-symbols:add-rounded"
+                              className="h-4 w-4"
                               inline
                             />
-                            {isEditing ? "Cancel" : "Edit"}
-                          </Button>
-                        )}
+                            Submit a Suggestion
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
-                    <div className="p-5">
-                      {isEditing ? (
-                        <div className="space-y-3">
-                          <div className="flex justify-end">
-                            <span className="text-secondary-text text-xs">
-                              {editReason.length} / 350 min
-                            </span>
-                          </div>
-                          <textarea
-                            value={editReason}
-                            onChange={(e) => setEditReason(e.target.value)}
-                            rows={8}
-                            className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
-                          />
-                          <RateLimitBanner
-                            until={editRateLimitUntil}
-                            label="You're updating too fast."
-                          />
-                          <div className="flex justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={handleEditSave}
-                              disabled={
-                                editSaving ||
-                                !!editRateLimitUntil ||
-                                editReason.trim().length < 350
-                              }
-                              className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              {editSaving ? (
-                                <>
-                                  <Spinner className="h-3.5 w-3.5" />
-                                  Saving...
-                                </>
-                              ) : (
-                                "Save"
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      ) : suggestion.reason.trim() ? (
-                        (() => {
-                          const isTruncated =
-                            suggestion.reason.split("\n").length > 5 ||
-                            suggestion.reason.length > MAX_REASON_LENGTH;
-                          const mdContent = (() => {
-                            const withBold = suggestion.reason.replace(
-                              /(Common Trades?:?)/gi,
-                              "**$1**",
-                            );
-                            return withBold
-                              .split(/\n\n+/)
-                              .map((part) => part.replace(/\n/g, "\n\n"))
-                              .join("\n\n");
-                          })();
-                          const showReasonToggle =
-                            reasonOverflows || (reasonExpanded && isTruncated);
-                          return (
-                            <div>
-                              <div
-                                ref={reasonRef}
-                                className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
-                                  isTruncated && !reasonExpanded
-                                    ? "max-h-36"
-                                    : ""
-                                }`}
-                              >
-                                <ReactMarkdown
-                                  remarkPlugins={[remarkGfm]}
-                                  components={{
-                                    h1: ({ children }) => (
-                                      <h1 className="text-primary-text mt-3 mb-1.5 text-lg font-bold first:mt-0">
-                                        {children}
-                                      </h1>
-                                    ),
-                                    h2: ({ children }) => (
-                                      <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
-                                        {children}
-                                      </h2>
-                                    ),
-                                    h3: ({ children }) => (
-                                      <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
-                                        {children}
-                                      </h3>
-                                    ),
-                                    p: ({ children }) => (
-                                      <p className="mb-2 last:mb-0">
-                                        {children}
-                                      </p>
-                                    ),
-                                    ul: ({ children }) => (
-                                      <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
-                                        {children}
-                                      </ul>
-                                    ),
-                                    ol: ({ children }) => (
-                                      <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
-                                        {children}
-                                      </ol>
-                                    ),
-                                    em: (props) => (
-                                      <em className="italic" {...props} />
-                                    ),
-                                    strong: (props) => (
-                                      <b
-                                        className="text-primary-text font-semibold"
-                                        {...props}
-                                      />
-                                    ),
-                                  }}
-                                >
-                                  {mdContent}
-                                </ReactMarkdown>
-                              </div>
-                              {showReasonToggle && (
-                                <button
-                                  type="button"
-                                  onClick={() => setReasonExpanded((v) => !v)}
-                                  className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
-                                >
-                                  <Icon
-                                    icon={
-                                      reasonExpanded
-                                        ? "heroicons-outline:chevron-up"
-                                        : "heroicons-outline:chevron-down"
-                                    }
-                                    className="h-4 w-4"
-                                    inline
-                                  />
-                                  {reasonExpanded ? "Show Less" : "Read More"}
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })()
-                      ) : (
-                        <p className="text-secondary-text text-sm leading-relaxed">
-                          No reason provided.
-                        </p>
-                      )}
-                    </div>
+
+                    {/* Video ad — 3rd column, desktop only */}
+                    <NitroValuesSuggestionDetailVideoPlayer />
                   </div>
                 </div>
 
-                {/* ── Mobile layout (< lg): tabs — Details | Discussion ── */}
-                <div className="lg:hidden">
-                  <Tabs defaultValue="details">
-                    <TabsList fullWidth>
-                      <TabsTrigger value="details" fullWidth>
-                        Details
-                      </TabsTrigger>
-                      {isValueSuggestion && (
-                        <TabsTrigger value="history" fullWidth>
-                          Value History
+                {/* ── Content + Sidebar ── */}
+                <div className="space-y-5">
+                  {/* Reason — always first on every screen */}
+                  <div className="min-w-0 space-y-5">
+                    {/* Reason */}
+                    <div className="border-border-card bg-secondary-bg rounded-xl border">
+                      <div className="border-border-card flex items-center justify-between border-b px-5 py-3.5">
+                        <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                          <Icon
+                            icon="material-symbols:description-outline-rounded"
+                            className="text-secondary-text h-4 w-4"
+                            inline
+                          />
+                          Reason
+                        </h2>
+                        {isAuthenticated &&
+                          user?.id === suggestion.user.id &&
+                          suggestion.status === "pending" && (
+                            <Button
+                              size="sm"
+                              variant={isEditing ? "destructive" : "default"}
+                              onClick={() => {
+                                if (isEditing) {
+                                  setIsEditing(false);
+                                } else {
+                                  setEditReason(suggestion.reason);
+                                  setIsEditing(true);
+                                }
+                              }}
+                            >
+                              <Icon
+                                icon={
+                                  isEditing
+                                    ? "material-symbols:close-rounded"
+                                    : "material-symbols:edit-outline-rounded"
+                                }
+                                className="h-3.5 w-3.5"
+                                inline
+                              />
+                              {isEditing ? "Cancel" : "Edit"}
+                            </Button>
+                          )}
+                      </div>
+                      <div className="p-5">
+                        {isEditing ? (
+                          <div className="space-y-3">
+                            <div className="flex justify-end">
+                              <span className="text-secondary-text text-xs">
+                                {editReason.length} / 350 min
+                              </span>
+                            </div>
+                            <textarea
+                              value={editReason}
+                              onChange={(e) => setEditReason(e.target.value)}
+                              rows={8}
+                              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
+                            />
+                            <RateLimitBanner
+                              until={editRateLimitUntil}
+                              label="You're updating too fast."
+                            />
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={handleEditSave}
+                                disabled={
+                                  editSaving ||
+                                  !!editRateLimitUntil ||
+                                  editReason.trim().length < 350
+                                }
+                                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {editSaving ? (
+                                  <>
+                                    <Spinner className="h-3.5 w-3.5" />
+                                    Saving...
+                                  </>
+                                ) : (
+                                  "Save"
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        ) : suggestion.reason.trim() ? (
+                          (() => {
+                            const isTruncated =
+                              suggestion.reason.split("\n").length > 5 ||
+                              suggestion.reason.length > MAX_REASON_LENGTH;
+                            const mdContent = (() => {
+                              const withBold = suggestion.reason.replace(
+                                /(Common Trades?:?)/gi,
+                                "**$1**",
+                              );
+                              return withBold
+                                .split(/\n\n+/)
+                                .map((part) => part.replace(/\n/g, "\n\n"))
+                                .join("\n\n");
+                            })();
+                            const showReasonToggle =
+                              reasonOverflows ||
+                              (reasonExpanded && isTruncated);
+                            return (
+                              <div>
+                                <div
+                                  ref={reasonRef}
+                                  className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
+                                    isTruncated && !reasonExpanded
+                                      ? "max-h-36"
+                                      : ""
+                                  }`}
+                                >
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                      h1: ({ children }) => (
+                                        <h1 className="text-primary-text mt-3 mb-1.5 text-lg font-bold first:mt-0">
+                                          {children}
+                                        </h1>
+                                      ),
+                                      h2: ({ children }) => (
+                                        <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
+                                          {children}
+                                        </h2>
+                                      ),
+                                      h3: ({ children }) => (
+                                        <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
+                                          {children}
+                                        </h3>
+                                      ),
+                                      p: ({ children }) => (
+                                        <p className="mb-2 last:mb-0">
+                                          {children}
+                                        </p>
+                                      ),
+                                      ul: ({ children }) => (
+                                        <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
+                                          {children}
+                                        </ul>
+                                      ),
+                                      ol: ({ children }) => (
+                                        <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
+                                          {children}
+                                        </ol>
+                                      ),
+                                      em: (props) => (
+                                        <em className="italic" {...props} />
+                                      ),
+                                      strong: (props) => (
+                                        <b
+                                          className="text-primary-text font-semibold"
+                                          {...props}
+                                        />
+                                      ),
+                                    }}
+                                  >
+                                    {mdContent}
+                                  </ReactMarkdown>
+                                </div>
+                                {showReasonToggle && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setReasonExpanded((v) => !v)}
+                                    className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                  >
+                                    <Icon
+                                      icon={
+                                        reasonExpanded
+                                          ? "heroicons-outline:chevron-up"
+                                          : "heroicons-outline:chevron-down"
+                                      }
+                                      className="h-4 w-4"
+                                      inline
+                                    />
+                                    {reasonExpanded ? "Show Less" : "Read More"}
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <p className="text-secondary-text text-sm leading-relaxed">
+                            No reason provided.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Mobile layout (< lg): tabs — Details | Discussion ── */}
+                  <div className="lg:hidden">
+                    <Tabs defaultValue="details">
+                      <TabsList fullWidth>
+                        <TabsTrigger value="details" fullWidth>
+                          Details
                         </TabsTrigger>
+                        {isValueSuggestion && (
+                          <TabsTrigger value="history" fullWidth>
+                            Value History
+                          </TabsTrigger>
+                        )}
+                        <TabsTrigger value="discussion" fullWidth>
+                          Discussion
+                        </TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="details" className="mt-4 space-y-5">
+                        {/* Value change */}
+                        <div className="border-border-card bg-secondary-bg rounded-xl border">
+                          <div className="border-border-card border-b px-5 py-3.5">
+                            <h2 className="text-primary-text flex items-center justify-center gap-2 text-sm font-semibold">
+                              <Icon
+                                icon="material-symbols:swap-vert-rounded"
+                                className="text-secondary-text h-4 w-4"
+                                inline
+                              />
+                              {fieldLabel(suggestion.field)} Suggestion
+                            </h2>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 p-5">
+                            <div className="min-w-0 p-3">
+                              <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                                <Icon
+                                  icon="mdi:minus-circle"
+                                  className="h-3.5 w-3.5"
+                                  inline
+                                />
+                                Old
+                              </div>
+                              <div
+                                className="text-secondary-text text-lg font-bold line-through"
+                                style={{
+                                  wordBreak: "normal",
+                                  overflowWrap: "anywhere",
+                                }}
+                              >
+                                {formatFullValue(
+                                  suggestion.current_value || "N/A",
+                                )}
+                              </div>
+                            </div>
+                            <div className="min-w-0 p-3">
+                              <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                                <Icon
+                                  icon="mdi:plus-circle"
+                                  className="h-3.5 w-3.5"
+                                  inline
+                                />
+                                New
+                              </div>
+                              <div
+                                className="text-primary-text text-lg font-bold"
+                                style={{
+                                  wordBreak: "normal",
+                                  overflowWrap: "anywhere",
+                                }}
+                              >
+                                {formatFullValue(suggestion.suggested_value)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Votes */}
+                        <div className="border-border-card bg-secondary-bg rounded-xl border">
+                          <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
+                            <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                              <Icon
+                                icon="material-symbols:how-to-vote-outline-rounded"
+                                className="text-secondary-text h-4 w-4"
+                                inline
+                              />
+                              Votes
+                            </h2>
+                            <div className="flex items-center gap-2">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleVote("upvote")}
+                                    disabled={
+                                      voteLoading || !!voteRateLimit || !!ban
+                                    }
+                                    className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    <Icon
+                                      icon={
+                                        userVote === "upvote"
+                                          ? "material-symbols:thumb-up-rounded"
+                                          : "material-symbols:thumb-up-outline-rounded"
+                                      }
+                                      className="text-button-success h-4 w-4"
+                                      inline
+                                    />
+                                    <span className="text-button-success font-bold">
+                                      {voteCounts.up}
+                                    </span>
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {userVote === "upvote"
+                                    ? "Remove upvote"
+                                    : "Upvote"}
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleVote("downvote")}
+                                    disabled={
+                                      voteLoading || !!voteRateLimit || !!ban
+                                    }
+                                    className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    <Icon
+                                      icon={
+                                        userVote === "downvote"
+                                          ? "material-symbols:thumb-down-rounded"
+                                          : "material-symbols:thumb-down-outline-rounded"
+                                      }
+                                      className="text-button-danger h-4 w-4"
+                                      inline
+                                    />
+                                    <span className="text-button-danger font-bold">
+                                      {voteCounts.down}
+                                    </span>
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {userVote === "downvote"
+                                    ? "Remove downvote"
+                                    : "Downvote"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </div>
+                          {voteRateLimit && voteRateLimitSeconds > 0 && (
+                            <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
+                              <Icon
+                                icon="material-symbols:hourglass-empty-rounded"
+                                className="h-3.5 w-3.5 shrink-0"
+                                inline
+                              />
+                              Too fast — wait{" "}
+                              {voteRateLimitSeconds >= 60
+                                ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
+                                : `${voteRateLimitSeconds}s`}
+                            </div>
+                          )}
+                          {(suggestion.votes.upvotes.length > 0 ||
+                            suggestion.votes.downvotes.length > 0) && (
+                            <div className="p-5">
+                              <Tabs defaultValue="upvotes">
+                                <TabsList fullWidth className="mb-4">
+                                  <TabsTrigger value="upvotes" fullWidth>
+                                    <span className="flex items-center gap-1.5">
+                                      <Icon
+                                        icon="material-symbols:thumb-up-outline-rounded"
+                                        className="text-button-success h-3.5 w-3.5"
+                                        inline
+                                      />
+                                      Upvotes ({suggestion.votes.upvotes.length}
+                                      )
+                                    </span>
+                                  </TabsTrigger>
+                                  <TabsTrigger value="downvotes" fullWidth>
+                                    <span className="flex items-center gap-1.5">
+                                      <Icon
+                                        icon="material-symbols:thumb-down-outline-rounded"
+                                        className="text-button-danger h-3.5 w-3.5"
+                                        inline
+                                      />
+                                      Downvotes (
+                                      {suggestion.votes.downvotes.length})
+                                    </span>
+                                  </TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="upvotes">
+                                  {suggestion.votes.upvotes.length === 0 ? (
+                                    <p className="text-secondary-text py-4 text-center text-sm">
+                                      No upvotes yet.
+                                    </p>
+                                  ) : (
+                                    <div className={voterListClassName}>
+                                      {suggestion.votes.upvotes.map((v) => (
+                                        <VoterCard
+                                          key={v.user.id + v.created_at}
+                                          v={v}
+                                        />
+                                      ))}
+                                    </div>
+                                  )}
+                                </TabsContent>
+                                <TabsContent value="downvotes">
+                                  {suggestion.votes.downvotes.length === 0 ? (
+                                    <p className="text-secondary-text py-4 text-center text-sm">
+                                      No downvotes yet.
+                                    </p>
+                                  ) : (
+                                    <div className={voterListClassName}>
+                                      {suggestion.votes.downvotes.map((v) => (
+                                        <VoterCard
+                                          key={v.user.id + v.created_at}
+                                          v={v}
+                                        />
+                                      ))}
+                                    </div>
+                                  )}
+                                </TabsContent>
+                              </Tabs>
+                            </div>
+                          )}
+                        </div>
+                        {/* Suggester Stats */}
+                        {suggesterStats && (
+                          <div className="border-border-card bg-secondary-bg rounded-xl border">
+                            <div className="border-border-card border-b px-5 py-3.5">
+                              <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                                <Icon
+                                  icon="material-symbols:bar-chart-4-bars-rounded"
+                                  className="text-secondary-text h-4 w-4"
+                                  inline
+                                />
+                                Suggester Stats
+                              </h2>
+                            </div>
+                            <div className="grid grid-cols-2 gap-px p-3">
+                              <div className="p-2">
+                                <p className="text-secondary-text mb-0.5 text-xs">
+                                  Submitted
+                                </p>
+                                <p className="text-primary-text text-base font-bold">
+                                  {suggesterStats.total_submitted}
+                                </p>
+                              </div>
+                              <div className="p-2">
+                                <p className="text-secondary-text mb-0.5 text-xs">
+                                  Acceptance Rate
+                                </p>
+                                <p
+                                  className={`text-base font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+                                >
+                                  {suggesterStats.acceptance_rate.toFixed(0)}%
+                                </p>
+                              </div>
+                              <div className="p-2">
+                                <p className="text-secondary-text mb-0.5 text-xs">
+                                  Accepted
+                                </p>
+                                <p className="text-button-success text-base font-bold">
+                                  {suggesterStats.total_accepted}
+                                </p>
+                              </div>
+                              <div className="p-2">
+                                <p className="text-secondary-text mb-0.5 text-xs">
+                                  Rejected
+                                </p>
+                                <p className="text-button-danger text-base font-bold">
+                                  {suggesterStats.total_rejected}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </TabsContent>
+                      {isValueSuggestion && (
+                        <TabsContent value="history" className="mt-4">
+                          <div className="border-border-card bg-secondary-bg rounded-xl border">
+                            <div className="p-5">
+                              {historyLoading ? (
+                                <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
+                              ) : (
+                                <ItemValueChart
+                                  historyData={itemHistory}
+                                  showOnlyValueHistory
+                                  hideTradingMetrics
+                                />
+                              )}
+                            </div>
+                          </div>
+                        </TabsContent>
                       )}
-                      <TabsTrigger value="discussion" fullWidth>
-                        Discussion
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="details" className="mt-4 space-y-5">
+                      <TabsContent value="discussion" className="mt-4">
+                        <ChangelogComments
+                          changelogId={suggestion.id}
+                          changelogTitle={`Value Suggestion #${suggestion.id}`}
+                          type="vsuggestion"
+                          suggestion={{
+                            suggester: suggestion.user.id,
+                            upvoterIds: suggestion.votes.upvotes.map(
+                              (v) => v.user.id,
+                            ),
+                            downvoterIds: suggestion.votes.downvotes.map(
+                              (v) => v.user.id,
+                            ),
+                          }}
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+
+                  {/* ── Desktop layout (lg+): 3-col grid ── */}
+                  <div className="hidden lg:grid lg:grid-cols-5 lg:gap-5">
+                    {/* Main — comments */}
+                    <div className="min-w-0 lg:col-span-3">
+                      <ChangelogComments
+                        changelogId={suggestion.id}
+                        changelogTitle={`Value Suggestion #${suggestion.id}`}
+                        type="vsuggestion"
+                        suggestion={{
+                          suggester: suggestion.user.id,
+                          upvoterIds: suggestion.votes.upvotes.map(
+                            (v) => v.user.id,
+                          ),
+                          downvoterIds: suggestion.votes.downvotes.map(
+                            (v) => v.user.id,
+                          ),
+                        }}
+                      />
+                    </div>
+
+                    {/* Sidebar — value change + votes + suggester stats */}
+                    <div className="space-y-5 lg:col-span-2">
                       {/* Value change */}
                       <div className="border-border-card bg-secondary-bg rounded-xl border">
                         <div className="border-border-card border-b px-5 py-3.5">
@@ -1111,6 +1433,7 @@ export default function ValueSuggestionDetailPage() {
                           </div>
                         </div>
                       </div>
+
                       {/* Votes */}
                       <div className="border-border-card bg-secondary-bg rounded-xl border">
                         <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
@@ -1261,6 +1584,7 @@ export default function ValueSuggestionDetailPage() {
                           </div>
                         )}
                       </div>
+
                       {/* Suggester Stats */}
                       {suggesterStats && (
                         <div className="border-border-card bg-secondary-bg rounded-xl border">
@@ -1312,10 +1636,20 @@ export default function ValueSuggestionDetailPage() {
                           </div>
                         </div>
                       )}
-                    </TabsContent>
-                    {isValueSuggestion && (
-                      <TabsContent value="history" className="mt-4">
+
+                      {/* Value History Chart */}
+                      {isValueSuggestion && (
                         <div className="border-border-card bg-secondary-bg rounded-xl border">
+                          <div className="border-border-card border-b px-5 py-3.5">
+                            <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                              <Icon
+                                icon="material-symbols:show-chart-rounded"
+                                className="text-secondary-text h-4 w-4"
+                                inline
+                              />
+                              Value History
+                            </h2>
+                          </div>
                           <div className="p-5">
                             {historyLoading ? (
                               <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
@@ -1328,337 +1662,12 @@ export default function ValueSuggestionDetailPage() {
                             )}
                           </div>
                         </div>
-                      </TabsContent>
-                    )}
-                    <TabsContent value="discussion" className="mt-4">
-                      <ChangelogComments
-                        changelogId={suggestion.id}
-                        changelogTitle={`Value Suggestion #${suggestion.id}`}
-                        type="vsuggestion"
-                        suggestion={{
-                          suggester: suggestion.user.id,
-                          upvoterIds: suggestion.votes.upvotes.map(
-                            (v) => v.user.id,
-                          ),
-                          downvoterIds: suggestion.votes.downvotes.map(
-                            (v) => v.user.id,
-                          ),
-                        }}
-                      />
-                    </TabsContent>
-                  </Tabs>
-                </div>
-
-                {/* ── Desktop layout (lg+): 3-col grid ── */}
-                <div className="hidden lg:grid lg:grid-cols-5 lg:gap-5">
-                  {/* Main — comments */}
-                  <div className="min-w-0 lg:col-span-3">
-                    <ChangelogComments
-                      changelogId={suggestion.id}
-                      changelogTitle={`Value Suggestion #${suggestion.id}`}
-                      type="vsuggestion"
-                      suggestion={{
-                        suggester: suggestion.user.id,
-                        upvoterIds: suggestion.votes.upvotes.map(
-                          (v) => v.user.id,
-                        ),
-                        downvoterIds: suggestion.votes.downvotes.map(
-                          (v) => v.user.id,
-                        ),
-                      }}
-                    />
-                  </div>
-
-                  {/* Sidebar — value change + votes + suggester stats */}
-                  <div className="space-y-5 lg:col-span-2">
-                    {/* Value change */}
-                    <div className="border-border-card bg-secondary-bg rounded-xl border">
-                      <div className="border-border-card border-b px-5 py-3.5">
-                        <h2 className="text-primary-text flex items-center justify-center gap-2 text-sm font-semibold">
-                          <Icon
-                            icon="material-symbols:swap-vert-rounded"
-                            className="text-secondary-text h-4 w-4"
-                            inline
-                          />
-                          {fieldLabel(suggestion.field)} Suggestion
-                        </h2>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 p-5">
-                        <div className="min-w-0 p-3">
-                          <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                            <Icon
-                              icon="mdi:minus-circle"
-                              className="h-3.5 w-3.5"
-                              inline
-                            />
-                            Old
-                          </div>
-                          <div
-                            className="text-secondary-text text-lg font-bold line-through"
-                            style={{
-                              wordBreak: "normal",
-                              overflowWrap: "anywhere",
-                            }}
-                          >
-                            {formatFullValue(suggestion.current_value || "N/A")}
-                          </div>
-                        </div>
-                        <div className="min-w-0 p-3">
-                          <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                            <Icon
-                              icon="mdi:plus-circle"
-                              className="h-3.5 w-3.5"
-                              inline
-                            />
-                            New
-                          </div>
-                          <div
-                            className="text-primary-text text-lg font-bold"
-                            style={{
-                              wordBreak: "normal",
-                              overflowWrap: "anywhere",
-                            }}
-                          >
-                            {formatFullValue(suggestion.suggested_value)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Votes */}
-                    <div className="border-border-card bg-secondary-bg rounded-xl border">
-                      <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
-                        <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                          <Icon
-                            icon="material-symbols:how-to-vote-outline-rounded"
-                            className="text-secondary-text h-4 w-4"
-                            inline
-                          />
-                          Votes
-                        </h2>
-                        <div className="flex items-center gap-2">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={() => handleVote("upvote")}
-                                disabled={
-                                  voteLoading || !!voteRateLimit || !!ban
-                                }
-                                className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                <Icon
-                                  icon={
-                                    userVote === "upvote"
-                                      ? "material-symbols:thumb-up-rounded"
-                                      : "material-symbols:thumb-up-outline-rounded"
-                                  }
-                                  className="text-button-success h-4 w-4"
-                                  inline
-                                />
-                                <span className="text-button-success font-bold">
-                                  {voteCounts.up}
-                                </span>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {userVote === "upvote"
-                                ? "Remove upvote"
-                                : "Upvote"}
-                            </TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={() => handleVote("downvote")}
-                                disabled={
-                                  voteLoading || !!voteRateLimit || !!ban
-                                }
-                                className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                <Icon
-                                  icon={
-                                    userVote === "downvote"
-                                      ? "material-symbols:thumb-down-rounded"
-                                      : "material-symbols:thumb-down-outline-rounded"
-                                  }
-                                  className="text-button-danger h-4 w-4"
-                                  inline
-                                />
-                                <span className="text-button-danger font-bold">
-                                  {voteCounts.down}
-                                </span>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {userVote === "downvote"
-                                ? "Remove downvote"
-                                : "Downvote"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </div>
-                      {voteRateLimit && voteRateLimitSeconds > 0 && (
-                        <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
-                          <Icon
-                            icon="material-symbols:hourglass-empty-rounded"
-                            className="h-3.5 w-3.5 shrink-0"
-                            inline
-                          />
-                          Too fast — wait{" "}
-                          {voteRateLimitSeconds >= 60
-                            ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
-                            : `${voteRateLimitSeconds}s`}
-                        </div>
-                      )}
-                      {(suggestion.votes.upvotes.length > 0 ||
-                        suggestion.votes.downvotes.length > 0) && (
-                        <div className="p-5">
-                          <Tabs defaultValue="upvotes">
-                            <TabsList fullWidth className="mb-4">
-                              <TabsTrigger value="upvotes" fullWidth>
-                                <span className="flex items-center gap-1.5">
-                                  <Icon
-                                    icon="material-symbols:thumb-up-outline-rounded"
-                                    className="text-button-success h-3.5 w-3.5"
-                                    inline
-                                  />
-                                  Upvotes ({suggestion.votes.upvotes.length})
-                                </span>
-                              </TabsTrigger>
-                              <TabsTrigger value="downvotes" fullWidth>
-                                <span className="flex items-center gap-1.5">
-                                  <Icon
-                                    icon="material-symbols:thumb-down-outline-rounded"
-                                    className="text-button-danger h-3.5 w-3.5"
-                                    inline
-                                  />
-                                  Downvotes ({suggestion.votes.downvotes.length}
-                                  )
-                                </span>
-                              </TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="upvotes">
-                              {suggestion.votes.upvotes.length === 0 ? (
-                                <p className="text-secondary-text py-4 text-center text-sm">
-                                  No upvotes yet.
-                                </p>
-                              ) : (
-                                <div className={voterListClassName}>
-                                  {suggestion.votes.upvotes.map((v) => (
-                                    <VoterCard
-                                      key={v.user.id + v.created_at}
-                                      v={v}
-                                    />
-                                  ))}
-                                </div>
-                              )}
-                            </TabsContent>
-                            <TabsContent value="downvotes">
-                              {suggestion.votes.downvotes.length === 0 ? (
-                                <p className="text-secondary-text py-4 text-center text-sm">
-                                  No downvotes yet.
-                                </p>
-                              ) : (
-                                <div className={voterListClassName}>
-                                  {suggestion.votes.downvotes.map((v) => (
-                                    <VoterCard
-                                      key={v.user.id + v.created_at}
-                                      v={v}
-                                    />
-                                  ))}
-                                </div>
-                              )}
-                            </TabsContent>
-                          </Tabs>
-                        </div>
                       )}
                     </div>
-
-                    {/* Suggester Stats */}
-                    {suggesterStats && (
-                      <div className="border-border-card bg-secondary-bg rounded-xl border">
-                        <div className="border-border-card border-b px-5 py-3.5">
-                          <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                            <Icon
-                              icon="material-symbols:bar-chart-4-bars-rounded"
-                              className="text-secondary-text h-4 w-4"
-                              inline
-                            />
-                            Suggester Stats
-                          </h2>
-                        </div>
-                        <div className="grid grid-cols-2 gap-px p-3">
-                          <div className="p-2">
-                            <p className="text-secondary-text mb-0.5 text-xs">
-                              Submitted
-                            </p>
-                            <p className="text-primary-text text-base font-bold">
-                              {suggesterStats.total_submitted}
-                            </p>
-                          </div>
-                          <div className="p-2">
-                            <p className="text-secondary-text mb-0.5 text-xs">
-                              Acceptance Rate
-                            </p>
-                            <p
-                              className={`text-base font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
-                            >
-                              {suggesterStats.acceptance_rate.toFixed(0)}%
-                            </p>
-                          </div>
-                          <div className="p-2">
-                            <p className="text-secondary-text mb-0.5 text-xs">
-                              Accepted
-                            </p>
-                            <p className="text-button-success text-base font-bold">
-                              {suggesterStats.total_accepted}
-                            </p>
-                          </div>
-                          <div className="p-2">
-                            <p className="text-secondary-text mb-0.5 text-xs">
-                              Rejected
-                            </p>
-                            <p className="text-button-danger text-base font-bold">
-                              {suggesterStats.total_rejected}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Value History Chart */}
-                    {isValueSuggestion && (
-                      <div className="border-border-card bg-secondary-bg rounded-xl border">
-                        <div className="border-border-card border-b px-5 py-3.5">
-                          <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                            <Icon
-                              icon="material-symbols:show-chart-rounded"
-                              className="text-secondary-text h-4 w-4"
-                              inline
-                            />
-                            Value History
-                          </h2>
-                        </div>
-                        <div className="p-5">
-                          {historyLoading ? (
-                            <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
-                          ) : (
-                            <ItemValueChart
-                              historyData={itemHistory}
-                              showOnlyValueHistory
-                              hideTradingMetrics
-                            />
-                          )}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </main>
     </>

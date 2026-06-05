@@ -208,7 +208,10 @@ function SuggestionForm({
   const [showItemDropdown, setShowItemDropdown] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
   const [accountAgeError, setAccountAgeError] = useState<string | null>(null);
-  const [isVt, setIsVt] = useState(false);
+  const [isVt, setIsVt] = useState(isVtEligible);
+  useEffect(() => {
+    if (isVtEligible) setIsVt(true);
+  }, [isVtEligible]);
   const itemSearchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1548,12 +1551,12 @@ export default function ValueSuggestionsPage() {
     ) ?? false;
 
   const filteredSuggestions = suggestions.filter((s) => {
-    if (s.is_vt === 1 && !canSeeVt) return false;
+    if (s.is_vt === 1) return canSeeVt && sort === "value_team";
+    if (sort === "value_team") return false;
     const item = s.item;
     const matchesType = typeFilter === "All" || item?.type === typeFilter;
     const matchesField = fieldFilter === "All" || s.field === fieldFilter;
-    const matchesVtSort = sort !== "value_team" || s.is_vt === 1;
-    return matchesType && matchesField && matchesVtSort;
+    return matchesType && matchesField;
   });
 
   const suggestionItemTypes = Array.from(
@@ -1779,7 +1782,6 @@ export default function ValueSuggestionsPage() {
     if (isAuthLoading || availableSorts.length === 0) return;
     if (vtDefaultAppliedRef.current) return;
     if (initialSortRef.current !== null) return;
-    if (localStorage.getItem("vsuggestions_sort")) return;
     vtDefaultAppliedRef.current = true;
     const isVtUser =
       user?.flags?.some(
@@ -1788,6 +1790,9 @@ export default function ValueSuggestionsPage() {
       ) ?? false;
     if (isVtUser && availableSorts.includes("value_team")) {
       void setParams({ sort: "value_team" }, { history: "replace" });
+    } else {
+      const lsSort = localStorage.getItem("vsuggestions_sort");
+      if (lsSort) void setParams({ sort: lsSort }, { history: "replace" });
     }
   }, [isAuthLoading, availableSorts, user, setParams]);
 
