@@ -1541,7 +1541,14 @@ export default function ValueSuggestionsPage() {
     };
   }, []);
 
+  const canSeeVt =
+    user?.flags?.some(
+      (f) =>
+        (f.flag === "is_owner" || f.flag === "is_vt") && f.enabled !== false,
+    ) ?? false;
+
   const filteredSuggestions = suggestions.filter((s) => {
+    if (s.is_vt === 1 && !canSeeVt) return false;
     const item = s.item;
     const matchesType = typeFilter === "All" || item?.type === typeFilter;
     const matchesField = fieldFilter === "All" || s.field === fieldFilter;
@@ -1766,6 +1773,23 @@ export default function ValueSuggestionsPage() {
       })
       .catch(() => {});
   }, [setParams]);
+
+  const vtDefaultAppliedRef = useRef(false);
+  useEffect(() => {
+    if (isAuthLoading || availableSorts.length === 0) return;
+    if (vtDefaultAppliedRef.current) return;
+    if (initialSortRef.current !== null) return;
+    if (localStorage.getItem("vsuggestions_sort")) return;
+    vtDefaultAppliedRef.current = true;
+    const isVtUser =
+      user?.flags?.some(
+        (f) =>
+          (f.flag === "is_owner" || f.flag === "is_vt") && f.enabled !== false,
+      ) ?? false;
+    if (isVtUser && availableSorts.includes("value_team")) {
+      void setParams({ sort: "value_team" }, { history: "replace" });
+    }
+  }, [isAuthLoading, availableSorts, user, setParams]);
 
   useEffect(() => {
     const { url, headers } = buildApiFetchRequest(

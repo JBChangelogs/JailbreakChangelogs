@@ -163,8 +163,14 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
 
 export default function ValueSuggestionDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { isAuthenticated, user, setLoginModal, bans, setBan } =
-    useAuthContext();
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    user,
+    setLoginModal,
+    bans,
+    setBan,
+  } = useAuthContext();
   const ban = bans["value_suggestions"] ?? null;
 
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
@@ -288,6 +294,17 @@ export default function ValueSuggestionDetailPage() {
   if (routeError) {
     throw routeError;
   }
+
+  useEffect(() => {
+    if (!suggestion || isAuthLoading) return;
+    if (suggestion.is_vt !== 1) return;
+    const canSee =
+      user?.flags?.some(
+        (f) =>
+          (f.flag === "is_owner" || f.flag === "is_vt") && f.enabled !== false,
+      ) ?? false;
+    if (!canSee) setShouldShowNotFound(true);
+  }, [suggestion, isAuthLoading, user]);
 
   useEffect(() => {
     if (!suggestion || !user) return;
