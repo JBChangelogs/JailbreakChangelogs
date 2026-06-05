@@ -1691,6 +1691,13 @@ export default function ValueSuggestionsPage() {
   );
 
   useEffect(() => {
+    if (hasLoadedOnceRef.current) {
+      setSuggestions([]);
+      setLoadingSuggestions(true);
+    }
+  }, [sort]);
+
+  useEffect(() => {
     fetchSuggestions(page);
   }, [fetchSuggestions, page]);
 
@@ -2256,15 +2263,9 @@ export default function ValueSuggestionsPage() {
           {/* Title row */}
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-primary-text font-semibold">
-              {loadingSuggestions
-                ? 0
-                : sort === "value_team"
-                  ? filteredSuggestions.length
-                  : total}{" "}
+              {loadingSuggestions ? 0 : total}{" "}
               {urlQuery
-                ? (sort === "value_team"
-                    ? filteredSuggestions.length
-                    : total) === 1
+                ? total === 1
                   ? "Search Result"
                   : "Search Results"
                 : "Recent Suggestions"}
