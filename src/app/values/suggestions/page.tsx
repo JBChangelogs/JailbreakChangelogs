@@ -1760,7 +1760,7 @@ export default function ValueSuggestionsPage() {
       PUBLIC_API_URL!,
       "/value-suggestions/sorts",
     );
-    fetch(url, { headers })
+    fetch(url, { credentials: "include", headers })
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -2256,9 +2256,15 @@ export default function ValueSuggestionsPage() {
           {/* Title row */}
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-primary-text font-semibold">
-              {loadingSuggestions ? 0 : total}{" "}
+              {loadingSuggestions
+                ? 0
+                : sort === "value_team"
+                  ? filteredSuggestions.length
+                  : total}{" "}
               {urlQuery
-                ? total === 1
+                ? (sort === "value_team"
+                    ? filteredSuggestions.length
+                    : total) === 1
                   ? "Search Result"
                   : "Search Results"
                 : "Recent Suggestions"}
