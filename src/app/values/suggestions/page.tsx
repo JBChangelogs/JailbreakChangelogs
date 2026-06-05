@@ -109,6 +109,7 @@ interface Suggestion {
   status: string;
   upvotes: number;
   downvotes: number;
+  is_vt: number;
   created_at: number;
   updated_at: number;
   user: SuggestionUser;
@@ -174,11 +175,13 @@ interface SuggestionFormProps {
   loadingItems: boolean;
   limits: SuggestionLimits | null;
   loadingLimits: boolean;
+  isVtEligible: boolean;
   onSubmit: (payload: {
     item: number;
     field: string;
     value: string;
     reason: string;
+    isVt: boolean;
   }) => Promise<void>;
   onCancel: () => void;
 }
@@ -188,6 +191,7 @@ function SuggestionForm({
   loadingItems,
   limits,
   loadingLimits,
+  isVtEligible,
   onSubmit,
   onCancel: _onCancel,
 }: SuggestionFormProps) {
@@ -204,6 +208,7 @@ function SuggestionForm({
   const [showItemDropdown, setShowItemDropdown] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
   const [accountAgeError, setAccountAgeError] = useState<string | null>(null);
+  const [isVt, setIsVt] = useState(false);
   const itemSearchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -275,6 +280,7 @@ function SuggestionForm({
         field,
         value: suggestedValue,
         reason: reason.trim(),
+        isVt,
       });
       setSelectedItem(null);
       setItemSearch("");
@@ -285,6 +291,7 @@ function SuggestionForm({
       setField("cash_value");
       setRateLimitUntil(null);
       setAccountAgeError(null);
+      setIsVt(false);
     } catch (err: unknown) {
       if (err instanceof RateLimitError) {
         setRateLimitUntil(Date.now() + err.retryAfter * 1000);
@@ -769,6 +776,38 @@ function SuggestionForm({
           until={rateLimitUntil}
           label="You're submitting too fast."
         />
+
+        {isVtEligible && (
+          <div>
+            <p className="text-primary-text mb-1.5 block text-sm font-medium">
+              Visibility
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setIsVt(false)}
+                className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                  !isVt
+                    ? "bg-button-info border-button-info text-form-button-text"
+                    : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
+                }`}
+              >
+                Public
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsVt(true)}
+                className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                  isVt
+                    ? "bg-button-info border-button-info text-form-button-text"
+                    : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
+                }`}
+              >
+                VT Only
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end">
           <Button
@@ -1506,7 +1545,8 @@ export default function ValueSuggestionsPage() {
     const item = s.item;
     const matchesType = typeFilter === "All" || item?.type === typeFilter;
     const matchesField = fieldFilter === "All" || s.field === fieldFilter;
-    return matchesType && matchesField;
+    const matchesVtSort = sort !== "value_team" || s.is_vt === 1;
+    return matchesType && matchesField && matchesVtSort;
   });
 
   const suggestionItemTypes = Array.from(
@@ -1787,23 +1827,26 @@ export default function ValueSuggestionsPage() {
     field: string;
     value: string;
     reason: string;
+    isVt: boolean;
   }) => {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       "/value-suggestions",
     );
+    const body: Record<string, unknown> = {
+      item: payload.item,
+      suggestion: {
+        field: payload.field,
+        value: payload.value,
+        reason: payload.reason,
+      },
+    };
+    if (payload.isVt) body.is_vt = true;
     const res = await fetch(url, {
       method: "POST",
       credentials: "include",
       headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        item: payload.item,
-        suggestion: {
-          field: payload.field,
-          value: payload.value,
-          reason: payload.reason,
-        },
-      }),
+      body: JSON.stringify(body),
     });
 
     const banInfo = parseBan(res);
@@ -2000,7 +2043,7 @@ export default function ValueSuggestionsPage() {
           </div>
 
           {/* Top Suggesters Leaderboard */}
-          {(loadingLeaderboard || leaderboard.length > 0) && (
+          {false && (loadingLeaderboard || leaderboard.length > 0) && (
             <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
               <div className="mb-4 flex items-center gap-2">
                 <Icon
@@ -2168,6 +2211,13 @@ export default function ValueSuggestionsPage() {
                 loadingItems={loadingItems}
                 limits={limits}
                 loadingLimits={loadingLimits}
+                isVtEligible={
+                  user?.flags?.some(
+                    (f) =>
+                      (f.flag === "is_owner" || f.flag === "is_vt") &&
+                      f.enabled !== false,
+                  ) ?? false
+                }
                 onSubmit={handleFormSubmit}
                 onCancel={() => setShowForm(false)}
               />
@@ -2193,7 +2243,12 @@ export default function ValueSuggestionsPage() {
                       type="button"
                       className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
                     >
-                      {sort ? sort.charAt(0).toUpperCase() + sort.slice(1) : ""}
+                      {sort
+                        ? sort
+                            .split("_")
+                            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                            .join(" ")
+                        : ""}
                       <Icon
                         icon="heroicons:chevron-down"
                         className="h-3.5 w-3.5 shrink-0"
@@ -2216,7 +2271,10 @@ export default function ValueSuggestionsPage() {
                         value={s}
                         className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
-                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                        {s
+                          .split("_")
+                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                          .join(" ")}
                       </DropdownMenuRadioItem>
                     ))}
                   </DropdownMenuRadioGroup>
@@ -2828,9 +2886,27 @@ export default function ValueSuggestionsPage() {
                       {/* Item name + badges */}
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="relative z-10 min-w-0">
-                          <p className="text-secondary-text mb-0.5 text-xs font-medium">
-                            #{suggestion.id}
-                          </p>
+                          <div className="mb-0.5 flex items-center gap-1.5">
+                            <p className="text-secondary-text text-xs font-medium">
+                              #{suggestion.id}
+                            </p>
+                            {suggestion.is_vt === 1 && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Image
+                                    src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
+                                    alt="Value Team"
+                                    width={20}
+                                    height={20}
+                                    className="shrink-0"
+                                  />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  Value Team Suggestion
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
                           {item ? (
                             <Link
                               href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}

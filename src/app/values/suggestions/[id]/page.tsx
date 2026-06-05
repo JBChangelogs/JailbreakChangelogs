@@ -97,6 +97,7 @@ interface Suggestion {
   status: string;
   upvotes: number;
   downvotes: number;
+  is_vt: number;
   created_at: number;
   updated_at: number;
   user: SuggestionUser;
@@ -728,7 +729,7 @@ export default function ValueSuggestionDetailPage() {
                       )}
                     </div>
 
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {item && (
                         <span
                           className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
@@ -753,6 +754,20 @@ export default function ValueSuggestionDetailPage() {
                       >
                         {suggestion.status}
                       </span>
+                      {suggestion.is_vt === 1 && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Image
+                              src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
+                              alt="Value Team"
+                              width={20}
+                              height={20}
+                              className="shrink-0"
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>Value Team Suggestion</TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
 
                     <div>
