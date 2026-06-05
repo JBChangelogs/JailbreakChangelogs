@@ -1041,6 +1041,33 @@ function SuggestionGuidelinesDialog({
   open: boolean;
   onConfirm: () => void;
 }) {
+  useEffect(() => {
+    if (!open) return;
+    if (!window.matchMedia("(max-width: 640px)").matches) return;
+
+    const AD_IDS = ["np-bottom-anchor", "np-video-player"];
+
+    const hide = () => {
+      AD_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && el.style.display !== "none") el.style.display = "none";
+      });
+    };
+
+    hide();
+
+    const observer = new MutationObserver(hide);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      AD_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "";
+      });
+    };
+  }, [open]);
+
   const rules = [
     "Not use any form of AI generated content to make any value suggestions (If found using AI, you will receive punishment for your actions).",
     "Not be biased solely on your trading experiences, as other people might have different experiences while trading an item.",
@@ -1056,12 +1083,12 @@ function SuggestionGuidelinesDialog({
     <Dialog open={open}>
       <DialogContent
         showClose={false}
-        className="bg-secondary-bg max-w-lg rounded-lg p-0 backdrop-blur-none"
+        className="bg-secondary-bg flex max-h-[90dvh] max-w-lg flex-col overflow-hidden rounded-lg p-0 backdrop-blur-none"
         aria-describedby={undefined}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
-        <DialogHeader className="px-6 pt-6 pb-2">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
           <DialogTitle className="text-primary-text flex items-center justify-center gap-2 text-base font-bold">
             <Icon
               icon="material-symbols:announcement-outline-rounded"
@@ -1075,40 +1102,42 @@ function SuggestionGuidelinesDialog({
           </p>
         </DialogHeader>
 
-        <div className="space-y-4 px-6 pt-2 pb-6">
-          <div>
-            <p className="text-primary-text mb-2 text-sm font-semibold">
-              This should serve as a reminder towards making any form of
-              suggestions to:
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-2 pb-4">
+          <div className="space-y-4">
+            <div>
+              <p className="text-primary-text mb-2 text-sm font-semibold">
+                This should serve as a reminder towards making any form of
+                suggestions to:
+              </p>
+              <ul className="space-y-2">
+                {rules.map((rule, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    <Icon
+                      icon="heroicons-outline:arrow-right"
+                      className="text-secondary-text mt-0.5 h-4 w-4 shrink-0"
+                      inline
+                    />
+                    <span className="text-secondary-text">{rule}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <p className="text-primary-text text-sm font-semibold">
+              We thank you for understanding, and hope to see more future
+              suggestions following these rules.
             </p>
-            <ul className="space-y-2">
-              {rules.map((rule, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm">
-                  <Icon
-                    icon="heroicons-outline:arrow-right"
-                    className="text-secondary-text mt-0.5 h-4 w-4 shrink-0"
-                    inline
-                  />
-                  <span className="text-secondary-text">{rule}</span>
-                </li>
-              ))}
-            </ul>
           </div>
+        </div>
 
-          <p className="text-primary-text text-sm font-semibold">
-            We thank you for understanding, and hope to see more future
-            suggestions following these rules.
-          </p>
-
-          <div className="border-border-card flex items-center justify-end border-t pt-4">
-            <Button
-              onClick={onConfirm}
-              className="bg-button-info hover:bg-button-info-hover text-form-button-text"
-              size="sm"
-            >
-              I Understand
-            </Button>
-          </div>
+        <div className="border-border-card flex shrink-0 items-center justify-center border-t px-6 py-4 sm:justify-end">
+          <Button
+            onClick={onConfirm}
+            className="bg-button-info hover:bg-button-info-hover text-form-button-text"
+            size="sm"
+          >
+            I Understand
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
