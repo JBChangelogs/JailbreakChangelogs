@@ -109,14 +109,14 @@ const TradeTotalsPills = ({ items }: { items: TradeItem[] }) => {
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+      <span className="border-border-card bg-quaternary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
+        Total: {formatTradeValue(cashTotal + dupedTotal)}
+      </span>
       <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
         Cash: {formatTradeValue(cashTotal)}
       </span>
       <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
         Duped: {formatTradeValue(dupedTotal)}
-      </span>
-      <span className="border-border-card bg-quaternary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
-        Total: {formatTradeValue(cashTotal + dupedTotal)}
       </span>
     </div>
   );
