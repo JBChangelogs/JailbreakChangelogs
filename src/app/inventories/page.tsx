@@ -16,6 +16,7 @@ import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import MostScannedLeaderboardClient from "@/components/Inventory/MostScannedLeaderboardClient";
 import InventoryFAQ from "@/components/Inventory/InventoryFAQ";
+import NetworthCapHistoryChart from "@/components/Inventory/NetworthCapHistoryChart";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 
 export const dynamic = "force-dynamic";
@@ -68,6 +69,8 @@ export default async function InventoriesPage() {
           <Suspense fallback={<StatsSkeleton />}>
             <StatsPolling />
           </Suspense>
+
+          <NetworthCapHistoryChart />
 
           <ConnectedBotsPolling />
 

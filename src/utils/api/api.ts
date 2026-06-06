@@ -1891,6 +1891,38 @@ export async function fetchUserMoneyHistory(
   }
 }
 
+export interface NetworthCapSnapshot {
+  snapshot_time: number;
+  total_networth: number;
+  total_duped_networth: number;
+  duplicates_percentage: number;
+}
+
+export async function fetchNetworthCapHistory(): Promise<
+  NetworthCapSnapshot[]
+> {
+  try {
+    const response = await fetch(
+      `${INVENTORY_API_URL}/networth/cap/history?limit=30`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
 // Official scan bots
 export interface OfficialBotUser {
   userId: number;
