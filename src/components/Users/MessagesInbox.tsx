@@ -2403,8 +2403,7 @@ export default function MessagesInbox() {
       const parsedBody = rawBody
         ? (() => {
             try {
-              return parseJsonWithLargeIds(rawBody) as ApiSendResponse &
-                ApiErrorResponse;
+              return JSON.parse(rawBody) as ApiSendResponse & ApiErrorResponse;
             } catch {
               return null;
             }
@@ -2707,8 +2706,7 @@ export default function MessagesInbox() {
       const parsedBody = rawBody
         ? (() => {
             try {
-              return parseJsonWithLargeIds(rawBody) as ApiSendResponse &
-                ApiErrorResponse;
+              return JSON.parse(rawBody) as ApiSendResponse & ApiErrorResponse;
             } catch {
               return null;
             }
