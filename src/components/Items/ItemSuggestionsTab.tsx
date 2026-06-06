@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
-import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/utils/ui/avatar";
 // RE-ADD: voting — import { useAuthContext } from "@/contexts/AuthContext";
@@ -35,6 +34,72 @@ import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
 
 const log = createLogger("UI");
+
+function SuggestionCardSkeleton() {
+  return (
+    <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
+      <div className="border-border-card flex border-b">
+        <div className="bg-button-success/10 flex flex-1 items-center justify-center py-2.5">
+          <div className="bg-quaternary-bg h-4 w-10 rounded" />
+        </div>
+        <div className="border-border-card border-l" />
+        <div className="bg-button-danger/10 flex flex-1 items-center justify-center py-2.5">
+          <div className="bg-quaternary-bg h-4 w-10 rounded" />
+        </div>
+      </div>
+      <div className="space-y-3 p-4">
+        <div className="space-y-2">
+          <div className="bg-quaternary-bg h-5 w-32 rounded" />
+          <div className="flex gap-1.5">
+            <div className="bg-quaternary-bg h-6 w-20 rounded-lg" />
+            <div className="bg-quaternary-bg h-6 w-16 rounded-lg" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="p-3">
+            <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
+            <div className="bg-quaternary-bg h-5 w-24 rounded" />
+          </div>
+          <div className="p-3">
+            <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
+            <div className="bg-quaternary-bg h-5 w-24 rounded" />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <div className="bg-quaternary-bg h-3.5 w-full rounded" />
+          <div className="bg-quaternary-bg h-3.5 w-4/5 rounded" />
+          <div className="bg-quaternary-bg h-3.5 w-3/5 rounded" />
+        </div>
+        <div className="border-border-card border-t pt-3">
+          <div className="bg-quaternary-bg mb-1.5 h-3 w-20 rounded" />
+          <div className="flex items-center gap-2">
+            <div className="bg-quaternary-bg h-6 w-6 rounded-full" />
+            <div>
+              <div className="bg-quaternary-bg mb-1 h-4 w-28 rounded" />
+              <div className="bg-quaternary-bg h-3 w-20 rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SuggestionsTabSkeleton() {
+  return (
+    <div className="animate-pulse space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="bg-quaternary-bg h-8 w-48 rounded" />
+        <div className="bg-quaternary-bg h-8 w-28 rounded" />
+      </div>
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SuggestionCardSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 interface UserSettings {
   custom_avatar?: boolean;
@@ -237,11 +302,7 @@ export default function ItemSuggestionsTab({
   };
 
   if (loading) {
-    return (
-      <div className="border-border-card bg-secondary-bg flex items-center justify-center rounded-lg border p-8">
-        <Spinner className="h-6 w-6" />
-      </div>
-    );
+    return <SuggestionsTabSkeleton />;
   }
 
   if (error) {

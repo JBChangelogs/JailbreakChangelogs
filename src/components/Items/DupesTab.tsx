@@ -9,6 +9,33 @@ import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
 
+function DuperRowSkeleton() {
+  return (
+    <div className="flex items-center gap-2 px-4 py-3 sm:gap-4">
+      <div className="bg-quaternary-bg h-4 w-6 shrink-0 rounded" />
+      <div className="bg-quaternary-bg h-10 w-10 shrink-0 rounded-full sm:h-12 sm:w-12" />
+      <div className="flex flex-1 flex-col gap-1.5">
+        <div className="bg-quaternary-bg h-4 w-36 rounded" />
+        <div className="bg-quaternary-bg h-3 w-24 rounded" />
+      </div>
+    </div>
+  );
+}
+
+function DupesTabSkeleton() {
+  return (
+    <div className="animate-pulse space-y-6">
+      <div className="bg-quaternary-bg h-8 w-36 rounded" />
+      <div className="bg-quaternary-bg h-12 w-full rounded-lg" />
+      <div className="border-border-card bg-secondary-bg divide-border-card divide-y rounded-lg border">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <DuperRowSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 interface ItemDupedUser {
   hasVerifiedBadge: boolean;
   id: number;
@@ -89,15 +116,8 @@ export default function DupesTab({ itemId }: DupesTabProps) {
     overscan: 5,
   });
 
-  // Loading state
   if (isLoadingDupes) {
-    return (
-      <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-        <div className="text-secondary-text animate-pulse text-lg font-semibold">
-          Loading dupers...
-        </div>
-      </div>
-    );
+    return <DupesTabSkeleton />;
   }
 
   // Error state

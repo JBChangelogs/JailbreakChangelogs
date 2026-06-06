@@ -106,6 +106,7 @@ export default function ProfileInventoryTab({
     "idle",
   );
   const [error, setError] = useState<string | null>(null);
+  const [isNotFound, setIsNotFound] = useState(false);
   const [items, setItems] = useState<InventoryItemNormalized[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -164,6 +165,7 @@ export default function ProfileInventoryTab({
     const fetchInventory = async () => {
       setStatus("loading");
       setError(null);
+      setIsNotFound(false);
 
       try {
         const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(trimmedId)}&nocache=false`;
@@ -221,6 +223,7 @@ export default function ProfileInventoryTab({
 
         const payload = (await response.json()) as unknown;
         if (!response.ok) {
+          if (response.status === 404) setIsNotFound(true);
           const message =
             (payload &&
             typeof payload === "object" &&
@@ -418,6 +421,7 @@ export default function ProfileInventoryTab({
 
   const header = useMemo(() => {
     if (!hasValidRobloxId) return null;
+    if (status === "error") return null;
     const hasFilters = Boolean(searchQuery.trim()) || typeFilter !== "all";
     const filterLabelParts: string[] = [];
     if (searchQuery.trim()) {
@@ -568,10 +572,41 @@ export default function ProfileInventoryTab({
       )}
 
       {status === "error" && (
-        <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-          <p className="text-secondary-text text-sm">
-            {error || "Failed to load inventory."}
+        <div className="py-6 text-center">
+          <Image
+            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            alt="Failed to load inventory"
+            width={160}
+            height={128}
+            className="mx-auto mb-4"
+          />
+          <p className="text-primary-text mb-1 font-semibold">
+            {isNotFound ? "Inventory Not Found" : "Failed to Load Inventory"}
           </p>
+          <p className="text-secondary-text mx-auto mb-6 max-w-sm text-sm leading-relaxed">
+            {isNotFound
+              ? "This user's inventory could not be found."
+              : (error ?? "Something went wrong while loading the inventory.")}
+          </p>
+          {isNotFound ? (
+            <Button asChild variant="default" size="sm">
+              <Link href="/inventories">Browse Inventories</Link>
+            </Button>
+          ) : (
+            hasValidRobloxId &&
+            INVENTORY_API_URL && (
+              <Button
+                size="sm"
+                onClick={() => {
+                  lastFetchedIdRef.current = null;
+                  setStatus("idle");
+                  setError(null);
+                }}
+              >
+                Try Again
+              </Button>
+            )
+          )}
         </div>
       )}
 
