@@ -3,7 +3,9 @@ import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Spinner } from "../ui/Spinner";
+import { RateLimitBanner } from "../ui/RateLimitBanner";
 import { isFeatureEnabled } from "@/utils/api/featureFlags";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { trackEvent } from "@/utils/analytics/rybbit";
@@ -60,10 +62,23 @@ export default function ChangelogSummary({
   changelogId,
   content,
 }: ChangelogSummaryProps) {
+  const { setLoginModal } = useAuthContext();
   const [streamedText, setStreamedText] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!rateLimitUntil) return;
+    const ms = rateLimitUntil - Date.now();
+    if (ms <= 0) {
+      setRateLimitUntil(null);
+      return;
+    }
+    const id = setTimeout(() => setRateLimitUntil(null), ms);
+    return () => clearTimeout(id);
+  }, [rateLimitUntil]);
 
   const generateSummary = useCallback(async () => {
     if (loading) return;
@@ -83,10 +98,23 @@ export default function ChangelogSummary({
       const response = await fetch(url, { credentials: "include", headers });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          toast.info(
+            "You must be logged in to generate AI summaries. Please log in and try again.",
+          );
+          setLoginModal({ open: true });
+          return;
+        }
         if (response.status === 429) {
-          const retryAfter = response.headers.get("retry-after");
-          const hours = retryAfter
-            ? Math.ceil(parseInt(retryAfter, 10) / 3600)
+          const retryAfterHeader = response.headers.get("retry-after");
+          const retryAfterSeconds = retryAfterHeader
+            ? parseInt(retryAfterHeader, 10)
+            : null;
+          if (retryAfterSeconds) {
+            setRateLimitUntil(Date.now() + retryAfterSeconds * 1000);
+          }
+          const hours = retryAfterSeconds
+            ? Math.ceil(retryAfterSeconds / 3600)
             : null;
           toast.error(
             hours
@@ -94,7 +122,6 @@ export default function ChangelogSummary({
               : "AI Summary rate limit exceeded. Please try again later.",
             { duration: 8000 },
           );
-          setError("Rate limit exceeded. Please try again later.");
           return;
         }
         throw new Error(`Request failed: ${response.status}`);
@@ -126,7 +153,7 @@ export default function ChangelogSummary({
     } finally {
       setLoading(false);
     }
-  }, [changelogId, loading]);
+  }, [changelogId, loading, setLoginModal]);
 
   useEffect(() => {
     setStreamedText("");
@@ -231,11 +258,20 @@ export default function ChangelogSummary({
           <Icon icon="solar:magic-stick-3-bold" className="text-link h-5 w-5" />
           <span className="text-primary-text font-medium">AI Summary</span>
         </div>
-        <Button onClick={generateSummary} className="w-full sm:w-auto">
+        <Button
+          onClick={generateSummary}
+          disabled={!!rateLimitUntil}
+          className="w-full sm:w-auto"
+        >
           <Icon icon="solar:magic-stick-3-bold" className="h-4 w-4" />
           Generate Summary
         </Button>
       </div>
+      <RateLimitBanner
+        until={rateLimitUntil}
+        label="AI Summary rate limit exceeded."
+        className="mt-3"
+      />
     </div>
   );
 }
