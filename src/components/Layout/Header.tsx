@@ -843,8 +843,8 @@ export default function Header() {
                           : "/logos/JBCL_Long_Transparent.webp"
                       }
                       alt="Jailbreak Changelogs Logo"
-                      width={213}
-                      height={48}
+                      width={isCollabPage ? 148 : 256}
+                      height={isCollabPage ? 48 : 58}
                       quality={90}
                       fetchPriority="high"
                       loading="eager"

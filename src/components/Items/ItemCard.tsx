@@ -425,7 +425,6 @@ export default function ItemCard({
                     alt={`${item.name} (active variant)`}
                     width={854}
                     height={480}
-                    loading="eager"
                     className="h-full w-full object-cover"
                     onError={handleImageError}
                   />

@@ -141,8 +141,8 @@ export default async function RootLayout({
                 <Image
                   src="/logos/JBCL_Long_Transparent.webp"
                   alt="Jailbreak Changelogs"
-                  width={213}
-                  height={48}
+                  width={256}
+                  height={58}
                   className="mx-auto mb-6 h-24 w-auto"
                 />
                 <h1 className="text-primary-text mb-4 text-2xl font-bold">
@@ -282,8 +282,8 @@ export default async function RootLayout({
               <Image
                 src="/logos/JBCL_Long_Transparent.webp"
                 alt="Jailbreak Changelogs"
-                width={213}
-                height={48}
+                width={256}
+                height={58}
                 loading="eager"
                 className="mx-auto mb-6 h-24 w-auto"
               />

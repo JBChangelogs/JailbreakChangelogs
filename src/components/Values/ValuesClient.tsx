@@ -64,6 +64,7 @@ export default function ValuesClient({
       },
     });
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
+  const [isInitialSortPending, setIsInitialSortPending] = useState(true);
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
   const DYNAMIC_MAX_VALUE = useMemo(() => {
@@ -135,6 +136,7 @@ export default function ValuesClient({
         favoritesData,
       );
       setSortedItems(sorted);
+      setIsInitialSortPending(false);
     };
     updateSortedItems();
   }, [items, debouncedSearchTerm, filterSort, valueSort, favorites]);
@@ -271,6 +273,7 @@ export default function ValuesClient({
         <div className="space-y-6">
           <ValuesItemsGrid
             items={sortedItems}
+            isLoading={isInitialSortPending}
             favorites={favorites}
             onFavoriteChange={(itemId, isFavorited) => {
               setFavorites((prev) =>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
+import ItemCardSkeleton from "@/components/Items/ItemCardSkeleton";
 import { Item } from "@/types";
 import { getEffectiveCashValue } from "@/utils/trading/values";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
@@ -13,6 +14,7 @@ import { getFilterDisplayName } from "./valuesFilterOptions";
 
 interface ValuesItemsGridProps {
   items: Item[];
+  isLoading?: boolean;
   favorites: number[];
   onFavoriteChange: (itemId: number, isFavorited: boolean) => void;
   appliedMinValue: number;
@@ -28,6 +30,7 @@ interface ValuesItemsGridProps {
 
 export default function ValuesItemsGrid({
   items,
+  isLoading = false,
   favorites,
   onFavoriteChange,
   appliedMinValue,
@@ -231,7 +234,11 @@ export default function ValuesItemsGrid({
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {displayedItems.length === 0 ? (
+        {displayedItems.length === 0 && isLoading ? (
+          [...Array(itemsPerPage)].map((_, index) => (
+            <ItemCardSkeleton key={index} />
+          ))
+        ) : displayedItems.length === 0 ? (
           <div className="border-border-card bg-secondary-bg col-span-full mb-4 rounded-lg border p-8 text-center">
             <h3 className="text-primary-text mb-1 font-semibold">
               {getEmptyStateTitle()}
