@@ -59,7 +59,11 @@ export default function ChangelogsPage() {
     };
 
     void redirectToLatest();
-  }, [router]);
+    // router from nextjs-toploader/app returns a new object reference on every
+    // render, so including it here would re-trigger the fetch in an infinite loop
+    // (e.g. hammering the API on every render while rate limited)
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isRateLimited) {
     return <RateLimitView retryAfter={rateLimitRetryAfter} />;

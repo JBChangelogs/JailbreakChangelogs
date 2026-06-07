@@ -21,7 +21,7 @@ import { UserData } from "@/types/auth";
 import SeasonRouteLoading from "@/app/seasons/[id]/loading";
 import RateLimitView from "@/components/Layout/RateLimitView";
 
-const LATEST_SEASON = 31;
+const LATEST_SEASON = Number(process.env.NEXT_PUBLIC_LATEST_SEASON);
 
 interface SeasonDetailsClientProps {
   seasonId: string;
@@ -104,7 +104,10 @@ export default function SeasonDetailsClient({
     };
 
     void loadPageData();
-  }, [seasonId, router]);
+    // router from nextjs-toploader/app returns a new object reference on every
+    // render, so including it here would re-trigger the fetch in an infinite loop
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [seasonId]);
 
   if (isRateLimited) {
     return <RateLimitView retryAfter={rateLimitRetryAfter} />;
