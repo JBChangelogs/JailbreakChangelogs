@@ -2,6 +2,12 @@ const nextConfig = {
   output: "standalone",
   compress: true,
   poweredByHeader: false,
+  deploymentId: process.env.RAILWAY_DEPLOYMENT_ID,
+  compiler: {
+    removeConsole: {
+      exclude: ["error"],
+    },
+  },
   allowedDevOrigins: [
     "127.0.0.1",
     "localhost",
