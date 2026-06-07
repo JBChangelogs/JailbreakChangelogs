@@ -29,19 +29,25 @@ export default function StatsPolling() {
         <div className="text-primary-text text-2xl font-bold">
           <CountUpNumber value={stats?.item_count ?? 0} />
         </div>
-        <div className="text-secondary-text text-sm">Items Tracked</div>
+        <div className="text-secondary-text text-sm uppercase">
+          Items Tracked
+        </div>
       </div>
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <div className="text-primary-text text-2xl font-bold">
           <CountUpNumber value={stats?.user_count ?? 0} />
         </div>
-        <div className="text-secondary-text text-sm">Users Scanned</div>
+        <div className="text-secondary-text text-sm uppercase">
+          Users Scanned
+        </div>
       </div>
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <div className="text-primary-text text-2xl font-bold">
           <CountUpNumber value={duplicatesStats?.total_duplicates ?? 0} />
         </div>
-        <div className="text-secondary-text text-sm">Total Duplicates</div>
+        <div className="text-secondary-text text-sm uppercase">
+          Total Duplicates
+        </div>
       </div>
     </div>
   );

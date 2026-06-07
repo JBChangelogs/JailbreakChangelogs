@@ -197,9 +197,7 @@ export default function ConnectedBotsPolling() {
   return (
     <div>
       <div className="mb-0 flex items-center gap-3">
-        <h2 className="text-secondary-text text-xl font-bold">
-          Connected Bots
-        </h2>
+        <h2 className="text-primary-text text-xl font-bold">Connected Bots</h2>
         <div className="flex items-center gap-2">
           <Icon icon="fluent:live-24-filled" className="h-4 w-4 text-red-500" />
           <span className="text-xs font-medium tracking-wide text-red-500 uppercase">
@@ -207,7 +205,7 @@ export default function ConnectedBotsPolling() {
           </span>
         </div>
       </div>
-      <div className="text-secondary-text mb-2 flex flex-wrap items-center gap-2 text-sm">
+      <div className="text-primary-text mb-2 flex flex-wrap items-center gap-2 text-sm">
         <span>
           <span className="font-semibold">
             {allBots.length.toLocaleString()}
