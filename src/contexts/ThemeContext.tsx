@@ -1,9 +1,14 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
+import { debounce } from "@/utils/helpers/debounce";
 
 type Theme = "light" | "dark";
+
+// Spamming the toggle shouldn't spam the realtime WS with one
+// "set_preference" message per click — wait for clicks to settle first.
+const THEME_SYNC_DEBOUNCE_MS = 500;
 
 interface ThemeContextType {
   theme: Theme;
@@ -54,6 +59,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
   const resolvedTheme = theme;
 
+  const dispatchThemeSyncRef = useRef(
+    debounce((newTheme: Theme) => {
+      window.dispatchEvent(
+        new CustomEvent("sendRealtimePreference", {
+          detail: { key: "theme", value: newTheme },
+        }),
+      );
+    }, THEME_SYNC_DEBOUNCE_MS),
+  );
+
   useEffect(() => {
     const savedTheme = getInitialTheme();
     setThemeState(savedTheme);
@@ -90,14 +105,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // User-initiated theme change — apply locally and sync to other devices via WS
+  // User-initiated theme change — apply locally right away, but debounce the
+  // WS sync so rapid toggling doesn't fire a "set_preference" per click.
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    window.dispatchEvent(
-      new CustomEvent("sendRealtimePreference", {
-        detail: { key: "theme", value: newTheme },
-      }),
-    );
+    dispatchThemeSyncRef.current(newTheme);
   };
 
   return (
