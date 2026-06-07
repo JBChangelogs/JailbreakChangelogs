@@ -254,7 +254,7 @@ export default function ValuesClient({
       <Link
         href="/values/suggestions"
         prefetch={false}
-        className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg mb-4 flex items-center justify-between rounded-lg border px-4 py-2.5 transition-colors"
+        className="border-border-card bg-tertiary-bg mb-4 flex items-center justify-between rounded-lg border px-4 py-2.5 transition-colors"
       >
         <p className="text-secondary-text text-sm">
           Disagree with a value?{" "}

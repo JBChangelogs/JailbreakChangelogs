@@ -345,7 +345,7 @@ export default function ValuesSearchControls({
                         setAppliedMaxValue(localRange[1]);
                         setMinInput(val.toLocaleString());
                       }}
-                      className="border-border-card bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+                      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
                       placeholder="Min"
                     />
                     <span className="text-secondary-text text-xs">-</span>
@@ -373,7 +373,7 @@ export default function ValuesSearchControls({
                         setAppliedMaxValue(val);
                         setMaxInput(val.toLocaleString());
                       }}
-                      className="border-border-card bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+                      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
                       placeholder="Max"
                     />
                   </div>

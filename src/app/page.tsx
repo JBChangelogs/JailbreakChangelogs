@@ -345,7 +345,7 @@ export default async function Home() {
               <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p
-                    className="text-xs font-semibold tracking-[0.2em] uppercase"
+                    className="text-sm font-semibold tracking-[0.2em] uppercase"
                     style={{ color: "#66B3FF" }}
                   >
                     Trusted by Badimo
@@ -379,41 +379,47 @@ export default async function Home() {
               </div>
               <div className="mb-4 hidden grid-cols-1 items-stretch gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
                 {featuredTestimonials.map((testimonial, i) => (
-                  <blockquote
+                  <Link
                     key={testimonial.name}
-                    className="flex flex-col rounded-2xl border border-white/20 bg-black/35 p-4 text-left"
-                    style={
-                      {
-                        viewTransitionName: `hero-card-${i + 5}`,
-                      } as React.CSSProperties
-                    }
+                    href="/testimonials"
+                    prefetch={false}
+                    className="block rounded-2xl transition-colors hover:bg-black/45"
                   >
-                    <p className="text-sm leading-relaxed text-white/90">
-                      &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
-                    </p>
-                    <footer className="mt-auto flex items-center gap-3 pt-4">
-                      <Image
-                        src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
-                        alt={testimonial.name}
-                        width={40}
-                        height={40}
-                        className={`h-10 w-10 object-contain ${
-                          testimonial.name !== BADIMO_TESTIMONIAL_NAME
-                            ? "rounded-full"
-                            : ""
-                        }`}
-                        loading="lazy"
-                      />
-                      <div>
-                        <p className="text-sm font-bold text-white">
-                          {testimonial.name}
-                        </p>
-                        <p className="text-xs text-white/80">
-                          {testimonial.role}
-                        </p>
-                      </div>
-                    </footer>
-                  </blockquote>
+                    <blockquote
+                      className="flex h-full flex-col rounded-2xl border border-white/20 bg-black/35 p-4 text-left"
+                      style={
+                        {
+                          viewTransitionName: `hero-card-${i + 5}`,
+                        } as React.CSSProperties
+                      }
+                    >
+                      <p className="text-sm leading-relaxed text-white/90">
+                        &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
+                      </p>
+                      <footer className="mt-auto flex items-center gap-3 pt-4">
+                        <Image
+                          src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
+                          alt={testimonial.name}
+                          width={40}
+                          height={40}
+                          className={`h-10 w-10 object-contain ${
+                            testimonial.name !== BADIMO_TESTIMONIAL_NAME
+                              ? "rounded-full"
+                              : ""
+                          }`}
+                          loading="lazy"
+                        />
+                        <div>
+                          <p className="text-sm font-bold text-white">
+                            {testimonial.name}
+                          </p>
+                          <p className="text-xs text-white/80">
+                            {testimonial.role}
+                          </p>
+                        </div>
+                      </footer>
+                    </blockquote>
+                  </Link>
                 ))}
               </div>
               <Button asChild variant="heroOutline" className="mb-4 md:hidden">
