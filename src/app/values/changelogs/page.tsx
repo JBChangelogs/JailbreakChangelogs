@@ -82,7 +82,7 @@ interface ValueChangelogsResponse {
   size: number;
 }
 
-const MAX_ENTRIES_SHOWN = 5;
+const MAX_ENTRIES_SHOWN = 3;
 
 export default function ValuesChangelogPage() {
   const [changelogs, setChangelogs] = useState<ValueChangelog[]>([]);
@@ -366,10 +366,10 @@ export default function ValuesChangelogPage() {
                               })}
 
                               {remaining > 0 && (
-                                <div className="border-border-card bg-tertiary-bg text-secondary-text rounded-lg border px-3 py-2 text-center text-sm">
-                                  +{remaining} more{" "}
-                                  {remaining === 1 ? "change" : "changes"}
-                                </div>
+                                <p className="text-link group-hover:text-link-hover px-1 text-sm font-medium transition-colors">
+                                  View {remaining} more{" "}
+                                  {remaining === 1 ? "change" : "changes"} →
+                                </p>
                               )}
                             </div>
 
@@ -407,8 +407,9 @@ export default function ValuesChangelogPage() {
                                           u.roblox_avatar ?? undefined
                                         }
                                         premiumType={u.premiumtype ?? 0}
-                                        size={5}
+                                        size={7}
                                         showBadge={false}
+                                        bgClassName="bg-tertiary-bg"
                                       />
                                       <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
                                         {u.roblox_display_name ||

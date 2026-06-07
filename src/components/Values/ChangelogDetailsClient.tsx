@@ -713,8 +713,9 @@ export default function ChangelogDetailsClient({
                             premiumType={
                               change.suggestion.metadata?.premiumtype ?? 0
                             }
-                            size={8}
+                            size={10}
                             showBadge={false}
+                            bgClassName="bg-tertiary-bg"
                           />
                           <div className="flex min-w-0 flex-col">
                             <span className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
@@ -1310,6 +1311,7 @@ export default function ChangelogDetailsClient({
                               premiumType={voter.premiumtype ?? 0}
                               size={10}
                               showBadge={false}
+                              bgClassName="bg-tertiary-bg"
                             />
                             <div className="min-w-0 flex-1">
                               <div className="text-primary-text mb-1 text-base font-bold">
