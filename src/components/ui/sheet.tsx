@@ -73,6 +73,9 @@ const SheetContent = React.forwardRef<
         <SheetPrimitive.Title className="sr-only">
           Navigation Menu
         </SheetPrimitive.Title>
+        <SheetPrimitive.Description className="sr-only">
+          Navigation links and actions for this panel
+        </SheetPrimitive.Description>
         {children}
       </SheetPrimitive.Content>
     </SheetPortal>

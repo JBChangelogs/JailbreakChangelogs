@@ -145,6 +145,7 @@ export default function SeasonLeaderboardPage() {
   return (
     <>
       <NitroSeasonsLeaderboardRailAd />
+      <NitroSeasonsLeaderboardRightRailAd />
       <main className="mb-8 min-h-screen">
         <div className="container mx-auto px-4">
           <Breadcrumb />

@@ -22,10 +22,28 @@ export default function NitroVideoPlayer() {
     const tier = user?.premiumtype ?? 0;
     const isSupporter = canHideAdsForPremiumType(tier);
 
+    // /changelogs/[id] and /seasons/[id] have sibling static routes that
+    // don't have a dedicated video-nc player, so exclude those segments.
+    const isChangelogDetailRoute =
+      pathname.startsWith("/changelogs/") &&
+      !pathname.startsWith("/changelogs/timeline");
+    const isSeasonDetailRoute =
+      pathname.startsWith("/seasons/") &&
+      !pathname.startsWith("/seasons/contracts") &&
+      !pathname.startsWith("/seasons/leaderboard") &&
+      !pathname.startsWith("/seasons/will-i-make-it");
+
     const hasDedicatedVideoNcPlayer =
       pathname === "/values" ||
       pathname === "/robberies" ||
-      pathname === "/values/calculator";
+      pathname === "/values/calculator" ||
+      pathname === "/trading" ||
+      pathname === "/values/suggestions" ||
+      pathname.startsWith("/values/suggestions/") ||
+      pathname.startsWith("/values/changelogs/") ||
+      pathname.startsWith("/item/") ||
+      isChangelogDetailRoute ||
+      isSeasonDetailRoute;
 
     const shouldSuppressFloatingPlayer =
       isSupporter || hasDedicatedVideoNcPlayer;

@@ -3,6 +3,7 @@
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -12,22 +13,14 @@ type NitroAdsWithRemove = {
   removeAd?: (id: string) => void;
 };
 
-const SLOT_ID = "np-item";
+const SLOT_ID = "np-item-video";
 
 const ITEMS_CONFIG = {
-  sizes: [
-    ["300", "250"],
-    ["320", "100"],
-    ["320", "50"],
-  ],
-  report: {
-    enabled: true,
-    icon: true,
-    wording: "Report Ad",
-    position: "top-right",
+  format: "video-nc",
+  video: {
+    mobile: "compact",
+    hidePlaylist: true,
   },
-  mediaQuery:
-    "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
 };
 
 interface Props {
@@ -89,13 +82,11 @@ export default function NitroItemsVideoPlayer({ className }: Props) {
     return null;
   }
 
-  // Apply min-height to prevent CLS
   return (
-    <div
-      id={SLOT_ID}
-      ref={containerRef}
-      className={className}
-      style={{ minHeight: "250px" }}
-    />
+    <div className={cn("mx-auto w-full max-w-sm", className)}>
+      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden rounded-lg">
+        <div id={SLOT_ID} ref={containerRef} className="h-full w-full" />
+      </div>
+    </div>
   );
 }

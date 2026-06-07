@@ -9,13 +9,13 @@ import { createLogger } from "@/services/logger";
 const log = createLogger("UI");
 
 type NitroAdsWithRemove = {
-  createAd?: (id: string, config: typeof CHANGES_CONFIG) => Promise<void>;
+  createAd?: (id: string, config: typeof CONFIG) => Promise<void>;
   removeAd?: (id: string) => void;
 };
 
-const SLOT_ID = "np-changelogs-video";
+const SLOT_ID = "np-values-changelog-detail-video";
 
-const CHANGES_CONFIG = {
+const CONFIG = {
   format: "video-nc",
   video: {
     mobile: "compact",
@@ -27,7 +27,9 @@ interface Props {
   className?: string;
 }
 
-export default function NitroChangelogVideoPlayer({ className }: Props) {
+export default function NitroValuesChangelogDetailVideoPlayer({
+  className,
+}: Props) {
   const { user, isLoading } = useAuthContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
@@ -60,18 +62,16 @@ export default function NitroChangelogVideoPlayer({ className }: Props) {
     createdRef.current = true;
 
     try {
-      Promise.resolve(nitroAds.createAd(SLOT_ID, CHANGES_CONFIG)).catch(
-        (error) => {
-          log.warn(
-            "[Nitro Ad] Failed to create changelog video player ad:",
-            error,
-          );
-          createdRef.current = false;
-        },
-      );
+      Promise.resolve(nitroAds.createAd(SLOT_ID, CONFIG)).catch((error) => {
+        log.warn(
+          "[Nitro Ad] Failed to create values changelog detail video player ad:",
+          error,
+        );
+        createdRef.current = false;
+      });
     } catch (error) {
       log.warn(
-        "[Nitro Ad] Error initializing changelog video player ad:",
+        "[Nitro Ad] Error initializing values changelog detail video player ad:",
         error,
       );
       createdRef.current = false;

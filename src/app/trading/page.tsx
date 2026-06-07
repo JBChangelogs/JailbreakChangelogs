@@ -4,19 +4,25 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TradeAds from "@/components/trading/TradeAds";
 import { fetchItems } from "@/utils/api/api";
 import Loading from "./loading";
+import NitroTradingRailAd from "@/components/Ads/NitroTradingRailAd";
+import NitroTradingRightRailAd from "@/components/Ads/NitroTradingRightRailAd";
 
 export const dynamic = "force-dynamic";
 
 export default function TradingPage() {
   return (
-    <main className="container mx-auto px-4 sm:px-6 lg:px-8">
-      <Breadcrumb />
+    <>
+      <NitroTradingRailAd />
+      <NitroTradingRightRailAd />
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <Breadcrumb />
 
-      <TradingDescription />
-      <Suspense fallback={<Loading />}>
-        <TradeAdsWrapper />
-      </Suspense>
-    </main>
+        <TradingDescription />
+        <Suspense fallback={<Loading />}>
+          <TradeAdsWrapper />
+        </Suspense>
+      </main>
+    </>
   );
 }
 

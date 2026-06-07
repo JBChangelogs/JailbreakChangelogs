@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
+import NitroValuesChangelogDetailVideoPlayer from "@/components/Ads/NitroValuesChangelogDetailVideoPlayer";
 
 interface UserData {
   id: string;
@@ -75,44 +76,51 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
 
   return (
     <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
-      <h1 className="text-primary-text mb-2 text-3xl font-bold">
-        Changelog #{changelog.id}
-      </h1>
-      <p className="text-secondary-text mb-4">
-        {changelog.change_count} change{changelog.change_count !== 1 ? "s" : ""}{" "}
-        • Posted on {formatMessageDate(changelog.created_at * 1000)}
-      </p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="flex-1">
+          <h1 className="text-primary-text mb-2 text-3xl font-bold">
+            Changelog #{changelog.id}
+          </h1>
+          <p className="text-secondary-text mb-4">
+            {changelog.change_count} change
+            {changelog.change_count !== 1 ? "s" : ""} • Posted on{" "}
+            {formatMessageDate(changelog.created_at * 1000)}
+          </p>
 
-      {/* Contributors */}
-      <div className="mt-4">
-        <h3 className="text-secondary-text mb-2 text-sm font-medium">
-          Contributors ({sortedContributors.length}):
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {sortedContributors.map(([userId, contributorData], index) => (
-            <span key={userId} className="flex items-center gap-1">
-              <UserAvatar
-                userId={userId}
-                avatarHash={null}
-                username={contributorData.name}
-                forceAvatarUrl={contributorData.avatarUrl ?? undefined}
-                premiumType={contributorData.premiumtype ?? 0}
-                size={6}
-                showBadge={false}
-              />
-              <Link
-                href={`/users/${userId}`}
-                prefetch={false}
-                className="text-link hover:text-link-hover text-sm hover:underline"
-              >
-                {contributorData.name}
-              </Link>
-              {index < sortedContributors.length - 1 && (
-                <span className="text-secondary-text text-sm">,</span>
-              )}
-            </span>
-          ))}
+          {/* Contributors */}
+          <div className="mt-4">
+            <h3 className="text-secondary-text mb-2 text-sm font-medium">
+              Contributors ({sortedContributors.length}):
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {sortedContributors.map(([userId, contributorData], index) => (
+                <span key={userId} className="flex items-center gap-1">
+                  <UserAvatar
+                    userId={userId}
+                    avatarHash={null}
+                    username={contributorData.name}
+                    forceAvatarUrl={contributorData.avatarUrl ?? undefined}
+                    premiumType={contributorData.premiumtype ?? 0}
+                    size={6}
+                    showBadge={false}
+                  />
+                  <Link
+                    href={`/users/${userId}`}
+                    prefetch={false}
+                    className="text-link hover:text-link-hover text-sm hover:underline"
+                  >
+                    {contributorData.name}
+                  </Link>
+                  {index < sortedContributors.length - 1 && (
+                    <span className="text-secondary-text text-sm">,</span>
+                  )}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
+
+        <NitroValuesChangelogDetailVideoPlayer className="w-full self-center lg:self-start" />
       </div>
     </div>
   );

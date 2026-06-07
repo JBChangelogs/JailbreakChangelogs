@@ -111,6 +111,7 @@ export default function ChangelogDetailsPageClient({
   return (
     <>
       <NitroChangelogRailAd />
+      <NitroChangelogRightRailAd />
       <ChangelogDetailsClient
         changelogList={changelogList}
         currentChangelog={currentChangelog}

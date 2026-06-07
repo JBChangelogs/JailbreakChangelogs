@@ -3,6 +3,8 @@ import { fetchComments } from "@/utils/api/api";
 import { fetchItems } from "@/utils/api/api";
 import TradeDetailsDataClient from "./TradeDetailsDataClient";
 import Loading from "./loading";
+import NitroTradingRailAd from "@/components/Ads/NitroTradingRailAd";
+import NitroTradingRightRailAd from "@/components/Ads/NitroTradingRightRailAd";
 
 export const dynamic = "force-dynamic";
 
@@ -12,9 +14,13 @@ export default function TradeDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <Suspense fallback={<Loading />}>
-      <TradeDetailsWrapper params={params} />
-    </Suspense>
+    <>
+      <NitroTradingRailAd />
+      <NitroTradingRightRailAd />
+      <Suspense fallback={<Loading />}>
+        <TradeDetailsWrapper params={params} />
+      </Suspense>
+    </>
   );
 }
 

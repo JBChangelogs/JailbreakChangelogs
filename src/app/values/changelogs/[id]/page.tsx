@@ -7,6 +7,7 @@ import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import ChangelogDetailsClient from "@/components/Values/ChangelogDetailsClient";
 import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
+import NitroValuesChangelogsRightRailAd from "@/components/Ads/NitroValuesChangelogsRightRailAd";
 import Loading from "./loading";
 import { createLogger } from "@/services/logger";
 
@@ -185,6 +186,7 @@ export default function ChangelogDetailsPage() {
   return (
     <>
       <NitroValuesChangelogsRailAd />
+      <NitroValuesChangelogsRightRailAd />
       <main className="mb-8 min-h-screen">
         <div className="container mx-auto px-4">
           <Breadcrumb />
