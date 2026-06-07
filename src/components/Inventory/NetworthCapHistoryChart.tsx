@@ -26,7 +26,11 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { fetchNetworthCapHistory, NetworthCapSnapshot } from "@/utils/api/api";
+import {
+  fetchNetworthCap,
+  fetchNetworthCapHistory,
+  NetworthCapSnapshot,
+} from "@/utils/api/api";
 
 type DateRange = "7" | "14" | "30";
 
@@ -50,6 +54,61 @@ const chartConfig = {
     color: "#ef4444",
   },
 } satisfies ChartConfig;
+
+const SNAPSHOT_TILES = [
+  {
+    key: "total_networth_str",
+    label: "Total Networth",
+    accentColor: chartConfig.total_networth.color,
+  },
+  {
+    key: "total_clean_networth_str",
+    label: "Clean Networth",
+    accentColor: "var(--color-form-success)",
+  },
+  {
+    key: "total_duped_networth_str",
+    label: "Duped Networth",
+    accentColor: chartConfig.total_duped_networth.color,
+  },
+] as const;
+
+function SnapshotTile({
+  label,
+  value,
+  accentColor,
+}: {
+  label: string;
+  value?: string;
+  accentColor: string;
+}) {
+  return (
+    <div className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border p-3">
+      <span
+        className="h-8 w-1 shrink-0 rounded-full"
+        style={{ backgroundColor: accentColor }}
+        aria-hidden="true"
+      />
+      <div className="min-w-0">
+        <div className="flex items-baseline gap-1.5">
+          <p className="text-secondary-text text-xs font-medium uppercase">
+            {label}
+          </p>
+          <span className="text-secondary-text text-[10px] font-medium tracking-wide uppercase">
+            (Last 24 hours)
+          </span>
+        </div>
+        {value ? (
+          <p className="text-primary-text truncate font-mono text-lg font-semibold tabular-nums">
+            {value}
+          </p>
+        ) : (
+          <Skeleton className="mt-1 h-5 w-20" />
+        )}
+      </div>
+    </div>
+  );
+}
 
 const formatValue = (value: number) => {
   if (value >= 1_000_000_000_000) {
@@ -165,6 +224,12 @@ export default function NetworthCapHistoryChart() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: capStats } = useQuery({
+    queryKey: ["networth-cap"],
+    queryFn: fetchNetworthCap,
+    staleTime: 5 * 60 * 1000,
+  });
+
   if (isLoading) {
     return (
       <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-4">
@@ -252,8 +317,8 @@ export default function NetworthCapHistoryChart() {
     <div className="border-border-card bg-secondary-bg mb-8 space-y-4 rounded-lg border p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-primary-text text-lg font-semibold">
-          Global Inventory Networth{" "}
-          <span className="text-secondary-text font-normal">
+          Global Inventory Networth
+          <span className="text-secondary-text mt-0.5 block font-normal sm:mt-0 sm:ml-1 sm:inline">
             (Past 30 Days)
           </span>
         </h2>
@@ -288,6 +353,17 @@ export default function NetworthCapHistoryChart() {
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {SNAPSHOT_TILES.map((tile) => (
+          <SnapshotTile
+            key={tile.key}
+            label={tile.label}
+            value={capStats?.[tile.key]}
+            accentColor={tile.accentColor}
+          />
+        ))}
       </div>
 
       <div className="h-87.5">
