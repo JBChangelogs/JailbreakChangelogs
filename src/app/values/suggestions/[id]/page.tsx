@@ -117,6 +117,7 @@ const fieldLabel = (field: string) =>
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-primary-text border-yellow-500/30",
   approved: "bg-green-500/20 text-primary-text border-green-500/30",
+  accepted: "bg-green-500/20 text-primary-text border-green-500/30",
   rejected: "bg-red-500/20 text-primary-text border-red-500/30",
 };
 
@@ -735,7 +736,7 @@ export default function ValueSuggestionDetailPage() {
                       <div>
                         {item ? (
                           <Link
-                            href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+                            href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}?tab=suggestions`}
                             prefetch={false}
                             className="text-primary-text hover:text-link text-2xl font-bold transition-colors"
                           >
@@ -1082,7 +1083,7 @@ export default function ValueSuggestionDetailPage() {
                                   className="h-3.5 w-3.5"
                                   inline
                                 />
-                                Old
+                                {`Old ${fieldLabel(suggestion.field).toUpperCase()}`}
                               </div>
                               <div
                                 className="text-secondary-text text-lg font-bold line-through"
@@ -1103,7 +1104,7 @@ export default function ValueSuggestionDetailPage() {
                                   className="h-3.5 w-3.5"
                                   inline
                                 />
-                                New
+                                {`New ${fieldLabel(suggestion.field).toUpperCase()}`}
                               </div>
                               <div
                                 className="text-primary-text text-lg font-bold"
@@ -1398,7 +1399,7 @@ export default function ValueSuggestionDetailPage() {
                                 className="h-3.5 w-3.5"
                                 inline
                               />
-                              Old
+                              {`Old ${fieldLabel(suggestion.field).toUpperCase()}`}
                             </div>
                             <div
                               className="text-secondary-text text-lg font-bold line-through"
@@ -1419,7 +1420,7 @@ export default function ValueSuggestionDetailPage() {
                                 className="h-3.5 w-3.5"
                                 inline
                               />
-                              New
+                              {`New ${fieldLabel(suggestion.field).toUpperCase()}`}
                             </div>
                             <div
                               className="text-primary-text text-lg font-bold"

@@ -475,7 +475,7 @@ export default function ItemSuggestionsTab({
                         className="h-3.5 w-3.5"
                         inline
                       />
-                      Old
+                      {`Old ${fieldLabel(suggestion.field).toUpperCase()}`}
                     </div>
                     <div
                       className="text-secondary-text text-base font-bold line-through"
@@ -491,7 +491,7 @@ export default function ItemSuggestionsTab({
                         className="h-3.5 w-3.5"
                         inline
                       />
-                      New
+                      {`New ${fieldLabel(suggestion.field).toUpperCase()}`}
                     </div>
                     <div
                       className="text-primary-text text-base font-bold"

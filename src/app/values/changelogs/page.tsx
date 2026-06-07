@@ -276,7 +276,7 @@ export default function ValuesChangelogPage() {
                                     {/* Row 1: item name + badges */}
                                     <div className="flex flex-wrap items-center gap-1.5">
                                       <Link
-                                        href={`/item/${encodeURIComponent(entry.item.type)}/${encodeURIComponent(entry.item.name)}`}
+                                        href={`/item/${encodeURIComponent(entry.item.type)}/${encodeURIComponent(entry.item.name)}?tab=changes`}
                                         prefetch={false}
                                         className="text-primary-text hover:text-link relative z-10 text-sm font-semibold transition-colors"
                                       >
@@ -312,6 +312,9 @@ export default function ValuesChangelogPage() {
                                           className="text-button-danger h-3.5 w-3.5 shrink-0"
                                           inline
                                         />
+                                        <span className="text-button-danger text-xs font-semibold tracking-wide uppercase">
+                                          {`Old ${fieldLabel(entry.field).toUpperCase()}`}
+                                        </span>
                                         <span className="text-secondary-text text-sm font-bold break-all line-through">
                                           {formatFullValue(
                                             entry.current_value || "N/A",
@@ -329,6 +332,9 @@ export default function ValuesChangelogPage() {
                                           className="text-button-success h-3.5 w-3.5 shrink-0"
                                           inline
                                         />
+                                        <span className="text-button-success text-xs font-semibold tracking-wide uppercase">
+                                          {`New ${fieldLabel(entry.field).toUpperCase()}`}
+                                        </span>
                                         <span className="text-primary-text text-sm font-bold break-all">
                                           {formatFullValue(
                                             entry.suggested_value,

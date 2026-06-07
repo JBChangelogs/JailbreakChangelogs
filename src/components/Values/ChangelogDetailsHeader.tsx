@@ -89,7 +89,7 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
 
           {/* Contributors */}
           <div className="mt-4">
-            <h3 className="text-secondary-text mb-2 text-sm font-medium">
+            <h3 className="text-primary-text mb-2 text-sm font-medium">
               Contributors ({sortedContributors.length}):
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -101,8 +101,9 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
                     username={contributorData.name}
                     forceAvatarUrl={contributorData.avatarUrl ?? undefined}
                     premiumType={contributorData.premiumtype ?? 0}
-                    size={6}
+                    size={8}
                     showBadge={false}
+                    bgClassName="bg-tertiary-bg"
                   />
                   <Link
                     href={`/users/${userId}`}

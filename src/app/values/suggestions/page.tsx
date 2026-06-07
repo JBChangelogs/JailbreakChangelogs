@@ -1189,6 +1189,7 @@ function SuggestionGuidelinesDialog({
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-primary-text border-yellow-500/30",
   approved: "bg-green-500/20 text-primary-text border-green-500/30",
+  accepted: "bg-green-500/20 text-primary-text border-green-500/30",
   rejected: "bg-red-500/20 text-primary-text border-red-500/30",
 };
 
@@ -1784,28 +1785,6 @@ export default function ValueSuggestionsPage() {
       })
       .catch(() => {});
   }, [setParams]);
-
-  const vtDefaultAppliedRef = useRef(false);
-  useEffect(() => {
-    if (isAuthLoading || availableSorts.length === 0) return;
-    if (vtDefaultAppliedRef.current) return;
-    if (initialSortRef.current !== null) return;
-    vtDefaultAppliedRef.current = true;
-    const isVtUser =
-      user?.flags?.some(
-        (f) =>
-          (f.flag === "is_owner" ||
-            f.flag === "is_vt" ||
-            f.flag === "is_vtm") &&
-          f.enabled !== false,
-      ) ?? false;
-    if (isVtUser && availableSorts.includes("value_team")) {
-      void setParams({ sort: "value_team" }, { history: "replace" });
-    } else {
-      const lsSort = localStorage.getItem("vsuggestions_sort");
-      if (lsSort) void setParams({ sort: lsSort }, { history: "replace" });
-    }
-  }, [isAuthLoading, availableSorts, user, setParams]);
 
   useEffect(() => {
     const { url, headers } = buildApiFetchRequest(
@@ -2968,7 +2947,7 @@ export default function ValueSuggestionsPage() {
                             </div>
                             {item ? (
                               <Link
-                                href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+                                href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}?tab=suggestions`}
                                 prefetch={false}
                                 className="text-primary-text hover:text-link text-base font-bold wrap-break-word whitespace-normal transition-colors"
                               >
@@ -3030,7 +3009,7 @@ export default function ValueSuggestionsPage() {
                                 className="h-3.5 w-3.5"
                                 inline
                               />
-                              Old
+                              {`Old ${fieldLabel(suggestion.field).toUpperCase()}`}
                             </div>
                             <div
                               className="text-secondary-text line-clamp-2 text-lg font-bold line-through"
@@ -3051,7 +3030,7 @@ export default function ValueSuggestionsPage() {
                                 className="h-3.5 w-3.5"
                                 inline
                               />
-                              New
+                              {`New ${fieldLabel(suggestion.field).toUpperCase()}`}
                             </div>
                             <div
                               className="text-primary-text line-clamp-2 text-lg font-bold"
