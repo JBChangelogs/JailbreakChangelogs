@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import Fuse from "fuse.js";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -206,6 +207,25 @@ const faqs: FAQ[] = [
   },
 ];
 
+// Fuzzy search index over questions and (HTML-stripped) answers. The FAQ list
+// is static, so the index can be built once at module load.
+const faqSearchIndex = new Fuse(
+  faqs.map((faq) => ({
+    question: faq.question,
+    plainAnswer: faq.answer.replace(/<[^>]+>/g, ""),
+  })),
+  {
+    keys: [
+      { name: "question", weight: 2 },
+      { name: "plainAnswer", weight: 1 },
+    ],
+    useTokenSearch: true,
+    ignoreLocation: true,
+    threshold: 0.3,
+    minMatchCharLength: 2,
+  },
+);
+
 export default function FAQPage() {
   const [activeCategory, setActiveCategory] = useState<"all" | FaqCategory>(
     "all",
@@ -224,17 +244,18 @@ export default function FAQPage() {
   }, []);
 
   const filteredFaqs = useMemo(() => {
+    const trimmedQuery = searchQuery.trim();
+    const matchingQuestions = trimmedQuery
+      ? new Set(
+          faqSearchIndex.search(trimmedQuery).map(({ item }) => item.question),
+        )
+      : null;
+
     return faqs.filter((faq) => {
       if (activeCategory !== "all" && faq.category !== activeCategory)
         return false;
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        const plainAnswer = faq.answer.replace(/<[^>]+>/g, "");
-        return (
-          faq.question.toLowerCase().includes(q) ||
-          plainAnswer.toLowerCase().includes(q)
-        );
-      }
+      if (matchingQuestions && !matchingQuestions.has(faq.question))
+        return false;
       return true;
     });
   }, [activeCategory, searchQuery]);

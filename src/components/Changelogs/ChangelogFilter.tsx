@@ -18,6 +18,7 @@ interface SearchResult {
   contentPreview?: string;
   mediaTypes: string[];
   mentions: string[];
+  highlightTerms?: string[];
 }
 
 interface ChangelogFilterProps {
@@ -26,6 +27,7 @@ interface ChangelogFilterProps {
   onChangelogSelect: (id: string) => void;
   searchQuery: string;
   searchResults: SearchResult[];
+  isSearching: boolean;
   isSearchFocused: boolean;
   onSearchChange: (query: string) => void;
   onSearchFocus: (focused: boolean) => void;
@@ -37,6 +39,7 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
   onChangelogSelect,
   searchQuery,
   searchResults,
+  isSearching,
   isSearchFocused,
   onSearchChange,
   onSearchFocus,
@@ -98,6 +101,7 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
           <ChangelogSearchInput
             searchQuery={searchQuery}
             searchResults={searchResults}
+            isSearching={isSearching}
             isSearchFocused={isSearchFocused}
             onSearchChange={onSearchChange}
             onSearchFocus={onSearchFocus}

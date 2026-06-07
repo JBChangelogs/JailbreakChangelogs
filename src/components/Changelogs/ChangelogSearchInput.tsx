@@ -1,5 +1,6 @@
 import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Spinner } from "@/components/ui/Spinner";
 import { getBadgeColor, highlightText } from "@/utils/changelogs/changelogs";
 
 interface SearchResult {
@@ -8,11 +9,13 @@ interface SearchResult {
   contentPreview?: string;
   mediaTypes: string[];
   mentions: string[];
+  highlightTerms?: string[];
 }
 
 interface ChangelogSearchInputProps {
   searchQuery: string;
   searchResults: SearchResult[];
+  isSearching: boolean;
   isSearchFocused: boolean;
   onSearchChange: (query: string) => void;
   onSearchFocus: (focused: boolean) => void;
@@ -24,6 +27,7 @@ interface ChangelogSearchInputProps {
 const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
   searchQuery,
   searchResults,
+  isSearching,
   isSearchFocused,
   onSearchChange,
   onSearchFocus,
@@ -126,64 +130,74 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
       {searchResults.length > 0 ? (
         <div className="border-tertiary-bg bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg">
           <div className="max-h-100 overflow-y-auto">
-            {searchResults.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => onChangelogSelect(item.id.toString())}
-                className="border-border-card bg-tertiary-bg group w-full cursor-pointer border-b px-4 py-3 text-left last:border-b-0 focus:outline-none"
-              >
-                <div className="mb-1 flex items-center gap-2">
-                  <span
-                    className="text-primary-text group-hover:text-link font-medium transition-colors"
-                    dangerouslySetInnerHTML={{
-                      __html: highlightText(
-                        item.title,
-                        searchQuery.replace(/^has:\w+\s*/, ""),
-                      ),
-                    }}
-                  />
-                  {item.mediaTypes.map((type) => (
+            {searchResults.map((item) => {
+              // Fuzzy results carry the actual matched text (which may differ
+              // from the typed query); fall back to the literal query for the
+              // `has:` filter mode, which still matches substrings verbatim.
+              const highlightTerms =
+                item.highlightTerms ?? searchQuery.replace(/^has:\w+\s*/, "");
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onChangelogSelect(item.id.toString())}
+                  className="border-border-card bg-tertiary-bg group w-full cursor-pointer border-b px-4 py-3 text-left last:border-b-0 focus:outline-none"
+                >
+                  <div className="mb-1 flex items-center gap-2">
                     <span
-                      key={type}
-                      className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium ${getBadgeColor(type as "video" | "audio" | "image")} text-white`}
-                    >
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </span>
-                  ))}
-                  {item.mentions.length > 0 && (
-                    <span
-                      className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium ${getBadgeColor("mentions")} text-white`}
-                    >
-                      Mentions
-                    </span>
-                  )}
-                </div>
-                {item.contentPreview && (
-                  <p
-                    className="text-secondary-text line-clamp-2 text-sm"
-                    dangerouslySetInnerHTML={{
-                      __html: highlightText(
-                        item.contentPreview,
-                        searchQuery.replace(/^has:\w+\s*/, ""),
-                      ),
-                    }}
-                  />
-                )}
-                {item.mentions.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {item.mentions.map((mention) => (
+                      className="text-primary-text group-hover:text-link font-medium transition-colors"
+                      dangerouslySetInnerHTML={{
+                        __html: highlightText(item.title, highlightTerms),
+                      }}
+                    />
+                    {item.mediaTypes.map((type) => (
                       <span
-                        key={mention}
-                        className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${getBadgeColor("mentions")} text-white`}
+                        key={type}
+                        className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium ${getBadgeColor(type as "video" | "audio" | "image")} text-white`}
                       >
-                        @{mention}
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
                       </span>
                     ))}
+                    {item.mentions.length > 0 && (
+                      <span
+                        className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium ${getBadgeColor("mentions")} text-white`}
+                      >
+                        Mentions
+                      </span>
+                    )}
                   </div>
-                )}
-              </button>
-            ))}
+                  {item.contentPreview && (
+                    <p
+                      className="text-secondary-text line-clamp-2 text-sm"
+                      dangerouslySetInnerHTML={{
+                        __html: highlightText(
+                          item.contentPreview,
+                          highlightTerms,
+                        ),
+                      }}
+                    />
+                  )}
+                  {item.mentions.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {item.mentions.map((mention) => (
+                        <span
+                          key={mention}
+                          className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${getBadgeColor("mentions")} text-white`}
+                        >
+                          @{mention}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
+        </div>
+      ) : isSearching ? (
+        <div className="border-tertiary-bg bg-secondary-bg text-secondary-text absolute z-10 mt-1 flex w-full items-center justify-center gap-2 rounded-lg border p-4 text-center">
+          <Spinner className="h-4 w-4" />
+          Searching...
         </div>
       ) : (
         searchQuery && (

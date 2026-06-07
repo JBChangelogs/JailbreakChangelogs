@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import Fuse from "fuse.js";
 import { useRouter } from "nextjs-toploader/app";
 import {
   extractContentInfo,
@@ -86,6 +87,8 @@ interface SearchResult {
   contentPreview?: string;
   mediaTypes: string[];
   mentions: string[];
+  // Actual text a fuzzy match was found on (may differ from the typed query)
+  highlightTerms?: string[];
 }
 
 interface ChangelogDetailsClientProps {
@@ -115,6 +118,28 @@ export default function ChangelogDetailsClient({
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  // True while the debounce is waiting to settle, so the UI can show a
+  // "searching" state instead of briefly flashing "no results found"
+  const isSearching =
+    searchQuery.trim() !== "" && searchQuery !== debouncedSearchQuery;
+
+  // Fuzzy search index over titles and content, rebuilt only when the list changes
+  const fuse = useMemo(
+    () =>
+      new Fuse(changelogList, {
+        keys: [
+          { name: "title", weight: 2 },
+          { name: "sections", weight: 1 },
+        ],
+        includeMatches: true,
+        useTokenSearch: true,
+        ignoreLocation: true,
+        threshold: 0.3,
+        minMatchCharLength: 2,
+      }),
+    [changelogList],
+  );
 
   // Update selectedId when changelogId changes
   useEffect(() => {
@@ -187,36 +212,37 @@ export default function ChangelogDetailsClient({
 
       results = filteredResults;
     } else {
-      const filteredResults = changelogList
-        .map((item) => {
-          const titleMatch = item.title
-            .toLowerCase()
-            .includes(debouncedSearchQuery.toLowerCase());
-          const contentMatch = item.sections
-            .toLowerCase()
-            .includes(debouncedSearchQuery.toLowerCase());
+      results = fuse.search(debouncedSearchQuery).map(({ item, matches }) => {
+        const contentInfo = extractContentInfo(item.sections);
+        const contentMatch = matches?.find((match) => match.key === "sections");
 
-          if (titleMatch || contentMatch) {
-            const contentInfo = extractContentInfo(item.sections);
-            return {
-              id: item.id,
-              title: item.title,
-              mediaTypes: contentInfo.mediaTypes,
-              mentions: contentInfo.mentions,
-              contentPreview: contentMatch
-                ? getContentPreview(item.sections, debouncedSearchQuery)
-                : undefined,
-            } as SearchResult;
+        // Fuzzy matches don't always contain the typed query verbatim (typos,
+        // transpositions), so highlight the actual text Fuse matched on rather
+        // than the raw query.
+        const matchedTerms = new Set<string>();
+        for (const match of matches ?? []) {
+          if (!match.value) continue;
+          for (const [start, end] of match.indices ?? []) {
+            matchedTerms.add(match.value.slice(start, end + 1));
           }
-          return null;
-        })
-        .filter((item): item is NonNullable<typeof item> => item !== null);
+        }
+        const highlightTerms = [...matchedTerms];
 
-      results = filteredResults;
+        return {
+          id: item.id,
+          title: item.title,
+          mediaTypes: contentInfo.mediaTypes,
+          mentions: contentInfo.mentions,
+          contentPreview: contentMatch
+            ? getContentPreview(item.sections, highlightTerms)
+            : undefined,
+          highlightTerms,
+        } as SearchResult;
+      });
     }
 
     setSearchResults(results);
-  }, [debouncedSearchQuery, changelogList]);
+  }, [debouncedSearchQuery, changelogList, fuse]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -256,6 +282,7 @@ export default function ChangelogDetailsClient({
           onChangelogSelect={handleChangelogSelect}
           searchQuery={searchQuery}
           searchResults={searchResults}
+          isSearching={isSearching}
           isSearchFocused={isSearchFocused}
           onSearchChange={handleSearch}
           onSearchFocus={setIsSearchFocused}

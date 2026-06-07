@@ -44,10 +44,18 @@ export function parseMarkdown(text: string) {
   });
 }
 
-// Helper function to highlight text
-export function highlightText(text: string, query: string) {
-  if (!query) return text;
-  const regex = new RegExp(`(${query})`, "gi");
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Helper function to highlight text. Accepts either a literal query (substring
+// search) or a list of terms (e.g. the actual words a fuzzy search matched on,
+// since the typed query itself may not appear verbatim in the text).
+export function highlightText(text: string, query: string | string[]) {
+  const terms = (Array.isArray(query) ? query : [query]).filter(Boolean);
+  if (terms.length === 0) return text;
+  const pattern = terms.map(escapeRegExp).join("|");
+  const regex = new RegExp(`(${pattern})`, "gi");
   return text.replace(
     regex,
     '<mark class="bg-highlight text-primary-text px-1 rounded">$1</mark>',
@@ -107,12 +115,20 @@ export function cleanMarkdown(text: string): string {
   );
 }
 
-// Update getContentPreview function
-export function getContentPreview(sections: string, query: string) {
+// Picks the line to preview. `query` can be the literal search string, or a
+// list of terms to look for (e.g. the words a fuzzy search actually matched on,
+// since the typed query itself may not appear verbatim in the content).
+export function getContentPreview(sections: string, query: string | string[]) {
+  const terms = (Array.isArray(query) ? query : [query])
+    .filter(Boolean)
+    .map((term) => term.toLowerCase());
   const lines = sections.split("\n");
-  for (const line of lines) {
-    if (line.toLowerCase().includes(query.toLowerCase())) {
-      return cleanMarkdown(line);
+  if (terms.length > 0) {
+    for (const line of lines) {
+      const lowerLine = line.toLowerCase();
+      if (terms.some((term) => lowerLine.includes(term))) {
+        return cleanMarkdown(line);
+      }
     }
   }
   return cleanMarkdown(lines[0]); // Return first line if no match found
