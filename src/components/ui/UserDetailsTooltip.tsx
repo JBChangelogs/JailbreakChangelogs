@@ -35,7 +35,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
             size={16}
             custom_avatar={user.custom_avatar}
             showBadge={false}
-            settings={user.settings_v2}
+            settings={user.settings_v2 ?? user.settings}
             premiumType={user.premiumtype}
           />
         </Link>
