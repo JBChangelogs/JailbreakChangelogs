@@ -1144,7 +1144,7 @@ export default function ValueSuggestionDetailPage() {
                                       icon={
                                         userVote === "upvote"
                                           ? "material-symbols:thumb-up-rounded"
-                                          : "material-symbols:thumb-up-outline-rounded"
+                                          : "material-symbols:thumb-up-rounded"
                                       }
                                       className="text-button-success h-4 w-4"
                                       inline
@@ -1174,7 +1174,7 @@ export default function ValueSuggestionDetailPage() {
                                       icon={
                                         userVote === "downvote"
                                           ? "material-symbols:thumb-down-rounded"
-                                          : "material-symbols:thumb-down-outline-rounded"
+                                          : "material-symbols:thumb-down-rounded"
                                       }
                                       className="text-button-danger h-4 w-4"
                                       inline
@@ -1213,7 +1213,7 @@ export default function ValueSuggestionDetailPage() {
                                   <TabsTrigger value="upvotes" fullWidth>
                                     <span className="flex items-center gap-1.5">
                                       <Icon
-                                        icon="material-symbols:thumb-up-outline-rounded"
+                                        icon="material-symbols:thumb-up-rounded"
                                         className="text-button-success h-3.5 w-3.5"
                                         inline
                                       />
@@ -1224,7 +1224,7 @@ export default function ValueSuggestionDetailPage() {
                                   <TabsTrigger value="downvotes" fullWidth>
                                     <span className="flex items-center gap-1.5">
                                       <Icon
-                                        icon="material-symbols:thumb-down-outline-rounded"
+                                        icon="material-symbols:thumb-down-rounded"
                                         className="text-button-danger h-3.5 w-3.5"
                                         inline
                                       />
@@ -1282,40 +1282,64 @@ export default function ValueSuggestionDetailPage() {
                                 Suggester Stats
                               </h2>
                             </div>
-                            <div className="grid grid-cols-2 gap-px p-3">
-                              <div className="p-2">
-                                <p className="text-secondary-text mb-0.5 text-xs">
-                                  Submitted
-                                </p>
-                                <p className="text-primary-text text-base font-bold">
-                                  {suggesterStats.total_submitted}
-                                </p>
+                            <div className="space-y-3 p-4">
+                              <div>
+                                <div className="mb-1.5 flex items-center justify-between">
+                                  <span className="text-secondary-text text-xs">
+                                    Acceptance Rate
+                                  </span>
+                                  <span
+                                    className={`text-sm font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+                                  >
+                                    {suggesterStats.acceptance_rate.toFixed(0)}%
+                                  </span>
+                                </div>
+                                <div className="bg-tertiary-bg h-1.5 overflow-hidden rounded-full">
+                                  <div
+                                    className={`h-full rounded-full transition-all ${suggesterStats.acceptance_rate >= 50 ? "bg-button-success" : "bg-button-danger"}`}
+                                    style={{
+                                      width: `${suggesterStats.acceptance_rate}%`,
+                                    }}
+                                  />
+                                </div>
                               </div>
-                              <div className="p-2">
-                                <p className="text-secondary-text mb-0.5 text-xs">
-                                  Acceptance Rate
-                                </p>
-                                <p
-                                  className={`text-base font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
-                                >
-                                  {suggesterStats.acceptance_rate.toFixed(0)}%
-                                </p>
-                              </div>
-                              <div className="p-2">
-                                <p className="text-secondary-text mb-0.5 text-xs">
-                                  Accepted
-                                </p>
-                                <p className="text-button-success text-base font-bold">
-                                  {suggesterStats.total_accepted}
-                                </p>
-                              </div>
-                              <div className="p-2">
-                                <p className="text-secondary-text mb-0.5 text-xs">
-                                  Rejected
-                                </p>
-                                <p className="text-button-danger text-base font-bold">
-                                  {suggesterStats.total_rejected}
-                                </p>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div className="bg-tertiary-bg rounded-lg p-2.5 text-center">
+                                  <Icon
+                                    icon="material-symbols:send-rounded"
+                                    className="text-secondary-text mx-auto mb-1 h-4 w-4"
+                                  />
+                                  <p className="text-primary-text text-sm font-bold">
+                                    {suggesterStats.total_submitted}
+                                  </p>
+                                  <p className="text-secondary-text text-[10px]">
+                                    Submitted
+                                  </p>
+                                </div>
+                                <div className="bg-button-success/10 rounded-lg p-2.5 text-center">
+                                  <Icon
+                                    icon="material-symbols:thumb-up-rounded"
+                                    className="text-button-success mx-auto mb-1 h-4 w-4"
+                                  />
+                                  <p className="text-button-success text-sm font-bold">
+                                    {suggesterStats.total_accepted}
+                                  </p>
+                                  <p className="text-secondary-text text-[10px]">
+                                    Accepted
+                                  </p>
+                                </div>
+                                <div className="bg-button-danger/10 rounded-lg p-2.5 text-center">
+                                  <Icon
+                                    icon="material-symbols:thumb-down-rounded"
+                                    className="text-button-danger mx-auto mb-1 h-4 w-4"
+                                  />
+                                  <p className="text-button-danger text-sm font-bold">
+                                    {suggesterStats.total_rejected}
+                                  </p>
+                                  <p className="text-secondary-text text-[10px]">
+                                    Rejected
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1461,7 +1485,7 @@ export default function ValueSuggestionDetailPage() {
                                     icon={
                                       userVote === "upvote"
                                         ? "material-symbols:thumb-up-rounded"
-                                        : "material-symbols:thumb-up-outline-rounded"
+                                        : "material-symbols:thumb-up-rounded"
                                     }
                                     className="text-button-success h-4 w-4"
                                     inline
@@ -1491,7 +1515,7 @@ export default function ValueSuggestionDetailPage() {
                                     icon={
                                       userVote === "downvote"
                                         ? "material-symbols:thumb-down-rounded"
-                                        : "material-symbols:thumb-down-outline-rounded"
+                                        : "material-symbols:thumb-down-rounded"
                                     }
                                     className="text-button-danger h-4 w-4"
                                     inline
@@ -1530,7 +1554,7 @@ export default function ValueSuggestionDetailPage() {
                                 <TabsTrigger value="upvotes" fullWidth>
                                   <span className="flex items-center gap-1.5">
                                     <Icon
-                                      icon="material-symbols:thumb-up-outline-rounded"
+                                      icon="material-symbols:thumb-up-rounded"
                                       className="text-button-success h-3.5 w-3.5"
                                       inline
                                     />
@@ -1540,7 +1564,7 @@ export default function ValueSuggestionDetailPage() {
                                 <TabsTrigger value="downvotes" fullWidth>
                                   <span className="flex items-center gap-1.5">
                                     <Icon
-                                      icon="material-symbols:thumb-down-outline-rounded"
+                                      icon="material-symbols:thumb-down-rounded"
                                       className="text-button-danger h-3.5 w-3.5"
                                       inline
                                     />
@@ -1599,40 +1623,64 @@ export default function ValueSuggestionDetailPage() {
                               Suggester Stats
                             </h2>
                           </div>
-                          <div className="grid grid-cols-2 gap-px p-3">
-                            <div className="p-2">
-                              <p className="text-secondary-text mb-0.5 text-xs">
-                                Submitted
-                              </p>
-                              <p className="text-primary-text text-base font-bold">
-                                {suggesterStats.total_submitted}
-                              </p>
+                          <div className="space-y-3 p-4">
+                            <div>
+                              <div className="mb-1.5 flex items-center justify-between">
+                                <span className="text-secondary-text text-xs">
+                                  Acceptance Rate
+                                </span>
+                                <span
+                                  className={`text-sm font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+                                >
+                                  {suggesterStats.acceptance_rate.toFixed(0)}%
+                                </span>
+                              </div>
+                              <div className="bg-tertiary-bg h-1.5 overflow-hidden rounded-full">
+                                <div
+                                  className={`h-full rounded-full transition-all ${suggesterStats.acceptance_rate >= 50 ? "bg-button-success" : "bg-button-danger"}`}
+                                  style={{
+                                    width: `${suggesterStats.acceptance_rate}%`,
+                                  }}
+                                />
+                              </div>
                             </div>
-                            <div className="p-2">
-                              <p className="text-secondary-text mb-0.5 text-xs">
-                                Acceptance Rate
-                              </p>
-                              <p
-                                className={`text-base font-bold ${suggesterStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
-                              >
-                                {suggesterStats.acceptance_rate.toFixed(0)}%
-                              </p>
-                            </div>
-                            <div className="p-2">
-                              <p className="text-secondary-text mb-0.5 text-xs">
-                                Accepted
-                              </p>
-                              <p className="text-button-success text-base font-bold">
-                                {suggesterStats.total_accepted}
-                              </p>
-                            </div>
-                            <div className="p-2">
-                              <p className="text-secondary-text mb-0.5 text-xs">
-                                Rejected
-                              </p>
-                              <p className="text-button-danger text-base font-bold">
-                                {suggesterStats.total_rejected}
-                              </p>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="bg-tertiary-bg rounded-lg p-2.5 text-center">
+                                <Icon
+                                  icon="material-symbols:send-rounded"
+                                  className="text-secondary-text mx-auto mb-1 h-4 w-4"
+                                />
+                                <p className="text-primary-text text-sm font-bold">
+                                  {suggesterStats.total_submitted}
+                                </p>
+                                <p className="text-secondary-text text-[10px]">
+                                  Submitted
+                                </p>
+                              </div>
+                              <div className="bg-button-success/10 rounded-lg p-2.5 text-center">
+                                <Icon
+                                  icon="material-symbols:thumb-up-rounded"
+                                  className="text-button-success mx-auto mb-1 h-4 w-4"
+                                />
+                                <p className="text-button-success text-sm font-bold">
+                                  {suggesterStats.total_accepted}
+                                </p>
+                                <p className="text-secondary-text text-[10px]">
+                                  Accepted
+                                </p>
+                              </div>
+                              <div className="bg-button-danger/10 rounded-lg p-2.5 text-center">
+                                <Icon
+                                  icon="material-symbols:thumb-down-rounded"
+                                  className="text-button-danger mx-auto mb-1 h-4 w-4"
+                                />
+                                <p className="text-button-danger text-sm font-bold">
+                                  {suggesterStats.total_rejected}
+                                </p>
+                                <p className="text-secondary-text text-[10px]">
+                                  Rejected
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>

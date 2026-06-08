@@ -1150,6 +1150,14 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                           className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
                                         />
                                         {type === "vsuggestion" &&
+                                          suggestion &&
+                                          reply.user_id ===
+                                            suggestion.suggester && (
+                                            <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                                              OP
+                                            </span>
+                                          )}
+                                        {type === "vsuggestion" &&
                                           suggestion?.upvoterIds?.includes(
                                             reply.user_id,
                                           ) && (
@@ -1191,6 +1199,14 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                               }
                                               className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
                                             />
+                                            {type === "vsuggestion" &&
+                                              suggestion &&
+                                              replyToTarget.user_id ===
+                                                suggestion.suggester && (
+                                                <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                                                  OP
+                                                </span>
+                                              )}
                                             {type === "vsuggestion" &&
                                               suggestion?.upvoterIds?.includes(
                                                 replyToTarget.user_id,
