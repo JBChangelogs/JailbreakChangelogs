@@ -636,6 +636,19 @@ export default function ChangelogDetailsClient({
                         <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                           Suggestion #{change.suggestion.id}
                         </span>
+                        {(() => {
+                          const primaryFieldKey = Object.keys(
+                            change.changes.old,
+                          ).find((k) => k !== "last_updated");
+                          return primaryFieldKey ? (
+                            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                              {formatSuggestionTypeLabel(
+                                change.suggestion?.metadata?.suggestion_type,
+                                primaryFieldKey,
+                              )}
+                            </span>
+                          ) : null;
+                        })()}
                       </div>
                     </div>
                   )}
@@ -972,18 +985,9 @@ export default function ChangelogDetailsClient({
                           <div key={key}>
                             <div className="flex items-start gap-2 overflow-hidden">
                               <div className="min-w-0 flex-1">
-                                <div className="text-primary-text mb-3 text-lg font-bold capitalize">
-                                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                                    {formatSuggestionTypeLabel(
-                                      change.suggestion?.metadata
-                                        ?.suggestion_type,
-                                      key,
-                                    )}
-                                  </span>
-                                </div>
                                 <div className="grid grid-cols-2 gap-6">
                                   <div className="min-w-0">
-                                    <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                    <div className="text-button-danger mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                       <Icon
                                         icon="mdi:minus-circle"
                                         className="text-button-danger h-4 w-4"
@@ -1076,7 +1080,7 @@ export default function ChangelogDetailsClient({
                                     })()}
                                   </div>
                                   <div className="min-w-0">
-                                    <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                    <div className="text-button-success mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                       <Icon
                                         icon="mdi:plus-circle"
                                         className="text-button-success h-4 w-4"
