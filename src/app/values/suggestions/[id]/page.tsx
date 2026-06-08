@@ -546,6 +546,14 @@ export default function ValueSuggestionDetailPage() {
         <div className="container mx-auto px-4 pb-10 sm:px-6">
           <Breadcrumb />
 
+          {/* Upvote Disclaimer */}
+          <div className="border-border-error bg-button-danger/10 mb-5 rounded-lg border px-5 py-4">
+            <p className="text-form-error text-lg font-bold">
+              Please note that a high upvote count does not guarantee a
+              suggestion will be accepted.
+            </p>
+          </div>
+
           {ban && <BanBanner ban={ban} className="mb-5" />}
 
           {(loading || (suggestion?.is_vt === 1 && isAuthLoading)) && (
