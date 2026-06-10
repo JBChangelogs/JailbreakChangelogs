@@ -27,23 +27,23 @@ const CATEGORY_STYLES: Record<
   { pill: string; activePill: string }
 > = {
   jailbreak: {
-    pill: "text-primary-text bg-blue-400/10",
+    pill: "text-primary-text bg-blue-400/20",
     activePill: "text-primary-text",
   },
   website: {
-    pill: "text-primary-text bg-purple-400/10",
+    pill: "text-primary-text bg-purple-400/20",
     activePill: "text-primary-text",
   },
   trading: {
-    pill: "text-primary-text bg-emerald-400/10",
+    pill: "text-primary-text bg-emerald-400/20",
     activePill: "text-primary-text",
   },
   account: {
-    pill: "text-primary-text bg-amber-400/10",
+    pill: "text-primary-text bg-amber-400/20",
     activePill: "text-primary-text",
   },
   inventory: {
-    pill: "text-primary-text bg-cyan-400/10",
+    pill: "text-primary-text bg-cyan-400/20",
     activePill: "text-primary-text",
   },
 };
@@ -143,7 +143,7 @@ const faqs: FAQ[] = [
     category: "website",
     question: "How can I support the website?",
     answer:
-      'Yes! Visit our <a href="/supporting" class="text-link hover:text-link-hover underline">Supporting</a> page where you can contribute either through real USD donations or via Robux. The page also shows the different supporter tiers and the perks you\'ll receive for each. Full instructions for both payment options are included.',
+      'Visit our <a href="/supporting" class="text-link hover:text-link-hover underline">Supporting</a> page where you can contribute either through real USD donations or via Robux. The page also shows the different supporter tiers and the perks you\'ll receive for each. Full instructions for both payment options are included.',
   },
   {
     category: "website",
@@ -277,7 +277,7 @@ export default function FAQPage() {
             </h1>
           </div>
           <p className="text-secondary-text mt-1 text-xs">
-            Last updated: May 23rd, 2026
+            Last updated: June 10th, 2026
           </p>
         </div>
 
