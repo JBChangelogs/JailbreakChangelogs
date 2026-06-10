@@ -261,6 +261,7 @@ export default function Header() {
   const [notificationTimeoutId, setNotificationTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [wsConnected, setWsConnected] = useState(false);
   const hasWsUnreadSeedRef = useRef(false);
 
   // Debounced notification fetching functions
@@ -407,6 +408,7 @@ export default function Header() {
     const handleConnectionChange = (event: Event) => {
       const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
       const connected = detail?.connected === true;
+      setWsConnected(connected);
       if (!connected) {
         hasWsUnreadSeedRef.current = false;
       }
@@ -854,6 +856,31 @@ export default function Header() {
                   </Link>
                 </div>
                 <div className="flex items-center gap-2">
+                  {showAuth &&
+                    userData?.flags?.some((f) => f.flag === "is_owner") && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          window.dispatchEvent(
+                            new CustomEvent(
+                              wsConnected
+                                ? "realtimeManualDisconnect"
+                                : "realtimeManualConnect",
+                            ),
+                          )
+                        }
+                        title={
+                          wsConnected
+                            ? "WebSocket connected — click to disconnect"
+                            : "WebSocket disconnected — click to reconnect"
+                        }
+                        className="border-border-card bg-secondary-bg hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                      >
+                        <span
+                          className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
+                        />
+                      </button>
+                    )}
                   {/* Notification icon */}
                   <Popover
                     open={notificationMenuOpen}

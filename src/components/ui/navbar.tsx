@@ -347,6 +347,7 @@ export const NavbarModern = ({
   const [notificationTimeoutId, setNotificationTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
 
   // Debounced notification fetching functions
   const fetchUnreadWithDebounce = (page: number, limit: number) => {
@@ -521,6 +522,23 @@ export const NavbarModern = ({
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+    const handleConnectionChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
+      setWsConnected(detail?.connected === true);
+    };
+    window.addEventListener(
+      "realtimeNotificationsConnection",
+      handleConnectionChange,
+    );
+    return () =>
+      window.removeEventListener(
+        "realtimeNotificationsConnection",
+        handleConnectionChange,
+      );
+  }, [isAuthenticated]);
 
   // Prediction-cone / safe-triangle for the user menu.
   // Replaces the old onMouseLeave timer. Tracks the cursor globally and keeps
@@ -967,6 +985,35 @@ export const NavbarModern = ({
 
         {/* Right side actions */}
         <div className="flex items-center gap-2">
+          {isAuthenticated &&
+            userData?.flags?.some((f) => f.flag === "is_owner") && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.dispatchEvent(
+                        new CustomEvent(
+                          wsConnected
+                            ? "realtimeManualDisconnect"
+                            : "realtimeManualConnect",
+                        ),
+                      )
+                    }
+                    className="border-border-card bg-secondary-bg hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200"
+                  >
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
+                    />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {wsConnected
+                    ? "WebSocket connected — click to disconnect"
+                    : "WebSocket disconnected — click to reconnect"}
+                </TooltipContent>
+              </Tooltip>
+            )}
           {/* Notification icon */}
           <Popover
             open={notificationMenuOpen}

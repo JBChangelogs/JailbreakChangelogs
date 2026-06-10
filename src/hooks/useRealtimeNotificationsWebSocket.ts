@@ -130,6 +130,8 @@ export function useRealtimeNotificationsWebSocket(
   const disableAutoReconnectRef = useRef(false);
   const handshakeRetryAttemptsRef = useRef(0);
   const reconnectOnFocusOnlyRef = useRef(false);
+  const manuallyDisconnectedRef = useRef(false);
+  const connectRef = useRef<(() => void) | null>(null);
   const locationPathRef = useRef<string>(
     typeof window !== "undefined"
       ? (window.location?.pathname || "/") + (window.location?.search || "")
@@ -195,6 +197,42 @@ export function useRealtimeNotificationsWebSocket(
   }, []);
 
   useEffect(() => {
+    const handleManualDisconnect = () => {
+      manuallyDisconnectedRef.current = true;
+      if (wsRef.current) {
+        wsRef.current.close(1000, "manual-disconnect");
+        wsRef.current = null;
+      }
+      window.dispatchEvent(
+        new CustomEvent("realtimeNotificationsConnection", {
+          detail: { connected: false },
+        }),
+      );
+    };
+
+    const handleManualConnect = () => {
+      manuallyDisconnectedRef.current = false;
+      if (
+        wsRef.current?.readyState === WebSocket.OPEN ||
+        wsRef.current?.readyState === WebSocket.CONNECTING
+      ) {
+        return;
+      }
+      connectRef.current?.();
+    };
+
+    window.addEventListener("realtimeManualDisconnect", handleManualDisconnect);
+    window.addEventListener("realtimeManualConnect", handleManualConnect);
+    return () => {
+      window.removeEventListener(
+        "realtimeManualDisconnect",
+        handleManualDisconnect,
+      );
+      window.removeEventListener("realtimeManualConnect", handleManualConnect);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isRealtimeNotificationsEnabled) {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -228,7 +266,7 @@ export function useRealtimeNotificationsWebSocket(
       if (unmounted || !enabledRef.current) {
         return;
       }
-      if (disableAutoReconnectRef.current) {
+      if (disableAutoReconnectRef.current || manuallyDisconnectedRef.current) {
         return;
       }
       if (
@@ -266,8 +304,15 @@ export function useRealtimeNotificationsWebSocket(
           openedForAttemptRef.current = true;
           disableAutoReconnectRef.current = false;
           handshakeRetryAttemptsRef.current = 0;
+          const wasDisconnected =
+            reconnectAttemptsRef.current > 0 || reconnectOnFocusOnlyRef.current;
           reconnectOnFocusOnlyRef.current = false;
           reconnectAttemptsRef.current = 0;
+          if (wasDisconnected) {
+            toast.success("Realtime features reconnected", {
+              id: "realtime-notifications-reconnected",
+            });
+          }
 
           if (pingIntervalRef.current) {
             clearInterval(pingIntervalRef.current);
@@ -352,7 +397,7 @@ export function useRealtimeNotificationsWebSocket(
               toast.error(
                 focusOnly
                   ? "Realtime features disabled"
-                  : "Realtime notifications disconnected",
+                  : "Realtime features disconnected",
                 {
                   id: focusOnly
                     ? `realtime-notifications-disabled:${payload.code}`
@@ -693,7 +738,7 @@ export function useRealtimeNotificationsWebSocket(
             return;
           }
           if (event.code in AUTH_WS_ERRORS) {
-            toast.error("Realtime notifications disconnected", {
+            toast.error("Realtime features disconnected", {
               id: `realtime-notifications-error:${event.code}`,
               description: AUTH_WS_ERRORS[event.code],
             });
@@ -717,7 +762,7 @@ export function useRealtimeNotificationsWebSocket(
             }
 
             disableAutoReconnectRef.current = true;
-            toast.error("Live notifications offline", {
+            toast.error("Realtime features offline", {
               id: "realtime-notifications-error:handshake-rejected",
               description:
                 "Couldn't connect after 3 attempts. Refresh to try again.",
@@ -750,7 +795,6 @@ export function useRealtimeNotificationsWebSocket(
         return;
       }
       if (reconnectOnFocusOnlyRef.current && enabledRef.current) {
-        reconnectOnFocusOnlyRef.current = false;
         connect();
       }
     };
@@ -764,9 +808,10 @@ export function useRealtimeNotificationsWebSocket(
       ) {
         return;
       }
-      reconnectOnFocusOnlyRef.current = false;
       connect();
     };
+
+    connectRef.current = connect;
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("focus", handleWindowFocus);
@@ -796,6 +841,8 @@ export function useRealtimeNotificationsWebSocket(
       disableAutoReconnectRef.current = false;
       handshakeRetryAttemptsRef.current = 0;
       reconnectOnFocusOnlyRef.current = false;
+      manuallyDisconnectedRef.current = false;
+      connectRef.current = null;
     };
   }, [isRealtimeNotificationsEnabled, ensureAudio]);
 }
