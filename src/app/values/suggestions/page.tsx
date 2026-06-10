@@ -1119,7 +1119,7 @@ function SuggestionGuidelinesDialog({
     "Your Roblox account must be at least 30 days old to submit or vote on value suggestions.",
     "If you are suggesting a value change, you must add at least 2 common trades at the end of your reasoning.",
     "You are not allowed to make duplicate suggestions (e.g. suggesting the same change multiple times).",
-    "Please only speak English so everybody understands. If you cannot speak english, at least use a translator.",
+    "Please only speak English so everybody understands. If you cannot speak English, at least use a translator.",
   ];
 
   return (
