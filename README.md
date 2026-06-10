@@ -49,4 +49,4 @@ Contributions are always welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for w
 - [Jakobiis](https://github.com/Jakobiis/) — Co-founder, Lead Back-end Developer & API Architect
 - [linsonder6](https://github.com/linsonder6/) — Bot Scanning Developer
 - [sencha](https://github.com/senchatf/) — Bot Scanning Developer
-- [KAS](https://github.com/dev-kas/) - Front-end and Back-end magician
+- [KAS](https://github.com/dev-kas/) — Front-end and Back-end magician
