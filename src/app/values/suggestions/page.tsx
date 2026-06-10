@@ -2868,7 +2868,7 @@ export default function ValueSuggestionsPage() {
                                         handleVote(suggestion, "upvote", e)
                                       }
                                       disabled={isVoting}
-                                      className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                                      className="bg-button-success/20 hover:bg-button-success/30 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                       <Icon
                                         icon={
