@@ -152,6 +152,8 @@ export async function logout() {
       if (error instanceof Error && error.name === "AbortError") {
         log.info("Logout request was aborted, clearing auth data locally");
         clearAuthData("logout request aborted");
+        // Best-effort retry without a timeout so the cookie gets cleared even if the first request was slow
+        fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
         return;
       }
       log.error("Error during logout", error);
@@ -183,18 +185,4 @@ function clearAuthData(reason: string) {
   safeLocalStorage.removeItem("avatar");
 
   window.dispatchEvent(new CustomEvent("authStateChanged"));
-}
-
-export function isAuthenticated(): boolean {
-  const userData = safeLocalStorage.getItem("user");
-  return !!userData;
-}
-
-export function getToken(): string | null {
-  // Token is HttpOnly, so we can't access it from client-side
-  // This function is deprecated and should not be used
-  log.warn(
-    "getToken() is deprecated — token is HttpOnly and cannot be accessed client-side",
-  );
-  return null;
 }

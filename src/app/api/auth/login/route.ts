@@ -28,9 +28,9 @@ export async function POST(request: Request) {
     const user = await resp.json();
 
     const envName = process.env.RAILWAY_ENVIRONMENT_NAME;
-    const isProd = envName === "production";
     const useSharedDomainCookie =
       envName === "production" || envName === "testing";
+    const isSecure = useSharedDomainCookie;
     const cookieDomain = useSharedDomainCookie
       ? ".jailbreakchangelogs.com"
       : undefined;
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       "SameSite=Lax",
       "Path=/",
       `Max-Age=${60 * 60 * 24 * 30}`,
-      isProd ? "Secure" : "",
+      isSecure ? "Secure" : "",
       cookieDomain ? `Domain=${cookieDomain}` : "",
     ]
       .filter(Boolean)
