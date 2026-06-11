@@ -2663,13 +2663,12 @@ export async function unlinkEmail(): Promise<{
   const token = getClientToken();
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/users/email/unlink",
+    `/users/email/unlink?token=${token}`,
   );
   const response = await fetch(url, {
     method: "DELETE",
     credentials: "include",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
+    headers,
     cache: "no-store",
   });
   const data = await response
