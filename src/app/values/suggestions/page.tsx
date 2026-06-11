@@ -1261,6 +1261,9 @@ export default function ValueSuggestionsPage() {
 
   // Per-suggestion voting loading state
   const [votingIds, setVotingIds] = useState<Set<number>>(new Set());
+  const [votingTypes, setVotingTypes] = useState<
+    Map<number, "upvote" | "downvote">
+  >(new Map());
   const [voteRateLimits, setVoteRateLimits] = useState<Map<number, number>>(
     new Map(),
   );
@@ -1308,24 +1311,50 @@ export default function ValueSuggestionsPage() {
         if (s.id !== suggestion.id) return s;
         let upvotes = s.upvotes;
         let downvotes = s.downvotes;
+        let newUpvoters = s.votes.upvotes;
+        let newDownvoters = s.votes.downvotes;
         if (removing) {
-          if (type === "upvote") upvotes--;
-          else downvotes--;
+          if (type === "upvote") {
+            upvotes--;
+            newUpvoters = newUpvoters.filter((v) => v.user.id !== user!.id);
+          } else {
+            downvotes--;
+            newDownvoters = newDownvoters.filter((v) => v.user.id !== user!.id);
+          }
         } else {
-          if (wasUpvoted) upvotes--;
-          if (wasDownvoted) downvotes--;
-          if (type === "upvote") upvotes++;
-          else downvotes++;
+          if (wasUpvoted) {
+            upvotes--;
+            newUpvoters = newUpvoters.filter((v) => v.user.id !== user!.id);
+          }
+          if (wasDownvoted) {
+            downvotes--;
+            newDownvoters = newDownvoters.filter((v) => v.user.id !== user!.id);
+          }
+          if (type === "upvote") {
+            upvotes++;
+            newUpvoters = [
+              ...newUpvoters,
+              { created_at: Date.now(), user: user! },
+            ];
+          } else {
+            downvotes++;
+            newDownvoters = [
+              ...newDownvoters,
+              { created_at: Date.now(), user: user! },
+            ];
+          }
         }
         return {
           ...s,
           upvotes: Math.max(0, upvotes),
           downvotes: Math.max(0, downvotes),
+          votes: { upvotes: newUpvoters, downvotes: newDownvoters },
         };
       }),
     );
 
     setVotingIds((prev) => new Set(prev).add(suggestion.id));
+    setVotingTypes((prev) => new Map(prev).set(suggestion.id, type));
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
@@ -1398,6 +1427,11 @@ export default function ValueSuggestionsPage() {
     } finally {
       setVotingIds((prev) => {
         const n = new Set(prev);
+        n.delete(suggestion.id);
+        return n;
+      });
+      setVotingTypes((prev) => {
+        const n = new Map(prev);
         n.delete(suggestion.id);
         return n;
       });
@@ -2854,6 +2888,7 @@ export default function ValueSuggestionsPage() {
                             votingIds.has(suggestion.id) ||
                             voteRateLimits.has(suggestion.id) ||
                             !!ban;
+                          const cardVotingType = votingTypes.get(suggestion.id);
                           const hasVoters =
                             suggestion.votes.upvotes.length > 0 ||
                             suggestion.votes.downvotes.length > 0;
@@ -2870,15 +2905,19 @@ export default function ValueSuggestionsPage() {
                                       disabled={isVoting}
                                       className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                      <Icon
-                                        icon={
-                                          userUpvoted
-                                            ? "material-symbols:thumb-up-rounded"
-                                            : "material-symbols:thumb-up-outline-rounded"
-                                        }
-                                        className="text-button-success h-4 w-4"
-                                        inline
-                                      />
+                                      {cardVotingType === "upvote" ? (
+                                        <Spinner className="text-button-success h-4 w-4" />
+                                      ) : (
+                                        <Icon
+                                          icon={
+                                            userUpvoted
+                                              ? "material-symbols:thumb-up-rounded"
+                                              : "material-symbols:thumb-up-outline-rounded"
+                                          }
+                                          className="text-button-success h-4 w-4"
+                                          inline
+                                        />
+                                      )}
                                       <span className="text-button-success font-bold">
                                         {suggestion.upvotes}
                                       </span>
@@ -2899,15 +2938,19 @@ export default function ValueSuggestionsPage() {
                                       disabled={isVoting}
                                       className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                      <Icon
-                                        icon={
-                                          userDownvoted
-                                            ? "material-symbols:thumb-down-rounded"
-                                            : "material-symbols:thumb-down-outline-rounded"
-                                        }
-                                        className="text-button-danger h-4 w-4"
-                                        inline
-                                      />
+                                      {cardVotingType === "downvote" ? (
+                                        <Spinner className="text-button-danger h-4 w-4" />
+                                      ) : (
+                                        <Icon
+                                          icon={
+                                            userDownvoted
+                                              ? "material-symbols:thumb-down-rounded"
+                                              : "material-symbols:thumb-down-outline-rounded"
+                                          }
+                                          className="text-button-danger h-4 w-4"
+                                          inline
+                                        />
+                                      )}
                                       <span className="text-button-danger font-bold">
                                         {suggestion.downvotes}
                                       </span>

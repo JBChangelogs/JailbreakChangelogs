@@ -186,6 +186,9 @@ export default function ValueSuggestionDetailPage() {
   const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
   const [voteCounts, setVoteCounts] = useState({ up: 0, down: 0 });
   const [voteLoading, setVoteLoading] = useState(false);
+  const [votingType, setVotingType] = useState<"upvote" | "downvote" | null>(
+    null,
+  );
   const [voteRateLimit, setVoteRateLimit] = useState<number | null>(null);
   const [voteRateLimitSeconds, setVoteRateLimitSeconds] = useState(0);
 
@@ -314,7 +317,8 @@ export default function ValueSuggestionDetailPage() {
       (v) => v.user.id === user.id,
     );
     setUserVote(hasUp ? "upvote" : hasDown ? "downvote" : null);
-  }, [suggestion, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestion?.id, user?.id]);
 
   useEffect(() => {
     setReasonExpanded(false);
@@ -390,6 +394,7 @@ export default function ValueSuggestionDetailPage() {
     });
 
     setVoteLoading(true);
+    setVotingType(type);
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
@@ -445,6 +450,7 @@ export default function ValueSuggestionDetailPage() {
       toast.error("Failed to register vote.");
     } finally {
       setVoteLoading(false);
+      setVotingType(null);
     }
   };
 
@@ -1148,15 +1154,19 @@ export default function ValueSuggestionDetailPage() {
                                     }
                                     className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                                   >
-                                    <Icon
-                                      icon={
-                                        userVote === "upvote"
-                                          ? "material-symbols:thumb-up-rounded"
-                                          : "material-symbols:thumb-up-rounded"
-                                      }
-                                      className="text-button-success h-4 w-4"
-                                      inline
-                                    />
+                                    {votingType === "upvote" ? (
+                                      <Spinner className="text-button-success h-4 w-4" />
+                                    ) : (
+                                      <Icon
+                                        icon={
+                                          userVote === "upvote"
+                                            ? "material-symbols:thumb-up-rounded"
+                                            : "material-symbols:thumb-up-outline-rounded"
+                                        }
+                                        className="text-button-success h-4 w-4"
+                                        inline
+                                      />
+                                    )}
                                     <span className="text-button-success font-bold">
                                       {voteCounts.up}
                                     </span>
@@ -1178,15 +1188,19 @@ export default function ValueSuggestionDetailPage() {
                                     }
                                     className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                                   >
-                                    <Icon
-                                      icon={
-                                        userVote === "downvote"
-                                          ? "material-symbols:thumb-down-rounded"
-                                          : "material-symbols:thumb-down-rounded"
-                                      }
-                                      className="text-button-danger h-4 w-4"
-                                      inline
-                                    />
+                                    {votingType === "downvote" ? (
+                                      <Spinner className="text-button-danger h-4 w-4" />
+                                    ) : (
+                                      <Icon
+                                        icon={
+                                          userVote === "downvote"
+                                            ? "material-symbols:thumb-down-rounded"
+                                            : "material-symbols:thumb-down-outline-rounded"
+                                        }
+                                        className="text-button-danger h-4 w-4"
+                                        inline
+                                      />
+                                    )}
                                     <span className="text-button-danger font-bold">
                                       {voteCounts.down}
                                     </span>
@@ -1489,15 +1503,19 @@ export default function ValueSuggestionDetailPage() {
                                   }
                                   className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                  <Icon
-                                    icon={
-                                      userVote === "upvote"
-                                        ? "material-symbols:thumb-up-rounded"
-                                        : "material-symbols:thumb-up-rounded"
-                                    }
-                                    className="text-button-success h-4 w-4"
-                                    inline
-                                  />
+                                  {votingType === "upvote" ? (
+                                    <Spinner className="text-button-success h-4 w-4" />
+                                  ) : (
+                                    <Icon
+                                      icon={
+                                        userVote === "upvote"
+                                          ? "material-symbols:thumb-up-rounded"
+                                          : "material-symbols:thumb-up-outline-rounded"
+                                      }
+                                      className="text-button-success h-4 w-4"
+                                      inline
+                                    />
+                                  )}
                                   <span className="text-button-success font-bold">
                                     {voteCounts.up}
                                   </span>
@@ -1519,15 +1537,19 @@ export default function ValueSuggestionDetailPage() {
                                   }
                                   className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                  <Icon
-                                    icon={
-                                      userVote === "downvote"
-                                        ? "material-symbols:thumb-down-rounded"
-                                        : "material-symbols:thumb-down-rounded"
-                                    }
-                                    className="text-button-danger h-4 w-4"
-                                    inline
-                                  />
+                                  {votingType === "downvote" ? (
+                                    <Spinner className="text-button-danger h-4 w-4" />
+                                  ) : (
+                                    <Icon
+                                      icon={
+                                        userVote === "downvote"
+                                          ? "material-symbols:thumb-down-rounded"
+                                          : "material-symbols:thumb-down-outline-rounded"
+                                      }
+                                      className="text-button-danger h-4 w-4"
+                                      inline
+                                    />
+                                  )}
                                   <span className="text-button-danger font-bold">
                                     {voteCounts.down}
                                   </span>
