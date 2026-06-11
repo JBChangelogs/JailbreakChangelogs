@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
@@ -56,6 +57,15 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
 }) => {
   const [imageAspectRatio, setImageAspectRatio] =
     useState<string>("aspect-[4/3]");
+  const [thumbnailLightbox, setThumbnailLightbox] = useState(false);
+
+  useEffect(() => {
+    if (!thumbnailLightbox) return;
+    const onKey = (e: KeyboardEvent) =>
+      e.key === "Escape" && setThumbnailLightbox(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [thumbnailLightbox]);
 
   const currentIndex = changelogList.findIndex((c) => c.id === changelogId);
   const prevChangelog =
@@ -199,17 +209,71 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
         {/* Image Section - 4/12 columns on desktop, full width on tablet and mobile */}
         <div className="space-y-8 sm:col-span-12 xl:col-span-4">
           {imageUrl && (
-            <div>
-              <div className={`relative w-full ${imageAspectRatio}`}>
-                <Image
-                  src={`https://assets.jailbreakchangelogs.com${imageUrl}`}
-                  alt={title}
-                  fill
-                  className="rounded-lg object-contain"
-                  onLoad={handleImageLoad}
-                />
+            <>
+              <div>
+                <div
+                  className={`group relative w-full cursor-zoom-in ${imageAspectRatio}`}
+                  onClick={() => setThumbnailLightbox(true)}
+                >
+                  <Image
+                    src={`https://assets.jailbreakchangelogs.com${imageUrl}`}
+                    alt={title}
+                    fill
+                    className="rounded-lg object-contain"
+                    onLoad={handleImageLoad}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/20 group-hover:opacity-100">
+                    <Icon
+                      icon="mdi:magnify-plus-outline"
+                      className="h-8 w-8 text-white drop-shadow"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+
+              {thumbnailLightbox &&
+                createPortal(
+                  <div
+                    className="fixed inset-0 z-[10000] flex cursor-default flex-col items-center justify-center gap-3 bg-black/90 p-4"
+                    onClick={() => setThumbnailLightbox(false)}
+                  >
+                    <button
+                      className="absolute top-4 right-4 cursor-pointer rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setThumbnailLightbox(false);
+                      }}
+                    >
+                      <Icon icon="mdi:close" className="h-5 w-5" />
+                    </button>
+                    <Image
+                      src={`https://assets.jailbreakchangelogs.com${imageUrl}`}
+                      alt={title}
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      style={{
+                        width: "min(95vw, 1400px)",
+                        height: "auto",
+                        maxHeight: "80vh",
+                        objectFit: "contain",
+                      }}
+                      className="rounded-lg"
+                      unoptimized
+                    />
+                    <a
+                      href={`https://assets.jailbreakchangelogs.com${imageUrl}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full px-6 text-center font-mono text-xs break-all text-white/50 hover:text-white/80 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {`https://assets.jailbreakchangelogs.com${imageUrl}`}
+                    </a>
+                  </div>,
+                  document.body,
+                )}
+            </>
           )}
 
           {/* Comments Section */}

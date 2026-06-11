@@ -291,7 +291,7 @@ export default function ConnectedBotsPolling() {
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-secondary-text">Last Updated:</span>
-                      <div className="border-border-card bg-tertiary-bg flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border">
+                      <div className="border-border-card bg-tertiary-bg flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border">
                         <LastUpdatedAvatar
                           userId={queueInfo.last_dequeue!.user_id}
                         />
@@ -303,37 +303,34 @@ export default function ConnectedBotsPolling() {
                       >
                         {lastProcessedRobloxData?.usersData?.[
                           queueInfo.last_dequeue!.user_id
-                        ]?.name ||
+                        ]?.displayName ||
                           lastProcessedRobloxData?.usersData?.[
                             queueInfo.last_dequeue!.user_id
-                          ]?.displayName ||
+                          ]?.name ||
                           queueInfo.last_dequeue!.user_id}
                       </Link>
                     </div>
                     {(() => {
                       const botId = queueInfo.last_dequeue!.data.bot_id;
                       const botUserData = botRobloxData?.usersData?.[botId];
-                      if (botUserData) {
-                        const botDisplayName =
-                          botUserData.name ||
-                          botUserData.displayName ||
-                          `Bot ${botId}`;
-                        return (
-                          <span className="text-secondary-text text-xs">
-                            (scanned by{" "}
-                            <a
-                              href={`https://www.roblox.com/users/${botId}/profile`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-text hover:text-link-hover transition-colors"
-                            >
-                              {botDisplayName}
-                            </a>
-                            )
-                          </span>
-                        );
-                      }
-                      return null;
+                      const botDisplayName =
+                        botUserData?.displayName ||
+                        botUserData?.name ||
+                        `Bot ${botId}`;
+                      return (
+                        <span className="text-secondary-text text-xs">
+                          (scanned by{" "}
+                          <a
+                            href={`https://www.roblox.com/users/${botId}/profile`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-text hover:text-link-hover transition-colors"
+                          >
+                            {botDisplayName}
+                          </a>
+                          )
+                        </span>
+                      );
                     })()}
                   </div>
                 ) : (
@@ -411,8 +408,8 @@ function LastUpdatedAvatar({ userId }: { userId: string }) {
     <Image
       src={avatarUrl}
       alt="Last processed user avatar"
-      width={24}
-      height={24}
+      width={32}
+      height={32}
       className="h-full w-full object-cover"
       onError={() => setAvatarError(true)}
     />

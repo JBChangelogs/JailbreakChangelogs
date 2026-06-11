@@ -815,8 +815,8 @@ export default function UserStatsSection({
                               {botAvatarError ? (
                                 <DefaultAvatar
                                   name={
-                                    botUser.name ||
                                     botUser.displayName ||
+                                    botUser.name ||
                                     String(botUser.id)
                                   }
                                 />
@@ -824,8 +824,8 @@ export default function UserStatsSection({
                                 <Image
                                   src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botUser.id}/avatar-headshot`}
                                   alt={
-                                    botUser.name ||
                                     botUser.displayName ||
+                                    botUser.name ||
                                     `Bot ${botUser.id} avatar`
                                   }
                                   width={24}
@@ -841,7 +841,7 @@ export default function UserStatsSection({
                               rel="noopener noreferrer"
                               className="text-primary-text hover:text-link font-medium transition-colors"
                             >
-                              {botUser.name || botUser.displayName}
+                              {botUser.displayName || botUser.name}
                             </a>
                           </>
                         ) : (
