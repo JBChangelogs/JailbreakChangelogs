@@ -101,12 +101,12 @@ export default function EventCountdownBanner() {
                 Enjoy the 2026 Live Event & Update!
               </span>
               <a
-                href={EVENT_URL}
+                href="https://www.roblox.com/games/606849621/Jailbreak"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs font-semibold whitespace-nowrap text-white underline transition-opacity hover:opacity-85"
               >
-                Sign Up
+                Join Event
               </a>
             </>
           ) : (
