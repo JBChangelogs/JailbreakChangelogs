@@ -2,46 +2,56 @@ import { parse } from "date-fns";
 
 // Parse markdown content into structured sections
 export function parseMarkdown(text: string) {
-  const sections = text.split("\n\n");
-  return sections.map((section) => {
-    const lines = section.split("\n");
-    const title = lines[0].startsWith("## ")
-      ? lines[0].substring(3)
-      : lines[0].startsWith("# ")
-        ? lines[0].substring(2)
-        : null;
-    const items = lines.slice(title ? 1 : 0).filter((line) => line.trim());
+  // Ensure headings always start a new paragraph even when the source omits the blank line
+  const normalized = text.replace(/([^\n])\n(#{1,6} )/g, "$1\n\n$2");
+  const sections = normalized.split("\n\n");
+  return sections
+    .filter((s) => s.trim())
+    .map((section) => {
+      const lines = section.split("\n");
+      const title = lines[0].startsWith("## ")
+        ? lines[0].substring(3)
+        : lines[0].startsWith("# ")
+          ? lines[0].substring(2)
+          : null;
+      const items = lines.slice(title ? 1 : 0).filter((line) => line.trim());
 
-    return {
-      title,
-      items: items.map((line) => {
-        // Remove all leading hyphens and spaces
-        const cleanLine = line.replace(/^[- ]+/, "").trim();
+      return {
+        title,
+        items: items.map((line) => {
+          // Remove all leading hyphens and spaces
+          const cleanLine = line.replace(/^[- ]+/, "").trim();
 
-        // Check for media embeds
-        const mediaMatch = cleanLine.match(/^\((image|video|audio)\)(.+)$/);
-        if (mediaMatch) {
+          // Check for media embeds
+          const mediaMatch = cleanLine.match(/^\((image|video|audio)\)(.+)$/);
+          if (mediaMatch) {
+            return {
+              type: "media" as const,
+              mediaType: mediaMatch[1] as "image" | "video" | "audio",
+              url: `https://assets.jailbreakchangelogs.com${mediaMatch[2].trim()}`,
+              isNested: line.trim().startsWith("- - "),
+            };
+          }
+
+          // Process inline markdown and mentions
+          const processedText = cleanLine
+            .replace(
+              /\*\*(.+?)\*\*/g,
+              '<strong class="text-primary-text">$1</strong>',
+            )
+            .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+            .replace(/@(\w+)/g, (_, username) => {
+              return `<a href="https://www.roblox.com/users/profile?username=${username}" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover active:text-link-active transition-colors duration-200">@${username}</a>`;
+            });
+
           return {
-            type: "media" as const,
-            mediaType: mediaMatch[1] as "image" | "video" | "audio",
-            url: `https://assets.jailbreakchangelogs.com${mediaMatch[2].trim()}`,
+            type: "text" as const,
+            text: processedText,
             isNested: line.trim().startsWith("- - "),
           };
-        }
-
-        // Process mentions in text
-        const processedText = cleanLine.replace(/@(\w+)/g, (_, username) => {
-          return `<a href="https://www.roblox.com/users/profile?username=${username}" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover active:text-link-active transition-colors duration-200">@${username}</a>`;
-        });
-
-        return {
-          type: "text" as const,
-          text: processedText,
-          isNested: line.trim().startsWith("- - "),
-        };
-      }),
-    };
-  });
+        }),
+      };
+    });
 }
 
 function escapeRegExp(value: string) {
