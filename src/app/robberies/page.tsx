@@ -70,7 +70,6 @@ const ROBBERIES_DISPLAY_MODE_STORAGE_KEY = "robberiesDisplayMode";
 // Define all robbery types with their marker names
 const ROBBERY_TYPES = [
   { marker_name: "Bank", name: "Rising City Bank" },
-  { marker_name: "Bank2", name: "Crater City Bank" },
   { marker_name: "CargoPlane", name: "Cargo Plane" },
   { marker_name: "CargoShip", name: "Cargo Ship" },
   { marker_name: "Casino", name: "Crown Jewel" },
@@ -86,12 +85,6 @@ const ROBBERY_TYPES = [
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const ROBBERY_COMBO_PRESETS = [
-  {
-    id: "double-bank",
-    label: "Crater + Rising City Bank",
-    description: "Crater + Rising open",
-    types: ["Bank", "Bank2"],
-  },
   {
     id: "museum-power",
     label: "Museum + Power",

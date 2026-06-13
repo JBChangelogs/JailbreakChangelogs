@@ -33,7 +33,7 @@ export default function HyperchromeCalculatorModal({
     { name: "HyperRed", robbery: "Tomb" },
     { name: "HyperOrange", robbery: "Museum" },
     { name: "HyperYellow", robbery: "Cargo Train / Passenger Train" },
-    { name: "HyperGreen", robbery: "Crater Bank / Rising City Bank" },
+    { name: "HyperGreen", robbery: "Rising City Bank" },
     { name: "HyperDiamond", robbery: "Jewelry Store" },
     { name: "HyperBlue", robbery: "Cargo Plane" },
     { name: "HyperPurple", robbery: "Power Plant" },

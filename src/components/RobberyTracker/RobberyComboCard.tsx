@@ -69,8 +69,6 @@ export default function RobberyComboCard({
   const comboImageUrls: Record<string, string> = {
     "museum-power":
       "https://assets.jailbreakchangelogs.com/assets/images/robberies/combos/Power_Museum_Combo.webp",
-    "double-bank":
-      "https://assets.jailbreakchangelogs.com/assets/images/robberies/combos/Bank_Combo.webp",
   };
   const comboImageUrl = comboImageUrls[comboId];
 

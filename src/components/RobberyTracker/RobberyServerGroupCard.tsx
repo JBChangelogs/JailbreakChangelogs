@@ -36,7 +36,6 @@ const ROBBERY_IMAGE_PRIORITY: string[] = [
   "TrainPassenger",
   "CargoPlane",
   "Bank",
-  "Bank2",
   "OilRig",
 ];
 
