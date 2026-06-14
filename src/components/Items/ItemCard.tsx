@@ -580,88 +580,131 @@ export default function ItemCard({
           </div>
 
           <div className="space-y-1 pb-2 sm:space-y-2">
-            <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
-              <div className="flex items-center gap-1 sm:gap-2">
-                <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
-                  Cash Value
-                </span>
-                {isValuesPage &&
-                  (() => {
-                    if (cashChange && cashChange.difference !== 0) {
-                      const isPositive = cashChange.difference > 0;
-                      return (
+            {isValuesPage ? (
+              <div className="border-border-card bg-tertiary-bg grid grid-cols-2 rounded-lg border">
+                <div className="flex flex-col gap-1.5 p-1.5 sm:p-3">
+                  <span className="text-primary-text text-xs font-semibold">
+                    Clean
+                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                      Value
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                        {isMobile
+                          ? currentItemData.cash_value
+                          : formatFullValue(currentItemData.cash_value)}
+                      </span>
+                      {cashChange && cashChange.difference !== 0 && (
                         <Icon
                           icon={
-                            isPositive
+                            cashChange.difference > 0
                               ? "mingcute:arrow-up-fill"
                               : "mingcute:arrow-down-fill"
                           }
-                          className={`h-4 w-4 ${isPositive ? "text-status-success" : "text-status-error"}`}
+                          className={`h-4 w-4 ${cashChange.difference > 0 ? "text-status-success" : "text-status-error"}`}
                         />
-                      );
-                    }
-                    return null;
-                  })()}
-              </div>
-              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
-                {isMobile
-                  ? currentItemData.cash_value
-                  : formatFullValue(currentItemData.cash_value)}
-              </span>
-            </div>
-
-            <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
-              <div className="flex items-center gap-1 sm:gap-2">
-                <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
-                  Duped Value
-                </span>
-                {isValuesPage &&
-                  (() => {
-                    if (dupedChange && dupedChange.difference !== 0) {
-                      const isPositive = dupedChange.difference > 0;
-                      return (
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                      Demand
+                    </span>
+                    <span
+                      className={`${getDemandColor(currentItemData.demand)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
+                    >
+                      {demandLabel}
+                    </span>
+                  </div>
+                </div>
+                <div className="border-border-card flex flex-col gap-1.5 border-l p-1.5 sm:p-3">
+                  <span className="text-primary-text text-xs font-semibold">
+                    Duped
+                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                      Value
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                        {isMobile
+                          ? currentItemData.duped_value
+                          : formatFullValue(currentItemData.duped_value)}
+                      </span>
+                      {dupedChange && dupedChange.difference !== 0 && (
                         <Icon
                           icon={
-                            isPositive
+                            dupedChange.difference > 0
                               ? "mingcute:arrow-up-fill"
                               : "mingcute:arrow-down-fill"
                           }
-                          className={`h-4 w-4 ${isPositive ? "text-status-success" : "text-status-error"}`}
+                          className={`h-4 w-4 ${dupedChange.difference > 0 ? "text-status-success" : "text-status-error"}`}
                         />
-                      );
-                    }
-                    return null;
-                  })()}
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                      Demand
+                    </span>
+                    <span
+                      className={`${getDemandColor(dupedDemandLabel)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
+                    >
+                      {dupedDemandLabel}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
-                {isMobile
-                  ? currentItemData.duped_value
-                  : formatFullValue(currentItemData.duped_value)}
-              </span>
-            </div>
+            ) : (
+              <>
+                <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
+                  <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                    Cash Value
+                  </span>
+                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
+                    {isMobile
+                      ? currentItemData.cash_value
+                      : formatFullValue(currentItemData.cash_value)}
+                  </span>
+                </div>
 
-            <div className="border-border-card bg-tertiary-bg grid grid-cols-2 rounded-lg border">
-              <div className="flex flex-col gap-1 p-1 sm:p-2.5">
-                <span className="text-secondary-text text-xs font-medium">
-                  Demand
-                </span>
-                <span
-                  className={`${getDemandColor(currentItemData.demand)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
-                >
-                  {demandLabel}
-                </span>
-              </div>
-              <div className="border-border-card flex flex-col gap-1 border-l p-1 sm:p-2.5">
-                <span className="text-secondary-text text-xs font-medium">
-                  Duped
-                </span>
-                <span
-                  className={`${getDemandColor(dupedDemandLabel)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
-                >
-                  {dupedDemandLabel}
-                </span>
-              </div>
-            </div>
+                <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
+                  <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                    Duped Value
+                  </span>
+                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
+                    {isMobile
+                      ? currentItemData.duped_value
+                      : formatFullValue(currentItemData.duped_value)}
+                  </span>
+                </div>
+
+                <div className="border-border-card bg-tertiary-bg grid grid-cols-2 rounded-lg border">
+                  <div className="flex flex-col gap-1 p-1 sm:p-2.5">
+                    <span className="text-secondary-text text-xs font-medium">
+                      Demand
+                    </span>
+                    <span
+                      className={`${getDemandColor(currentItemData.demand)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
+                    >
+                      {demandLabel}
+                    </span>
+                  </div>
+                  <div className="border-border-card flex flex-col gap-1 border-l p-1 sm:p-2.5">
+                    <span className="text-secondary-text text-xs font-medium">
+                      Duped
+                    </span>
+                    <span
+                      className={`${getDemandColor(dupedDemandLabel)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
+                    >
+                      {dupedDemandLabel}
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
 
             {isValuesPage && (
               <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
