@@ -846,24 +846,48 @@ export default function ValueSuggestionDetailPage() {
                             </p>
                           </div>
                         </div>
-                        <Button
-                          variant="success"
-                          size="sm"
-                          asChild
-                          className="mt-3 w-fit"
-                        >
-                          <Link
-                            href="/values/suggestions?submit=true"
-                            prefetch={false}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Button
+                            variant="success"
+                            size="sm"
+                            asChild
+                            className="w-fit"
                           >
-                            <Icon
-                              icon="material-symbols:add-rounded"
-                              className="h-4 w-4"
-                              inline
-                            />
-                            Submit a Suggestion
-                          </Link>
-                        </Button>
+                            <Link
+                              href="/values/suggestions?submit=true"
+                              prefetch={false}
+                            >
+                              <Icon
+                                icon="material-symbols:add-rounded"
+                                className="h-4 w-4"
+                                inline
+                              />
+                              Submit a Suggestion
+                            </Link>
+                          </Button>
+                          {suggestion.user.roblox_id && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              asChild
+                              className="w-fit"
+                            >
+                              <Link
+                                href={`/inventories/${suggestion.user.roblox_id}`}
+                                prefetch={false}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Icon
+                                  icon="material-symbols:inventory-2-outline-rounded"
+                                  className="h-4 w-4"
+                                  inline
+                                />
+                                View Inventory
+                              </Link>
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
 

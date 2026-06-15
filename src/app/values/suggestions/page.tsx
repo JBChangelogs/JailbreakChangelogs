@@ -184,6 +184,7 @@ interface SuggestionFormProps {
     isVt: boolean;
   }) => Promise<void>;
   onCancel: () => void;
+  onOpenGuidelines: () => void;
 }
 
 function SuggestionForm({
@@ -193,7 +194,8 @@ function SuggestionForm({
   loadingLimits,
   isVtEligible,
   onSubmit,
-  onCancel: _onCancel,
+  onCancel,
+  onOpenGuidelines,
 }: SuggestionFormProps) {
   const [itemSearch, setItemSearch] = useState("");
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
@@ -209,6 +211,7 @@ function SuggestionForm({
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
   const [accountAgeError, setAccountAgeError] = useState<string | null>(null);
   const [isVt, setIsVt] = useState(isVtEligible);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   useEffect(() => {
     if (isVtEligible) setIsVt(true);
   }, [isVtEligible]);
@@ -264,7 +267,7 @@ function SuggestionForm({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedItem) {
       toast.error("Please select an item.");
@@ -274,6 +277,12 @@ function SuggestionForm({
       toast.error(`Reason must be at least ${minChars} characters.`);
       return;
     }
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmedSubmit = async () => {
+    if (!selectedItem) return;
+    setConfirmOpen(false);
     setSubmitting(true);
     setSuggestedValueError(null);
     setReasonError(null);
@@ -507,12 +516,12 @@ function SuggestionForm({
 
         {/* Auto-calc banner for item 587 */}
         {isAutoCalcItem && (
-          <div className="border-link bg-tertiary-bg rounded-lg border px-3 py-2.5 text-sm">
+          <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
             <span className="text-primary-text">
-              <strong>Cash Value</strong> and <strong>Duped Value</strong> for
-              this item are automatically calculated as the sum of accepted
-              suggestions from other HyperChrome Level 5 items — they can&apos;t
-              be suggested directly. You can still suggest other fields below.
+              Cash Value and Duped Value for this item are automatically
+              calculated as the sum of accepted suggestions from other
+              HyperChrome Level 5 items — they can&apos;t be suggested directly.
+              You can still suggest other fields below.
             </span>
           </div>
         )}
@@ -630,30 +639,37 @@ function SuggestionForm({
                 Loading options...
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {(limits?.valid_trends ?? []).map((t) => {
-                  const hex = getTrendHexColor(t);
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setSuggestedValue(t)}
-                      className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
-                        suggestedValue === t
-                          ? "ring-2"
-                          : "opacity-60 hover:opacity-90"
-                      }`}
-                      style={
-                        {
-                          borderColor: hex,
-                          "--tw-ring-color": hex,
-                        } as React.CSSProperties
-                      }
-                    >
-                      {t}
-                    </button>
-                  );
-                })}
+              <div className="space-y-2">
+                <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                  <span className="text-primary-text">
+                    Select one of the options below as your suggested trend.
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(limits?.valid_trends ?? []).map((t) => {
+                    const hex = getTrendHexColor(t);
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setSuggestedValue(t)}
+                        className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                          suggestedValue === t
+                            ? "ring-2"
+                            : "opacity-60 hover:opacity-90"
+                        }`}
+                        style={
+                          {
+                            borderColor: hex,
+                            "--tw-ring-color": hex,
+                          } as React.CSSProperties
+                        }
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )
           ) : ["demand", "duped_demand"].includes(field) ? (
@@ -662,74 +678,99 @@ function SuggestionForm({
                 Loading options...
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {(limits?.valid_demands ?? []).map((d) => {
-                  const hex = getDemandHexColor(d);
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setSuggestedValue(d)}
-                      className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
-                        suggestedValue === d
-                          ? "ring-2"
-                          : "opacity-60 hover:opacity-90"
-                      }`}
-                      style={
-                        {
-                          borderColor: hex,
-                          "--tw-ring-color": hex,
-                        } as React.CSSProperties
-                      }
-                    >
-                      {d}
-                    </button>
-                  );
-                })}
+              <div className="space-y-2">
+                <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                  <span className="text-primary-text">
+                    Select one of the options below as your suggested{" "}
+                    {fieldLabel(field).toLowerCase()}.
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(limits?.valid_demands ?? []).map((d) => {
+                    const hex = getDemandHexColor(d);
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setSuggestedValue(d)}
+                        className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                          suggestedValue === d
+                            ? "ring-2"
+                            : "opacity-60 hover:opacity-90"
+                        }`}
+                        style={
+                          {
+                            borderColor: hex,
+                            "--tw-ring-color": hex,
+                          } as React.CSSProperties
+                        }
+                      >
+                        {d}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )
           ) : field === "notes" ? (
-            <div>
-              <div className="mb-1 flex justify-end">
-                <span
-                  className={`text-xs ${suggestedValue.length > maxNoteLength ? "text-red-400" : "text-secondary-text"}`}
-                >
-                  {suggestedValue.length} / {maxNoteLength}
+            <div className="space-y-2">
+              <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                <span className="text-primary-text">
+                  Enter the note text you want to suggest for this item.
                 </span>
               </div>
-              <textarea
-                placeholder="Enter the suggested note..."
-                value={suggestedValue}
-                onChange={(e) => setSuggestedValue(e.target.value)}
-                required
-                rows={3}
-                className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
-              />
+              <div>
+                <textarea
+                  placeholder="Enter the suggested note..."
+                  value={suggestedValue}
+                  onChange={(e) => setSuggestedValue(e.target.value)}
+                  required
+                  rows={3}
+                  className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
+                />
+                <div className="mt-1 flex justify-end">
+                  <span
+                    className={`text-xs ${suggestedValue.length > maxNoteLength ? "text-red-400" : "text-secondary-text"}`}
+                  >
+                    {suggestedValue.length} / {maxNoteLength}
+                  </span>
+                </div>
+              </div>
             </div>
           ) : (
-            <input
-              type="text"
-              placeholder={
-                ["cash_value", "duped_value"].includes(field)
-                  ? "e.g. 50m, 500m, 500k, 10,000,000"
-                  : `Enter suggested ${fieldLabel(field).toLowerCase()}...`
-              }
-              value={suggestedValue}
-              onChange={(e) => {
-                setSuggestedValue(e.target.value);
-                const isNumericField = ["cash_value", "duped_value"].includes(
-                  field,
-                );
-                setSuggestedValueError(
-                  isNumericField && e.target.value.trim()
-                    ? (parseValueInput(e.target.value, limits?.max_cash)
-                        .error ?? null)
-                    : null,
-                );
-              }}
-              required
-              className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
-            />
+            <div className="space-y-2">
+              {["cash_value", "duped_value"].includes(field) && (
+                <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                  <span className="text-primary-text">
+                    Enter a numeric value. Supported formats: 50m, 500k,
+                    10,000,000.
+                  </span>
+                </div>
+              )}
+              <input
+                type="text"
+                placeholder={
+                  ["cash_value", "duped_value"].includes(field)
+                    ? "e.g. 50m, 500m, 500k, 10,000,000"
+                    : `Enter suggested ${fieldLabel(field).toLowerCase()}...`
+                }
+                value={suggestedValue}
+                onChange={(e) => {
+                  setSuggestedValue(e.target.value);
+                  const isNumericField = ["cash_value", "duped_value"].includes(
+                    field,
+                  );
+                  setSuggestedValueError(
+                    isNumericField && e.target.value.trim()
+                      ? (parseValueInput(e.target.value, limits?.max_cash)
+                          .error ?? null)
+                      : null,
+                  );
+                }}
+                required
+                className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
+              />
+            </div>
           )}
           {suggestedValueError && (
             <p className="mt-1 text-xs text-red-400">{suggestedValueError}</p>
@@ -738,16 +779,9 @@ function SuggestionForm({
 
         {/* Reason */}
         <div>
-          <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-primary-text text-sm font-medium">
-              Reason for Suggested {fieldLabel(field)}
-            </label>
-            <span
-              className={`text-xs ${reason.length > maxChars ? "text-red-400" : "text-secondary-text"}`}
-            >
-              {reason.length} / {minChars}–{maxChars}
-            </span>
-          </div>
+          <label className="text-primary-text mb-1.5 block text-sm font-medium">
+            Reason for Suggested {fieldLabel(field)}
+          </label>
           <textarea
             placeholder="Explain why this value should change. Include evidence, market observations, or trade history. Must be at least 350 characters."
             value={reason}
@@ -759,9 +793,18 @@ function SuggestionForm({
             rows={5}
             className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none${reasonError ? " border-border-error!" : ""}`}
           />
-          {reasonError && (
-            <p className="text-form-error mt-1 text-xs">{reasonError}</p>
-          )}
+          <div className="mt-1 flex items-center justify-between">
+            {reasonError ? (
+              <p className="text-form-error text-xs">{reasonError}</p>
+            ) : (
+              <span />
+            )}
+            <span
+              className={`text-xs ${reason.length > maxChars ? "text-red-400" : "text-secondary-text"}`}
+            >
+              {reason.length} / {minChars}–{maxChars}
+            </span>
+          </div>
         </div>
 
         {accountAgeError && (
@@ -812,9 +855,13 @@ function SuggestionForm({
           </div>
         )}
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+            Cancel
+          </Button>
           <Button
             type="submit"
+            size="sm"
             disabled={
               submitting ||
               !!rateLimitUntil ||
@@ -844,6 +891,174 @@ function SuggestionForm({
           </Button>
         </div>
       </form>
+
+      {/* Confirmation dialog */}
+      <Dialog
+        open={confirmOpen}
+        onOpenChange={(o) => !o && setConfirmOpen(false)}
+      >
+        <DialogContent
+          showClose
+          className="bg-secondary-bg flex max-h-[90dvh] max-w-lg flex-col overflow-hidden rounded-lg p-0 backdrop-blur-none"
+          aria-describedby={undefined}
+        >
+          {/* Scrollable area */}
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <DialogHeader className="px-6 pt-5 pb-2">
+              <DialogTitle className="text-primary-text text-base font-bold">
+                Review your suggestion
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 px-6 pt-2 pb-6">
+              {/* Guidelines reminder */}
+              <div className="border-border-error bg-button-danger/10 rounded-lg border px-5 py-4">
+                <p className="text-form-error font-bold">
+                  Make sure your suggestion follows the{" "}
+                  <button
+                    type="button"
+                    className="text-link hover:text-link-hover cursor-pointer underline transition-colors"
+                    onClick={() => onOpenGuidelines()}
+                  >
+                    submission guidelines
+                  </button>
+                  . Suggestions that don&apos;t will be rejected.
+                </p>
+              </div>
+
+              {/* Item + type + field + visibility meta */}
+              <div className="space-y-1.5">
+                <p className="text-primary-text font-semibold">
+                  {selectedItem?.name ?? "—"}
+                </p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {selectedItem &&
+                    (() => {
+                      const icon = getCategoryIcon(selectedItem.type);
+                      const color = getCategoryColor(selectedItem.type);
+                      return (
+                        <span
+                          className={`${badgeBase} text-primary-text`}
+                          style={{
+                            borderColor: color,
+                            backgroundColor: `${color}22`,
+                          }}
+                        >
+                          {icon && (
+                            <icon.Icon
+                              className="mr-1.5 h-3 w-3"
+                              style={{ color }}
+                            />
+                          )}
+                          {selectedItem.type}
+                        </span>
+                      );
+                    })()}
+                  <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium">
+                    {fieldLabel(field)}
+                  </span>
+                  {isVtEligible && isVt && (
+                    <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium">
+                      <Image
+                        src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
+                        alt="VT"
+                        width={14}
+                        height={14}
+                        className="shrink-0"
+                      />
+                      VT Only
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Hero value change */}
+              <div className="bg-tertiary-bg border-border-card rounded-xl border p-5">
+                <div className="flex flex-col items-center gap-3 sm:flex-row">
+                  <div className="min-w-0 flex-1 text-center">
+                    <p className="text-button-danger mb-1 text-xs font-semibold tracking-wide uppercase">
+                      Old {fieldLabel(field)}
+                    </p>
+                    <p
+                      className="text-secondary-text text-2xl font-bold line-through"
+                      style={{ overflowWrap: "anywhere" }}
+                    >
+                      {formatFullValue(
+                        (selectedItem?.[field as keyof Item] as string) ||
+                          "N/A",
+                      )}
+                    </p>
+                  </div>
+                  <Icon
+                    icon="material-symbols:arrow-downward-rounded"
+                    className="text-tertiary-text h-6 w-6 shrink-0 sm:hidden"
+                    inline
+                  />
+                  <Icon
+                    icon="material-symbols:arrow-forward-rounded"
+                    className="text-tertiary-text hidden h-6 w-6 shrink-0 sm:block"
+                    inline
+                  />
+                  <div className="min-w-0 flex-1 text-center">
+                    <p className="text-button-success mb-1 text-xs font-semibold tracking-wide uppercase">
+                      New {fieldLabel(field)}
+                    </p>
+                    <p
+                      className="text-primary-text text-2xl font-bold"
+                      style={{ overflowWrap: "anywhere" }}
+                    >
+                      {formatFullValue(suggestedValue)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reason */}
+              <div>
+                <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
+                  Reason
+                </p>
+                <p className="text-primary-text text-sm leading-relaxed break-words whitespace-pre-wrap">
+                  {reason.trim()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sticky footer */}
+          <div className="border-border-card shrink-0 border-t px-6 py-4">
+            <div className="flex justify-end gap-2">
+              <DialogClose asChild>
+                <Button variant="ghost" size="sm" disabled={submitting}>
+                  Go Back
+                </Button>
+              </DialogClose>
+              <Button
+                size="sm"
+                onClick={handleConfirmedSubmit}
+                disabled={submitting}
+                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
+              >
+                {submitting ? (
+                  <>
+                    <Spinner className="h-4 w-4" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Icon
+                      icon="material-symbols:send-rounded"
+                      className="h-4 w-4"
+                      inline
+                    />
+                    Confirm & Submit
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -2359,6 +2574,7 @@ export default function ValueSuggestionsPage() {
                 }
                 onSubmit={handleFormSubmit}
                 onCancel={() => setShowForm(false)}
+                onOpenGuidelines={() => setGuidelinesOpen(true)}
               />
             )}
           </div>
@@ -3071,7 +3287,7 @@ export default function ValueSuggestionsPage() {
 
                           {/* Value comparison */}
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="min-w-0 p-3">
+                            <div className="min-w-0 px-3 pt-3">
                               <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
                                 <Icon
                                   icon="mdi:minus-circle"
@@ -3092,7 +3308,7 @@ export default function ValueSuggestionsPage() {
                                 )}
                               </div>
                             </div>
-                            <div className="min-w-0 p-3">
+                            <div className="min-w-0 px-3 pt-3">
                               <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
                                 <Icon
                                   icon="mdi:plus-circle"
@@ -3244,6 +3460,21 @@ export default function ValueSuggestionsPage() {
                             </div>
                           </div>
                         </div>
+
+                        {/* Discussion strip */}
+                        <Link
+                          href={`/values/suggestions/${suggestion.id}`}
+                          prefetch={false}
+                          onClick={(e) => e.stopPropagation()}
+                          className="border-border-card bg-tertiary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative z-10 flex w-full items-center justify-center gap-1.5 border-t py-2 text-xs transition-colors"
+                        >
+                          <Icon
+                            icon="material-symbols:chat-bubble-outline-rounded"
+                            className="h-3.5 w-3.5"
+                            inline
+                          />
+                          Discussion
+                        </Link>
                       </div>
                     );
                   })}
