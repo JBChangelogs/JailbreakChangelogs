@@ -46,8 +46,11 @@ function MarkdownBody({ children }: { children: string }) {
           </ul>
         ),
         li: ({ children }) => (
-          <li className="flex items-start gap-2">
-            <span className="text-link mt-1 shrink-0">•</span>
+          <li className="flex items-start gap-2 text-sm">
+            <Icon
+              icon="heroicons-outline:arrow-right"
+              className="text-secondary-text mt-1 h-4 w-4 shrink-0"
+            />
             <span>{children}</span>
           </li>
         ),
