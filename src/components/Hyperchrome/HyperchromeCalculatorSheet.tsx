@@ -467,7 +467,7 @@ export default function HyperchromeCalculatorModal({
                     </div>
                     <div>
                       <div className="text-primary-text text-sm font-semibold">
-                        CEO / Mansion Wildcard (Random Color)
+                        VP / Mansion Wildcard (Random Color)
                       </div>
                     </div>
                   </div>
@@ -490,7 +490,7 @@ export default function HyperchromeCalculatorModal({
                             : "text-secondary-text text-lg font-bold"
                         }
                       >
-                        CEO defeats
+                        VP defeats
                       </div>
                     </div>
                     <div

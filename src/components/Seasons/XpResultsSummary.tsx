@@ -1,6 +1,7 @@
 import { CalculationResults, Season } from "@/types/seasons";
 import { Icon } from "../ui/IconWrapper";
 import XpProgressBar from "@/components/Inventory/XpProgressBar";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 
 interface XpResultsSummaryProps {
@@ -205,29 +206,20 @@ export default function XpResultsSummary({
       {/* Main Status Card */}
       <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
         {/* XP Mode Toggle */}
-        <div className="mb-6 overflow-x-auto">
-          <div
-            role="tablist"
-            className="border-border-card flex min-w-max rounded-lg border p-1"
-          >
-            <button
-              role="tab"
-              aria-selected={xpMode === "normal"}
-              onClick={() => setXpMode("normal")}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${xpMode === "normal" ? "bg-accent text-white" : "text-secondary-text hover:text-primary-text"}`}
-            >
+        <Tabs
+          value={xpMode}
+          onValueChange={(v) => setXpMode(v as "normal" | "double")}
+          className="mb-6"
+        >
+          <TabsList fullWidth>
+            <TabsTrigger value="normal" fullWidth>
               Normal XP
-            </button>
-            <button
-              role="tab"
-              aria-selected={xpMode === "double"}
-              onClick={() => setXpMode("double")}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${xpMode === "double" ? "bg-accent text-white" : "text-secondary-text hover:text-primary-text"}`}
-            >
+            </TabsTrigger>
+            <TabsTrigger value="double" fullWidth>
               Double XP Weekend
-            </button>
-          </div>
-        </div>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <div className="mb-6 text-center">
           <div className="mb-2 flex items-center justify-center gap-2">
@@ -292,6 +284,7 @@ export default function XpResultsSummary({
             currentLevel={results.currentLevel}
             currentXp={getXpWithinCurrentLevel()}
             season={season}
+            bgStyle="tertiary"
             mobileSecondaryTextMode="xp"
           />
         </div>
