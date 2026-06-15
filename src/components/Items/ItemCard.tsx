@@ -23,6 +23,7 @@ import {
 } from "@/utils/items/itemUnlockMetadata";
 import {
   formatUnlockLevelBadge,
+  formatPlacementBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
 } from "@/utils/items/itemUnlockPresentation";
@@ -288,10 +289,12 @@ export default function ItemCard({
     : null;
   const visibleItemMetadata = isValuesPage ? itemMetadata : null;
   const metadataLevel = visibleItemMetadata?.level;
+  const metadataPlacement = visibleItemMetadata?.placement;
   const hasMetadataLevel = hasUnlockLevel(metadataLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
     visibleItemMetadata?.season,
     metadataLevel,
+    metadataPlacement,
   );
 
   const formatChange = (difference: number) => {
@@ -334,7 +337,8 @@ export default function ItemCard({
           </div>
           {isValuesPage &&
             (typeof visibleItemMetadata?.season === "number" ||
-              hasMetadataLevel) && (
+              hasMetadataLevel ||
+              metadataPlacement) && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
@@ -346,6 +350,11 @@ export default function ItemCard({
                     {hasMetadataLevel && (
                       <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                         {formatUnlockLevelBadge(metadataLevel)}
+                      </span>
+                    )}
+                    {!hasMetadataLevel && metadataPlacement && (
+                      <span className="bg-status-warning inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold text-black">
+                        {formatPlacementBadge(metadataPlacement)}
                       </span>
                     )}
                   </div>

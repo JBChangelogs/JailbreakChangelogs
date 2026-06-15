@@ -56,6 +56,7 @@ import {
 } from "@/utils/items/itemUnlockMetadata";
 import {
   formatUnlockLevelBadge,
+  formatPlacementBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
 } from "@/utils/items/itemUnlockPresentation";
@@ -276,10 +277,12 @@ export default function ItemDetailsClient({
 
   const currentItem = item;
   const metadataLevel = itemMetadata?.level;
+  const metadataPlacement = itemMetadata?.placement;
   const hasMetadataLevel = hasUnlockLevel(metadataLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
     itemMetadata?.season,
     metadataLevel,
+    metadataPlacement,
   );
 
   return (
@@ -507,7 +510,8 @@ export default function ItemDetailsClient({
                   </span>
                 )}
                 {(typeof itemMetadata?.season === "number" ||
-                  hasMetadataLevel) && (
+                  hasMetadataLevel ||
+                  metadataPlacement) && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex cursor-help items-center gap-1">
@@ -519,6 +523,11 @@ export default function ItemDetailsClient({
                         {hasMetadataLevel && (
                           <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                             {formatUnlockLevelBadge(metadataLevel)}
+                          </span>
+                        )}
+                        {!hasMetadataLevel && metadataPlacement && (
+                          <span className="bg-status-warning inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold text-black">
+                            {formatPlacementBadge(metadataPlacement)}
                           </span>
                         )}
                       </div>

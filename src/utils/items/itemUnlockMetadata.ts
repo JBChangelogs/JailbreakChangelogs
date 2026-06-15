@@ -1,11 +1,23 @@
 export interface ItemUnlockMetadataEntry {
   id: number;
+  type?: string;
+  name?: string;
   season?: number;
   level?: string;
+  placement?: string;
+}
+
+interface RawItemUnlockMetadataEntry {
+  item_id?: number;
+  type?: string;
+  name?: string;
+  season?: number;
+  level?: number;
+  placement?: string;
 }
 
 interface ItemUnlockMetadataResponse {
-  items?: ItemUnlockMetadataEntry[];
+  items?: RawItemUnlockMetadataEntry[];
 }
 
 let itemUnlockMetadataPromise: Promise<
@@ -20,7 +32,7 @@ export async function fetchItemUnlockMetadataById(): Promise<
   }
 
   itemUnlockMetadataPromise = fetch(
-    "https://assets.jailbreakchangelogs.com/assets/json/season_items.json",
+    "https://assets.jailbreakchangelogs.com/assets/json/season_items_v2.json",
   )
     .then(async (response) => {
       if (!response.ok) {
@@ -34,17 +46,17 @@ export async function fetchItemUnlockMetadataById(): Promise<
       const entries = Array.isArray(data.items) ? data.items : [];
 
       for (const entry of entries) {
-        if (typeof entry.id !== "number") continue;
+        if (typeof entry.item_id !== "number") continue;
 
-        metadataMap.set(entry.id, {
-          id: entry.id,
+        metadataMap.set(entry.item_id, {
+          id: entry.item_id,
+          type: typeof entry.type === "string" ? entry.type : undefined,
+          name: typeof entry.name === "string" ? entry.name : undefined,
           season: typeof entry.season === "number" ? entry.season : undefined,
           level:
-            typeof entry.level === "string"
-              ? entry.level
-              : typeof entry.level === "number"
-                ? String(entry.level)
-                : undefined,
+            typeof entry.level === "number" ? String(entry.level) : undefined,
+          placement:
+            typeof entry.placement === "string" ? entry.placement : undefined,
         });
       }
 
