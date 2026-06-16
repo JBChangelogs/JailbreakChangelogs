@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { bangers } from "@/app/fonts";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -215,81 +216,81 @@ export default function MostScannedLeaderboardClient({
       )}
 
       {/* Virtualized leaderboard container */}
-      <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-        <div
-          ref={parentRef}
-          className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-128 scrollbar-thin scrollbar-track-transparent overflow-y-auto pr-2"
-          style={{
-            scrollbarWidth: "thin",
-            scrollbarColor: "var(--color-border-primary) transparent",
-          }}
-        >
-          {filteredLeaderboard.length === 0 && searchTerm ? (
-            <div className="py-8 text-center">
-              <p className="text-secondary-text">
-                No users found matching &quot;{searchTerm}&quot;
-              </p>
-            </div>
-          ) : (
-            <div
-              style={{
-                height: `${virtualizer.getTotalSize()}px`,
-                width: "100%",
-                position: "relative",
-              }}
-            >
-              {virtualizer.getVirtualItems().map((virtualItem) => {
-                const user = filteredLeaderboard[virtualItem.index];
-                const index = virtualItem.index;
+      <div
+        ref={parentRef}
+        className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-128 scrollbar-thin scrollbar-track-transparent overflow-y-auto pr-2"
+        style={{
+          scrollbarWidth: "thin",
+          scrollbarColor: "var(--color-border-primary) transparent",
+        }}
+      >
+        {filteredLeaderboard.length === 0 && searchTerm ? (
+          <div className="py-8 text-center">
+            <p className="text-secondary-text">
+              No users found matching &quot;{searchTerm}&quot;
+            </p>
+          </div>
+        ) : (
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const user = filteredLeaderboard[virtualItem.index];
+              const index = virtualItem.index;
 
-                const userData = userDataMap[user.user_id];
-                const displayName =
-                  userData?.displayName ||
-                  userData?.name ||
-                  `User ${user.user_id}`;
-                const username = userData?.name || user.user_id;
-                const avatarUrl = getUserAvatar(user.user_id);
+              const userData = userDataMap[user.user_id];
+              const displayName =
+                userData?.displayName ||
+                userData?.name ||
+                `User ${user.user_id}`;
+              const username = userData?.name || user.user_id;
+              const avatarUrl = getUserAvatar(user.user_id);
 
-                return (
+              return (
+                <div
+                  key={user.user_id}
+                  data-index={virtualItem.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
                   <div
-                    key={user.user_id}
-                    data-index={virtualItem.index}
-                    ref={virtualizer.measureElement}
+                    className={`mb-3 rounded-lg border p-3 transition-colors ${
+                      index <= 2
+                        ? ""
+                        : "border-border-card bg-tertiary-bg hover:border-border-focus"
+                    }`}
                     style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      transform: `translateY(${virtualItem.start}px)`,
+                      ...(index === 0 && {
+                        background:
+                          "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
+                        borderColor: "hsl(45, 100%, 50%, 0.5)",
+                      }),
+                      ...(index === 1 && {
+                        background:
+                          "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
+                        borderColor: "hsl(0, 0%, 75%, 0.5)",
+                      }),
+                      ...(index === 2 && {
+                        background:
+                          "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
+                        borderColor: "hsl(30, 100%, 50%, 0.5)",
+                      }),
                     }}
                   >
-                    <div
-                      className={`mb-3 flex flex-col gap-3 rounded-lg border p-3 transition-colors sm:flex-row sm:items-center ${
-                        index <= 2
-                          ? ""
-                          : "border-border-card bg-tertiary-bg hover:border-border-focus"
-                      }`}
-                      style={{
-                        ...(index === 0 && {
-                          background:
-                            "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
-                          borderColor: "hsl(45, 100%, 50%, 0.5)",
-                        }),
-                        ...(index === 1 && {
-                          background:
-                            "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
-                          borderColor: "hsl(0, 0%, 75%, 0.5)",
-                        }),
-                        ...(index === 2 && {
-                          background:
-                            "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
-                          borderColor: "hsl(30, 100%, 50%, 0.5)",
-                        }),
-                      }}
-                    >
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
                         <div
-                          className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold sm:h-8 sm:w-8 ${
+                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-8 sm:w-8 ${
                             index <= 2 ? "text-black" : "text-primary-text"
                           }`}
                           style={{
@@ -309,53 +310,41 @@ export default function MostScannedLeaderboardClient({
                         >
                           #{index + 1}
                         </div>
-
-                        {/* Avatar */}
                         <div className="bg-quaternary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
                           <LeaderboardAvatar
                             avatarUrl={avatarUrl}
                             displayName={displayName}
                           />
                         </div>
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start gap-2">
-                          <div className="min-w-0 flex-1">
-                            <a
-                              href={`https://www.roblox.com/users/${user.user_id}/profile`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-text hover:text-link-hover font-medium wrap-break-word transition-colors"
-                            >
-                              {displayName}
-                            </a>
-                            <div className="text-secondary-text text-sm wrap-break-word">
-                              @{username} • {user.upsert_count.toLocaleString()}{" "}
-                              scans
-                            </div>
-                          </div>
-                          <Button
-                            asChild
-                            size="sm"
-                            className="mt-1 shrink-0 text-xs"
+                        <div className="flex min-w-0 flex-col">
+                          <a
+                            href={`https://www.roblox.com/users/${user.user_id}/profile`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`${bangers.className} text-primary-text hover:text-link-hover truncate text-xl tracking-wide transition-colors`}
                           >
-                            <Link
-                              href={`/inventories/${user.user_id}`}
-                              prefetch={false}
-                            >
-                              View Inventory
-                            </Link>
-                          </Button>
+                            {username}
+                          </a>
+                          <span className="text-secondary-text truncate text-xs">
+                            {user.upsert_count.toLocaleString()} scans
+                          </span>
                         </div>
                       </div>
+                      <Button asChild size="sm" className="shrink-0 text-xs">
+                        <Link
+                          href={`/inventories/${user.user_id}`}
+                          prefetch={false}
+                        >
+                          View Inventory
+                        </Link>
+                      </Button>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
