@@ -42,7 +42,7 @@ const markdownComponents: Components = {
       <Icon
         icon="heroicons-outline:arrow-right"
         aria-hidden="true"
-        className="text-secondary-textmt-1 h-4 w-4"
+        className="text-secondary-text mt-1 h-4 w-4"
       />
       <span>{children}</span>
     </li>
