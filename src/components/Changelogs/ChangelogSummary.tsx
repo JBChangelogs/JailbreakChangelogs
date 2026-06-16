@@ -9,56 +9,48 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { trackEvent } from "@/utils/analytics/rybbit";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import ReactMarkdown, { Components } from "react-markdown";
 
 interface ChangelogSummaryProps {
   changelogId: number;
   content: string;
 }
 
+const markdownComponents: Components = {
+  h2: ({ children }) => (
+    <h2 className="text-primary-text mt-4 mb-2 text-base font-semibold first:mt-0">
+      {children}
+    </h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="text-primary-text mt-3 mb-1 text-sm font-semibold first:mt-0">
+      {children}
+    </h3>
+  ),
+  p: ({ children }) => (
+    <p className="text-secondary-text mb-2 text-sm">{children}</p>
+  ),
+  strong: ({ children }) => (
+    <strong className="text-primary-text font-semibold">{children}</strong>
+  ),
+  ul: ({ children }) => (
+    <ul className="text-secondary-text space-y-1">{children}</ul>
+  ),
+  li: ({ children }) => (
+    <li className="flex items-start mt-0.5 gap-2 text-sm">
+      <Icon
+        icon="heroicons-outline:arrow-right"
+        aria-hidden="true"
+        className="text-secondary-textmt-1 h-4 w-4"
+      />
+      <span>{children}</span>
+    </li>
+  ),
+};
+
 function MarkdownBody({ children }: { children: string }) {
   return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      components={{
-        h2: ({ children }) => (
-          <h2 className="text-primary-text mt-4 mb-2 text-base font-semibold first:mt-0">
-            {children}
-          </h2>
-        ),
-        h3: ({ children }) => (
-          <h3 className="text-primary-text mt-3 mb-1 text-sm font-semibold first:mt-0">
-            {children}
-          </h3>
-        ),
-        p: ({ children }) => (
-          <p className="text-secondary-text mb-2 text-sm">{children}</p>
-        ),
-        strong: ({ children }) => (
-          <strong className="text-primary-text font-semibold">
-            {children}
-          </strong>
-        ),
-        ul: ({ children }) => (
-          <ul className="text-secondary-text mb-2 space-y-1 text-sm">
-            {children}
-          </ul>
-        ),
-        li: ({ children }) => (
-          <li className="flex items-start gap-2 text-sm">
-            <Icon
-              icon="heroicons-outline:arrow-right"
-              aria-hidden="true"
-              className="text-secondary-text mt-1 h-4 w-4 shrink-0"
-            />
-            <span>{children}</span>
-          </li>
-        ),
-      }}
-    >
-      {children}
-    </ReactMarkdown>
+    <ReactMarkdown components={markdownComponents}>{children}</ReactMarkdown>
   );
 }
 
