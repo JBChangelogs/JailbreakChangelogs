@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/Spinner";
 import {
   getItemImagePath,
@@ -18,7 +18,12 @@ import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { formatFullValue } from "@/utils/trading/values";
 import { Item } from "@/types";
 import {
+  fetchItemUnlockMetadataById,
+  ItemUnlockMetadataEntry,
+} from "@/utils/items/itemUnlockMetadata";
+import {
   formatUnlockLevelBadge,
+  formatPlacementBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
 } from "@/utils/items/itemUnlockPresentation";
@@ -51,6 +56,7 @@ interface OGItem {
   level: number | null;
   timesTraded: number;
   id: string;
+  item_id: number;
   categoryTitle: string;
   info: Array<{
     title: string;
@@ -88,17 +94,39 @@ export default function OGItemCard({
 }: OGItemCardProps) {
   const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
+  const [itemUnlockMetadata, setItemUnlockMetadata] =
+    useState<ItemUnlockMetadataEntry | null>(null);
   const isOriginalOwner = item.isOriginalOwner;
   const isDuplicate = duplicateCount > 1;
   const displayedSeason =
     typeof item.season === "number" ? item.season : undefined;
   const displayedLevel =
     typeof item.level === "number" ? String(item.level) : undefined;
+  const displayedPlacement =
+    typeof itemUnlockMetadata?.placement === "string"
+      ? itemUnlockMetadata.placement
+      : undefined;
   const hasDisplayedLevel = hasUnlockLevel(displayedLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
     displayedSeason,
     displayedLevel,
+    displayedPlacement,
   );
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchItemUnlockMetadataById()
+      .then((metadataById) => {
+        if (!isMounted) return;
+        setItemUnlockMetadata(metadataById.get(item.item_id) ?? null);
+      })
+      .catch(() => {
+        if (isMounted) setItemUnlockMetadata(null);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [item.item_id]);
 
   /* oxlint-disable jsx-a11y/prefer-tag-over-role */
   return (
@@ -332,25 +360,28 @@ export default function OGItemCard({
         </div>
       </div>
 
-      {/* Season and Level badges - always show container for consistent layout */}
+      {/* Season, Level, and Placement badges */}
       <div className="mt-3 flex min-h-10 justify-center gap-2 pt-3">
-        {(typeof displayedSeason === "number" || hasDisplayedLevel) && (
+        {(typeof displayedSeason === "number" ||
+          hasDisplayedLevel ||
+          displayedPlacement) && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex cursor-help items-center gap-2">
+              <div className="flex cursor-help items-center gap-1">
                 {typeof displayedSeason === "number" && (
-                  <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border">
-                    <span className="text-form-button-text text-xs font-bold">
-                      S{displayedSeason}
-                    </span>
-                  </div>
+                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                    S{displayedSeason}
+                  </span>
                 )}
                 {hasDisplayedLevel && (
-                  <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border">
-                    <span className="text-form-button-text text-xs font-bold">
-                      {formatUnlockLevelBadge(displayedLevel)}
-                    </span>
-                  </div>
+                  <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                    {formatUnlockLevelBadge(displayedLevel)}
+                  </span>
+                )}
+                {!hasDisplayedLevel && displayedPlacement && (
+                  <span className="bg-status-warning inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold text-black">
+                    {formatPlacementBadge(displayedPlacement)}
+                  </span>
                 )}
               </div>
             </TooltipTrigger>

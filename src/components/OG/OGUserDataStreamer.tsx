@@ -9,6 +9,7 @@ interface OGItem {
   level: number | null;
   timesTraded: number;
   id: string;
+  item_id: number;
   categoryTitle: string;
   info: Array<{
     title: string;

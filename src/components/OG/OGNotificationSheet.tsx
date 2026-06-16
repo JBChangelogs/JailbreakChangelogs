@@ -335,7 +335,7 @@ export default function OGNotificationSheet({
           {/* User Info - Show Roblox data if available */}
           {user?.roblox_id && (
             <div className="border-border-card bg-tertiary-bg mt-6 flex shrink-0 items-center gap-3 rounded-xl border p-3">
-              <div className="bg-tertiary-bg border-border-card relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2">
+              <div className="bg-quaternary-bg border-border-card relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2">
                 {!avatarError ? (
                   <Image
                     src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${user.roblox_id}/avatar-headshot`}
