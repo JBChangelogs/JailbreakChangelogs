@@ -7,10 +7,17 @@ import { safeLocalStorage } from "@/utils/storage/safeStorage";
 const REPLAY_1_TIMESTAMP = 1781976300;
 const REPLAY_1_LIVE_UNTIL = REPLAY_1_TIMESTAMP + 900; // show "LIVE NOW" for 15 min
 const REPLAY_2_TIMESTAMP = 1782071100;
+const REPLAY_2_LIVE_UNTIL = REPLAY_2_TIMESTAMP + 900; // show "LIVE NOW" for 15 min
+const REPLAY_3_TIMESTAMP = 1782091500;
 const REPLAY_1_URL = "https://www.roblox.com/events/6421592384919962212";
 const REPLAY_2_URL = "https://www.roblox.com/events/6667625703820886590";
+const REPLAY_3_URL = "https://www.roblox.com/events/8810279197240066706";
 const GAME_URL = "https://www.roblox.com/games/606849621/Jailbreak";
-const DISMISS_KEY = "jailbreak-live-event-replay-2026-dismissed";
+const DISMISS_KEYS = {
+  1: "jailbreak-live-event-replay-1-2026-dismissed",
+  2: "jailbreak-live-event-replay-2-2026-dismissed",
+  3: "jailbreak-live-event-replay-3-2026-dismissed",
+} as const;
 
 interface TimeLeft {
   days: number;
@@ -24,7 +31,9 @@ type Phase =
   | { replay: 1; timeLeft: TimeLeft }
   | { replay: "1-live" }
   | { replay: 2; timeLeft: TimeLeft }
-  | { replay: "2-live" };
+  | { replay: "2-live" }
+  | { replay: 3; timeLeft: TimeLeft }
+  | { replay: "3-live" };
 
 function getPhase(): Phase {
   const now = Math.floor(Date.now() / 1000);
@@ -59,7 +68,23 @@ function getPhase(): Phase {
     };
   }
 
-  return { replay: "2-live" };
+  if (now < REPLAY_2_LIVE_UNTIL) return { replay: "2-live" };
+
+  if (now < REPLAY_3_TIMESTAMP) {
+    const diff = REPLAY_3_TIMESTAMP - now;
+    return {
+      replay: 3,
+      timeLeft: {
+        days: Math.floor(diff / 86400),
+        hours: Math.floor((diff % 86400) / 3600),
+        minutes: Math.floor((diff % 3600) / 60),
+        seconds: diff % 60,
+        expired: false,
+      },
+    };
+  }
+
+  return { replay: "3-live" };
 }
 
 function pad(n: number): string {
@@ -76,43 +101,57 @@ const strokeStyle = {
 
 export default function EventCountdownBanner() {
   const shouldShow = isFeatureEnabled("LIVE_EVENT_COUNTDOWN");
-  const [isVisible, setIsVisible] = useState<boolean | null>(null);
+  const [dismissedReplays, setDismissedReplays] = useState<Set<number>>(
+    new Set(),
+  );
   const [phase, setPhase] = useState<Phase | null>(null);
 
   useEffect(() => {
-    const dismissed = safeLocalStorage.getItem(DISMISS_KEY);
-    if (dismissed === "true") {
-      setIsVisible(false);
-    } else {
-      setIsVisible(true);
-      setPhase(getPhase());
-    }
+    const dismissed = new Set<number>();
+    ([1, 2, 3] as const).forEach((n) => {
+      if (safeLocalStorage.getItem(DISMISS_KEYS[n]) === "true")
+        dismissed.add(n);
+    });
+    setDismissedReplays(dismissed);
+    setPhase(getPhase());
   }, []);
 
   useEffect(() => {
-    if (!isVisible) return;
-    const interval = setInterval(() => {
-      setPhase(getPhase());
-    }, 1000);
+    const interval = setInterval(() => setPhase(getPhase()), 1000);
     return () => clearInterval(interval);
-  }, [isVisible]);
+  }, []);
+
+  if (!shouldShow || !phase) return null;
+
+  const isLive =
+    phase.replay === "1-live" ||
+    phase.replay === "2-live" ||
+    phase.replay === "3-live";
+  const isCountdown =
+    phase.replay === 1 || phase.replay === 2 || phase.replay === 3;
+  const replayNum =
+    phase.replay === 1 || phase.replay === "1-live"
+      ? 1
+      : phase.replay === 2 || phase.replay === "2-live"
+        ? 2
+        : 3;
+  const eventUrl =
+    replayNum === 1
+      ? REPLAY_1_URL
+      : replayNum === 2
+        ? REPLAY_2_URL
+        : REPLAY_3_URL;
+
+  if (dismissedReplays.has(replayNum)) return null;
 
   const handleDismiss = () => {
-    setIsVisible(false);
-    safeLocalStorage.setItem(DISMISS_KEY, "true");
+    safeLocalStorage.setItem(DISMISS_KEYS[replayNum as 1 | 2 | 3], "true");
+    setDismissedReplays((prev) => new Set([...prev, replayNum]));
   };
-
-  if (!shouldShow || isVisible !== true || !phase) return null;
-
-  const isReplay1Live = phase.replay === "1-live";
-  const isReplay2Live = phase.replay === "2-live";
-  const isCountdown = phase.replay === 1 || phase.replay === 2;
-  const replayNum = phase.replay === 1 || phase.replay === "1-live" ? 1 : 2;
-  const eventUrl = replayNum === 1 ? REPLAY_1_URL : REPLAY_2_URL;
 
   const parts: string[] = [];
   if (isCountdown) {
-    const { timeLeft } = phase as { replay: 1 | 2; timeLeft: TimeLeft };
+    const { timeLeft } = phase as { replay: 1 | 2 | 3; timeLeft: TimeLeft };
     if (timeLeft.days > 0) parts.push(`${timeLeft.days} days`);
     if (timeLeft.hours > 0) parts.push(`${pad(timeLeft.hours)} hours`);
     parts.push(`${pad(timeLeft.minutes)} minutes`);
@@ -127,12 +166,10 @@ export default function EventCountdownBanner() {
             className="text-xs font-black tracking-widest uppercase"
             style={strokeStyle}
           >
-            {isReplay1Live || isReplay2Live
-              ? "🎉 LIVE NOW"
-              : `📺 REPLAY #${replayNum}`}
+            {isLive ? "🎉 LIVE NOW" : `📺 REPLAY #${replayNum}`}
           </span>
 
-          {isReplay1Live || isReplay2Live ? (
+          {isLive ? (
             <>
               <span
                 className="text-xs font-semibold whitespace-nowrap"
