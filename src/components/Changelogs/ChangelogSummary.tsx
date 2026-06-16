@@ -10,6 +10,7 @@ import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import ReactMarkdown, { Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChangelogSummaryProps {
   changelogId: number;
@@ -37,7 +38,7 @@ const markdownComponents: Components = {
     <ul className="text-secondary-text space-y-1">{children}</ul>
   ),
   li: ({ children }) => (
-    <li className="flex items-start mt-0.5 gap-2 text-sm">
+    <li className="mt-0.5 flex items-start gap-2 text-sm">
       <Icon
         icon="heroicons-outline:arrow-right"
         aria-hidden="true"
@@ -50,7 +51,9 @@ const markdownComponents: Components = {
 
 function MarkdownBody({ children }: { children: string }) {
   return (
-    <ReactMarkdown components={markdownComponents}>{children}</ReactMarkdown>
+    <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+      {children}
+    </ReactMarkdown>
   );
 }
 
