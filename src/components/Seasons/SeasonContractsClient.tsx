@@ -53,23 +53,33 @@ export default function SeasonContractsClient({
           {/* Team Header */}
           <div className="text-center">
             <div className="relative inline-block">
-              <div className="border-border-card bg-secondary-bg relative rounded-2xl border px-8 py-4">
+              <div
+                className={`relative rounded-2xl border px-8 py-4 ${
+                  team === "Criminal"
+                    ? "border-orange-500/30 bg-orange-500/10"
+                    : "border-blue-500/30 bg-blue-500/10"
+                }`}
+              >
                 <div className="flex items-center justify-center gap-4">
                   {/* Team Icon */}
                   {team === "Criminal" ? (
                     <Icon
                       icon="ri:criminal-fill"
-                      className="text-primary-text h-8 w-8 shrink-0 sm:h-10 sm:w-10"
+                      className="text-orange-500 h-8 w-8 shrink-0 sm:h-10 sm:w-10"
                       inline={true}
                     />
                   ) : (
                     <Icon
                       icon="game-icons:police-officer-head"
-                      className="text-primary-text h-8 w-8 shrink-0 sm:h-10 sm:w-10"
+                      className="text-blue-500 h-8 w-8 shrink-0 sm:h-10 sm:w-10"
                       inline={true}
                     />
                   )}
-                  <span className="text-primary-text text-2xl font-bold tracking-wide uppercase">
+                  <span
+                    className={`text-2xl font-bold tracking-wide uppercase ${
+                      team === "Criminal" ? "text-orange-500" : "text-blue-500"
+                    }`}
+                  >
                     {team} Contracts
                   </span>
                 </div>
@@ -82,28 +92,44 @@ export default function SeasonContractsClient({
             {grouped[team].map((c, idx) => (
               <div
                 key={`${team}-${c.name}-${idx}`}
-                className="group border-border-card relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300"
+                className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 ${
+                  team === "Criminal"
+                    ? "border-orange-500/30 bg-orange-500/5 hover:border-orange-500/60"
+                    : "border-blue-500/30 bg-blue-500/5 hover:border-blue-500/60"
+                }`}
               >
                 {/* Season Pass Corner Badge */}
                 {c.reqseasonpass && (
                   <div className="absolute top-3 right-3 z-10">
-                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                    <span
+                      className={`inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${
+                        team === "Criminal"
+                          ? "border-orange-500/30 bg-orange-950/40 text-orange-200"
+                          : "border-blue-500/30 bg-blue-950/40 text-blue-200"
+                      }`}
+                    >
                       Season Pass
                     </span>
                   </div>
                 )}
 
                 {/* Contract Header */}
-                <div className="bg-secondary-bg px-4 py-3">
+                <div
+                  className={`px-4 py-3 ${
+                    team === "Criminal" ? "bg-orange-500/10" : "bg-blue-500/10"
+                  }`}
+                >
                   <div
-                    className={`text-primary-text text-2xl uppercase ${bangers.className}`}
+                    className={`text-2xl uppercase ${bangers.className} ${
+                      team === "Criminal" ? "text-orange-400" : "text-blue-400"
+                    }`}
                   >
                     Contract {idx + 1}
                   </div>
                 </div>
 
                 {/* Contract Body */}
-                <div className="bg-secondary-bg relative flex flex-1 flex-col px-4 py-6">
+                <div className="relative flex flex-1 flex-col px-4 py-6">
                   <div className="relative z-10 flex h-full flex-col">
                     {/* Task Description */}
                     <div className="mb-4 flex flex-1 items-center justify-center">
@@ -124,17 +150,23 @@ export default function SeasonContractsClient({
                         </div>
                       </div>
                     )}
-
                     {/* Reward Section */}
                     <div className="mt-auto">
-                      <div className="relative">
-                        <div className="bg-primary-bg absolute inset-0 rounded-xl opacity-50 blur-sm"></div>
-                        <div className="border-border-card bg-tertiary-bg relative rounded-xl border px-4 py-3">
-                          <div
-                            className={`text-primary-text text-2xl uppercase ${bangers.className} text-center`}
-                          >
-                            REWARD: {c.reward} XP
-                          </div>
+                      <div
+                        className={`relative rounded-xl border px-4 py-3 transition-colors ${
+                          team === "Criminal"
+                            ? "border-orange-500/40 bg-orange-500/10 shadow-[0_0_15px_rgba(249,115,22,0.15)]"
+                            : "border-blue-500/40 bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.15)]"
+                        }`}
+                      >
+                        <div
+                          className={`text-2xl uppercase ${bangers.className} text-center ${
+                            team === "Criminal"
+                              ? "text-orange-600 dark:text-orange-400"
+                              : "text-blue-600 dark:text-blue-400"
+                          }`}
+                        >
+                          REWARD: {c.reward} XP
                         </div>
                       </div>
                     </div>
