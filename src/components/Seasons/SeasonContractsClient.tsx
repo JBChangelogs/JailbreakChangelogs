@@ -17,6 +17,82 @@ export interface SeasonContractProps {
   updatedAt?: number;
 }
 
+type ContractWikiNote = {
+  match: (desc: string, name: string) => boolean;
+  note: string;
+};
+
+const CONTRACT_WIKI_NOTES: ContractWikiNote[] = [
+  // ── Police ──────────────────────────────────────────────────────────────
+  {
+    match: (d, n) =>
+      n === "AccumArrestBounty" ||
+      (d.includes("arrest") && d.includes("worth") && d.includes("bounty")),
+    note: "Goal varies per player (e.g., 5,500–6,000). Displayed value may be approximate.",
+  },
+  {
+    match: (d) =>
+      d.includes("arrest") &&
+      d.includes("criminals") &&
+      !d.includes("worth") &&
+      !d.includes("with a"),
+    note: "The variable goal can be between 12–17 criminals.",
+  },
+  {
+    match: (d) => d.includes("pit maneuver"),
+    note: "The variable goal can be between 5–7 criminals.",
+  },
+  {
+    match: (d) => d.includes("taze"),
+    note: "The variable goal can be between 4–6 criminals.",
+  },
+  {
+    match: (d) => d.includes("arrest a criminal with"),
+    note: "The bounty threshold can be $2,500 or $3,000.",
+  },
+  // ── Criminal ────────────────────────────────────────────────────────────
+  {
+    match: (d) =>
+      d.includes("rob the bank") ||
+      (d.includes("rob") && d.includes("bank") && d.includes("times")),
+    note: "The variable goal can be 3 or 4 bank robberies.",
+  },
+  {
+    match: (d) => d.includes("power plant"),
+    note: "The criminal must not die. If they die, the contract resets and a 15-second penalty is added.",
+  },
+  {
+    match: (d) => d.includes("rob") && d.includes("train"),
+    note: "Works for both trains despite the grammar mistake implying it's only the Cargo Train.",
+  },
+  {
+    match: (d) =>
+      d.includes("take down") && d.includes("police") && d.includes("dying"),
+    note: "The variable goal can be between 4–6 police. If the player dies as a criminal, the contract resets with a 15-second penalty. Police kills on criminals and prisoners also count. Melee kills (Sword or Baton) don't count.",
+  },
+  {
+    match: (d) => d.includes("knock over"),
+    note: "The variable goal can be between 400–410 items.",
+  },
+  {
+    match: (d) => d.includes("deal") && d.includes("damage"),
+    note: "The variable goal can be between 1,800–2,200 damage.",
+  },
+  {
+    match: (d) => d.includes("small stores"),
+    note: "Must rob both the Donut Store and Gas Station without dying. Can rob the same store twice. If the criminal dies, the contract resets with a 15-second penalty.",
+  },
+  {
+    match: (d) => d.includes("collect a bounty"),
+    note: "The criminal must not die. If they die, the contract resets and a 15-second penalty is added.",
+  },
+];
+
+function getContractNote(description: string, name: string): string | null {
+  const d = description.toLowerCase();
+  return CONTRACT_WIKI_NOTES.find((n) => n.match(d, name))?.note ?? null;
+}
+
 export default function SeasonContractsClient({
   contracts,
   updatedAt,
@@ -40,14 +116,6 @@ export default function SeasonContractsClient({
 
   return (
     <div className="space-y-12">
-      {formatUpdatedAt && (
-        <div className="text-center">
-          <span className="border-border-card bg-secondary-bg text-secondary-text inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm backdrop-blur-sm">
-            Last updated: {formatUpdatedAt}
-          </span>
-        </div>
-      )}
-
       {(["Criminal", "Police"] as const).map((team) => (
         <div key={team} className="space-y-6">
           {/* Team Header */}
@@ -55,7 +123,6 @@ export default function SeasonContractsClient({
             <div className="relative inline-block">
               <div className="border-border-card bg-secondary-bg relative rounded-2xl border px-8 py-4">
                 <div className="flex items-center justify-center gap-4">
-                  {/* Team Icon */}
                   {team === "Criminal" ? (
                     <Icon
                       icon="ri:criminal-fill"
@@ -79,72 +146,114 @@ export default function SeasonContractsClient({
 
           {/* Contracts Grid */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {grouped[team].map((c, idx) => (
-              <div
-                key={`${team}-${c.name}-${idx}`}
-                className="group border-border-card relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300"
-              >
-                {/* Season Pass Corner Badge */}
-                {c.reqseasonpass && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                      Season Pass
-                    </span>
-                  </div>
-                )}
-
-                {/* Contract Header */}
-                <div className="bg-secondary-bg px-4 py-3">
+            {grouped[team].map((c, idx) => {
+              const wikiNote = getContractNote(c.description, c.name);
+              return (
+                <div
+                  key={`${team}-${c.name}-${idx}`}
+                  className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 ${
+                    c.reqseasonpass
+                      ? "border-supporter-gold-border/50"
+                      : "border-border-card"
+                  }`}
+                  style={
+                    c.reqseasonpass
+                      ? {
+                          boxShadow:
+                            "0 0 18px color-mix(in srgb, var(--color-supporter-gold-border) 12%, transparent)",
+                        }
+                      : undefined
+                  }
+                >
+                  {/* Contract Header */}
                   <div
-                    className={`text-primary-text text-2xl uppercase ${bangers.className}`}
+                    className={`flex items-center justify-between px-4 py-3 ${
+                      c.reqseasonpass
+                        ? "bg-supporter-gold-bg"
+                        : "bg-secondary-bg"
+                    }`}
                   >
-                    Contract {idx + 1}
-                  </div>
-                </div>
-
-                {/* Contract Body */}
-                <div className="bg-secondary-bg relative flex flex-1 flex-col px-4 py-6">
-                  <div className="relative z-10 flex h-full flex-col">
-                    {/* Task Description */}
-                    <div className="mb-4 flex flex-1 items-center justify-center">
-                      <div className="text-primary-text text-center text-xl leading-tight font-bold">
-                        {c.description}
-                      </div>
+                    <div
+                      className={`text-2xl uppercase ${bangers.className} ${
+                        c.reqseasonpass
+                          ? "text-warning-dark"
+                          : "text-primary-text"
+                      }`}
+                    >
+                      Contract {idx + 1}
                     </div>
+                    {c.reqseasonpass && (
+                      <span className="border-supporter-gold-border/40 bg-supporter-gold-bg text-warning-dark inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold">
+                        <Icon
+                          icon="mdi:crown"
+                          className="h-3.5 w-3.5"
+                          inline={true}
+                        />
+                        Season Pass
+                      </span>
+                    )}
+                  </div>
 
-                    {/* Special Note */}
-                    {c.name === "AccumArrestBounty" && (
-                      <div className="bg-button-info/10 border-button-info mb-4 rounded-lg border p-3">
-                        <div className="text-primary-text flex items-center gap-2 text-sm">
-                          <span className="font-medium">Note:</span>
-                          <span>
-                            This goal varies per player (e.g., 5,500–6,000).
-                            Displayed value may be approximate.
-                          </span>
+                  {/* Contract Body */}
+                  <div className="bg-secondary-bg relative flex flex-1 flex-col px-4 py-6">
+                    <div className="relative z-10 flex h-full flex-col">
+                      {/* Task Description */}
+                      <div className="mb-4 flex flex-1 items-center justify-center">
+                        <div className="text-primary-text text-center text-xl leading-tight font-bold">
+                          {c.description}
                         </div>
                       </div>
-                    )}
 
-                    {/* Reward Section */}
-                    <div className="mt-auto">
-                      <div className="relative">
-                        <div className="bg-primary-bg absolute inset-0 rounded-xl opacity-50 blur-sm"></div>
-                        <div className="border-border-card bg-tertiary-bg relative rounded-xl border px-4 py-3">
-                          <div
-                            className={`text-primary-text text-2xl uppercase ${bangers.className} text-center`}
-                          >
-                            REWARD: {c.reward} XP
+                      {/* Wiki Note */}
+                      {wikiNote && (
+                        <div className="bg-button-info/10 border-button-info mb-4 rounded-lg border p-3">
+                          <div className="text-primary-text text-center text-sm">
+                            {wikiNote}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Reward Section */}
+                      <div className="mt-auto">
+                        <div className="relative">
+                          <div className="bg-primary-bg absolute inset-0 rounded-xl opacity-50 blur-sm"></div>
+                          <div className="border-border-card bg-tertiary-bg relative rounded-xl border px-4 py-3">
+                            <div
+                              className={`text-primary-text text-2xl uppercase ${bangers.className} text-center`}
+                            >
+                              REWARD: {c.reward} XP
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ))}
+
+      <div className="flex items-center justify-between">
+        <p className="text-secondary-text text-xs">
+          Contract notes sourced from the{" "}
+          <a
+            href="https://jailbreak.fandom.com/wiki/Contracts"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-link hover:text-link-hover underline underline-offset-2 transition-colors"
+          >
+            Jailbreak Wiki
+          </a>
+        </p>
+        {formatUpdatedAt && (
+          <p className="text-secondary-text text-sm">
+            <span className="font-semibold">Last Updated:</span>{" "}
+            {formatUpdatedAt}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
