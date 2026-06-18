@@ -1,49 +1,72 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+type ConnectionStatus = "online" | "offline" | "reconnected";
 
 export default function OfflineDetector() {
-  // Start with false (online) to avoid false offline messages
-  // Only show offline when we actually detect offline events
-  const [isOffline, setIsOffline] = useState(false);
+  const [status, setStatus] = useState<ConnectionStatus>("online");
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-
-    // Check initial state after component mounts
-    // This ensures we get the actual current state rather than relying on initial navigator.onLine
-    const checkInitialState = () => {
-      if (typeof navigator !== "undefined" && !navigator.onLine) {
-        setIsOffline(true);
-      }
+    const handleOnline = () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      setStatus("reconnected");
+      timerRef.current = setTimeout(() => setStatus("online"), 3000);
     };
 
-    // Add event listeners
+    const handleOffline = () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      setStatus("offline");
+    };
+
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    // Check initial state after a brief delay to ensure navigator is ready
-    const timeoutId = setTimeout(checkInitialState, 100);
+    const initCheck = setTimeout(() => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        setStatus("offline");
+      }
+    }, 100);
 
-    // Cleanup
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
-      clearTimeout(timeoutId);
+      clearTimeout(initCheck);
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, []);
 
-  if (!isOffline) return null;
+  const isVisible = status !== "online";
+  const isOffline = status === "offline";
 
   return (
-    <div className="w-full bg-[#B45309] text-white">
-      <div className="container mx-auto px-4 py-2">
-        <div className="relative flex flex-col items-center justify-center gap-2 lg:flex-row lg:gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-center text-xs font-semibold text-white">
-              You are currently offline. Check your internet connection.
-            </span>
+    <div
+      className={`grid transition-all duration-300 ease-in-out ${
+        isVisible ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+      }`}
+    >
+      <div className="overflow-hidden">
+        <div
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          className="w-full transition-colors duration-300"
+          style={{
+            backgroundColor: isOffline
+              ? "var(--color-status-warning)"
+              : "var(--color-form-success)",
+            color: isOffline ? "var(--color-primary-bg)" : "#fff",
+          }}
+        >
+          <div className="container mx-auto px-4 py-2">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-center text-xs font-semibold">
+                {isOffline
+                  ? "You are currently offline. Check your internet connection."
+                  : "You're back online!"}
+              </span>
+            </div>
           </div>
         </div>
       </div>
