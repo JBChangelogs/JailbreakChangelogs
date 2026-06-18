@@ -1300,7 +1300,6 @@ function SuggestionGuidelinesDialog({
 }) {
   useEffect(() => {
     if (!open) return;
-    if (!window.matchMedia("(max-width: 640px)").matches) return;
 
     const AD_IDS = ["np-bottom-anchor", "np-video-player"];
 
