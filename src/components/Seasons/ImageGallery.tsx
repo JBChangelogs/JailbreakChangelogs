@@ -9,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Reward {
   id: number;
@@ -29,6 +30,8 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
     stopOnMouseEnter: true,
     stopOnFocusIn: true,
   });
+
+  const { resolvedTheme } = useTheme();
 
   const filteredRewards = rewards.filter((reward) => {
     // Include rewards with valid images
@@ -84,11 +87,11 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
         </CarouselContent>
         <CarouselPrevious
           variant="ghost"
-          className="top-1/2 left-2 z-10 h-8 w-8 -translate-y-1/2 rounded-full bg-black/50 text-white hover:bg-black/70"
+          className={`top-1/2 left-2 z-10 h-8 w-8 -translate-y-1/2 rounded-full text-white hover:bg-black/70 ${resolvedTheme === "dark" ? "bg-black/50" : "bg-white/50"}`}
         />
         <CarouselNext
           variant="ghost"
-          className="top-1/2 right-2 z-10 h-8 w-8 -translate-y-1/2 rounded-full bg-black/50 text-white hover:bg-black/70"
+          className={`top-1/2 right-2 z-10 h-8 w-8 -translate-y-1/2 rounded-full text-white hover:bg-black/70 ${resolvedTheme === "dark" ? "bg-black/50" : "bg-white/50"}`}
         />
       </Carousel>
     </div>
