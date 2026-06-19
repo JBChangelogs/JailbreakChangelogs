@@ -15,7 +15,11 @@ import {
   getVideoPath,
   handleImageError,
 } from "@/utils/ui/images";
-import { getCategoryIcon, getCategoryColor } from "@/utils/items/categoryIcons";
+import {
+  getCategoryIcon,
+  getCategoryColor,
+  CategoryIconBadge,
+} from "@/utils/items/categoryIcons";
 import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
@@ -182,6 +186,49 @@ export default function DupeItemCard({
 
       {/* Item Image */}
       <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg">
+        {(itemData?.is_limited === 1 || itemData?.is_seasonal === 1) && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="absolute top-2 right-2 z-10">
+                <CategoryIconBadge
+                  type={item.categoryTitle}
+                  isLimited={itemData?.is_limited === 1}
+                  isSeasonal={itemData?.is_seasonal === 1}
+                  className="h-4 w-4"
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              {itemData?.is_seasonal === 1 ? "Seasonal item" : "Limited item"}
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {(typeof displayedSeason === "number" ||
+          hasDisplayedLevel ||
+          displayedPlacement) && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
+                {typeof displayedSeason === "number" && (
+                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                    S{displayedSeason}
+                  </span>
+                )}
+                {hasDisplayedLevel && (
+                  <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                    {formatUnlockLevelBadge(displayedLevel)}
+                  </span>
+                )}
+                {!hasDisplayedLevel && displayedPlacement && (
+                  <span className="bg-status-warning inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold text-black">
+                    {formatPlacementBadge(displayedPlacement)}
+                  </span>
+                )}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{requirementsTooltipText}</TooltipContent>
+          </Tooltip>
+        )}
         {!["Brakes"].includes(item.categoryTitle) ? (
           isVideoItem(item.title) ? (
             <video
@@ -335,36 +382,6 @@ export default function DupeItemCard({
             {formatDateOnly(item.logged_at)}
           </div>
         </div>
-      </div>
-
-      {/* Season, Level, and Placement badges */}
-      <div className="mt-3 flex min-h-10 items-center justify-center gap-2 pt-3">
-        {(typeof displayedSeason === "number" ||
-          hasDisplayedLevel ||
-          displayedPlacement) && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex cursor-help items-center gap-1">
-                {typeof displayedSeason === "number" && (
-                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                    S{displayedSeason}
-                  </span>
-                )}
-                {hasDisplayedLevel && (
-                  <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                    {formatUnlockLevelBadge(displayedLevel)}
-                  </span>
-                )}
-                {!hasDisplayedLevel && displayedPlacement && (
-                  <span className="bg-status-warning inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold text-black">
-                    {formatPlacementBadge(displayedPlacement)}
-                  </span>
-                )}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>{requirementsTooltipText}</TooltipContent>
-          </Tooltip>
-        )}
       </div>
     </div>
   );
