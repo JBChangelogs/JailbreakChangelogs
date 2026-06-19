@@ -103,6 +103,19 @@ const platformGroups = [
         title: "Seasons & Rewards",
         description: "See season rewards, contracts, and your progress tools.",
       },
+      {
+        href: "/seasons/leaderboard",
+        icon: "mdi:podium",
+        title: "Season Leaderboard",
+        description: "See where you rank on the current season leaderboard.",
+      },
+      {
+        href: "/seasons/will-i-make-it",
+        icon: "mdi:calculator",
+        title: "Will I Make It?",
+        description:
+          "Calculate whether you can hit your target season level before the season ends.",
+      },
     ],
   },
   {
@@ -183,30 +196,12 @@ export default async function Home() {
       getTestimonials(),
     ]);
 
-  const legacyStats: HeroStatCard[] = [
+  const heroStats: HeroStatCard[] = [
     {
       label: "Users",
       icon: "mdi:account-group",
       value: homepageStats?.total_users ?? 0,
     },
-    {
-      label: "Trades Posted",
-      icon: "mdi:swap-horizontal",
-      value: homepageStats?.total_trades ?? 0,
-    },
-    {
-      label: "Updates Recorded",
-      icon: "mdi:book-open-page-variant",
-      value: homepageStats?.total_changelogs ?? 0,
-    },
-    {
-      label: "Comments Posted",
-      icon: "mdi:comment-text",
-      value: homepageStats?.total_comments ?? 0,
-    },
-  ];
-
-  const impactStatsCards: HeroStatCard[] = [
     {
       label: "Items Tracked",
       icon: "mdi:shape",
@@ -228,20 +223,6 @@ export default async function Home() {
       icon: "mdi:cash-multiple",
       value: networthCap?.total_networth ?? 0,
       valueStr: networthCap?.total_networth_str,
-      badge: "Last 24 hours",
-    },
-    {
-      label: "Clean Networth",
-      icon: "mdi:cash-check",
-      value: networthCap?.total_clean_networth ?? 0,
-      valueStr: networthCap?.total_clean_networth_str,
-      badge: "Last 24 hours",
-    },
-    {
-      label: "Duped Networth",
-      icon: "mdi:cash-remove",
-      value: networthCap?.total_duped_networth ?? 0,
-      valueStr: networthCap?.total_duped_networth_str,
       badge: "Last 24 hours",
     },
   ];
@@ -427,8 +408,8 @@ export default async function Home() {
                   View Testimonials
                 </Link>
               </Button>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {legacyStats.map((stat, i) => (
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {heroStats.map((stat, i) => (
                   <div
                     key={stat.label}
                     className={heroStatCardClass}
@@ -438,45 +419,17 @@ export default async function Home() {
                       } as React.CSSProperties
                     }
                   >
-                    <div className="mb-2">
-                      <span className="text-xs font-medium text-white/85 uppercase">
+                    <div className="mb-3 flex items-center gap-2">
+                      <Icon
+                        icon={stat.icon}
+                        className="h-4 w-4 text-white/60"
+                        inline={true}
+                      />
+                      <span className="text-xs font-semibold tracking-wide text-white/70 uppercase">
                         {stat.label}
                       </span>
                     </div>
-                    <p className="text-3xl leading-none font-bold text-white">
-                      {stat.prefix ?? ""}
-                      <CountUpNumber value={stat.value} />
-                      {stat.suffix ? (
-                        <span className="text-sm font-medium text-white/85">
-                          {stat.suffix}
-                        </span>
-                      ) : null}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                {impactStatsCards.map((stat, i) => (
-                  <div
-                    key={stat.label}
-                    className={heroStatCardClass}
-                    style={
-                      {
-                        viewTransitionName: `hero-card-${i + 13}`,
-                      } as React.CSSProperties
-                    }
-                  >
-                    <div className="mb-2">
-                      <span className="block text-xs font-medium text-white/85 uppercase">
-                        {stat.label}
-                      </span>
-                      {stat.badge ? (
-                        <span className="text-[10px] font-medium tracking-wide text-white/45 uppercase">
-                          {stat.badge}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="text-3xl leading-none font-bold text-white">
+                    <p className="text-2xl leading-none font-bold text-white md:text-3xl">
                       {stat.prefix ?? ""}
                       {stat.valueStr ?? (
                         <CountUpNumber
@@ -485,11 +438,16 @@ export default async function Home() {
                         />
                       )}
                       {stat.suffix ? (
-                        <span className="text-sm font-medium text-white/85">
+                        <span className="text-sm font-semibold text-white/60">
                           {stat.suffix}
                         </span>
                       ) : null}
                     </p>
+                    {stat.badge ? (
+                      <p className="mt-1.5 text-[10px] font-medium tracking-wide text-white/40 uppercase">
+                        {stat.badge}
+                      </p>
+                    ) : null}
                   </div>
                 ))}
               </div>
