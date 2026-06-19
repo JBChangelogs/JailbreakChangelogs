@@ -68,6 +68,8 @@ export default function OGNotificationSheet({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [avatarError, setAvatarError] = useState(false);
+  const limitMap: Record<number, number> = { 0: 3, 1: 5, 2: 10, 3: 15 };
+  const maxNotifications = limitMap[user?.premiumtype ?? 0] ?? 3;
 
   const { modalState, openModal, closeModal } = useSupporterModal();
   const sheetContentRef = useRef<HTMLDivElement | null>(null);
@@ -334,7 +336,12 @@ export default function OGNotificationSheet({
 
           {/* User Info - Show Roblox data if available */}
           {user?.roblox_id && (
-            <div className="border-border-card bg-tertiary-bg mt-6 flex shrink-0 items-center gap-3 rounded-xl border p-3">
+            <Link
+              href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-link bg-tertiary-bg hover:border-link group mt-6 flex shrink-0 items-center gap-3 rounded-xl border p-3 transition-colors"
+            >
               <div className="bg-quaternary-bg border-border-card relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2">
                 {!avatarError ? (
                   <Image
@@ -355,14 +362,21 @@ export default function OGNotificationSheet({
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-primary-text truncate text-sm font-semibold">
+                <p className="text-primary-text group-hover:text-link truncate text-sm font-semibold transition-colors">
                   {user.roblox_display_name || user.roblox_username || "User"}
                 </p>
                 <p className="text-secondary-text truncate text-xs">
                   @{user.roblox_username || user.roblox_id}
                 </p>
+                <p className="text-link truncate text-xs">
+                  Monitoring OG items for this account
+                </p>
               </div>
-            </div>
+              <Icon
+                icon="heroicons:arrow-top-right-on-square"
+                className="text-secondary-text h-4 w-4 shrink-0"
+              />
+            </Link>
           )}
 
           <div className="mt-6 flex min-h-0 flex-1 flex-col gap-6">
@@ -518,20 +532,10 @@ export default function OGNotificationSheet({
                           notifiedItemIds.includes(String(item.id)),
                         ) && (
                           <div className="space-y-4">
-                            <div className="flex items-center justify-between px-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-secondary-text text-[11px] font-black tracking-widest uppercase">
-                                  Watching (
-                                  {
-                                    sortedAndFilteredItems.filter((i) =>
-                                      notifiedItemIds.includes(String(i.id)),
-                                    ).length
-                                  }
-                                  )
-                                </h3>
-                              </div>
-                              <div className="bg-border-primary/50 ml-4 h-px flex-1" />
-                            </div>
+                            <h3 className="text-secondary-text px-1 text-[11px] font-black tracking-widest uppercase">
+                              Watching ({notifiedItemIds.length} /{" "}
+                              {maxNotifications})
+                            </h3>
                             <div className="grid gap-3">
                               {sortedAndFilteredItems
                                 .filter((item) =>
@@ -547,12 +551,9 @@ export default function OGNotificationSheet({
                           (item) => !notifiedItemIds.includes(String(item.id)),
                         ) && (
                           <div className="space-y-4">
-                            <div className="flex items-center justify-between px-1">
-                              <h3 className="text-secondary-text text-[11px] font-black tracking-widest uppercase">
-                                Available for Notifications
-                              </h3>
-                              <div className="bg-border-primary/50 ml-4 h-px flex-1" />
-                            </div>
+                            <h3 className="text-secondary-text px-1 text-[11px] font-black tracking-widest uppercase">
+                              Available for Notifications
+                            </h3>
                             <div className="grid gap-3">
                               {sortedAndFilteredItems
                                 .filter(

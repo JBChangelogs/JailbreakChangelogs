@@ -465,7 +465,7 @@ export default function OGFinderResults({
             setShowNotificationSheet(true);
             trackEvent("Open OG Notification Sheet");
           }}
-          variant="default"
+          variant="success"
           size="lg"
           title="Get Notified"
         >
