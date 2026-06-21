@@ -17,11 +17,9 @@ import {
   type ServerRegionData,
 } from "@/hooks/useRobberyTrackerWebSocket";
 import { useRobberyTrackerMansionsWebSocket } from "@/hooks/useRobberyTrackerMansionsWebSocket";
-import { useRobberyTrackerAirdropsWebSocket } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import { Icon } from "@/components/ui/IconWrapper";
 import RobberyCard from "@/components/RobberyTracker/RobberyCard";
 import RobberyComboCard from "@/components/RobberyTracker/RobberyComboCard";
-import AirdropCard from "@/components/RobberyTracker/AirdropCard";
 import RobberyServerGroupCard from "@/components/RobberyTracker/RobberyServerGroupCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import { useServerRegions } from "@/hooks/useServerRegions";
@@ -46,7 +44,6 @@ import { safeSessionStorage } from "@/utils/storage/safeStorage";
 type TimeSort = "newest" | "oldest";
 type ServerSize = "all" | "big" | "small";
 type RobberyFilterMode = "any" | "all";
-type AirdropDifficultyFilter = "all" | "easy" | "medium" | "hard";
 type RobberiesDisplayMode = "individual" | "grouped";
 
 function serverTimeToMinutes(serverTime: number) {
@@ -174,14 +171,11 @@ function RobberyTrackerContent() {
 
   const activeView = useMemo(() => {
     if (searchParams.has("mansions")) return "mansions";
-    if (searchParams.has("airdrops")) return "airdrops";
     return "robberies";
   }, [searchParams]);
 
-  const handleViewChange = (view: "robberies" | "mansions" | "airdrops") => {
-    let query = "";
-    if (view === "mansions") query = "?mansions";
-    else if (view === "airdrops") query = "?airdrops";
+  const handleViewChange = (view: "robberies" | "mansions") => {
+    const query = view === "mansions" ? "?mansions" : "";
     router.push(`${pathname}${query}`);
   };
 
@@ -212,88 +206,39 @@ function RobberyTrackerContent() {
     checkBanStatus: checkMansionsBanStatus,
   } = useRobberyTrackerMansionsWebSocket(activeView === "mansions", user?.id);
 
-  const {
-    airdrops,
-    isConnected: airdropsConnected,
-    isConnecting: airdropsConnecting,
-    isIdle: airdropsIdle,
-    error: airdropsError,
-    requiresManualReconnect: airdropsRequiresManualReconnect,
-    reconnect: reconnectAirdrops,
-    isBanned: airdropsBanned,
-    banRemainingSeconds: airdropsBanRemainingSeconds,
-    checkBanStatus: checkAirdropsBanStatus,
-  } = useRobberyTrackerAirdropsWebSocket(activeView === "airdrops", user?.id);
-
   const isConnecting =
-    activeView === "robberies"
-      ? robberiesConnecting
-      : activeView === "mansions"
-        ? mansionsConnecting
-        : airdropsConnecting;
+    activeView === "robberies" ? robberiesConnecting : mansionsConnecting;
 
   const isConnected =
-    activeView === "robberies"
-      ? robberiesConnected
-      : activeView === "mansions"
-        ? mansionsConnected
-        : airdropsConnected;
+    activeView === "robberies" ? robberiesConnected : mansionsConnected;
 
-  const isIdle =
-    activeView === "robberies"
-      ? robberiesIdle
-      : activeView === "mansions"
-        ? mansionsIdle
-        : airdropsIdle;
+  const isIdle = activeView === "robberies" ? robberiesIdle : mansionsIdle;
 
-  const error =
-    activeView === "robberies"
-      ? robberiesError
-      : activeView === "mansions"
-        ? mansionsError
-        : airdropsError;
+  const error = activeView === "robberies" ? robberiesError : mansionsError;
 
   const requiresManualReconnect =
     activeView === "robberies"
       ? robberiesRequiresManualReconnect
-      : activeView === "mansions"
-        ? mansionsRequiresManualReconnect
-        : airdropsRequiresManualReconnect;
+      : mansionsRequiresManualReconnect;
 
   const isBanned =
-    activeView === "robberies"
-      ? robberiesBanned
-      : activeView === "mansions"
-        ? mansionsBanned
-        : airdropsBanned;
+    activeView === "robberies" ? robberiesBanned : mansionsBanned;
 
   const banRemainingSeconds =
     activeView === "robberies"
       ? robberiesBanRemainingSeconds
-      : activeView === "mansions"
-        ? mansionsBanRemainingSeconds
-        : airdropsBanRemainingSeconds;
+      : mansionsBanRemainingSeconds;
 
   const handleManualReconnect =
-    activeView === "robberies"
-      ? reconnectRobberies
-      : activeView === "mansions"
-        ? reconnectMansions
-        : reconnectAirdrops;
+    activeView === "robberies" ? reconnectRobberies : reconnectMansions;
 
   const handleBanStatusCheck =
     activeView === "robberies"
       ? checkRobberiesBanStatus
-      : activeView === "mansions"
-        ? checkMansionsBanStatus
-        : checkAirdropsBanStatus;
+      : checkMansionsBanStatus;
 
   const hasData =
-    activeView === "robberies"
-      ? robberies.length > 0
-      : activeView === "mansions"
-        ? mansions.length > 0
-        : airdrops.length > 0;
+    activeView === "robberies" ? robberies.length > 0 : mansions.length > 0;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [robberiesTimeSort, setRobberiesTimeSort] = useState<TimeSort>(() => {
@@ -304,8 +249,6 @@ function RobberyTrackerContent() {
   });
   const [otherTimeSort, setOtherTimeSort] = useState<TimeSort>("newest");
   const [serverSize, setServerSize] = useState<ServerSize>("all");
-  const [airdropDifficultyFilter, setAirdropDifficultyFilter] =
-    useState<AirdropDifficultyFilter>("all");
   const [selectedRobberyTypes, setSelectedRobberyTypes] = useState<string[]>(
     () => {
       const storedTypes = safeSessionStorage.getItem(
@@ -368,9 +311,6 @@ function RobberyTrackerContent() {
       );
       return storedDisplayMode === "grouped" ? "grouped" : "individual";
     });
-  const [activeAirdropLocation, setActiveAirdropLocation] = useState<
-    "all" | "CactusValley" | "Dunes"
-  >("all");
   const timeSort =
     activeView === "robberies" ? robberiesTimeSort : otherTimeSort;
 
@@ -426,15 +366,6 @@ function RobberyTrackerContent() {
     timeSort === "newest"
       ? "Logged (Newest to Oldest)"
       : "Logged (Oldest to Newest)";
-
-  const airdropDifficultyFilterLabel =
-    airdropDifficultyFilter === "all"
-      ? "All Difficulties"
-      : airdropDifficultyFilter === "easy"
-        ? "Easy Only"
-        : airdropDifficultyFilter === "medium"
-          ? "Medium Only"
-          : "Hard Only";
 
   const robberyFilterModeLabel =
     robberyFilterMode === "any"
@@ -805,19 +736,6 @@ function RobberyTrackerContent() {
     fetchRegionData(ids).then(mergeRegionResults);
   }, [robberies, activeView, fetchRegionData, mergeRegionResults]);
 
-  useEffect(() => {
-    if (activeView !== "airdrops") return;
-    const ids: string[] = [];
-    for (const airdrop of airdrops) {
-      const id = airdrop.server?.job_id;
-      if (!id || fetchedRegionIdsRef.current.has(id)) continue;
-      ids.push(id);
-      fetchedRegionIdsRef.current.add(id);
-    }
-    if (ids.length === 0) return;
-    fetchRegionData(ids).then(mergeRegionResults);
-  }, [airdrops, activeView, fetchRegionData, mergeRegionResults]);
-
   // Filter and sort Mansions (simpler as no type filtering)
   const filteredMansions = useMemo(() => {
     let filtered = mansions;
@@ -914,70 +832,6 @@ function RobberyTrackerContent() {
       ready: filteredMansions.filter((r) => r.status === 2).length,
     };
   }, [filteredMansions]);
-
-  // Filter airdrops by location
-  const filteredAirdrops = useMemo(() => {
-    let filtered = airdrops;
-
-    // Filter by location
-    if (activeAirdropLocation !== "all") {
-      filtered = filtered.filter(
-        (airdrop) => airdrop.location === activeAirdropLocation,
-      );
-    }
-
-    // Apply server size filter
-    if (serverSize !== "all") {
-      filtered = filtered.filter((airdrop) => {
-        const playerCount = airdrop.server?.players?.length || 0;
-        return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
-      });
-    }
-
-    // Apply search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (airdrop) =>
-          airdrop.location.toLowerCase().includes(query) ||
-          airdrop.color.toLowerCase().includes(query),
-      );
-    }
-
-    // Apply difficulty filter
-    if (airdropDifficultyFilter !== "all") {
-      const allowedColors =
-        airdropDifficultyFilter === "easy"
-          ? new Set(["Brown"])
-          : airdropDifficultyFilter === "medium"
-            ? new Set(["Blue"])
-            : new Set(["Red"]);
-      filtered = filtered.filter((airdrop) => allowedColors.has(airdrop.color));
-    }
-
-    // Sort by timestamp
-    return filtered.sort((a, b) => {
-      return timeSort === "newest"
-        ? b.timestamp - a.timestamp
-        : a.timestamp - b.timestamp;
-    });
-  }, [
-    airdrops,
-    activeAirdropLocation,
-    searchQuery,
-    timeSort,
-    serverSize,
-    airdropDifficultyFilter,
-  ]);
-
-  // Calculate airdrop statistics
-  const airdropStats = useMemo(() => {
-    const total = filteredAirdrops.length;
-    const easy = filteredAirdrops.filter((a) => a.color === "Brown").length;
-    const medium = filteredAirdrops.filter((a) => a.color === "Blue").length;
-    const hard = filteredAirdrops.filter((a) => a.color === "Red").length;
-    return { total, easy, medium, hard };
-  }, [filteredAirdrops]);
 
   const [banCountdownSeconds, setBanCountdownSeconds] = useState<number | null>(
     null,
@@ -1251,67 +1105,6 @@ function RobberyTrackerContent() {
                       </DropdownMenu>
                     </div>
 
-                    {/* Difficulty Filter Dropdown (Airdrops only) */}
-                    {activeView === "airdrops" && (
-                      <div className="col-span-1 w-full lg:flex-1">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button
-                              type="button"
-                              className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
-                              aria-label="Filter by difficulty"
-                            >
-                              <span className="truncate">
-                                {airdropDifficultyFilterLabel}
-                              </span>
-                              <Icon
-                                icon="heroicons:chevron-down"
-                                className="text-secondary-text h-5 w-5"
-                              />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="start"
-                            className="border-border-card bg-secondary-bg text-primary-text max-h-60 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                          >
-                            <DropdownMenuRadioGroup
-                              value={airdropDifficultyFilter}
-                              onValueChange={(value) =>
-                                setAirdropDifficultyFilter(
-                                  value as AirdropDifficultyFilter,
-                                )
-                              }
-                            >
-                              <DropdownMenuRadioItem
-                                value="all"
-                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                              >
-                                All Difficulties
-                              </DropdownMenuRadioItem>
-                              <DropdownMenuRadioItem
-                                value="easy"
-                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                              >
-                                Easy Only
-                              </DropdownMenuRadioItem>
-                              <DropdownMenuRadioItem
-                                value="medium"
-                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                              >
-                                Medium Only
-                              </DropdownMenuRadioItem>
-                              <DropdownMenuRadioItem
-                                value="hard"
-                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                              >
-                                Hard Only
-                              </DropdownMenuRadioItem>
-                            </DropdownMenuRadioGroup>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    )}
-
                     {/* Time Sort Dropdown */}
                     <div className="col-span-full w-full lg:col-span-1 lg:flex-1">
                       <DropdownMenu>
@@ -1402,7 +1195,7 @@ function RobberyTrackerContent() {
                   </div>
                 )}
               </div>
-            ) : activeView === "mansions" ? (
+            ) : (
               mansionStats.total > 0 && (
                 <div className="flex flex-wrap items-center gap-3 text-sm">
                   <span className="text-primary-text font-semibold">
@@ -1435,48 +1228,6 @@ function RobberyTrackerContent() {
                   </div>
                 </div>
               )
-            ) : (
-              airdropStats.total > 0 && (
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <span className="text-primary-text font-semibold">
-                    {searchQuery || activeAirdropLocation !== "all" ? (
-                      <>
-                        Showing {airdropStats.total} of {airdrops.length}{" "}
-                        Airdrops
-                      </>
-                    ) : (
-                      <>
-                        {airdropStats.total}{" "}
-                        {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
-                      </>
-                    )}
-                  </span>
-                  <div className="flex items-center gap-2 text-xs">
-                    {airdropStats.easy > 0 && (
-                      <span className="text-secondary-text">
-                        {airdropStats.easy} Easy
-                      </span>
-                    )}
-                    {airdropStats.easy > 0 && airdropStats.medium > 0 && (
-                      <span className="text-tertiary-text">•</span>
-                    )}
-                    {airdropStats.medium > 0 && (
-                      <span className="text-secondary-text">
-                        {airdropStats.medium} Medium
-                      </span>
-                    )}
-                    {(airdropStats.easy > 0 || airdropStats.medium > 0) &&
-                      airdropStats.hard > 0 && (
-                        <span className="text-tertiary-text">•</span>
-                      )}
-                    {airdropStats.hard > 0 && (
-                      <span className="text-secondary-text">
-                        {airdropStats.hard} Hard
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )
             )}
 
             {/* Connection Status */}
@@ -1500,7 +1251,7 @@ function RobberyTrackerContent() {
             <Tabs
               value={activeView}
               onValueChange={(value) =>
-                handleViewChange(value as "robberies" | "mansions" | "airdrops")
+                handleViewChange(value as "robberies" | "mansions")
               }
             >
               <TabsList fullWidth>
@@ -1509,9 +1260,6 @@ function RobberyTrackerContent() {
                 </TabsTrigger>
                 <TabsTrigger value="mansions" fullWidth>
                   Mansions
-                </TabsTrigger>
-                <TabsTrigger value="airdrops" fullWidth>
-                  Airdrops
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -1868,7 +1616,7 @@ function RobberyTrackerContent() {
                     </div>
                   )}
                 </>
-              ) : activeView === "mansions" ? (
+              ) : (
                 <>
                   {/* Mansions Grid */}
                   {filteredMansions.length > 0 ? (
@@ -1897,165 +1645,6 @@ function RobberyTrackerContent() {
                     </div>
                   )}
                 </>
-              ) : (
-                <>
-                  {/* Airdrop Location Tabs */}
-                  <div className="mb-6 overflow-x-auto">
-                    <Tabs
-                      value={activeAirdropLocation}
-                      onValueChange={(value) =>
-                        setActiveAirdropLocation(
-                          value as "all" | "CactusValley" | "Dunes",
-                        )
-                      }
-                    >
-                      <TabsList fullWidth>
-                        <TabsTrigger value="all" fullWidth>
-                          All Locations
-                        </TabsTrigger>
-                        <TabsTrigger value="CactusValley" fullWidth>
-                          Cactus Valley
-                        </TabsTrigger>
-                        <TabsTrigger value="Dunes" fullWidth>
-                          Dunes
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-
-                  {/* Airdrop Statistics */}
-                  {airdropStats.total > 0 && (
-                    <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
-                      <span className="text-primary-text font-semibold">
-                        {searchQuery || activeAirdropLocation !== "all" ? (
-                          <>
-                            Showing {airdropStats.total} of {airdrops.length}{" "}
-                            Airdrops
-                          </>
-                        ) : (
-                          <>
-                            {airdropStats.total}{" "}
-                            {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
-                          </>
-                        )}
-                      </span>
-                      <div className="flex items-center gap-2 text-xs">
-                        {airdropStats.easy > 0 && (
-                          <span className="text-secondary-text">
-                            {airdropStats.easy} Easy
-                          </span>
-                        )}
-                        {airdropStats.easy > 0 && airdropStats.medium > 0 && (
-                          <span className="text-tertiary-text">•</span>
-                        )}
-                        {airdropStats.medium > 0 && (
-                          <span className="text-secondary-text">
-                            {airdropStats.medium} Medium
-                          </span>
-                        )}
-                        {(airdropStats.easy > 0 || airdropStats.medium > 0) &&
-                          airdropStats.hard > 0 && (
-                            <span className="text-tertiary-text">•</span>
-                          )}
-                        {airdropStats.hard > 0 && (
-                          <span className="text-secondary-text">
-                            {airdropStats.hard} Hard
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Airdrops Grid */}
-                  {filteredAirdrops.length > 0 ? (
-                    <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                      {filteredAirdrops.map((airdrop, index) => (
-                        <AirdropCard
-                          key={`${airdrop.location}-${airdrop.color}-${airdrop.server?.job_id || index}-${airdrop.timestamp}`}
-                          airdrop={airdrop}
-                          regionData={
-                            serverRegionsByJobId[airdrop.server?.job_id ?? ""]
-                          }
-                          useExternalRegionData
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                      {(() => {
-                        const hasActiveAirdropFilters =
-                          Boolean(searchQuery) ||
-                          activeAirdropLocation !== "all" ||
-                          airdropDifficultyFilter !== "all" ||
-                          serverSize !== "all";
-
-                        const locationLabel =
-                          activeAirdropLocation === "all"
-                            ? null
-                            : activeAirdropLocation
-                                .replace(/([A-Z])/g, " $1")
-                                .trim();
-
-                        const difficultyLabel =
-                          airdropDifficultyFilter === "easy"
-                            ? "Easy"
-                            : airdropDifficultyFilter === "medium"
-                              ? "Medium"
-                              : airdropDifficultyFilter === "hard"
-                                ? "Hard"
-                                : null;
-
-                        const subject = difficultyLabel
-                          ? `${difficultyLabel} airdrops`
-                          : "airdrops";
-
-                        const constraints: string[] = [];
-                        if (locationLabel)
-                          constraints.push(`in ${locationLabel}`);
-                        if (serverSize !== "all") {
-                          constraints.push(
-                            serverSize === "big"
-                              ? "in big servers"
-                              : "in small servers",
-                          );
-                        }
-
-                        const constraintsText =
-                          constraints.length > 0
-                            ? ` ${constraints.join(" ")}`
-                            : "";
-
-                        return (
-                          <>
-                            <Icon
-                              icon="heroicons:magnifying-glass"
-                              className="text-tertiary-text mb-4 h-12 w-12"
-                            />
-                            <h3 className="text-primary-text text-lg font-medium">
-                              {hasActiveAirdropFilters
-                                ? "No airdrops match your filters"
-                                : "No airdrops tracked yet"}
-                            </h3>
-                            <p className="text-secondary-text">
-                              {hasActiveAirdropFilters ? (
-                                searchQuery ? (
-                                  <>No airdrops match your search and filters</>
-                                ) : (
-                                  <>
-                                    No {subject}
-                                    {constraintsText} right now
-                                  </>
-                                )
-                              ) : (
-                                <>Waiting for airdrop data...</>
-                              )}
-                            </p>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  )}
-                </>
               )}
             </>
           ) : (
@@ -2077,14 +1666,10 @@ function RobberyTrackerContent() {
                         className="text-tertiary-text mx-auto mb-4 h-16 w-16"
                       />
                       <h3 className="text-secondary-text mb-2 text-lg font-medium">
-                        {activeView === "mansions"
-                          ? "No mansions tracked yet"
-                          : "No airdrops tracked yet"}
+                        No mansions tracked yet
                       </h3>
                       <p className="text-tertiary-text text-sm">
-                        Waiting for{" "}
-                        {activeView === "mansions" ? "mansion" : "airdrop"}{" "}
-                        data...
+                        Waiting for mansion data...
                       </p>
                     </>
                   )}
