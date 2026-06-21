@@ -12,6 +12,27 @@ import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
 
+const getUserAvatar = (userId: string) =>
+  `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+
+const getUserDisplay = (
+  userId: string,
+  robloxUsers: Record<string, { displayName?: string; name?: string }>,
+): string => {
+  const user = robloxUsers[userId];
+  if (!user) return userId;
+  return user.displayName || user.name || userId;
+};
+
+const getUserName = (
+  userId: string,
+  robloxUsers: Record<string, { displayName?: string; name?: string }>,
+): string => {
+  const user = robloxUsers[userId];
+  if (!user) return userId;
+  return user.name || user.displayName || userId;
+};
+
 function HoarderRowSkeleton() {
   return (
     <div className="flex items-center gap-2 px-4 py-3 sm:gap-4">
@@ -81,6 +102,11 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     enabled: userIds.length > 0,
   });
 
+  const hoarderRankMap = useMemo(
+    () => new Map(hoarders.map((h, i) => [h.user_id, i + 1])),
+    [hoarders],
+  );
+
   // Filter hoarders based on search
   const filteredHoarders = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -99,11 +125,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       );
     });
   }, [hoarders, searchTerm, robloxUsers]);
-
-  // Generate avatar URL
-  const getUserAvatar = (userId: string) => {
-    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
-  };
 
   // TanStack Virtual setup for list
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -157,19 +178,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       </div>
     );
   }
-
-  const getUserDisplay = (userId: string): string => {
-    const user = robloxUsers[userId];
-    if (!user) return userId;
-    return user.displayName || user.name || userId;
-  };
-
-  const getUserName = (userId: string): string => {
-    const user = robloxUsers[userId];
-    if (!user) return userId;
-    // If no username, use display name as fallback
-    return user.name || user.displayName || userId;
-  };
 
   return (
     <div className="space-y-6">
@@ -251,9 +259,9 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
             {virtualizer.getVirtualItems().map((virtualItem) => {
               const hoarder = filteredHoarders[virtualItem.index];
               const rank =
-                hoarders.findIndex((h) => h.user_id === hoarder.user_id) + 1;
-              const displayName = getUserDisplay(hoarder.user_id);
-              const username = getUserName(hoarder.user_id);
+                hoarderRankMap.get(hoarder.user_id) ?? virtualItem.index + 1;
+              const displayName = getUserDisplay(hoarder.user_id, robloxUsers);
+              const username = getUserName(hoarder.user_id, robloxUsers);
               const avatar = getUserAvatar(hoarder.user_id);
 
               return (

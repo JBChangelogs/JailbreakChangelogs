@@ -1,3 +1,4 @@
+import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import {
@@ -21,7 +22,7 @@ interface ItemValuesProps {
   recentChanges?: RecentChange[] | null;
 }
 
-export default function ItemValues({
+function ItemValues({
   cashValue,
   dupedValue,
   demand,
@@ -36,6 +37,8 @@ export default function ItemValues({
   const isRobuxPrice = price.toLowerCase().includes("robux");
   const isUSDPrice = price.includes("$");
   const hasNoPrice = price === "N/A";
+  const cashChange = getValueChange(recentChanges, "cash_value");
+  const dupedChange = getValueChange(recentChanges, "duped_value");
 
   return (
     <div className="border-border-card bg-secondary-bg hover:shadow-card-shadow mb-8 space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
@@ -53,25 +56,18 @@ export default function ItemValues({
             <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
               Cash Value
             </h4>
-            {(() => {
-              const cashChange = getValueChange(recentChanges, "cash_value");
-              if (cashChange && cashChange.difference !== 0) {
-                const isPositive = cashChange.difference > 0;
-                return (
-                  <span
-                    className={`inline-flex h-6 items-center gap-1 rounded-lg px-2 text-xs leading-none font-semibold ${
-                      isPositive
-                        ? "bg-status-success text-white"
-                        : "bg-status-error text-white"
-                    }`}
-                  >
-                    {isPositive ? "+" : "-"}
-                    {Math.abs(cashChange.difference).toLocaleString()}
-                  </span>
-                );
-              }
-              return null;
-            })()}
+            {cashChange && cashChange.difference !== 0 && (
+              <span
+                className={`inline-flex h-6 items-center gap-1 rounded-lg px-2 text-xs leading-none font-semibold ${
+                  cashChange.difference > 0
+                    ? "bg-status-success text-white"
+                    : "bg-status-error text-white"
+                }`}
+              >
+                {cashChange.difference > 0 ? "+" : "-"}
+                {Math.abs(cashChange.difference).toLocaleString()}
+              </span>
+            )}
           </div>
           <p className="text-primary-text text-3xl font-bold">
             {formatFullValue(cashValue)}
@@ -84,25 +80,18 @@ export default function ItemValues({
             <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
               Duped Value
             </h4>
-            {(() => {
-              const dupedChange = getValueChange(recentChanges, "duped_value");
-              if (dupedChange && dupedChange.difference !== 0) {
-                const isPositive = dupedChange.difference > 0;
-                return (
-                  <span
-                    className={`inline-flex h-6 items-center gap-1 rounded-lg px-2 text-xs leading-none font-semibold ${
-                      isPositive
-                        ? "bg-status-success text-white"
-                        : "bg-status-error text-white"
-                    }`}
-                  >
-                    {isPositive ? "+" : "-"}
-                    {Math.abs(dupedChange.difference).toLocaleString()}
-                  </span>
-                );
-              }
-              return null;
-            })()}
+            {dupedChange && dupedChange.difference !== 0 && (
+              <span
+                className={`inline-flex h-6 items-center gap-1 rounded-lg px-2 text-xs leading-none font-semibold ${
+                  dupedChange.difference > 0
+                    ? "bg-status-success text-white"
+                    : "bg-status-error text-white"
+                }`}
+              >
+                {dupedChange.difference > 0 ? "+" : "-"}
+                {Math.abs(dupedChange.difference).toLocaleString()}
+              </span>
+            )}
           </div>
           <p className="text-primary-text text-3xl font-bold">
             {formatFullValue(dupedValue)}
@@ -214,3 +203,5 @@ export default function ItemValues({
     </div>
   );
 }
+
+export default React.memo(ItemValues);

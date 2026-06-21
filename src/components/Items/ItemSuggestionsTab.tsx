@@ -12,6 +12,7 @@ import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { formatFullValue } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
 import { createLogger } from "@/services/logger";
 // RE-ADD: voting — import { toast } from "sonner";
 import Image from "next/image";
@@ -34,6 +35,41 @@ import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
 
 const log = createLogger("UI");
+
+const COMMON_TRADES_REGEX = /(Common Trades?:?)/gi;
+
+const MARKDOWN_COMPONENTS: Components = {
+  h1: ({ children }) => (
+    <h1 className="text-primary-text mt-3 mb-1.5 text-base font-bold first:mt-0">
+      {children}
+    </h1>
+  ),
+  h2: ({ children }) => (
+    <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
+      {children}
+    </h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
+      {children}
+    </h3>
+  ),
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  ul: ({ children }) => (
+    <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
+      {children}
+    </ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
+      {children}
+    </ol>
+  ),
+  em: (props) => <em className="italic" {...props} />,
+  strong: (props) => (
+    <b className="text-primary-text font-semibold" {...props} />
+  ),
+};
 
 function SuggestionCardSkeleton() {
   return (
@@ -278,7 +314,11 @@ export default function ItemSuggestionsTab({
     for (const [id, el] of reasonRefs.current.entries()) {
       if (el && el.scrollHeight > el.clientHeight) next.add(id);
     }
-    setOverflowingReasons(next);
+    setOverflowingReasons((prev) => {
+      if (prev.size === next.size && [...next].every((id) => prev.has(id)))
+        return prev;
+      return next;
+    });
   }, [suggestions, loading]);
 
   // RE-ADD: voting — restore handleVote here
@@ -515,54 +555,13 @@ export default function ItemSuggestionsTab({
                     >
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
-                        components={{
-                          h1: ({ children }) => (
-                            <h1 className="text-primary-text mt-3 mb-1.5 text-base font-bold first:mt-0">
-                              {children}
-                            </h1>
-                          ),
-                          h2: ({ children }) => (
-                            <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
-                              {children}
-                            </h2>
-                          ),
-                          h3: ({ children }) => (
-                            <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
-                              {children}
-                            </h3>
-                          ),
-                          p: ({ children }) => (
-                            <p className="mb-2 last:mb-0">{children}</p>
-                          ),
-                          ul: ({ children }) => (
-                            <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
-                              {children}
-                            </ul>
-                          ),
-                          ol: ({ children }) => (
-                            <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
-                              {children}
-                            </ol>
-                          ),
-                          em: (props) => <em className="italic" {...props} />,
-                          strong: (props) => (
-                            <b
-                              className="text-primary-text font-semibold"
-                              {...props}
-                            />
-                          ),
-                        }}
+                        components={MARKDOWN_COMPONENTS}
                       >
-                        {(() => {
-                          const withBold = reasonText.replace(
-                            /(Common Trades?:?)/gi,
-                            "**$1**",
-                          );
-                          return withBold
-                            .split(/\n\n+/)
-                            .map((part) => part.replace(/\n/g, "\n\n"))
-                            .join("\n\n");
-                        })()}
+                        {reasonText
+                          .replace(COMMON_TRADES_REGEX, "**$1**")
+                          .split(/\n\n+/)
+                          .map((part) => part.replace(/\n/g, "\n\n"))
+                          .join("\n\n")}
                       </ReactMarkdown>
                     </div>
                     {(overflowingReasons.has(suggestion.id) ||

@@ -12,6 +12,7 @@ import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { formatFullValue } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
 import { createLogger } from "@/services/logger";
 import Link from "next/link";
 import {
@@ -32,6 +33,41 @@ import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
 
 const log = createLogger("UI");
+
+const COMMON_TRADES_REGEX = /(Common Trades?:?)/gi;
+
+const MARKDOWN_COMPONENTS: Components = {
+  h1: ({ children }) => (
+    <h1 className="text-primary-text mt-3 mb-1.5 text-base font-bold first:mt-0">
+      {children}
+    </h1>
+  ),
+  h2: ({ children }) => (
+    <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
+      {children}
+    </h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
+      {children}
+    </h3>
+  ),
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  ul: ({ children }) => (
+    <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
+      {children}
+    </ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
+      {children}
+    </ol>
+  ),
+  em: (props) => <em className="italic" {...props} />,
+  strong: (props) => (
+    <b className="text-primary-text font-semibold" {...props} />
+  ),
+};
 
 function ChangelogCardSkeleton() {
   return (
@@ -233,31 +269,42 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
   useEffect(() => {
     if (loading) return;
 
-    const observers: ResizeObserver[] = [];
-
+    const elToId = new Map<Element, number>();
     for (const [id, el] of reasonRefs.current.entries()) {
-      if (!el) continue;
+      if (el) elToId.set(el, id);
+    }
 
-      const checkOverflow = () => {
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const id = elToId.get(entry.target);
+        if (id === undefined) continue;
+        const el = entry.target as HTMLElement;
         const overflows = el.scrollHeight > el.clientHeight;
         setOverflowingReasons((prev) => {
-          const has = prev.has(id);
-          if (overflows === has) return prev;
+          if (overflows === prev.has(id)) return prev;
           const next = new Set(prev);
           if (overflows) next.add(id);
           else next.delete(id);
           return next;
         });
-      };
+      }
+    });
 
-      checkOverflow();
-      const observer = new ResizeObserver(checkOverflow);
+    for (const [id, el] of reasonRefs.current.entries()) {
+      if (!el) continue;
+      const overflows = el.scrollHeight > el.clientHeight;
+      setOverflowingReasons((prev) => {
+        if (overflows === prev.has(id)) return prev;
+        const next = new Set(prev);
+        if (overflows) next.add(id);
+        else next.delete(id);
+        return next;
+      });
       observer.observe(el);
-      observers.push(observer);
     }
 
-    return () => observers.forEach((o) => o.disconnect());
-  }, [changelogs, loading, expandedReasons]);
+    return () => observer.disconnect();
+  }, [changelogs, loading]);
 
   const openVotersModal = (
     changelog: ValueChangelog,
@@ -465,54 +512,13 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                     >
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
-                        components={{
-                          h1: ({ children }) => (
-                            <h1 className="text-primary-text mt-3 mb-1.5 text-base font-bold first:mt-0">
-                              {children}
-                            </h1>
-                          ),
-                          h2: ({ children }) => (
-                            <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
-                              {children}
-                            </h2>
-                          ),
-                          h3: ({ children }) => (
-                            <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
-                              {children}
-                            </h3>
-                          ),
-                          p: ({ children }) => (
-                            <p className="mb-2 last:mb-0">{children}</p>
-                          ),
-                          ul: ({ children }) => (
-                            <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
-                              {children}
-                            </ul>
-                          ),
-                          ol: ({ children }) => (
-                            <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
-                              {children}
-                            </ol>
-                          ),
-                          em: (props) => <em className="italic" {...props} />,
-                          strong: (props) => (
-                            <b
-                              className="text-primary-text font-semibold"
-                              {...props}
-                            />
-                          ),
-                        }}
+                        components={MARKDOWN_COMPONENTS}
                       >
-                        {(() => {
-                          const withBold = reasonText.replace(
-                            /(Common Trades?:?)/gi,
-                            "**$1**",
-                          );
-                          return withBold
-                            .split(/\n\n+/)
-                            .map((part) => part.replace(/\n/g, "\n\n"))
-                            .join("\n\n");
-                        })()}
+                        {reasonText
+                          .replace(COMMON_TRADES_REGEX, "**$1**")
+                          .split(/\n\n+/)
+                          .map((part) => part.replace(/\n/g, "\n\n"))
+                          .join("\n\n")}
                       </ReactMarkdown>
                     </div>
                     {(overflowingReasons.has(changelog.id) ||

@@ -89,6 +89,11 @@ export default function DupesTab({ itemId }: DupesTabProps) {
     },
   });
 
+  const dupeRankMap = useMemo(
+    () => new Map(dupedUsers.map((u, i) => [u.id, i + 1])),
+    [dupedUsers],
+  );
+
   // Filter dupes based on search
   const filteredDupes = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -239,7 +244,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
               const user = filteredDupes[virtualItem.index];
-              const rank = dupedUsers.findIndex((u) => u.id === user.id) + 1;
+              const rank = dupeRankMap.get(user.id) ?? virtualItem.index + 1;
 
               return (
                 <div

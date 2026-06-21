@@ -66,6 +66,58 @@ import { useTheme } from "@/contexts/ThemeContext";
 
 const log = createLogger("UI");
 
+const TAB_LABELS = [
+  "Details",
+  "Charts",
+  "Changes",
+  "Suggestions",
+  "Dupes",
+  "Hoarders",
+  "Similar Items",
+  "Comments",
+];
+
+const INITIAL_DESCRIPTION_LENGTH = 500;
+
+const BLUEBIRD_DEFAULT_IMAGE =
+  "https://assets.jailbreakchangelogs.com/assets/images/items/vehicles/BlueBird.webp";
+const BLUEBIRD_RAISED_IMAGE =
+  "https://assets.jailbreakchangelogs.com/assets/images/items/vehicles/BlueBird_1.webp";
+
+const TAB_NAME_TO_INDEX: Record<string, number> = {
+  charts: 1,
+  changes: 2,
+  suggestions: 3,
+  dupes: 4,
+  hoarders: 5,
+  similar: 6,
+  comments: 7,
+};
+
+const TAB_INDEX_TO_NAME: Record<number, string | null> = {
+  0: null,
+  1: "charts",
+  2: "changes",
+  3: "suggestions",
+  4: "dupes",
+  5: "hoarders",
+  6: "similar",
+  7: "comments",
+};
+
+const CHART_UPDATE_TIME = (() => {
+  const today = new Date();
+  const utcTime = new Date(
+    Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 22, 0, 0),
+  );
+  return utcTime.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZoneName: "short",
+  });
+})();
+
 interface ItemDetailsClientProps {
   item: ItemDetails;
   initialFavoriteCount?: number | null;
@@ -84,16 +136,7 @@ const ItemDetailsTabs = React.memo(
     value: number;
     onChange: (v: number) => void;
   }) {
-    const labels = [
-      "Details",
-      "Charts",
-      "Changes",
-      "Suggestions",
-      "Dupes",
-      "Hoarders",
-      "Similar Items",
-      "Comments",
-    ];
+    const labels = TAB_LABELS;
 
     return (
       <div className="overflow-x-auto">
@@ -120,6 +163,248 @@ const ItemDetailsTabs = React.memo(
   (prev, next) => prev.value === next.value,
 );
 
+interface ItemMediaColumnProps {
+  item: ItemDetails;
+  favoriteButtonSlot?: React.ReactNode;
+  resolvedTheme: string | undefined;
+}
+
+const ItemMediaColumn = React.memo(function ItemMediaColumn({
+  item,
+  favoriteButtonSlot,
+  resolvedTheme,
+}: ItemMediaColumnProps) {
+  const isBlueBird = item.id === 919;
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isBlueBirdRaised, setIsBlueBirdRaised] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (!isDriftItem(item.type) || !videoRef.current) return;
+    if (isHovered) {
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) =>
+          log.error("Error playing drift video:", error),
+        );
+      }
+    } else {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, [isHovered, item.type]);
+
+  useEffect(() => {
+    if (!isBlueBird) return;
+    const interval = window.setInterval(() => {
+      setIsBlueBirdRaised((prev) => !prev);
+    }, 2200);
+    return () => window.clearInterval(interval);
+  }, [isBlueBird]);
+
+  const handleHornClick = () => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio(getHornAudioPath(item?.name || ""));
+      audioRef.current.onended = () => setIsPlaying(false);
+    }
+    if (isPlaying) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+      setTimeout(() => {
+        if (audioRef.current && !audioRef.current.paused) {
+          audioRef.current.pause();
+        }
+      }, 150);
+    } else {
+      const isAudioReady =
+        audioRef.current.currentTime > 0 &&
+        !audioRef.current.paused &&
+        !audioRef.current.ended &&
+        audioRef.current.readyState > audioRef.current.HAVE_CURRENT_DATA;
+      if (!isAudioReady) {
+        audioRef.current.currentTime = 0;
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => setIsPlaying(true))
+            .catch((error) => {
+              log.error("Error playing audio:", error);
+              setIsPlaying(false);
+            });
+        }
+      }
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div
+        className="bg-secondary-bg relative aspect-video w-full overflow-hidden rounded-lg"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+          <CategoryIconBadge
+            type={item.type}
+            isLimited={item.is_limited === 1}
+            isSeasonal={item.is_seasonal === 1}
+            className="h-5 w-5"
+          />
+        </div>
+        <div className="absolute top-4 left-4 z-10">{favoriteButtonSlot}</div>
+        {isBlueBird ? (
+          <div className="relative h-full w-full overflow-hidden">
+            <Image
+              src={
+                isBlueBirdRaised
+                  ? BLUEBIRD_RAISED_IMAGE
+                  : BLUEBIRD_DEFAULT_IMAGE
+              }
+              alt={`${item.name} (active variant)`}
+              width={2560}
+              height={1440}
+              fetchPriority="high"
+              loading="eager"
+              className="h-full w-full object-cover"
+              onError={handleImageError}
+            />
+            <div className="pointer-events-none absolute right-4 bottom-4 left-4">
+              <div className="text-right text-xs font-semibold tracking-wide text-white">
+                <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                  {isBlueBirdRaised ? "LOWERED MODE" : "RAISED MODE"}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : isVideoItem(item.name) ? (
+          <video
+            ref={videoRef}
+            src={getVideoPath(item.type, item.name)}
+            loop
+            muted
+            playsInline
+            autoPlay
+            className="h-full w-full object-cover"
+          />
+        ) : isDriftItem(item.type) ? (
+          <div className="relative h-full w-full">
+            <Image
+              src={getItemImagePath(item.type, item.name)}
+              alt={item.name}
+              width={2560}
+              height={1440}
+              fetchPriority="high"
+              loading="eager"
+              className={`h-full w-full object-cover transition-opacity duration-300 ${
+                isHovered ? "opacity-0" : "opacity-100"
+              }`}
+              onError={handleImageError}
+            />
+            <video
+              ref={videoRef}
+              src={getDriftVideoPath(item.name)}
+              loop
+              muted
+              playsInline
+              className={`absolute top-0 left-0 h-full w-full object-cover transition-opacity duration-300 ${
+                isHovered ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          </div>
+        ) : (
+          <Image
+            src={getItemImagePath(item.type, item.name)}
+            alt={item.name}
+            width={2560}
+            height={1440}
+            fetchPriority="high"
+            loading="eager"
+            className="h-full w-full object-cover"
+            onError={handleImageError}
+          />
+        )}
+        {isHornItem(item.type) && (
+          <button
+            onClick={handleHornClick}
+            className={`bg-primary-bg/50 absolute inset-0 flex items-center justify-center transition-opacity ${
+              isHovered || isPlaying ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {isPlaying ? (
+              <Icon
+                icon="heroicons:pause"
+                className="text-primary-text h-12 w-12 transition-transform"
+              />
+            ) : (
+              <Icon
+                icon="heroicons:play-solid"
+                className="text-primary-text h-12 w-12 transition-transform"
+              />
+            )}
+          </button>
+        )}
+      </div>
+      <div className="mt-4 hidden justify-center xl:flex">
+        <NitroItemsVideoPlayer className="min-h-45 w-full max-w-xs sm:max-w-sm md:max-w-md" />
+      </div>
+      <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-0.5 shadow-lg">
+        <div className="bg-tertiary-bg rounded-md p-4 text-center">
+          <div className="mb-3 flex justify-center">
+            <Image
+              src={`/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`}
+              alt="Jailbreak Changelogs x Trading Core"
+              width={220}
+              height={48}
+              className="h-12 w-auto"
+            />
+          </div>
+          <h3 className="text-primary-text mb-1 text-lg font-semibold">
+            Help make a better value list
+          </h3>
+          <p className="text-secondary-text mb-3 text-sm leading-relaxed">
+            In partnership with Trading Core, you can suggest values for{" "}
+            {item.name} directly on the site. The community votes and our team
+            reviews before applying changes.
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <Button asChild className="w-full gap-2 sm:w-auto">
+              <Link href="/values/suggestions">
+                <Icon
+                  icon="material-symbols:edit-outline-rounded"
+                  className="h-4 w-4"
+                  inline={true}
+                />
+                Suggest a Value
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="secondary"
+              className="w-full gap-2 sm:w-auto"
+            >
+              <a
+                href="https://discord.com/invite/baHCsb8N5A"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon
+                  icon="ic:baseline-discord"
+                  className="h-4 w-4"
+                  inline={true}
+                />
+                Join the Discussion
+              </a>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export default function ItemDetailsClient({
   item,
   commentsSlot,
@@ -129,73 +414,25 @@ export default function ItemDetailsClient({
 }: ItemDetailsClientProps) {
   "use memo";
   const { resolvedTheme } = useTheme();
-  const isBlueBird = item.id === 919;
-  const blueBirdDefaultImage =
-    "https://assets.jailbreakchangelogs.com/assets/images/items/vehicles/BlueBird.webp";
-  const blueBirdRaisedImage =
-    "https://assets.jailbreakchangelogs.com/assets/images/items/vehicles/BlueBird_1.webp";
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isBlueBirdRaised, setIsBlueBirdRaised] = useState(false);
   const [visibleLength, setVisibleLength] = useState(500);
   const [tabParam, setTabParam] = useQueryState("tab", {
     defaultValue: "",
     history: "push",
     shallow: true,
   });
-  const activeTab = useMemo(() => {
-    const map: Record<string, number> = {
-      charts: 1,
-      changes: 2,
-      suggestions: 3,
-      dupes: 4,
-      hoarders: 5,
-      similar: 6,
-      comments: 7,
-    };
-    return tabParam ? (map[tabParam] ?? 0) : 0;
-  }, [tabParam]);
+  const activeTab = useMemo(
+    () => (tabParam ? (TAB_NAME_TO_INDEX[tabParam] ?? 0) : 0),
+    [tabParam],
+  );
   const [activeChartTab, setActiveChartTab] = useState(0);
   const [itemMetadata, setItemMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
     item?.last_updated,
     `item-detail-${item?.id}-parent`,
   );
-
-  useEffect(() => {
-    if (item?.type && isDriftItem(item.type) && videoRef.current) {
-      if (isHovered) {
-        // Handle video play promise properly to avoid race conditions
-        const playPromise = videoRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            log.error("Error playing drift video:", error);
-          });
-        }
-      } else {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
-      }
-    }
-  }, [isHovered, item?.type]);
-
-  useEffect(() => {
-    if (!isBlueBird) return;
-    const interval = window.setInterval(() => {
-      setIsBlueBirdRaised((prev) => !prev);
-    }, 2200);
-
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, [isBlueBird]);
-
-  const INITIAL_DESCRIPTION_LENGTH = 500;
 
   useEffect(() => {
     let isMounted = true;
@@ -215,74 +452,30 @@ export default function ItemDetailsClient({
     };
   }, [item.id]);
 
-  const handleHornClick = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(getHornAudioPath(item?.name || ""));
-      audioRef.current.onended = () => setIsPlaying(false);
-    }
-
-    if (isPlaying) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
-
-      // Add a small delay to prevent race conditions
-      setTimeout(() => {
-        if (audioRef.current && !audioRef.current.paused) {
-          audioRef.current.pause();
-        }
-      }, 150);
-    } else {
-      // Check if audio is truly ready to play
-      const isAudioReady =
-        audioRef.current.currentTime > 0 &&
-        !audioRef.current.paused &&
-        !audioRef.current.ended &&
-        audioRef.current.readyState > audioRef.current.HAVE_CURRENT_DATA;
-
-      if (!isAudioReady) {
-        // Reset the audio to start
-        audioRef.current.currentTime = 0;
-
-        // Use a promise to handle play() properly and avoid race conditions
-        const playPromise = audioRef.current.play();
-
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              setIsPlaying(true);
-            })
-            .catch((error) => {
-              log.error("Error playing audio:", error);
-              setIsPlaying(false);
-            });
-        }
-      }
-    }
-  };
-
   const handleTabChange = (newValue: number) => {
-    const names: Record<number, string | null> = {
-      0: null,
-      1: "charts",
-      2: "changes",
-      3: "suggestions",
-      4: "dupes",
-      5: "hoarders",
-      6: "similar",
-      7: "comments",
-    };
-    void setTabParam(names[newValue] ?? null);
+    void setTabParam(TAB_INDEX_TO_NAME[newValue] ?? null);
   };
 
   const currentItem = item;
   const metadataLevel = itemMetadata?.level;
   const metadataPlacement = itemMetadata?.placement;
   const hasMetadataLevel = hasUnlockLevel(metadataLevel);
-  const requirementsTooltipText = formatUnlockRequirementsTooltip(
-    itemMetadata?.season,
-    metadataLevel,
-    metadataPlacement,
+  const requirementsTooltipText = useMemo(
+    () =>
+      formatUnlockRequirementsTooltip(
+        itemMetadata?.season,
+        metadataLevel,
+        metadataPlacement,
+      ),
+    [itemMetadata, metadataLevel, metadataPlacement],
+  );
+  const categoryColor = useMemo(
+    () => getCategoryColor(currentItem.type),
+    [currentItem.type],
+  );
+  const categoryIcon = useMemo(
+    () => getCategoryIcon(currentItem.type),
+    [currentItem.type],
   );
 
   return (
@@ -292,175 +485,11 @@ export default function ItemDetailsClient({
 
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
           {/* Left column - Media */}
-          <div className="relative">
-            <div
-              className="bg-secondary-bg relative aspect-video w-full overflow-hidden rounded-lg"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              <div className="absolute top-4 right-4 z-10 flex gap-2">
-                <CategoryIconBadge
-                  type={item.type}
-                  isLimited={currentItem.is_limited === 1}
-                  isSeasonal={currentItem.is_seasonal === 1}
-                  className="h-5 w-5"
-                />
-              </div>
-
-              <div className="absolute top-4 left-4 z-10">
-                {favoriteButtonSlot}
-              </div>
-
-              {isBlueBird ? (
-                <div className="relative h-full w-full overflow-hidden">
-                  <Image
-                    src={
-                      isBlueBirdRaised
-                        ? blueBirdRaisedImage
-                        : blueBirdDefaultImage
-                    }
-                    alt={`${item.name} (active variant)`}
-                    width={2560}
-                    height={1440}
-                    fetchPriority="high"
-                    loading="eager"
-                    className="h-full w-full object-cover"
-                    onError={handleImageError}
-                  />
-                  <div className="pointer-events-none absolute right-4 bottom-4 left-4">
-                    <div className="text-right text-xs font-semibold tracking-wide text-white">
-                      <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
-                        {isBlueBirdRaised ? "LOWERED MODE" : "RAISED MODE"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ) : isVideoItem(item.name) ? (
-                <video
-                  ref={videoRef}
-                  src={getVideoPath(item.type, item.name)}
-                  loop
-                  muted
-                  playsInline
-                  autoPlay
-                  className="h-full w-full object-cover"
-                />
-              ) : isDriftItem(item.type) ? (
-                <div className="relative h-full w-full">
-                  <Image
-                    src={getItemImagePath(item.type, item.name)}
-                    alt={item.name}
-                    width={2560}
-                    height={1440}
-                    fetchPriority="high"
-                    loading="eager"
-                    className={`h-full w-full object-cover transition-opacity duration-300 ${
-                      isHovered ? "opacity-0" : "opacity-100"
-                    }`}
-                    onError={handleImageError}
-                  />
-                  <video
-                    ref={videoRef}
-                    src={getDriftVideoPath(item.name)}
-                    loop
-                    muted
-                    playsInline
-                    className={`absolute top-0 left-0 h-full w-full object-cover transition-opacity duration-300 ${
-                      isHovered ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                </div>
-              ) : (
-                <Image
-                  src={getItemImagePath(item.type, item.name)}
-                  alt={item.name}
-                  width={2560}
-                  height={1440}
-                  fetchPriority="high"
-                  loading="eager"
-                  className="h-full w-full object-cover"
-                  onError={handleImageError}
-                />
-              )}
-
-              {isHornItem(item.type) && (
-                <button
-                  onClick={handleHornClick}
-                  className={`bg-primary-bg/50 absolute inset-0 flex items-center justify-center transition-opacity ${
-                    isHovered || isPlaying ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  {isPlaying ? (
-                    <Icon
-                      icon="heroicons:pause"
-                      className="text-primary-text h-12 w-12 transition-transform"
-                    />
-                  ) : (
-                    <Icon
-                      icon="heroicons:play-solid"
-                      className="text-primary-text h-12 w-12 transition-transform"
-                    />
-                  )}
-                </button>
-              )}
-            </div>
-
-            <div className="mt-4 hidden justify-center xl:flex">
-              <NitroItemsVideoPlayer className="min-h-45 w-full max-w-xs sm:max-w-sm md:max-w-md" />
-            </div>
-
-            <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-0.5 shadow-lg">
-              <div className="bg-tertiary-bg rounded-md p-4 text-center">
-                <div className="mb-3 flex justify-center">
-                  <Image
-                    src={`/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`}
-                    alt="Jailbreak Changelogs x Trading Core"
-                    width={220}
-                    height={48}
-                    className="h-12 w-auto"
-                  />
-                </div>
-                <h3 className="text-primary-text mb-1 text-lg font-semibold">
-                  Help make a better value list
-                </h3>
-                <p className="text-secondary-text mb-3 text-sm leading-relaxed">
-                  In partnership with Trading Core, you can suggest values for{" "}
-                  {currentItem.name} directly on the site. The community votes
-                  and our team reviews before applying changes.
-                </p>
-                <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-                  <Button asChild className="w-full gap-2 sm:w-auto">
-                    <Link href="/values/suggestions">
-                      <Icon
-                        icon="material-symbols:edit-outline-rounded"
-                        className="h-4 w-4"
-                        inline={true}
-                      />
-                      Suggest a Value
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="secondary"
-                    className="w-full gap-2 sm:w-auto"
-                  >
-                    <a
-                      href="https://discord.com/invite/baHCsb8N5A"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Icon
-                        icon="ic:baseline-discord"
-                        className="h-4 w-4"
-                        inline={true}
-                      />
-                      Join the Discussion
-                    </a>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ItemMediaColumn
+            item={item}
+            favoriteButtonSlot={favoriteButtonSlot}
+            resolvedTheme={resolvedTheme}
+          />
 
           {/* Right column - Details */}
           <div className="space-y-6">
@@ -474,19 +503,14 @@ export default function ItemDetailsClient({
               <div className="mt-2 flex flex-wrap gap-2">
                 <span
                   className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-                  style={{
-                    borderColor: getCategoryColor(currentItem.type),
-                  }}
+                  style={{ borderColor: categoryColor }}
                 >
-                  {(() => {
-                    const categoryIcon = getCategoryIcon(currentItem.type);
-                    return categoryIcon ? (
-                      <categoryIcon.Icon
-                        className="mr-1.5 h-3 w-3"
-                        style={{ color: getCategoryColor(currentItem.type) }}
-                      />
-                    ) : null;
-                  })()}
+                  {categoryIcon && (
+                    <categoryIcon.Icon
+                      className="mr-1.5 h-3 w-3"
+                      style={{ color: categoryColor }}
+                    />
+                  )}
                   {currentItem.type}
                 </span>
                 {currentItem.is_limited === 1 && (
@@ -747,27 +771,7 @@ export default function ItemDetailsClient({
                         Chart Update Schedule
                       </div>
                       <div className="text-secondary-text mt-1 text-xs">
-                        Charts update daily at{" "}
-                        {(() => {
-                          // Create 6 PM Eastern Time and convert to user's local timezone
-                          const today = new Date();
-                          const year = today.getFullYear();
-                          const month = today.getMonth();
-                          const day = today.getDate();
-
-                          // Create 6 PM Eastern Time (18:00 ET) - create UTC time directly
-                          const utcTime = new Date(
-                            Date.UTC(year, month, day, 22, 0, 0),
-                          ); // 6 PM EST = 10 PM UTC
-
-                          // Format in user's local timezone
-                          return utcTime.toLocaleTimeString("en-US", {
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                            timeZoneName: "short",
-                          });
-                        })()}
+                        Charts update daily at {CHART_UPDATE_TIME}
                       </div>
                     </div>
                   </div>

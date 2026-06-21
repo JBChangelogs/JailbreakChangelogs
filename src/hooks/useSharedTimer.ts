@@ -104,18 +104,12 @@ export const useOptimizedRealTimeRelativeDate = (
   timestamp: string | number | null | undefined,
   id: string,
 ) => {
-  const getInitialRelativeTime = () => {
-    if (!timestamp) return "";
-    return formatRelativeDate(timestamp);
-  };
-
-  const [relativeTime, setRelativeTime] = useState<string>(
-    getInitialRelativeTime,
+  const [relativeTime, setRelativeTime] = useState<string>(() =>
+    timestamp ? formatRelativeDate(timestamp) : "",
   );
 
   useEffect(() => {
-    setRelativeTime(getInitialRelativeTime());
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
+    setRelativeTime(timestamp ? formatRelativeDate(timestamp) : "");
   }, [timestamp]);
 
   const updateRelativeTime = useCallback(() => {
