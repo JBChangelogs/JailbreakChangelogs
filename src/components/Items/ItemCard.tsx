@@ -1,3 +1,4 @@
+import React from "react";
 import { Item } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,12 +51,14 @@ interface ItemCardProps {
   item: Item;
   isFavorited: boolean;
   onFavoriteChange: (isFavorited: boolean) => void;
+  itemMetadata?: ItemUnlockMetadataEntry | null;
 }
 
-export default function ItemCard({
+function ItemCard({
   item,
   isFavorited,
   onFavoriteChange,
+  itemMetadata: itemMetadataProp,
 }: ItemCardProps) {
   const isBlueBird = item.id === 919;
   const blueBirdDefaultImage =
@@ -71,26 +74,27 @@ export default function ItemCard({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pathname = usePathname();
   const isValuesPage = pathname === "/values";
-  const [itemMetadata, setItemMetadata] =
+  const [localItemMetadata, setLocalItemMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
+  const itemMetadata =
+    itemMetadataProp !== undefined ? itemMetadataProp : localItemMetadata;
   const { isAuthenticated, setLoginModal } = useAuthContext();
 
   useEffect(() => {
+    if (!isVideoItem(item.name)) return;
     const currentMediaRef = mediaRef.current;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (isVideoItem(item.name) && videoRef.current) {
-          if (entry.isIntersecting) {
-            // Check if video is ready to play and handle promise properly
-            const playPromise = videoRef.current.play();
-            if (playPromise !== undefined) {
-              playPromise.catch((error) => {
-                log.error("Error playing video:", error);
-              });
-            }
-          } else {
-            videoRef.current.pause();
+        if (!videoRef.current) return;
+        if (entry.isIntersecting) {
+          const playPromise = videoRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((error) => {
+              log.error("Error playing video:", error);
+            });
           }
+        } else {
+          videoRef.current.pause();
         }
       },
       {
@@ -140,24 +144,24 @@ export default function ItemCard({
   }, [isBlueBird]);
 
   useEffect(() => {
-    if (!isValuesPage) return;
+    if (!isValuesPage || itemMetadataProp !== undefined) return;
 
     let isMounted = true;
 
     fetchItemUnlockMetadataById()
       .then((metadataById) => {
         if (!isMounted) return;
-        setItemMetadata(metadataById.get(item.id) ?? null);
+        setLocalItemMetadata(metadataById.get(item.id) ?? null);
       })
       .catch((error) => {
         log.error("Error loading item metadata:", error);
-        if (isMounted) setItemMetadata(null);
+        if (isMounted) setLocalItemMetadata(null);
       });
 
     return () => {
       isMounted = false;
     };
-  }, [isValuesPage, item.id]);
+  }, [isValuesPage, item.id, itemMetadataProp]);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -763,3 +767,11 @@ export default function ItemCard({
     </div>
   );
 }
+
+export default React.memo(ItemCard, (prev, next) => {
+  return (
+    prev.item === next.item &&
+    prev.isFavorited === next.isFavorited &&
+    prev.itemMetadata === next.itemMetadata
+  );
+});

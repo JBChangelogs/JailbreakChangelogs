@@ -1,16 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
 import ItemCardSkeleton from "@/components/Items/ItemCardSkeleton";
 import { Item } from "@/types";
 import { getEffectiveCashValue } from "@/utils/trading/values";
+import {
+  fetchItemUnlockMetadataById,
+  ItemUnlockMetadataEntry,
+} from "@/utils/items/itemUnlockMetadata";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";
 import { Button } from "../ui/button";
 import { getFilterDisplayName } from "./valuesFilterOptions";
+
+const parseNumericValue = (value: string | null): number => {
+  if (!value || value === "N/A") return -1;
+  const lower = value.toLowerCase();
+  const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
+  if (Number.isNaN(num)) return -1;
+  if (lower.includes("k")) return num * 1_000;
+  if (lower.includes("m")) return num * 1_000_000;
+  if (lower.includes("b")) return num * 1_000_000_000;
+  return num;
+};
 
 interface ValuesItemsGridProps {
   items: Item[];
@@ -44,7 +59,17 @@ export default function ValuesItemsGrid({
   debouncedSearchTerm,
 }: ValuesItemsGridProps) {
   const [page, setPage] = useState(1);
-  const itemsPerPage = 24;
+  const itemsPerPage = 32;
+  const [metadataMap, setMetadataMap] = useState<Map<
+    number,
+    ItemUnlockMetadataEntry
+  > | null>(null);
+
+  useEffect(() => {
+    fetchItemUnlockMetadataById()
+      .then(setMetadataMap)
+      .catch(() => {});
+  }, []);
 
   // State derivation to reset page when filters change
   const [prevFilters, setPrevFilters] = useState({
@@ -72,26 +97,18 @@ export default function ValuesItemsGrid({
     setPage(1);
   }
 
-  const parseNumericValue = (value: string | null): number => {
-    if (!value || value === "N/A") return -1;
-    const lower = value.toLowerCase();
-    const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
-    if (Number.isNaN(num)) return -1;
-    if (lower.includes("k")) return num * 1_000;
-    if (lower.includes("m")) return num * 1_000_000;
-    if (lower.includes("b")) return num * 1_000_000_000;
-    return num;
-  };
+  const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
 
-  const rangeFilteredItems =
-    appliedMinValue === 0 && appliedMaxValue >= MAX_VALUE_RANGE
-      ? items
-      : items.filter((item) => {
-          const cash = parseNumericValue(getEffectiveCashValue(item));
-          const isOpenEndedMax = appliedMaxValue >= MAX_VALUE_RANGE;
-          if (isOpenEndedMax) return cash >= appliedMinValue;
-          return cash >= appliedMinValue && cash <= appliedMaxValue;
-        });
+  const rangeFilteredItems = useMemo(() => {
+    if (appliedMinValue === 0 && appliedMaxValue >= MAX_VALUE_RANGE)
+      return items;
+    return items.filter((item) => {
+      const cash = parseNumericValue(getEffectiveCashValue(item));
+      const isOpenEndedMax = appliedMaxValue >= MAX_VALUE_RANGE;
+      if (isOpenEndedMax) return cash >= appliedMinValue;
+      return cash >= appliedMinValue && cash <= appliedMaxValue;
+    });
+  }, [items, appliedMinValue, appliedMaxValue, MAX_VALUE_RANGE]);
 
   const totalPages = Math.ceil(rangeFilteredItems.length / itemsPerPage);
   const displayedItems = rangeFilteredItems.slice(
@@ -267,7 +284,8 @@ export default function ValuesItemsGrid({
             <React.Fragment key={item.id}>
               <ItemCard
                 item={item}
-                isFavorited={favorites.includes(item.id)}
+                isFavorited={favoritesSet.has(item.id)}
+                itemMetadata={metadataMap?.get(item.id) ?? null}
                 onFavoriteChange={(fav) => {
                   onFavoriteChange(item.id, fav);
                 }}

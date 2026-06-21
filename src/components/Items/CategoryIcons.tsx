@@ -1,3 +1,4 @@
+import React from "react";
 import { FilterSort, ValueSort } from "@/types";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -11,7 +12,72 @@ interface CategoryIconsProps {
   onValueSort: (sort: ValueSort) => void;
 }
 
-export default function CategoryIcons({
+const mobileOrderMap: Record<string, number> = {
+  "name-vehicles": 1,
+  "name-hyperchromes": 2,
+  "name-textures": 3,
+  "name-rims": 4,
+  "name-spoilers": 5,
+  "name-drifts": 6,
+  "name-tire-styles": 7,
+  "name-tire-stickers": 8,
+  "name-furnitures": 9,
+  "name-body-colors": 10,
+  "name-weapon-skins": 11,
+  "name-horns": 12,
+  "name-seasonal-items": 13,
+  "name-limited-items": 14,
+  favorites: 15,
+};
+
+const getCategoryData = (type: string, id: string, name: string) => {
+  const categoryIcon = getCategoryIcon(type);
+  const iconColor = getCategoryColor(type);
+  return {
+    id,
+    name,
+    icon: categoryIcon?.Icon ? "dynamic" : "mdi:help-circle",
+    iconComponent: categoryIcon?.Icon,
+    iconColor,
+    bgColor: `${iconColor}1A`,
+    onClick: undefined as (() => void) | undefined,
+  };
+};
+
+const STATIC_CATEGORIES = [
+  getCategoryData("vehicles", "name-vehicles", "Vehicles"),
+  getCategoryData("hyperchromes", "name-hyperchromes", "HyperChromes"),
+  getCategoryData("rims", "name-rims", "Rims"),
+  getCategoryData("textures", "name-textures", "Textures"),
+  getCategoryData("spoilers", "name-spoilers", "Spoilers"),
+  getCategoryData("tire styles", "name-tire-styles", "Tire Styles"),
+  getCategoryData("tire stickers", "name-tire-stickers", "Tire Stickers"),
+  getCategoryData("horns", "name-horns", "Horns"),
+  getCategoryData("body colors", "name-body-colors", "Body Colors"),
+  getCategoryData("drifts", "name-drifts", "Drifts"),
+  getCategoryData("weapon skins", "name-weapon-skins", "Weapon Skins"),
+  getCategoryData("furniture", "name-furnitures", "Furniture"),
+  {
+    id: "name-seasonal-items",
+    name: "Seasonal",
+    icon: "noto-v1:snowflake",
+    iconComponent: null as null,
+    bgColor: "rgba(64, 192, 231, 0.1)",
+    iconColor: "#40c0e7",
+    onClick: undefined as (() => void) | undefined,
+  },
+  {
+    id: "name-limited-items",
+    name: "Limited",
+    icon: "mdi:clock",
+    iconComponent: null as null,
+    bgColor: "rgba(18, 78, 102, 0.1)",
+    iconColor: "#ffd700",
+    onClick: undefined as (() => void) | undefined,
+  },
+];
+
+function CategoryIcons({
   onSelect,
   selectedFilter,
   onValueSort,
@@ -20,40 +86,6 @@ export default function CategoryIcons({
   const handleCategoryClick = (categoryId: string) => {
     onSelect(categoryId as FilterSort);
     onValueSort("cash-desc");
-  };
-
-  // Helper function to get category data using the centralized utility
-  const getCategoryData = (type: string, id: string, name: string) => {
-    const categoryIcon = getCategoryIcon(type);
-    const iconColor = getCategoryColor(type);
-
-    return {
-      id,
-      name,
-      icon: categoryIcon?.Icon ? "dynamic" : "mdi:help-circle", // fallback icon
-      iconComponent: categoryIcon?.Icon,
-      iconColor,
-      bgColor: `${iconColor}1A`, // Convert hex to rgba with 10% opacity
-      onClick: undefined, // No custom onClick for these categories
-    };
-  };
-
-  const mobileOrderMap: Record<string, number> = {
-    "name-vehicles": 1,
-    "name-hyperchromes": 2,
-    "name-textures": 3,
-    "name-rims": 4,
-    "name-spoilers": 5,
-    "name-drifts": 6,
-    "name-tire-styles": 7,
-    "name-tire-stickers": 8,
-    "name-furnitures": 9,
-    "name-body-colors": 10,
-    "name-weapon-skins": 11,
-    "name-horns": 12,
-    "name-seasonal-items": 13,
-    "name-limited-items": 14,
-    favorites: 15,
   };
 
   const categories = [
@@ -72,34 +104,7 @@ export default function CategoryIcons({
         handleCategoryClick("favorites");
       },
     },
-    getCategoryData("vehicles", "name-vehicles", "Vehicles"),
-    getCategoryData("hyperchromes", "name-hyperchromes", "HyperChromes"),
-    getCategoryData("rims", "name-rims", "Rims"),
-    getCategoryData("textures", "name-textures", "Textures"),
-    getCategoryData("spoilers", "name-spoilers", "Spoilers"),
-    getCategoryData("tire styles", "name-tire-styles", "Tire Styles"),
-    getCategoryData("tire stickers", "name-tire-stickers", "Tire Stickers"),
-    getCategoryData("horns", "name-horns", "Horns"),
-    getCategoryData("body colors", "name-body-colors", "Body Colors"),
-    getCategoryData("drifts", "name-drifts", "Drifts"),
-    getCategoryData("weapon skins", "name-weapon-skins", "Weapon Skins"),
-    getCategoryData("furniture", "name-furnitures", "Furniture"),
-    {
-      id: "name-seasonal-items",
-      name: "Seasonal",
-      icon: "noto-v1:snowflake",
-      iconComponent: null,
-      bgColor: "rgba(64, 192, 231, 0.1)",
-      iconColor: "#40c0e7",
-    },
-    {
-      id: "name-limited-items",
-      name: "Limited",
-      icon: "mdi:clock",
-      iconComponent: null,
-      bgColor: "rgba(18, 78, 102, 0.1)",
-      iconColor: "#ffd700",
-    },
+    ...STATIC_CATEGORIES,
   ];
 
   return (
@@ -153,3 +158,5 @@ export default function CategoryIcons({
     </div>
   );
 }
+
+export default React.memo(CategoryIcons);

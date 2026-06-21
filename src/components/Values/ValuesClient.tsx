@@ -4,6 +4,7 @@ import { createLogger } from "@/services/logger";
 import { useState, useEffect, useRef, useMemo } from "react";
 
 const log = createLogger("UI");
+const EMPTY_FAVORITES: number[] = [];
 import { use } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, FavoriteItem } from "@/types";
@@ -125,9 +126,14 @@ export default function ValuesClient({
     loadFavorites();
   }, [user]);
 
+  const effectiveFavorites =
+    filterSort === "favorites" ? favorites : EMPTY_FAVORITES;
+
   useEffect(() => {
     const updateSortedItems = async () => {
-      const favoritesData = favorites.map((id) => ({ item_id: String(id) }));
+      const favoritesData = effectiveFavorites.map((id) => ({
+        item_id: String(id),
+      }));
       const sorted = await sortAndFilterItems(
         items,
         filterSort,
@@ -139,7 +145,7 @@ export default function ValuesClient({
       setIsInitialSortPending(false);
     };
     updateSortedItems();
-  }, [items, debouncedSearchTerm, filterSort, valueSort, favorites]);
+  }, [items, debouncedSearchTerm, filterSort, valueSort, effectiveFavorites]);
 
   return (
     <ValuesErrorBoundary>

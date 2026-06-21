@@ -372,11 +372,11 @@ export const getEffectiveTrend = (item: Item): string | null => {
   return item.trend;
 };
 
-export const filterByType = async (
+export const filterByType = (
   items: Item[],
   filterSort: FilterSort,
   userFavorites?: Array<{ item_id: string }>,
-): Promise<Item[]> => {
+): Item[] => {
   switch (filterSort) {
     case "name-limited-items":
       return items.filter((item) => item.is_limited === 1);
@@ -442,7 +442,7 @@ export const sortAndFilterItems = async (
   let result = [...items];
 
   // Apply filter based on filterSort
-  result = await filterByType(result, filterSort, userFavorites);
+  result = filterByType(result, filterSort, userFavorites);
 
   // Apply search filter
   if (searchTerm) {

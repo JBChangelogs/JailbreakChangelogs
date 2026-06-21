@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { YouTubeEmbed } from "@next/third-parties/google";
 import { Icon } from "@/components/ui/IconWrapper";
 import { demandOrder, trendOrder } from "@/utils/trading/values";
@@ -13,85 +13,84 @@ interface TradingGuidesProps {
   onScrollToSearch: () => void;
 }
 
-export default function TradingGuides({
+const tradingTerms = [
+  {
+    term: "Demand",
+    description: "A measurement of how desired an item is in trading",
+  },
+  {
+    term: "Lowball",
+    description:
+      "When someone offers for your items but their side is lower in value and or demand",
+  },
+  {
+    term: "Avoided",
+    description:
+      "Items that traders generally avoid, typically due to low demand",
+  },
+  {
+    term: "Overpay(s)",
+    description:
+      "When one party offers additional value on top of an item's base value, usually due to a difference in demand between the two parties",
+  },
+  {
+    term: "Base value",
+    description:
+      "The flat value of an item without factoring in its pull power",
+  },
+  {
+    term: "Pull power / Pull value",
+    description:
+      "The highest value an item can consistently obtain in trades based on current market demand and offers",
+  },
+  { term: "LF", description: "Looking for" },
+  { term: "D", description: "Duped; items that are duped" },
+  { term: "C", description: "Clean; items that are not duped" },
+  { term: "TR", description: "Trading" },
+  { term: "IA", description: "Instant accept" },
+  { term: "AA", description: "Auto Accept" },
+  { term: "MLF", description: "Mainly looking for" },
+  { term: "NLF", description: "Not looking for" },
+  {
+    term: "W",
+    description:
+      "Win; a trade in which one side clearly receives greater overall value or demand",
+  },
+  {
+    term: "L",
+    description:
+      "Loss; a trade in which one side clearly receives lower overall value or demand",
+  },
+  {
+    term: "F",
+    description: "Fair; a trade balanced in value and/or demand",
+  },
+  {
+    term: "WFL",
+    description:
+      "Win/Fair/Loss. Asking if a particular trade is or was good (e.g: Was this a win, fair, or loss?)",
+  },
+  {
+    term: "Adds",
+    description:
+      "Additional items included in a trade to compensate for a value or demand imbalance",
+  },
+  {
+    term: "Downgrade",
+    description: "Trading one high-value item for multiple lower-value items",
+  },
+  {
+    term: "Upgrade",
+    description: "Trading multiple lower-value items for one higher-value item",
+  },
+];
+
+function TradingGuides({
   valueSort,
   onValueSortChange,
   onScrollToSearch,
 }: TradingGuidesProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const tradingTerms = [
-    {
-      term: "Demand",
-      description: "A measurement of how desired an item is in trading",
-    },
-    {
-      term: "Lowball",
-      description:
-        "When someone offers for your items but their side is lower in value and or demand",
-    },
-    {
-      term: "Avoided",
-      description:
-        "Items that traders generally avoid, typically due to low demand",
-    },
-    {
-      term: "Overpay(s)",
-      description:
-        "When one party offers additional value on top of an item's base value, usually due to a difference in demand between the two parties",
-    },
-    {
-      term: "Base value",
-      description:
-        "The flat value of an item without factoring in its pull power",
-    },
-    {
-      term: "Pull power / Pull value",
-      description:
-        "The highest value an item can consistently obtain in trades based on current market demand and offers",
-    },
-    { term: "LF", description: "Looking for" },
-    { term: "D", description: "Duped; items that are duped" },
-    { term: "C", description: "Clean; items that are not duped" },
-    { term: "TR", description: "Trading" },
-    { term: "IA", description: "Instant accept" },
-    { term: "AA", description: "Auto Accept" },
-    { term: "MLF", description: "Mainly looking for" },
-    { term: "NLF", description: "Not looking for" },
-    {
-      term: "W",
-      description:
-        "Win; a trade in which one side clearly receives greater overall value or demand",
-    },
-    {
-      term: "L",
-      description:
-        "Loss; a trade in which one side clearly receives lower overall value or demand",
-    },
-    {
-      term: "F",
-      description: "Fair; a trade balanced in value and/or demand",
-    },
-    {
-      term: "WFL",
-      description:
-        "Win/Fair/Loss. Asking if a particular trade is or was good (e.g: Was this a win, fair, or loss?)",
-    },
-    {
-      term: "Adds",
-      description:
-        "Additional items included in a trade to compensate for a value or demand imbalance",
-    },
-    {
-      term: "Downgrade",
-      description: "Trading one high-value item for multiple lower-value items",
-    },
-    {
-      term: "Upgrade",
-      description:
-        "Trading multiple lower-value items for one higher-value item",
-    },
-  ];
 
   const getDemandHexColor = (demand: string): string => {
     switch (demand) {
@@ -380,3 +379,5 @@ export default function TradingGuides({
     </div>
   );
 }
+
+export default React.memo(TradingGuides);

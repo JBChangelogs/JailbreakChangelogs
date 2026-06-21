@@ -98,22 +98,19 @@ export const useValueSortState = (options: UseValueSortStateOptions = {}) => {
     ? (rawUrlValueSort as ValueSort)
     : undefined;
 
-  const storedFilterSort =
-    canStoreFilter &&
-    isValidValue(
-      safeSessionStorage.getItem(storageKeys!.filterSort!),
-      validFilterSortSet,
-    )
-      ? (safeSessionStorage.getItem(storageKeys!.filterSort!) as FilterSort)
-      : undefined;
-  const storedValueSort =
-    canStoreValue &&
-    isValidValue(
-      safeSessionStorage.getItem(storageKeys!.valueSort!),
-      validValueSortSet,
-    )
-      ? (safeSessionStorage.getItem(storageKeys!.valueSort!) as ValueSort)
-      : undefined;
+  const rawStoredFilter = canStoreFilter
+    ? safeSessionStorage.getItem(storageKeys!.filterSort!)
+    : null;
+  const storedFilterSort = isValidValue(rawStoredFilter, validFilterSortSet)
+    ? (rawStoredFilter as FilterSort)
+    : undefined;
+
+  const rawStoredValue = canStoreValue
+    ? safeSessionStorage.getItem(storageKeys!.valueSort!)
+    : null;
+  const storedValueSort = isValidValue(rawStoredValue, validValueSortSet)
+    ? (rawStoredValue as ValueSort)
+    : undefined;
 
   useEffect(() => {
     if (urlFilterSort && canStoreFilter) {
