@@ -674,7 +674,7 @@ export default function InventoryCheckerClient({
     try {
       const resolvedId = await getRobloxId(input);
       if (resolvedId) {
-        router.push(`/inventories/${resolvedId}`);
+        router.push(`/inventories/${input}`);
       } else {
         setInternalIsLoading(false);
         const truncated =

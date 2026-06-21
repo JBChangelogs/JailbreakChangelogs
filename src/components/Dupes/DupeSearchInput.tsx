@@ -52,7 +52,7 @@ export default function DupeSearchInput({
     try {
       const resolvedId = await getRobloxId(input);
       if (resolvedId) {
-        router.push(`/dupes/${resolvedId}`);
+        router.push(`/dupes/${input}`);
       } else {
         setIsSearching(false);
         const truncated =

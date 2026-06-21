@@ -189,7 +189,7 @@ export default function OGFinderResults({
     try {
       const resolvedId = await getRobloxId(input);
       if (resolvedId) {
-        router.push(`/og/${resolvedId}`);
+        router.push(`/og/${input}`);
       } else {
         setIsLoading(false);
         const truncated =
