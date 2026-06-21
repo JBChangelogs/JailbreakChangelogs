@@ -7,13 +7,11 @@ const log = createLogger("UI");
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { Pagination } from "@/components/ui/Pagination";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { logout, trackLogoutSource } from "@/utils/auth/auth";
-import { toast } from "sonner";
 import LoginModal from "../Auth/LoginModal";
 import EscapeLoginModal from "../Auth/EscapeLoginModal";
 import { useEscapeLogin } from "@/utils/auth/escapeLogin";
@@ -21,7 +19,6 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Spinner } from "@/components/ui/Spinner";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -43,108 +40,12 @@ import NewsTicker from "./NewsTicker";
 import EventCountdownBanner from "./EventCountdownBanner";
 import OfflineDetector from "../OfflineDetector";
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  fetchNotificationHistory,
-  fetchUnreadNotificationCount,
-  fetchUnreadNotifications,
-  clearNotificationHistory,
-  NotificationHistory,
-  NotificationItem,
-} from "@/utils/api/api";
-import { formatCompactDateTime } from "@/utils/helpers/timestamp";
-import {
-  getNotificationActionLabel,
-  parseNotificationUrl,
-} from "@/utils/notifications/notificationUrl";
-import { NotifDescription } from "@/components/notifications/NotifDescription";
-import { TwemojiText } from "@/components/ui/TwemojiText";
+import { fetchUnreadNotificationCount } from "@/utils/api/api";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
-import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
-
-const UnreadNotificationBadge = ({ count }: { count: number }) => {
-  if (count === 0) return null;
-
-  const displayCount = count > 99 ? "99+" : count.toString();
-  const isDoubleDigit = count > 9 && count <= 99;
-
-  return (
-    <span
-      className={`absolute top-0 right-0 z-10 flex translate-x-1/4 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white ${
-        isDoubleDigit || count > 99 ? "h-4 min-w-4 px-1" : "h-4 w-4"
-      }`}
-    >
-      {displayCount}
-    </span>
-  );
-};
-
-const NotificationTimestamp = ({
-  timestamp,
-  notificationId,
-}: {
-  timestamp: string | number;
-  notificationId: number;
-}) => {
-  const timestampString =
-    typeof timestamp === "string" ? timestamp : timestamp.toString();
-  const timestampNumber =
-    typeof timestamp === "number" ? timestamp : Number.parseInt(timestamp, 10);
-  const hasValidNumber = Number.isFinite(timestampNumber);
-  const relativeTime = useOptimizedRealTimeRelativeDate(
-    timestampString,
-    `mobile-notification-${notificationId}`,
-  );
-  const isWithin24Hours =
-    relativeTime === "just now" ||
-    relativeTime.includes("second") ||
-    relativeTime.includes("minute") ||
-    relativeTime.includes("hour");
-
-  const absoluteTime = hasValidNumber
-    ? formatCompactDateTime(timestampNumber)
-    : timestampString;
-
-  return (
-    <p className="text-secondary-text mt-1 text-right text-xs">
-      <span>{isWithin24Hours ? relativeTime : absoluteTime}</span>
-    </p>
-  );
-};
-
-const getNotificationType = (
-  notification:
-    | NotificationItem
-    | {
-        type?: unknown;
-        metadata?: Record<string, unknown> | null;
-      },
-): string | null => {
-  if (typeof notification.type === "string" && notification.type.trim()) {
-    return notification.type.trim().toLowerCase();
-  }
-
-  const metadata = notification.metadata;
-  if (!metadata || typeof metadata !== "object") {
-    return null;
-  }
-
-  const metadataType = metadata.type;
-  if (typeof metadataType === "string" && metadataType.trim()) {
-    return metadataType.trim().toLowerCase();
-  }
-
-  return null;
-};
+import { NotificationPopover } from "@/components/notifications/NotificationPopover";
 
 const MobileNavSection = ({
   title,
@@ -251,70 +152,15 @@ export default function Header() {
     setOpenNavSection((prev) => (prev === title ? "" : title));
   const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
-  const [notificationTab, setNotificationTab] = useState<"history" | "unread">(
-    "unread",
-  );
-  const [notifications, setNotifications] =
-    useState<NotificationHistory | null>(null);
-  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-  const [notificationPage, setNotificationPage] = useState(1);
-  const [notificationTimeoutId, setNotificationTimeoutId] =
-    useState<NodeJS.Timeout | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [wsConnected, setWsConnected] = useState(false);
   const hasWsUnreadSeedRef = useRef(false);
-
-  // Debounced notification fetching functions
-  const fetchUnreadWithDebounce = (page: number, limit: number) => {
-    if (notificationTimeoutId) {
-      clearTimeout(notificationTimeoutId);
-    }
-
-    const timeoutId = setTimeout(async () => {
-      setIsLoadingNotifications(true);
-      let data = await fetchUnreadNotifications(page, limit);
-
-      // When paginating, viewing each page marks those notifications as seen,
-      // shrinking total_pages. If the requested page no longer exists, step
-      // back to the previous page so the user sees the actual last page.
-      if (data.items.length === 0 && page > 1) {
-        const prevPage = page - 1;
-        setNotificationPage(prevPage);
-        data = await fetchUnreadNotifications(prevPage, limit);
-      }
-
-      setNotifications(data);
-      const nextUnread =
-        typeof data.unread_count === "number"
-          ? data.unread_count
-          : Math.max(0, data.total || 0);
-      setUnreadCount(Math.max(0, nextUnread));
-      setIsLoadingNotifications(false);
-    }, 300);
-
-    setNotificationTimeoutId(timeoutId);
-  };
-
-  const fetchHistoryWithDebounce = (page: number, limit: number) => {
-    if (notificationTimeoutId) {
-      clearTimeout(notificationTimeoutId);
-    }
-
-    const timeoutId = setTimeout(async () => {
-      setIsLoadingNotifications(true);
-      const data = await fetchNotificationHistory(page, limit);
-      setNotifications(data);
-      setIsLoadingNotifications(false);
-    }, 300);
-
-    setNotificationTimeoutId(timeoutId);
-  };
 
   const {
     setLoginModal,
     user: authUser,
     isAuthenticated,
     isLoading,
+    wsConnected,
   } = useAuthContext();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -336,7 +182,7 @@ export default function Header() {
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, pathname]);
+  }, [isAuthenticated]);
 
   useToastRuntimeRightOffset({
     enabled: !isXlUp,
@@ -351,25 +197,17 @@ export default function Header() {
         event as CustomEvent<{
           total_notifications?: unknown;
           type?: unknown;
-          data?: {
-            type?: unknown;
-            title?: string;
-            description?: string;
-            link?: string;
-            metadata?: Record<string, unknown> | null;
-          };
+          data?: { type?: unknown };
         }>
       ).detail;
       const totalNotifications =
         typeof detail?.total_notifications === "number"
           ? detail.total_notifications
           : null;
-      const wsNotification = detail?.data;
-      const notificationType = getNotificationType({
-        type: detail?.type ?? detail?.data?.type,
-        metadata: wsNotification?.metadata ?? null,
-      });
-      const isBroadcast = notificationType === "broadcast";
+      const rawType = detail?.type ?? detail?.data?.type;
+      const isBroadcast =
+        typeof rawType === "string" &&
+        rawType.trim().toLowerCase() === "broadcast";
 
       setUnreadCount((prev) => {
         if (isBroadcast) return prev;
@@ -396,38 +234,15 @@ export default function Header() {
       hasWsUnreadSeedRef.current = false;
       setUnreadCount(0);
     }, 0);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
+    return () => clearTimeout(timeoutId);
   }, [isAuthenticated]);
 
+  // Reset unread seed when WS drops so the next connection re-seeds the count.
   useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const handleConnectionChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
-      const connected = detail?.connected === true;
-      setWsConnected(connected);
-      if (!connected) {
-        hasWsUnreadSeedRef.current = false;
-      }
-    };
-
-    window.addEventListener(
-      "realtimeNotificationsConnection",
-      handleConnectionChange,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "realtimeNotificationsConnection",
-        handleConnectionChange,
-      );
-    };
-  }, [isAuthenticated]);
-
-  const displayNotifications = notifications;
+    if (!wsConnected) {
+      hasWsUnreadSeedRef.current = false;
+    }
+  }, [wsConnected]);
 
   const desktopHeaderRef = useRef<HTMLDivElement>(null);
   const mobileHeaderRef = useRef<HTMLDivElement>(null);
@@ -882,297 +697,13 @@ export default function Header() {
                       </button>
                     )}
                   {/* Notification icon */}
-                  <Popover
-                    open={notificationMenuOpen}
-                    onOpenChange={(open) => {
-                      setNotificationMenuOpen(open);
-                      if (open && isAuthenticated) {
-                        // Reset to unread tab when opening
-                        setNotificationTab("unread");
-                        setNotificationPage(1);
-                        setIsLoadingNotifications(true); // Show loading immediately
-                        setNotifications(null); // Clear old notifications
-                        fetchUnreadWithDebounce(1, 5);
-                      } else if (!open) {
-                        // Reset state when closing
-                        setNotifications(null);
-                        setIsLoadingNotifications(false);
-                      }
-                    }}
-                  >
-                    <PopoverTrigger asChild>
-                      <button
-                        suppressHydrationWarning={true}
-                        className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
-                        aria-label="Notifications"
-                      >
-                        <Icon
-                          icon="mingcute:notification-line"
-                          className="text-primary-text h-4 w-4"
-                          inline={true}
-                        />
-                        {showAuth && unreadCount > 0 && (
-                          <UnreadNotificationBadge count={unreadCount} />
-                        )}
-                      </button>
-                    </PopoverTrigger>
-
-                    <PopoverContent
-                      align="center"
-                      side="bottom"
-                      className="w-[calc(100vw-1rem)] max-w-md overflow-hidden rounded-2xl p-0"
-                    >
-                      {/* Header */}
-                      <div className="border-border-secondary border-b px-4 py-3">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-primary-text font-semibold">
-                            {displayNotifications
-                              ? `${displayNotifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${displayNotifications.total !== 1 ? "s" : ""}`
-                              : `0 ${notificationTab === "unread" ? "Unread " : ""}Notifications`}
-                          </h3>
-                          {notificationTab === "history" &&
-                            displayNotifications &&
-                            displayNotifications.total > 0 && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={async () => {
-                                      const success =
-                                        await clearNotificationHistory();
-                                      if (success) {
-                                        toast.success(
-                                          "Cleared notification history",
-                                          {
-                                            duration: 2000,
-                                          },
-                                        );
-                                        // Refetch to update the list
-                                        setIsLoadingNotifications(true);
-                                        const data =
-                                          await fetchNotificationHistory(1, 5);
-                                        setNotifications(data);
-                                        setNotificationPage(1);
-                                        setIsLoadingNotifications(false);
-                                      } else {
-                                        toast.error(
-                                          "Failed to clear notification history",
-                                          {
-                                            duration: 3000,
-                                          },
-                                        );
-                                      }
-                                    }}
-                                    data-rybbit-event={
-                                      "Clear Notification History"
-                                    }
-                                    className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
-                                  >
-                                    <Icon
-                                      icon="si:bin-fill"
-                                      className="h-5 w-5"
-                                      inline={true}
-                                    />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent>Clear History</TooltipContent>
-                              </Tooltip>
-                            )}
-                        </div>
-                      </div>
-
-                      {/* Tabs */}
-                      {showAuth && (
-                        <div className="border-border-secondary border-b">
-                          <Tabs
-                            value={notificationTab}
-                            onValueChange={(value) => {
-                              if (value !== "unread" && value !== "history") {
-                                return;
-                              }
-                              setNotificationTab(value);
-                              setNotificationPage(1);
-                              setIsLoadingNotifications(true); // Show loading immediately
-                              setNotifications(null); // Clear old notifications
-                              if (value === "unread") {
-                                fetchUnreadWithDebounce(1, 5);
-                                return;
-                              }
-                              fetchHistoryWithDebounce(1, 5);
-                            }}
-                          >
-                            <TabsList
-                              className="w-full rounded-none border-0 p-0"
-                              fullWidth
-                            >
-                              <TabsTrigger
-                                value="unread"
-                                fullWidth
-                                className="rounded-none data-[state=active]:shadow-none"
-                              >
-                                Unread
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="history"
-                                fullWidth
-                                className="rounded-none data-[state=active]:shadow-none"
-                              >
-                                History
-                              </TabsTrigger>
-                            </TabsList>
-                          </Tabs>
-                        </div>
-                      )}
-
-                      {/* Manage Notifications Link */}
-                      {showAuth && (
-                        <div className="border-border-secondary bg-secondary-bg/30 border-b px-4 py-2">
-                          <p className="text-secondary-text text-xs">
-                            Manage which notifications you receive in{" "}
-                            <Link
-                              href="/settings?highlight=notifications"
-                              className="text-link hover:underline"
-                              onClick={() => setNotificationMenuOpen(false)}
-                            >
-                              Settings
-                            </Link>
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Content */}
-                      <div className="max-h-96 overflow-y-auto">
-                        {isLoadingNotifications ? (
-                          <div className="flex min-h-50 flex-col items-center justify-center px-4 py-8">
-                            <Spinner className="h-8 w-8" />
-                            <p className="text-secondary-text mt-3 text-center text-sm">
-                              Loading notifications...
-                            </p>
-                          </div>
-                        ) : !showAuth ? (
-                          <div className="flex flex-col items-center justify-center px-4 py-8">
-                            <p className="text-secondary-text text-center text-sm">
-                              You must be logged in to view notifications
-                            </p>
-                          </div>
-                        ) : displayNotifications &&
-                          displayNotifications.items.length > 0 ? (
-                          <>
-                            <div className="py-2">
-                              {displayNotifications.items.map((notif) => {
-                                // Check if link domain is whitelisted and extract URL info
-                                const urlInfo = parseNotificationUrl(
-                                  notif.link,
-                                );
-                                const actionLabel =
-                                  getNotificationActionLabel(urlInfo);
-                                const shouldHideViewAction =
-                                  notif.title.trim().toLowerCase() ===
-                                  "login detected";
-
-                                return (
-                                  <div
-                                    key={notif.id}
-                                    className="border-border-secondary hover:bg-secondary-bg block border-b px-4 py-3 transition-colors last:border-b-0"
-                                  >
-                                    <div className="flex-1">
-                                      <div className="flex items-start justify-between gap-2">
-                                        <TwemojiText
-                                          tag="p"
-                                          className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal"
-                                        >
-                                          {notif.title}
-                                        </TwemojiText>
-                                      </div>
-                                      <div className="text-secondary-text mt-1 text-xs wrap-break-word">
-                                        <NotifDescription
-                                          text={notif.description}
-                                          className="text-secondary-text text-xs leading-relaxed"
-                                        />
-                                      </div>
-                                      {shouldHideViewAction ? null : urlInfo.isWhitelisted ? (
-                                        urlInfo.isJailbreakChangelogs &&
-                                        urlInfo.relativePath ? (
-                                          <Button
-                                            variant="default"
-                                            size="sm"
-                                            asChild
-                                            className="mt-2"
-                                          >
-                                            <Link
-                                              href={urlInfo.relativePath}
-                                              prefetch={false}
-                                              onClick={() =>
-                                                setNotificationMenuOpen(false)
-                                              }
-                                            >
-                                              {actionLabel}
-                                            </Link>
-                                          </Button>
-                                        ) : !urlInfo.isJailbreakChangelogs &&
-                                          urlInfo.validatedExternalHref ? (
-                                          <Button
-                                            variant="default"
-                                            size="sm"
-                                            asChild
-                                            className="mt-2"
-                                          >
-                                            <a
-                                              href={
-                                                urlInfo.validatedExternalHref
-                                              }
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                            >
-                                              {actionLabel}
-                                            </a>
-                                          </Button>
-                                        ) : null
-                                      ) : (
-                                        <p className="text-secondary-text mt-1 text-xs break-all">
-                                          {notif.link}
-                                        </p>
-                                      )}
-                                      <NotificationTimestamp
-                                        timestamp={notif.last_updated}
-                                        notificationId={notif.id}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            {displayNotifications.total_pages > 1 && (
-                              <div className="border-border-secondary flex justify-center border-t py-3">
-                                <Pagination
-                                  count={displayNotifications.total_pages}
-                                  page={notificationPage}
-                                  onChange={(_event, value) => {
-                                    setNotificationPage(value);
-                                    if (notificationTab === "history") {
-                                      fetchHistoryWithDebounce(value, 5);
-                                    } else {
-                                      fetchUnreadWithDebounce(value, 5);
-                                    }
-                                  }}
-                                />
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div className="flex min-h-50 flex-col items-center justify-center px-4 py-8">
-                            <Icon
-                              icon="mingcute:notification-line"
-                              className="text-secondary-text mb-3 h-12 w-12"
-                              inline={true}
-                            />
-                            <p className="text-secondary-text text-center text-sm">
-                              No new notifications
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                  <NotificationPopover
+                    unreadCount={unreadCount}
+                    setUnreadCount={setUnreadCount}
+                    isAuthenticated={isAuthenticated}
+                    variant="mobile"
+                    onOpenChange={setNotificationMenuOpen}
+                  />
                   {showAuth && (
                     <Link
                       href="/messages"

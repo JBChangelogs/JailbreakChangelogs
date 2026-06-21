@@ -7,6 +7,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   useRef,
   Suspense,
 } from "react";
@@ -41,6 +42,7 @@ interface AuthContextType extends AuthState {
   setShowLoginModal: (show: boolean) => void;
   bans: Record<string, BanInfo>;
   setBan: (ban: BanInfo) => void;
+  wsConnected: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -88,6 +90,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
   const [loginModalOnlyRoblox, setLoginModalOnlyRoblox] = useState(false);
   const [bans, setBansMap] = useState<Record<string, BanInfo>>({});
+  const [hasToken, setHasToken] = useState(() => !!getJbclToken());
+  const [wsConnected, setWsConnected] = useState(false);
   const setBan = useCallback((ban: BanInfo) => {
     if (ban.expiresAt > 0) {
       const ms = ban.expiresAt * 1000 - Date.now();
@@ -108,14 +112,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
   const isUserActiveRef = useRef(true);
 
+  useEffect(() => {
+    if (!authState.isAuthenticated) {
+      setWsConnected(false);
+      return;
+    }
+    const handleConnectionChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
+      setWsConnected(detail?.connected === true);
+    };
+    window.addEventListener(
+      "realtimeNotificationsConnection",
+      handleConnectionChange,
+    );
+    return () =>
+      window.removeEventListener(
+        "realtimeNotificationsConnection",
+        handleConnectionChange,
+      );
+  }, [authState.isAuthenticated]);
+
   useRealtimeNotificationsWebSocket(
-    (authState.isAuthenticated && !authState.isLoading) || !!getJbclToken(),
+    (authState.isAuthenticated && !authState.isLoading) || hasToken,
     locationString,
   );
 
   const initializeAuth = useCallback(async () => {
     try {
       const token = getJbclToken();
+      setHasToken(!!token);
 
       if (!token) {
         setAuthState({
@@ -184,6 +209,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } else {
           // Token is invalid — clear state
           safeSetJSON("user", null);
+          setHasToken(false);
           setAuthState({
             isAuthenticated: false,
             user: null,
@@ -372,7 +398,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       .catch((e) => log.error("Dev login fetch error", e));
   }, [initializeAuth]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       trackLogoutSource("AuthContext");
       await authLogout();
@@ -383,6 +409,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         error: null,
       });
       setBansMap({});
+      setHasToken(false);
+      setWsConnected(false);
 
       trackEvent("User Logout");
       trackClearUserId();
@@ -392,7 +420,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       log.error("Logout error", err);
       // Errors are now handled by toast.promise in authLogout()
     }
-  };
+  }, [router]);
 
   const setLoginModal = useCallback(
     ({
@@ -413,17 +441,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [],
   );
 
-  const contextValue: AuthContextType = {
-    ...authState,
-    logout: handleLogout,
-    loginModalTab,
-    loginModalOnlyRoblox,
-    setLoginModal,
-    showLoginModal,
-    setShowLoginModal,
-    bans,
-    setBan,
-  };
+  const contextValue = useMemo<AuthContextType>(
+    () => ({
+      ...authState,
+      logout: handleLogout,
+      loginModalTab,
+      loginModalOnlyRoblox,
+      setLoginModal,
+      showLoginModal,
+      setShowLoginModal,
+      bans,
+      setBan,
+      wsConnected,
+    }),
+    [
+      authState,
+      handleLogout,
+      loginModalTab,
+      loginModalOnlyRoblox,
+      setLoginModal,
+      showLoginModal,
+      bans,
+      setBan,
+      wsConnected,
+    ],
+  );
 
   return (
     <AuthContext.Provider value={contextValue}>

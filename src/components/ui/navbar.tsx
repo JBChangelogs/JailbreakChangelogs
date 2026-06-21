@@ -1,6 +1,6 @@
 "use client";
 import { createLogger } from "@/services/logger";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 const log = createLogger("UI");
 import Link from "next/link";
@@ -20,23 +20,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Pagination } from "@/components/ui/Pagination";
-import {
-  fetchNotificationHistory,
-  fetchUnreadNotifications,
-  clearNotificationHistory,
-  NotificationHistory,
-} from "@/utils/api/api";
-import { formatCustomDate } from "@/utils/helpers/timestamp";
-import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { toast } from "sonner";
-import { Spinner } from "@/components/ui/Spinner";
-import {
-  getNotificationActionLabel,
-  parseNotificationUrl,
-} from "@/utils/notifications/notificationUrl";
-import { NotifDescription } from "@/components/notifications/NotifDescription";
-import { TwemojiText } from "@/components/ui/TwemojiText";
+import { NotificationPopover } from "@/components/notifications/NotificationPopover";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -54,12 +38,6 @@ const AnimatedThemeToggler = dynamic(
 );
 import { Icon } from "./IconWrapper";
 import { Button } from "./button";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
 
@@ -273,50 +251,6 @@ export const NavDropdownItem = ({
   );
 };
 
-const UnreadNotificationBadge = ({ count }: { count: number }) => {
-  if (count === 0) return null;
-
-  const displayCount = count > 99 ? "99+" : count.toString();
-
-  return (
-    <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
-      {displayCount}
-    </span>
-  );
-};
-
-const NotificationTimestamp = ({
-  timestamp,
-  notificationId,
-}: {
-  timestamp: string | number;
-  notificationId: number;
-}) => {
-  const timestampString =
-    typeof timestamp === "string" ? timestamp : timestamp.toString();
-  const timestampNumber =
-    typeof timestamp === "number" ? timestamp : Number.parseInt(timestamp, 10);
-  const hasValidNumber = Number.isFinite(timestampNumber);
-
-  const relativeTime = useOptimizedRealTimeRelativeDate(
-    timestampString,
-    `notification-${notificationId}`,
-  );
-
-  return (
-    <p className="text-secondary-text mt-1 text-right text-xs">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="cursor-help">{relativeTime}</span>
-        </TooltipTrigger>
-        <TooltipContent>
-          {hasValidNumber ? formatCustomDate(timestampNumber) : timestampString}
-        </TooltipContent>
-      </Tooltip>
-    </p>
-  );
-};
-
 export const NavbarModern = ({
   className,
   unreadCount,
@@ -330,83 +264,32 @@ export const NavbarModern = ({
 }) => {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  useEffect(() => {
-    onUserMenuOpenChange?.(userMenuOpen);
-  }, [userMenuOpen, onUserMenuOpenChange]);
+  const setUserMenuOpenWithCallback = React.useCallback(
+    (open: boolean) => {
+      setUserMenuOpen(open);
+      onUserMenuOpenChange?.(open);
+    },
+    [onUserMenuOpenChange],
+  );
   const userMenuWrapperRef = React.useRef<HTMLDivElement>(null);
   const userMenuDropdownRef = React.useRef<HTMLDivElement>(null);
   const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
-  const [notificationTab, setNotificationTab] = useState<"history" | "unread">(
-    "unread",
-  );
-  const [notifications, setNotifications] =
-    useState<NotificationHistory | null>(null);
-  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-  const [notificationPage, setNotificationPage] = useState(1);
-  const [notificationTimeoutId, setNotificationTimeoutId] =
-    useState<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [wsConnected, setWsConnected] = useState(false);
-
-  // Debounced notification fetching functions
-  const fetchUnreadWithDebounce = (page: number, limit: number) => {
-    if (notificationTimeoutId) {
-      clearTimeout(notificationTimeoutId);
-    }
-
-    const timeoutId = setTimeout(async () => {
-      setIsLoadingNotifications(true);
-      let data = await fetchUnreadNotifications(page, limit);
-
-      // When paginating, viewing each page marks those notifications as seen,
-      // shrinking total_pages. If the requested page no longer exists, step
-      // back to the previous page so the user sees the actual last page.
-      if (data.items.length === 0 && page > 1) {
-        const prevPage = page - 1;
-        setNotificationPage(prevPage);
-        data = await fetchUnreadNotifications(prevPage, limit);
-      }
-
-      setNotifications(data);
-      const nextUnread =
-        typeof data.unread_count === "number"
-          ? data.unread_count
-          : Math.max(0, data.total || 0);
-      setUnreadCount(Math.max(0, nextUnread));
-      setIsLoadingNotifications(false);
-    }, 300);
-
-    setNotificationTimeoutId(timeoutId);
-  };
-
-  const fetchHistoryWithDebounce = (page: number, limit: number) => {
-    if (notificationTimeoutId) {
-      clearTimeout(notificationTimeoutId);
-    }
-
-    const timeoutId = setTimeout(async () => {
-      setIsLoadingNotifications(true);
-      const data = await fetchNotificationHistory(page, limit);
-      setNotifications(data);
-      setIsLoadingNotifications(false);
-    }, 300);
-
-    setNotificationTimeoutId(timeoutId);
-  };
 
   const pathname = usePathname();
   const [navMenuValue, setNavMenuValue] = useState("");
   const navRootWrapperRef = React.useRef<HTMLDivElement>(null);
   const navViewportWrapperRef = React.useRef<HTMLDivElement | null>(null);
-  const navCursorRef = React.useRef({ x: 0, y: 0 });
+  const navViewportContainerRef = React.useRef<HTMLDivElement>(null);
   const triggerRefs = React.useRef<Record<string, HTMLButtonElement | null>>(
     {},
   );
-  const [viewportCenter, setViewportCenter] = useState<number | null>(null);
 
   React.useEffect(() => {
+    const container = navViewportContainerRef.current;
     if (
+      container &&
       navMenuValue &&
       triggerRefs.current[navMenuValue] &&
       navRootWrapperRef.current
@@ -415,20 +298,9 @@ export const NavbarModern = ({
       const root = navRootWrapperRef.current;
       const triggerRect = trigger.getBoundingClientRect();
       const rootRect = root.getBoundingClientRect();
-      setViewportCenter(
-        triggerRect.left - rootRect.left + triggerRect.width / 2,
-      );
+      container.style.left = `${triggerRect.left - rootRect.left + triggerRect.width / 2}px`;
     }
   }, [navMenuValue]);
-
-  // Passive global cursor tracker — keeps navCursorRef fresh without causing re-renders.
-  React.useEffect(() => {
-    const track = (e: MouseEvent) => {
-      navCursorRef.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener("mousemove", track, { passive: true });
-    return () => window.removeEventListener("mousemove", track);
-  }, []);
 
   // Only pass-through open events — all closing is owned by the mousemove effect below.
   // Radix doesn't fire onValueChange("") when the cursor moves within the Root but off
@@ -448,7 +320,6 @@ export const NavbarModern = ({
     const activeValue = navMenuValue;
 
     const onMove = (e: MouseEvent) => {
-      navCursorRef.current = { x: e.clientX, y: e.clientY };
       const { clientX: x, clientY: y } = e;
 
       const activeTriggerEl = triggerRefs.current[activeValue];
@@ -513,6 +384,7 @@ export const NavbarModern = ({
     user: authUser,
     isAuthenticated,
     logout,
+    wsConnected,
   } = useAuthContext();
 
   const { resolvedTheme } = useTheme();
@@ -522,23 +394,6 @@ export const NavbarModern = ({
   React.useEffect(() => {
     setMounted(true);
   }, []);
-
-  React.useEffect(() => {
-    if (!isAuthenticated) return;
-    const handleConnectionChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
-      setWsConnected(detail?.connected === true);
-    };
-    window.addEventListener(
-      "realtimeNotificationsConnection",
-      handleConnectionChange,
-    );
-    return () =>
-      window.removeEventListener(
-        "realtimeNotificationsConnection",
-        handleConnectionChange,
-      );
-  }, [isAuthenticated]);
 
   // Prediction-cone / safe-triangle for the user menu.
   // Replaces the old onMouseLeave timer. Tracks the cursor globally and keeps
@@ -586,7 +441,7 @@ export const NavbarModern = ({
           closeTimer = null;
         }
       } else if (!closeTimer) {
-        closeTimer = setTimeout(() => setUserMenuOpen(false), 100);
+        closeTimer = setTimeout(() => setUserMenuOpenWithCallback(false), 100);
       }
     };
 
@@ -595,7 +450,7 @@ export const NavbarModern = ({
       window.removeEventListener("mousemove", onMove);
       if (closeTimer) clearTimeout(closeTimer);
     };
-  }, [userMenuOpen]);
+  }, [userMenuOpen, setUserMenuOpenWithCallback]);
 
   useToastRuntimeRightOffset({
     enabled: isXlUp,
@@ -616,13 +471,11 @@ export const NavbarModern = ({
   const handleLogout = async () => {
     try {
       await logout();
-      setUserMenuOpen(false);
+      setUserMenuOpenWithCallback(false);
     } catch (err) {
       log.error("Logout error", err);
     }
   };
-
-  const displayNotifications = notifications;
 
   return (
     <div
@@ -953,10 +806,11 @@ export const NavbarModern = ({
 
             {/* Viewport */}
             <div
+              ref={navViewportContainerRef}
               style={{
                 position: "absolute",
                 top: "100%",
-                left: viewportCenter !== null ? `${viewportCenter}px` : "50%",
+                left: "50%",
                 transform: "translateX(-50%)",
                 zIndex: 1300,
                 perspective: "2000px",
@@ -1015,287 +869,13 @@ export const NavbarModern = ({
               </Tooltip>
             )}
           {/* Notification icon */}
-          <Popover
-            open={notificationMenuOpen}
-            onOpenChange={(open) => {
-              setNotificationMenuOpen(open);
-              if (open && isAuthenticated) {
-                // Reset to unread tab when opening
-                setNotificationTab("unread");
-                setNotificationPage(1);
-                setIsLoadingNotifications(true); // Show loading immediately
-                setNotifications(null); // Clear old notifications
-                fetchUnreadWithDebounce(1, 5);
-              } else if (!open) {
-                // Reset state when closing
-                setNotifications(null);
-                setIsLoadingNotifications(false);
-              }
-            }}
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <PopoverTrigger asChild>
-                  <button
-                    suppressHydrationWarning={true}
-                    className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200"
-                  >
-                    <Icon
-                      icon="mingcute:notification-line"
-                      className="text-primary-text h-5 w-5"
-                      inline={true}
-                    />
-                    {isAuthenticated && unreadCount > 0 && (
-                      <UnreadNotificationBadge count={unreadCount} />
-                    )}
-                  </button>
-                </PopoverTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Notifications</TooltipContent>
-            </Tooltip>
-
-            <PopoverContent
-              align="end"
-              className="w-80 overflow-hidden rounded-2xl p-0"
-            >
-              {/* Header */}
-              <div className="border-border-secondary border-b px-4 py-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-primary-text font-semibold">
-                    {displayNotifications
-                      ? `${displayNotifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${displayNotifications.total !== 1 ? "s" : ""}`
-                      : `0 ${notificationTab === "unread" ? "Unread " : ""}Notifications`}
-                  </h3>
-                  {notificationTab === "history" &&
-                    displayNotifications &&
-                    displayNotifications.total > 0 && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={async () => {
-                              const success = await clearNotificationHistory();
-                              if (success) {
-                                toast.success("Cleared notification history", {
-                                  duration: 2000,
-                                });
-                                // Refetch to update the list
-                                setIsLoadingNotifications(true);
-                                const data = await fetchNotificationHistory(
-                                  1,
-                                  5,
-                                );
-                                setNotifications(data);
-                                setNotificationPage(1);
-                                setIsLoadingNotifications(false);
-                              } else {
-                                toast.error(
-                                  "Failed to clear notification history",
-                                  {
-                                    duration: 3000,
-                                  },
-                                );
-                              }
-                            }}
-                            data-rybbit-event={"Clear Notification History"}
-                            className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
-                          >
-                            <Icon
-                              icon="si:bin-fill"
-                              className="h-5 w-5"
-                              inline={true}
-                            />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>Clear History</TooltipContent>
-                      </Tooltip>
-                    )}
-                </div>
-              </div>
-
-              {/* Tabs */}
-              {isAuthenticated && (
-                <div className="border-border-secondary border-b">
-                  <Tabs
-                    value={notificationTab}
-                    onValueChange={(value) => {
-                      if (value !== "unread" && value !== "history") return;
-                      setNotificationTab(value);
-                      setNotificationPage(1);
-                      setIsLoadingNotifications(true); // Show loading immediately
-                      setNotifications(null); // Clear old notifications
-                      if (value === "unread") {
-                        fetchUnreadWithDebounce(1, 5);
-                        return;
-                      }
-                      fetchHistoryWithDebounce(1, 5);
-                    }}
-                  >
-                    <TabsList
-                      className="w-full rounded-none border-0 p-0"
-                      fullWidth
-                    >
-                      <TabsTrigger
-                        value="unread"
-                        fullWidth
-                        className="rounded-none data-[state=active]:shadow-none"
-                      >
-                        Unread
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="history"
-                        fullWidth
-                        className="rounded-none data-[state=active]:shadow-none"
-                      >
-                        History
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-              )}
-
-              {/* Manage Notifications Link */}
-              {isAuthenticated && (
-                <div className="border-border-secondary bg-secondary-bg/30 border-b px-4 py-2">
-                  <p className="text-secondary-text text-xs">
-                    Manage which notifications you receive in{" "}
-                    <Link
-                      href="/settings?highlight=notifications"
-                      className="text-link hover:underline"
-                      onClick={() => setNotificationMenuOpen(false)}
-                    >
-                      Settings
-                    </Link>
-                  </p>
-                </div>
-              )}
-
-              {/* Content */}
-              <div className="max-h-96 overflow-y-auto">
-                {isLoadingNotifications ? (
-                  <div className="flex min-h-50 flex-col items-center justify-center px-4 py-8">
-                    <Spinner className="h-8 w-8" />
-                    <p className="text-secondary-text mt-3 text-center text-sm">
-                      Loading notifications...
-                    </p>
-                  </div>
-                ) : !isAuthenticated ? (
-                  <div className="flex flex-col items-center justify-center px-4 py-8">
-                    <p className="text-secondary-text text-center text-sm">
-                      You must be logged in to view notifications
-                    </p>
-                  </div>
-                ) : displayNotifications &&
-                  displayNotifications.items.length > 0 ? (
-                  <>
-                    <div className="py-2">
-                      {displayNotifications.items.map((notif) => {
-                        // Check if link domain is whitelisted and extract URL info
-                        const urlInfo = parseNotificationUrl(notif.link);
-                        const actionLabel = getNotificationActionLabel(urlInfo);
-                        const shouldHideViewAction =
-                          notif.title.trim().toLowerCase() === "login detected";
-
-                        return (
-                          <div
-                            key={notif.id}
-                            className="border-border-secondary hover:bg-secondary-bg block border-b px-4 py-3 transition-colors last:border-b-0"
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <TwemojiText
-                                tag="p"
-                                className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal"
-                              >
-                                {notif.title}
-                              </TwemojiText>
-                            </div>
-                            <div className="text-secondary-text mt-1 text-xs wrap-break-word">
-                              <NotifDescription
-                                text={notif.description}
-                                className="text-secondary-text text-xs leading-relaxed"
-                              />
-                            </div>
-                            {shouldHideViewAction ? null : urlInfo.isWhitelisted ? (
-                              urlInfo.isJailbreakChangelogs &&
-                              urlInfo.relativePath ? (
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  asChild
-                                  className="mt-2"
-                                >
-                                  <Link
-                                    href={urlInfo.relativePath}
-                                    prefetch={false}
-                                    onClick={() =>
-                                      setNotificationMenuOpen(false)
-                                    }
-                                  >
-                                    {actionLabel}
-                                  </Link>
-                                </Button>
-                              ) : !urlInfo.isJailbreakChangelogs &&
-                                urlInfo.validatedExternalHref ? (
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  asChild
-                                  className="mt-2"
-                                >
-                                  <a
-                                    href={urlInfo.validatedExternalHref}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    {actionLabel}
-                                  </a>
-                                </Button>
-                              ) : null
-                            ) : (
-                              <p className="text-secondary-text mt-1 text-xs break-all">
-                                {notif.link}
-                              </p>
-                            )}
-                            <NotificationTimestamp
-                              timestamp={notif.last_updated}
-                              notificationId={notif.id}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {displayNotifications.total_pages > 1 && (
-                      <div className="border-border-secondary flex justify-center border-t py-3">
-                        <Pagination
-                          count={displayNotifications.total_pages}
-                          page={notificationPage}
-                          siblingCount={0}
-                          onChange={(_event, value) => {
-                            setNotificationPage(value);
-                            if (notificationTab === "history") {
-                              fetchHistoryWithDebounce(value, 5);
-                            } else {
-                              fetchUnreadWithDebounce(value, 5);
-                            }
-                          }}
-                        />
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex min-h-50 flex-col items-center justify-center px-4 py-8">
-                    <Icon
-                      icon="mingcute:notification-line"
-                      className="text-secondary-text mb-3 h-12 w-12"
-                      inline={true}
-                    />
-                    <p className="text-secondary-text text-center text-sm">
-                      No new notifications
-                    </p>
-                  </div>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
+          <NotificationPopover
+            unreadCount={unreadCount}
+            setUnreadCount={setUnreadCount}
+            isAuthenticated={isAuthenticated}
+            variant="desktop"
+            onOpenChange={setNotificationMenuOpen}
+          />
 
           {/* Messages button (desktop) */}
           <Tooltip>
@@ -1327,7 +907,7 @@ export const NavbarModern = ({
             <div ref={userMenuWrapperRef} className="relative">
               <button
                 className="flex items-center gap-2 rounded-full p-1 transition-colors"
-                onMouseEnter={() => setUserMenuOpen(true)}
+                onMouseEnter={() => setUserMenuOpenWithCallback(true)}
               >
                 <UserAvatar
                   userId={userData.id}
@@ -1353,7 +933,7 @@ export const NavbarModern = ({
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.92, y: 8 }}
                       transition={menuTransition}
-                      onClick={() => setUserMenuOpen(false)}
+                      onClick={() => setUserMenuOpenWithCallback(false)}
                     >
                       {/* User info */}
                       <Link
@@ -1444,7 +1024,7 @@ export const NavbarModern = ({
                             className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
                             onClick={() => {
                               setUtmModalOpen(true);
-                              setUserMenuOpen(false);
+                              setUserMenuOpenWithCallback(false);
                             }}
                           >
                             <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
@@ -1463,7 +1043,7 @@ export const NavbarModern = ({
                         <Link
                           href="/reports"
                           className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
-                          onClick={() => setUserMenuOpen(false)}
+                          onClick={() => setUserMenuOpenWithCallback(false)}
                         >
                           <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
                             <Icon
