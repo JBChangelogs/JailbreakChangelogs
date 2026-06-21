@@ -21,8 +21,6 @@ import NitroVideoCloseSupporterModal from "@/components/Ads/NitroVideoCloseSuppo
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
 import AdErrorBoundary from "@/components/Ads/AdErrorBoundary";
-import AdBlockRecovery from "@/components/Ads/AdBlockRecovery";
-import AdBlockPrompt from "@/components/Ads/AdBlockPrompt";
 import RybbitIdentity from "@/components/Analytics/RybbitIdentity";
 import {
   checkMaintenanceMode,
@@ -181,8 +179,6 @@ export default async function RootLayout({
 
                     <AuthProvider>
                       <RybbitIdentity />
-                      <AdBlockRecovery />
-                      <AdBlockPrompt />
                       <AdErrorBoundary>
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
@@ -322,8 +318,6 @@ export default async function RootLayout({
 
                 <AuthProvider>
                   <RybbitIdentity />
-                  <AdBlockRecovery />
-                  <AdBlockPrompt />
                   <NitroBottomAnchor />
                   <NitroVideoPlayer />
                   <NitroAnchorCloseSupporterModal />
