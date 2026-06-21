@@ -54,6 +54,7 @@ import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
 } from "@/utils/items/itemUnlockMetadata";
+import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import {
   formatUnlockLevelBadge,
   formatPlacementBadge,
@@ -427,6 +428,7 @@ export default function ItemDetailsClient({
   const [activeChartTab, setActiveChartTab] = useState(0);
   const [itemMetadata, setItemMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
+  const [placementLimit, setPlacementLimit] = useState<number | null>(null);
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
@@ -446,6 +448,17 @@ export default function ItemDetailsClient({
         log.error("Error loading item metadata:", error);
         if (isMounted) setItemMetadata(null);
       });
+
+    if (item.type === "Furniture") {
+      fetchFurniturePlacementLimits()
+        .then((limitsMap) => {
+          if (!isMounted) return;
+          setPlacementLimit(limitsMap.get(item.id) ?? null);
+        })
+        .catch(() => {
+          if (isMounted) setPlacementLimit(null);
+        });
+    }
 
     return () => {
       isMounted = false;
@@ -738,6 +751,7 @@ export default function ItemDetailsClient({
                   health={currentItem.health}
                   type={currentItem.type}
                   recentChanges={item.recent_changes}
+                  placementLimit={placementLimit}
                 />
               </>
             )}

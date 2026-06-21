@@ -52,6 +52,7 @@ interface ItemCardProps {
   isFavorited: boolean;
   onFavoriteChange: (isFavorited: boolean) => void;
   itemMetadata?: ItemUnlockMetadataEntry | null;
+  placementLimit?: number | null;
 }
 
 function ItemCard({
@@ -59,6 +60,7 @@ function ItemCard({
   isFavorited,
   onFavoriteChange,
   itemMetadata: itemMetadataProp,
+  placementLimit,
 }: ItemCardProps) {
   const isBlueBird = item.id === 919;
   const blueBirdDefaultImage =
@@ -733,6 +735,26 @@ function ItemCard({
                 </span>
               </div>
             )}
+            {isValuesPage &&
+              item.type === "Furniture" &&
+              placementLimit != null && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="border-border-card bg-tertiary-bg flex cursor-help items-center justify-between rounded-lg border p-1 sm:p-2.5">
+                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                        Placement Limit
+                      </span>
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
+                        {placementLimit}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    You can place up to {placementLimit} of this item in your
+                    base
+                  </TooltipContent>
+                </Tooltip>
+              )}
           </div>
 
           <div className="border-border-card text-secondary-text mt-auto flex flex-col gap-1 border-t pt-1 text-[10px] sm:flex-row sm:items-center sm:justify-between sm:pt-2 sm:text-xs">
@@ -772,6 +794,7 @@ export default React.memo(ItemCard, (prev, next) => {
   return (
     prev.item === next.item &&
     prev.isFavorited === next.isFavorited &&
-    prev.itemMetadata === next.itemMetadata
+    prev.itemMetadata === next.itemMetadata &&
+    prev.placementLimit === next.placementLimit
   );
 });

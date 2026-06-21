@@ -20,6 +20,7 @@ interface ItemValuesProps {
   health: number;
   type: string;
   recentChanges?: RecentChange[] | null;
+  placementLimit?: number | null;
 }
 
 function ItemValues({
@@ -33,6 +34,7 @@ function ItemValues({
   health,
   type,
   recentChanges,
+  placementLimit,
 }: ItemValuesProps) {
   const isRobuxPrice = price.toLowerCase().includes("robux");
   const isUSDPrice = price.includes("$");
@@ -187,6 +189,20 @@ function ItemValues({
               : trend}
           </span>
         </div>
+
+        {/* Placement Limit - only for Furniture */}
+        {type === "Furniture" && placementLimit != null && (
+          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
+                Placement Limit
+              </h4>
+            </div>
+            <p className="text-primary-text text-3xl font-bold">
+              {placementLimit}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Item Notes - Full width */}

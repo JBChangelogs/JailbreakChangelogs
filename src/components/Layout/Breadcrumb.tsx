@@ -114,7 +114,8 @@ export default function Breadcrumb({
         }
         if (index === 1) {
           const itemType = decodeURIComponent(segment).replace(/-/g, " ");
-          const filterSort = itemTypeToFilterSort[itemType] || "name-all-items";
+          const filterSort =
+            itemTypeToFilterSort[itemType.toLowerCase()] || "name-all-items";
           return {
             label: itemType
               .split(" ")

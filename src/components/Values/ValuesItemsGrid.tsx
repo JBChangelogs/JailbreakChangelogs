@@ -10,6 +10,7 @@ import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
 } from "@/utils/items/itemUnlockMetadata";
+import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";
@@ -64,10 +65,17 @@ export default function ValuesItemsGrid({
     number,
     ItemUnlockMetadataEntry
   > | null>(null);
+  const [placementLimitsMap, setPlacementLimitsMap] = useState<Map<
+    number,
+    number
+  > | null>(null);
 
   useEffect(() => {
     fetchItemUnlockMetadataById()
       .then(setMetadataMap)
+      .catch(() => {});
+    fetchFurniturePlacementLimits()
+      .then(setPlacementLimitsMap)
       .catch(() => {});
   }, []);
 
@@ -286,6 +294,7 @@ export default function ValuesItemsGrid({
                 item={item}
                 isFavorited={favoritesSet.has(item.id)}
                 itemMetadata={metadataMap?.get(item.id) ?? null}
+                placementLimit={placementLimitsMap?.get(item.id) ?? null}
                 onFavoriteChange={(fav) => {
                   onFavoriteChange(item.id, fav);
                 }}
