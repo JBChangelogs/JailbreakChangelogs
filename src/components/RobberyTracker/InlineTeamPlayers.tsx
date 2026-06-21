@@ -17,8 +17,12 @@ export default function InlineTeamPlayers({
 }) {
   if (players.length === 0) return null;
 
-  const copsCount = players.filter((p) => p.team === "Police").length;
-  const criminalsCount = players.filter((p) => p.team === "Criminal").length;
+  let copsCount = 0;
+  let criminalsCount = 0;
+  for (const p of players) {
+    if (p.team === "Police") copsCount++;
+    else if (p.team === "Criminal") criminalsCount++;
+  }
 
   return (
     <div

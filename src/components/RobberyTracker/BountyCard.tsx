@@ -1,12 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { BountyData } from "@/hooks/useRobberyTrackerBountiesWebSocket";
 import RobberyPlayersModal from "./RobberyPlayersModal";
+import { formatServerTime } from "./utils";
+
+function getAvatarUrl(userId: number): string {
+  return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+}
 
 interface BountyCardProps {
   bounty: BountyData;
@@ -19,16 +24,6 @@ export default function BountyCard({
 }: BountyCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
 
-  // Format bounty amount with commas
-  const formatBounty = (amount: number): string => {
-    return amount.toLocaleString();
-  };
-
-  // Get Roblox avatar URL
-  const getAvatarUrl = (userId: number): string => {
-    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
-  };
-
   // Create unique ID for timer subscription
   const jobId = bounty.server?.job_id || "";
   const timerId = `bounty-${bounty.userid}-${jobId}-${bounty.timestamp}`;
@@ -38,15 +33,6 @@ export default function BountyCard({
     bounty.timestamp,
     timerId,
   );
-
-  // Format server time as 12-hour clock with AM/PM
-  const formatServerTime = (serverTime: number) => {
-    const hours24 = Math.floor(serverTime);
-    const minutes = Math.floor((serverTime % 1) * 60);
-    const period = hours24 >= 12 ? "PM" : "AM";
-    const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
-    return `${hours12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} ${period}`;
-  };
 
   const players = bounty.server?.players || [];
 
@@ -86,7 +72,7 @@ export default function BountyCard({
             className="h-6 w-6 text-yellow-400"
           />
           <span className="text-2xl font-bold text-yellow-400">
-            ${formatBounty(bounty.bounty)}
+            ${bounty.bounty.toLocaleString()}
           </span>
         </div>
       </div>

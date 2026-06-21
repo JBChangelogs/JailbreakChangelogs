@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { BountyData } from "@/hooks/useRobberyTrackerBountiesWebSocket";
@@ -12,6 +12,7 @@ import { useServerRegions } from "@/hooks/useServerRegions";
 import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import { buildRobloxServerDeepLink } from "./deepLink";
 import { Spinner } from "@/components/ui/Spinner";
+import { formatServerTime } from "./utils";
 
 interface ServerBountyGroupProps {
   serverId: string;
@@ -26,8 +27,8 @@ export default function ServerBountyGroup({
   regionData: externalRegionData,
   useExternalRegionData = false,
 }: ServerBountyGroupProps) {
-  const [isPlayersModalOpen, setIsPlayersModalOpen] = React.useState(false);
-  const [isJoining, setIsJoining] = React.useState(false);
+  const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
   const [internalRegionData, setInternalRegionData] =
     useState<ServerRegionData | null>(null);
 
@@ -45,27 +46,16 @@ export default function ServerBountyGroup({
   const players = bounties[0]?.server?.players || [];
   const copCount = players.filter((p) => p.team === "Police").length;
 
-  // Format bounty amount with commas
-  const formatBounty = (amount: number): string => {
-    return amount.toLocaleString();
-  };
-
   // Get latest timestamp for "Last update"
-  const latestTimestamp = Math.max(...bounties.map((b) => b.timestamp));
+  const latestTimestamp = bounties.reduce(
+    (max, b) => (b.timestamp > max ? b.timestamp : max),
+    bounties[0].timestamp,
+  );
   const timerId = `server-group-${serverId}-${latestTimestamp}`;
   const relativeTime = useOptimizedRealTimeRelativeDate(
     latestTimestamp,
     timerId,
   );
-
-  // Format server time
-  const formatServerTime = (serverTime: number) => {
-    const hours24 = Math.floor(serverTime);
-    const minutes = Math.floor((serverTime % 1) * 60);
-    const period = hours24 >= 12 ? "PM" : "AM";
-    const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
-    return `${hours12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} ${period}`;
-  };
 
   const serverTime = bounties[0]?.server_time;
 
@@ -96,7 +86,7 @@ export default function ServerBountyGroup({
                   className="h-6 w-6 text-yellow-400"
                 />
                 <span className="text-2xl font-bold text-yellow-400">
-                  ${formatBounty(totalBounty)}
+                  ${totalBounty.toLocaleString()}
                 </span>
               </div>
             </div>

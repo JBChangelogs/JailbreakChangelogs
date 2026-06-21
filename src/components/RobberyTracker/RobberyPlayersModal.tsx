@@ -32,6 +32,16 @@ interface RobberyPlayersModalProps {
   players: Player[];
 }
 
+const EMPTY_MESSAGES: Record<"All" | "Police" | "Criminal", string> = {
+  Police: "No cops found",
+  Criminal: "No criminals found",
+  All: "No players found",
+};
+
+function getUserAvatar(userId: string): string {
+  return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+}
+
 export default function RobberyPlayersModal({
   isOpen,
   onClose,
@@ -41,10 +51,7 @@ export default function RobberyPlayersModal({
     "All",
   );
 
-  // Collect all user IDs to fetch their display names and avatars
-  const playerIds = useMemo(() => {
-    return players.map((p) => p.user_id);
-  }, [players]);
+  const playerIds = useMemo(() => players.map((p) => p.user_id), [players]);
 
   // Fetch user data (names, avatars, etc.) - only when modal is open
   const { data: robloxData } = useRobloxBotsDataQuery(
@@ -57,13 +64,16 @@ export default function RobberyPlayersModal({
     return players.filter((p) => p.team === teamName);
   }, [activeTab, players]);
 
-  const getEmptyMessage = () => {
-    if (activeTab === "Police") return "No cops found";
-    if (activeTab === "Criminal") return "No criminals found";
-    return "No players found";
-  };
+  const { copsCount, criminalsCount } = useMemo(() => {
+    let cops = 0;
+    let criminals = 0;
+    for (const p of players) {
+      if (p.team === "Police") cops++;
+      else if (p.team === "Criminal") criminals++;
+    }
+    return { copsCount: cops, criminalsCount: criminals };
+  }, [players]);
 
-  // Helper to get user display name
   const getUserDisplay = (userId: string) => {
     if (!robloxData?.usersData) return userId;
     const user = robloxData.usersData[userId];
@@ -75,19 +85,6 @@ export default function RobberyPlayersModal({
     const user = robloxData.usersData[userId];
     return user?.name ? `@${user.name}` : `@${userId}`;
   };
-
-  const getUserAvatar = (userId: string) => {
-    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
-  };
-
-  const copsCount = useMemo(
-    () => players.filter((p) => p.team === "Police").length,
-    [players],
-  );
-  const criminalsCount = useMemo(
-    () => players.filter((p) => p.team === "Criminal").length,
-    [players],
-  );
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -194,7 +191,7 @@ export default function RobberyPlayersModal({
             </div>
           ) : (
             <div className="text-secondary-text py-8 text-center">
-              {getEmptyMessage()}
+              {EMPTY_MESSAGES[activeTab]}
             </div>
           )}
         </div>

@@ -98,6 +98,70 @@ type RobberyComboResult = {
   latestTimestamp: number;
 };
 
+function computeComboResults(
+  robberies: RobberyData[],
+  presets: ReadonlyArray<{
+    id: string;
+    label: string;
+    types: ReadonlyArray<string>;
+  }>,
+  query: string,
+): RobberyComboResult[] {
+  const results: RobberyComboResult[] = [];
+
+  for (const preset of presets) {
+    const presetTypeSet = new Set<string>(preset.types);
+    const openByServer = new Map<string, Map<string, RobberyData>>();
+
+    for (const robbery of robberies) {
+      if (robbery.status !== 1 && robbery.status !== 2) continue;
+      if (!presetTypeSet.has(robbery.marker_name)) continue;
+
+      const serverId = robbery.server?.job_id || robbery.job_id;
+      if (!serverId) continue;
+
+      let serverMap = openByServer.get(serverId);
+      if (!serverMap) {
+        serverMap = new Map<string, RobberyData>();
+        openByServer.set(serverId, serverMap);
+      }
+
+      const current = serverMap.get(robbery.marker_name);
+      if (!current || robbery.timestamp > current.timestamp) {
+        serverMap.set(robbery.marker_name, robbery);
+      }
+    }
+
+    for (const [serverId, robberyMap] of openByServer.entries()) {
+      if (!preset.types.every((type) => robberyMap.has(type))) continue;
+
+      const comboRobberies = preset.types
+        .map((type) => robberyMap.get(type))
+        .filter(Boolean) as RobberyData[];
+
+      if (
+        query &&
+        !(
+          preset.label.toLowerCase().includes(query) ||
+          comboRobberies.some((r) => r.name.toLowerCase().includes(query))
+        )
+      ) {
+        continue;
+      }
+
+      results.push({
+        comboId: preset.id,
+        comboLabel: preset.label,
+        serverId,
+        robberies: comboRobberies,
+        latestTimestamp: Math.max(...comboRobberies.map((r) => r.timestamp)),
+      });
+    }
+  }
+
+  return results;
+}
+
 function StatusPageAction({ className = "" }: { className?: string }) {
   return (
     <div className={`mt-2 flex flex-col items-center gap-2 ${className}`}>
@@ -174,10 +238,12 @@ function RobberyTrackerContent() {
     return "robberies";
   }, [searchParams]);
 
-  const handleViewChange = (view: "robberies" | "mansions") => {
-    const query = view === "mansions" ? "?mansions" : "";
-    router.push(`${pathname}${query}`);
-  };
+  const handleViewChange = useCallback(
+    (view: "robberies" | "mansions") => {
+      router.push(`${pathname}${view === "mansions" ? "?mansions" : ""}`);
+    },
+    [router, pathname],
+  );
 
   // Connect to WebSocket endpoints conditionally based on active view
   const {
@@ -408,80 +474,30 @@ function RobberyTrackerContent() {
   );
 
   const comboPresetCounts = useMemo(() => {
-    const counts = new Map<string, number>();
     const query = searchQuery.trim().toLowerCase();
-
-    let base = robberies.filter(
-      (robbery) => robbery.status === 1 || robbery.status === 2,
-    );
+    let base = robberies;
     if (serverSize !== "all") {
       base = base.filter((robbery) => {
         const playerCount = robbery.server?.players?.length || 0;
         return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
       });
     }
-
-    for (const preset of ROBBERY_COMBO_PRESETS) {
-      const presetTypeSet = new Set<string>(preset.types);
-      const openByServer = new Map<string, Map<string, RobberyData>>();
-
-      for (const robbery of base) {
-        if (!presetTypeSet.has(robbery.marker_name)) continue;
-
-        const serverId = robbery.server?.job_id || robbery.job_id;
-        if (!serverId) continue;
-
-        let serverMap = openByServer.get(serverId);
-        if (!serverMap) {
-          serverMap = new Map<string, RobberyData>();
-          openByServer.set(serverId, serverMap);
-        }
-
-        const current = serverMap.get(robbery.marker_name);
-        if (!current || robbery.timestamp > current.timestamp) {
-          serverMap.set(robbery.marker_name, robbery);
-        }
-      }
-
-      let count = 0;
-      for (const robberyMap of openByServer.values()) {
-        const hasAllPresetTypes = preset.types.every((type) =>
-          robberyMap.has(type),
-        );
-        if (!hasAllPresetTypes) continue;
-
-        const comboRobberies = preset.types
-          .map((type) => robberyMap.get(type))
-          .filter(Boolean) as RobberyData[];
-
-        if (
-          query &&
-          !(
-            preset.label.toLowerCase().includes(query) ||
-            comboRobberies.some((robbery) =>
-              robbery.name.toLowerCase().includes(query),
-            )
-          )
-        ) {
-          continue;
-        }
-
-        count++;
-      }
-
-      counts.set(preset.id, count);
+    const results = computeComboResults(base, ROBBERY_COMBO_PRESETS, query);
+    const counts = new Map<string, number>();
+    for (const result of results) {
+      counts.set(result.comboId, (counts.get(result.comboId) ?? 0) + 1);
     }
-
     return counts;
   }, [robberies, serverSize, searchQuery]);
 
   // Filter and sort robberies
   const filteredRobberies = useMemo(() => {
+    const typeSet = new Set(selectedRobberyTypes);
+
     let filtered = robberies.filter(
       (robbery) => robbery.status === 1 || robbery.status === 2,
     );
 
-    // Apply server size filter
     if (serverSize !== "all") {
       filtered = filtered.filter((robbery) => {
         const playerCount = robbery.server?.players?.length || 0;
@@ -489,51 +505,40 @@ function RobberyTrackerContent() {
       });
     }
 
-    if (selectedRobberyTypes.length > 0) {
-      if (robberyFilterMode === "all" && selectedRobberyTypes.length > 1) {
-        const selectedTypeSet = new Set(selectedRobberyTypes);
-        const eligibleRobberiesByServer = new Map<string, Set<string>>();
+    if (typeSet.size > 0) {
+      if (robberyFilterMode === "all" && typeSet.size > 1) {
+        const eligibleByServer = new Map<string, Set<string>>();
 
         for (const robbery of filtered) {
-          if (robbery.status !== 1 && robbery.status !== 2) continue;
           const serverId = robbery.server?.job_id || robbery.job_id;
           if (!serverId) continue;
 
-          let serverTypes = eligibleRobberiesByServer.get(serverId);
+          let serverTypes = eligibleByServer.get(serverId);
           if (!serverTypes) {
             serverTypes = new Set<string>();
-            eligibleRobberiesByServer.set(serverId, serverTypes);
+            eligibleByServer.set(serverId, serverTypes);
           }
           serverTypes.add(robbery.marker_name);
         }
 
-        const comboMatchingServers = new Set<string>();
-        for (const [
-          serverId,
-          serverTypes,
-        ] of eligibleRobberiesByServer.entries()) {
-          const hasAllTypes = [...selectedTypeSet].every((selectedType) =>
-            serverTypes.has(selectedType),
-          );
-          if (hasAllTypes) comboMatchingServers.add(serverId);
+        const comboServers = new Set<string>();
+        for (const [serverId, serverTypes] of eligibleByServer.entries()) {
+          if (selectedRobberyTypes.every((t) => serverTypes.has(t))) {
+            comboServers.add(serverId);
+          }
         }
 
         filtered = filtered.filter((robbery) => {
           const serverId = robbery.server?.job_id || robbery.job_id;
-          return (
-            comboMatchingServers.has(serverId) &&
-            (robbery.status === 1 || robbery.status === 2) &&
-            selectedTypeSet.has(robbery.marker_name)
-          );
+          return comboServers.has(serverId) && typeSet.has(robbery.marker_name);
         });
       } else {
         filtered = filtered.filter((robbery) =>
-          selectedRobberyTypes.includes(robbery.marker_name),
+          typeSet.has(robbery.marker_name),
         );
       }
     }
 
-    // Apply search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((robbery) =>
@@ -542,11 +547,9 @@ function RobberyTrackerContent() {
     }
 
     return filtered.sort((a, b) => {
-      // Sort by status first (Open -> In Progress)
       if (a.status !== b.status) {
         return a.status - b.status;
       }
-
       if (timeSort === "newest") {
         return b.timestamp - a.timestamp;
       }
@@ -575,35 +578,31 @@ function RobberyTrackerContent() {
       .map(([jobId, group]) => ({
         jobId,
         robberies: group,
-        latestTimestamp: Math.max(...group.map((r) => r.timestamp)),
+        latestTimestamp: group.reduce(
+          (max, r) => (r.timestamp > max ? r.timestamp : max),
+          group[0].timestamp,
+        ),
       }))
       .sort((a, b) => b.latestTimestamp - a.latestTimestamp);
   }, [filteredRobberies]);
 
-  const baselineRobberies = useMemo(() => {
-    let filtered = robberies.filter(
-      (robbery) => robbery.status === 1 || robbery.status === 2,
-    );
-
-    if (serverSize !== "all") {
-      filtered = filtered.filter((robbery) => {
+  const baselineStats = useMemo(() => {
+    let total = 0;
+    const uniqueServers = new Set<string>();
+    for (const robbery of robberies) {
+      if (robbery.status !== 1 && robbery.status !== 2) continue;
+      if (serverSize !== "all") {
         const playerCount = robbery.server?.players?.length || 0;
-        return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
-      });
-    }
-
-    return filtered;
-  }, [robberies, serverSize]);
-
-  const baselineGroupedServers = useMemo(() => {
-    const groups = new Map<string, true>();
-    for (const robbery of baselineRobberies) {
+        const isBig = playerCount >= 9;
+        if (serverSize === "big" && !isBig) continue;
+        if (serverSize === "small" && isBig) continue;
+      }
+      total++;
       const jobId = robbery.server?.job_id || robbery.job_id;
-      if (!jobId) continue;
-      groups.set(jobId, true);
+      if (jobId) uniqueServers.add(jobId);
     }
-    return groups.size;
-  }, [baselineRobberies]);
+    return { total, groupedTotal: uniqueServers.size };
+  }, [robberies, serverSize]);
 
   const filteredRobberyCombos = useMemo<RobberyComboResult[]>(() => {
     if (!isPowerComboMode) return [];
@@ -620,64 +619,8 @@ function RobberyTrackerContent() {
     const activePresets = ROBBERY_COMBO_PRESETS.filter((preset) =>
       activeComboPresetIds.includes(preset.id),
     );
-    const comboResults: RobberyComboResult[] = [];
 
-    for (const preset of activePresets) {
-      const presetTypeSet = new Set<string>(preset.types);
-      const openByServer = new Map<string, Map<string, RobberyData>>();
-
-      for (const robbery of base) {
-        if (robbery.status !== 1 && robbery.status !== 2) continue;
-        if (!presetTypeSet.has(robbery.marker_name)) continue;
-
-        const serverId = robbery.server?.job_id || robbery.job_id;
-        if (!serverId) continue;
-
-        let serverMap = openByServer.get(serverId);
-        if (!serverMap) {
-          serverMap = new Map<string, RobberyData>();
-          openByServer.set(serverId, serverMap);
-        }
-
-        const current = serverMap.get(robbery.marker_name);
-        if (!current || robbery.timestamp > current.timestamp) {
-          serverMap.set(robbery.marker_name, robbery);
-        }
-      }
-
-      for (const [serverId, robberyMap] of openByServer.entries()) {
-        const hasAllPresetTypes = preset.types.every((type) =>
-          robberyMap.has(type),
-        );
-        if (!hasAllPresetTypes) continue;
-
-        const comboRobberies = preset.types
-          .map((type) => robberyMap.get(type))
-          .filter(Boolean) as RobberyData[];
-
-        if (
-          query &&
-          !(
-            preset.label.toLowerCase().includes(query) ||
-            comboRobberies.some((robbery) =>
-              robbery.name.toLowerCase().includes(query),
-            )
-          )
-        ) {
-          continue;
-        }
-
-        comboResults.push({
-          comboId: preset.id,
-          comboLabel: preset.label,
-          serverId,
-          robberies: comboRobberies,
-          latestTimestamp: Math.max(...comboRobberies.map((r) => r.timestamp)),
-        });
-      }
-    }
-
-    return comboResults.sort((a, b) =>
+    return computeComboResults(base, activePresets, query).sort((a, b) =>
       timeSort === "newest"
         ? b.latestTimestamp - a.latestTimestamp
         : a.latestTimestamp - b.latestTimestamp,
@@ -693,6 +636,20 @@ function RobberyTrackerContent() {
 
   const mergedServerRegionsByJobId = useMemo(() => {
     if (activeView !== "robberies") return serverRegionsByJobId;
+
+    let hasNew = false;
+    for (const robbery of robberies) {
+      const jobId = robbery.server?.job_id || robbery.job_id;
+      if (
+        isNonEmptyString(jobId) &&
+        robbery.region_data &&
+        serverRegionsByJobId[jobId] == null
+      ) {
+        hasNew = true;
+        break;
+      }
+    }
+    if (!hasNew) return serverRegionsByJobId;
 
     const next = { ...serverRegionsByJobId };
     for (const robbery of robberies) {
@@ -789,34 +746,38 @@ function RobberyTrackerContent() {
     }
 
     if (robberiesDisplayMode === "grouped") {
-      const statuses = groupedRobberies.map((group) => {
-        const hasOpen = group.robberies.some((r) => r.status === 1);
-        if (hasOpen) return 1;
-        const hasActive = group.robberies.some((r) => r.status === 2);
-        return hasActive ? 2 : 0;
-      });
-
+      let open = 0;
+      let inProgress = 0;
+      for (const group of groupedRobberies) {
+        if (group.robberies.some((r) => r.status === 1)) open++;
+        else if (group.robberies.some((r) => r.status === 2)) inProgress++;
+      }
       return {
         total: groupedRobberies.length,
-        open: statuses.filter((s) => s === 1).length,
-        inProgress: statuses.filter((s) => s === 2).length,
-        baselineTotal: baselineGroupedServers,
+        open,
+        inProgress,
+        baselineTotal: baselineStats.groupedTotal,
         nounSingular: "Server",
         nounPlural: "Servers",
       };
     }
 
+    let open = 0;
+    let inProgress = 0;
+    for (const r of filteredRobberies) {
+      if (r.status === 1) open++;
+      else if (r.status === 2) inProgress++;
+    }
     return {
       total: filteredRobberies.length,
-      open: filteredRobberies.filter((r) => r.status === 1).length,
-      inProgress: filteredRobberies.filter((r) => r.status === 2).length,
-      baselineTotal: baselineRobberies.length,
+      open,
+      inProgress,
+      baselineTotal: baselineStats.total,
       nounSingular: "Robbery",
       nounPlural: "Robberies",
     };
   }, [
-    baselineGroupedServers,
-    baselineRobberies.length,
+    baselineStats,
     filteredRobberies,
     filteredRobberyCombos.length,
     groupedRobberies,
@@ -824,13 +785,14 @@ function RobberyTrackerContent() {
     robberiesDisplayMode,
   ]);
 
-  // Calculate mansion statistics
   const mansionStats = useMemo(() => {
-    return {
-      total: filteredMansions.length,
-      open: filteredMansions.filter((r) => r.status === 1).length,
-      ready: filteredMansions.filter((r) => r.status === 2).length,
-    };
+    let open = 0;
+    let ready = 0;
+    for (const m of filteredMansions) {
+      if (m.status === 1) open++;
+      else if (m.status === 2) ready++;
+    }
+    return { total: filteredMansions.length, open, ready };
   }, [filteredMansions]);
 
   const [banCountdownSeconds, setBanCountdownSeconds] = useState<number | null>(
@@ -849,7 +811,9 @@ function RobberyTrackerContent() {
         setBanCountdownSeconds(null);
         setIsCheckingBanStatus(false);
       }, 0);
-      return;
+      return () => {
+        if (resetTimer) clearTimeout(resetTimer);
+      };
     }
 
     banReconnectTriggeredRef.current = false;
@@ -871,32 +835,35 @@ function RobberyTrackerContent() {
     };
   }, [isBanned, banRemainingSeconds]);
 
-  const banTimeLeft = useMemo(() => {
-    if (banCountdownSeconds === null) return null;
-    const totalSeconds = Math.max(0, banCountdownSeconds);
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return { days, hours, minutes, seconds };
-  }, [banCountdownSeconds]);
+  let banTimeLeft: {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null = null;
+  if (banCountdownSeconds !== null) {
+    const t = Math.max(0, banCountdownSeconds);
+    banTimeLeft = {
+      days: Math.floor(t / 86400),
+      hours: Math.floor((t % 86400) / 3600),
+      minutes: Math.floor((t % 3600) / 60),
+      seconds: t % 60,
+    };
+  }
 
   useEffect(() => {
     if (isBanned && banCountdownSeconds === 0) {
       if (banReconnectTriggeredRef.current) return;
       banReconnectTriggeredRef.current = true;
-      if (typeof handleBanStatusCheck === "function") {
-        const beginCheck = setTimeout(() => {
-          setIsCheckingBanStatus(true);
+      const beginCheck = setTimeout(() => {
+        setIsCheckingBanStatus(true);
+      }, 0);
+      void handleBanStatusCheck().finally(() => {
+        setTimeout(() => {
+          setIsCheckingBanStatus(false);
         }, 0);
-        void Promise.resolve(handleBanStatusCheck()).finally(() => {
-          setTimeout(() => {
-            setIsCheckingBanStatus(false);
-          }, 0);
-        });
-        return () => clearTimeout(beginCheck);
-      }
-      return;
+      });
+      return () => clearTimeout(beginCheck);
     }
     if (!isBanned) {
       banReconnectTriggeredRef.current = false;
@@ -1004,6 +971,12 @@ function RobberyTrackerContent() {
       </main>
     );
   }
+
+  const hasActiveRobberyFilters =
+    Boolean(searchQuery) ||
+    selectedRobberyTypes.length > 0 ||
+    serverSize !== "all";
+  const selectedTypeSetForRender = new Set(selectedRobberyTypes);
 
   return (
     <>
@@ -1161,7 +1134,6 @@ function RobberyTrackerContent() {
 
           {/* Status Bar */}
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            {/* Statistics - Conditional based on view */}
             {/* Statistics - Conditional based on view */}
             {activeView === "robberies" ? (
               <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -1341,7 +1313,7 @@ function RobberyTrackerContent() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {ROBBERY_TYPES.map((type) => {
-                        const isSelected = selectedRobberyTypes.includes(
+                        const isSelected = selectedTypeSetForRender.has(
                           type.marker_name,
                         );
                         return (
@@ -1574,44 +1546,31 @@ function RobberyTrackerContent() {
                     </div>
                   ) : (
                     <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                      {(() => {
-                        const hasActiveRobberyFilters =
-                          Boolean(searchQuery) ||
-                          selectedRobberyTypes.length > 0 ||
-                          serverSize !== "all";
-
-                        return (
+                      <Icon
+                        icon="heroicons:magnifying-glass"
+                        className="text-tertiary-text mb-4 h-12 w-12"
+                      />
+                      <h3 className="text-primary-text text-lg font-medium">
+                        {hasActiveRobberyFilters
+                          ? "No robberies found"
+                          : "No robberies tracked yet"}
+                      </h3>
+                      <p className="text-secondary-text">
+                        {selectedRobberyTypes.length > 0 && !searchQuery ? (
                           <>
-                            <Icon
-                              icon="heroicons:magnifying-glass"
-                              className="text-tertiary-text mb-4 h-12 w-12"
-                            />
-                            <h3 className="text-primary-text text-lg font-medium">
-                              {hasActiveRobberyFilters
-                                ? "No robberies found"
-                                : "No robberies tracked yet"}
-                            </h3>
-                            <p className="text-secondary-text">
-                              {selectedRobberyTypes.length > 0 &&
-                              !searchQuery ? (
-                                <>
-                                  No robberies logged yet for the selected type
-                                  {selectedRobberyTypes.length > 1 ? "s" : ""}
-                                </>
-                              ) : selectedRobberyTypes.length > 0 &&
-                                searchQuery ? (
-                                <>No robberies match your filters and search</>
-                              ) : searchQuery ? (
-                                <>Try adjusting your search query</>
-                              ) : hasActiveRobberyFilters ? (
-                                <>No robberies found for your current filters</>
-                              ) : (
-                                <>Waiting for robbery data...</>
-                              )}
-                            </p>
+                            No robberies logged yet for the selected type
+                            {selectedRobberyTypes.length > 1 ? "s" : ""}
                           </>
-                        );
-                      })()}
+                        ) : selectedRobberyTypes.length > 0 && searchQuery ? (
+                          <>No robberies match your filters and search</>
+                        ) : searchQuery ? (
+                          <>Try adjusting your search query</>
+                        ) : hasActiveRobberyFilters ? (
+                          <>No robberies found for your current filters</>
+                        ) : (
+                          <>Waiting for robbery data...</>
+                        )}
+                      </p>
                       <StatusPageAction />
                     </div>
                   )}
@@ -1655,9 +1614,7 @@ function RobberyTrackerContent() {
                 <div className="text-center">
                   {activeView === "robberies" ? (
                     <>
-                      <RobberiesInitialEmptyState
-                        key={`${activeView}-${isConnected}-${hasData}-${Boolean(error)}`}
-                      />
+                      <RobberiesInitialEmptyState key={activeView} />
                     </>
                   ) : (
                     <>

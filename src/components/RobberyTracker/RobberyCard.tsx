@@ -1,7 +1,7 @@
 "use client";
 
 import { createLogger } from "@/services/logger";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const log = createLogger("UI");
 import Image from "next/image";
@@ -16,6 +16,12 @@ import { useServerRegions } from "@/hooks/useServerRegions";
 import { toast } from "sonner";
 import { buildRobloxServerDeepLink } from "./deepLink";
 import InlineTeamPlayers from "./InlineTeamPlayers";
+import {
+  formatServerTime,
+  isValidCasinoCode,
+  robberyMarkerToImageName,
+  robberyMarkerToDisplayName,
+} from "./utils";
 import {
   Tooltip,
   TooltipContent,
@@ -46,20 +52,11 @@ export default function RobberyCard({
 
   const { fetchRegionData } = useServerRegions();
 
-  // Map marker_name to image name (for cases where image name differs from marker_name)
-  const getImageName = (markerName: string): string => {
-    if (markerName === "MoneyTruck") return "Bank Truck";
-    return markerName;
-  };
-
-  // Map marker_name to display name (override the name from API if needed)
-  const getDisplayName = (markerName: string, apiName: string): string => {
-    if (markerName === "MoneyTruck") return "Bank Truck";
-    return apiName;
-  };
-
-  const imageName = getImageName(robbery.marker_name);
-  const displayName = getDisplayName(robbery.marker_name, robbery.name);
+  const imageName = robberyMarkerToImageName(robbery.marker_name);
+  const displayName = robberyMarkerToDisplayName(
+    robbery.marker_name,
+    robbery.name,
+  );
   const imageUrl = `https://assets.jailbreakchangelogs.com/assets/images/robberies/${imageName}.webp`;
 
   // Create unique ID for timer subscription (same pattern as card key)
@@ -200,17 +197,7 @@ export default function RobberyCard({
     }
   }, [robbery.marker_name, robbery.status, robbery.metadata]);
 
-  // Format server time as 12-hour clock with AM/PM (e.g., 2.24 -> 02:14 AM, 20.56 -> 08:34 PM)
-  const formatServerTime = (serverTime: number) => {
-    const hours24 = Math.floor(serverTime);
-    const minutes = Math.floor((serverTime % 1) * 60);
-    const period = hours24 >= 12 ? "PM" : "AM";
-    const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
-    return `${hours12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} ${period}`;
-  };
-
-  // Handle casino code copy
-  const handleCopyCasinoCode = async (code: string) => {
+  const handleCopyCasinoCode = useCallback(async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
       toast.success(`Casino code ${code} copied!`, {
@@ -220,13 +207,9 @@ export default function RobberyCard({
       log.error("Failed to copy casino code", err);
       toast.error("Failed to copy casino code");
     }
-  };
+  }, []);
 
-  const isValidCasinoCode = (code: string | null | undefined) =>
-    typeof code === "string" && /^\d+$/.test(code.trim());
-
-  // Get status badge
-  const getStatusBadge = () => {
+  const statusBadge = useMemo(() => {
     if (isTrainNearClose) {
       return (
         <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
@@ -300,7 +283,7 @@ export default function RobberyCard({
           </div>
         );
     }
-  };
+  }, [isTrainNearClose, robbery.marker_name, robbery.status, planeCountdown]);
 
   const players = robbery.server?.players || [];
 
@@ -329,7 +312,7 @@ export default function RobberyCard({
             <h3 className="text-primary-text min-w-0 flex-1 truncate text-base font-semibold">
               {displayName}
             </h3>
-            <div className="shrink-0">{getStatusBadge()}</div>
+            <div className="shrink-0">{statusBadge}</div>
           </div>
 
           {/* Server time */}

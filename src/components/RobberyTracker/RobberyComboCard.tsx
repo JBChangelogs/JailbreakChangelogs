@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import InlineTeamPlayers from "./InlineTeamPlayers";
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
+import { formatServerTime, getStatusBadgeClass } from "./utils";
 
 interface RobberyComboCardProps {
   comboId: string;
@@ -25,6 +26,24 @@ interface RobberyComboCardProps {
   regionData?: ServerRegionData | null;
   useExternalRegionData?: boolean;
 }
+
+function getStatusText(status: number): string {
+  switch (status) {
+    case 1:
+      return "Open";
+    case 2:
+      return "In Progress";
+    case 3:
+      return "Closed";
+    default:
+      return "Unknown";
+  }
+}
+
+const COMBO_IMAGE_URLS: Record<string, string> = {
+  "museum-power":
+    "https://assets.jailbreakchangelogs.com/assets/images/robberies/combos/Power_Museum_Combo.webp",
+};
 
 export default function RobberyComboCard({
   comboId,
@@ -54,10 +73,29 @@ export default function RobberyComboCard({
     `combo-last-joined-${serverId || "unknown"}-${comboId}`,
   );
 
-  const sortedRobberies = [...robberies].sort((a, b) =>
-    a.name.localeCompare(b.name),
-  );
-  const latestTimestamp = Math.max(...sortedRobberies.map((r) => r.timestamp));
+  const { sortedRobberies, latestTimestamp, isAllOpen, isAllInProgress } =
+    useMemo(() => {
+      const sorted = [...robberies].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      const latest = sorted.reduce(
+        (max, r) => (r.timestamp > max ? r.timestamp : max),
+        sorted[0]?.timestamp ?? 0,
+      );
+      let allOpen = sorted.length > 0;
+      let allInProgress = sorted.length > 0;
+      for (const r of sorted) {
+        if (r.status !== 1) allOpen = false;
+        if (r.status !== 2) allInProgress = false;
+      }
+      return {
+        sortedRobberies: sorted,
+        latestTimestamp: latest,
+        isAllOpen: allOpen,
+        isAllInProgress: allInProgress,
+      };
+    }, [robberies]);
+
   const timerId = `combo-${serverId}-${latestTimestamp}`;
   const relativeTime = useOptimizedRealTimeRelativeDate(
     latestTimestamp,
@@ -66,61 +104,17 @@ export default function RobberyComboCard({
 
   const firstRobbery = sortedRobberies[0];
   const players = firstRobbery?.server?.players || [];
-  const comboImageUrls: Record<string, string> = {
-    "museum-power":
-      "https://assets.jailbreakchangelogs.com/assets/images/robberies/combos/Power_Museum_Combo.webp",
-  };
-  const comboImageUrl = comboImageUrls[comboId];
+  const comboImageUrl = COMBO_IMAGE_URLS[comboId];
 
   useEffect(() => {
-    if (useExternalRegionData || !serverId) return;
+    if (useExternalRegionData || !serverId || internalRegionData) return;
 
     fetchRegionData([serverId]).then((results) => {
       const data = results[serverId];
       if (data) setInternalRegionData(data);
     });
-  }, [useExternalRegionData, serverId, fetchRegionData]);
+  }, [useExternalRegionData, serverId, fetchRegionData, internalRegionData]);
 
-  const formatServerTime = (serverTime: number) => {
-    const hours24 = Math.floor(serverTime);
-    const minutes = Math.floor((serverTime % 1) * 60);
-    const period = hours24 >= 12 ? "PM" : "AM";
-    const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
-    return `${hours12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} ${period}`;
-  };
-
-  const getStatusBadgeClass = (status: number) => {
-    switch (status) {
-      case 1:
-        return "text-primary-text border-status-success/30 bg-status-success/20";
-      case 2:
-        return "text-primary-text border-status-warning/30 bg-status-warning/20";
-      case 3:
-        return "text-primary-text border-border-card bg-tertiary-bg";
-      default:
-        return "text-primary-text border-border-card bg-tertiary-bg";
-    }
-  };
-
-  const getStatusText = (status: number) => {
-    switch (status) {
-      case 1:
-        return "Open";
-      case 2:
-        return "In Progress";
-      case 3:
-        return "Closed";
-      default:
-        return "Unknown";
-    }
-  };
-
-  const uniqueStatuses = Array.from(
-    new Set(sortedRobberies.map((r) => r.status)),
-  );
-  const isAllOpen = uniqueStatuses.length === 1 && uniqueStatuses[0] === 1;
-  const isAllInProgress =
-    uniqueStatuses.length === 1 && uniqueStatuses[0] === 2;
   const comboHeaderStatusText = isAllOpen ? "All Open" : "All In Progress";
   const comboHeaderStatusClass = isAllOpen
     ? getStatusBadgeClass(1)

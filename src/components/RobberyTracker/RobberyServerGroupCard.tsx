@@ -1,7 +1,7 @@
 "use client";
 
 import { createLogger } from "@/services/logger";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const log = createLogger("UI");
 import Image from "next/image";
@@ -24,46 +24,14 @@ import {
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
-
-const ROBBERY_IMAGE_PRIORITY: string[] = [
-  "Jewelry",
-  "TrainCargo",
-  "PowerPlant",
-  "Museum",
-  "Casino",
-  "Tomb",
-  "MoneyTruck",
-  "TrainPassenger",
-  "CargoPlane",
-  "Bank",
-  "OilRig",
-];
-
-function robberyMarkerToImageName(markerName: string): string {
-  if (markerName === "MoneyTruck") return "Bank Truck";
-  return markerName;
-}
-
-function robberyMarkerToDisplayName(
-  markerName: string,
-  apiName: string,
-): string {
-  if (markerName === "MoneyTruck") return "Bank Truck";
-  return apiName;
-}
-
-function getStatusBadgeClass(status: number) {
-  switch (status) {
-    case 1:
-      return "text-primary-text border-status-success/30 bg-status-success/20";
-    case 2:
-      return "text-primary-text border-status-warning/30 bg-status-warning/20";
-    case 3:
-      return "text-primary-text border-border-card bg-tertiary-bg";
-    default:
-      return "text-primary-text border-border-card bg-tertiary-bg";
-  }
-}
+import {
+  formatServerTime,
+  getStatusBadgeClass,
+  isValidCasinoCode,
+  robberyMarkerToImageName,
+  robberyMarkerToDisplayName,
+  ROBBERY_PRIORITY_MAP,
+} from "./utils";
 
 function getStatusText(status: number) {
   switch (status) {
@@ -77,17 +45,6 @@ function getStatusText(status: number) {
       return "Unknown";
   }
 }
-
-function formatServerTime(serverTime: number) {
-  const hours24 = Math.floor(serverTime);
-  const minutes = Math.floor((serverTime % 1) * 60);
-  const period = hours24 >= 12 ? "PM" : "AM";
-  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
-  return `${hours12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} ${period}`;
-}
-
-const isValidCasinoCode = (code: string | null | undefined) =>
-  typeof code === "string" && /^\d+$/.test(code.trim());
 
 export default function RobberyServerGroupCard({
   serverId,
@@ -116,7 +73,11 @@ export default function RobberyServerGroupCard({
   );
 
   const latestTimestamp = useMemo(
-    () => Math.max(...robberies.map((r) => r.timestamp)),
+    () =>
+      robberies.reduce(
+        (max, r) => (r.timestamp > max ? r.timestamp : max),
+        robberies[0].timestamp,
+      ),
     [robberies],
   );
   const timerId = `server-group-${serverId}-${latestTimestamp}`;
@@ -140,14 +101,9 @@ export default function RobberyServerGroupCard({
   }, [robberies]);
 
   const sortedUniqueRobberies = useMemo(() => {
-    const popularityIndex = (marker: string) => {
-      const i = ROBBERY_IMAGE_PRIORITY.indexOf(marker);
-      return i === -1 ? Number.POSITIVE_INFINITY : i;
-    };
-
     const statusIndex = (status: number) => {
-      if (status === 1) return 0; // Open
-      if (status === 2) return 1; // Active
+      if (status === 1) return 0;
+      if (status === 2) return 1;
       return 2;
     };
 
@@ -155,49 +111,44 @@ export default function RobberyServerGroupCard({
       const statusDiff = statusIndex(a.status) - statusIndex(b.status);
       if (statusDiff !== 0) return statusDiff;
 
-      const popularityDiff =
-        popularityIndex(a.marker_name) - popularityIndex(b.marker_name);
-      if (popularityDiff !== 0) return popularityDiff;
+      const aPriority = ROBBERY_PRIORITY_MAP.get(a.marker_name) ?? Infinity;
+      const bPriority = ROBBERY_PRIORITY_MAP.get(b.marker_name) ?? Infinity;
+      if (aPriority !== bPriority) return aPriority - bPriority;
 
       return b.timestamp - a.timestamp;
     });
   }, [uniqueRobberies]);
 
-  const prioritizedImages = useMemo(() => {
-    return sortedUniqueRobberies.slice(0, 4).map((robbery) => {
-      const imageName = robberyMarkerToImageName(robbery.marker_name);
-      const imageUrl = `https://assets.jailbreakchangelogs.com/assets/images/robberies/${imageName}.webp`;
-      const alt = robberyMarkerToDisplayName(robbery.marker_name, robbery.name);
-      return { imageUrl, alt };
-    });
-  }, [sortedUniqueRobberies]);
+  // Merge chipRobberies, prioritizedImages, and casinoRobberyInTop into one memo
+  const { chipRobberies, prioritizedImages, casinoRobberyInTop } =
+    useMemo(() => {
+      const top4 = sortedUniqueRobberies.slice(0, 4);
+      return {
+        chipRobberies: top4,
+        prioritizedImages: top4.map((robbery) => ({
+          imageUrl: `https://assets.jailbreakchangelogs.com/assets/images/robberies/${robberyMarkerToImageName(robbery.marker_name)}.webp`,
+          alt: robberyMarkerToDisplayName(robbery.marker_name, robbery.name),
+        })),
+        casinoRobberyInTop:
+          top4.find((r) => r.marker_name === "Casino") ?? null,
+      };
+    }, [sortedUniqueRobberies]);
 
-  const chipRobberies = useMemo(
-    () => sortedUniqueRobberies.slice(0, 4),
-    [sortedUniqueRobberies],
-  );
   const remainingChipCount = Math.max(0, sortedUniqueRobberies.length - 4);
   const remainingRobberies = useMemo(
     () => sortedUniqueRobberies.slice(4),
     [sortedUniqueRobberies],
   );
 
-  const casinoRobberyInTop = useMemo(
-    () => chipRobberies.find((robbery) => robbery.marker_name === "Casino"),
-    [chipRobberies],
-  );
-
-  const handleCopyCasinoCode = async (code: string) => {
+  const handleCopyCasinoCode = useCallback(async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
-      toast.success(`Casino code ${code} copied!`, {
-        duration: 2000,
-      });
+      toast.success(`Casino code ${code} copied!`, { duration: 2000 });
     } catch (err) {
       log.error("Failed to copy casino code", err);
       toast.error("Failed to copy casino code");
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (useExternalRegionData) return;
@@ -290,7 +241,7 @@ export default function RobberyServerGroupCard({
             </div>
           ) : (
             <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-1">
-              {prioritizedImages.slice(0, 4).map((img, idx) => (
+              {prioritizedImages.map((img, idx) => (
                 <div
                   key={`${img.imageUrl}-${idx}`}
                   className="bg-tertiary-bg relative h-full w-full overflow-hidden"

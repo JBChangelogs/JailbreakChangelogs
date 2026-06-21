@@ -463,7 +463,7 @@ export default function ItemDetailsClient({
     return () => {
       isMounted = false;
     };
-  }, [item.id]);
+  }, [item.id, item.type]);
 
   const handleTabChange = (newValue: number) => {
     void setTabParam(TAB_INDEX_TO_NAME[newValue] ?? null);
