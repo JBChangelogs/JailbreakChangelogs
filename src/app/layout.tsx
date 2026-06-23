@@ -102,7 +102,7 @@ export default async function RootLayout({
           {/* Apply saved theme class before React hydrates to prevent FOUC */}
           <script
             dangerouslySetInnerHTML={{
-              __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.classList.add(t);}}catch(e){}})();`,
+              __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'||t==='amoled'){document.documentElement.classList.add(t);}}catch(e){}})();`,
             }}
           />
           {/* Rybbit Analytics */}
@@ -235,7 +235,7 @@ export default async function RootLayout({
         {/* Apply saved theme class before React hydrates to prevent FOUC */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.classList.add(t);}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'||t==='amoled'){document.documentElement.classList.add(t);}}catch(e){}})();`,
           }}
         />
         {/* Preconnect to external asset domains */}

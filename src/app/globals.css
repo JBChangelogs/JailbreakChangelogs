@@ -246,6 +246,121 @@
   --header-height: 0px; /* Dynamic header height, set by JS */
 }
 
+/* AMOLED THEME - Applied when .amoled class is present */
+/* Pure black backgrounds to turn off OLED pixels and save battery */
+.amoled {
+  /* Background Colors - Pure blacks */
+  --color-primary-bg: #000000;
+  --color-secondary-bg: #0a0a0a;
+  --color-tertiary-bg: #111111;
+  --color-quaternary-bg: hsl(0, 0%, 12%);
+  --color-surface-bg: #050505;
+  --color-overlay-bg: hsl(0, 0%, 0%, 0.9);
+  --color-newsletter-bg: hsl(60, 100%, 100%);
+
+  /* Text Colors - same as dark */
+  --color-primary-text: hsl(60, 100%, 100%);
+  --color-secondary-text: hsl(214, 16%, 64%);
+  --color-tertiary-text: hsl(214, 12%, 45%);
+  --color-quaternary-text: hsl(214, 8%, 35%);
+  --color-card-headline: hsl(60, 100%, 100%);
+  --color-card-paragraph: hsl(214, 16%, 64%);
+
+  /* Border Colors - slightly brighter than dark to stay visible on pure black */
+  --color-border-primary: hsl(214, 8%, 18%);
+  --color-border-card: hsl(214, 8%, 20%);
+  --color-border-secondary: hsl(214, 6%, 13%);
+  --color-border-tertiary: hsl(214, 4%, 10%);
+  --color-border-focus: hsl(210, 99%, 50%);
+  --color-border-error: hsl(0, 81%, 62%);
+
+  /* Card Elements - same as dark */
+  --color-card-tag-bg: hsl(210, 99%, 50%);
+  --color-card-tag-text: hsl(60, 100%, 100%);
+  --color-card-highlight: hsl(60, 100%, 100%);
+  --color-card-shadow: hsl(0, 0%, 0%, 0.3);
+
+  /* Interactive Elements - same as dark */
+  --color-link: hsl(210, 100%, 70%);
+  --color-link-hover: hsl(210, 100%, 75%);
+  --color-link-active: hsl(210, 100%, 65%);
+  --color-link-visited: hsl(214, 12%, 65%);
+
+  /* Button Colors - same as dark */
+  --color-button-info: hsl(210, 99%, 35%);
+  --color-button-info-hover: hsl(210, 99%, 30%);
+  --color-button-info-active: hsl(218, 60%, 32%);
+  --color-button-info-disabled: hsl(214, 8%, 25%);
+  --color-button-success: hsl(155, 65%, 30%);
+  --color-button-success-hover: hsl(155, 60%, 24%);
+  --color-button-danger: hsl(0, 81%, 62%);
+  --color-button-danger-hover: hsl(0, 75%, 55%);
+  --color-button-secondary: hsl(214, 8%, 25%);
+  --color-button-secondary-hover: hsl(214, 6%, 20%);
+  --color-form-button: hsl(210, 99%, 35%);
+  --color-form-button-text: hsl(60, 100%, 100%);
+
+  /* Form Elements */
+  --color-form-input: #050505;
+  --color-form-input-focus: #0a0a0a;
+  --color-form-input-disabled: hsl(214, 4%, 10%);
+  --color-form-label: hsl(60, 100%, 100%);
+  --color-form-placeholder: hsl(214, 8%, 35%);
+  --color-form-error: hsl(0, 81%, 62%);
+  --color-form-success: hsl(155, 61%, 44%);
+
+  /* Status Colors - same as dark */
+  --color-status-success: hsl(155, 61%, 30%);
+  --color-status-success-vibrant: hsl(120, 61%, 50%);
+  --color-status-warning: hsl(38, 100%, 61%);
+  --color-status-error: hsl(0, 81%, 45%);
+  --color-status-info: hsl(210, 99%, 50%);
+  --color-status-neutral: hsl(214, 8%, 35%);
+
+  /* Utility Colors - same as dark */
+  --color-highlight: hsl(210, 99%, 50%);
+  --color-secondary: hsl(225, 5%, 47%);
+  --color-tertiary: hsl(155, 61%, 44%);
+  --color-stroke: hsl(0, 0%, 0%);
+
+  /* Warning Colors - same as dark */
+  --color-warning: hsl(38, 100%, 61%);
+  --color-warning-light: hsl(48, 100%, 62%);
+  --color-warning-dark: hsl(32, 85%, 52%);
+
+  /* Badge Colors - same as dark */
+  --color-badge-owner: linear-gradient(to right, hsl(270, 100%, 50%), hsl(240, 100%, 50%));
+  --color-badge-tester: hsl(270, 100%, 60%);
+  --color-badge-vtm: linear-gradient(to right, hsl(155, 100%, 30%), hsl(155, 100%, 25%));
+  --color-badge-vt: hsl(220, 100%, 50%);
+  --color-badge-partner: hsl(25, 100%, 50%);
+  --color-badge-contributor: linear-gradient(to right, hsl(180, 100%, 30%), hsl(180, 100%, 25%));
+  --color-badge-developer: linear-gradient(to right, hsl(90, 100%, 50%), hsl(90, 100%, 45%));
+  --color-badge-designer: linear-gradient(to right, hsl(290, 100%, 55%), hsl(320, 100%, 50%));
+  --color-badge-early-adopter: linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%));
+  --color-badge-premium-bronze: linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%));
+  --color-badge-premium-silver: linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%));
+  --color-badge-premium-gold: linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%));
+
+  /* Supporter Border Colors - same as dark */
+  --color-supporter-bronze-border: #cd7f32;
+  --color-supporter-silver-border: #c0c0c0;
+  --color-supporter-gold-border: #ffd700;
+
+  /* Supporter Card Backgrounds - darker tints for pure black */
+  --color-supporter-bronze-bg: hsl(30, 25%, 10%);
+  --color-supporter-silver-bg: hsl(210, 8%, 10%);
+  --color-supporter-gold-bg: hsl(45, 30%, 10%);
+
+  /* Opacity Variations */
+  --color-overlay-light: hsl(0, 0%, 0%, 0.5);
+  --color-overlay-medium: hsl(0, 0%, 0%, 0.7);
+  --color-overlay-dark: hsl(0, 0%, 0%, 0.95);
+
+  /* Hero Overlays */
+  --color-hero-overlay: hsl(0, 0%, 0%, 0.8);
+}
+
 /* LIGHT THEME - Applied when .light class is present */
 .light {
   /* Background Colors - Light theme */
