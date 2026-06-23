@@ -23,22 +23,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return "dark";
 
     const savedTheme = safeLocalStorage.getItem("theme");
-    const hasBeenMigrated = safeLocalStorage.getItem(
-      "theme-christmas-removal-migration",
-    );
-
-    // One-time migration: if user has Christmas theme but hasn't been migrated yet,
-    // switch them to dark theme
-    if (!hasBeenMigrated && savedTheme === "christmas") {
-      safeLocalStorage.setItem("theme-christmas-removal-migration", "done");
-      safeLocalStorage.setItem("theme", "dark");
-      return "dark";
-    }
-
-    // Mark migration as done for users who already had light/dark theme or no theme
-    if (!hasBeenMigrated) {
-      safeLocalStorage.setItem("theme-christmas-removal-migration", "done");
-    }
 
     if (savedTheme === "system") {
       const prefersDark = window.matchMedia(
