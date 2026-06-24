@@ -337,50 +337,303 @@ export default function TradeHistoryModal({
               );
             }
 
-            return (
-              <div className="space-y-2">
-                {owners.map((owner, index) => {
-                  const userId = owner.UserId.toString();
+            if (owners.length === 1) {
+              return (
+                <div className="py-8 text-center">
+                  <p className="text-secondary-text">
+                    This item has no trade history yet — it has never been
+                    traded.
+                  </p>
+                </div>
+              );
+            }
 
-                  return (
-                    <div
-                      key={`${userId}-${owner.TradeTime}-${index}`}
-                      className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
-                    >
-                      <div className="flex min-w-0 flex-1 items-center gap-3">
-                        <div className="shrink-0">
-                          <TradeAvatarImage userId={userId} />
+            const isCapped = owners.length >= 49;
+
+            if (!isCapped) {
+              // Build paired trades: history[i] received from history[i+1]
+              const trades = [];
+              for (let i = 0; i < owners.length - 1; i++) {
+                trades.push({
+                  fromUser: owners[i],
+                  toUser: owners[i + 1],
+                  tradeNumber: i + 1,
+                });
+              }
+              const firstTradeNumber = 1;
+
+              return (
+                <div className="space-y-2">
+                  {trades.map((trade) => {
+                    const fromId = trade.fromUser.UserId.toString();
+                    const toId = trade.toUser.UserId.toString();
+                    return (
+                      <div
+                        key={`${fromId}-${toId}-${trade.toUser.TradeTime}`}
+                        className={`flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center ${
+                          trade.tradeNumber === firstTradeNumber
+                            ? "border-[#FFD700] bg-[#FFD700]/10"
+                            : "border-border-card bg-tertiary-bg"
+                        }`}
+                      >
+                        <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+                          {/* From user */}
+                          <div className="flex items-center gap-2">
+                            <TradeAvatarImage userId={fromId} />
+                            <a
+                              href={`https://www.roblox.com/users/${fromId}/profile`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block"
+                            >
+                              <div className="text-link hover:text-link-hover flex items-center gap-1 font-medium transition-colors">
+                                {getDisplayName(fromId)}
+                                {getHasVerifiedBadge(fromId) && (
+                                  <VerifiedBadgeIcon className="h-3.5 w-3.5" />
+                                )}
+                              </div>
+                              <div className="text-secondary-text text-xs">
+                                @{getUsername(fromId)}
+                              </div>
+                            </a>
+                          </div>
+
+                          {/* Arrow + trade number */}
+                          <div className="text-secondary-text flex items-center gap-1 sm:px-1">
+                            <svg
+                              className="h-4 w-4 shrink-0 sm:hidden"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17 13l-5 5m0 0l-5-5m5 5V6"
+                              />
+                            </svg>
+                            <svg
+                              className="hidden h-4 w-4 shrink-0 sm:block"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"
+                              />
+                            </svg>
+                            <span className="text-xs whitespace-nowrap">
+                              Trade #{trade.tradeNumber}
+                            </span>
+                          </div>
+
+                          {/* To user */}
+                          <div className="flex items-center gap-2">
+                            <TradeAvatarImage userId={toId} />
+                            <a
+                              href={`https://www.roblox.com/users/${toId}/profile`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block"
+                            >
+                              <div className="text-link hover:text-link-hover flex items-center gap-1 font-medium transition-colors">
+                                {getDisplayName(toId)}
+                                {getHasVerifiedBadge(toId) && (
+                                  <VerifiedBadgeIcon className="h-3.5 w-3.5" />
+                                )}
+                              </div>
+                              <div className="text-secondary-text text-xs">
+                                @{getUsername(toId)}
+                              </div>
+                            </a>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <a
-                            href={`https://www.roblox.com/users/${userId}/profile`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block"
-                          >
-                            <div className="text-link hover:text-link-hover flex items-center gap-1.5 font-medium transition-colors">
-                              {getDisplayName(userId)}
-                              {getHasVerifiedBadge(userId) && (
-                                <VerifiedBadgeIcon className="h-4 w-4" />
-                              )}
-                            </div>
-                            <div className="text-secondary-text text-sm">
-                              @{getUsername(userId)}
-                            </div>
-                          </a>
-                        </div>
-                      </div>
-                      <div className="text-secondary-text text-xs sm:shrink-0 sm:text-right sm:text-sm">
-                        {new Date(owner.TradeTime * 1000).toLocaleDateString(
-                          "en-US",
-                          {
+
+                        <div className="text-secondary-text w-full text-center text-xs sm:w-auto sm:shrink-0 sm:text-right sm:text-sm">
+                          {new Date(
+                            trade.toUser.TradeTime * 1000,
+                          ).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
                             year: "numeric",
                             hour: "2-digit",
                             minute: "2-digit",
-                          },
-                        )}
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            }
+
+            // Capped at 49+: gold first-known-owner card + dotted divider + chain trades
+            const firstOwner = owners[0];
+            const firstOwnerId = firstOwner.UserId.toString();
+
+            const cappedChainTrades = [];
+            for (let i = 1; i < owners.length - 1; i++) {
+              cappedChainTrades.push({
+                fromUser: owners[i],
+                toUser: owners[i + 1],
+              });
+            }
+
+            return (
+              <div className="space-y-2">
+                {/* First known owner — gold OG card */}
+                <div className="flex flex-col gap-3 rounded-lg border border-[#FFD700] bg-[#FFD700]/10 p-3 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <div className="shrink-0">
+                      <TradeAvatarImage userId={firstOwnerId} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <a
+                        href={`https://www.roblox.com/users/${firstOwnerId}/profile`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-link hover:text-link-hover font-medium transition-colors">
+                            {getDisplayName(firstOwnerId)}
+                          </span>
+                          {getHasVerifiedBadge(firstOwnerId) && (
+                            <VerifiedBadgeIcon className="h-4 w-4" />
+                          )}
+                          <span className="text-secondary-text text-xs font-normal">
+                            Original owner
+                          </span>
+                        </div>
+                        <div className="text-secondary-text text-sm">
+                          @{getUsername(firstOwnerId)}
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div className="text-secondary-text text-xs sm:shrink-0 sm:text-right sm:text-sm">
+                    {new Date(firstOwner.TradeTime * 1000).toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      },
+                    )}
+                  </div>
+                </div>
+
+                {/* Dotted divider — earlier trades may be missing */}
+                <div className="relative py-4">
+                  <div
+                    className="absolute inset-0 flex items-center"
+                    aria-hidden="true"
+                  >
+                    <div className="border-tertiary-text/60 w-full border-t-2 border-dashed" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-secondary-bg border-border-card text-secondary-text rounded-full border px-3 text-xs font-medium">
+                      Earlier trades may be missing — history capped at 49
+                    </span>
+                  </div>
+                </div>
+
+                {/* Chain trades */}
+                {cappedChainTrades.map((trade) => {
+                  const fromId = trade.fromUser.UserId.toString();
+                  const toId = trade.toUser.UserId.toString();
+                  return (
+                    <div
+                      key={`${fromId}-${toId}-${trade.toUser.TradeTime}`}
+                      className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
+                    >
+                      <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+                        <div className="flex items-center gap-2">
+                          <TradeAvatarImage userId={fromId} />
+                          <a
+                            href={`https://www.roblox.com/users/${fromId}/profile`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                          >
+                            <div className="text-link hover:text-link-hover flex items-center gap-1 font-medium transition-colors">
+                              {getDisplayName(fromId)}
+                              {getHasVerifiedBadge(fromId) && (
+                                <VerifiedBadgeIcon className="h-3.5 w-3.5" />
+                              )}
+                            </div>
+                            <div className="text-secondary-text text-xs">
+                              @{getUsername(fromId)}
+                            </div>
+                          </a>
+                        </div>
+
+                        <div className="text-secondary-text flex items-center sm:px-1">
+                          <svg
+                            className="h-4 w-4 shrink-0 sm:hidden"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17 13l-5 5m0 0l-5-5m5 5V6"
+                            />
+                          </svg>
+                          <svg
+                            className="hidden h-4 w-4 shrink-0 sm:block"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
+                          </svg>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <TradeAvatarImage userId={toId} />
+                          <a
+                            href={`https://www.roblox.com/users/${toId}/profile`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                          >
+                            <div className="text-link hover:text-link-hover flex items-center gap-1 font-medium transition-colors">
+                              {getDisplayName(toId)}
+                              {getHasVerifiedBadge(toId) && (
+                                <VerifiedBadgeIcon className="h-3.5 w-3.5" />
+                              )}
+                            </div>
+                            <div className="text-secondary-text text-xs">
+                              @{getUsername(toId)}
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="text-secondary-text w-full text-center text-xs sm:w-auto sm:shrink-0 sm:text-right sm:text-sm">
+                        {new Date(
+                          trade.toUser.TradeTime * 1000,
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </div>
                     </div>
                   );
