@@ -243,7 +243,7 @@ export default function DupeComparisonClient({
       )}
 
       {/* Shared Summary Header */}
-      <div className="bg-secondary-bg border-border-card mx-auto max-w-4xl rounded-xl border p-6 text-center shadow-sm">
+      <div className="bg-secondary-bg border-border-card mx-auto max-w-7xl rounded-xl border p-6 text-center shadow-sm">
         <div className="mb-6 flex flex-col items-center gap-6 md:flex-row md:items-center md:text-left">
           <div
             className="bg-secondary-bg border-border-card relative w-full shrink-0 overflow-hidden rounded-lg border md:w-64"
@@ -421,7 +421,7 @@ export default function DupeComparisonClient({
               )}
           </div>
         </div>
-        <div className="bg-button-info/10 border-border-card text-secondary-text mx-auto flex max-w-2xl items-start gap-4 rounded-lg border p-4 text-sm shadow-sm">
+        <div className="bg-button-info/10 border-border-card text-secondary-text mx-auto flex max-w-7xl items-start gap-4 rounded-lg border p-4 text-sm shadow-sm">
           <div>
             <span className="text-primary-text font-bold">Note:</span> We only
             show 2 copies here. Item 1 can change over time as more duplicates
@@ -430,7 +430,7 @@ export default function DupeComparisonClient({
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2">
         <VariantColumn
           title="Item 1"
           item={duplicateItem}
