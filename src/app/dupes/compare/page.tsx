@@ -2,6 +2,8 @@ import { fetchDuplicateVariants, fetchItems } from "@/utils/api/api";
 import DupeComparisonClient from "@/components/Dupes/DupeComparisonClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { notFound } from "next/navigation";
+import NitroDupeCompareRailAd from "@/components/Ads/NitroDupeCompareRailAd";
+import NitroDupeCompareRightRailAd from "@/components/Ads/NitroDupeCompareRightRailAd";
 
 export const dynamic = "force-dynamic";
 
@@ -26,23 +28,27 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 pb-8">
-      <Breadcrumb />
+    <>
+      <NitroDupeCompareRailAd />
+      <NitroDupeCompareRightRailAd />
+      <div className="container mx-auto px-4 pb-8">
+        <Breadcrumb />
 
-      <div className="mb-8">
-        <h1 className="text-primary-text text-3xl font-bold">
-          Duplicate Comparison
-        </h1>
-        <p className="text-secondary-text mt-2">
-          Comparing item variants to verify duplicates.
-        </p>
+        <div className="mb-8">
+          <h1 className="text-primary-text text-3xl font-bold">
+            Duplicate Comparison
+          </h1>
+          <p className="text-secondary-text mt-2">
+            Comparing item variants to verify duplicates.
+          </p>
+        </div>
+
+        <DupeComparisonClient
+          ogItem={variantsData.og}
+          duplicateItem={variantsData.duplicate}
+          itemsData={itemsData}
+        />
       </div>
-
-      <DupeComparisonClient
-        ogItem={variantsData.og}
-        duplicateItem={variantsData.duplicate}
-        itemsData={itemsData}
-      />
-    </div>
+    </>
   );
 }
