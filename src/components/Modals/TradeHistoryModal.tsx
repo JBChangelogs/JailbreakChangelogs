@@ -202,7 +202,7 @@ export default function TradeHistoryModal({
     const [isLoading, setIsLoading] = useState(true);
     const [avatarError, setAvatarError] = useState(false);
     return (
-      <div className="bg-tertiary-bg relative h-10 w-10 overflow-hidden rounded-full">
+      <div className="bg-quaternary-bg relative h-10 w-10 overflow-hidden rounded-full">
         {avatarError ? (
           <DefaultAvatar name={userId} />
         ) : (

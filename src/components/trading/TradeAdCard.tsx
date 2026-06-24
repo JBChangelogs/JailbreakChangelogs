@@ -128,7 +128,7 @@ const TradeSidePreview = ({
           <span className="text-secondary-text">Qty</span>
         </div>
         {previewItems.length > 0 ? (
-          <div className="max-h-56 overflow-y-auto">
+          <div className="max-h-80 overflow-y-auto">
             {previewItems.map((item) => {
               const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
               const itemHref = getTradeItemDetailHref(item);

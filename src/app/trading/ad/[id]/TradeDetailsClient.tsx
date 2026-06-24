@@ -185,7 +185,7 @@ const TradeSidePreview = ({
   }, 0);
 
   return (
-    <section className="overflow-hidden">
+    <section className="flex flex-col overflow-hidden">
       <div className="mb-3 flex items-center justify-center">
         <h3 className="text-primary-text text-sm font-semibold">
           {title}{" "}
@@ -194,13 +194,14 @@ const TradeSidePreview = ({
           </span>
         </h3>
       </div>
-      <div className="border-border-card bg-tertiary-bg/40 rounded-xl border">
+      {/* Mobile list view */}
+      <div className="border-border-card bg-tertiary-bg/40 flex-1 rounded-xl border lg:hidden">
         <div className="border-border-card grid grid-cols-[1fr_auto] gap-3 border-b px-3 py-2 text-xs font-semibold">
           <span className="text-secondary-text">Item</span>
           <span className="text-secondary-text">Qty</span>
         </div>
         {previewItems.length > 0 ? (
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-80 overflow-y-auto">
             {previewItems.map((item) => {
               const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
               const itemHref = getTradeItemDetailHref(item);
@@ -235,94 +236,86 @@ const TradeSidePreview = ({
                 </Tooltip>
               );
 
-              const rowContent = (
-                <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="bg-tertiary-bg relative hidden aspect-video w-28 shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block">
-                      <Image
-                        src={getTradeItemImagePath(item, true)}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                        onError={handleImageError}
-                        draggable={false}
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        {nameNode}
-                        <span
-                          className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-                          style={{
-                            borderColor: getCategoryColor(item.type),
-                          }}
-                        >
-                          {(() => {
-                            const categoryIcon = getCategoryIcon(item.type);
-                            return categoryIcon ? (
-                              <categoryIcon.Icon
-                                className="h-3 w-3"
-                                style={{ color: getCategoryColor(item.type) }}
-                              />
-                            ) : null;
-                          })()}
-                          {item.type}
-                        </span>
-                        {item.isDuped && (
-                          <span className="bg-status-error/90 inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-semibold text-white">
-                            Duped
-                          </span>
-                        )}
-                        {item.isOG && (
-                          <span className="inline-flex h-6 items-center rounded-lg border border-white/10 bg-black/40 px-2.5 text-xs leading-none font-semibold text-white">
-                            OG
-                          </span>
-                        )}
-                      </div>
-                      {!isCustomTradeItem(item) && (
-                        <div className="text-secondary-text mt-1 text-xs">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-medium">
-                              {item.isDuped ? "Duped value:" : "Cash value:"}
-                            </span>
-                            <span className="tabular-nums">
-                              {(() => {
-                                const rawValue = item.isDuped
-                                  ? item.duped_value
-                                  : item.cash_value;
-                                if (rawValue == null || rawValue === "N/A")
-                                  return "N/A";
-                                const totalValue =
-                                  parseTradeValue(rawValue) * item.count;
-                                return formatTradeValue(totalValue);
-                              })()}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                      <div className="sr-only">
-                        {item.name} ({item.type})
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-primary-text text-sm font-semibold tabular-nums">
-                    ×{item.count}
-                  </div>
-                </div>
-              );
-
-              const row = (
-                <div className="hover:bg-quaternary-bg cursor-default transition-colors">
-                  {rowContent}
-                </div>
-              );
-
               return (
                 <div
                   key={itemKey}
                   className="border-border-card border-b last:border-b-0"
                 >
-                  {row}
+                  <div className="hover:bg-quaternary-bg cursor-default transition-colors">
+                    <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="bg-tertiary-bg relative hidden aspect-video w-28 shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block">
+                          <Image
+                            src={getTradeItemImagePath(item, true)}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                            onError={handleImageError}
+                            draggable={false}
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {nameNode}
+                            <span
+                              className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                              style={{
+                                borderColor: getCategoryColor(item.type),
+                              }}
+                            >
+                              {(() => {
+                                const categoryIcon = getCategoryIcon(item.type);
+                                return categoryIcon ? (
+                                  <categoryIcon.Icon
+                                    className="h-3 w-3"
+                                    style={{
+                                      color: getCategoryColor(item.type),
+                                    }}
+                                  />
+                                ) : null;
+                              })()}
+                              {item.type}
+                            </span>
+                            {item.isDuped && (
+                              <span className="bg-status-error/90 inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-semibold text-white">
+                                Duped
+                              </span>
+                            )}
+                            {item.isOG && (
+                              <span className="inline-flex h-6 items-center rounded-lg border border-white/10 bg-black/40 px-2.5 text-xs leading-none font-semibold text-white">
+                                OG
+                              </span>
+                            )}
+                          </div>
+                          {!isCustomTradeItem(item) && (
+                            <div className="text-secondary-text mt-1 text-xs">
+                              <span className="font-medium">
+                                {item.isDuped ? "Duped value:" : "Cash value:"}
+                              </span>{" "}
+                              <span className="tabular-nums">
+                                {(() => {
+                                  const rawValue = item.isDuped
+                                    ? item.duped_value
+                                    : item.cash_value;
+                                  if (rawValue == null || rawValue === "N/A")
+                                    return "N/A";
+                                  return formatTradeValue(
+                                    parseTradeValue(rawValue) * item.count,
+                                  );
+                                })()}
+                              </span>
+                            </div>
+                          )}
+                          <div className="sr-only">
+                            {item.name} ({item.type})
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-primary-text text-sm font-semibold tabular-nums">
+                        ×{item.count}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -334,7 +327,126 @@ const TradeSidePreview = ({
         )}
       </div>
 
-      {hasStandardItems && (
+      {/* Desktop 4-column card grid */}
+      <div className="hidden lg:flex lg:flex-1 lg:flex-col">
+        {previewItems.length > 0 ? (
+          <div className="border-border-card bg-tertiary-bg/40 flex-1 rounded-xl border p-2">
+            <div className="grid grid-cols-4 gap-2">
+              {previewItems.map((item) => {
+                const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}-grid`;
+                const itemHref = getTradeItemDetailHref(item);
+
+                const cardInner = (
+                  <div className="bg-tertiary-bg hover:bg-quaternary-bg overflow-hidden rounded-lg border border-white/5 transition-colors">
+                    <div className="relative aspect-video w-full overflow-hidden">
+                      <Image
+                        src={getTradeItemImagePath(item, true)}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        onError={handleImageError}
+                        draggable={false}
+                      />
+                      <div className="absolute right-1 bottom-1 flex items-center gap-1">
+                        {item.isDuped && (
+                          <span className="bg-status-error/90 rounded px-1 py-0.5 text-[10px] leading-none font-semibold text-white">
+                            D
+                          </span>
+                        )}
+                        {item.isOG && (
+                          <span className="rounded border border-white/10 bg-black/60 px-1 py-0.5 text-[10px] leading-none font-semibold text-white">
+                            OG
+                          </span>
+                        )}
+                        <span className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] leading-none font-semibold text-white backdrop-blur-sm">
+                          ×{item.count}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="px-1.5 py-1">
+                      <p className="text-primary-text line-clamp-1 text-[11px] leading-tight font-semibold">
+                        {item.name}
+                      </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                        <span
+                          className="bg-tertiary-bg/40 text-primary-text inline-flex h-5 items-center gap-1 rounded border px-1.5 text-[10px] leading-none font-medium backdrop-blur-xl"
+                          style={{ borderColor: getCategoryColor(item.type) }}
+                        >
+                          {(() => {
+                            const categoryIcon = getCategoryIcon(item.type);
+                            return categoryIcon ? (
+                              <categoryIcon.Icon
+                                className="h-2.5 w-2.5 shrink-0"
+                                style={{ color: getCategoryColor(item.type) }}
+                              />
+                            ) : null;
+                          })()}
+                          {item.type}
+                        </span>
+                      </div>
+                      {!isCustomTradeItem(item) && (
+                        <p className="text-secondary-text mt-0.5 truncate text-[10px]">
+                          <span className="font-medium">
+                            {item.isDuped ? "Duped value:" : "Cash value:"}
+                          </span>{" "}
+                          <span className="tabular-nums">
+                            {(() => {
+                              const rawValue = item.isDuped
+                                ? item.duped_value
+                                : item.cash_value;
+                              if (rawValue == null || rawValue === "N/A")
+                                return "N/A";
+                              return formatTradeValue(
+                                parseTradeValue(rawValue) * item.count,
+                              );
+                            })()}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+
+                const cardWithLink = itemHref ? (
+                  <Link href={itemHref} prefetch={false} className="block">
+                    {cardInner}
+                  </Link>
+                ) : (
+                  <div>{cardInner}</div>
+                );
+
+                return (
+                  <div key={itemKey} className="cursor-default">
+                    {isCustomTradeItem(item) ? (
+                      cardWithLink
+                    ) : (
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <div>{cardWithLink}</div>
+                        </TooltipTrigger>
+                        <TradeItemHoverTooltip
+                          side="top"
+                          item={{
+                            ...item,
+                            base_name: item.base_name || item.name,
+                            name: item.name,
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <p className="text-secondary-text px-3 py-3 text-xs">
+            No items listed
+          </p>
+        )}
+      </div>
+
+      {hasStandardItems ? (
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
           <span className="border-border-card bg-quaternary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
             Total: {formatTradeValue(cashTotal + dupedTotal)}
@@ -346,6 +458,8 @@ const TradeSidePreview = ({
             Duped: {formatTradeValue(dupedTotal)}
           </span>
         </div>
+      ) : (
+        <div className="mt-3 hidden h-6 lg:block" />
       )}
     </section>
   );
