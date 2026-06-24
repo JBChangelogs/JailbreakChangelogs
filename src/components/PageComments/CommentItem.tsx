@@ -596,11 +596,11 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                       <TooltipContent>Reply</TooltipContent>
                     </Tooltip>
                   )}
-                  {isLoggedIn && availableEmojis.length > 0 && (
+                  {isLoggedIn && availableEmojis.length > 0 && !reactionBan && (
                     <Popover
                       open={reactionPickerHoverOpenId === comment.id}
                       onOpenChange={(open) => {
-                        if (open && (isRateLimited || !!reactionBan)) return;
+                        if (open && isRateLimited) return;
                         setReactionPickerHoverOpenId(open ? comment.id : null);
                       }}
                     >
@@ -610,7 +610,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
+                              className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited ? "cursor-not-allowed" : ""}`}
                             >
                               <Icon
                                 icon="fluent:emoji-add-16-regular"
@@ -1282,79 +1282,76 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                     </TooltipTrigger>
                                     <TooltipContent>Reply</TooltipContent>
                                   </Tooltip>
-                                  {availableEmojis.length > 0 && (
-                                    <Popover
-                                      open={
-                                        reactionPickerHoverOpenId === reply.id
-                                      }
-                                      onOpenChange={(open) => {
-                                        if (
-                                          open &&
-                                          (isRateLimited || !!reactionBan)
-                                        )
-                                          return;
-                                        setReactionPickerHoverOpenId(
-                                          open ? reply.id : null,
-                                        );
-                                      }}
-                                    >
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <PopoverTrigger asChild>
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
-                                            >
-                                              <Icon
-                                                icon="fluent:emoji-add-16-regular"
-                                                className="h-3.5 w-3.5"
-                                              />
-                                            </Button>
-                                          </PopoverTrigger>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          Add a reaction
-                                        </TooltipContent>
-                                      </Tooltip>
-                                      <PopoverContent
-                                        className="w-auto p-2"
-                                        align="end"
+                                  {availableEmojis.length > 0 &&
+                                    !reactionBan && (
+                                      <Popover
+                                        open={
+                                          reactionPickerHoverOpenId === reply.id
+                                        }
+                                        onOpenChange={(open) => {
+                                          if (open && isRateLimited) return;
+                                          setReactionPickerHoverOpenId(
+                                            open ? reply.id : null,
+                                          );
+                                        }}
                                       >
-                                        <div className="grid grid-cols-5 gap-1">
-                                          {availableEmojis.map((emoji) => (
-                                            <button
-                                              key={emoji}
-                                              type="button"
-                                              onClick={() => {
-                                                void handleReact(
-                                                  reply.id,
-                                                  emoji,
-                                                );
-                                                setReactionPickerHoverOpenId(
-                                                  null,
-                                                );
-                                              }}
-                                              className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
-                                            >
-                                              {twemojiEnabled ? (
-                                                <Twemoji
-                                                  tag="span"
-                                                  options={{
-                                                    className: "twemoji",
-                                                  }}
-                                                >
-                                                  {emoji}
-                                                </Twemoji>
-                                              ) : (
-                                                emoji
-                                              )}
-                                            </button>
-                                          ))}
-                                        </div>
-                                      </PopoverContent>
-                                    </Popover>
-                                  )}
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <PopoverTrigger asChild>
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited ? "cursor-not-allowed" : ""}`}
+                                              >
+                                                <Icon
+                                                  icon="fluent:emoji-add-16-regular"
+                                                  className="h-3.5 w-3.5"
+                                                />
+                                              </Button>
+                                            </PopoverTrigger>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            Add a reaction
+                                          </TooltipContent>
+                                        </Tooltip>
+                                        <PopoverContent
+                                          className="w-auto p-2"
+                                          align="end"
+                                        >
+                                          <div className="grid grid-cols-5 gap-1">
+                                            {availableEmojis.map((emoji) => (
+                                              <button
+                                                key={emoji}
+                                                type="button"
+                                                onClick={() => {
+                                                  void handleReact(
+                                                    reply.id,
+                                                    emoji,
+                                                  );
+                                                  setReactionPickerHoverOpenId(
+                                                    null,
+                                                  );
+                                                }}
+                                                className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
+                                              >
+                                                {twemojiEnabled ? (
+                                                  <Twemoji
+                                                    tag="span"
+                                                    options={{
+                                                      className: "twemoji",
+                                                    }}
+                                                  >
+                                                    {emoji}
+                                                  </Twemoji>
+                                                ) : (
+                                                  emoji
+                                                )}
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </PopoverContent>
+                                      </Popover>
+                                    )}
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <Button

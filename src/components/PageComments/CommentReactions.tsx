@@ -44,7 +44,7 @@ export function CommentReactions({
   } = useCommentsContext();
   const { twemojiEnabled } = useTwemoji();
 
-  const isReactionBlocked = isRateLimited || !!reactionBan;
+  const isReactionBlocked = isRateLimited;
   const [tooltipResetKey, setTooltipResetKey] = useState(0);
   const shiftPressedRef = useRef(false);
 
@@ -143,8 +143,12 @@ export function CommentReactions({
             <TooltipTrigger asChild>
               <button
                 type="button"
-                onClick={() => void handleReact(commentId, r.emoji)}
-                className={`flex items-center gap-1 rounded-lg border ${compact ? "px-2 py-0.5" : "px-2 py-1"} text-sm transition-colors ${isReactionBlocked ? "cursor-not-allowed" : "cursor-pointer"} ${
+                onClick={
+                  reactionBan
+                    ? undefined
+                    : () => void handleReact(commentId, r.emoji)
+                }
+                className={`flex items-center gap-1 rounded-lg border ${compact ? "px-2 py-0.5" : "px-2 py-1"} text-sm transition-colors ${isReactionBlocked ? "cursor-not-allowed" : reactionBan ? "cursor-default" : "cursor-pointer"} ${
                   r.user_reacted
                     ? "border-link/30 bg-link/10 text-link"
                     : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30"
@@ -174,7 +178,7 @@ export function CommentReactions({
           </button>
         )}
 
-        {isLoggedIn && availableEmojis.length > 0 && (
+        {isLoggedIn && availableEmojis.length > 0 && !reactionBan && (
           <Popover
             open={reactionPickerInlineOpenId === commentId}
             onOpenChange={(open) => {

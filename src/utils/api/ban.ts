@@ -31,7 +31,6 @@ export function showBanToast(ban: BanInfo) {
   const feature = ban.banType
     ? ban.banType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
     : "this feature";
-  const expires = ban.expiresAt ? formatFullDate(ban.expiresAt) : "permanently";
   toast.error(
     `You have been banned${feature !== "this feature" ? ` (${feature})` : ""}.`,
     {
@@ -39,7 +38,13 @@ export function showBanToast(ban: BanInfo) {
         "div",
         { className: "flex flex-col gap-0.5" },
         createElement("span", null, `Reason: ${ban.reason}`),
-        createElement("span", null, `Expires: ${expires}`),
+        ban.expiresAt
+          ? createElement(
+              "span",
+              null,
+              `Expires: ${formatFullDate(ban.expiresAt)}`,
+            )
+          : createElement("span", null, "This ban is permanent."),
       ),
     },
   );

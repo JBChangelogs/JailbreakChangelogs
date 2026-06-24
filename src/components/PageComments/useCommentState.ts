@@ -119,7 +119,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     >
   >(new Map());
   const commentBan = bans["communication"] ?? null;
-  const reactionBan = bans["communication"] ?? null;
+  const reactionBan = bans["reactions"] ?? null;
 
   // --- Pagination ---
   const [page, setPage] = useState(1);

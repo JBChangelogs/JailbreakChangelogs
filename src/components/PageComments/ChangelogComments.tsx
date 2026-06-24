@@ -81,12 +81,8 @@ function CommentsLayout() {
             label="You're reacting too fast."
             className="px-3 py-2"
           />
-          {(commentBan ?? reactionBan) && (
-            <BanBanner
-              ban={(commentBan ?? reactionBan)!}
-              className="px-3 py-2"
-            />
-          )}
+          {commentBan && <BanBanner ban={commentBan} className="px-3 py-2" />}
+          {reactionBan && <BanBanner ban={reactionBan} className="px-3 py-2" />}
 
           {/* New Comment Form */}
           <CommentForm />
