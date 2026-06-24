@@ -223,7 +223,7 @@ export default function TradeHistoryList({
         className={`flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center ${
           isFirst
             ? "border-[#FFD700] bg-[#FFD700]/10"
-            : "border-border-card bg-tertiary-bg"
+            : "border-border-card bg-secondary-bg"
         }`}
       >
         <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
