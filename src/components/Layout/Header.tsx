@@ -5,11 +5,11 @@ import Link from "next/link";
 
 const log = createLogger("UI");
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { logout, trackLogoutSource } from "@/utils/auth/auth";
 import LoginModal from "../Auth/LoginModal";
@@ -18,6 +18,7 @@ import { useEscapeLogin } from "@/utils/auth/escapeLogin";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
+import type { UserData } from "@/types/auth";
 import { useTheme } from "@/contexts/ThemeContext";
 
 const AnimatedThemeToggler = dynamic(
@@ -136,26 +137,347 @@ const MobileNavItem = ({
   </Link>
 );
 
+const MobileDrawer = memo(function MobileDrawer({
+  userData,
+  openNavSection,
+  toggleNavSection,
+  onClose,
+  onLogout,
+  setUtmModalOpen,
+}: {
+  userData: UserData | null;
+  openNavSection: string;
+  toggleNavSection: (title: string) => void;
+  onClose: () => void;
+  onLogout: () => void;
+  setUtmModalOpen: (open: boolean) => void;
+}) {
+  const { setLoginModal } = useAuthContext();
+
+  return (
+    <div className="flex h-full flex-col">
+      {userData ? (
+        <>
+          <Link
+            href={`/users/${userData?.id}`}
+            onClick={onClose}
+            className="hover:bg-tertiary-bg border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b p-3 transition-colors"
+          >
+            <UserAvatar
+              userId={userData.id}
+              avatarHash={userData.avatar}
+              username={userData.username}
+              size={10}
+              custom_avatar={userData.custom_avatar}
+              showBadge={false}
+              settings={userData.settings_v2}
+              premiumType={userData.premiumtype}
+            />
+            <div className="min-w-0 flex-1">
+              <div className="text-primary-text truncate font-semibold">
+                {userData.global_name || userData.username}
+              </div>
+              <div className="text-secondary-text truncate text-xs">
+                @{userData.username}
+              </div>
+            </div>
+            <Icon
+              icon="material-symbols:chevron-right-rounded"
+              className="text-secondary-text h-4 w-4 shrink-0"
+              inline={true}
+            />
+          </Link>
+          <div className="p-2">
+            {!userData.roblox_id && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  setLoginModal({ open: true, tab: "roblox" });
+                }}
+                className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+              >
+                <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                  <RobloxIcon className="text-link h-4 w-4" />
+                </div>
+                <span className="text-primary-text text-sm font-medium">
+                  Connect Roblox
+                </span>
+              </button>
+            )}
+            <Link
+              href="/settings"
+              onClick={onClose}
+              className="hover:bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+            >
+              <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                <Icon
+                  icon="material-symbols:settings-rounded"
+                  className="text-link h-4 w-4"
+                  inline={true}
+                />
+              </div>
+              <span className="text-primary-text text-sm font-medium">
+                Settings
+              </span>
+            </Link>
+            {userData?.flags?.some((f) => f.flag === "is_owner") && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  setUtmModalOpen(true);
+                }}
+                className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+              >
+                <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                  <Icon
+                    icon="heroicons:link"
+                    className="text-link h-4 w-4"
+                    inline={true}
+                  />
+                </div>
+                <span className="text-primary-text text-sm font-medium">
+                  Generate UTM Link
+                </span>
+              </button>
+            )}
+            <Link
+              href="/reports"
+              onClick={onClose}
+              className="hover:bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+            >
+              <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                <Icon
+                  icon="heroicons:flag"
+                  className="text-link h-4 w-4"
+                  inline={true}
+                />
+              </div>
+              <span className="text-primary-text text-sm font-medium">
+                My Reports
+              </span>
+            </Link>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+              data-rybbit-event="Logout"
+            >
+              <div className="bg-button-danger/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                <Icon
+                  icon="material-symbols:logout-rounded"
+                  className="text-button-danger h-4 w-4"
+                  inline={true}
+                />
+              </div>
+              <span className="text-button-danger text-sm font-medium">
+                Logout
+              </span>
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="px-4 py-3">
+          <Button
+            onClick={() => {
+              setLoginModal({ open: true });
+              onClose();
+            }}
+          >
+            Login
+          </Button>
+        </div>
+      )}
+
+      <div className="border-border-card border-t">
+        <MobileNavSection
+          title="Updates"
+          sectionIcon="material-symbols:article-rounded"
+          open={openNavSection === "Updates"}
+          onToggle={() => toggleNavSection("Updates")}
+        >
+          <MobileNavItem
+            href="/changelogs"
+            icon="material-symbols:article-rounded"
+            label="Game Changelogs"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/changelogs/timeline"
+            icon="material-symbols:schedule-rounded"
+            label="Timeline"
+            onClick={onClose}
+          />
+        </MobileNavSection>
+
+        <MobileNavSection
+          title="Seasons"
+          sectionIcon="material-symbols:layers-rounded"
+          open={openNavSection === "Seasons"}
+          onToggle={() => toggleNavSection("Seasons")}
+        >
+          <MobileNavItem
+            href="/seasons"
+            icon="material-symbols:layers-rounded"
+            label="Browse Seasons"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/seasons/leaderboard"
+            icon="material-symbols:leaderboard-rounded"
+            label="Season Leaderboard"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/seasons/will-i-make-it"
+            icon="material-symbols:trending-up-rounded"
+            label="Will I Make It"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/seasons/contracts"
+            icon="material-symbols:task-alt-rounded"
+            label="Weekly Contracts"
+            onClick={onClose}
+          />
+        </MobileNavSection>
+
+        <MobileNavSection
+          title="Trading"
+          sectionIcon="material-symbols:price-check-rounded"
+          open={openNavSection === "Trading"}
+          onToggle={() => toggleNavSection("Trading")}
+        >
+          <MobileNavItem
+            href="/values"
+            icon="material-symbols:price-check-rounded"
+            label="Value List"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/values/calculator"
+            icon="material-symbols:calculate-rounded"
+            label="Value Calculator"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/values/suggestions"
+            icon="material-symbols:lightbulb-outline-rounded"
+            label="Value Suggestions"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/values/changelogs"
+            icon="material-symbols:history-rounded"
+            label="Value Changelogs"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/trading"
+            icon="material-symbols:swap-horiz-rounded"
+            label="Trade Ads"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/dupes"
+            icon="material-symbols:content-copy-rounded"
+            label="Dupe Finder"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/inventories"
+            icon="material-symbols:inventory-2-rounded"
+            label="Inventory Checker"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/og"
+            icon="material-symbols:star-rounded"
+            label="OG Finder"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/hyperchrome-pity"
+            icon="material-symbols:percent-rounded"
+            label="Hyperchrome Pity"
+            onClick={onClose}
+          />
+        </MobileNavSection>
+
+        <MobileNavSection
+          title="Community"
+          sectionIcon="material-symbols:groups-rounded"
+          open={openNavSection === "Community"}
+          onToggle={() => toggleNavSection("Community")}
+        >
+          <MobileNavItem
+            href="/users"
+            icon="material-symbols:person-search-rounded"
+            label="User Search"
+            prefetch={false}
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/robberies"
+            icon="material-symbols:local-police-rounded"
+            label="Robbery Tracker"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/bounties"
+            icon="mdi:currency-usd"
+            label="Bounty Tracker"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/servers"
+            icon="material-symbols:groups-rounded"
+            label="Private Servers"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/contributors"
+            icon="material-symbols:groups-rounded"
+            label="Meet the Team"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/testimonials"
+            icon="material-symbols:rate-review-rounded"
+            label="Testimonials"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/supporting"
+            icon="material-symbols:favorite-rounded"
+            label="Support Us"
+            onClick={onClose}
+          />
+        </MobileNavSection>
+      </div>
+
+      <div className="border-border-card my-4 border-t" />
+    </div>
+  );
+});
+
 export default function Header() {
-  const pathname = usePathname();
   const isXlUp = useMediaQuery("(min-width: 1280px)");
-  const isCollabPage =
-    pathname === "/values" ||
-    pathname.startsWith("/item") ||
-    pathname.startsWith("/trading") ||
-    pathname.startsWith("/values/changelogs") ||
-    pathname.startsWith("/values/suggestions");
+  const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openNavSection, setOpenNavSection] = useState<string>("Updates");
-  const toggleNavSection = (title: string) =>
-    setOpenNavSection((prev) => (prev === title ? "" : title));
+  const toggleNavSection = useCallback(
+    (title: string) =>
+      setOpenNavSection((prev) => (prev === title ? "" : title)),
+    [],
+  );
   const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const hasWsUnreadSeedRef = useRef(false);
 
   const {
-    setLoginModal,
     user: authUser,
     isAuthenticated,
     isLoading,
@@ -294,326 +616,19 @@ export default function Header() {
     };
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       trackLogoutSource("Header Component");
       await logout();
     } catch (err) {
       log.error("Logout error", err);
-      // Errors are now handled by toast.promise in logout()
     }
-  };
+  }, []);
 
-  const handleDrawerToggle = () => {
+  const handleDrawerToggle = useCallback(() => {
     setMobileOpen((prev) => !prev);
-  };
+  }, []);
 
-  const drawer = (
-    <div className="flex h-full flex-col">
-      {userData ? (
-        <>
-          <Link
-            href={`/users/${userData?.id}`}
-            onClick={handleDrawerToggle}
-            className="hover:bg-tertiary-bg border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b p-3 transition-colors"
-          >
-            <UserAvatar
-              userId={userData.id}
-              avatarHash={userData.avatar}
-              username={userData.username}
-              size={10}
-              custom_avatar={userData.custom_avatar}
-              showBadge={false}
-              settings={userData.settings_v2}
-              premiumType={userData.premiumtype}
-            />
-            <div className="min-w-0 flex-1">
-              <div className="text-primary-text truncate font-semibold">
-                {userData.global_name || userData.username}
-              </div>
-              <div className="text-secondary-text truncate text-xs">
-                @{userData.username}
-              </div>
-            </div>
-            <Icon
-              icon="material-symbols:chevron-right-rounded"
-              className="text-secondary-text h-4 w-4 shrink-0"
-              inline={true}
-            />
-          </Link>
-          <div className="p-2">
-            {!userData.roblox_id && (
-              <button
-                type="button"
-                onClick={() => {
-                  handleDrawerToggle();
-                  setLoginModal({ open: true, tab: "roblox" });
-                }}
-                className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-              >
-                <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                  <RobloxIcon className="text-link h-4 w-4" />
-                </div>
-                <span className="text-primary-text text-sm font-medium">
-                  Connect Roblox
-                </span>
-              </button>
-            )}
-            <Link
-              href="/settings"
-              onClick={handleDrawerToggle}
-              className="hover:bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors"
-            >
-              <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                <Icon
-                  icon="material-symbols:settings-rounded"
-                  className="text-link h-4 w-4"
-                  inline={true}
-                />
-              </div>
-              <span className="text-primary-text text-sm font-medium">
-                Settings
-              </span>
-            </Link>
-            {userData?.flags?.some((f) => f.flag === "is_owner") && (
-              <button
-                type="button"
-                onClick={() => {
-                  handleDrawerToggle();
-                  setUtmModalOpen(true);
-                }}
-                className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-              >
-                <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                  <Icon
-                    icon="heroicons:link"
-                    className="text-link h-4 w-4"
-                    inline={true}
-                  />
-                </div>
-                <span className="text-primary-text text-sm font-medium">
-                  Generate UTM Link
-                </span>
-              </button>
-            )}
-            <Link
-              href="/reports"
-              onClick={handleDrawerToggle}
-              className="hover:bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors"
-            >
-              <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                <Icon
-                  icon="heroicons:flag"
-                  className="text-link h-4 w-4"
-                  inline={true}
-                />
-              </div>
-              <span className="text-primary-text text-sm font-medium">
-                My Reports
-              </span>
-            </Link>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-              data-rybbit-event="Logout"
-            >
-              <div className="bg-button-danger/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                <Icon
-                  icon="material-symbols:logout-rounded"
-                  className="text-button-danger h-4 w-4"
-                  inline={true}
-                />
-              </div>
-              <span className="text-button-danger text-sm font-medium">
-                Logout
-              </span>
-            </button>
-          </div>
-        </>
-      ) : (
-        <div className="px-4 py-3">
-          <Button
-            onClick={() => {
-              setLoginModal({ open: true });
-              handleDrawerToggle();
-            }}
-          >
-            Login
-          </Button>
-        </div>
-      )}
-
-      <div className="border-border-card border-t">
-        <MobileNavSection
-          title="Updates"
-          sectionIcon="material-symbols:article-rounded"
-          open={openNavSection === "Updates"}
-          onToggle={() => toggleNavSection("Updates")}
-        >
-          <MobileNavItem
-            href="/changelogs"
-            icon="material-symbols:article-rounded"
-            label="Game Changelogs"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/changelogs/timeline"
-            icon="material-symbols:schedule-rounded"
-            label="Timeline"
-            onClick={handleDrawerToggle}
-          />
-        </MobileNavSection>
-
-        <MobileNavSection
-          title="Seasons"
-          sectionIcon="material-symbols:layers-rounded"
-          open={openNavSection === "Seasons"}
-          onToggle={() => toggleNavSection("Seasons")}
-        >
-          <MobileNavItem
-            href="/seasons"
-            icon="material-symbols:layers-rounded"
-            label="Browse Seasons"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/seasons/leaderboard"
-            icon="material-symbols:leaderboard-rounded"
-            label="Season Leaderboard"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/seasons/will-i-make-it"
-            icon="material-symbols:trending-up-rounded"
-            label="Will I Make It"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/seasons/contracts"
-            icon="material-symbols:task-alt-rounded"
-            label="Weekly Contracts"
-            onClick={handleDrawerToggle}
-          />
-        </MobileNavSection>
-
-        <MobileNavSection
-          title="Trading"
-          sectionIcon="material-symbols:price-check-rounded"
-          open={openNavSection === "Trading"}
-          onToggle={() => toggleNavSection("Trading")}
-        >
-          <MobileNavItem
-            href="/values"
-            icon="material-symbols:price-check-rounded"
-            label="Value List"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/values/calculator"
-            icon="material-symbols:calculate-rounded"
-            label="Value Calculator"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/values/suggestions"
-            icon="material-symbols:lightbulb-outline-rounded"
-            label="Value Suggestions"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/values/changelogs"
-            icon="material-symbols:history-rounded"
-            label="Value Changelogs"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/trading"
-            icon="material-symbols:swap-horiz-rounded"
-            label="Trade Ads"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/dupes"
-            icon="material-symbols:content-copy-rounded"
-            label="Dupe Finder"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/inventories"
-            icon="material-symbols:inventory-2-rounded"
-            label="Inventory Checker"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/og"
-            icon="material-symbols:star-rounded"
-            label="OG Finder"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/hyperchrome-pity"
-            icon="material-symbols:percent-rounded"
-            label="Hyperchrome Pity"
-            onClick={handleDrawerToggle}
-          />
-        </MobileNavSection>
-
-        <MobileNavSection
-          title="Community"
-          sectionIcon="material-symbols:groups-rounded"
-          open={openNavSection === "Community"}
-          onToggle={() => toggleNavSection("Community")}
-        >
-          <MobileNavItem
-            href="/users"
-            icon="material-symbols:person-search-rounded"
-            label="User Search"
-            prefetch={false}
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/robberies"
-            icon="material-symbols:local-police-rounded"
-            label="Robbery Tracker"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/bounties"
-            icon="mdi:currency-usd"
-            label="Bounty Tracker"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/servers"
-            icon="material-symbols:groups-rounded"
-            label="Private Servers"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/contributors"
-            icon="material-symbols:groups-rounded"
-            label="Meet the Team"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/testimonials"
-            icon="material-symbols:rate-review-rounded"
-            label="Testimonials"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
-            href="/supporting"
-            icon="material-symbols:favorite-rounded"
-            label="Support Us"
-            onClick={handleDrawerToggle}
-          />
-        </MobileNavSection>
-      </div>
-
-      <div className="border-border-card my-4 border-t" />
-    </div>
-  );
   return (
     <>
       {/* Desktop navbar - hidden on mobile/tablet via CSS */}
@@ -632,6 +647,7 @@ export default function Header() {
             unreadCount={unreadCount}
             setUnreadCount={setUnreadCount}
             onUserMenuOpenChange={setDesktopUserMenuOpen}
+            setUtmModalOpen={setUtmModalOpen}
           />
         </div>
       </div>
@@ -743,7 +759,14 @@ export default function Header() {
           {/* Mobile Drawer */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetContent side="right" className="w-72 overflow-y-auto p-0">
-              {drawer}
+              <MobileDrawer
+                userData={userData}
+                openNavSection={openNavSection}
+                toggleNavSection={toggleNavSection}
+                onClose={handleDrawerToggle}
+                onLogout={handleLogout}
+                setUtmModalOpen={setUtmModalOpen}
+              />
             </SheetContent>
           </Sheet>
         </>

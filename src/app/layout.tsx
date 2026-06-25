@@ -12,7 +12,6 @@ import VersionInfoWrapper from "@/components/Layout/VersionInfoWrapper";
 import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
 import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
-import ThemeProvider from "@/components/ThemeProvider";
 import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
 import { TwemojiProvider } from "@/contexts/TwemojiContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -81,6 +80,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'||t==='amoled'){document.documentElement.classList.add(t);}}catch(e){}})();`;
+
 export default async function RootLayout({
   children,
 }: {
@@ -100,11 +101,7 @@ export default async function RootLayout({
       >
         <head>
           {/* Apply saved theme class before React hydrates to prevent FOUC */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'||t==='amoled'){document.documentElement.classList.add(t);}}catch(e){}})();`,
-            }}
-          />
+          <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
           {/* Rybbit Analytics */}
           {isRailwayDeployed && (
             <Script
@@ -159,65 +156,63 @@ export default async function RootLayout({
           </noscript>
           <CustomThemeProvider>
             <TwemojiProvider>
-              <ThemeProvider>
-                <QueryProvider>
-                  <Toaster
-                    position="top-right"
-                    dir="ltr"
-                    expand
-                    offset={{
-                      top: "calc(var(--header-height, 0px) + 16px)",
-                      right: "var(--toast-runtime-right, 16px)",
-                    }}
+              <QueryProvider>
+                <Toaster
+                  position="top-right"
+                  dir="ltr"
+                  expand
+                  offset={{
+                    top: "calc(var(--header-height, 0px) + 16px)",
+                    right: "var(--toast-runtime-right, 16px)",
+                  }}
+                />
+                <MaintenanceBypass>
+                  <NextTopLoader
+                    color="var(--color-button-info)"
+                    showSpinner={false}
+                    shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
                   />
-                  <MaintenanceBypass>
-                    <NextTopLoader
-                      color="var(--color-button-info)"
-                      showSpinner={false}
-                      shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                    />
 
-                    <AuthProvider>
-                      <RybbitIdentity />
-                      <AdErrorBoundary>
-                        <NitroBottomAnchor />
-                        <NitroVideoPlayer />
-                        <NitroAnchorCloseSupporterModal />
-                        <NitroVideoCloseSupporterModal />
-                      </AdErrorBoundary>
-                      <div
-                        id="main-layout"
-                        className="flex min-h-screen flex-col"
+                  <AuthProvider>
+                    <RybbitIdentity />
+                    <AdErrorBoundary>
+                      <NitroBottomAnchor />
+                      <NitroVideoPlayer />
+                      <NitroAnchorCloseSupporterModal />
+                      <NitroVideoCloseSupporterModal />
+                    </AdErrorBoundary>
+                    <div
+                      id="main-layout"
+                      className="flex min-h-screen flex-col"
+                    >
+                      <Suspense
+                        fallback={
+                          <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
+                        }
                       >
-                        <Suspense
-                          fallback={
-                            <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
-                          }
-                        >
-                          <HideOnAccessDenied>
-                            <Header />
-                          </HideOnAccessDenied>
-                        </Suspense>
-                        <main className="min-h-screen flex-1">
-                          <NuqsAdapter>
-                            <Suspense>{children}</Suspense>
-                          </NuqsAdapter>
-                        </main>
                         <HideOnAccessDenied>
-                          <Footer
-                            githubUrl={githubUrl}
-                            versionInfo={
-                              <Suspense fallback={<VersionInfoSkeleton />}>
-                                <VersionInfoWrapper />
-                              </Suspense>
-                            }
-                          />
+                          <Header />
                         </HideOnAccessDenied>
-                      </div>
-                    </AuthProvider>
-                  </MaintenanceBypass>
-                </QueryProvider>
-              </ThemeProvider>
+                      </Suspense>
+                      <main className="min-h-screen flex-1">
+                        <NuqsAdapter>
+                          <Suspense>{children}</Suspense>
+                        </NuqsAdapter>
+                      </main>
+                      <HideOnAccessDenied>
+                        <Footer
+                          githubUrl={githubUrl}
+                          versionInfo={
+                            <Suspense fallback={<VersionInfoSkeleton />}>
+                              <VersionInfoWrapper />
+                            </Suspense>
+                          }
+                        />
+                      </HideOnAccessDenied>
+                    </div>
+                  </AuthProvider>
+                </MaintenanceBypass>
+              </QueryProvider>
             </TwemojiProvider>
           </CustomThemeProvider>
         </body>
@@ -233,11 +228,7 @@ export default async function RootLayout({
     >
       <head>
         {/* Apply saved theme class before React hydrates to prevent FOUC */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'||t==='amoled'){document.documentElement.classList.add(t);}}catch(e){}})();`,
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {/* Preconnect to external asset domains */}
         <link rel="preconnect" href="https://assets.jailbreakchangelogs.com" />
         <link
@@ -299,58 +290,56 @@ export default async function RootLayout({
         </noscript>
         <CustomThemeProvider>
           <TwemojiProvider>
-            <ThemeProvider>
-              <QueryProvider>
-                <Toaster
-                  position="top-right"
-                  dir="ltr"
-                  expand
-                  offset={{
-                    top: "calc(var(--header-height, 0px) + 16px)",
-                    right: "var(--toast-runtime-right, 16px)",
-                  }}
-                />
-                <NextTopLoader
-                  color="var(--color-button-info)"
-                  showSpinner={false}
-                  shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                />
+            <QueryProvider>
+              <Toaster
+                position="top-right"
+                dir="ltr"
+                expand
+                offset={{
+                  top: "calc(var(--header-height, 0px) + 16px)",
+                  right: "var(--toast-runtime-right, 16px)",
+                }}
+              />
+              <NextTopLoader
+                color="var(--color-button-info)"
+                showSpinner={false}
+                shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+              />
 
-                <AuthProvider>
-                  <RybbitIdentity />
-                  <NitroBottomAnchor />
-                  <NitroVideoPlayer />
-                  <NitroAnchorCloseSupporterModal />
-                  <NitroVideoCloseSupporterModal />
-                  <div className="flex min-h-screen flex-col">
-                    <Suspense
-                      fallback={
-                        <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
-                      }
-                    >
-                      <HideOnAccessDenied>
-                        <Header />
-                      </HideOnAccessDenied>
-                    </Suspense>
-                    <main className="min-h-screen flex-1">
-                      <NuqsAdapter>
-                        <Suspense>{children}</Suspense>
-                      </NuqsAdapter>
-                    </main>
+              <AuthProvider>
+                <RybbitIdentity />
+                <NitroBottomAnchor />
+                <NitroVideoPlayer />
+                <NitroAnchorCloseSupporterModal />
+                <NitroVideoCloseSupporterModal />
+                <div className="flex min-h-screen flex-col">
+                  <Suspense
+                    fallback={
+                      <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
+                    }
+                  >
                     <HideOnAccessDenied>
-                      <Footer
-                        githubUrl={githubUrl}
-                        versionInfo={
-                          <Suspense fallback={<VersionInfoSkeleton />}>
-                            <VersionInfoWrapper />
-                          </Suspense>
-                        }
-                      />
+                      <Header />
                     </HideOnAccessDenied>
-                  </div>
-                </AuthProvider>
-              </QueryProvider>
-            </ThemeProvider>
+                  </Suspense>
+                  <main className="min-h-screen flex-1">
+                    <NuqsAdapter>
+                      <Suspense>{children}</Suspense>
+                    </NuqsAdapter>
+                  </main>
+                  <HideOnAccessDenied>
+                    <Footer
+                      githubUrl={githubUrl}
+                      versionInfo={
+                        <Suspense fallback={<VersionInfoSkeleton />}>
+                          <VersionInfoWrapper />
+                        </Suspense>
+                      }
+                    />
+                  </HideOnAccessDenied>
+                </div>
+              </AuthProvider>
+            </QueryProvider>
           </TwemojiProvider>
         </CustomThemeProvider>
       </body>

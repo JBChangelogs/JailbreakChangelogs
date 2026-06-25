@@ -5,9 +5,9 @@ import React, { useState } from "react";
 const log = createLogger("UI");
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import * as NavigationMenu from "@radix-ui/react-navigation-menu";
+import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -38,7 +38,6 @@ const AnimatedThemeToggler = dynamic(
 );
 import { Icon } from "./IconWrapper";
 import { Button } from "./button";
-import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
 
 const menuTransition = {
@@ -48,153 +47,6 @@ const menuTransition = {
   stiffness: 100,
   restDelta: 0.001,
   restSpeed: 0.001,
-};
-
-export const MenuItem = ({
-  setActive,
-  active,
-  item,
-  children,
-  wide = false,
-  direction = 0,
-}: {
-  setActive: (item: string | null) => void;
-  active: string | null;
-  item: string;
-  children?: React.ReactNode;
-  wide?: boolean;
-  direction?: number;
-}) => {
-  const isActive = active === item;
-  return (
-    <div onMouseEnter={() => setActive(item)} className="relative">
-      <motion.span
-        className={`flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 transition-colors duration-200 ${
-          isActive
-            ? "bg-button-info text-form-button-text"
-            : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active"
-        }`}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ duration: 0.2 }}
-      >
-        <span className="font-bold">{item}</span>
-        <Icon
-          icon={isActive ? "mdi:chevron-up" : "mdi:chevron-down"}
-          className={`h-4 w-4 shrink-0 transition-colors duration-200 ${isActive ? "text-form-button-text" : "text-secondary-text"}`}
-          inline={true}
-        />
-      </motion.span>
-      <AnimatePresence>
-        {isActive && (
-          <motion.div
-            initial={{ x: direction * 48, opacity: direction !== 0 ? 0.4 : 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -direction * 48, opacity: direction !== 0 ? 0.4 : 0 }}
-            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className={`absolute left-1/2 z-1300 mt-0 -translate-x-1/2 ${wide ? "min-w-[540px]" : "min-w-65"}`}
-            style={{ top: "100%" }}
-          >
-            <motion.div
-              layout
-              transition={{
-                type: "spring",
-                mass: 0.4,
-                damping: 16,
-                stiffness: 220,
-              }}
-              className="border-border-card bg-primary-bg overflow-hidden rounded-2xl border backdrop-blur-sm"
-            >
-              <motion.div
-                layout
-                className={
-                  wide
-                    ? "grid grid-cols-2 gap-2 p-3"
-                    : "flex flex-col gap-1 px-2 py-3"
-                }
-              >
-                {children}
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-interface HoveredLinkProps {
-  children: React.ReactNode;
-  href: string;
-  className?: string;
-  setActive?: (item: string | null) => void;
-  [key: string]: unknown;
-}
-
-export const HoveredLink = ({
-  children,
-  href,
-  className = "",
-  setActive,
-  ...rest
-}: HoveredLinkProps) => {
-  return (
-    <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
-      <Link
-        href={href}
-        className={`text-primary-text hover:bg-button-info hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors ${className}`}
-        onClick={() => setActive?.(null)}
-        {...rest}
-      >
-        {children}
-      </Link>
-    </motion.div>
-  );
-};
-
-export const NavLink = ({
-  href,
-  children,
-  className = "",
-  setActive,
-}: {
-  href: string;
-  children: React.ReactNode;
-  className?: string;
-  setActive?: (item: string | null) => void;
-}) => {
-  return (
-    <motion.div
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.2 }}
-      onMouseEnter={() => setActive?.(null)}
-    >
-      <Link
-        href={href}
-        className={`text-primary-text hover:bg-button-info hover:text-form-button-text active:bg-button-info-active active:text-form-button-text rounded-lg px-3 py-1 font-bold transition-colors duration-200 ${className}`}
-      >
-        {children}
-      </Link>
-    </motion.div>
-  );
-};
-
-export const Badge = ({
-  children,
-  variant = "new",
-}: {
-  children: React.ReactNode;
-  variant?: "new" | "coming-soon";
-}) => {
-  const baseClasses =
-    "rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase";
-  const variantClasses =
-    variant === "new"
-      ? "bg-button-info border-border-card text-form-button-text"
-      : "bg-button-info text-form-button-text";
-
-  return <span className={`${baseClasses} ${variantClasses}`}>{children}</span>;
 };
 
 export const NavDropdownItem = ({
@@ -256,11 +108,13 @@ export const NavbarModern = ({
   unreadCount,
   setUnreadCount,
   onUserMenuOpenChange,
+  setUtmModalOpen,
 }: {
   className?: string;
   unreadCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
   onUserMenuOpenChange?: (open: boolean) => void;
+  setUtmModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -273,11 +127,9 @@ export const NavbarModern = ({
   );
   const userMenuWrapperRef = React.useRef<HTMLDivElement>(null);
   const userMenuDropdownRef = React.useRef<HTMLDivElement>(null);
-  const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
-  const pathname = usePathname();
+  const isCollabPage = useIsCollabPage();
   const [navMenuValue, setNavMenuValue] = useState("");
   const navRootWrapperRef = React.useRef<HTMLDivElement>(null);
   const navViewportWrapperRef = React.useRef<HTMLDivElement | null>(null);
@@ -318,6 +170,8 @@ export const NavbarModern = ({
 
     let closeTimer: ReturnType<typeof setTimeout> | null = null;
     const activeValue = navMenuValue;
+    // Cache trigger elements once per effect run — triggers don't change while a menu is open
+    const triggerEls = Object.values(triggerRefs.current);
 
     const onMove = (e: MouseEvent) => {
       const { clientX: x, clientY: y } = e;
@@ -335,7 +189,7 @@ export const NavbarModern = ({
       // Keep open when hovering any trigger so L↔R transitions don't flicker
       const inAnyTrigger =
         inActiveTrigger ||
-        Object.values(triggerRefs.current).some((el) => {
+        triggerEls.some((el) => {
           if (!el) return false;
           const r = el.getBoundingClientRect();
           return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
@@ -372,7 +226,7 @@ export const NavbarModern = ({
       }
     };
 
-    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
     return () => {
       window.removeEventListener("mousemove", onMove);
       if (closeTimer) clearTimeout(closeTimer);
@@ -383,6 +237,7 @@ export const NavbarModern = ({
     setLoginModal,
     user: authUser,
     isAuthenticated,
+    isLoading,
     logout,
     wsConnected,
   } = useAuthContext();
@@ -390,10 +245,6 @@ export const NavbarModern = ({
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
   const shouldShowSupportButton = (userData?.premiumtype ?? 0) <= 0;
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Prediction-cone / safe-triangle for the user menu.
   // Replaces the old onMouseLeave timer. Tracks the cursor globally and keeps
@@ -445,7 +296,7 @@ export const NavbarModern = ({
       }
     };
 
-    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
     return () => {
       window.removeEventListener("mousemove", onMove);
       if (closeTimer) clearTimeout(closeTimer);
@@ -460,13 +311,6 @@ export const NavbarModern = ({
         ? "304px"
         : "16px",
   });
-
-  const isCollabPage =
-    pathname === "/values" ||
-    pathname.startsWith("/item") ||
-    pathname.startsWith("/trading") ||
-    pathname.startsWith("/values/changelogs") ||
-    pathname.startsWith("/values/suggestions");
 
   const handleLogout = async () => {
     try {
@@ -900,8 +744,7 @@ export const NavbarModern = ({
           <AnimatedThemeToggler />
 
           {/* User menu or login button */}
-          {!mounted ? (
-            // Show login button during SSR and initial hydration to prevent mismatch
+          {isLoading ? (
             <Button onClick={() => setShowLoginModal(true)}>Login</Button>
           ) : userData ? (
             <div ref={userMenuWrapperRef} className="relative">
@@ -1084,11 +927,6 @@ export const NavbarModern = ({
           )}
         </div>
       </div>
-      {/* Render the modal outside the dropdown but inside the component */}
-      <UtmGeneratorModal
-        isOpen={utmModalOpen}
-        onClose={() => setUtmModalOpen(false)}
-      />
     </div>
   );
 };
