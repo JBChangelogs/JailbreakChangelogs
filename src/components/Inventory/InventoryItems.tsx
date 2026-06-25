@@ -662,14 +662,12 @@ export default function InventoryItems({
 
           const nameNormalized = normalize(itemData.name);
           const typeNormalized = normalize(itemData.type);
-          const creatorNormalized = normalize(itemData.creator || "");
           const nameTokens = tokenize(itemData.name);
           const nameAlphaNum = splitAlphaNum(itemData.name);
 
           const matches =
             nameNormalized.includes(searchNormalized) ||
             typeNormalized.includes(searchNormalized) ||
-            creatorNormalized.includes(searchNormalized) ||
             isTokenSubsequence(searchTokens, nameTokens) ||
             isTokenSubsequence(searchAlphaNum, nameAlphaNum);
 
@@ -869,14 +867,12 @@ export default function InventoryItems({
 
         const nameNormalized = normalize(itemData.name);
         const typeNormalized = normalize(itemData.type);
-        const creatorNormalized = normalize(itemData.creator || "");
         const nameTokens = tokenize(itemData.name);
         const nameAlphaNum = splitAlphaNum(itemData.name);
 
         const matches =
           nameNormalized.includes(searchNormalized) ||
           typeNormalized.includes(searchNormalized) ||
-          creatorNormalized.includes(searchNormalized) ||
           isTokenSubsequence(searchTokens, nameTokens) ||
           isTokenSubsequence(searchAlphaNum, nameAlphaNum);
 
