@@ -293,8 +293,8 @@
   --color-button-info-disabled: hsl(214, 8%, 25%);
   --color-button-success: hsl(155, 70%, 48%);
   --color-button-success-hover: hsl(155, 65%, 40%);
-  --color-button-danger: hsl(0, 81%, 62%);
-  --color-button-danger-hover: hsl(0, 75%, 55%);
+  --color-button-danger: hsl(0, 95%, 72%);
+  --color-button-danger-hover: hsl(0, 90%, 64%);
   --color-button-secondary: hsl(214, 8%, 32%);
   --color-button-secondary-hover: hsl(214, 6%, 28%);
   --color-form-button: hsl(210, 99%, 45%);
