@@ -286,18 +286,18 @@
   --color-link-active: hsl(210, 100%, 65%);
   --color-link-visited: hsl(214, 12%, 65%);
 
-  /* Button Colors - same as dark */
-  --color-button-info: hsl(210, 99%, 35%);
-  --color-button-info-hover: hsl(210, 99%, 30%);
-  --color-button-info-active: hsl(218, 60%, 32%);
+  /* Button Colors - brightened from dark for pure black contrast */
+  --color-button-info: hsl(210, 99%, 45%);
+  --color-button-info-hover: hsl(210, 99%, 38%);
+  --color-button-info-active: hsl(218, 65%, 42%);
   --color-button-info-disabled: hsl(214, 8%, 25%);
-  --color-button-success: hsl(155, 65%, 30%);
-  --color-button-success-hover: hsl(155, 60%, 24%);
+  --color-button-success: hsl(155, 70%, 48%);
+  --color-button-success-hover: hsl(155, 65%, 40%);
   --color-button-danger: hsl(0, 81%, 62%);
   --color-button-danger-hover: hsl(0, 75%, 55%);
-  --color-button-secondary: hsl(214, 8%, 25%);
-  --color-button-secondary-hover: hsl(214, 6%, 20%);
-  --color-form-button: hsl(210, 99%, 35%);
+  --color-button-secondary: hsl(214, 8%, 32%);
+  --color-button-secondary-hover: hsl(214, 6%, 28%);
+  --color-form-button: hsl(210, 99%, 45%);
   --color-form-button-text: hsl(60, 100%, 100%);
 
   /* Form Elements */
@@ -309,11 +309,11 @@
   --color-form-error: hsl(0, 81%, 62%);
   --color-form-success: hsl(155, 61%, 44%);
 
-  /* Status Colors - same as dark */
-  --color-status-success: hsl(155, 61%, 30%);
+  /* Status Colors - brightened from dark for pure black contrast */
+  --color-status-success: hsl(155, 65%, 45%);
   --color-status-success-vibrant: hsl(120, 61%, 50%);
   --color-status-warning: hsl(38, 100%, 61%);
-  --color-status-error: hsl(0, 81%, 45%);
+  --color-status-error: hsl(0, 81%, 55%);
   --color-status-info: hsl(210, 99%, 50%);
   --color-status-neutral: hsl(214, 8%, 35%);
 
@@ -331,10 +331,10 @@
   /* Badge Colors - same as dark */
   --color-badge-owner: linear-gradient(to right, hsl(270, 100%, 50%), hsl(240, 100%, 50%));
   --color-badge-tester: hsl(270, 100%, 60%);
-  --color-badge-vtm: linear-gradient(to right, hsl(155, 100%, 30%), hsl(155, 100%, 25%));
+  --color-badge-vtm: linear-gradient(to right, hsl(155, 100%, 42%), hsl(155, 100%, 36%));
   --color-badge-vt: hsl(220, 100%, 50%);
   --color-badge-partner: hsl(25, 100%, 50%);
-  --color-badge-contributor: linear-gradient(to right, hsl(180, 100%, 30%), hsl(180, 100%, 25%));
+  --color-badge-contributor: linear-gradient(to right, hsl(180, 100%, 38%), hsl(180, 100%, 32%));
   --color-badge-developer: linear-gradient(to right, hsl(90, 100%, 50%), hsl(90, 100%, 45%));
   --color-badge-designer: linear-gradient(to right, hsl(290, 100%, 55%), hsl(320, 100%, 50%));
   --color-badge-early-adopter: linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%));

@@ -532,66 +532,48 @@ function ItemCard({
                 {currentItemData.id === 713 ? "Reference Only" : "Non-Tradable"}
               </span>
             )}
-            {isValuesPage &&
-              (() => {
-                const badges = [];
-
-                // Add cash value badge if it has changed
-                if (cashChange && cashChange.difference !== 0) {
-                  const isPositive = cashChange.difference > 0;
-                  const formattedDiff = formatChange(cashChange.difference);
-
-                  badges.push(
-                    <Tooltip key="cash-change">
-                      <TooltipTrigger asChild>
-                        <span
-                          className={`inline-flex h-5 items-center gap-0.5 rounded-lg px-1.5 text-[10px] leading-none font-semibold sm:h-6 sm:px-2 sm:text-xs ${
-                            isPositive
-                              ? "bg-status-success text-white"
-                              : "bg-status-error text-white"
-                          }`}
-                        >
-                          {isPositive ? "+" : "-"}
-                          {formattedDiff}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Cash Value {isPositive ? "increased" : "decreased"} by{" "}
-                        {formattedDiff}
-                      </TooltipContent>
-                    </Tooltip>,
-                  );
-                }
-
-                // Add duped value badge if it has changed
-                if (dupedChange && dupedChange.difference !== 0) {
-                  const isPositive = dupedChange.difference > 0;
-                  const formattedDiff = formatChange(dupedChange.difference);
-
-                  badges.push(
-                    <Tooltip key="duped-change">
-                      <TooltipTrigger asChild>
-                        <span
-                          className={`inline-flex h-5 items-center gap-0.5 rounded-lg px-1.5 text-[10px] leading-none font-semibold sm:h-6 sm:px-2 sm:text-xs ${
-                            isPositive
-                              ? "bg-status-success text-white"
-                              : "bg-status-error text-white"
-                          }`}
-                        >
-                          {isPositive ? "+" : "-"}
-                          {formattedDiff}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Duped Value {isPositive ? "increased" : "decreased"} by{" "}
-                        {formattedDiff}
-                      </TooltipContent>
-                    </Tooltip>,
-                  );
-                }
-
-                return badges;
-              })()}
+            {isValuesPage && cashChange && cashChange.difference !== 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className={`inline-flex items-center text-[10px] font-semibold sm:text-xs ${
+                      cashChange.difference > 0
+                        ? "text-status-success"
+                        : "text-status-error"
+                    }`}
+                  >
+                    {cashChange.difference > 0 ? "+" : "-"}
+                    {formatChange(cashChange.difference)}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Cash Value{" "}
+                  {cashChange.difference > 0 ? "increased" : "decreased"} by{" "}
+                  {formatChange(cashChange.difference)}
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {isValuesPage && dupedChange && dupedChange.difference !== 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className={`inline-flex items-center text-[10px] font-semibold sm:text-xs ${
+                      dupedChange.difference > 0
+                        ? "text-status-success"
+                        : "text-status-error"
+                    }`}
+                  >
+                    {dupedChange.difference > 0 ? "+" : "-"}
+                    {formatChange(dupedChange.difference)}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Duped Value{" "}
+                  {dupedChange.difference > 0 ? "increased" : "decreased"} by{" "}
+                  {formatChange(dupedChange.difference)}
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
 
           <div className="space-y-1 pb-2 sm:space-y-2">
