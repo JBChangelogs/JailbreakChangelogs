@@ -626,19 +626,44 @@ export default function HyperchromeCalculatorModal({
                     const robberiesDone = (resultPity / 100) * currentPityBase;
                     const publicPity =
                       (robberiesDone / HYPERCHROME_PITY_PUBLIC[lvlNum]) * 100;
-
-                    if (publicPity > 100) return null;
+                    const isGuaranteed = publicPity >= 100;
+                    const cappedPct = Math.min(publicPity, 100);
+                    const barColor =
+                      cappedPct >= 66
+                        ? "var(--color-form-success)"
+                        : cappedPct >= 33
+                          ? "var(--color-warning)"
+                          : "var(--color-button-danger)";
 
                     return (
                       <div
                         key={lvlNum}
-                        className="border-border-card bg-secondary-bg rounded-lg border p-3 text-center"
+                        className="border-border-card bg-secondary-bg flex flex-col gap-2 rounded-lg border p-3"
                       >
-                        <div className="text-primary-text text-lg font-bold">
+                        <div className="text-secondary-text text-[11px] font-semibold tracking-wider uppercase">
                           Level {lvlNum}
                         </div>
-                        <div className="text-secondary-text text-sm">
-                          {publicPity.toFixed(2)}% pity
+                        <div
+                          className="text-xl font-black"
+                          style={{ color: barColor }}
+                        >
+                          {isGuaranteed ? "100%" : `${publicPity.toFixed(2)}%`}
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <div className="bg-button-secondary h-1.5 w-full overflow-hidden rounded-full">
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${cappedPct}%`,
+                                backgroundColor: barColor,
+                              }}
+                            />
+                          </div>
+                          <div className="text-secondary-text text-xs">
+                            {isGuaranteed
+                              ? "Guaranteed next roll"
+                              : "Public pity"}
+                          </div>
                         </div>
                       </div>
                     );
