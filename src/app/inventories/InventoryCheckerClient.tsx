@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQueryState } from "nuqs";
-import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
@@ -15,10 +14,7 @@ import {
   ENABLE_WS_SCAN,
   INVENTORY_API_URL,
   PUBLIC_API_URL,
-  MaxStreamsError,
 } from "@/utils/api/api";
-import { toast } from "sonner";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { RobloxUser, Item } from "@/types";
@@ -114,8 +110,6 @@ export default function InventoryCheckerClient({
   const [searchId, setSearchId] = useState(
     originalSearchTerm || robloxId || "",
   );
-  const [internalIsLoading, setInternalIsLoading] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState(false);
   const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
@@ -146,13 +140,10 @@ export default function InventoryCheckerClient({
     useState<string>("Not in queue");
   const hasAutoFetchedQueueRef = useRef(false);
 
-  const router = useRouter();
-
   // Auth context and scan functionality
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const scanWebSocket = useScanWebSocket(robloxId || "");
   const { modalState, openModal, closeModal } = useSupporterModal();
-  const { getId: getRobloxId } = useUsernameToId();
   const [showScanModal, setShowScanModal] = useState(false);
 
   const [activeSeason, setActiveSeason] = useState<Season | null>(
@@ -404,11 +395,6 @@ export default function InventoryCheckerClient({
   // Derive active tab from robloxId to avoid setState in effect
   const effectiveActiveTab = activeTab > tabIndex.max ? 0 : activeTab;
 
-  // Derive loading state to avoid setState in effects
-  // Reset internal loading when data arrives or there's an error
-  const isLoading =
-    (internalIsLoading && !initialData && !error) || externalIsLoading || false;
-
   // Destructure scanWebSocket properties before useEffect to satisfy exhaustive-deps
   const {
     status: scanStatus,
@@ -655,45 +641,6 @@ export default function InventoryCheckerClient({
 
   // Items data is now passed as props from server-side, no need to fetch
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const input = searchId.trim();
-    if (!input) return;
-
-    trackEvent("Inventory Search", { searchTerm: input });
-    setSearchError(null);
-
-    const isUsername = !/^\d+$/.test(input);
-    if (!isUsername) {
-      setInternalIsLoading(true);
-      router.push(`/inventories/${input}`);
-      return;
-    }
-
-    setInternalIsLoading(true);
-    try {
-      const resolvedId = await getRobloxId(input);
-      if (resolvedId) {
-        router.push(`/inventories/${input}`);
-      } else {
-        setInternalIsLoading(false);
-        const truncated =
-          input.length > 50 ? `${input.substring(0, 47)}...` : input;
-        const msg = `Username "${truncated}" not found. Please check the spelling and try again.`;
-        toast.error(msg);
-        setSearchError(msg);
-      }
-    } catch (err) {
-      setInternalIsLoading(false);
-      const msg =
-        err instanceof MaxStreamsError
-          ? "Unable to search by username at this time. Please use the Roblox ID instead."
-          : "Server error while looking up username. Please try searching by Roblox ID instead.";
-      toast.error(msg);
-      setSearchError(msg);
-    }
-  };
-
   const handleItemClick = useCallback((item: InventoryItem) => {
     setSelectedItem(item);
     setShowHistoryModal(true);
@@ -710,19 +657,8 @@ export default function InventoryCheckerClient({
       <SearchForm
         searchId={searchId}
         setSearchId={setSearchId}
-        handleSearch={handleSearch}
-        isLoading={isLoading}
         externalIsLoading={externalIsLoading || false}
       />
-      {searchError && (
-        <div className="text-primary-text border-button-danger/30 bg-button-danger/10 -mt-4 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
-          <Icon
-            icon="heroicons:exclamation-circle"
-            className="h-4 w-4 shrink-0"
-          />
-          {searchError}
-        </div>
-      )}
       <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
         <Icon icon="emojione:light-bulb" className="text-sm text-yellow-500" />
         Helpful tip: Press{" "}
@@ -736,17 +672,74 @@ export default function InventoryCheckerClient({
         to quickly focus the search.
       </div>
 
-      {isLoading || externalIsLoading ? (
-        /* Loading Skeleton for User Data */
-        <div className="border-border-card bg-secondary-bg min-h-50 rounded-lg border p-6 shadow-sm">
-          <div className="animate-pulse space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-button-secondary h-16 w-16 rounded-full"></div>
-              <div className="flex-1">
-                <div className="bg-button-secondary mb-2 h-6 w-32 rounded"></div>
-                <div className="bg-button-secondary h-4 w-24 rounded"></div>
+      {externalIsLoading ? (
+        <div className="animate-pulse space-y-6">
+          {/* User profile card */}
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="bg-button-secondary h-16 w-16 shrink-0 rounded-full" />
+                <div className="space-y-2">
+                  <div className="bg-button-secondary h-6 w-36 rounded" />
+                  <div className="bg-button-secondary h-4 w-24 rounded" />
+                  <div className="flex gap-2 pt-1">
+                    <div className="bg-button-secondary h-7 w-20 rounded-lg" />
+                    <div className="bg-button-secondary h-7 w-20 rounded-lg" />
+                  </div>
+                </div>
               </div>
+              <div className="bg-button-secondary h-9 w-36 rounded-lg xl:shrink-0" />
             </div>
+          </div>
+
+          {/* Item count chips */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center"
+              >
+                <div className="bg-button-secondary mx-auto mb-2 h-4 w-20 rounded" />
+                <div className="bg-button-secondary mx-auto h-7 w-12 rounded" />
+              </div>
+            ))}
+          </div>
+
+          {/* Value stat cards */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {[0, 1].map((i) => (
+              <div
+                key={i}
+                className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center"
+              >
+                <div className="bg-button-secondary mx-auto mb-3 h-4 w-28 rounded" />
+                <div className="bg-button-secondary mx-auto h-8 w-24 rounded" />
+              </div>
+            ))}
+          </div>
+
+          {/* Tab bar */}
+          <div className="border-border-card bg-secondary-bg flex gap-1 rounded-lg border p-1">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="bg-button-secondary h-9 flex-1 rounded-md"
+              />
+            ))}
+          </div>
+
+          {/* Item grid */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <div
+                key={i}
+                className="border-border-card bg-secondary-bg rounded-lg border p-3"
+              >
+                <div className="bg-button-secondary mb-3 aspect-square w-full rounded-md" />
+                <div className="bg-button-secondary mb-2 h-4 w-3/4 rounded" />
+                <div className="bg-button-secondary h-3 w-1/2 rounded" />
+              </div>
+            ))}
           </div>
         </div>
       ) : (

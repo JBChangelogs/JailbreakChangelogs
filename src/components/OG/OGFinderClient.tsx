@@ -189,7 +189,49 @@ export default function OGFinderClient({
       </div>
 
       {/* Results */}
-      {robloxId && <OGFinderDataStreamer robloxId={robloxId} />}
+      {externalIsLoading ? (
+        <div className="animate-pulse space-y-6">
+          {/* User info card */}
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+            <div className="bg-button-secondary mb-4 h-7 w-40 rounded" />
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="bg-button-secondary h-16 w-16 shrink-0 rounded-full" />
+                  <div className="space-y-2">
+                    <div className="bg-button-secondary h-6 w-36 rounded" />
+                    <div className="bg-button-secondary h-4 w-24 rounded" />
+                    <div className="flex gap-2 pt-1">
+                      <div className="bg-button-secondary h-7 w-20 rounded-lg" />
+                      <div className="bg-button-secondary h-7 w-20 rounded-lg" />
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-1 lg:text-right">
+                  <div className="bg-button-secondary h-4 w-24 rounded lg:ml-auto" />
+                  <div className="bg-button-secondary h-8 w-12 rounded lg:ml-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Item grid */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <div
+                key={i}
+                className="border-border-card bg-secondary-bg rounded-lg border p-4"
+              >
+                <div className="bg-button-secondary mb-3 aspect-square w-full rounded-md" />
+                <div className="bg-button-secondary mb-2 h-4 w-3/4 rounded" />
+                <div className="bg-button-secondary h-3 w-1/2 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        robloxId && <OGFinderDataStreamer robloxId={robloxId} />
+      )}
 
       {/* Error Display */}
       {error && !initialData && (
