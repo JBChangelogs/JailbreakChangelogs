@@ -387,13 +387,10 @@ export default function TradeHistoryModal({
                               className="block"
                             >
                               <div className="text-link hover:text-link-hover flex items-center gap-1 font-medium transition-colors">
-                                {getDisplayName(fromId)}
+                                {getUsername(fromId)}
                                 {getHasVerifiedBadge(fromId) && (
                                   <VerifiedBadgeIcon className="h-3.5 w-3.5" />
                                 )}
-                              </div>
-                              <div className="text-secondary-text text-xs">
-                                @{getUsername(fromId)}
                               </div>
                             </a>
                           </div>
@@ -441,13 +438,10 @@ export default function TradeHistoryModal({
                               className="block"
                             >
                               <div className="text-link hover:text-link-hover flex items-center gap-1 font-medium transition-colors">
-                                {getDisplayName(toId)}
+                                {getUsername(toId)}
                                 {getHasVerifiedBadge(toId) && (
                                   <VerifiedBadgeIcon className="h-3.5 w-3.5" />
                                 )}
-                              </div>
-                              <div className="text-secondary-text text-xs">
-                                @{getUsername(toId)}
                               </div>
                             </a>
                           </div>
@@ -500,7 +494,7 @@ export default function TradeHistoryModal({
                       >
                         <div className="flex flex-wrap items-center gap-1.5">
                           <span className="text-link hover:text-link-hover font-medium transition-colors">
-                            {getDisplayName(firstOwnerId)}
+                            {getUsername(firstOwnerId)}
                           </span>
                           {getHasVerifiedBadge(firstOwnerId) && (
                             <VerifiedBadgeIcon className="h-4 w-4" />
@@ -508,9 +502,6 @@ export default function TradeHistoryModal({
                           <span className="text-secondary-text text-xs font-normal">
                             Original owner
                           </span>
-                        </div>
-                        <div className="text-secondary-text text-sm">
-                          @{getUsername(firstOwnerId)}
                         </div>
                       </a>
                     </div>
@@ -563,13 +554,10 @@ export default function TradeHistoryModal({
                             className="block"
                           >
                             <div className="text-link hover:text-link-hover flex items-center gap-1 font-medium transition-colors">
-                              {getDisplayName(fromId)}
+                              {getUsername(fromId)}
                               {getHasVerifiedBadge(fromId) && (
                                 <VerifiedBadgeIcon className="h-3.5 w-3.5" />
                               )}
-                            </div>
-                            <div className="text-secondary-text text-xs">
-                              @{getUsername(fromId)}
                             </div>
                           </a>
                         </div>
@@ -612,13 +600,10 @@ export default function TradeHistoryModal({
                             className="block"
                           >
                             <div className="text-link hover:text-link-hover flex items-center gap-1 font-medium transition-colors">
-                              {getDisplayName(toId)}
+                              {getUsername(toId)}
                               {getHasVerifiedBadge(toId) && (
                                 <VerifiedBadgeIcon className="h-3.5 w-3.5" />
                               )}
-                            </div>
-                            <div className="text-secondary-text text-xs">
-                              @{getUsername(toId)}
                             </div>
                           </a>
                         </div>

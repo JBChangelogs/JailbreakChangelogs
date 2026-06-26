@@ -87,9 +87,9 @@ export default function DupeUserInfo({
                       href={`https://discord.com/users/${userConnectionData.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-quaternary-bg border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                      className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                     >
-                      <DiscordIcon className="text-border-focus h-3.5 w-3.5 shrink-0" />
+                      <DiscordIcon className="h-3.5 w-3.5 shrink-0" />
                       Discord
                     </Link>
                   </TooltipTrigger>
