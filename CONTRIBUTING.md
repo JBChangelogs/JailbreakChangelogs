@@ -45,16 +45,14 @@ We enforce Oxlint + Oxfmt via Git hooks (Husky + lint-staged).
   - Runs `oxlint --fix` and `oxfmt` on staged JS/TS files
   - If issues remain, the commit is blocked; fix and re-commit
 
-- On push: formatting is verified
-  - Runs `bun run format:check`; push is blocked if any files are not formatted
+- On push: formatting and linting are verified
+  - Runs `bun run format:check` and `oxlint --deny-warnings`; push is blocked if any files are not formatted or have lint warnings/errors
 
 Manual commands (if needed):
 
 ```
-bun run lint         # lint the repo
-bun run format       # write formatting changes (src/)
-bun run format:check # check formatting without writing (src/)
-bun run check        # type-check + lint + format check
+bun run format  # auto-fix formatting
+bun run check   # type-check + lint + format check
 ```
 
 Notes:
