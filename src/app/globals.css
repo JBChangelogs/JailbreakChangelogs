@@ -286,10 +286,10 @@
   --color-link-active: hsl(210, 100%, 65%);
   --color-link-visited: hsl(214, 12%, 65%);
 
-  /* Button Colors - brightened from dark for pure black contrast */
-  --color-button-info: hsl(210, 99%, 45%);
-  --color-button-info-hover: hsl(210, 99%, 38%);
-  --color-button-info-active: hsl(218, 65%, 42%);
+  /* Button Colors - toned down from original AMOLED values to reduce burn-in risk */
+  --color-button-info: hsl(210, 80%, 32%);
+  --color-button-info-hover: hsl(210, 80%, 26%);
+  --color-button-info-active: hsl(218, 55%, 28%);
   --color-button-info-disabled: hsl(214, 8%, 25%);
   --color-button-success: hsl(155, 70%, 48%);
   --color-button-success-hover: hsl(155, 65%, 40%);
@@ -297,7 +297,7 @@
   --color-button-danger-hover: hsl(0, 90%, 64%);
   --color-button-secondary: hsl(214, 8%, 32%);
   --color-button-secondary-hover: hsl(214, 6%, 28%);
-  --color-form-button: hsl(210, 99%, 45%);
+  --color-form-button: hsl(210, 80%, 32%);
   --color-form-button-text: hsl(60, 100%, 100%);
 
   /* Form Elements */
