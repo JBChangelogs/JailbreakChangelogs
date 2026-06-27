@@ -1,3 +1,4 @@
 #!/usr/bin/env sh
 bun run format:check
+bunx oxlint --deny-warnings
 
