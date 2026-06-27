@@ -587,7 +587,7 @@ export default function ValueSuggestionDetailPage() {
               </div>
 
               {/* Reason */}
-              <div className="border-border-card bg-tertiary-bg rounded-xl border">
+              <div className="border-border-card bg-secondary-bg rounded-xl border">
                 <div className="border-border-card border-b px-5 py-3.5">
                   <div className="bg-quaternary-bg h-4 w-16 rounded" />
                 </div>
@@ -602,7 +602,7 @@ export default function ValueSuggestionDetailPage() {
 
               {/* Mobile: stacked value + votes cards */}
               <div className="space-y-5 lg:hidden">
-                <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                <div className="border-border-card bg-secondary-bg rounded-xl border">
                   <div className="border-border-card border-b px-5 py-3.5">
                     <div className="bg-quaternary-bg h-4 w-32 rounded" />
                   </div>
@@ -617,7 +617,7 @@ export default function ValueSuggestionDetailPage() {
                     </div>
                   </div>
                 </div>
-                <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                <div className="border-border-card bg-secondary-bg rounded-xl border">
                   <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
                     <div className="bg-quaternary-bg h-4 w-12 rounded" />
                     <div className="flex gap-2">
@@ -637,7 +637,7 @@ export default function ValueSuggestionDetailPage() {
                   <div className="bg-quaternary-bg h-3 w-2/3 rounded" />
                 </div>
                 <div className="space-y-5 lg:col-span-2">
-                  <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                  <div className="border-border-card bg-secondary-bg rounded-xl border">
                     <div className="border-border-card border-b px-5 py-3.5">
                       <div className="bg-quaternary-bg h-4 w-32 rounded" />
                     </div>
@@ -652,7 +652,7 @@ export default function ValueSuggestionDetailPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                  <div className="border-border-card bg-secondary-bg rounded-xl border">
                     <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
                       <div className="bg-quaternary-bg h-4 w-12 rounded" />
                       <div className="flex gap-2">
@@ -667,7 +667,7 @@ export default function ValueSuggestionDetailPage() {
           )}
 
           {error && !loading && (
-            <div className="border-border-card bg-tertiary-bg rounded-xl border p-10 text-center">
+            <div className="border-border-card bg-secondary-bg rounded-xl border p-10 text-center">
               <Icon
                 icon="material-symbols:error-outline-rounded"
                 className="text-button-danger mx-auto mb-3 h-12 w-12"
@@ -901,7 +901,7 @@ export default function ValueSuggestionDetailPage() {
                   {/* Reason — always first on every screen */}
                   <div className="min-w-0 space-y-5">
                     {/* Reason */}
-                    <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                    <div className="border-border-card bg-secondary-bg rounded-xl border">
                       <div className="border-border-card flex items-center justify-between border-b px-5 py-3.5">
                         <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
                           <Icon
@@ -1102,7 +1102,7 @@ export default function ValueSuggestionDetailPage() {
                       </TabsList>
                       <TabsContent value="details" className="mt-4 space-y-5">
                         {/* Value change */}
-                        <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                        <div className="border-border-card bg-secondary-bg rounded-xl border">
                           <div className="border-border-card border-b px-5 py-3.5">
                             <h2 className="text-primary-text flex items-center justify-center gap-2 text-sm font-semibold">
                               <Icon
@@ -1157,7 +1157,7 @@ export default function ValueSuggestionDetailPage() {
                           </div>
                         </div>
                         {/* Votes */}
-                        <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                        <div className="border-border-card bg-secondary-bg rounded-xl border">
                           <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
                             <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
                               <Icon
@@ -1317,7 +1317,7 @@ export default function ValueSuggestionDetailPage() {
                         </div>
                         {/* Suggester Stats */}
                         {suggesterStats && (
-                          <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                          <div className="border-border-card bg-secondary-bg rounded-xl border">
                             <div className="border-border-card border-b px-5 py-3.5">
                               <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
                                 <Icon
@@ -1393,7 +1393,7 @@ export default function ValueSuggestionDetailPage() {
                       </TabsContent>
                       {isValueSuggestion && (
                         <TabsContent value="history" className="mt-4">
-                          <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                          <div className="border-border-card bg-secondary-bg rounded-xl border">
                             <div className="p-5">
                               {historyLoading ? (
                                 <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
@@ -1450,7 +1450,7 @@ export default function ValueSuggestionDetailPage() {
                     {/* Sidebar — value change + votes + suggester stats */}
                     <div className="space-y-5 lg:col-span-2">
                       {/* Value change */}
-                      <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                      <div className="border-border-card bg-secondary-bg rounded-xl border">
                         <div className="border-border-card border-b px-5 py-3.5">
                           <h2 className="text-primary-text flex items-center justify-center gap-2 text-sm font-semibold">
                             <Icon
@@ -1506,7 +1506,7 @@ export default function ValueSuggestionDetailPage() {
                       </div>
 
                       {/* Votes */}
-                      <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                      <div className="border-border-card bg-secondary-bg rounded-xl border">
                         <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
                           <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
                             <Icon
@@ -1666,7 +1666,7 @@ export default function ValueSuggestionDetailPage() {
 
                       {/* Suggester Stats */}
                       {suggesterStats && (
-                        <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                        <div className="border-border-card bg-secondary-bg rounded-xl border">
                           <div className="border-border-card border-b px-5 py-3.5">
                             <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
                               <Icon
@@ -1742,7 +1742,7 @@ export default function ValueSuggestionDetailPage() {
 
                       {/* Value History Chart */}
                       {isValueSuggestion && (
-                        <div className="border-border-card bg-tertiary-bg rounded-xl border">
+                        <div className="border-border-card bg-secondary-bg rounded-xl border">
                           <div className="border-border-card border-b px-5 py-3.5">
                             <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
                               <Icon
