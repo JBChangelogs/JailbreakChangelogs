@@ -202,7 +202,7 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                   const time = formatTime(secondsLeft);
                   return (
                     <>
-                      <div>
+                      <div className="flex flex-col items-center lg:flex-row lg:items-baseline">
                         <span className="countdown text-primary-text text-4xl font-semibold">
                           <span
                             style={
@@ -214,11 +214,11 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                             {time.days}
                           </span>
                         </span>
-                        <span className="text-primary-text ml-1">
+                        <span className="text-primary-text lg:ml-1">
                           {pluralize(time.days, "day", "days")}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex flex-col items-center lg:flex-row lg:items-baseline">
                         <span className="countdown text-primary-text text-4xl font-semibold">
                           <span
                             style={
@@ -230,11 +230,11 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                             {time.hours}
                           </span>
                         </span>
-                        <span className="text-primary-text ml-1">
+                        <span className="text-primary-text lg:ml-1">
                           {pluralize(time.hours, "hour", "hours")}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex flex-col items-center lg:flex-row lg:items-baseline">
                         <span className="countdown text-primary-text text-4xl font-semibold">
                           <span
                             style={
@@ -246,11 +246,11 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                             {time.minutes}
                           </span>
                         </span>
-                        <span className="text-primary-text ml-1">
+                        <span className="text-primary-text lg:ml-1">
                           {pluralize(time.minutes, "min", "mins")}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex flex-col items-center lg:flex-row lg:items-baseline">
                         <span className="countdown text-primary-text text-4xl font-semibold">
                           <span
                             style={
@@ -262,7 +262,7 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                             {time.seconds}
                           </span>
                         </span>
-                        <span className="text-primary-text ml-1">
+                        <span className="text-primary-text lg:ml-1">
                           {pluralize(time.seconds, "sec", "secs")}
                         </span>
                       </div>
@@ -289,7 +289,7 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                   const time = formatTime(dailySecondsLeft);
                   return (
                     <>
-                      <div>
+                      <div className="flex flex-col items-center lg:flex-row lg:items-baseline">
                         <span className="countdown text-primary-text text-4xl font-semibold">
                           <span
                             style={
@@ -301,11 +301,11 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                             {time.days}
                           </span>
                         </span>
-                        <span className="text-primary-text ml-1">
+                        <span className="text-primary-text lg:ml-1">
                           {pluralize(time.days, "day", "days")}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex flex-col items-center lg:flex-row lg:items-baseline">
                         <span className="countdown text-primary-text text-4xl font-semibold">
                           <span
                             style={
@@ -317,11 +317,11 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                             {time.hours}
                           </span>
                         </span>
-                        <span className="text-primary-text ml-1">
+                        <span className="text-primary-text lg:ml-1">
                           {pluralize(time.hours, "hour", "hours")}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex flex-col items-center lg:flex-row lg:items-baseline">
                         <span className="countdown text-primary-text text-4xl font-semibold">
                           <span
                             style={
@@ -333,11 +333,11 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                             {time.minutes}
                           </span>
                         </span>
-                        <span className="text-primary-text ml-1">
+                        <span className="text-primary-text lg:ml-1">
                           {pluralize(time.minutes, "min", "mins")}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex flex-col items-center lg:flex-row lg:items-baseline">
                         <span className="countdown text-primary-text text-4xl font-semibold">
                           <span
                             style={
@@ -349,7 +349,7 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
                             {time.seconds}
                           </span>
                         </span>
-                        <span className="text-primary-text ml-1">
+                        <span className="text-primary-text lg:ml-1">
                           {pluralize(time.seconds, "sec", "secs")}
                         </span>
                       </div>

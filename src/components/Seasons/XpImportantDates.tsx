@@ -134,7 +134,7 @@ export default function XpImportantDates({
               </div>
               {doubleXpTimeLeft && (
                 <div className="flex justify-center gap-4">
-                  <div>
+                  <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                     <span className="countdown text-primary-text text-4xl font-semibold">
                       <span
                         style={
@@ -148,11 +148,11 @@ export default function XpImportantDates({
                         {doubleXpTimeLeft.days}
                       </span>
                     </span>
-                    <span className="text-primary-text ml-1">
+                    <span className="text-primary-text sm:ml-1">
                       {pluralize(doubleXpTimeLeft.days, "day", "days")}
                     </span>
                   </div>
-                  <div>
+                  <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                     <span className="countdown text-primary-text text-4xl font-semibold">
                       <span
                         style={
@@ -166,11 +166,11 @@ export default function XpImportantDates({
                         {doubleXpTimeLeft.hours}
                       </span>
                     </span>
-                    <span className="text-primary-text ml-1">
+                    <span className="text-primary-text sm:ml-1">
                       {pluralize(doubleXpTimeLeft.hours, "hour", "hours")}
                     </span>
                   </div>
-                  <div>
+                  <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                     <span className="countdown text-primary-text text-4xl font-semibold">
                       <span
                         style={
@@ -184,11 +184,11 @@ export default function XpImportantDates({
                         {doubleXpTimeLeft.minutes}
                       </span>
                     </span>
-                    <span className="text-primary-text ml-1">
+                    <span className="text-primary-text sm:ml-1">
                       {pluralize(doubleXpTimeLeft.minutes, "min", "mins")}
                     </span>
                   </div>
-                  <div>
+                  <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                     <span className="countdown text-primary-text text-4xl font-semibold">
                       <span
                         style={
@@ -202,7 +202,7 @@ export default function XpImportantDates({
                         {doubleXpTimeLeft.seconds}
                       </span>
                     </span>
-                    <span className="text-primary-text ml-1">
+                    <span className="text-primary-text sm:ml-1">
                       {pluralize(doubleXpTimeLeft.seconds, "sec", "secs")}
                     </span>
                   </div>
@@ -222,7 +222,7 @@ export default function XpImportantDates({
             </div>
             {seasonEndTimeLeft && (
               <div className="flex justify-center gap-4">
-                <div>
+                <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                   <span className="countdown text-primary-text text-4xl font-semibold">
                     <span
                       style={
@@ -236,11 +236,11 @@ export default function XpImportantDates({
                       {seasonEndTimeLeft.days}
                     </span>
                   </span>
-                  <span className="text-primary-text ml-1">
+                  <span className="text-primary-text sm:ml-1">
                     {pluralize(seasonEndTimeLeft.days, "day", "days")}
                   </span>
                 </div>
-                <div>
+                <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                   <span className="countdown text-primary-text text-4xl font-semibold">
                     <span
                       style={
@@ -254,11 +254,11 @@ export default function XpImportantDates({
                       {seasonEndTimeLeft.hours}
                     </span>
                   </span>
-                  <span className="text-primary-text ml-1">
+                  <span className="text-primary-text sm:ml-1">
                     {pluralize(seasonEndTimeLeft.hours, "hour", "hours")}
                   </span>
                 </div>
-                <div>
+                <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                   <span className="countdown text-primary-text text-4xl font-semibold">
                     <span
                       style={
@@ -272,11 +272,11 @@ export default function XpImportantDates({
                       {seasonEndTimeLeft.minutes}
                     </span>
                   </span>
-                  <span className="text-primary-text ml-1">
+                  <span className="text-primary-text sm:ml-1">
                     {pluralize(seasonEndTimeLeft.minutes, "min", "mins")}
                   </span>
                 </div>
-                <div>
+                <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                   <span className="countdown text-primary-text text-4xl font-semibold">
                     <span
                       style={
@@ -290,7 +290,7 @@ export default function XpImportantDates({
                       {seasonEndTimeLeft.seconds}
                     </span>
                   </span>
-                  <span className="text-primary-text ml-1">
+                  <span className="text-primary-text sm:ml-1">
                     {pluralize(seasonEndTimeLeft.seconds, "sec", "secs")}
                   </span>
                 </div>

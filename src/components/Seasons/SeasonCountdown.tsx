@@ -155,8 +155,8 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
             </span>
           </div>
           {timeLeft && (
-            <div className="flex gap-4">
-              <div>
+            <div className="flex justify-center gap-4 sm:justify-start">
+              <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                 <span className="countdown text-primary-text text-4xl font-semibold">
                   <span
                     style={{ "--value": timeLeft.days } as React.CSSProperties}
@@ -166,11 +166,11 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                     {timeLeft.days}
                   </span>
                 </span>
-                <span className="text-primary-text ml-1">
+                <span className="text-primary-text sm:ml-1">
                   {pluralize(timeLeft.days, "day", "days")}
                 </span>
               </div>
-              <div>
+              <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                 <span className="countdown text-primary-text text-4xl font-semibold">
                   <span
                     style={{ "--value": timeLeft.hours } as React.CSSProperties}
@@ -180,11 +180,11 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                     {timeLeft.hours}
                   </span>
                 </span>
-                <span className="text-primary-text ml-1">
+                <span className="text-primary-text sm:ml-1">
                   {pluralize(timeLeft.hours, "hour", "hours")}
                 </span>
               </div>
-              <div>
+              <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                 <span className="countdown text-primary-text text-4xl font-semibold">
                   <span
                     style={
@@ -196,11 +196,11 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                     {timeLeft.minutes}
                   </span>
                 </span>
-                <span className="text-primary-text ml-1">
+                <span className="text-primary-text sm:ml-1">
                   {pluralize(timeLeft.minutes, "min", "mins")}
                 </span>
               </div>
-              <div>
+              <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                 <span className="countdown text-primary-text text-4xl font-semibold">
                   <span
                     style={
@@ -212,7 +212,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                     {timeLeft.seconds}
                   </span>
                 </span>
-                <span className="text-primary-text ml-1">
+                <span className="text-primary-text sm:ml-1">
                   {pluralize(timeLeft.seconds, "sec", "secs")}
                 </span>
               </div>
@@ -230,8 +230,8 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
               </span>
             </div>
             {nextSeasonTimeLeft && (
-              <div className="flex gap-4">
-                <div>
+              <div className="flex justify-center gap-4 sm:justify-start">
+                <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                   <span className="countdown text-primary-text text-4xl font-semibold">
                     <span
                       style={
@@ -245,11 +245,11 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                       {nextSeasonTimeLeft.days}
                     </span>
                   </span>
-                  <span className="text-primary-text ml-1">
+                  <span className="text-primary-text sm:ml-1">
                     {pluralize(nextSeasonTimeLeft.days, "day", "days")}
                   </span>
                 </div>
-                <div>
+                <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                   <span className="countdown text-primary-text text-4xl font-semibold">
                     <span
                       style={
@@ -263,11 +263,11 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                       {nextSeasonTimeLeft.hours}
                     </span>
                   </span>
-                  <span className="text-primary-text ml-1">
+                  <span className="text-primary-text sm:ml-1">
                     {pluralize(nextSeasonTimeLeft.hours, "hour", "hours")}
                   </span>
                 </div>
-                <div>
+                <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                   <span className="countdown text-primary-text text-4xl font-semibold">
                     <span
                       style={
@@ -281,11 +281,11 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                       {nextSeasonTimeLeft.minutes}
                     </span>
                   </span>
-                  <span className="text-primary-text ml-1">
+                  <span className="text-primary-text sm:ml-1">
                     {pluralize(nextSeasonTimeLeft.minutes, "min", "mins")}
                   </span>
                 </div>
-                <div>
+                <div className="flex flex-col items-center sm:flex-row sm:items-baseline">
                   <span className="countdown text-primary-text text-4xl font-semibold">
                     <span
                       style={
@@ -299,7 +299,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                       {nextSeasonTimeLeft.seconds}
                     </span>
                   </span>
-                  <span className="text-primary-text ml-1">
+                  <span className="text-primary-text sm:ml-1">
                     {pluralize(nextSeasonTimeLeft.seconds, "sec", "secs")}
                   </span>
                 </div>
