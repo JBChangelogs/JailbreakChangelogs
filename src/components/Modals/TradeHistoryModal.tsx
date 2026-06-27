@@ -167,15 +167,6 @@ export default function TradeHistoryModal({
     fetchUsers();
   }, [isOpen, tradeHistoryUserIds, usersData]);
 
-  const getDisplayName = (userId: string) => {
-    const cachedUser = finalUsers[userId];
-    if (cachedUser) {
-      return cachedUser.displayName;
-    }
-
-    return userId;
-  };
-
   const getUsername = (userId: string) => {
     const cachedUser = finalUsers[userId];
     if (cachedUser) {
