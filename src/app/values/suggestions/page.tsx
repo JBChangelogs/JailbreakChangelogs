@@ -3452,7 +3452,7 @@ export default function ValueSuggestionsPage() {
                                   {formatMessageDate(suggestion.created_at)}
                                   {suggestion.updated_at !==
                                   suggestion.created_at
-                                    ? " (Edited)"
+                                    ? " (Updated)"
                                     : ""}
                                 </p>
                               </div>

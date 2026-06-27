@@ -645,7 +645,7 @@ export default function ItemSuggestionsTab({
                       <p className="text-secondary-text text-xs">
                         {formatMessageDate(suggestion.created_at)}
                         {suggestion.updated_at !== suggestion.created_at
-                          ? " (Edited)"
+                          ? " (Updated)"
                           : ""}
                       </p>
                     </div>

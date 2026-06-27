@@ -323,34 +323,68 @@ export default function UserValueSuggestionsTab({
           Value Suggestions [0]
         </h2>
         {userStats && (
-          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-              <p className="text-secondary-text mb-0.5 text-xs">Submitted</p>
-              <p className="text-primary-text text-lg font-bold">
-                {userStats.total_submitted}
-              </p>
+          <div className="border-border-card bg-tertiary-bg mb-4 rounded-xl border">
+            <div className="border-border-card border-b px-5 py-3.5">
+              <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                <Icon
+                  icon="material-symbols:bar-chart-4-bars-rounded"
+                  className="text-secondary-text h-4 w-4"
+                  inline
+                />
+                Suggester Stats
+              </h2>
             </div>
-            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-              <p className="text-secondary-text mb-0.5 text-xs">Accepted</p>
-              <p className="text-button-success text-lg font-bold">
-                {userStats.total_accepted}
-              </p>
-            </div>
-            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-              <p className="text-secondary-text mb-0.5 text-xs">Rejected</p>
-              <p className="text-button-danger text-lg font-bold">
-                {userStats.total_rejected}
-              </p>
-            </div>
-            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-              <p className="text-secondary-text mb-0.5 text-xs">
-                Accepted Rate
-              </p>
-              <p
-                className={`text-lg font-bold ${userStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
-              >
-                {userStats.acceptance_rate.toFixed(0)}%
-              </p>
+            <div className="space-y-3 p-4">
+              <div>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="text-secondary-text text-xs">
+                    Acceptance Rate
+                  </span>
+                  <span
+                    className={`text-sm font-bold ${userStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+                  >
+                    {userStats.acceptance_rate.toFixed(0)}%
+                  </span>
+                </div>
+                <div className="bg-quaternary-bg h-1.5 overflow-hidden rounded-full">
+                  <div
+                    className={`h-full rounded-full transition-all ${userStats.acceptance_rate >= 50 ? "bg-button-success" : "bg-button-danger"}`}
+                    style={{ width: `${userStats.acceptance_rate}%` }}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-quaternary-bg rounded-lg p-2.5 text-center">
+                  <Icon
+                    icon="material-symbols:send-rounded"
+                    className="text-secondary-text mx-auto mb-1 h-4 w-4"
+                  />
+                  <p className="text-primary-text text-sm font-bold">
+                    {userStats.total_submitted}
+                  </p>
+                  <p className="text-secondary-text text-xs">Submitted</p>
+                </div>
+                <div className="bg-button-success/10 rounded-lg p-2.5 text-center">
+                  <Icon
+                    icon="material-symbols:thumb-up-rounded"
+                    className="text-button-success mx-auto mb-1 h-4 w-4"
+                  />
+                  <p className="text-button-success text-sm font-bold">
+                    {userStats.total_accepted}
+                  </p>
+                  <p className="text-secondary-text text-xs">Accepted</p>
+                </div>
+                <div className="bg-button-danger/10 rounded-lg p-2.5 text-center">
+                  <Icon
+                    icon="material-symbols:thumb-down-rounded"
+                    className="text-button-danger mx-auto mb-1 h-4 w-4"
+                  />
+                  <p className="text-button-danger text-sm font-bold">
+                    {userStats.total_rejected}
+                  </p>
+                  <p className="text-secondary-text text-xs">Rejected</p>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -393,34 +427,68 @@ export default function UserValueSuggestionsTab({
 
         {/* Stats strip */}
         {userStats && (
-          <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-              <p className="text-secondary-text mb-0.5 text-xs">Submitted</p>
-              <p className="text-primary-text text-lg font-bold">
-                {userStats.total_submitted}
-              </p>
+          <div className="border-border-card bg-tertiary-bg mb-3 rounded-xl border">
+            <div className="border-border-card border-b px-5 py-3.5">
+              <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                <Icon
+                  icon="material-symbols:bar-chart-4-bars-rounded"
+                  className="text-secondary-text h-4 w-4"
+                  inline
+                />
+                Suggester Stats
+              </h2>
             </div>
-            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-              <p className="text-secondary-text mb-0.5 text-xs">Accepted</p>
-              <p className="text-button-success text-lg font-bold">
-                {userStats.total_accepted}
-              </p>
-            </div>
-            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-              <p className="text-secondary-text mb-0.5 text-xs">Rejected</p>
-              <p className="text-button-danger text-lg font-bold">
-                {userStats.total_rejected}
-              </p>
-            </div>
-            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-              <p className="text-secondary-text mb-0.5 text-xs">
-                Accepted Rate
-              </p>
-              <p
-                className={`text-lg font-bold ${userStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
-              >
-                {userStats.acceptance_rate.toFixed(0)}%
-              </p>
+            <div className="space-y-3 p-4">
+              <div>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="text-secondary-text text-xs">
+                    Acceptance Rate
+                  </span>
+                  <span
+                    className={`text-sm font-bold ${userStats.acceptance_rate >= 50 ? "text-button-success" : "text-button-danger"}`}
+                  >
+                    {userStats.acceptance_rate.toFixed(0)}%
+                  </span>
+                </div>
+                <div className="bg-quaternary-bg h-1.5 overflow-hidden rounded-full">
+                  <div
+                    className={`h-full rounded-full transition-all ${userStats.acceptance_rate >= 50 ? "bg-button-success" : "bg-button-danger"}`}
+                    style={{ width: `${userStats.acceptance_rate}%` }}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-quaternary-bg rounded-lg p-2.5 text-center">
+                  <Icon
+                    icon="material-symbols:send-rounded"
+                    className="text-secondary-text mx-auto mb-1 h-4 w-4"
+                  />
+                  <p className="text-primary-text text-sm font-bold">
+                    {userStats.total_submitted}
+                  </p>
+                  <p className="text-secondary-text text-xs">Submitted</p>
+                </div>
+                <div className="bg-button-success/10 rounded-lg p-2.5 text-center">
+                  <Icon
+                    icon="material-symbols:thumb-up-rounded"
+                    className="text-button-success mx-auto mb-1 h-4 w-4"
+                  />
+                  <p className="text-button-success text-sm font-bold">
+                    {userStats.total_accepted}
+                  </p>
+                  <p className="text-secondary-text text-xs">Accepted</p>
+                </div>
+                <div className="bg-button-danger/10 rounded-lg p-2.5 text-center">
+                  <Icon
+                    icon="material-symbols:thumb-down-rounded"
+                    className="text-button-danger mx-auto mb-1 h-4 w-4"
+                  />
+                  <p className="text-button-danger text-sm font-bold">
+                    {userStats.total_rejected}
+                  </p>
+                  <p className="text-secondary-text text-xs">Rejected</p>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -734,7 +802,7 @@ export default function UserValueSuggestionsTab({
                         </TooltipContent>
                       </Tooltip>
                       {suggestion.updated_at !== suggestion.created_at
-                        ? " (Edited)"
+                        ? " (Updated)"
                         : ""}
                     </p>
                   </div>

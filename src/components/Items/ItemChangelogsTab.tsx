@@ -601,9 +601,6 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                       </Tooltip>
                       <p className="text-secondary-text text-xs">
                         {formatMessageDate(changelog.created_at)}
-                        {changelog.updated_at !== changelog.created_at
-                          ? " (Edited)"
-                          : ""}
                       </p>
                     </div>
                   </div>
