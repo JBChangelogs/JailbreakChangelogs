@@ -2447,7 +2447,7 @@ export default function ValueSuggestionsPage() {
                             className="text-xs font-bold"
                             style={{
                               color:
-                                accentColor ?? "var(--color-tertiary-text)",
+                                accentColor ?? "var(--color-secondary-text)",
                             }}
                           >
                             #{i + 1}
@@ -2505,7 +2505,7 @@ export default function ValueSuggestionsPage() {
                             >
                               {rate}%
                             </p>
-                            <p className="text-tertiary-text mt-0.5 text-xs">
+                            <p className="text-secondary-text mt-0.5 text-xs">
                               acceptance
                             </p>
                           </div>
