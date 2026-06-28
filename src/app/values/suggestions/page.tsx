@@ -2386,14 +2386,9 @@ export default function ValueSuggestionsPage() {
           </div>
 
           {/* Top Suggesters Leaderboard */}
-          {false && (loadingLeaderboard || leaderboard.length > 0) && (
+          {(loadingLeaderboard || leaderboard.length > 0) && (
             <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
               <div className="mb-4 flex items-center gap-2">
-                <Icon
-                  icon="material-symbols:trophy-rounded"
-                  className="h-5 w-5 shrink-0 text-yellow-400"
-                  inline
-                />
                 <span className="text-primary-text text-lg font-semibold">
                   Top Suggesters
                   {!loadingLeaderboard && leaderboard.length > 0 && (
@@ -2408,12 +2403,12 @@ export default function ValueSuggestionsPage() {
                   ? Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className="border-border-card bg-tertiary-bg flex aspect-square w-56 shrink-0 animate-pulse flex-col items-center gap-1.5 rounded-lg border p-3"
+                        className="border-border-card bg-tertiary-bg flex w-52 shrink-0 animate-pulse flex-col items-center gap-2 rounded-xl border p-4"
                       >
                         <div className="bg-quaternary-bg h-3 w-6 rounded" />
-                        <div className="bg-quaternary-bg h-14 w-14 rounded-full" />
+                        <div className="bg-quaternary-bg h-12 w-12 rounded-full" />
                         <div className="bg-quaternary-bg h-3 w-20 rounded" />
-                        <div className="bg-quaternary-bg h-5 w-20 rounded-full" />
+                        <div className="bg-quaternary-bg h-6 w-16 rounded" />
                         <div className="bg-quaternary-bg h-3 w-full rounded" />
                         <div className="bg-quaternary-bg h-3 w-full rounded" />
                       </div>
@@ -2427,57 +2422,38 @@ export default function ValueSuggestionsPage() {
                         entry.acceptance_rate % 1 === 0
                           ? String(entry.acceptance_rate)
                           : entry.acceptance_rate.toFixed(1);
-                      const podiumCardStyle =
+                      const accentColor =
                         i === 0
-                          ? {
-                              background:
-                                "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
-                              borderColor: "hsl(45, 100%, 50%, 0.5)",
-                            }
+                          ? "hsl(45,100%,50%)"
                           : i === 1
-                            ? {
-                                background:
-                                  "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
-                                borderColor: "hsl(0, 0%, 75%, 0.5)",
-                              }
+                            ? "hsl(0,0%,75%)"
                             : i === 2
-                              ? {
-                                  background:
-                                    "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
-                                  borderColor: "hsl(30, 100%, 50%, 0.5)",
-                                }
-                              : undefined;
-                      const podiumBadgeStyle =
-                        i === 0
-                          ? {
-                              background:
-                                "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
-                            }
-                          : i === 1
-                            ? {
-                                background:
-                                  "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
-                              }
-                            : i === 2
-                              ? {
-                                  background:
-                                    "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
-                                }
+                              ? "hsl(30,100%,50%)"
                               : undefined;
                       return (
                         <Link
                           key={entry.user.id}
                           href={`/users/${entry.user.id}`}
                           prefetch={false}
-                          className="border-border-card bg-tertiary-bg hover:border-link group flex aspect-square w-56 shrink-0 flex-col items-center gap-1.5 rounded-lg border p-3 transition-colors"
-                          style={podiumCardStyle}
+                          className="border-border-card bg-tertiary-bg group flex w-52 shrink-0 flex-col items-center gap-3 rounded-xl border p-4 transition-opacity hover:opacity-80"
+                          style={
+                            accentColor
+                              ? { borderColor: accentColor }
+                              : undefined
+                          }
                         >
+                          {/* Rank */}
                           <span
-                            className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${i <= 2 ? "text-black" : "text-primary-text"}`}
-                            style={podiumBadgeStyle}
+                            className="text-xs font-bold"
+                            style={{
+                              color:
+                                accentColor ?? "var(--color-tertiary-text)",
+                            }}
                           >
                             #{i + 1}
                           </span>
+
+                          {/* Avatar */}
                           <UserAvatar
                             userId={entry.user.id!}
                             avatarHash={entry.user.avatar ?? null}
@@ -2492,8 +2468,10 @@ export default function ValueSuggestionsPage() {
                             premiumType={entry.user.premiumtype}
                             bgClassName="bg-quaternary-bg"
                           />
-                          <span className="flex w-full items-center justify-center gap-1 text-sm font-semibold">
-                            <span className="text-primary-text group-hover:text-link truncate transition-colors">
+
+                          {/* Name + supporter */}
+                          <div className="flex w-full items-center justify-center gap-1">
+                            <span className="text-primary-text group-hover:text-link truncate text-sm font-semibold transition-colors">
                               {displayName}
                             </span>
                             {entry.user.premiumtype !== undefined &&
@@ -2504,8 +2482,8 @@ export default function ValueSuggestionsPage() {
                                     <Image
                                       src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${entry.user.premiumtype}.svg`}
                                       alt={`Supporter Type ${entry.user.premiumtype}`}
-                                      width={16}
-                                      height={16}
+                                      width={12}
+                                      height={12}
                                       className="shrink-0 cursor-pointer"
                                     />
                                   </TooltipTrigger>
@@ -2514,22 +2492,37 @@ export default function ValueSuggestionsPage() {
                                   </TooltipContent>
                                 </Tooltip>
                               )}
-                          </span>
-                          <span className="bg-button-success text-form-button-text rounded-lg px-2.5 py-1 text-xs font-medium">
-                            {entry.total_accepted} accepted
-                          </span>
-                          <div className="w-full space-y-1 text-xs">
-                            <div className="flex items-center justify-between gap-2">
+                          </div>
+
+                          {/* Acceptance rate hero */}
+                          <div className="text-center">
+                            <p
+                              className="text-lg leading-none font-bold"
+                              style={{
+                                color:
+                                  accentColor ?? "var(--color-primary-text)",
+                              }}
+                            >
+                              {rate}%
+                            </p>
+                            <p className="text-tertiary-text mt-0.5 text-xs">
+                              acceptance
+                            </p>
+                          </div>
+
+                          {/* Stats */}
+                          <div className="border-border-card w-full space-y-1 border-t pt-2 text-xs">
+                            <div className="flex items-center justify-between">
                               <span className="text-secondary-text">
-                                Acceptance Rate:
+                                Accepted
                               </span>
                               <span className="text-primary-text font-medium">
-                                {rate}%
+                                {entry.total_accepted}
                               </span>
                             </div>
-                            <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center justify-between">
                               <span className="text-secondary-text">
-                                Total Submitted:
+                                Submitted
                               </span>
                               <span className="text-primary-text font-medium">
                                 {entry.total_submitted}
