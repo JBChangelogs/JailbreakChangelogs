@@ -2435,7 +2435,7 @@ export default function ValueSuggestionsPage() {
                           key={entry.user.id}
                           href={`/users/${entry.user.id}`}
                           prefetch={false}
-                          className="border-border-card bg-tertiary-bg group flex w-52 shrink-0 flex-col items-center gap-3 rounded-xl border p-4 transition-opacity hover:opacity-80"
+                          className="border-border-card bg-tertiary-bg group flex w-52 shrink-0 flex-col items-center gap-3 rounded-xl border p-4"
                           style={
                             accentColor
                               ? { borderColor: accentColor }
