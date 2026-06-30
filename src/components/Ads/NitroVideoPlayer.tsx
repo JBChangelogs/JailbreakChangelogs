@@ -38,8 +38,8 @@ export default function NitroVideoPlayer() {
       pathname === "/robberies" ||
       pathname === "/values/calculator" ||
       pathname === "/trading" ||
-      pathname === "/values/suggestions" ||
-      pathname.startsWith("/values/suggestions/") ||
+      pathname === "/items/suggestions" ||
+      pathname.startsWith("/items/suggestions/") ||
       pathname.startsWith("/values/changelogs/") ||
       pathname.startsWith("/item/") ||
       isChangelogDetailRoute ||

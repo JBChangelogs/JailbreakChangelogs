@@ -8,6 +8,6 @@ export function useIsCollabPage() {
     pathname.startsWith("/item") ||
     pathname.startsWith("/trading") ||
     pathname.startsWith("/values/changelogs") ||
-    pathname.startsWith("/values/suggestions")
+    pathname.startsWith("/items/suggestions")
   );
 }

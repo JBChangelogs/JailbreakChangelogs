@@ -98,6 +98,16 @@ const nextConfig = {
         destination: "/hyperchrome-pity",
         permanent: true,
       },
+      {
+        source: "/values/suggestions",
+        destination: "/items/suggestions",
+        permanent: true,
+      },
+      {
+        source: "/values/suggestions/:path*",
+        destination: "/items/suggestions/:path*",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

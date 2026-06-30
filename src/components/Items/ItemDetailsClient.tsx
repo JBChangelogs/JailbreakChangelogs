@@ -372,7 +372,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
           </p>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
             <Button asChild className="w-full gap-2 sm:w-auto">
-              <Link href="/values/suggestions">
+              <Link href="/items/suggestions">
                 <Icon
                   icon="material-symbols:edit-outline-rounded"
                   className="h-4 w-4"

@@ -512,7 +512,7 @@ export default function Comment({
                   : item_type.toLowerCase() === "inventory"
                     ? `/inventories/${item_id}`
                     : item_type.toLowerCase() === "vsuggestion"
-                      ? `/values/suggestions/${item_id}`
+                      ? `/items/suggestions/${item_id}`
                       : `/item/${encodeURIComponent(item_type)}/${encodeURIComponent(itemDetails?.name || "")}`
           }
           prefetch={false}

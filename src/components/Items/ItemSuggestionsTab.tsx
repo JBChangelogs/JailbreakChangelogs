@@ -381,7 +381,7 @@ export default function ItemSuggestionsTab({
             suggestions page to submit one.
           </p>
           <Button asChild variant="default" size="sm">
-            <Link href="/values/suggestions">View All Suggestions</Link>
+            <Link href="/items/suggestions">View All Suggestions</Link>
           </Button>
         </div>
       </div>
@@ -396,7 +396,7 @@ export default function ItemSuggestionsTab({
           Item Suggestions ({total})
         </h3>
         <Button asChild size="sm" variant="default">
-          <Link href="/values/suggestions">All Suggestions</Link>
+          <Link href="/items/suggestions">All Suggestions</Link>
         </Button>
       </div>
 
@@ -422,7 +422,7 @@ export default function ItemSuggestionsTab({
               className="border-border-card bg-secondary-bg group hover:border-link hover:bg-tertiary-bg relative overflow-hidden rounded-xl border transition-colors"
             >
               <Link
-                href={`/values/suggestions/${suggestion.id}`}
+                href={`/items/suggestions/${suggestion.id}`}
                 prefetch={false}
                 className="absolute inset-0 z-0"
                 aria-label={`View suggestion #${suggestion.id}`}
@@ -483,7 +483,7 @@ export default function ItemSuggestionsTab({
                 {/* Title + badges */}
                 <div className="space-y-2">
                   <Link
-                    href={`/values/suggestions/${suggestion.id}`}
+                    href={`/items/suggestions/${suggestion.id}`}
                     prefetch={false}
                     className="text-primary-text group-hover:text-link text-base font-bold transition-colors"
                   >

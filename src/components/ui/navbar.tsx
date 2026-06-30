@@ -502,7 +502,7 @@ export const NavbarModern = ({
                       description="Compare items and get fair trade valuations"
                     />
                     <NavDropdownItem
-                      href="/values/suggestions"
+                      href="/items/suggestions"
                       icon="material-symbols:lightbulb-outline-rounded"
                       title="Value Suggestions"
                       description="Submit and vote on community value change suggestions"

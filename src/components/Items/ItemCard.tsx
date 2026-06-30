@@ -757,7 +757,7 @@ function ItemCard({
             )}
             {isValuesPage && (
               <Link
-                href="/values/suggestions"
+                href="/items/suggestions"
                 prefetch={false}
                 onClick={(e) => e.stopPropagation()}
                 className="text-link hover:text-link-hover relative z-20 underline transition-colors"

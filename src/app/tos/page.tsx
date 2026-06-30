@@ -176,7 +176,7 @@ export default function TermsOfServicePage() {
               <p className="text-secondary-text mb-4">
                 By submitting a value suggestion on the{" "}
                 <Link
-                  href="/values/suggestions"
+                  href="/items/suggestions"
                   className="text-link hover:text-link-hover hover:underline"
                 >
                   Value Suggestions

@@ -186,14 +186,14 @@ export default function ValuesClient({
                 </Link>
               </Button>
               <Button asChild>
-                <Link href="/values/suggestions" prefetch={false}>
+                <Link href="/items/suggestions" prefetch={false}>
                   Value Suggestions
                 </Link>
               </Button>
             </div>
 
             <Link
-              href="/values/suggestions"
+              href="/items/suggestions"
               prefetch={false}
               className="border-border-card bg-tertiary-bg mb-4 flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors"
             >
@@ -258,7 +258,7 @@ export default function ValuesClient({
       />
 
       <Link
-        href="/values/suggestions"
+        href="/items/suggestions"
         prefetch={false}
         className="border-border-card bg-tertiary-bg mb-4 flex items-center justify-between rounded-lg border px-4 py-2.5 transition-colors"
       >

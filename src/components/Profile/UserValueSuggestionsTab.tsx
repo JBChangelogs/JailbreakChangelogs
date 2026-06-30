@@ -405,7 +405,7 @@ export default function UserValueSuggestionsTab({
               : "This user hasn't submitted any value suggestions yet."}
           </p>
           <Button asChild variant="default" size="sm">
-            <Link href="/values/suggestions">View All Suggestions</Link>
+            <Link href="/items/suggestions">View All Suggestions</Link>
           </Button>
         </div>
       </div>
@@ -421,7 +421,7 @@ export default function UserValueSuggestionsTab({
             Value Suggestions [{total}]
           </h2>
           <Button asChild size="sm" variant="default">
-            <Link href="/values/suggestions">All Suggestions</Link>
+            <Link href="/items/suggestions">All Suggestions</Link>
           </Button>
         </div>
 
@@ -514,7 +514,7 @@ export default function UserValueSuggestionsTab({
               >
                 {/* Full-card link overlay — sits behind all interactive children */}
                 <Link
-                  href={`/values/suggestions/${suggestion.id}`}
+                  href={`/items/suggestions/${suggestion.id}`}
                   prefetch={false}
                   className="absolute inset-0 z-0"
                   aria-label={`View suggestion #${suggestion.id}`}
@@ -577,7 +577,7 @@ export default function UserValueSuggestionsTab({
                   <div className="space-y-2">
                     <div className="flex items-center gap-3">
                       <Link
-                        href={`/values/suggestions/${suggestion.id}`}
+                        href={`/items/suggestions/${suggestion.id}`}
                         prefetch={false}
                         className="bg-quaternary-bg relative z-10 h-20 w-28 shrink-0 overflow-hidden rounded-lg"
                       >
@@ -604,7 +604,7 @@ export default function UserValueSuggestionsTab({
                       </Link>
                       <div className="relative z-10 min-w-0">
                         <Link
-                          href={`/values/suggestions/${suggestion.id}`}
+                          href={`/items/suggestions/${suggestion.id}`}
                           prefetch={false}
                           className="text-primary-text hover:text-link text-base font-bold transition-colors"
                         >
