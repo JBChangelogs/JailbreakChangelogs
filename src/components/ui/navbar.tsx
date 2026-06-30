@@ -504,7 +504,7 @@ export const NavbarModern = ({
                     <NavDropdownItem
                       href="/items/suggestions"
                       icon="material-symbols:lightbulb-outline-rounded"
-                      title="Value Suggestions"
+                      title="Item Suggestions"
                       description="Submit and vote on community value change suggestions"
                     />
                     <NavDropdownItem
