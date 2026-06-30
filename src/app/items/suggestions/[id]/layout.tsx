@@ -13,14 +13,14 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
-    title: `Value Suggestion #${id} | Jailbreak Changelogs`,
-    description: `View this community value suggestion on Jailbreak Changelogs.`,
+    title: `Item Suggestion #${id} | Jailbreak Changelogs`,
+    description: `View this community item suggestion on Jailbreak Changelogs.`,
     alternates: {
       canonical: `/items/suggestions/${id}`,
     },
     openGraph: {
-      title: `Value Suggestion #${id} | Jailbreak Changelogs`,
-      description: `View this community value suggestion on Jailbreak Changelogs.`,
+      title: `Item Suggestion #${id} | Jailbreak Changelogs`,
+      description: `View this community item suggestion on Jailbreak Changelogs.`,
       type: "website",
       url: `https://jailbreakchangelogs.com/items/suggestions/${id}`,
       siteName: "Jailbreak Changelogs",
@@ -29,14 +29,14 @@ export async function generateMetadata({
           url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
           width: 2400,
           height: 1260,
-          alt: "Value Suggestion Banner",
+          alt: "Item Suggestion Banner",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `Value Suggestion #${id} | Jailbreak Changelogs`,
-      description: `View this community value suggestion on Jailbreak Changelogs.`,
+      title: `Item Suggestion #${id} | Jailbreak Changelogs`,
+      description: `View this community item suggestion on Jailbreak Changelogs.`,
       images: [
         "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
       ],

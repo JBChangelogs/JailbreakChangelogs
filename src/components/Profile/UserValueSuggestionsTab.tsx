@@ -306,7 +306,7 @@ export default function UserValueSuggestionsTab({
     return (
       <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
         <h2 className="text-primary-text mb-3 text-lg font-semibold">
-          Value Suggestions
+          Item Suggestions
         </h2>
         <p className="text-status-error mb-4 text-sm">{error}</p>
         <Button onClick={() => fetchSuggestions(page)} size="sm">
@@ -320,7 +320,7 @@ export default function UserValueSuggestionsTab({
     return (
       <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
         <h2 className="text-primary-text mb-3 text-lg font-semibold">
-          Value Suggestions [0]
+          Item Suggestions [0]
         </h2>
         {userStats && (
           <div className="border-border-card bg-tertiary-bg mb-4 rounded-xl border">
@@ -401,8 +401,8 @@ export default function UserValueSuggestionsTab({
           </p>
           <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
             {currentUserId === userId
-              ? "You haven't submitted any value suggestions yet."
-              : "This user hasn't submitted any value suggestions yet."}
+              ? "You haven't submitted any item suggestions yet."
+              : "This user hasn't submitted any item suggestions yet."}
           </p>
           <Button asChild variant="default" size="sm">
             <Link href="/items/suggestions">View All Suggestions</Link>
@@ -418,7 +418,7 @@ export default function UserValueSuggestionsTab({
         {/* Header */}
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-primary-text text-lg font-semibold">
-            Value Suggestions [{total}]
+            Item Suggestions [{total}]
           </h2>
           <Button asChild size="sm" variant="default">
             <Link href="/items/suggestions">All Suggestions</Link>

@@ -32,7 +32,7 @@ export default function Error({
               Failed to load suggestion
             </h1>
             <p className="text-secondary-text mt-4">
-              Something went wrong while loading this value suggestion. You can
+              Something went wrong while loading this item suggestion. You can
               try again or go back to the suggestions list.
             </p>
 

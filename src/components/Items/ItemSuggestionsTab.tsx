@@ -377,7 +377,7 @@ export default function ItemSuggestionsTab({
             No Suggestions Yet
           </p>
           <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
-            No value suggestions have been submitted for this item. Head to the
+            No item suggestions have been submitted for this item. Head to the
             suggestions page to submit one.
           </p>
           <Button asChild variant="default" size="sm">

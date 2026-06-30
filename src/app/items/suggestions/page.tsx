@@ -348,7 +348,7 @@ function SuggestionForm({
   return (
     <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6">
       <h2 className="text-primary-text mb-4 text-lg font-semibold">
-        New Value Suggestion
+        New Item Suggestion
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Item search */}
@@ -1325,12 +1325,12 @@ function SuggestionGuidelinesDialog({
   }, [open]);
 
   const rules = [
-    "Not use any form of AI generated content to make any value suggestions (If found using AI, you will receive punishment for your actions).",
+    "Not use any form of AI generated content to make any item suggestions (If found using AI, you will receive punishment for your actions).",
     "Not be biased solely on your trading experiences, as other people might have different experiences while trading an item.",
     "Add a meaningful, effort-filled reasoning towards your suggestion. Padding with repeated characters or filler text does not count and will likely result in your suggestion being ignored by the Value Team.",
     "Troll suggesters may be banned from value suggesting at the sole discretion of Value Team managers, website owners, or website moderators.",
     "No botting reactions with alt accounts because any form of manipulation is not allowed on this value list.",
-    "Your Roblox account must be at least 30 days old to submit or vote on value suggestions.",
+    "Your Roblox account must be at least 30 days old to submit or vote on item suggestions.",
     "If you are suggesting a value change, you must add at least 2 common trades at the end of your reasoning.",
     "You are not allowed to make duplicate suggestions (e.g. suggesting the same change multiple times).",
     "Please only speak English so everybody understands. If you cannot speak English, at least use a translator.",
@@ -1506,7 +1506,7 @@ export default function ValueSuggestionsPage() {
     e.stopPropagation();
     e.preventDefault();
     if (!isAuthenticated) {
-      toast.info("You need to be logged in to vote on value suggestions.");
+      toast.info("You need to be logged in to vote on item suggestions.");
       setLoginModal({ open: true });
       return;
     }
@@ -1617,7 +1617,7 @@ export default function ValueSuggestionsPage() {
         } else if (res.status === 403) {
           if (data?.detail === "Forbidden") {
             toast.info(
-              "You need to connect your Roblox account to vote on value suggestions.",
+              "You need to connect your Roblox account to vote on item suggestions.",
             );
             setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
           } else {
@@ -2147,7 +2147,7 @@ export default function ValueSuggestionsPage() {
       if (res.status === 403) {
         if (data?.detail === "Forbidden") {
           toast.info(
-            "You need to connect your Roblox account to submit value suggestions.",
+            "You need to connect your Roblox account to submit item suggestions.",
           );
           setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
           throw { response: { status: res.status, data } };
@@ -2201,7 +2201,7 @@ export default function ValueSuggestionsPage() {
     }
     if (user && !user.roblox_id) {
       toast.info(
-        "You need to connect your Roblox account to submit value suggestions.",
+        "You need to connect your Roblox account to submit item suggestions.",
       );
       setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
       return;
@@ -2314,7 +2314,7 @@ export default function ValueSuggestionsPage() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
               <div className="flex-1">
                 <h1 className="text-primary-text mb-1 text-2xl font-semibold">
-                  Value Suggestions
+                  Item Suggestions
                 </h1>
                 <p className="text-secondary-text text-sm">
                   Help keep item values accurate. Submit a suggestion with your
@@ -2364,7 +2364,7 @@ export default function ValueSuggestionsPage() {
                     <Button
                       onClick={() => {
                         toast.info(
-                          "You need to be logged in to submit value suggestions.",
+                          "You need to be logged in to submit item suggestions.",
                         );
                         setLoginModal({ open: true });
                       }}
@@ -2912,7 +2912,7 @@ export default function ValueSuggestionsPage() {
               </h3>
               <p className="text-secondary-text mb-6 text-sm">
                 {!isAuthenticated
-                  ? "Log in to be the first to submit a value suggestion."
+                  ? "Log in to be the first to submit a item suggestion."
                   : !user?.roblox_id
                     ? "You need to connect your Roblox account before you can submit a suggestion."
                     : "Be the first to suggest a value change."}
@@ -2959,7 +2959,7 @@ export default function ValueSuggestionsPage() {
                       className="h-4 w-4"
                       inline
                     />
-                    New Value Suggestion
+                    New Item Suggestion
                   </Button>
                 )}
               </div>
@@ -3008,7 +3008,7 @@ export default function ValueSuggestionsPage() {
               </h3>
               <p className="text-secondary-text text-sm">
                 {suggestions.length === 0
-                  ? "Be the first to submit a value suggestion."
+                  ? "Be the first to submit a item suggestion."
                   : "Try adjusting your search or filter."}
               </p>
               {suggestions.length > 0 && (

@@ -370,7 +370,7 @@ export default function ValueSuggestionDetailPage() {
 
   const handleVote = async (type: "upvote" | "downvote") => {
     if (!isAuthenticated) {
-      toast.info("You need to be logged in to vote on value suggestions.");
+      toast.info("You need to be logged in to vote on item suggestions.");
       setLoginModal({ open: true });
       return;
     }
@@ -430,7 +430,7 @@ export default function ValueSuggestionDetailPage() {
         } else if (res.status === 403) {
           if (data?.detail === "Forbidden") {
             toast.info(
-              "You need to connect your Roblox account to vote on value suggestions.",
+              "You need to connect your Roblox account to vote on item suggestions.",
             );
             setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
           } else {
@@ -1411,7 +1411,7 @@ export default function ValueSuggestionDetailPage() {
                       <TabsContent value="discussion" className="mt-4">
                         <ChangelogComments
                           changelogId={suggestion.id}
-                          changelogTitle={`Value Suggestion #${suggestion.id}`}
+                          changelogTitle={`Item Suggestion #${suggestion.id}`}
                           type="vsuggestion"
                           suggestion={{
                             suggester: suggestion.user.id,
@@ -1433,7 +1433,7 @@ export default function ValueSuggestionDetailPage() {
                     <div className="min-w-0 lg:col-span-3">
                       <ChangelogComments
                         changelogId={suggestion.id}
-                        changelogTitle={`Value Suggestion #${suggestion.id}`}
+                        changelogTitle={`Item Suggestion #${suggestion.id}`}
                         type="vsuggestion"
                         suggestion={{
                           suggester: suggestion.user.id,

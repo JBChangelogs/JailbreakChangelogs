@@ -243,7 +243,7 @@ export default function Comment({
   const formattedDate = formatRelativeDate(parseInt(date));
   const contentType =
     item_type.toLowerCase() === "vsuggestion"
-      ? "Value Suggestion"
+      ? "Item Suggestion"
       : item_type.charAt(0).toUpperCase() + item_type.slice(1);
 
   const hasReactions = reactions && reactions.length > 0;
@@ -363,7 +363,7 @@ export default function Comment({
         <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
           <Image
             src={IMAGE_PATHS.PLACEHOLDER}
-            alt="Value Suggestion"
+            alt="Item Suggestion"
             fill
             className="object-cover"
             onError={handleImageError}
@@ -466,7 +466,7 @@ export default function Comment({
     }
 
     if (item_type.toLowerCase() === "vsuggestion") {
-      return `Value Suggestion #${item_id}`;
+      return `Item Suggestion #${item_id}`;
     }
 
     if (itemDetails?.name) {

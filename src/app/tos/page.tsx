@@ -171,21 +171,21 @@ export default function TermsOfServicePage() {
 
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
-                7. Value Suggestions
+                7. Item Suggestions
               </h2>
               <p className="text-secondary-text mb-4">
-                By submitting a value suggestion on the{" "}
+                By submitting a item suggestion on the{" "}
                 <Link
                   href="/items/suggestions"
                   className="text-link hover:text-link-hover hover:underline"
                 >
-                  Value Suggestions
+                  Item Suggestions
                 </Link>{" "}
                 page, you agree to the following rules. Failure to follow these
                 rules may result in your suggestion being ignored or removed,
                 and repeated or egregious violations may result in a ban from
-                the value suggestion feature at the sole discretion of Value
-                Team managers, website owners, or website moderators.
+                the item suggestion feature at the sole discretion of Value Team
+                managers, website owners, or website moderators.
               </p>
               <ul className="text-secondary-text list-inside list-disc space-y-2">
                 <li>
@@ -210,7 +210,7 @@ export default function TermsOfServicePage() {
                 </li>
                 <li>
                   Your Roblox account must be at least 30 days old to submit or
-                  vote on value suggestions.
+                  vote on item suggestions.
                 </li>
                 <li>
                   Troll suggestions or bad-faith submissions may result in a

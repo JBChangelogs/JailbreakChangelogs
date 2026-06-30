@@ -273,7 +273,7 @@ function ProfileOverflowTabs({
     "Favorites",
     "Private Servers",
     ...(hasRobloxConnection ? ["Trade Ads", "Inventory"] : []),
-    ...(hasValueSuggestionsTab ? ["Value Suggestions"] : []),
+    ...(hasValueSuggestionsTab ? ["Item Suggestions"] : []),
     ...(isOwnProfile ? ["Bans"] : []),
   ];
 

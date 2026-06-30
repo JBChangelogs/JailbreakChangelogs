@@ -187,7 +187,7 @@ export default function ValuesClient({
               </Button>
               <Button asChild>
                 <Link href="/items/suggestions" prefetch={false}>
-                  Value Suggestions
+                  Item Suggestions
                 </Link>
               </Button>
             </div>
