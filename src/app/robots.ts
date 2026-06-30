@@ -27,7 +27,7 @@ export default function robots(): MetadataRoute.Robots {
       "https://jailbreakchangelogs.com/changelogs/sitemap.xml",
       "https://jailbreakchangelogs.com/seasons/sitemap.xml",
       "https://jailbreakchangelogs.com/values/sitemap.xml",
-      "https://jailbreakchangelogs.com/values/changelogs/sitemap.xml",
+      "https://jailbreakchangelogs.com/items/changelogs/sitemap.xml",
     ],
   };
 }

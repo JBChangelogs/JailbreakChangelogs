@@ -2326,7 +2326,7 @@ export default function ValueSuggestionsPage() {
                     <Link href="/values">Value List</Link>
                   </Button>
                   <Button asChild variant="default" size="sm">
-                    <Link href="/values/changelogs">Value Changelogs</Link>
+                    <Link href="/items/changelogs">Item Changelogs</Link>
                   </Button>
                   <Button
                     variant="default"

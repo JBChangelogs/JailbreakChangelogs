@@ -544,7 +544,7 @@ export default function ItemChangelogs({
               suggestions in one place.
             </p>
             <Button asChild className="gap-2">
-              <Link href="/values/changelogs">
+              <Link href="/items/changelogs">
                 <svg
                   className="h-4 w-4"
                   fill="none"

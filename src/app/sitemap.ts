@@ -85,7 +85,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "hourly" as const,
     },
     {
-      url: `${BASE_URL}/values/changelogs`,
+      url: `${BASE_URL}/items/changelogs`,
       lastModified: new Date().toISOString(),
       priority: 0.7,
       changeFrequency: "daily" as const,
@@ -173,7 +173,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
     },
     {
-      url: `${BASE_URL}/values/changelogs/sitemap.xml`,
+      url: `${BASE_URL}/items/changelogs/sitemap.xml`,
       lastModified: new Date().toISOString(),
       priority: 0.8,
       changeFrequency: "daily" as const,

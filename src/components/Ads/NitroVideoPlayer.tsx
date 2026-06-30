@@ -40,7 +40,7 @@ export default function NitroVideoPlayer() {
       pathname === "/trading" ||
       pathname === "/items/suggestions" ||
       pathname.startsWith("/items/suggestions/") ||
-      pathname.startsWith("/values/changelogs/") ||
+      pathname.startsWith("/items/changelogs/") ||
       pathname.startsWith("/item/") ||
       isChangelogDetailRoute ||
       isSeasonDetailRoute;

@@ -360,7 +360,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
             No value changes have been recorded for this item yet.
           </p>
           <Button asChild variant="default" size="sm">
-            <Link href="/values/changelogs">View All Changelogs</Link>
+            <Link href="/items/changelogs">View All Changelogs</Link>
           </Button>
         </div>
       </div>
@@ -375,7 +375,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
           Item Changes ({total})
         </h3>
         <Button asChild size="sm" variant="default">
-          <Link href="/values/changelogs">All Changelogs</Link>
+          <Link href="/items/changelogs">All Changelogs</Link>
         </Button>
       </div>
 

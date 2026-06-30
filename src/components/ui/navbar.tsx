@@ -508,9 +508,9 @@ export const NavbarModern = ({
                       description="Submit and vote on community value change suggestions"
                     />
                     <NavDropdownItem
-                      href="/values/changelogs"
+                      href="/items/changelogs"
                       icon="material-symbols:history-rounded"
-                      title="Value Changelogs"
+                      title="Item Changelogs"
                       description="Dig into every value update — the reasoning, who voted, and who made the final call"
                     />
                     <NavDropdownItem

@@ -368,9 +368,9 @@ const MobileDrawer = memo(function MobileDrawer({
             onClick={onClose}
           />
           <MobileNavItem
-            href="/values/changelogs"
+            href="/items/changelogs"
             icon="material-symbols:history-rounded"
-            label="Value Changelogs"
+            label="Item Changelogs"
             onClick={onClose}
           />
           <MobileNavItem
