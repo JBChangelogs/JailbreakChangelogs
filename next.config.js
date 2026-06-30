@@ -99,6 +99,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/items",
+        destination: "/values",
+        permanent: false,
+      },
+      {
         source: "/values/suggestions",
         destination: "/items/suggestions",
         permanent: true,
