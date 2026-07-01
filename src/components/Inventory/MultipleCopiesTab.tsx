@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useLayoutEffect } from "react";
 import Link from "next/link";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -29,6 +29,7 @@ interface DuplicatesTabProps {
   robloxUsers: Record<string, RobloxUser>;
   onItemClick: (item: InventoryItem) => void;
   itemsData: Item[];
+  isActive?: boolean;
 }
 
 type SortOrder =
@@ -97,6 +98,7 @@ export default function DuplicatesTab({
   robloxUsers,
   onItemClick,
   itemsData,
+  isActive = true,
 }: DuplicatesTabProps) {
   "use no memo";
   const [searchTerm, setSearchTerm] = useState("");
@@ -337,6 +339,16 @@ export default function DuplicatesTab({
     estimateSize: () => 80,
     overscan: 5,
   });
+
+  // This tab stays mounted-but-hidden (display:none) when switching away, so
+  // its ResizeObserver can miss the hidden -> visible transition and measure
+  // a 0px container. Force a synchronous remeasure once the tab is actually
+  // shown again, before the browser paints.
+  useLayoutEffect(() => {
+    if (isActive) {
+      virtualizer.measure();
+    }
+  }, [isActive, virtualizer]);
 
   // Parse numeric values
   const parseNumericValue = (value: string | null): number => {

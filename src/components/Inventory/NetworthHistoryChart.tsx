@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -32,6 +32,7 @@ import { UserNetworthData } from "@/utils/api/api";
 interface NetworthHistoryChartProps {
   userId: string;
   initialData?: UserNetworthData[];
+  isActive?: boolean;
 }
 
 type DateRange = "10" | "25" | "50" | "100" | "250" | "all";
@@ -50,10 +51,20 @@ const BASE_DATE_RANGE_OPTIONS: {
 
 const NetworthHistoryChart = ({
   initialData = [],
+  isActive = true,
 }: NetworthHistoryChartProps) => {
   const filteredHistory = initialData.filter(
     (item) => item.snapshot_time && item.networth !== undefined,
   );
+
+  // The Graphs tab stays mounted-but-hidden (display:none) when switching
+  // away, and ResponsiveContainer can measure a 0px container if it first
+  // mounts while hidden. Defer mounting the chart until the tab has actually
+  // been shown once, then keep it rendered permanently (avoids remounting
+  // recharts on every tab switch).
+  const hasBeenActiveRef = useRef(isActive);
+  if (isActive) hasBeenActiveRef.current = true;
+  const renderChart = hasBeenActiveRef.current;
 
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [chartType] = useState<ChartType>("area");
@@ -319,237 +330,247 @@ const NetworthHistoryChart = ({
         </div>
 
         <div className="h-87.5">
-          <ChartContainer
-            config={networthChartConfig}
-            className="h-full w-full"
-          >
-            {chartType === "area" ? (
-              <AreaChart
-                accessibilityLayer
-                data={networthChartData}
-                margin={{ left: 6, right: 6 }}
-              >
-                <defs>
-                  <linearGradient
-                    id={networthGradientId}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="5%"
-                      stopColor="var(--color-networth)"
-                      stopOpacity={0.45}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="var(--color-networth)"
-                      stopOpacity={0.04}
-                    />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  vertical={false}
-                  stroke="var(--color-border-card)"
-                  strokeOpacity={0.5}
-                />
-                <XAxis
-                  dataKey="timestamp"
-                  type="number"
-                  scale="time"
-                  domain={["dataMin", "dataMax"]}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={false}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={isSmallScreen ? 0 : 8}
-                  width={isSmallScreen ? 0 : 56}
-                  domain={[networthAxisMin, networthAxisMax]}
-                  tick={
-                    isSmallScreen
-                      ? false
-                      : {
-                          fill: "var(--color-secondary-text)",
-                          fontSize: 12,
-                        }
-                  }
-                  tickFormatter={(tickValue: number) =>
-                    formatValue(Number(tickValue))
-                  }
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      className="min-w-48 px-3 py-2"
-                      formatter={(value) => (
-                        <div className="flex w-full items-center justify-between gap-3">
-                          <span className="text-secondary-text flex items-center gap-2">
-                            <span
-                              className="h-2.5 w-2.5 shrink-0 rounded-xs"
-                              style={{
-                                backgroundColor: "var(--color-networth)",
-                              }}
-                            />
-                            Networth
-                          </span>
-                          <span className="text-primary-text font-mono font-semibold tabular-nums">
-                            {value === null || value === undefined
-                              ? "N/A"
-                              : Number(value).toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      labelFormatter={(_, payload) => {
-                        const row = payload?.[0]?.payload as
-                          | { timestamp?: number | string }
-                          | undefined;
-                        const timestamp =
-                          typeof row?.timestamp === "number"
-                            ? row.timestamp
-                            : Number(row?.timestamp);
-                        if (!Number.isFinite(timestamp)) {
-                          return "Unknown Date";
-                        }
-                        return new Date(timestamp).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        });
-                      }}
-                    />
-                  }
-                />
-                <RechartsLegend
-                  verticalAlign="bottom"
-                  formatter={(value) => (
-                    <span style={{ color: "var(--color-secondary-text)" }}>
-                      {value}
-                    </span>
-                  )}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="networth"
-                  name="Networth"
-                  fill={`url(#${networthGradientId})`}
-                  fillOpacity={1}
-                  stroke="var(--color-networth)"
-                  strokeWidth={3}
-                  dot={false}
-                  isAnimationActive={false}
-                  activeDot={{
-                    r: 5,
-                    fill: "var(--color-secondary-bg)",
-                    stroke: "var(--color-networth)",
-                    strokeWidth: 2,
-                  }}
-                />
-              </AreaChart>
-            ) : (
-              <BarChart
-                accessibilityLayer
-                data={networthChartData}
-                margin={{ left: 6, right: 6 }}
-              >
-                <CartesianGrid
-                  vertical={false}
-                  stroke="var(--color-border-card)"
-                  strokeOpacity={0.5}
-                />
-                <XAxis
-                  dataKey="timestamp"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={false}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={isSmallScreen ? 0 : 8}
-                  width={isSmallScreen ? 0 : 56}
-                  domain={[networthAxisMin, networthAxisMax]}
-                  tick={
-                    isSmallScreen
-                      ? false
-                      : {
-                          fill: "var(--color-secondary-text)",
-                          fontSize: 12,
-                        }
-                  }
-                  tickFormatter={(tickValue: number) =>
-                    formatValue(Number(tickValue))
-                  }
-                />
-                <ChartTooltip
-                  cursor={{
-                    fill: "#6b7280",
-                    fillOpacity: 0.28,
-                  }}
-                  content={
-                    <ChartTooltipContent
-                      className="min-w-48 px-3 py-2"
-                      formatter={(value) => (
-                        <div className="flex w-full items-center justify-between gap-3">
-                          <span className="text-secondary-text flex items-center gap-2">
-                            <span
-                              className="h-2.5 w-2.5 shrink-0 rounded-xs"
-                              style={{
-                                backgroundColor: "var(--color-networth)",
-                              }}
-                            />
-                            Networth
-                          </span>
-                          <span className="text-primary-text font-mono font-semibold tabular-nums">
-                            {value === null || value === undefined
-                              ? "N/A"
-                              : Number(value).toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      labelFormatter={(_, payload) => {
-                        const row = payload?.[0]?.payload as
-                          | { timestamp?: number | string }
-                          | undefined;
-                        const timestamp =
-                          typeof row?.timestamp === "number"
-                            ? row.timestamp
-                            : Number(row?.timestamp);
-                        if (!Number.isFinite(timestamp)) {
-                          return "Unknown Date";
-                        }
-                        return new Date(timestamp).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        });
-                      }}
-                    />
-                  }
-                />
-                <RechartsLegend
-                  verticalAlign="bottom"
-                  formatter={(value) => (
-                    <span style={{ color: "var(--color-secondary-text)" }}>
-                      {value}
-                    </span>
-                  )}
-                />
-                <Bar
-                  dataKey="networth"
-                  name="Networth"
-                  fill="var(--color-networth)"
-                  fillOpacity={0.7}
-                  radius={[6, 6, 0, 0]}
-                  isAnimationActive={false}
-                />
-              </BarChart>
-            )}
-          </ChartContainer>
+          {!renderChart ? (
+            <Skeleton className="h-full w-full" />
+          ) : (
+            <ChartContainer
+              config={networthChartConfig}
+              className="h-full w-full"
+            >
+              {chartType === "area" ? (
+                <AreaChart
+                  accessibilityLayer
+                  data={networthChartData}
+                  margin={{ left: 6, right: 6 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id={networthGradientId}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="var(--color-networth)"
+                        stopOpacity={0.45}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="var(--color-networth)"
+                        stopOpacity={0.04}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    vertical={false}
+                    stroke="var(--color-border-card)"
+                    strokeOpacity={0.5}
+                  />
+                  <XAxis
+                    dataKey="timestamp"
+                    type="number"
+                    scale="time"
+                    domain={["dataMin", "dataMax"]}
+                    tickLine={false}
+                    axisLine={false}
+                    tick={false}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={isSmallScreen ? 0 : 8}
+                    width={isSmallScreen ? 0 : 56}
+                    domain={[networthAxisMin, networthAxisMax]}
+                    tick={
+                      isSmallScreen
+                        ? false
+                        : {
+                            fill: "var(--color-secondary-text)",
+                            fontSize: 12,
+                          }
+                    }
+                    tickFormatter={(tickValue: number) =>
+                      formatValue(Number(tickValue))
+                    }
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent
+                        className="min-w-48 px-3 py-2"
+                        formatter={(value) => (
+                          <div className="flex w-full items-center justify-between gap-3">
+                            <span className="text-secondary-text flex items-center gap-2">
+                              <span
+                                className="h-2.5 w-2.5 shrink-0 rounded-xs"
+                                style={{
+                                  backgroundColor: "var(--color-networth)",
+                                }}
+                              />
+                              Networth
+                            </span>
+                            <span className="text-primary-text font-mono font-semibold tabular-nums">
+                              {value === null || value === undefined
+                                ? "N/A"
+                                : Number(value).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        labelFormatter={(_, payload) => {
+                          const row = payload?.[0]?.payload as
+                            | { timestamp?: number | string }
+                            | undefined;
+                          const timestamp =
+                            typeof row?.timestamp === "number"
+                              ? row.timestamp
+                              : Number(row?.timestamp);
+                          if (!Number.isFinite(timestamp)) {
+                            return "Unknown Date";
+                          }
+                          return new Date(timestamp).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          );
+                        }}
+                      />
+                    }
+                  />
+                  <RechartsLegend
+                    verticalAlign="bottom"
+                    formatter={(value) => (
+                      <span style={{ color: "var(--color-secondary-text)" }}>
+                        {value}
+                      </span>
+                    )}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="networth"
+                    name="Networth"
+                    fill={`url(#${networthGradientId})`}
+                    fillOpacity={1}
+                    stroke="var(--color-networth)"
+                    strokeWidth={3}
+                    dot={false}
+                    isAnimationActive={false}
+                    activeDot={{
+                      r: 5,
+                      fill: "var(--color-secondary-bg)",
+                      stroke: "var(--color-networth)",
+                      strokeWidth: 2,
+                    }}
+                  />
+                </AreaChart>
+              ) : (
+                <BarChart
+                  accessibilityLayer
+                  data={networthChartData}
+                  margin={{ left: 6, right: 6 }}
+                >
+                  <CartesianGrid
+                    vertical={false}
+                    stroke="var(--color-border-card)"
+                    strokeOpacity={0.5}
+                  />
+                  <XAxis
+                    dataKey="timestamp"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={false}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={isSmallScreen ? 0 : 8}
+                    width={isSmallScreen ? 0 : 56}
+                    domain={[networthAxisMin, networthAxisMax]}
+                    tick={
+                      isSmallScreen
+                        ? false
+                        : {
+                            fill: "var(--color-secondary-text)",
+                            fontSize: 12,
+                          }
+                    }
+                    tickFormatter={(tickValue: number) =>
+                      formatValue(Number(tickValue))
+                    }
+                  />
+                  <ChartTooltip
+                    cursor={{
+                      fill: "#6b7280",
+                      fillOpacity: 0.28,
+                    }}
+                    content={
+                      <ChartTooltipContent
+                        className="min-w-48 px-3 py-2"
+                        formatter={(value) => (
+                          <div className="flex w-full items-center justify-between gap-3">
+                            <span className="text-secondary-text flex items-center gap-2">
+                              <span
+                                className="h-2.5 w-2.5 shrink-0 rounded-xs"
+                                style={{
+                                  backgroundColor: "var(--color-networth)",
+                                }}
+                              />
+                              Networth
+                            </span>
+                            <span className="text-primary-text font-mono font-semibold tabular-nums">
+                              {value === null || value === undefined
+                                ? "N/A"
+                                : Number(value).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        labelFormatter={(_, payload) => {
+                          const row = payload?.[0]?.payload as
+                            | { timestamp?: number | string }
+                            | undefined;
+                          const timestamp =
+                            typeof row?.timestamp === "number"
+                              ? row.timestamp
+                              : Number(row?.timestamp);
+                          if (!Number.isFinite(timestamp)) {
+                            return "Unknown Date";
+                          }
+                          return new Date(timestamp).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          );
+                        }}
+                      />
+                    }
+                  />
+                  <RechartsLegend
+                    verticalAlign="bottom"
+                    formatter={(value) => (
+                      <span style={{ color: "var(--color-secondary-text)" }}>
+                        {value}
+                      </span>
+                    )}
+                  />
+                  <Bar
+                    dataKey="networth"
+                    name="Networth"
+                    fill="var(--color-networth)"
+                    fillOpacity={0.7}
+                    radius={[6, 6, 0, 0]}
+                    isAnimationActive={false}
+                  />
+                </BarChart>
+              )}
+            </ChartContainer>
+          )}
         </div>
 
         {(networthTrend || networthRangeLabel) && (

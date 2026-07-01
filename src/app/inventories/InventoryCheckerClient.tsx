@@ -1274,6 +1274,7 @@ export default function InventoryCheckerClient({
                             robloxUsers={deferredRobloxUsers}
                             onItemClick={handleItemClick}
                             itemsData={itemsData}
+                            isActive={effectiveActiveTab === tabIndex.copies}
                           />
                         )}
                       </div>
@@ -1313,6 +1314,7 @@ export default function InventoryCheckerClient({
                             <MemoNetworthHistoryChart
                               userId={robloxId}
                               initialData={networthData}
+                              isActive={effectiveActiveTab === tabIndex.graphs}
                             />
                           </div>
 
@@ -1323,6 +1325,7 @@ export default function InventoryCheckerClient({
                             <MemoMoneyHistoryChart
                               userId={robloxId}
                               initialData={moneyHistoryData}
+                              isActive={effectiveActiveTab === tabIndex.graphs}
                             />
                           </div>
                         </div>
