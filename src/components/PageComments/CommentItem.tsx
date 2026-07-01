@@ -121,6 +121,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     setBreakdownTab,
     getStableReactionOrder,
     isTester,
+    canDeleteAnyComment,
   } = useCommentsContext();
   const { twemojiEnabled } = useTwemoji();
 
@@ -734,16 +735,30 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             </DropdownMenuItem>
                           </>
                         ) : (
-                          <DropdownMenuItem
-                            onClick={() => handleReportClick(comment.id)}
-                            className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
-                          >
-                            <Icon
-                              icon="heroicons-outline:flag"
-                              className="mr-2 h-4 w-4"
-                            />
-                            Report Comment
-                          </DropdownMenuItem>
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => handleReportClick(comment.id)}
+                              className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
+                            >
+                              <Icon
+                                icon="heroicons-outline:flag"
+                                className="mr-2 h-4 w-4"
+                              />
+                              Report Comment
+                            </DropdownMenuItem>
+                            {canDeleteAnyComment && (
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteComment(comment.id)}
+                                className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                              >
+                                <Icon
+                                  icon="heroicons-outline:trash"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Delete Comment (Moderator)
+                              </DropdownMenuItem>
+                            )}
+                          </>
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -1025,13 +1040,27 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                   </ContextMenuItem>
                 </>
               ) : (
-                <ContextMenuItem
-                  onClick={() => handleReportClick(comment.id)}
-                  className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
-                >
-                  <Icon icon="heroicons-outline:flag" className="h-4 w-4" />
-                  Report Comment
-                </ContextMenuItem>
+                <>
+                  <ContextMenuItem
+                    onClick={() => handleReportClick(comment.id)}
+                    className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                  >
+                    <Icon icon="heroicons-outline:flag" className="h-4 w-4" />
+                    Report Comment
+                  </ContextMenuItem>
+                  {canDeleteAnyComment && (
+                    <ContextMenuItem
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                    >
+                      <Icon
+                        icon="heroicons-outline:trash"
+                        className="h-4 w-4"
+                      />
+                      Delete Comment (Moderator)
+                    </ContextMenuItem>
+                  )}
+                </>
               )}
             </>
           )}
@@ -1438,18 +1467,34 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                           </DropdownMenuItem>
                                         </>
                                       ) : (
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleReportClick(reply.id)
-                                          }
-                                          className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
-                                        >
-                                          <Icon
-                                            icon="heroicons-outline:flag"
-                                            className="mr-2 h-4 w-4"
-                                          />
-                                          Report Comment
-                                        </DropdownMenuItem>
+                                        <>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleReportClick(reply.id)
+                                            }
+                                            className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
+                                          >
+                                            <Icon
+                                              icon="heroicons-outline:flag"
+                                              className="mr-2 h-4 w-4"
+                                            />
+                                            Report Comment
+                                          </DropdownMenuItem>
+                                          {canDeleteAnyComment && (
+                                            <DropdownMenuItem
+                                              onClick={() =>
+                                                handleDeleteComment(reply.id)
+                                              }
+                                              className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                                            >
+                                              <Icon
+                                                icon="heroicons-outline:trash"
+                                                className="mr-2 h-4 w-4"
+                                              />
+                                              Delete (Moderator)
+                                            </DropdownMenuItem>
+                                          )}
+                                        </>
                                       )}
                                     </DropdownMenuContent>
                                   </DropdownMenu>
@@ -1665,16 +1710,32 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                 </ContextMenuItem>
                               </>
                             ) : (
-                              <ContextMenuItem
-                                onClick={() => handleReportClick(reply.id)}
-                                className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
-                              >
-                                <Icon
-                                  icon="heroicons-outline:flag"
-                                  className="h-4 w-4"
-                                />
-                                Report Comment
-                              </ContextMenuItem>
+                              <>
+                                <ContextMenuItem
+                                  onClick={() => handleReportClick(reply.id)}
+                                  className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                                >
+                                  <Icon
+                                    icon="heroicons-outline:flag"
+                                    className="h-4 w-4"
+                                  />
+                                  Report Comment
+                                </ContextMenuItem>
+                                {canDeleteAnyComment && (
+                                  <ContextMenuItem
+                                    onClick={() =>
+                                      handleDeleteComment(reply.id)
+                                    }
+                                    className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                                  >
+                                    <Icon
+                                      icon="heroicons-outline:trash"
+                                      className="h-4 w-4"
+                                    />
+                                    Delete Comment (Moderator)
+                                  </ContextMenuItem>
+                                )}
+                              </>
                             )}
                           </>
                         )}

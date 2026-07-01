@@ -1328,6 +1328,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
         f.enabled === true,
     ) ?? false;
 
+  const canDeleteAnyComment =
+    (user as UserData | null)?.flags?.some(
+      (f) =>
+        (f.flag === "is_owner" || f.flag === "website_moderator") &&
+        f.enabled === true,
+    ) ?? false;
+
   return {
     changelogId,
     changelogTitle,
@@ -1408,5 +1415,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
     getStableReactionOrder,
     setLoginModal,
     isTester,
+    canDeleteAnyComment,
   };
 }
