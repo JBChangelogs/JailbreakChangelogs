@@ -745,7 +745,7 @@ function ItemCard({
               )}
           </div>
 
-          <div className="border-border-card text-secondary-text mt-auto flex flex-col gap-1 border-t pt-1 text-[10px] sm:flex-row sm:items-center sm:justify-between sm:pt-2 sm:text-xs">
+          <div className="text-secondary-text mt-auto flex flex-col gap-1 pt-1 text-[10px] sm:flex-row sm:items-center sm:justify-between sm:pt-2 sm:text-xs">
             {currentItemData.last_updated ? (
               <Tooltip>
                 <TooltipTrigger asChild>

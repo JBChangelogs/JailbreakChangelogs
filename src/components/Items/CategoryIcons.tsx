@@ -71,7 +71,7 @@ const STATIC_CATEGORIES = [
     name: "Limited",
     icon: "mdi:clock",
     iconComponent: null as null,
-    bgColor: "rgba(18, 78, 102, 0.1)",
+    bgColor: "rgba(255, 215, 0, 0.1)",
     iconColor: "#ffd700",
     onClick: undefined as (() => void) | undefined,
   },

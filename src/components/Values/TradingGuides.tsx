@@ -222,7 +222,7 @@ function TradingGuides({
             Trading Guides & Information
           </h3>
           {!isExpanded && (
-            <span className="bg-button-info text-form-button-text hidden animate-pulse items-center rounded-full px-2 py-1 text-xs font-medium md:inline-flex">
+            <span className="bg-button-info text-form-button-text hidden animate-pulse items-center rounded-lg px-2 py-1 text-xs font-medium md:inline-flex">
               Click me!
             </span>
           )}
