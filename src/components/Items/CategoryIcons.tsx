@@ -109,7 +109,9 @@ function CategoryIcons({
 
   return (
     <div className="mb-8">
-      <h3 className="text-primary-text mb-6 text-2xl font-bold">Categories</h3>
+      <h3 className="text-primary-text mb-4 text-2xl font-bold">
+        Item Categories ({categories.length})
+      </h3>
       <div className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 scrollbar-thin scrollbar-track-transparent grid-cols-1 gap-4 overflow-y-auto p-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {categories.map((category) => {
           const isSelected = selectedFilter === category.id;
@@ -121,7 +123,7 @@ function CategoryIcons({
               onClick={
                 category.onClick || (() => handleCategoryClick(category.id))
               }
-              className={`order-(--mobile-order) flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all sm:order-0 sm:p-4 ${
+              className={`order-(--mobile-order) flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all hover:bg-(--hover-bg) sm:order-0 sm:p-4 ${
                 isSelected
                   ? "bg-tertiary-bg ring-border-focus ring-2"
                   : "bg-tertiary-bg"
@@ -130,6 +132,7 @@ function CategoryIcons({
                 {
                   borderColor: category.iconColor,
                   "--mobile-order": mobileOrder,
+                  "--hover-bg": category.bgColor,
                   "--tw-ring-color": isSelected
                     ? category.iconColor
                     : undefined,

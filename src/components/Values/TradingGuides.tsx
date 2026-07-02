@@ -205,7 +205,7 @@ function TradingGuides({
   };
 
   return (
-    <div className="border-secondary-text mt-8 border-t pt-8">
+    <div>
       {/* Collapsible Header */}
       <button
         onClick={() => {

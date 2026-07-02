@@ -22,6 +22,7 @@ import { valueSortOptions } from "./valuesSortOptions";
 import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { formatRelativeDate } from "@/utils/helpers/timestamp";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
@@ -195,7 +196,7 @@ export default function ValuesClient({
             <Link
               href="/items/suggestions"
               prefetch={false}
-              className="border-border-card bg-tertiary-bg mb-4 flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors"
+              className="border-border-card bg-tertiary-bg mb-4 flex flex-col gap-1 rounded-lg border px-4 py-3 transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-3"
             >
               <p className="text-secondary-text text-sm">
                 Think a value is wrong?{" "}
@@ -204,13 +205,13 @@ export default function ValuesClient({
                 </span>{" "}
                 to help keep the value list accurate.
               </p>
+              {lastUpdated && (
+                <p className="text-secondary-text shrink-0 text-xs">
+                  Last updated: {formatClientDate(lastUpdated)} (
+                  {formatRelativeDate(lastUpdated)})
+                </p>
+              )}
             </Link>
-
-            {lastUpdated && (
-              <p className="text-secondary-text mb-4 text-sm">
-                Last updated: {formatClientDate(lastUpdated)}
-              </p>
-            )}
           </div>
 
           <NitroValuesVideoPlayer className="w-full self-center lg:self-start" />

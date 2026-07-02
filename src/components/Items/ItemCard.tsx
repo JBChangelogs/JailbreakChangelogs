@@ -497,86 +497,92 @@ function ItemCard({
           )}
         </div>
         <div className="flex flex-1 flex-col space-y-2 p-2 sm:space-y-4 sm:p-4">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-primary-text group-hover:text-link text-sm font-semibold transition-colors min-[375px]:text-xs min-[425px]:text-sm sm:text-lg">
-              {item.name}
-            </h3>
-            {item.notes && item.notes !== "N/A" && item.notes.trim() !== "" && (
-              <div className="relative z-20 hidden shrink-0 lg:block">
+          <div className="flex flex-col gap-1 sm:gap-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-primary-text group-hover:text-link text-sm font-semibold transition-colors min-[375px]:text-xs min-[425px]:text-sm sm:text-lg">
+                {item.name}
+              </h3>
+              {item.notes &&
+                item.notes !== "N/A" &&
+                item.notes.trim() !== "" && (
+                  <div className="relative z-20 hidden shrink-0 lg:block">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg text-secondary-text hover:text-primary-text flex cursor-help items-center justify-center rounded-md border p-1 transition-colors duration-200">
+                          <Icon
+                            icon="mdi:information-outline"
+                            className="h-3.5 w-3.5 sm:h-4 sm:w-4"
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>{item.notes}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                )}
+            </div>
+
+            <div className="flex flex-wrap gap-1 sm:gap-2">
+              <span
+                className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
+                style={{
+                  borderColor: getCategoryColor(item.type),
+                }}
+              >
+                {item.type}
+              </span>
+              {currentItemData.tradable === 0 && (
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex">
+                  {currentItemData.id === 713
+                    ? "Reference Only"
+                    : "Non-Tradable"}
+                </span>
+              )}
+              {isValuesPage && cashChange && cashChange.difference !== 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg text-secondary-text hover:text-primary-text flex cursor-help items-center justify-center rounded-md border p-1 transition-colors duration-200">
-                      <Icon
-                        icon="mdi:information-outline"
-                        className="h-3.5 w-3.5 sm:h-4 sm:w-4"
-                      />
-                    </div>
+                    <span
+                      className={`inline-flex items-center text-[10px] font-semibold sm:text-xs ${
+                        cashChange.difference > 0
+                          ? "text-status-success"
+                          : "text-status-error"
+                      }`}
+                    >
+                      {cashChange.difference > 0 ? "+" : "-"}
+                      {formatChange(cashChange.difference)}
+                    </span>
                   </TooltipTrigger>
-                  <TooltipContent>{item.notes}</TooltipContent>
-                </Tooltip>
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-wrap gap-1 pb-2 sm:gap-2">
-            <span
-              className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
-              style={{
-                borderColor: getCategoryColor(item.type),
-              }}
-            >
-              {item.type}
-            </span>
-            {currentItemData.tradable === 0 && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex">
-                {currentItemData.id === 713 ? "Reference Only" : "Non-Tradable"}
-              </span>
-            )}
-            {isValuesPage && cashChange && cashChange.difference !== 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span
-                    className={`inline-flex items-center text-[10px] font-semibold sm:text-xs ${
-                      cashChange.difference > 0
-                        ? "text-status-success"
-                        : "text-status-error"
-                    }`}
-                  >
-                    {cashChange.difference > 0 ? "+" : "-"}
+                  <TooltipContent>
+                    Cash Value{" "}
+                    {cashChange.difference > 0 ? "increased" : "decreased"} by{" "}
                     {formatChange(cashChange.difference)}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Cash Value{" "}
-                  {cashChange.difference > 0 ? "increased" : "decreased"} by{" "}
-                  {formatChange(cashChange.difference)}
-                </TooltipContent>
-              </Tooltip>
-            )}
-            {isValuesPage && dupedChange && dupedChange.difference !== 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span
-                    className={`inline-flex items-center text-[10px] font-semibold sm:text-xs ${
-                      dupedChange.difference > 0
-                        ? "text-status-success"
-                        : "text-status-error"
-                    }`}
-                  >
-                    {dupedChange.difference > 0 ? "+" : "-"}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {isValuesPage && dupedChange && dupedChange.difference !== 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      className={`inline-flex items-center text-[10px] font-semibold sm:text-xs ${
+                        dupedChange.difference > 0
+                          ? "text-status-success"
+                          : "text-status-error"
+                      }`}
+                    >
+                      {dupedChange.difference > 0 ? "+" : "-"}
+                      {formatChange(dupedChange.difference)}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Duped Value{" "}
+                    {dupedChange.difference > 0 ? "increased" : "decreased"} by{" "}
                     {formatChange(dupedChange.difference)}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Duped Value{" "}
-                  {dupedChange.difference > 0 ? "increased" : "decreased"} by{" "}
-                  {formatChange(dupedChange.difference)}
-                </TooltipContent>
-              </Tooltip>
-            )}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-1 pb-2 sm:space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             {isValuesPage ? (
               <div className="border-border-card bg-tertiary-bg grid grid-cols-2 rounded-lg border">
                 <div className="flex flex-col gap-1.5 p-1.5 sm:p-3">
