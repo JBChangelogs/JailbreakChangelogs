@@ -86,6 +86,10 @@ const USER_ACCESS_ERROR_PREFIXES = [
 ] as const;
 
 function getErrorMessageFromResponse(data: unknown, fallback: string): string {
+  if (typeof data === "string" && data.trim()) {
+    return data;
+  }
+
   if (!data || typeof data !== "object") {
     return fallback;
   }

@@ -6,7 +6,7 @@ import React from "react";
 const log = createLogger("UI");
 import { Icon } from "@/components/ui/IconWrapper";
 import { formatProfileDate } from "@/utils/helpers/timestamp";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuthContext, getJbclToken } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,7 @@ import DOMPurify from "dompurify";
 import type { UserData } from "@/types/auth";
 import { Button } from "@/components/ui/button";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
+import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,6 +71,13 @@ const processMentions = (text: string): string => {
   });
 };
 
+const URL_PATTERN =
+  /\b(?:https?:\/\/|www\.)\S+|\b[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.(?:gg|com|net|org|me|io|gl|ly|co|xyz|app|dev|chat|tv)(?:\/\S*)?\b/gi;
+
+const redactLinks = (text: string): string => {
+  return text.replace(URL_PATTERN, "[REDACTED]");
+};
+
 const sanitizeHTML = (html: string): string => {
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ["span", "br"],
@@ -100,6 +108,42 @@ const ServerList: React.FC<{
     null,
   );
   const [deletingServer, setDeletingServer] = React.useState(false);
+  const [expandedRules, setExpandedRules] = React.useState<Set<number>>(
+    new Set(),
+  );
+  const [truncatedRules, setTruncatedRules] = React.useState<Set<number>>(
+    new Set(),
+  );
+  const ruleParagraphRefs = React.useRef<Map<number, HTMLParagraphElement>>(
+    new Map(),
+  );
+
+  const measureRulesTruncation = React.useCallback((serverId: number) => {
+    const node = ruleParagraphRefs.current.get(serverId);
+    if (!node) return;
+    const isOverflowing = node.scrollHeight > node.clientHeight + 1;
+    setTruncatedRules((prev) => {
+      const alreadyMarked = prev.has(serverId);
+      if (isOverflowing === alreadyMarked) return prev;
+      const next = new Set(prev);
+      if (isOverflowing) {
+        next.add(serverId);
+      } else {
+        next.delete(serverId);
+      }
+      return next;
+    });
+  }, []);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      ruleParagraphRefs.current.forEach((_node, serverId) =>
+        measureRulesTruncation(serverId),
+      );
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [measureRulesTruncation]);
   const [page, setPage] = React.useState(1);
   const itemsPerPage = 15;
 
@@ -265,7 +309,10 @@ const ServerList: React.FC<{
       setError(null);
 
       try {
-        const serversResponse = await fetch("/api/servers/list", {
+        if (!PUBLIC_API_URL) {
+          throw new Error("Missing PUBLIC_API_URL");
+        }
+        const serversResponse = await fetch(`${PUBLIC_API_URL}/servers/list`, {
           cache: "no-store",
         });
         if (!serversResponse.ok) {
@@ -323,7 +370,10 @@ const ServerList: React.FC<{
 
   const handleServerAdded = async () => {
     try {
-      const serversResponse = await fetch("/api/servers/list", {
+      if (!PUBLIC_API_URL) {
+        throw new Error("Missing PUBLIC_API_URL");
+      }
+      const serversResponse = await fetch(`${PUBLIC_API_URL}/servers/list`, {
         cache: "no-store",
       });
       if (!serversResponse.ok) {
@@ -364,7 +414,8 @@ const ServerList: React.FC<{
   const confirmDeleteServer = async () => {
     if (!serverToDelete) return;
     if (deletingServer) return;
-    if (!isAuthenticated) {
+    const owner = getJbclToken();
+    if (!isAuthenticated || !PUBLIC_API_URL || !owner) {
       toast.info("You must be logged in to delete a server.");
       setDeleteModalOpen(false);
       setServerToDelete(null);
@@ -373,25 +424,25 @@ const ServerList: React.FC<{
     setDeletingServer(true);
     const deletingToastId = toast.loading("Deleting server...");
     try {
-      const response = await fetch(`/api/servers/delete`, {
+      const response = await fetch(`${PUBLIC_API_URL}/servers/delete`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           link: serverToDelete.link,
+          owner,
         }),
       });
       if (response.ok) {
         toast.success("Server deleted successfully!", { id: deletingToastId });
         handleServerAdded();
       } else {
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: "Failed to delete server" }));
-        toast.error(`Error deleting server: ${errorData.message}`, {
-          id: deletingToastId,
-        });
+        const message = await getResponseErrorMessage(
+          response,
+          "Failed to delete server",
+        );
+        toast.error(message, { id: deletingToastId });
       }
     } catch {
       toast.error("An error occurred while deleting the server.", {
@@ -564,10 +615,6 @@ const ServerList: React.FC<{
               size="sm"
               className="shrink-0 whitespace-nowrap"
             >
-              <Icon
-                icon="heroicons:plus-circle"
-                className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5"
-              />
               <span className="hidden sm:inline">Add server</span>
               <span className="sm:hidden">Add</span>
             </Button>
@@ -601,39 +648,18 @@ const ServerList: React.FC<{
               : formatProfileDate(server.expires);
           const hasRules = Boolean(server.rules && server.rules !== "N/A");
           const parsedRules = hasRules
-            ? sanitizeHTML(processMentions(sanitizeText(server.rules)))
+            ? sanitizeHTML(
+                processMentions(redactLinks(sanitizeText(server.rules))),
+              )
             : "No rules set by owner";
-          const shouldShowRulesExpand = hasRules && server.rules.length > 140;
-
-          // Background style for different supporter tiers
-          const getBackgroundStyle = (): React.CSSProperties => {
-            if (!isSupporter) return {};
-
-            switch (premiumType) {
-              case 1:
-                return {
-                  backgroundColor: "var(--color-supporter-bronze-bg)",
-                };
-              case 2:
-                return {
-                  backgroundColor: "var(--color-supporter-silver-bg)",
-                };
-              case 3:
-                return {
-                  backgroundColor: "var(--color-supporter-gold-bg)",
-                };
-              default:
-                return {};
-            }
-          };
+          const isRulesExpanded = expandedRules.has(server.id);
+          const shouldShowRulesExpand =
+            hasRules && truncatedRules.has(server.id);
 
           return (
             <div
               key={server.id}
-              className={`border-border-card rounded-xl border p-4 shadow-sm transition-all hover:shadow-md sm:p-5 ${
-                isSupporter ? "" : "bg-secondary-bg"
-              }`}
-              style={getBackgroundStyle()}
+              className="border-border-card bg-secondary-bg flex h-full flex-col rounded-xl border p-4 shadow-sm transition-all hover:shadow-md sm:p-5"
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -761,29 +787,51 @@ const ServerList: React.FC<{
                   Server rules
                 </h4>
                 <p
-                  className="text-secondary-text text-sm wrap-break-word"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
+                  ref={(node) => {
+                    if (node) {
+                      ruleParagraphRefs.current.set(server.id, node);
+                    } else {
+                      ruleParagraphRefs.current.delete(server.id);
+                    }
+                    if (!isRulesExpanded) {
+                      measureRulesTruncation(server.id);
+                    }
                   }}
+                  className="text-secondary-text text-sm wrap-break-word"
+                  style={
+                    isRulesExpanded
+                      ? undefined
+                      : {
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }
+                  }
                   dangerouslySetInnerHTML={{ __html: parsedRules }}
                 />
                 {shouldShowRulesExpand && (
-                  <details className="mt-2">
-                    <summary className="text-link hover:text-link-hover cursor-pointer text-xs">
-                      Read full rules
-                    </summary>
-                    <p
-                      className="text-secondary-text mt-2 text-sm wrap-break-word"
-                      dangerouslySetInnerHTML={{ __html: parsedRules }}
-                    />
-                  </details>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedRules((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(server.id)) {
+                          next.delete(server.id);
+                        } else {
+                          next.add(server.id);
+                        }
+                        return next;
+                      })
+                    }
+                    className="text-link hover:text-link-hover mt-2 cursor-pointer text-xs"
+                  >
+                    {isRulesExpanded ? "Show less" : "Read full rules"}
+                  </button>
                 )}
               </div>
 
-              <div className="border-border-card mt-4 flex items-center justify-between border-t pt-4">
+              <div className="mt-auto flex items-center justify-between pt-4">
                 <Button
                   onClick={() => handleCopyLink(server.link)}
                   size="sm"

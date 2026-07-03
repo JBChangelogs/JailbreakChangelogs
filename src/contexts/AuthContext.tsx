@@ -49,7 +49,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(
   undefined,
 );
 
-function getJbclToken(): string | null {
+export function getJbclToken(): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : null;

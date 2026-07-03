@@ -6,7 +6,8 @@ import React from "react";
 const log = createLogger("UI");
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuthContext, getJbclToken } from "@/contexts/AuthContext";
+import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import {
   Dialog,
   DialogContent,
@@ -233,14 +234,20 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       }
     }
 
+    const owner = getJbclToken();
+    if (!PUBLIC_API_URL || !owner) {
+      toast.error("You must be logged in to save a server");
+      return;
+    }
+
     setLoading(true);
     const savingToastId = toast.loading(
       editingServer ? "Saving server changes..." : "Adding server...",
     );
     try {
       const endpoint = editingServer
-        ? `/api/servers/update?id=${editingServer.id}`
-        : `/api/servers/add`;
+        ? `${PUBLIC_API_URL}/servers/update?id=${editingServer.id}`
+        : `${PUBLIC_API_URL}/servers/add`;
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -249,6 +256,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
           link: normalizedLink,
           rules: normalizedRules,
           expires: normalizedExpires,
+          owner,
         }),
       });
 
@@ -262,21 +270,11 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
         onServerAdded();
         onClose();
       } else {
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: "Failed to save server" }));
-        if (response.status === 409) {
-          toast.error("This server already exists", { id: savingToastId });
-        } else if (response.status === 403) {
-          toast.error(
-            "Server link must start with: https://www.roblox.com/share?code=",
-            { id: savingToastId },
-          );
-        } else {
-          toast.error(`Error saving server: ${errorData.message}`, {
-            id: savingToastId,
-          });
-        }
+        const message = await getResponseErrorMessage(
+          response,
+          "Failed to save server",
+        );
+        toast.error(message, { id: savingToastId });
       }
     } catch (err) {
       toast.error("An error occurred while saving the server", {
@@ -424,7 +422,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
 
               <label
                 htmlFor="server-never-expires"
-                className="mt-3 flex cursor-pointer items-center space-x-2"
+                className="mt-3 inline-flex w-fit cursor-pointer items-center space-x-2"
               >
                 <Checkbox
                   id="server-never-expires"
