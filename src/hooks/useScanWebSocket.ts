@@ -231,18 +231,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setStatus("error");
               setPhase("failed_not_in_server");
 
-              setTimeout(() => {
-                if (
-                  wsRef.current &&
-                  wsRef.current.readyState === WebSocket.OPEN
-                ) {
-                  wsRef.current.close();
-                }
-                setStatus("idle");
-                setMessage(undefined);
-                setProgress(undefined);
-                setError(undefined);
-              }, 2000);
+              if (
+                wsRef.current &&
+                wsRef.current.readyState === WebSocket.OPEN
+              ) {
+                wsRef.current.close();
+              }
             } else if (
               data.message &&
               data.message.toLowerCase().includes("server full")
@@ -252,18 +246,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setPhase("server_full");
               setProgress(undefined);
 
-              setTimeout(() => {
-                if (
-                  wsRef.current &&
-                  wsRef.current.readyState === WebSocket.OPEN
-                ) {
-                  wsRef.current.close();
-                }
-                setStatus("idle");
-                setMessage(undefined);
-                setProgress(undefined);
-                setError(undefined);
-              }, 5000);
+              if (
+                wsRef.current &&
+                wsRef.current.readyState === WebSocket.OPEN
+              ) {
+                wsRef.current.close();
+              }
             } else if (
               data.message &&
               data.message.toLowerCase().includes("user found")

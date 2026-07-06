@@ -518,36 +518,22 @@ export default function InventoryCheckerClient({
       lastShownErrorRef.current = currentError;
 
       if (scanError && scanError.includes("No bots available")) {
-        showScanErrorToast(
-          "No scan bots available",
-          undefined,
-          "All scan bots are currently unavailable. Please try again later.",
-        );
         setScanErrorBanner({
           title: "No scan bots available",
           subtitle:
             "All scan bots are currently unavailable. Please try again later.",
         });
       } else if (scanPhase === "failed_not_in_server") {
-        showScanErrorToast(
-          "User not found in game. Please join a trade server and try again.",
-        );
         setScanErrorBanner({
           title: "User not found in game",
           subtitle: "Please join a trade server and try again.",
         });
       } else if (scanPhase === "server_full") {
-        showScanErrorToast(
-          "Server Full",
-          undefined,
-          "The trade server is full. Please try again in a moment.",
-        );
         setScanErrorBanner({
           title: "Server Full",
           subtitle: "The trade server is full. Please try again in a moment.",
         });
       } else if (scanError && scanError.includes("high enough supporter")) {
-        showScanErrorToast("You need to be Supporter III to use this feature.");
         setScanErrorBanner({
           title: "Supporter III required",
           subtitle: "You need to be Supporter III to use this feature.",
@@ -593,12 +579,7 @@ export default function InventoryCheckerClient({
           title: "Recent scan cooldown",
           subtitle: message,
         });
-        // Add small delay to ensure loading toast is fully dismissed
-        setTimeout(() => {
-          showScanErrorToast(message);
-        }, 100);
       } else if (scanError) {
-        showScanErrorToast(scanError);
         setScanErrorBanner({ title: "Scan Error", subtitle: scanError });
       }
     }
@@ -978,7 +959,9 @@ export default function InventoryCheckerClient({
                                 variant={
                                   scanWebSocket.status === "completed"
                                     ? "success"
-                                    : "default"
+                                    : scanWebSocket.status === "error"
+                                      ? "destructive"
+                                      : "default"
                                 }
                                 size="md"
                                 className="gap-2"
@@ -1013,6 +996,23 @@ export default function InventoryCheckerClient({
                                     </svg>
                                     Scan Complete
                                   </>
+                                ) : scanWebSocket.status === "error" ? (
+                                  <>
+                                    <svg
+                                      className="h-4 w-4"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                                      />
+                                    </svg>
+                                    Scan Failed
+                                  </>
                                 ) : (
                                   <>
                                     <svg
@@ -1028,63 +1028,9 @@ export default function InventoryCheckerClient({
                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                       />
                                     </svg>
-                                    {scanWebSocket.message &&
-                                    scanWebSocket.message.includes(
-                                      "recent scan",
-                                    ) ? (
-                                      <>
-                                        <svg
-                                          className="h-4 w-4"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                          />
-                                        </svg>
-                                        {scanWebSocket.message.includes(
-                                          "recent scan",
-                                        )
-                                          ? "Recent Scan Found"
-                                          : scanWebSocket.message.includes(
-                                                "User not found",
-                                              )
-                                            ? "User Not Found"
-                                            : scanWebSocket.message.includes(
-                                                  "not in game",
-                                                )
-                                              ? "Not In Game"
-                                              : scanWebSocket.message}
-                                      </>
-                                    ) : scanWebSocket.message &&
-                                      scanWebSocket.message.includes(
-                                        "not found",
-                                      ) ? (
-                                      <>
-                                        <svg
-                                          className="h-4 w-4"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                                          />
-                                        </svg>
-                                        User Not Found
-                                      </>
-                                    ) : !ENABLE_WS_SCAN ? (
-                                      "Scanning Disabled"
-                                    ) : (
-                                      "Request a Scan"
-                                    )}
+                                    {!ENABLE_WS_SCAN
+                                      ? "Scanning Disabled"
+                                      : "Request a Scan"}
                                   </>
                                 )}
                               </Button>

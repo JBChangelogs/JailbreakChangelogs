@@ -190,9 +190,9 @@ export default function UserProfileSection({
 
       {/* Scan Button or Login Prompt */}
       {isOwnInventory ? (
-        <div className="mt-4 space-y-3 xl:mt-0 xl:shrink-0">
+        <div className="mt-4 space-y-3 xl:mt-0 xl:w-80 xl:shrink-0">
           {/* Action Buttons */}
-          <div className="flex flex-col gap-3 lg:flex-row lg:gap-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:gap-3 xl:justify-end">
             <Button
               onClick={handleScanClick}
               disabled={
@@ -201,7 +201,11 @@ export default function UserProfileSection({
                 scanWebSocket.status === "connecting"
               }
               variant={
-                scanWebSocket.status === "completed" ? "success" : "default"
+                scanWebSocket.status === "completed"
+                  ? "success"
+                  : scanWebSocket.status === "error"
+                    ? "destructive"
+                    : "default"
               }
               size="md"
               className="gap-2"
@@ -252,6 +256,23 @@ export default function UserProfileSection({
                     />
                   </svg>
                   Scan Complete
+                </>
+              ) : scanWebSocket.status === "error" ? (
+                <>
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                    />
+                  </svg>
+                  Scan Failed
                 </>
               ) : (
                 <>
