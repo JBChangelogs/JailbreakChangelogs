@@ -231,13 +231,14 @@ function TradingGuides({
                   <button
                     key={demand}
                     onClick={() => handleDemandClick(demand)}
-                    className={`bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all focus:outline-none ${
+                    className={`bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all hover:bg-(--hover-bg) focus:outline-none ${
                       valueSort === getDemandValue(demand) ? "ring-2" : ""
                     }`}
                     style={
                       {
                         borderColor: getDemandHexColor(demand),
                         "--tw-ring-color": getDemandHexColor(demand),
+                        "--hover-bg": `${getDemandHexColor(demand)}1A`,
                       } as React.CSSProperties
                     }
                   >
@@ -283,13 +284,14 @@ function TradingGuides({
                     <button
                       key={trend}
                       onClick={() => handleTrendClick(trend)}
-                      className={`bg-tertiary-bg hover:bg-opacity-80 flex cursor-pointer flex-col items-start gap-2 rounded-xl border-2 p-3 text-left transition-all focus:outline-none ${
+                      className={`bg-tertiary-bg flex cursor-pointer flex-col items-start gap-2 rounded-xl border-2 p-3 text-left transition-all hover:bg-(--hover-bg) focus:outline-none ${
                         valueSort === getTrendValue(trend) ? "ring-2" : ""
                       }`}
                       style={
                         {
                           borderColor: getTrendHexColor(trend),
                           "--tw-ring-color": getTrendHexColor(trend),
+                          "--hover-bg": `${getTrendHexColor(trend)}1A`,
                         } as React.CSSProperties
                       }
                     >
