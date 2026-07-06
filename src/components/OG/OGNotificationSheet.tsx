@@ -28,6 +28,19 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/Spinner";
 import { createLogger } from "@/services/logger";
+import {
+  fetchEmailLinkedStatus,
+  fetchEmailNotificationStatus,
+} from "@/utils/api/api";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Pagination } from "@/components/ui/Pagination";
+
+const ITEMS_PER_PAGE = 20;
 
 const log = createLogger("NOTIFY");
 
@@ -68,6 +81,10 @@ export default function OGNotificationSheet({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [avatarError, setAvatarError] = useState(false);
+  const [emailLinked, setEmailLinked] = useState(false);
+  const [emailNotifEnabled, setEmailNotifEnabled] = useState(false);
+  const [activeTab, setActiveTab] = useState<"watching" | "all">("watching");
+  const [page, setPage] = useState(1);
   const limitMap: Record<number, number> = { 0: 3, 1: 5, 2: 10, 3: 15 };
   const maxNotifications = limitMap[user?.premiumtype ?? 0] ?? 3;
 
@@ -135,6 +152,22 @@ export default function OGNotificationSheet({
     }
   }, [user?.roblox_id]);
 
+  /**
+   * Fetches whether the user has an email linked and email notifications enabled
+   */
+  const fetchEmailStatus = useCallback(async () => {
+    try {
+      const [linkedData, enabledData] = await Promise.all([
+        fetchEmailLinkedStatus(),
+        fetchEmailNotificationStatus(),
+      ]);
+      setEmailLinked(linkedData.linked === true);
+      setEmailNotifEnabled(enabledData.enabled === true);
+    } catch (error) {
+      log.error("Error fetching email status:", error);
+    }
+  }, []);
+
   // Fetch items when sheet opens
   useEffect(() => {
     if (isOpen && user?.roblox_id) {
@@ -142,8 +175,15 @@ export default function OGNotificationSheet({
       setAvatarError(false);
       fetchItems();
       fetchNotifications();
+      fetchEmailStatus();
     }
-  }, [isOpen, user?.roblox_id, fetchItems, fetchNotifications]);
+  }, [
+    isOpen,
+    user?.roblox_id,
+    fetchItems,
+    fetchNotifications,
+    fetchEmailStatus,
+  ]);
 
   /**
    * Toggles notification for a specific item
@@ -283,34 +323,52 @@ export default function OGNotificationSheet({
     }
   };
 
-  // Filter and prioritize items
-  const sortedAndFilteredItems = useMemo(() => {
-    // 1. Filter based on search and type
-    const filtered = items.filter((item) => {
-      const matchesSearch =
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.type.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesType = selectedType === "all" || item.type === selectedType;
-      return matchesSearch && matchesType;
-    });
+  // Filter items by search and type, sorted alphabetically
+  const filteredItems = useMemo(() => {
+    return items
+      .filter((item) => {
+        const matchesSearch =
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.type.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesType =
+          selectedType === "all" || item.type === selectedType;
+        return matchesSearch && matchesType;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [items, searchQuery, selectedType]);
 
-    // 2. Sort: Watchlisted items first, then alphabetically
-    return [...filtered].sort((a, b) => {
-      const aIsWatched = notifiedItemIds.includes(String(a.id));
-      const bIsWatched = notifiedItemIds.includes(String(b.id));
+  // Subset of filtered items the user is currently watching
+  const watchingItems = useMemo(
+    () =>
+      filteredItems.filter((item) => notifiedItemIds.includes(String(item.id))),
+    [filteredItems, notifiedItemIds],
+  );
 
-      if (aIsWatched && !bIsWatched) return -1;
-      if (!aIsWatched && bIsWatched) return 1;
+  // Reset to page 1 whenever the active list changes shape
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedType, activeTab]);
 
-      // Secondary sort by name
-      return a.name.localeCompare(b.name);
-    });
-  }, [items, searchQuery, selectedType, notifiedItemIds]);
+  const activeListItems =
+    activeTab === "watching" ? watchingItems : filteredItems;
+  const totalPages = Math.max(
+    1,
+    Math.ceil(activeListItems.length / ITEMS_PER_PAGE),
+  );
+  const displayedItems = activeListItems.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE,
+  );
+
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
+    setPage(value);
+  };
 
   // Get unique item types for filter
   const itemTypes = Array.from(new Set(items.map((item) => item.type))).sort();
-  const currentTypeLabel =
-    selectedType === "all" ? "All Item Categories" : selectedType;
 
   // Check authentication states
   const isAuthenticated = !!user;
@@ -322,7 +380,7 @@ export default function OGNotificationSheet({
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent
           ref={sheetContentRef}
-          className="bg-secondary-bg flex h-full w-full flex-col sm:max-w-md"
+          className="bg-secondary-bg flex h-full w-full flex-col sm:max-w-lg"
         >
           <SheetHeader className="shrink-0">
             <SheetTitle className="text-2xl font-bold">
@@ -334,52 +392,91 @@ export default function OGNotificationSheet({
             </SheetDescription>
           </SheetHeader>
 
-          {/* User Info - Show Roblox data if available */}
+          {/* Identity + email upsell - compact borderless strip */}
           {user?.roblox_id && (
-            <Link
-              href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-link bg-tertiary-bg hover:border-link group mt-6 flex shrink-0 items-center gap-3 rounded-xl border p-3 transition-colors"
-            >
-              <div className="bg-quaternary-bg border-border-card relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2">
-                {!avatarError ? (
-                  <Image
-                    src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${user.roblox_id}/avatar-headshot`}
-                    alt="Your Avatar"
-                    fill
-                    className="rounded-full object-cover"
-                    onError={() => setAvatarError(true)}
-                    unoptimized
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Icon
-                      icon="heroicons:user"
-                      className="text-tertiary-text h-6 w-6"
+            <div className="border-border-card mt-4 shrink-0 space-y-2 border-b pb-4">
+              <Link
+                href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group hover:bg-tertiary-bg/50 -mx-1 flex items-center gap-2.5 rounded-lg px-1 py-1 transition-colors"
+              >
+                <div className="bg-quaternary-bg border-border-card relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+                  {!avatarError ? (
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${user.roblox_id}/avatar-headshot`}
+                      alt="Your Avatar"
+                      fill
+                      className="rounded-full object-cover"
+                      onError={() => setAvatarError(true)}
+                      unoptimized
                     />
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-primary-text group-hover:text-link truncate text-sm font-semibold transition-colors">
-                  {user.roblox_display_name || user.roblox_username || "User"}
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Icon
+                        icon="heroicons:user"
+                        className="text-tertiary-text h-4 w-4"
+                      />
+                    </div>
+                  )}
+                </div>
+                <p className="min-w-0 flex-1 truncate text-sm">
+                  <span className="text-primary-text group-hover:text-link font-semibold transition-colors">
+                    {user.roblox_display_name || user.roblox_username || "User"}
+                  </span>
+                  <span className="text-secondary-text">
+                    {" "}
+                    &middot; @{user.roblox_username || user.roblox_id}
+                  </span>
                 </p>
-                <p className="text-secondary-text truncate text-xs">
-                  @{user.roblox_username || user.roblox_id}
-                </p>
-                <p className="text-link truncate text-xs">
-                  Monitoring OG items for this account
-                </p>
-              </div>
-              <Icon
-                icon="heroicons:arrow-top-right-on-square"
-                className="text-secondary-text h-4 w-4 shrink-0"
-              />
-            </Link>
+                <Icon
+                  icon="heroicons:arrow-top-right-on-square"
+                  className="text-secondary-text h-3.5 w-3.5 shrink-0"
+                />
+              </Link>
+
+              {!(emailLinked && emailNotifEnabled) && (
+                <div className="flex items-center gap-1.5">
+                  <Icon
+                    icon="heroicons:envelope"
+                    className="text-link h-3.5 w-3.5 shrink-0"
+                    inline={true}
+                  />
+                  <p className="text-secondary-text min-w-0 flex-1 truncate text-xs">
+                    Get notified by email too &mdash;{" "}
+                    <Link
+                      href="/settings?highlight=notifications"
+                      onClick={onClose}
+                      className="text-link hover:text-link-hover font-semibold"
+                    >
+                      {emailLinked ? "enable it" : "link your email"}
+                    </Link>
+                  </p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Icon
+                        icon="heroicons:information-circle"
+                        className="text-secondary-text hover:text-primary-text h-3.5 w-3.5 shrink-0 cursor-help transition-colors"
+                        inline={true}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-secondary-bg text-primary-text max-w-60 border-none shadow-(--color-card-shadow)"
+                    >
+                      <p>
+                        We don&apos;t store your email address separately
+                        &mdash; it&apos;s obtained from Discord OAuth and used
+                        only for sending notifications.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              )}
+            </div>
           )}
 
-          <div className="mt-6 flex min-h-0 flex-1 flex-col gap-6">
+          <div className="mt-4 flex min-h-0 flex-1 flex-col gap-6">
             {/* Authentication check */}
             {!canUseFeature && (
               <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
@@ -423,152 +520,162 @@ export default function OGNotificationSheet({
             )}
 
             {canUseFeature && (
-              <>
-                {/* Search and filter controls - Unified spacing with list */}
-                <div className="flex min-h-0 flex-1 flex-col gap-4">
-                  <div className="shrink-0 space-y-4">
-                    {/* Search input - Values page style refined */}
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Search items..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus w-full rounded-xl border py-4 pr-11 pl-11 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                      />
-                      <Icon
-                        icon="heroicons:magnifying-glass"
-                        className="text-secondary-text absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2"
-                        inline={true}
-                      />
-                      {searchQuery && (
-                        <button
-                          onClick={() => setSearchQuery("")}
-                          className="text-secondary-text hover:text-primary-text absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 cursor-pointer transition-colors"
-                        >
-                          <Icon icon="heroicons:x-mark" inline={true} />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Type filter */}
-                    <DropdownMenu modal={false}>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          type="button"
-                          className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                          aria-label="Select item category"
-                        >
-                          <span className="truncate">{currentTypeLabel}</span>
-                          <Icon
-                            icon="heroicons:chevron-down"
-                            className="text-secondary-text h-5 w-5"
-                            inline={true}
-                          />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="start"
-                        container={sheetContentRef.current}
-                        className="border-border-card bg-tertiary-bg text-primary-text max-h-70 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              <div className="flex min-h-0 flex-1 flex-col gap-3">
+                {/* Search + category filter - single row */}
+                <div className="flex shrink-0 gap-2">
+                  <div className="relative min-w-0 flex-1">
+                    <input
+                      type="text"
+                      placeholder="Search items..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus w-full rounded-xl border py-2.5 pr-9 pl-9 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    />
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="text-secondary-text absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                      inline={true}
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 cursor-pointer transition-colors"
                       >
-                        <DropdownMenuCheckboxItem
-                          checked={selectedType === "all"}
-                          onCheckedChange={(checked) => {
-                            if (checked) setSelectedType("all");
-                          }}
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          All Item Categories
-                        </DropdownMenuCheckboxItem>
-                        {itemTypes.map((type) => (
-                          <DropdownMenuCheckboxItem
-                            key={type}
-                            checked={selectedType === type}
-                            onCheckedChange={(checked) => {
-                              if (checked) setSelectedType(type);
-                              else if (selectedType === type)
-                                setSelectedType("all");
-                            }}
-                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                          >
-                            {type}
-                          </DropdownMenuCheckboxItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  {/* Items list */}
-                  <div className="-mr-1 flex-1 overflow-y-auto pr-1">
-                    {isLoadingItems || isLoadingNotifications ? (
-                      <div className="flex flex-col items-center justify-center gap-4 py-20">
-                        <Spinner className="shadow-button-info/20 h-10 w-10 drop-shadow-lg" />
-                        <p className="text-secondary-text text-sm font-medium">
-                          Loading catalog...
-                        </p>
-                      </div>
-                    ) : sortedAndFilteredItems.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="bg-tertiary-bg/50 mb-6 rounded-full p-6">
-                          <Icon
-                            icon="heroicons:magnifying-glass"
-                            className="text-secondary-text/40 h-12 w-12"
-                            inline={true}
-                          />
-                        </div>
-                        <h3 className="text-primary-text mb-2 text-lg font-semibold">
-                          No items found
-                        </h3>
-                        <p className="text-secondary-text mx-auto max-w-60 text-sm">
-                          We couldn&apos;t find any items matching your current
-                          filters.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-8 pb-8">
-                        {/* Watching Section */}
-                        {sortedAndFilteredItems.some((item) =>
-                          notifiedItemIds.includes(String(item.id)),
-                        ) && (
-                          <div className="space-y-4">
-                            <h3 className="text-secondary-text px-1 text-[11px] font-black tracking-widest uppercase">
-                              Watching ({notifiedItemIds.length} /{" "}
-                              {maxNotifications})
-                            </h3>
-                            <div className="grid gap-3">
-                              {sortedAndFilteredItems
-                                .filter((item) =>
-                                  notifiedItemIds.includes(String(item.id)),
-                                )
-                                .map((item) => renderItemCard(item))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Discovery Section (formerly Available) */}
-                        {sortedAndFilteredItems.some(
-                          (item) => !notifiedItemIds.includes(String(item.id)),
-                        ) && (
-                          <div className="space-y-4">
-                            <h3 className="text-secondary-text px-1 text-[11px] font-black tracking-widest uppercase">
-                              Available for Notifications
-                            </h3>
-                            <div className="grid gap-3">
-                              {sortedAndFilteredItems
-                                .filter(
-                                  (item) =>
-                                    !notifiedItemIds.includes(String(item.id)),
-                                )
-                                .map((item) => renderItemCard(item))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                        <Icon icon="heroicons:x-mark" inline={true} />
+                      </button>
                     )}
                   </div>
+
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className={cn(
+                          "border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-auto shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm transition-all duration-300 focus:ring-1 focus:outline-none",
+                          selectedType !== "all" && "border-link text-link",
+                        )}
+                        aria-label="Filter by item category"
+                      >
+                        <Icon
+                          icon="heroicons:funnel"
+                          className="h-4 w-4 shrink-0"
+                          inline={true}
+                        />
+                        <span className="max-w-20 truncate">
+                          {selectedType === "all" ? "Filter" : selectedType}
+                        </span>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      container={sheetContentRef.current}
+                      className="border-border-card bg-tertiary-bg text-primary-text max-h-70 w-(--radix-popper-anchor-width) min-w-40 scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    >
+                      <DropdownMenuCheckboxItem
+                        checked={selectedType === "all"}
+                        onCheckedChange={(checked) => {
+                          if (checked) setSelectedType("all");
+                        }}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                      >
+                        All
+                      </DropdownMenuCheckboxItem>
+                      {itemTypes.map((type) => (
+                        <DropdownMenuCheckboxItem
+                          key={type}
+                          checked={selectedType === type}
+                          onCheckedChange={(checked) => {
+                            if (checked) setSelectedType(type);
+                            else if (selectedType === type)
+                              setSelectedType("all");
+                          }}
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                        >
+                          {type}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-              </>
+
+                {/* Watching / All Items tabs */}
+                <Tabs
+                  value={activeTab}
+                  onValueChange={(value) =>
+                    setActiveTab(value as "watching" | "all")
+                  }
+                  className="flex min-h-0 flex-1 flex-col"
+                >
+                  <TabsList fullWidth className="shrink-0">
+                    <TabsTrigger fullWidth value="watching">
+                      Watching ({notifiedItemIds.length}/{maxNotifications})
+                    </TabsTrigger>
+                    <TabsTrigger fullWidth value="all">
+                      All Items
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent
+                    value="watching"
+                    className="-mr-1 flex min-h-0 flex-1 flex-col overflow-y-auto pr-1"
+                  >
+                    {isLoadingItems || isLoadingNotifications ? (
+                      renderLoadingState()
+                    ) : watchingItems.length === 0 ? (
+                      renderEmptyState(
+                        "heroicons:bell-slash",
+                        "Not watching anything yet",
+                        'Switch to "All Items" and toggle the ones you want to track.',
+                      )
+                    ) : (
+                      <>
+                        <div className="grid gap-3 pb-4">
+                          {displayedItems.map((item) => renderItemCard(item))}
+                        </div>
+                        {totalPages > 1 && (
+                          <div className="mt-auto flex justify-center pb-8">
+                            <Pagination
+                              count={totalPages}
+                              page={page}
+                              onChange={handlePageChange}
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent
+                    value="all"
+                    className="-mr-1 flex min-h-0 flex-1 flex-col overflow-y-auto pr-1"
+                  >
+                    {isLoadingItems || isLoadingNotifications ? (
+                      renderLoadingState()
+                    ) : filteredItems.length === 0 ? (
+                      renderEmptyState(
+                        "heroicons:magnifying-glass",
+                        "No items found",
+                        "We couldn't find any items matching your current filters.",
+                      )
+                    ) : (
+                      <>
+                        <div className="grid gap-3 pb-4">
+                          {displayedItems.map((item) => renderItemCard(item))}
+                        </div>
+                        {totalPages > 1 && (
+                          <div className="mt-auto flex justify-center pb-8">
+                            <Pagination
+                              count={totalPages}
+                              page={page}
+                              onChange={handlePageChange}
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </div>
             )}
           </div>
         </SheetContent>
@@ -577,7 +684,38 @@ export default function OGNotificationSheet({
     </>
   );
 
-  // Define renderItemCard helper inside the same component scope
+  // Define render helpers inside the same component scope
+  function renderLoadingState() {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <Spinner className="shadow-button-info/20 h-10 w-10 drop-shadow-lg" />
+        <p className="text-secondary-text text-sm font-medium">
+          Loading catalog...
+        </p>
+      </div>
+    );
+  }
+
+  function renderEmptyState(icon: string, title: string, description: string) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="bg-tertiary-bg/50 mb-6 rounded-full p-6">
+          <Icon
+            icon={icon}
+            className="text-secondary-text/40 h-12 w-12"
+            inline={true}
+          />
+        </div>
+        <h3 className="text-primary-text mb-2 text-lg font-semibold">
+          {title}
+        </h3>
+        <p className="text-secondary-text mx-auto max-w-60 text-sm">
+          {description}
+        </p>
+      </div>
+    );
+  }
+
   function renderItemCard(item: PartialItem) {
     const isNotified = notifiedItemIds.includes(String(item.id));
     const isProcessing = processingItemId === item.id;
