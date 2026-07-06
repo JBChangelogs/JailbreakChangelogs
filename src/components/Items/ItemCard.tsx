@@ -544,7 +544,7 @@ function ItemCard({
                       className={`inline-flex items-center text-[10px] font-semibold sm:text-xs ${
                         cashChange.difference > 0
                           ? "text-status-success"
-                          : "text-status-error"
+                          : "text-button-danger"
                       }`}
                     >
                       {cashChange.difference > 0 ? "+" : "-"}
@@ -565,7 +565,7 @@ function ItemCard({
                       className={`inline-flex items-center text-[10px] font-semibold sm:text-xs ${
                         dupedChange.difference > 0
                           ? "text-status-success"
-                          : "text-status-error"
+                          : "text-button-danger"
                       }`}
                     >
                       {dupedChange.difference > 0 ? "+" : "-"}
@@ -606,7 +606,7 @@ function ItemCard({
                               ? "mingcute:arrow-up-fill"
                               : "mingcute:arrow-down-fill"
                           }
-                          className={`h-4 w-4 ${cashChange.difference > 0 ? "text-status-success" : "text-status-error"}`}
+                          className={`h-4 w-4 ${cashChange.difference > 0 ? "text-status-success" : "text-button-danger"}`}
                         />
                       )}
                     </div>
@@ -643,7 +643,7 @@ function ItemCard({
                               ? "mingcute:arrow-up-fill"
                               : "mingcute:arrow-down-fill"
                           }
-                          className={`h-4 w-4 ${dupedChange.difference > 0 ? "text-status-success" : "text-status-error"}`}
+                          className={`h-4 w-4 ${dupedChange.difference > 0 ? "text-status-success" : "text-button-danger"}`}
                         />
                       )}
                     </div>
