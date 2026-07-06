@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { demandOrder, trendOrder } from "@/utils/trading/values";
 import { ValueSort } from "@/types";
 import { trendDescriptions } from "@/utils/trading/tradingDefinitions";
+import { getDemandHexColor, getTrendHexColor } from "@/utils/items/badgeColors";
 
 interface TradingGuidesProps {
   valueSort: ValueSort;
@@ -92,29 +93,6 @@ function TradingGuides({
 }: TradingGuidesProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const getDemandHexColor = (demand: string): string => {
-    switch (demand) {
-      case "Close To None":
-        return "#4b5563";
-      case "Very Low":
-        return "#dc2626";
-      case "Low":
-        return "#b45309";
-      case "Below Average":
-        return "#f59e0b";
-      case "Average":
-        return "#facc15";
-      case "Decent":
-        return "#16a34a";
-      case "High":
-        return "#2563eb";
-      case "Very High":
-        return "#9333ea";
-      default:
-        return "#4b5563";
-    }
-  };
-
   const getDemandValue = (demand: string): string => {
     switch (demand) {
       case "Close To None":
@@ -146,29 +124,6 @@ function TradingGuides({
       onValueSortChange(demandValue as ValueSort);
     }
     onScrollToSearch();
-  };
-
-  const getTrendHexColor = (trend: string): string => {
-    switch (trend) {
-      case "Dropping":
-        return "#e11d48";
-      case "Unstable":
-        return "#b45309";
-      case "Hoarded":
-        return "#7c3aed";
-      case "Manipulated":
-        return "#ca8a04";
-      case "Stable":
-        return "#6b7280";
-      case "Recovering":
-        return "#ea580c";
-      case "Rising":
-        return "#1d4ed8";
-      case "Hyped":
-        return "#ec4899";
-      default:
-        return "#6b7280";
-    }
   };
 
   const getTrendValue = (trend: string): string => {
