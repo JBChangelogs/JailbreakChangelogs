@@ -139,6 +139,10 @@ export default function InventoryCheckerClient({
   const [queueStatusMessage, setQueueStatusMessage] =
     useState<string>("Not in queue");
   const hasAutoFetchedQueueRef = useRef(false);
+  const [scanErrorBanner, setScanErrorBanner] = useState<{
+    title: string;
+    subtitle?: string;
+  } | null>(null);
 
   // Auth context and scan functionality
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
@@ -403,6 +407,7 @@ export default function InventoryCheckerClient({
     error: scanError,
     progress: scanProgress,
     expiresAt: scanExpiresAt,
+    queuePosition: wsQueuePosition,
     forceShowError: scanForceShowError,
     resetForceShowError: scanResetForceShowError,
   } = scanWebSocket;
@@ -475,6 +480,7 @@ export default function InventoryCheckerClient({
     if (scanStatus === "connecting") {
       lastShownErrorRef.current = null;
       lastShownSuccessRef.current = null;
+      setScanErrorBanner(null);
       showScanLoadingToast("Connecting to scan service...");
     }
 
@@ -497,6 +503,7 @@ export default function InventoryCheckerClient({
         showScanSuccessToast(successMessage);
       }
 
+      setScanErrorBanner(null);
       fetchQueuePosition();
     }
 
@@ -516,18 +523,35 @@ export default function InventoryCheckerClient({
           undefined,
           "All scan bots are currently unavailable. Please try again later.",
         );
+        setScanErrorBanner({
+          title: "No scan bots available",
+          subtitle:
+            "All scan bots are currently unavailable. Please try again later.",
+        });
       } else if (scanPhase === "failed_not_in_server") {
         showScanErrorToast(
           "User not found in game. Please join a trade server and try again.",
         );
+        setScanErrorBanner({
+          title: "User not found in game",
+          subtitle: "Please join a trade server and try again.",
+        });
       } else if (scanPhase === "server_full") {
         showScanErrorToast(
           "Server Full",
           undefined,
           "The trade server is full. Please try again in a moment.",
         );
+        setScanErrorBanner({
+          title: "Server Full",
+          subtitle: "The trade server is full. Please try again in a moment.",
+        });
       } else if (scanError && scanError.includes("high enough supporter")) {
         showScanErrorToast("You need to be Supporter III to use this feature.");
+        setScanErrorBanner({
+          title: "Supporter III required",
+          subtitle: "You need to be Supporter III to use this feature.",
+        });
         const tierNames = [
           "Free",
           "Supporter I",
@@ -565,12 +589,17 @@ export default function InventoryCheckerClient({
             message = `You have a recent scan. Please wait ${timeText} before requesting another scan.`;
           }
         }
+        setScanErrorBanner({
+          title: "Recent scan cooldown",
+          subtitle: message,
+        });
         // Add small delay to ensure loading toast is fully dismissed
         setTimeout(() => {
           showScanErrorToast(message);
         }, 100);
       } else if (scanError) {
         showScanErrorToast(scanError);
+        setScanErrorBanner({ title: "Scan Error", subtitle: scanError });
       }
     }
 
@@ -946,7 +975,11 @@ export default function InventoryCheckerClient({
                                   scanWebSocket.status === "scanning" ||
                                   scanWebSocket.status === "connecting"
                                 }
-                                variant="default"
+                                variant={
+                                  scanWebSocket.status === "completed"
+                                    ? "success"
+                                    : "default"
+                                }
                                 size="md"
                                 className="gap-2"
                               >
@@ -1056,36 +1089,58 @@ export default function InventoryCheckerClient({
                                 )}
                               </Button>
                             </div>
-                            <div className="flex items-center justify-center gap-2">
-                              <p className="text-secondary-text text-xs">
-                                {isLoadingQueuePosition ? (
-                                  "Checking queue position..."
-                                ) : queuePosition ? (
-                                  <span className="text-primary-text font-medium">
-                                    Queue Position: #
-                                    {queuePosition.position.toLocaleString()}
+                            {scanErrorBanner ? (
+                              <div className="flex w-full items-start justify-center gap-1.5 text-center">
+                                <Icon
+                                  icon="heroicons:exclamation-triangle"
+                                  className="text-button-danger mt-0.5 h-3.5 w-3.5 shrink-0"
+                                />
+                                <p className="text-button-danger min-w-0 flex-1 text-xs wrap-break-word">
+                                  <span className="font-medium">
+                                    {scanErrorBanner.title}
                                   </span>
-                                ) : (
-                                  queueStatusMessage || "Not in queue"
-                                )}
-                              </p>
-                              <button
-                                type="button"
-                                onClick={fetchQueuePosition}
-                                disabled={isLoadingQueuePosition}
-                                aria-label="Refresh queue position"
-                                className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                              >
-                                {isLoadingQueuePosition ? (
-                                  <Spinner className="h-4 w-4" />
-                                ) : (
-                                  <Icon
-                                    icon="material-symbols:refresh"
-                                    className="h-4 w-4"
-                                  />
-                                )}
-                              </button>
-                            </div>
+                                  {scanErrorBanner.subtitle && (
+                                    <> — {scanErrorBanner.subtitle}</>
+                                  )}
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="flex w-full items-center justify-center gap-2">
+                                <p className="text-secondary-text min-w-0 flex-1 text-xs wrap-break-word">
+                                  {isLoadingQueuePosition ? (
+                                    "Checking queue position..."
+                                  ) : queuePosition ? (
+                                    <span className="text-primary-text font-medium">
+                                      Queue Position: #
+                                      {queuePosition.position.toLocaleString()}
+                                    </span>
+                                  ) : wsQueuePosition !== undefined ? (
+                                    <span className="text-primary-text font-medium">
+                                      Queue Position: #
+                                      {wsQueuePosition.toLocaleString()}
+                                    </span>
+                                  ) : (
+                                    queueStatusMessage || "Not in queue"
+                                  )}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={fetchQueuePosition}
+                                  disabled={isLoadingQueuePosition}
+                                  aria-label="Refresh queue position"
+                                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                                >
+                                  {isLoadingQueuePosition ? (
+                                    <Spinner className="h-4 w-4" />
+                                  ) : (
+                                    <Icon
+                                      icon="material-symbols:refresh"
+                                      className="h-4 w-4"
+                                    />
+                                  )}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1229,6 +1284,11 @@ export default function InventoryCheckerClient({
                 showOnlyLimited={showOnlyLimited}
                 showOnlySeasonal={showOnlySeasonal}
                 scanWebSocket={scanWebSocket}
+                scanErrorBanner={scanErrorBanner}
+                queuePosition={queuePosition}
+                isLoadingQueuePosition={isLoadingQueuePosition}
+                queueStatusMessage={queueStatusMessage}
+                fetchQueuePosition={fetchQueuePosition}
               />
 
               {/* Tabbed Interface */}

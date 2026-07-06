@@ -22,6 +22,11 @@ interface UserStatsProps {
   showOnlyLimited: boolean;
   showOnlySeasonal: boolean;
   scanWebSocket: UseScanWebSocketReturn;
+  scanErrorBanner?: { title: string; subtitle?: string } | null;
+  queuePosition?: { position: number; delay: number } | null;
+  isLoadingQueuePosition?: boolean;
+  queueStatusMessage?: string;
+  fetchQueuePosition?: () => void;
 }
 
 export default function UserStats({
@@ -37,6 +42,11 @@ export default function UserStats({
   showOnlyLimited,
   showOnlySeasonal,
   scanWebSocket,
+  scanErrorBanner,
+  queuePosition,
+  isLoadingQueuePosition,
+  queueStatusMessage,
+  fetchQueuePosition,
 }: UserStatsProps) {
   // Helper functions
   const getUserDisplay = useCallback(
@@ -210,6 +220,11 @@ export default function UserStats({
           getHasVerifiedBadge={getHasVerifiedBadge}
           currentData={initialData}
           scanWebSocket={scanWebSocket}
+          scanErrorBanner={scanErrorBanner}
+          queuePosition={queuePosition}
+          isLoadingQueuePosition={isLoadingQueuePosition}
+          queueStatusMessage={queueStatusMessage}
+          fetchQueuePosition={fetchQueuePosition}
         />
       )}
 

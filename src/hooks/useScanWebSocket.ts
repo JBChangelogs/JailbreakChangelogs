@@ -33,6 +33,7 @@ export interface UseScanWebSocketReturn {
   progress: number | undefined;
   error: string | undefined;
   expiresAt: number | undefined;
+  queuePosition: number | undefined;
   isConnected: boolean;
   startScan: (turnstileToken?: string) => void;
   stopScan: () => void;
@@ -47,6 +48,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const [progress, setProgress] = useState<number | undefined>();
   const [error, setError] = useState<string | undefined>();
   const [expiresAt, setExpiresAt] = useState<number | undefined>();
+  const [queuePosition, setQueuePosition] = useState<number | undefined>();
   const [isConnected, setIsConnected] = useState(false);
   const [forceShowError, setForceShowError] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>();
@@ -115,6 +117,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     setStatus("connecting");
     setPhase("connecting");
     setError(undefined);
+    setQueuePosition(undefined);
 
     try {
       // Include Turnstile token in WebSocket URL if available
@@ -300,6 +303,17 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setProgress(100);
               setStatus("completed");
               setPhase("queued");
+              if (positionMatch) {
+                setQueuePosition(parseInt(positionMatch[1]));
+              }
+
+              if (
+                wsRef.current &&
+                wsRef.current.readyState === WebSocket.OPEN
+              ) {
+                wsRef.current.close();
+              }
+              clearScanTimers();
             } else {
               if (data.data && data.data.position) {
                 const position = data.data.position;
@@ -462,6 +476,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     setProgress(undefined);
     setError(undefined);
     setExpiresAt(undefined);
+    setQueuePosition(undefined);
   }, [clearScanTimers]);
 
   const resetForceShowError = useCallback(() => {
@@ -481,6 +496,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     progress,
     error,
     expiresAt,
+    queuePosition,
     isConnected,
     startScan,
     stopScan,

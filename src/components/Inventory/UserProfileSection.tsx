@@ -14,6 +14,7 @@ import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
 import { ENABLE_WS_SCAN } from "@/utils/api/api";
 import { getScanActiveButtonLabel } from "@/utils/notifications/scanProgressMessage";
 import { Button } from "../ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 
 import {
   Tooltip,
@@ -31,6 +32,11 @@ interface UserProfileSectionProps {
   getHasVerifiedBadge: (userId: string) => boolean;
   currentData: InventoryData;
   scanWebSocket: UseScanWebSocketReturn;
+  scanErrorBanner?: { title: string; subtitle?: string } | null;
+  queuePosition?: { position: number; delay: number } | null;
+  isLoadingQueuePosition?: boolean;
+  queueStatusMessage?: string;
+  fetchQueuePosition?: () => void;
 }
 
 export default function UserProfileSection({
@@ -42,6 +48,11 @@ export default function UserProfileSection({
   getHasVerifiedBadge,
   currentData,
   scanWebSocket,
+  scanErrorBanner,
+  queuePosition,
+  isLoadingQueuePosition,
+  queueStatusMessage,
+  fetchQueuePosition,
 }: UserProfileSectionProps) {
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
 
@@ -189,7 +200,9 @@ export default function UserProfileSection({
                 scanWebSocket.status === "scanning" ||
                 scanWebSocket.status === "connecting"
               }
-              variant="default"
+              variant={
+                scanWebSocket.status === "completed" ? "success" : "default"
+              }
               size="md"
               className="gap-2"
             >
@@ -269,7 +282,7 @@ export default function UserProfileSection({
                   <span>Progress</span>
                   <span>{scanWebSocket.progress}%</span>
                 </div>
-                <div className="bg-surface-bg h-2 w-full rounded-full">
+                <div className="bg-quaternary-bg h-2 w-full rounded-full">
                   <div
                     className="bg-button-info h-2 rounded-full transition-all duration-300"
                     style={{ width: `${scanWebSocket.progress}%` }}
@@ -277,6 +290,56 @@ export default function UserProfileSection({
                 </div>
               </div>
             )}
+
+          {/* Persistent scan outcome — stays visible even if the toast is missed */}
+          {(scanWebSocket.status === "completed" ||
+            scanWebSocket.status === "error") &&
+            (scanErrorBanner ? (
+              <div className="mt-2 flex w-full items-start justify-center gap-1.5 text-center">
+                <Icon
+                  icon="heroicons:exclamation-triangle"
+                  className="text-button-danger mt-0.5 h-3.5 w-3.5 shrink-0"
+                />
+                <p className="text-button-danger min-w-0 flex-1 text-xs wrap-break-word">
+                  <span className="font-medium">{scanErrorBanner.title}</span>
+                  {scanErrorBanner.subtitle && (
+                    <> — {scanErrorBanner.subtitle}</>
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-2 flex w-full items-center justify-center gap-2">
+                <p className="text-secondary-text min-w-0 flex-1 text-xs wrap-break-word">
+                  {isLoadingQueuePosition ? (
+                    "Checking queue position..."
+                  ) : queuePosition ? (
+                    <span className="text-primary-text font-medium">
+                      Queue Position: #{queuePosition.position.toLocaleString()}
+                    </span>
+                  ) : scanWebSocket.queuePosition !== undefined ? (
+                    <span className="text-primary-text font-medium">
+                      Queue Position: #
+                      {scanWebSocket.queuePosition.toLocaleString()}
+                    </span>
+                  ) : (
+                    queueStatusMessage || "Not in queue"
+                  )}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => fetchQueuePosition?.()}
+                  disabled={isLoadingQueuePosition}
+                  aria-label="Refresh queue position"
+                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                >
+                  {isLoadingQueuePosition ? (
+                    <Spinner className="h-4 w-4" />
+                  ) : (
+                    <Icon icon="material-symbols:refresh" className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            ))}
         </div>
       ) : (
         /* Show login prompt for potential profile owner */
