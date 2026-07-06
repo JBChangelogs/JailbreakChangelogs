@@ -632,14 +632,12 @@ export default function Header() {
   return (
     <>
       {/* Desktop navbar - hidden on mobile/tablet via CSS */}
-      <ServiceAvailabilityTicker />
-
-      {/* Desktop navbar - hidden on mobile/tablet via CSS */}
       <div
         ref={desktopHeaderRef}
         className={`sticky top-0 hidden xl:block ${desktopUserMenuOpen ? "z-[2147483647]" : "z-1300"}`}
         style={{ viewTransitionName: "navbar" } as React.CSSProperties}
       >
+        <ServiceAvailabilityTicker />
         <OfflineDetector />
         <NewsTicker />
         <div className="relative z-10">
@@ -659,6 +657,7 @@ export default function Header() {
         style={{ viewTransitionName: "navbar-mobile" } as React.CSSProperties}
       >
         <>
+          <ServiceAvailabilityTicker />
           <OfflineDetector />
           <NewsTicker />
           <div className="relative z-10">
