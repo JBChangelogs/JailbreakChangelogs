@@ -21,17 +21,9 @@ export default function ServiceAvailabilityTicker() {
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              <strong>SERVICE ALERT:</strong> Inventory lookups are temporarily
-              unavailable while we resolve a backend issue. For now, you may see
-              500 errors on the{" "}
-              <Link
-                href="/inventories"
-                prefetch={false}
-                className="text-link hover:underline"
-              >
-                inventory checker
-              </Link>
-              . Follow progress on{" "}
+              Inventories API is down — inventory lookups, OG finder, dupe
+              finder, robbery and bounty tracking are affected while we look
+              into it. Check{" "}
               <Link
                 href="https://status.jailbreakchangelogs.com/"
                 prefetch={false}
@@ -40,8 +32,8 @@ export default function ServiceAvailabilityTicker() {
                 className="text-link hover:underline"
               >
                 our status page
-              </Link>
-              .
+              </Link>{" "}
+              for updates.
             </span>
           </div>
         </div>
