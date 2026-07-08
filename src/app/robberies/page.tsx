@@ -8,15 +8,12 @@ import {
   useCallback,
   type CSSProperties,
 } from "react";
-import { useSearchParams, usePathname } from "next/navigation";
-import { useRouter } from "nextjs-toploader/app";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import {
   useRobberyTrackerWebSocket,
   type RobberyData,
   type ServerRegionData,
 } from "@/hooks/useRobberyTrackerWebSocket";
-import { useRobberyTrackerMansionsWebSocket } from "@/hooks/useRobberyTrackerMansionsWebSocket";
 import { Icon } from "@/components/ui/IconWrapper";
 import RobberyCard from "@/components/RobberyTracker/RobberyCard";
 import RobberyComboCard from "@/components/RobberyTracker/RobberyComboCard";
@@ -46,18 +43,6 @@ type ServerSize = "all" | "big" | "small";
 type RobberyFilterMode = "any" | "all";
 type RobberiesDisplayMode = "individual" | "grouped";
 
-function serverTimeToMinutes(serverTime: number) {
-  if (!Number.isFinite(serverTime)) return null;
-  const hours24 = Math.floor(serverTime);
-  const minutes = Math.floor((serverTime % 1) * 60);
-  return hours24 * 60 + minutes;
-}
-
-function mansionTimeUntilCloseMinutes(serverTimeMinutes: number) {
-  const mansionCloseMinutes = 4 * 60;
-  return (mansionCloseMinutes - serverTimeMinutes + 24 * 60) % (24 * 60);
-}
-
 const ROBBERIES_TIME_SORT_STORAGE_KEY = "robberiesTimeSort";
 const ROBBERIES_SELECTED_TYPES_STORAGE_KEY = "robberiesSelectedTypes";
 const ROBBERIES_FILTER_MODE_STORAGE_KEY = "robberiesFilterMode";
@@ -72,6 +57,7 @@ const ROBBERY_TYPES = [
   { marker_name: "Casino", name: "Crown Jewel" },
   { marker_name: "Jewelry", name: "Jewelry Store" },
   { marker_name: "Grocery", name: "Grocery Store" },
+  { marker_name: "Mansion", name: "Mansion" },
   { marker_name: "MoneyTruck", name: "Bank Truck" },
   { marker_name: "Museum", name: "Museum" },
   { marker_name: "OilRig", name: "Oil Rig" },
@@ -229,82 +215,20 @@ function isNonEmptyString(value: unknown): value is string {
 
 function RobberyTrackerContent() {
   const { user } = useAuthContext();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const activeView = useMemo(() => {
-    if (searchParams.has("mansions")) return "mansions";
-    return "robberies";
-  }, [searchParams]);
-
-  const handleViewChange = useCallback(
-    (view: "robberies" | "mansions") => {
-      router.push(`${pathname}${view === "mansions" ? "?mansions" : ""}`);
-    },
-    [router, pathname],
-  );
-
-  // Connect to WebSocket endpoints conditionally based on active view
   const {
     robberies,
-    isConnected: robberiesConnected,
-    isConnecting: robberiesConnecting,
-    isIdle: robberiesIdle,
-    error: robberiesError,
-    requiresManualReconnect: robberiesRequiresManualReconnect,
-    reconnect: reconnectRobberies,
-    isBanned: robberiesBanned,
-    banRemainingSeconds: robberiesBanRemainingSeconds,
-    checkBanStatus: checkRobberiesBanStatus,
-  } = useRobberyTrackerWebSocket(activeView === "robberies", user?.id);
+    isConnected,
+    isConnecting,
+    isIdle,
+    error,
+    requiresManualReconnect,
+    reconnect: handleManualReconnect,
+    isBanned,
+    banRemainingSeconds,
+    checkBanStatus: handleBanStatusCheck,
+  } = useRobberyTrackerWebSocket(true, user?.id);
 
-  const {
-    mansions,
-    isConnected: mansionsConnected,
-    isConnecting: mansionsConnecting,
-    isIdle: mansionsIdle,
-    error: mansionsError,
-    requiresManualReconnect: mansionsRequiresManualReconnect,
-    reconnect: reconnectMansions,
-    isBanned: mansionsBanned,
-    banRemainingSeconds: mansionsBanRemainingSeconds,
-    checkBanStatus: checkMansionsBanStatus,
-  } = useRobberyTrackerMansionsWebSocket(activeView === "mansions", user?.id);
-
-  const isConnecting =
-    activeView === "robberies" ? robberiesConnecting : mansionsConnecting;
-
-  const isConnected =
-    activeView === "robberies" ? robberiesConnected : mansionsConnected;
-
-  const isIdle = activeView === "robberies" ? robberiesIdle : mansionsIdle;
-
-  const error = activeView === "robberies" ? robberiesError : mansionsError;
-
-  const requiresManualReconnect =
-    activeView === "robberies"
-      ? robberiesRequiresManualReconnect
-      : mansionsRequiresManualReconnect;
-
-  const isBanned =
-    activeView === "robberies" ? robberiesBanned : mansionsBanned;
-
-  const banRemainingSeconds =
-    activeView === "robberies"
-      ? robberiesBanRemainingSeconds
-      : mansionsBanRemainingSeconds;
-
-  const handleManualReconnect =
-    activeView === "robberies" ? reconnectRobberies : reconnectMansions;
-
-  const handleBanStatusCheck =
-    activeView === "robberies"
-      ? checkRobberiesBanStatus
-      : checkMansionsBanStatus;
-
-  const hasData =
-    activeView === "robberies" ? robberies.length > 0 : mansions.length > 0;
+  const hasData = robberies.length > 0;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [robberiesTimeSort, setRobberiesTimeSort] = useState<TimeSort>(() => {
@@ -313,7 +237,6 @@ function RobberyTrackerContent() {
     );
     return storedTimeSort === "oldest" ? "oldest" : "newest";
   });
-  const [otherTimeSort, setOtherTimeSort] = useState<TimeSort>("newest");
   const [serverSize, setServerSize] = useState<ServerSize>("all");
   const [selectedRobberyTypes, setSelectedRobberyTypes] = useState<string[]>(
     () => {
@@ -377,8 +300,7 @@ function RobberyTrackerContent() {
       );
       return storedDisplayMode === "grouped" ? "grouped" : "individual";
     });
-  const timeSort =
-    activeView === "robberies" ? robberiesTimeSort : otherTimeSort;
+  const timeSort = robberiesTimeSort;
 
   const [serverRegionsByJobId, setServerRegionsByJobId] = useState<
     Record<string, ServerRegionData | null>
@@ -438,8 +360,7 @@ function RobberyTrackerContent() {
       ? "Any Selected Type"
       : "Power Combo (All Selected Types)";
 
-  const isPowerComboMode =
-    activeView === "robberies" && robberyFilterMode === "all";
+  const isPowerComboMode = robberyFilterMode === "all";
 
   const robberyTypeCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -635,8 +556,6 @@ function RobberyTrackerContent() {
   ]);
 
   const mergedServerRegionsByJobId = useMemo(() => {
-    if (activeView !== "robberies") return serverRegionsByJobId;
-
     let hasNew = false;
     for (const robbery of robberies) {
       const jobId = robbery.server?.job_id || robbery.job_id;
@@ -660,7 +579,7 @@ function RobberyTrackerContent() {
       }
     }
     return next;
-  }, [activeView, robberies, serverRegionsByJobId]);
+  }, [robberies, serverRegionsByJobId]);
 
   const mergeRegionResults = useCallback(
     (results: Record<string, ServerRegionData | null>) => {
@@ -680,7 +599,6 @@ function RobberyTrackerContent() {
   );
 
   useEffect(() => {
-    if (activeView !== "robberies") return;
     const ids: string[] = [];
     for (const robbery of robberies) {
       if (robbery.region_data) continue;
@@ -691,46 +609,7 @@ function RobberyTrackerContent() {
     }
     if (ids.length === 0) return;
     fetchRegionData(ids).then(mergeRegionResults);
-  }, [robberies, activeView, fetchRegionData, mergeRegionResults]);
-
-  // Filter and sort Mansions (simpler as no type filtering)
-  const filteredMansions = useMemo(() => {
-    let filtered = mansions;
-
-    // Apply server size filter
-    if (serverSize !== "all") {
-      filtered = filtered.filter((robbery) => {
-        const playerCount = robbery.server?.players?.length || 0;
-        return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
-      });
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((robbery) =>
-        robbery.name.toLowerCase().includes(query),
-      );
-    }
-
-    return filtered.sort((a, b) => {
-      const minutesA = serverTimeToMinutes(a.server_time);
-      const minutesB = serverTimeToMinutes(b.server_time);
-
-      if (minutesA === null && minutesB !== null) return 1;
-      if (minutesA !== null && minutesB === null) return -1;
-
-      if (minutesA !== null && minutesB !== null && minutesA !== minutesB) {
-        const timeUntilCloseA = mansionTimeUntilCloseMinutes(minutesA);
-        const timeUntilCloseB = mansionTimeUntilCloseMinutes(minutesB);
-        if (timeUntilCloseA !== timeUntilCloseB)
-          return timeUntilCloseB - timeUntilCloseA;
-      }
-
-      if (a.status !== b.status) return a.status - b.status;
-      if (timeSort === "newest") return b.timestamp - a.timestamp;
-      return a.timestamp - b.timestamp;
-    });
-  }, [mansions, searchQuery, timeSort, serverSize]);
+  }, [robberies, fetchRegionData, mergeRegionResults]);
 
   // Calculate robbery statistics
   const robberyStats = useMemo(() => {
@@ -784,16 +663,6 @@ function RobberyTrackerContent() {
     isPowerComboMode,
     robberiesDisplayMode,
   ]);
-
-  const mansionStats = useMemo(() => {
-    let open = 0;
-    let ready = 0;
-    for (const m of filteredMansions) {
-      if (m.status === 1) open++;
-      else if (m.status === 2) ready++;
-    }
-    return { total: filteredMansions.length, open, ready };
-  }, [filteredMansions]);
 
   const [banCountdownSeconds, setBanCountdownSeconds] = useState<number | null>(
     null,
@@ -1100,14 +969,9 @@ function RobberyTrackerContent() {
                         >
                           <DropdownMenuRadioGroup
                             value={timeSort}
-                            onValueChange={(value) => {
-                              const nextValue = value as TimeSort;
-                              if (activeView === "robberies") {
-                                setRobberiesTimeSort(nextValue);
-                                return;
-                              }
-                              setOtherTimeSort(nextValue);
-                            }}
+                            onValueChange={(value) =>
+                              setRobberiesTimeSort(value as TimeSort)
+                            }
                           >
                             <DropdownMenuRadioItem
                               value="newest"
@@ -1134,73 +998,37 @@ function RobberyTrackerContent() {
 
           {/* Status Bar */}
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            {/* Statistics - Conditional based on view */}
-            {activeView === "robberies" ? (
-              <div className="flex flex-wrap items-center gap-3 text-sm">
-                <span className="text-primary-text font-semibold">
-                  {searchQuery || selectedRobberyTypes.length > 0 ? (
-                    <>
-                      Showing {robberyStats.total} of{" "}
-                      {robberyStats.baselineTotal}{" "}
-                      {robberyStats.baselineTotal === 1
-                        ? robberyStats.nounSingular
-                        : robberyStats.nounPlural}
-                    </>
-                  ) : (
-                    <>
-                      {robberyStats.total}{" "}
-                      {robberyStats.total === 1
-                        ? robberyStats.nounSingular
-                        : robberyStats.nounPlural}
-                    </>
-                  )}
-                </span>
-                {!(robberiesDisplayMode === "grouped" && !isPowerComboMode) && (
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="text-secondary-text">
-                      {robberyStats.open} Open
-                    </span>
-                    <span className="text-tertiary-text">•</span>
-                    <span className="text-secondary-text">
-                      {robberyStats.inProgress} In Progress
-                    </span>
-                  </div>
+            {/* Statistics */}
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <span className="text-primary-text font-semibold">
+                {searchQuery || selectedRobberyTypes.length > 0 ? (
+                  <>
+                    Showing {robberyStats.total} of {robberyStats.baselineTotal}{" "}
+                    {robberyStats.baselineTotal === 1
+                      ? robberyStats.nounSingular
+                      : robberyStats.nounPlural}
+                  </>
+                ) : (
+                  <>
+                    {robberyStats.total}{" "}
+                    {robberyStats.total === 1
+                      ? robberyStats.nounSingular
+                      : robberyStats.nounPlural}
+                  </>
                 )}
-              </div>
-            ) : (
-              mansionStats.total > 0 && (
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <span className="text-primary-text font-semibold">
-                    {searchQuery ? (
-                      <>
-                        Showing {mansionStats.total} of {mansions.length}{" "}
-                        Mansions
-                      </>
-                    ) : (
-                      <>
-                        {mansionStats.total}{" "}
-                        {mansionStats.total === 1 ? "Mansion" : "Mansions"}
-                      </>
-                    )}
+              </span>
+              {!(robberiesDisplayMode === "grouped" && !isPowerComboMode) && (
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-secondary-text">
+                    {robberyStats.open} Open
                   </span>
-                  <div className="flex items-center gap-2 text-xs">
-                    {mansionStats.open > 0 && (
-                      <span className="text-secondary-text">
-                        {mansionStats.open} Open
-                      </span>
-                    )}
-                    {mansionStats.open > 0 && mansionStats.ready > 0 && (
-                      <span className="text-tertiary-text">•</span>
-                    )}
-                    {mansionStats.ready > 0 && (
-                      <span className="text-secondary-text">
-                        {mansionStats.ready} Ready to Open
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-tertiary-text">•</span>
+                  <span className="text-secondary-text">
+                    {robberyStats.inProgress} In Progress
+                  </span>
                 </div>
-              )
-            )}
+              )}
+            </div>
 
             {/* Connection Status */}
             <div className="flex items-center gap-2">
@@ -1216,25 +1044,6 @@ function RobberyTrackerContent() {
             </div>
 
             <TotalRobberiesLoggedPolling className="hidden sm:ml-auto sm:inline-flex" />
-          </div>
-
-          {/* Main View Toggle */}
-          <div className="mb-6 overflow-x-auto">
-            <Tabs
-              value={activeView}
-              onValueChange={(value) =>
-                handleViewChange(value as "robberies" | "mansions")
-              }
-            >
-              <TabsList fullWidth>
-                <TabsTrigger value="robberies" fullWidth>
-                  Robberies
-                </TabsTrigger>
-                <TabsTrigger value="mansions" fullWidth>
-                  Mansions
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
 
           {/* Loading State - only show when no data */}
@@ -1277,333 +1086,291 @@ function RobberyTrackerContent() {
 
           {hasData ? (
             <>
-              {/* Conditional Rendering Based on View */}
-              {activeView === "robberies" ? (
-                <>
-                  {/* Robbery Type Multi-Select */}
-                  <div className="mb-6">
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="text-secondary-text text-sm font-medium">
-                        Filter by Robbery Type{" "}
-                        {(selectedRobberyTypes.length > 0 ||
-                          activeComboPresetIds.length > 0) && (
-                          <span className="text-primary-text">
-                            (
-                            {isPowerComboMode
-                              ? activeComboPresetIds.length
-                              : selectedRobberyTypes.length}{" "}
-                            selected)
-                          </span>
-                        )}
-                      </p>
-                      {(selectedRobberyTypes.length > 0 ||
-                        activeComboPresetIds.length > 0 ||
-                        robberyFilterMode !== "any") && (
-                        <button
-                          onClick={() => {
-                            setSelectedRobberyTypes([]);
-                            setSelectedComboPresetIds([]);
-                            setRobberyFilterMode("any");
-                          }}
-                          className="text-link hover:text-link-hover cursor-pointer text-sm font-medium transition-colors"
-                        >
-                          Clear Filters
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {ROBBERY_TYPES.map((type) => {
-                        const isSelected = selectedTypeSetForRender.has(
-                          type.marker_name,
-                        );
-                        return (
-                          <Button
-                            key={type.marker_name}
-                            onClick={() => {
-                              if (robberyFilterMode === "all") {
-                                setRobberyFilterMode("any");
-                                setSelectedComboPresetIds([]);
-                              }
-                              setSelectedRobberyTypes((prev) =>
-                                prev.includes(type.marker_name)
-                                  ? prev.filter((t) => t !== type.marker_name)
-                                  : [...prev, type.marker_name],
-                              );
-                            }}
-                            variant={isSelected ? "default" : "secondary"}
-                            size="sm"
-                            className="gap-2"
-                          >
-                            {isSelected && (
-                              <Icon
-                                icon="heroicons:check"
-                                className="h-4 w-4"
-                              />
-                            )}
-                            <span>
-                              ({robberyTypeCounts.get(type.marker_name) || 0}){" "}
-                              {type.name}
-                            </span>
-                          </Button>
-                        );
-                      })}
-                      {ROBBERY_COMBO_PRESETS.map((preset) => {
-                        const isActive =
-                          robberyFilterMode === "all" &&
-                          activeComboPresetIds.includes(preset.id);
-
-                        return (
-                          <Button
-                            key={preset.id}
-                            onClick={() => {
-                              if (
-                                robberyFilterMode === "all" &&
-                                selectedComboPresetIds.length === 1 &&
-                                selectedComboPresetIds.includes(preset.id)
-                              ) {
-                                setRobberyFilterMode("any");
-                                setSelectedComboPresetIds([]);
-                                return;
-                              }
-
-                              setRobberyFilterMode("all");
-                              setSelectedRobberyTypes([]);
-                              setSelectedComboPresetIds((prev) => {
-                                if (prev.length === 0) return [preset.id];
-                                if (prev.includes(preset.id)) {
-                                  return prev.filter((id) => id !== preset.id);
-                                }
-                                return [...prev, preset.id];
-                              });
-                            }}
-                            variant={isActive ? "default" : "secondary"}
-                            size="sm"
-                            className="gap-2"
-                            title={preset.description}
-                          >
-                            {isActive && (
-                              <Icon
-                                icon="heroicons:check"
-                                className="h-4 w-4"
-                              />
-                            )}
-                            <span className="text-xs font-semibold tabular-nums">
-                              ({comboPresetCounts.get(preset.id) || 0})
-                            </span>
-                            <span>{preset.label}</span>
-                          </Button>
-                        );
-                      })}
-                    </div>
-                    <div className="mt-4 w-full lg:max-w-md">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-11 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
-                            aria-label="Robbery type filter mode"
-                          >
-                            <span className="truncate">
-                              {robberyFilterModeLabel}
-                            </span>
-                            <Icon
-                              icon="heroicons:chevron-down"
-                              className="text-secondary-text h-5 w-5"
-                            />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="start"
-                          className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
-                        >
-                          <DropdownMenuRadioGroup
-                            value={robberyFilterMode}
-                            onValueChange={(value) => {
-                              const nextMode = value as RobberyFilterMode;
-                              setRobberyFilterMode(nextMode);
-                              if (nextMode === "all") {
-                                setSelectedRobberyTypes([]);
-                              }
-                            }}
-                          >
-                            <DropdownMenuRadioItem
-                              value="any"
-                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                            >
-                              Any Selected Type
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem
-                              value="all"
-                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                            >
-                              Power Combo (All Types Open)
-                            </DropdownMenuRadioItem>
-                          </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    {isPowerComboMode && (
-                      <p className="text-secondary-text mt-3 text-xs">
-                        Power Combo mode supports multiple combo presets at
-                        once. If no preset is selected, all supported combo
-                        presets are shown.
-                      </p>
+              {/* Robbery Type Multi-Select */}
+              <div className="mb-6">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-secondary-text text-sm font-medium">
+                    Filter by Robbery Type{" "}
+                    {(selectedRobberyTypes.length > 0 ||
+                      activeComboPresetIds.length > 0) && (
+                      <span className="text-primary-text">
+                        (
+                        {isPowerComboMode
+                          ? activeComboPresetIds.length
+                          : selectedRobberyTypes.length}{" "}
+                        selected)
+                      </span>
                     )}
-                  </div>
-
-                  {!isPowerComboMode && (
-                    <div className="mb-4 overflow-x-auto">
-                      <Tabs
-                        value={robberiesDisplayMode}
-                        onValueChange={(value) =>
-                          setRobberiesDisplayMode(value as RobberiesDisplayMode)
-                        }
+                  </p>
+                  {(selectedRobberyTypes.length > 0 ||
+                    activeComboPresetIds.length > 0 ||
+                    robberyFilterMode !== "any") && (
+                    <button
+                      onClick={() => {
+                        setSelectedRobberyTypes([]);
+                        setSelectedComboPresetIds([]);
+                        setRobberyFilterMode("any");
+                      }}
+                      className="text-link hover:text-link-hover cursor-pointer text-sm font-medium transition-colors"
+                    >
+                      Clear Filters
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {ROBBERY_TYPES.map((type) => {
+                    const isSelected = selectedTypeSetForRender.has(
+                      type.marker_name,
+                    );
+                    return (
+                      <Button
+                        key={type.marker_name}
+                        onClick={() => {
+                          if (robberyFilterMode === "all") {
+                            setRobberyFilterMode("any");
+                            setSelectedComboPresetIds([]);
+                          }
+                          setSelectedRobberyTypes((prev) =>
+                            prev.includes(type.marker_name)
+                              ? prev.filter((t) => t !== type.marker_name)
+                              : [...prev, type.marker_name],
+                          );
+                        }}
+                        variant={isSelected ? "default" : "secondary"}
+                        size="sm"
+                        className="gap-2"
                       >
-                        <TabsList fullWidth>
-                          <TabsTrigger value="individual" fullWidth>
-                            Individual
-                          </TabsTrigger>
-                          <TabsTrigger value="grouped" fullWidth>
-                            Grouped (Server)
-                          </TabsTrigger>
-                        </TabsList>
-                      </Tabs>
-                    </div>
-                  )}
-
-                  {/* Robberies Grid */}
-                  {isPowerComboMode ? (
-                    filteredRobberyCombos.length > 0 ? (
-                      <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                        {filteredRobberyCombos.map((combo) => (
-                          <RobberyComboCard
-                            key={`${combo.comboId}-${combo.serverId}`}
-                            comboId={combo.comboId}
-                            serverId={combo.serverId}
-                            robberies={combo.robberies}
-                            comboLabel={combo.comboLabel}
-                            regionData={
-                              mergedServerRegionsByJobId[combo.serverId]
-                            }
-                            useExternalRegionData
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                        <Icon
-                          icon="heroicons:magnifying-glass"
-                          className="text-tertiary-text mb-4 h-12 w-12"
-                        />
-                        <h3 className="text-primary-text text-lg font-medium">
-                          No combo servers found
-                        </h3>
-                        <p className="text-secondary-text">
-                          Try changing selected robberies or server size filters
-                        </p>
-                      </div>
-                    )
-                  ) : robberiesDisplayMode === "grouped" ? (
-                    groupedRobberies.length > 0 ? (
-                      <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                        {groupedRobberies.map((group) => (
-                          <RobberyServerGroupCard
-                            key={group.jobId}
-                            serverId={group.jobId}
-                            robberies={group.robberies}
-                            regionData={mergedServerRegionsByJobId[group.jobId]}
-                            useExternalRegionData
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                        <Icon
-                          icon="heroicons:magnifying-glass"
-                          className="text-tertiary-text mb-4 h-12 w-12"
-                        />
-                        <h3 className="text-primary-text text-lg font-medium">
-                          No servers found
-                        </h3>
-                        <p className="text-secondary-text">
-                          Try changing your filters or search query
-                        </p>
-                      </div>
-                    )
-                  ) : filteredRobberies.length > 0 ? (
-                    <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                      {filteredRobberies.map((robbery) => {
-                        const jobId = robbery.server?.job_id || robbery.job_id;
-                        return (
-                          <RobberyCard
-                            key={`${robbery.marker_name}-${jobId}-${robbery.timestamp}`}
-                            robbery={robbery}
-                            regionData={mergedServerRegionsByJobId[jobId]}
-                            useExternalRegionData
-                          />
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                      <Icon
-                        icon="heroicons:magnifying-glass"
-                        className="text-tertiary-text mb-4 h-12 w-12"
-                      />
-                      <h3 className="text-primary-text text-lg font-medium">
-                        {hasActiveRobberyFilters
-                          ? "No robberies found"
-                          : "No robberies tracked yet"}
-                      </h3>
-                      <p className="text-secondary-text">
-                        {selectedRobberyTypes.length > 0 && !searchQuery ? (
-                          <>
-                            No robberies logged yet for the selected type
-                            {selectedRobberyTypes.length > 1 ? "s" : ""}
-                          </>
-                        ) : selectedRobberyTypes.length > 0 && searchQuery ? (
-                          <>No robberies match your filters and search</>
-                        ) : searchQuery ? (
-                          <>Try adjusting your search query</>
-                        ) : hasActiveRobberyFilters ? (
-                          <>No robberies found for your current filters</>
-                        ) : (
-                          <>Waiting for robbery data...</>
+                        {isSelected && (
+                          <Icon icon="heroicons:check" className="h-4 w-4" />
                         )}
-                      </p>
-                      <StatusPageAction />
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {/* Mansions Grid */}
-                  {filteredMansions.length > 0 ? (
-                    <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                      {filteredMansions.map((robbery) => (
-                        <RobberyCard
-                          key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
-                          robbery={robbery}
+                        <span>
+                          ({robberyTypeCounts.get(type.marker_name) || 0}){" "}
+                          {type.name}
+                        </span>
+                      </Button>
+                    );
+                  })}
+                  {ROBBERY_COMBO_PRESETS.map((preset) => {
+                    const isActive =
+                      robberyFilterMode === "all" &&
+                      activeComboPresetIds.includes(preset.id);
+
+                    return (
+                      <Button
+                        key={preset.id}
+                        onClick={() => {
+                          if (
+                            robberyFilterMode === "all" &&
+                            selectedComboPresetIds.length === 1 &&
+                            selectedComboPresetIds.includes(preset.id)
+                          ) {
+                            setRobberyFilterMode("any");
+                            setSelectedComboPresetIds([]);
+                            return;
+                          }
+
+                          setRobberyFilterMode("all");
+                          setSelectedRobberyTypes([]);
+                          setSelectedComboPresetIds((prev) => {
+                            if (prev.length === 0) return [preset.id];
+                            if (prev.includes(preset.id)) {
+                              return prev.filter((id) => id !== preset.id);
+                            }
+                            return [...prev, preset.id];
+                          });
+                        }}
+                        variant={isActive ? "default" : "secondary"}
+                        size="sm"
+                        className="gap-2"
+                        title={preset.description}
+                      >
+                        {isActive && (
+                          <Icon icon="heroicons:check" className="h-4 w-4" />
+                        )}
+                        <span className="text-xs font-semibold tabular-nums">
+                          ({comboPresetCounts.get(preset.id) || 0})
+                        </span>
+                        <span>{preset.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 w-full lg:max-w-md">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-11 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                        aria-label="Robbery type filter mode"
+                      >
+                        <span className="truncate">
+                          {robberyFilterModeLabel}
+                        </span>
+                        <Icon
+                          icon="heroicons:chevron-down"
+                          className="text-secondary-text h-5 w-5"
                         />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                      <Icon
-                        icon="heroicons:magnifying-glass"
-                        className="text-tertiary-text mb-4 h-12 w-12"
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
+                    >
+                      <DropdownMenuRadioGroup
+                        value={robberyFilterMode}
+                        onValueChange={(value) => {
+                          const nextMode = value as RobberyFilterMode;
+                          setRobberyFilterMode(nextMode);
+                          if (nextMode === "all") {
+                            setSelectedRobberyTypes([]);
+                          }
+                        }}
+                      >
+                        <DropdownMenuRadioItem
+                          value="any"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          Any Selected Type
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem
+                          value="all"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          Power Combo (All Types Open)
+                        </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                {isPowerComboMode && (
+                  <p className="text-secondary-text mt-3 text-xs">
+                    Power Combo mode supports multiple combo presets at once. If
+                    no preset is selected, all supported combo presets are
+                    shown.
+                  </p>
+                )}
+              </div>
+
+              {!isPowerComboMode && (
+                <div className="mb-4 overflow-x-auto">
+                  <Tabs
+                    value={robberiesDisplayMode}
+                    onValueChange={(value) =>
+                      setRobberiesDisplayMode(value as RobberiesDisplayMode)
+                    }
+                  >
+                    <TabsList fullWidth>
+                      <TabsTrigger value="individual" fullWidth>
+                        Individual
+                      </TabsTrigger>
+                      <TabsTrigger value="grouped" fullWidth>
+                        Grouped (Server)
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              )}
+
+              {/* Robberies Grid */}
+              {isPowerComboMode ? (
+                filteredRobberyCombos.length > 0 ? (
+                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                    {filteredRobberyCombos.map((combo) => (
+                      <RobberyComboCard
+                        key={`${combo.comboId}-${combo.serverId}`}
+                        comboId={combo.comboId}
+                        serverId={combo.serverId}
+                        robberies={combo.robberies}
+                        comboLabel={combo.comboLabel}
+                        regionData={mergedServerRegionsByJobId[combo.serverId]}
+                        useExternalRegionData
                       />
-                      <h3 className="text-primary-text text-lg font-medium">
-                        No mansions found
-                      </h3>
-                      <p className="text-secondary-text">
-                        {searchQuery
-                          ? "No mansions match your search"
-                          : "No mansions logged yet"}
-                      </p>
-                    </div>
-                  )}
-                </>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="text-tertiary-text mb-4 h-12 w-12"
+                    />
+                    <h3 className="text-primary-text text-lg font-medium">
+                      No combo servers found
+                    </h3>
+                    <p className="text-secondary-text">
+                      Try changing selected robberies or server size filters
+                    </p>
+                  </div>
+                )
+              ) : robberiesDisplayMode === "grouped" ? (
+                groupedRobberies.length > 0 ? (
+                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                    {groupedRobberies.map((group) => (
+                      <RobberyServerGroupCard
+                        key={group.jobId}
+                        serverId={group.jobId}
+                        robberies={group.robberies}
+                        regionData={mergedServerRegionsByJobId[group.jobId]}
+                        useExternalRegionData
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="text-tertiary-text mb-4 h-12 w-12"
+                    />
+                    <h3 className="text-primary-text text-lg font-medium">
+                      No servers found
+                    </h3>
+                    <p className="text-secondary-text">
+                      Try changing your filters or search query
+                    </p>
+                  </div>
+                )
+              ) : filteredRobberies.length > 0 ? (
+                <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                  {filteredRobberies.map((robbery) => {
+                    const jobId = robbery.server?.job_id || robbery.job_id;
+                    return (
+                      <RobberyCard
+                        key={`${robbery.marker_name}-${jobId}-${robbery.timestamp}`}
+                        robbery={robbery}
+                        regionData={mergedServerRegionsByJobId[jobId]}
+                        useExternalRegionData
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
+                  <Icon
+                    icon="heroicons:magnifying-glass"
+                    className="text-tertiary-text mb-4 h-12 w-12"
+                  />
+                  <h3 className="text-primary-text text-lg font-medium">
+                    {hasActiveRobberyFilters
+                      ? "No robberies found"
+                      : "No robberies tracked yet"}
+                  </h3>
+                  <p className="text-secondary-text">
+                    {selectedRobberyTypes.length > 0 && !searchQuery ? (
+                      <>
+                        No robberies logged yet for the selected type
+                        {selectedRobberyTypes.length > 1 ? "s" : ""}
+                      </>
+                    ) : selectedRobberyTypes.length > 0 && searchQuery ? (
+                      <>No robberies match your filters and search</>
+                    ) : searchQuery ? (
+                      <>Try adjusting your search query</>
+                    ) : hasActiveRobberyFilters ? (
+                      <>No robberies found for your current filters</>
+                    ) : (
+                      <>Waiting for robbery data...</>
+                    )}
+                  </p>
+                  <StatusPageAction />
+                </div>
               )}
             </>
           ) : (
@@ -1612,24 +1379,7 @@ function RobberyTrackerContent() {
             !error && (
               <div className="flex min-h-screen flex-col items-center justify-start py-20 pt-24">
                 <div className="text-center">
-                  {activeView === "robberies" ? (
-                    <>
-                      <RobberiesInitialEmptyState key={activeView} />
-                    </>
-                  ) : (
-                    <>
-                      <Icon
-                        icon="mdi:clock"
-                        className="text-tertiary-text mx-auto mb-4 h-16 w-16"
-                      />
-                      <h3 className="text-secondary-text mb-2 text-lg font-medium">
-                        No mansions tracked yet
-                      </h3>
-                      <p className="text-tertiary-text text-sm">
-                        Waiting for mansion data...
-                      </p>
-                    </>
-                  )}
+                  <RobberiesInitialEmptyState />
                 </div>
               </div>
             )
