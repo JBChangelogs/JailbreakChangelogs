@@ -7,6 +7,8 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -18,6 +20,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  advancedFilterGroups,
+  chipFilterOptions,
   filterGroups,
   getFilterSortsButtonLabel,
   getFilterSortsDisplayNames,
@@ -30,7 +34,7 @@ interface ValuesSearchControlsProps {
   clearTrigger: number;
   selectedFilterSorts: FilterSort[];
   onToggleFilterSort: (sort: FilterSort) => void;
-  onClearFilterSorts: () => void;
+  onClearFilterSorts: (subset?: FilterSort[]) => void;
   valueSort: ValueSort;
   setValueSort: (sort: ValueSort) => void;
   rangeValue: number[];
@@ -58,6 +62,7 @@ export default function ValuesSearchControls({
   maxValueRange,
 }: ValuesSearchControlsProps) {
   const isAuthenticated = useIsAuthenticated();
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -137,6 +142,17 @@ export default function ValuesSearchControls({
   const filterLabel = getFilterSortsButtonLabel(selectedFilterSorts);
 
   const sortLabel = getValueSortLabel(valueSort);
+
+  const advancedFilterValues = useMemo(
+    () =>
+      advancedFilterGroups.flatMap((group) =>
+        group.options.map((o) => o.value),
+      ),
+    [],
+  );
+  const hasActiveAdvancedFilters = selectedFilterSorts.some((value) =>
+    advancedFilterValues.includes(value),
+  );
 
   // Handle Ctrl+F to focus search input
   useEffect(() => {
@@ -226,7 +242,7 @@ export default function ValuesSearchControls({
                     {selectedFilterSorts.length > 0 && (
                       <button
                         type="button"
-                        onClick={onClearFilterSorts}
+                        onClick={() => onClearFilterSorts()}
                         className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
                       >
                         Clear Filters
@@ -243,15 +259,6 @@ export default function ValuesSearchControls({
                             checked={selectedFilterSorts.includes(option.value)}
                             onSelect={(e) => e.preventDefault()}
                             onCheckedChange={() => {
-                              if (
-                                option.value === "favorites" &&
-                                !isAuthenticated
-                              ) {
-                                toast.info(
-                                  "Please log in to view your favorites",
-                                );
-                                return;
-                              }
                               onToggleFilterSort(option.value);
                               trackFilterSortEvent(
                                 "values",
@@ -328,6 +335,109 @@ export default function ValuesSearchControls({
               </div>
             </div>
           </div>
+
+          {/* Quick filter chips */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              size="sm"
+              variant={showAdvancedFilters ? "default" : "secondary"}
+            >
+              <Icon
+                icon="rivet-icons:filter"
+                className="h-4 w-4"
+                inline={true}
+              />
+              Filter
+              <Icon
+                icon={
+                  showAdvancedFilters
+                    ? "heroicons:chevron-up"
+                    : "heroicons:chevron-down"
+                }
+                className="h-4 w-4"
+                inline={true}
+              />
+            </Button>
+            {chipFilterOptions.map((option) => (
+              <Button
+                key={option.value}
+                type="button"
+                size="sm"
+                variant={
+                  selectedFilterSorts.includes(option.value)
+                    ? "default"
+                    : "secondary"
+                }
+                onClick={() => {
+                  if (option.value === "favorites" && !isAuthenticated) {
+                    toast.info("Please log in to view your favorites");
+                    return;
+                  }
+                  onToggleFilterSort(option.value);
+                  trackFilterSortEvent("values", "filter", option.value);
+                }}
+              >
+                <Icon icon={option.icon} style={{ color: option.iconColor }} />
+                {option.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Advanced Filters: Demand and Trend */}
+          {showAdvancedFilters && (
+            <div className="bg-secondary-bg border-border-card rounded-lg border p-4">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-primary-text text-sm font-semibold">
+                    Advanced Filters
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onClearFilterSorts(advancedFilterValues)}
+                    className={`text-link hover:text-link-hover cursor-pointer text-sm font-medium ${
+                      hasActiveAdvancedFilters ? "visible" : "invisible"
+                    }`}
+                  >
+                    Clear Demand & Trend Filters
+                  </button>
+                </div>
+                {advancedFilterGroups.map((group) => (
+                  <div key={group.label} className="flex flex-col gap-2">
+                    <span className="text-primary-text text-sm font-medium">
+                      {group.label}:
+                    </span>
+                    <div className="flex flex-wrap gap-4">
+                      {group.options.map((option) => (
+                        <label
+                          key={option.value}
+                          htmlFor={`advanced-filter-${option.value}`}
+                          className="flex cursor-pointer items-center gap-2"
+                        >
+                          <Checkbox
+                            id={`advanced-filter-${option.value}`}
+                            checked={selectedFilterSorts.includes(option.value)}
+                            onCheckedChange={() => {
+                              onToggleFilterSort(option.value);
+                              trackFilterSortEvent(
+                                "values",
+                                "filter",
+                                option.value,
+                              );
+                            }}
+                          />
+                          <span className="text-primary-text text-sm">
+                            {option.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="w-full">
             <div className="border-border-card bg-secondary-bg rounded-lg border px-3 py-2">

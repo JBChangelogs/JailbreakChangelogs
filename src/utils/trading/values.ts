@@ -404,10 +404,70 @@ const matchesFilterSort = (item: Item, filterSort: FilterSort): boolean => {
       return item.type.toLowerCase() === "horn";
     case "name-weapon-skins":
       return item.type.toLowerCase() === "weapon skin";
+    case "demand-close-to-none":
+    case "demand-very-low":
+    case "demand-low":
+    case "demand-below-average":
+    case "demand-average":
+    case "demand-decent":
+    case "demand-high":
+    case "demand-very-high":
+      return (
+        normalizeValueText(item.demand) ===
+        normalizeValueText(demandValueMap[filterSort])
+      );
+    case "trend-stable":
+    case "trend-rising":
+    case "trend-hyped":
+    case "trend-dropping":
+    case "trend-unstable":
+    case "trend-hoarded":
+    case "trend-manipulated":
+    case "trend-recovering":
+      return (
+        normalizeValueText(item.trend) ===
+        normalizeValueText(trendValueMap[filterSort])
+      );
     default:
       return false;
   }
 };
+
+const TAG_FILTER_SORTS: FilterSort[] = [
+  "name-seasonal-items",
+  "name-limited-items",
+  "name-untradeable-items",
+];
+
+const DEMAND_FILTER_SORTS: FilterSort[] = [
+  "demand-close-to-none",
+  "demand-very-low",
+  "demand-low",
+  "demand-below-average",
+  "demand-average",
+  "demand-decent",
+  "demand-high",
+  "demand-very-high",
+];
+
+const TREND_FILTER_SORTS: FilterSort[] = [
+  "trend-stable",
+  "trend-rising",
+  "trend-hyped",
+  "trend-dropping",
+  "trend-unstable",
+  "trend-hoarded",
+  "trend-manipulated",
+  "trend-recovering",
+];
+
+// Non-favorites dimensions: a selection within a dimension is OR'd,
+// but each active dimension must be satisfied (AND) against the others
+const FILTER_DIMENSIONS: FilterSort[][] = [
+  TAG_FILTER_SORTS,
+  DEMAND_FILTER_SORTS,
+  TREND_FILTER_SORTS,
+];
 
 export const filterByTypes = (
   items: Item[],
@@ -417,8 +477,13 @@ export const filterByTypes = (
   if (!filterSorts || filterSorts.length === 0) return items;
 
   const hasFavorites = filterSorts.includes("favorites");
+  const dimensionFilters = FILTER_DIMENSIONS.map((dimension) =>
+    filterSorts.filter((filterSort) => dimension.includes(filterSort)),
+  );
+  const classifiedFilters = new Set(dimensionFilters.flat());
   const typeFilters = filterSorts.filter(
-    (filterSort) => filterSort !== "favorites",
+    (filterSort) =>
+      filterSort !== "favorites" && !classifiedFilters.has(filterSort),
   );
 
   // Create a Set of both direct IDs and parent IDs from variants
@@ -440,16 +505,19 @@ export const filterByTypes = (
       : null;
 
   return items.filter((item) => {
-    const isFavorite = favoriteIds ? favoriteIds.has(String(item.id)) : false;
-    const matchesType = typeFilters.some((filterSort) =>
-      matchesFilterSort(item, filterSort),
-    );
+    if (hasFavorites && !favoriteIds?.has(String(item.id))) return false;
 
-    // Favorites narrows down the selected types rather than adding to them
-    if (hasFavorites && typeFilters.length > 0)
-      return isFavorite && matchesType;
-    if (hasFavorites) return isFavorite;
-    return matchesType;
+    for (const dimensionFilter of [...dimensionFilters, typeFilters]) {
+      if (
+        dimensionFilter.length > 0 &&
+        !dimensionFilter.some((filterSort) =>
+          matchesFilterSort(item, filterSort),
+        )
+      )
+        return false;
+    }
+
+    return true;
   });
 };
 
@@ -518,11 +586,6 @@ export const sortAndFilterItems = async (
       });
     }
   }
-
-  result = filterByValueSort(result, valueSort, {
-    getDemand: getEffectiveDemand,
-    getTrend: getEffectiveTrend,
-  });
 
   if (
     valueSort === "season-number-asc" ||

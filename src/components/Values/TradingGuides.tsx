@@ -4,13 +4,13 @@ import React, { useState } from "react";
 import { YouTubeEmbed } from "@next/third-parties/google";
 import { Icon } from "@/components/ui/IconWrapper";
 import { demandOrder, trendOrder } from "@/utils/trading/values";
-import { ValueSort } from "@/types";
+import { FilterSort } from "@/types";
 import { trendDescriptions } from "@/utils/trading/tradingDefinitions";
 import { getDemandHexColor, getTrendHexColor } from "@/utils/items/badgeColors";
 
 interface TradingGuidesProps {
-  valueSort: ValueSort;
-  onValueSortChange: (sort: ValueSort) => void;
+  selectedFilterSorts: FilterSort[];
+  onToggleFilterSort: (filterSort: FilterSort) => void;
   onScrollToSearch: () => void;
 }
 
@@ -87,8 +87,8 @@ const tradingTerms = [
 ];
 
 function TradingGuides({
-  valueSort,
-  onValueSortChange,
+  selectedFilterSorts,
+  onToggleFilterSort,
   onScrollToSearch,
 }: TradingGuidesProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -117,12 +117,7 @@ function TradingGuides({
   };
 
   const handleDemandClick = (demand: string) => {
-    const demandValue = getDemandValue(demand);
-    if (valueSort === demandValue) {
-      onValueSortChange("cash-desc");
-    } else {
-      onValueSortChange(demandValue as ValueSort);
-    }
+    onToggleFilterSort(getDemandValue(demand) as FilterSort);
     onScrollToSearch();
   };
 
@@ -150,12 +145,7 @@ function TradingGuides({
   };
 
   const handleTrendClick = (trend: string) => {
-    const trendValue = getTrendValue(trend);
-    if (valueSort === trendValue) {
-      onValueSortChange("cash-desc");
-    } else {
-      onValueSortChange(trendValue as ValueSort);
-    }
+    onToggleFilterSort(getTrendValue(trend) as FilterSort);
     onScrollToSearch();
   };
 
@@ -232,7 +222,11 @@ function TradingGuides({
                     key={demand}
                     onClick={() => handleDemandClick(demand)}
                     className={`bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all hover:bg-(--hover-bg) focus:outline-none ${
-                      valueSort === getDemandValue(demand) ? "ring-2" : ""
+                      selectedFilterSorts.includes(
+                        getDemandValue(demand) as FilterSort,
+                      )
+                        ? "ring-2"
+                        : ""
                     }`}
                     style={
                       {
@@ -285,7 +279,11 @@ function TradingGuides({
                       key={trend}
                       onClick={() => handleTrendClick(trend)}
                       className={`bg-tertiary-bg flex cursor-pointer flex-col items-start gap-2 rounded-xl border-2 p-3 text-left transition-all hover:bg-(--hover-bg) focus:outline-none ${
-                        valueSort === getTrendValue(trend) ? "ring-2" : ""
+                        selectedFilterSorts.includes(
+                          getTrendValue(trend) as FilterSort,
+                        )
+                          ? "ring-2"
+                          : ""
                       }`}
                       style={
                         {

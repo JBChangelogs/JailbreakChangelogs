@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -324,11 +325,20 @@ export default function InventoryFilters({
         <Button
           onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
           size="sm"
-          variant="secondary"
+          variant={showAdvancedFilters ? "default" : "secondary"}
           className="w-fit"
         >
           <Icon icon="rivet-icons:filter" className="h-4 w-4" inline={true} />
           Filter
+          <Icon
+            icon={
+              showAdvancedFilters
+                ? "heroicons:chevron-up"
+                : "heroicons:chevron-down"
+            }
+            className="h-4 w-4"
+            inline={true}
+          />
         </Button>
         <Button
           onClick={() => onFilterToggle(!showOnlyOriginal)}
@@ -457,38 +467,42 @@ export default function InventoryFilters({
                   Other:
                 </span>
                 <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
+                  <label
+                    htmlFor="inventory-hide-duplicates"
+                    className="flex cursor-pointer items-center gap-2"
+                  >
+                    <Checkbox
+                      id="inventory-hide-duplicates"
                       checked={hideDuplicates}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        onHideDuplicatesToggle(checked);
+                      onCheckedChange={(checked) => {
+                        const isChecked = checked === true;
+                        onHideDuplicatesToggle(isChecked);
                         window.rybbit?.event(
                           "Inventory Filter Hide Duplicates Toggle",
-                          { active: checked },
+                          { active: isChecked },
                         );
                       }}
-                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
                     />
                     <span className="text-primary-text text-sm">
                       Hide Duplicates
                     </span>
                   </label>
 
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
+                  <label
+                    htmlFor="inventory-show-missing-items"
+                    className="flex cursor-pointer items-center gap-2"
+                  >
+                    <Checkbox
+                      id="inventory-show-missing-items"
                       checked={showMissingItems}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        onShowMissingItemsToggle(checked);
+                      onCheckedChange={(checked) => {
+                        const isChecked = checked === true;
+                        onShowMissingItemsToggle(isChecked);
                         window.rybbit?.event(
                           "Inventory Filter Show Missing Items Toggle",
-                          { active: checked },
+                          { active: isChecked },
                         );
                       }}
-                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
                     />
                     <span className="text-primary-text text-sm">
                       Show Missing Items

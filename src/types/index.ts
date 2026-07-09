@@ -29,7 +29,23 @@ export type FilterSort =
   | "name-furnitures"
   | "name-horns"
   | "name-weapon-skins"
-  | "favorites";
+  | "favorites"
+  | "demand-close-to-none"
+  | "demand-very-low"
+  | "demand-low"
+  | "demand-below-average"
+  | "demand-average"
+  | "demand-decent"
+  | "demand-high"
+  | "demand-very-high"
+  | "trend-stable"
+  | "trend-rising"
+  | "trend-hyped"
+  | "trend-dropping"
+  | "trend-unstable"
+  | "trend-hoarded"
+  | "trend-manipulated"
+  | "trend-recovering";
 
 export type ValueSort =
   | "random"

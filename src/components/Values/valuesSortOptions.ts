@@ -69,27 +69,6 @@ export const valueSortGroups: ValueSortGroup[] = [
     options: [
       { value: "demand-desc", label: "Demand (High to Low)" },
       { value: "demand-asc", label: "Demand (Low to High)" },
-      { value: "demand-close-to-none", label: "Close To None" },
-      { value: "demand-very-low", label: "Very Low Demand" },
-      { value: "demand-low", label: "Low Demand" },
-      { value: "demand-below-average", label: "Below Average Demand" },
-      { value: "demand-average", label: "Average Demand" },
-      { value: "demand-decent", label: "Decent Demand" },
-      { value: "demand-high", label: "High Demand" },
-      { value: "demand-very-high", label: "Very High Demand" },
-    ],
-  },
-  {
-    label: "Trend",
-    options: [
-      { value: "trend-dropping", label: "Dropping Trend" },
-      { value: "trend-hoarded", label: "Hoarded Trend" },
-      { value: "trend-hyped", label: "Hyped Trend" },
-      { value: "trend-manipulated", label: "Manipulated Trend" },
-      { value: "trend-recovering", label: "Recovering Trend" },
-      { value: "trend-rising", label: "Rising Trend" },
-      { value: "trend-stable", label: "Stable Trend" },
-      { value: "trend-unstable", label: "Unstable Trend" },
     ],
   },
 ];

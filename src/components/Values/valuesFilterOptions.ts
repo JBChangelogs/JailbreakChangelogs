@@ -7,10 +7,6 @@ type FilterGroup = {
 
 export const filterGroups: FilterGroup[] = [
   {
-    label: "General",
-    options: [{ value: "favorites", label: "My Favorites" }],
-  },
-  {
     label: "Vehicle",
     options: [
       { value: "name-vehicles", label: "Vehicles" },
@@ -32,17 +28,79 @@ export const filterGroups: FilterGroup[] = [
       { value: "name-furnitures", label: "Furniture" },
     ],
   },
+];
+
+// Rendered in a collapsible "Advanced Filters" panel (toggled by a Filter
+// button) rather than the main dropdown, since these are more granular,
+// less frequently used than item type
+export const advancedFilterGroups: FilterGroup[] = [
   {
-    label: "Tags",
+    label: "Demand",
     options: [
-      { value: "name-seasonal-items", label: "Seasonal" },
-      { value: "name-limited-items", label: "Limited" },
-      { value: "name-untradeable-items", label: "Untradable" },
+      { value: "demand-close-to-none", label: "Close To None" },
+      { value: "demand-very-low", label: "Very Low" },
+      { value: "demand-low", label: "Low" },
+      { value: "demand-below-average", label: "Below Average" },
+      { value: "demand-average", label: "Average" },
+      { value: "demand-decent", label: "Decent" },
+      { value: "demand-high", label: "High" },
+      { value: "demand-very-high", label: "Very High" },
+    ],
+  },
+  {
+    label: "Trend",
+    options: [
+      { value: "trend-dropping", label: "Dropping" },
+      { value: "trend-unstable", label: "Unstable" },
+      { value: "trend-hoarded", label: "Hoarded" },
+      { value: "trend-manipulated", label: "Manipulated" },
+      { value: "trend-stable", label: "Stable" },
+      { value: "trend-recovering", label: "Recovering" },
+      { value: "trend-rising", label: "Rising" },
+      { value: "trend-hyped", label: "Hyped" },
     ],
   },
 ];
 
-export const filterOptions = filterGroups.flatMap((group) => group.options);
+// Toggled as standalone chips below the filter/sort dropdowns rather than
+// buried in the dropdown, since they're the most frequently used filters
+export const chipFilterOptions: {
+  value: FilterSort;
+  label: string;
+  icon: string;
+  iconColor: string;
+}[] = [
+  {
+    value: "favorites",
+    label: "My Favorites",
+    icon: "mdi:star",
+    iconColor: "#ffd700",
+  },
+  {
+    value: "name-seasonal-items",
+    label: "Seasonal",
+    icon: "noto-v1:snowflake",
+    iconColor: "#40c0e7",
+  },
+  {
+    value: "name-limited-items",
+    label: "Limited",
+    icon: "mdi:clock",
+    iconColor: "#ffd700",
+  },
+  {
+    value: "name-untradeable-items",
+    label: "Untradable",
+    icon: "heroicons:lock-closed",
+    iconColor: "#ef4444",
+  },
+];
+
+export const filterOptions = [
+  ...filterGroups.flatMap((group) => group.options),
+  ...advancedFilterGroups.flatMap((group) => group.options),
+  ...chipFilterOptions,
+];
 
 const filterLabelMap: Record<FilterSort, string> = filterOptions.reduce(
   (map, option) => {

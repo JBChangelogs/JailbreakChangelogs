@@ -1,7 +1,5 @@
 import React from "react";
 import { FilterSort, ValueSort } from "@/types";
-import { toast } from "sonner";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { getCategoryIcon, getCategoryColor } from "@/utils/items/categoryIcons";
 
 import { Icon } from "../ui/IconWrapper";
@@ -25,9 +23,6 @@ const mobileOrderMap: Record<string, number> = {
   "name-body-colors": 10,
   "name-weapon-skins": 11,
   "name-horns": 12,
-  "name-seasonal-items": 13,
-  "name-limited-items": 14,
-  favorites: 15,
 };
 
 const getCategoryData = (type: string, id: string, name: string) => {
@@ -40,7 +35,6 @@ const getCategoryData = (type: string, id: string, name: string) => {
     iconComponent: categoryIcon?.Icon,
     iconColor,
     bgColor: `${iconColor}1A`,
-    onClick: undefined as (() => void) | undefined,
   };
 };
 
@@ -57,24 +51,6 @@ const STATIC_CATEGORIES = [
   getCategoryData("drifts", "name-drifts", "Drifts"),
   getCategoryData("weapon skins", "name-weapon-skins", "Weapon Skins"),
   getCategoryData("furniture", "name-furnitures", "Furniture"),
-  {
-    id: "name-seasonal-items",
-    name: "Seasonal",
-    icon: "noto-v1:snowflake",
-    iconComponent: null as null,
-    bgColor: "rgba(64, 192, 231, 0.1)",
-    iconColor: "#40c0e7",
-    onClick: undefined as (() => void) | undefined,
-  },
-  {
-    id: "name-limited-items",
-    name: "Limited",
-    icon: "mdi:clock",
-    iconComponent: null as null,
-    bgColor: "rgba(255, 215, 0, 0.1)",
-    iconColor: "#ffd700",
-    onClick: undefined as (() => void) | undefined,
-  },
 ];
 
 function CategoryIcons({
@@ -82,38 +58,18 @@ function CategoryIcons({
   selectedFilters,
   onValueSort,
 }: CategoryIconsProps) {
-  const { isAuthenticated } = useAuthContext();
   const handleCategoryClick = (categoryId: string) => {
     onSelect(categoryId as FilterSort);
     onValueSort("cash-desc");
   };
 
-  const categories = [
-    {
-      id: "favorites",
-      name: "My Favorites",
-      icon: "mdi:star",
-      iconComponent: null,
-      bgColor: "rgba(255, 215, 0, 0.1)",
-      iconColor: "#ffd700",
-      onClick: () => {
-        if (!isAuthenticated) {
-          toast.info("Please log in to view your favorites");
-          return;
-        }
-        handleCategoryClick("favorites");
-      },
-    },
-    ...STATIC_CATEGORIES,
-  ];
-
   return (
     <div className="mb-8">
       <h3 className="text-primary-text mb-4 text-2xl font-bold">
-        Item Categories ({categories.length})
+        Item Categories ({STATIC_CATEGORIES.length})
       </h3>
       <div className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 scrollbar-thin scrollbar-track-transparent grid-cols-1 gap-4 overflow-y-auto p-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {categories.map((category) => {
+        {STATIC_CATEGORIES.map((category) => {
           const isSelected = selectedFilters.includes(
             category.id as FilterSort,
           );
@@ -122,9 +78,7 @@ function CategoryIcons({
           return (
             <button
               key={category.id}
-              onClick={
-                category.onClick || (() => handleCategoryClick(category.id))
-              }
+              onClick={() => handleCategoryClick(category.id)}
               className={`order-(--mobile-order) flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all hover:bg-(--hover-bg) sm:order-0 sm:p-4 ${
                 isSelected
                   ? "bg-tertiary-bg ring-border-focus ring-2"

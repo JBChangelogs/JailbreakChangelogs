@@ -121,10 +121,16 @@ export default function ValuesClient({
     [isAuthenticated, persistFilterSorts],
   );
 
-  const handleClearFilterSorts = useCallback(() => {
-    setSelectedFilterSortsState([]);
-    persistFilterSorts([]);
-  }, [persistFilterSorts]);
+  const handleClearFilterSorts = useCallback(
+    (subset?: FilterSort[]) => {
+      setSelectedFilterSortsState((prev) => {
+        const next = subset ? prev.filter((v) => !subset.includes(v)) : [];
+        persistFilterSorts(next);
+        return next;
+      });
+    },
+    [persistFilterSorts],
+  );
 
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
   const [isInitialSortPending, setIsInitialSortPending] = useState(true);
@@ -288,8 +294,8 @@ export default function ValuesClient({
         />
 
         <TradingGuides
-          valueSort={valueSort}
-          onValueSortChange={setValueSort}
+          selectedFilterSorts={selectedFilterSorts}
+          onToggleFilterSort={handleToggleFilterSort}
           onScrollToSearch={() => {
             if (searchSectionRef.current) {
               const headerOffset = 80;
