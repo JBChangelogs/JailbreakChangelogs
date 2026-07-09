@@ -107,8 +107,9 @@
   --color-button-success-hover: hsl(155, 60%, 24%); /* Success hover */
   --color-button-danger: hsl(0, 81%, 62%); /* Error/destructive actions */
   --color-button-danger-hover: hsl(0, 75%, 55%); /* Danger hover */
-  --color-button-secondary: hsl(214, 8%, 25%); /* Secondary buttons */
-  --color-button-secondary-hover: hsl(214, 6%, 20%); /* Secondary hover */
+  --color-button-secondary: hsl(212, 14%, 22%); /* Secondary buttons */
+  --color-button-secondary-hover: hsl(212, 14%, 18%); /* Secondary hover */
+  --color-button-secondary-active: hsl(212, 20%, 16%); /* Secondary active */
   --color-form-button: hsl(
     210,
     99%,
@@ -295,8 +296,9 @@
   --color-button-success-hover: hsl(155, 65%, 40%);
   --color-button-danger: hsl(0, 95%, 72%);
   --color-button-danger-hover: hsl(0, 90%, 64%);
-  --color-button-secondary: hsl(214, 8%, 32%);
-  --color-button-secondary-hover: hsl(214, 6%, 28%);
+  --color-button-secondary: hsl(212, 12%, 14%);
+  --color-button-secondary-hover: hsl(212, 14%, 19%);
+  --color-button-secondary-active: hsl(212, 18%, 11%);
   --color-form-button: hsl(210, 80%, 32%);
   --color-form-button-text: hsl(60, 100%, 100%);
 
@@ -456,14 +458,19 @@
   --color-button-danger-hover: hsl(0, 75%, 55%); /* Danger hover */
   --color-button-secondary: hsl(
     214,
-    8%,
-    75%
-  ); /* Secondary buttons - Light gray */
+    10%,
+    90%
+  ); /* Secondary buttons - Light neutral gray */
   --color-button-secondary-hover: hsl(
     214,
-    6%,
-    80%
-  ); /* Secondary hover - Lighter */
+    10%,
+    84%
+  ); /* Secondary hover - Slightly darker */
+  --color-button-secondary-active: hsl(
+    214,
+    12%,
+    78%
+  ); /* Secondary active - Darker still */
   --color-form-button: hsl(
     210,
     99%,
