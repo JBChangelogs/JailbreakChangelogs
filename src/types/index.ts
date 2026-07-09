@@ -292,3 +292,12 @@ export interface DupeOwnerSearchResult {
   displayName: string;
   total_dupes: string;
 }
+
+export interface DupeItemSearchResult {
+  id: number;
+  item_id: string;
+  name: string;
+  type: string;
+  owner_id: string;
+  username: string;
+}

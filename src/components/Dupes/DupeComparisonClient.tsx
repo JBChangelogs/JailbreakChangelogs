@@ -14,6 +14,7 @@ import {
 } from "@/utils/items/categoryIcons";
 import { formatCustomDate } from "@/utils/helpers/timestamp";
 import TradeHistoryList from "./TradeHistoryList";
+import DupeOwnerItemSearch from "./DupeOwnerItemSearch";
 import {
   getItemImagePath,
   isVideoItem,
@@ -428,6 +429,16 @@ export default function DupeComparisonClient({
             are found.
           </div>
         </div>
+
+        {originalOwnerId && (
+          <DupeOwnerItemSearch
+            ownerId={originalOwnerId}
+            ownerDisplayName={
+              robloxUsers[originalOwnerId]?.displayName ||
+              robloxUsers[originalOwnerId]?.name
+            }
+          />
+        )}
       </div>
 
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2">
