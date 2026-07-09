@@ -8,7 +8,7 @@ import { Icon } from "../ui/IconWrapper";
 
 interface CategoryIconsProps {
   onSelect: (filter: FilterSort) => void;
-  selectedFilter: FilterSort;
+  selectedFilters: FilterSort[];
   onValueSort: (sort: ValueSort) => void;
 }
 
@@ -79,7 +79,7 @@ const STATIC_CATEGORIES = [
 
 function CategoryIcons({
   onSelect,
-  selectedFilter,
+  selectedFilters,
   onValueSort,
 }: CategoryIconsProps) {
   const { isAuthenticated } = useAuthContext();
@@ -114,7 +114,9 @@ function CategoryIcons({
       </h3>
       <div className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 scrollbar-thin scrollbar-track-transparent grid-cols-1 gap-4 overflow-y-auto p-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {categories.map((category) => {
-          const isSelected = selectedFilter === category.id;
+          const isSelected = selectedFilters.includes(
+            category.id as FilterSort,
+          );
           const mobileOrder = mobileOrderMap[category.id] || 99;
 
           return (

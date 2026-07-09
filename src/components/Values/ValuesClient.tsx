@@ -1,17 +1,21 @@
 "use client";
 
 import { createLogger } from "@/services/logger";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 
 const log = createLogger("UI");
 const EMPTY_FAVORITES: number[] = [];
+const FILTER_SORT_STORAGE_KEY = "valuesFilterSort";
 import { use } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems, parseCashValue } from "@/utils/trading/values";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import { fetchUserFavorites } from "@/utils/api/api";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuthContext, useIsAuthenticated } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { safeSessionStorage } from "@/utils/storage/safeStorage";
 import TradingGuides from "./TradingGuides";
 import ValuesSearchControls from "./ValuesSearchControls";
 import ValuesItemsGrid from "./ValuesItemsGrid";
@@ -28,6 +32,18 @@ interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
   lastUpdatedPromise: Promise<number | null>;
 }
+
+const parseFilterSorts = (
+  raw: string | null,
+  validValues: FilterSort[],
+): FilterSort[] =>
+  raw
+    ? raw
+        .split(",")
+        .filter((value): value is FilterSort =>
+          validValues.includes(value as FilterSort),
+        )
+    : [];
 
 export default function ValuesClient({
   itemsPromise,
@@ -50,21 +66,66 @@ export default function ValuesClient({
     [],
   );
 
-  const { filterSort, setFilterSort, valueSort, setValueSort } =
-    useValueSortState({
-      defaultFilterSort: "name-all-items",
-      defaultValueSort: "cash-desc",
-      storageKeys: {
-        filterSort: "valuesFilterSort",
-        valueSort: "valuesValueSort",
-      },
+  const { valueSort, setValueSort } = useValueSortState({
+    defaultValueSort: "cash-desc",
+    storageKeys: {
+      valueSort: "valuesValueSort",
+    },
+    validValueSorts,
+    urlSync: {
+      enabled: true,
+      cleanupPath: "/values",
+    },
+  });
+
+  const searchParams = useSearchParams();
+  const isAuthenticated = useIsAuthenticated();
+
+  const [selectedFilterSorts, setSelectedFilterSortsState] = useState<
+    FilterSort[]
+  >(() => {
+    const fromUrl = parseFilterSorts(
+      searchParams.get("filterSort"),
       validFilterSorts,
-      validValueSorts,
-      urlSync: {
-        enabled: true,
-        cleanupPath: "/values",
-      },
-    });
+    );
+    if (fromUrl.length > 0) return fromUrl;
+
+    return parseFilterSorts(
+      safeSessionStorage.getItem(FILTER_SORT_STORAGE_KEY),
+      validFilterSorts,
+    );
+  });
+
+  const persistFilterSorts = useCallback((next: FilterSort[]) => {
+    if (next.length > 0) {
+      safeSessionStorage.setItem(FILTER_SORT_STORAGE_KEY, next.join(","));
+    } else {
+      safeSessionStorage.removeItem(FILTER_SORT_STORAGE_KEY);
+    }
+  }, []);
+
+  const handleToggleFilterSort = useCallback(
+    (value: FilterSort) => {
+      if (value === "favorites" && !isAuthenticated) {
+        toast.info("Please log in to view your favorites");
+        return;
+      }
+      setSelectedFilterSortsState((prev) => {
+        const next = prev.includes(value)
+          ? prev.filter((v) => v !== value)
+          : [...prev, value];
+        persistFilterSorts(next);
+        return next;
+      });
+    },
+    [isAuthenticated, persistFilterSorts],
+  );
+
+  const handleClearFilterSorts = useCallback(() => {
+    setSelectedFilterSortsState([]);
+    persistFilterSorts([]);
+  }, [persistFilterSorts]);
+
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
   const [isInitialSortPending, setIsInitialSortPending] = useState(true);
   const [favorites, setFavorites] = useState<number[]>([]);
@@ -88,11 +149,7 @@ export default function ValuesClient({
     useState<number>(DYNAMIC_MAX_VALUE);
 
   const handleCategorySelect = (filter: FilterSort) => {
-    if (filterSort === filter) {
-      setFilterSort("name-all-items");
-    } else {
-      setFilterSort(filter);
-    }
+    handleToggleFilterSort(filter);
 
     if (searchSectionRef.current) {
       const headerOffset = 80;
@@ -127,8 +184,9 @@ export default function ValuesClient({
     loadFavorites();
   }, [user]);
 
-  const effectiveFavorites =
-    filterSort === "favorites" ? favorites : EMPTY_FAVORITES;
+  const effectiveFavorites = selectedFilterSorts.includes("favorites")
+    ? favorites
+    : EMPTY_FAVORITES;
 
   useEffect(() => {
     const updateSortedItems = async () => {
@@ -137,7 +195,7 @@ export default function ValuesClient({
       }));
       const sorted = await sortAndFilterItems(
         items,
-        filterSort,
+        selectedFilterSorts,
         valueSort,
         debouncedSearchTerm,
         favoritesData,
@@ -146,7 +204,13 @@ export default function ValuesClient({
       setIsInitialSortPending(false);
     };
     updateSortedItems();
-  }, [items, debouncedSearchTerm, filterSort, valueSort, effectiveFavorites]);
+  }, [
+    items,
+    debouncedSearchTerm,
+    selectedFilterSorts,
+    valueSort,
+    effectiveFavorites,
+  ]);
 
   return (
     <ValuesErrorBoundary>
@@ -219,7 +283,7 @@ export default function ValuesClient({
 
         <CategoryIcons
           onSelect={handleCategorySelect}
-          selectedFilter={filterSort}
+          selectedFilters={selectedFilterSorts}
           onValueSort={setValueSort}
         />
 
@@ -245,8 +309,9 @@ export default function ValuesClient({
       <ValuesSearchControls
         onDebouncedSearchChange={setDebouncedSearchTerm}
         clearTrigger={clearSearchTrigger}
-        filterSort={filterSort}
-        setFilterSort={setFilterSort}
+        selectedFilterSorts={selectedFilterSorts}
+        onToggleFilterSort={handleToggleFilterSort}
+        onClearFilterSorts={handleClearFilterSorts}
         valueSort={valueSort}
         setValueSort={setValueSort}
         rangeValue={rangeValue}
@@ -298,15 +363,16 @@ export default function ValuesClient({
               setAppliedMaxValue(DYNAMIC_MAX_VALUE);
             }}
             onClearAllFilters={() => {
-              setFilterSort("name-all-items");
+              handleClearFilterSorts();
               setValueSort("cash-desc");
               setClearSearchTrigger((prev) => prev + 1);
               setRangeValue([0, DYNAMIC_MAX_VALUE]);
               setAppliedMinValue(0);
               setAppliedMaxValue(DYNAMIC_MAX_VALUE);
             }}
-            onClearCategoryFilter={() => setFilterSort("name-all-items")}
-            filterSort={filterSort}
+            onClearCategoryFilter={handleClearFilterSorts}
+            selectedFilterSorts={selectedFilterSorts}
+            totalItemsCount={items.length}
             valueSort={valueSort}
             debouncedSearchTerm={debouncedSearchTerm}
           />

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
 import ItemCardSkeleton from "@/components/Items/ItemCardSkeleton";
-import { Item } from "@/types";
+import { Item, FilterSort } from "@/types";
 import { getEffectiveCashValue } from "@/utils/trading/values";
 import {
   fetchItemUnlockMetadataById,
@@ -15,7 +15,7 @@ import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";
 import { Button } from "../ui/button";
-import { getFilterDisplayName } from "./valuesFilterOptions";
+import { getFilterSortsDisplayNames } from "./valuesFilterOptions";
 
 const parseNumericValue = (value: string | null): number => {
   if (!value || value === "N/A") return -1;
@@ -39,7 +39,8 @@ interface ValuesItemsGridProps {
   onResetValueRange: () => void;
   onClearAllFilters: () => void;
   onClearCategoryFilter: () => void;
-  filterSort: string;
+  selectedFilterSorts: FilterSort[];
+  totalItemsCount: number;
   valueSort: string;
   debouncedSearchTerm: string;
 }
@@ -55,7 +56,8 @@ export default function ValuesItemsGrid({
   onResetValueRange,
   onClearAllFilters,
   onClearCategoryFilter,
-  filterSort,
+  selectedFilterSorts,
+  totalItemsCount,
   valueSort,
   debouncedSearchTerm,
 }: ValuesItemsGridProps) {
@@ -79,9 +81,11 @@ export default function ValuesItemsGrid({
       .catch(() => {});
   }, []);
 
+  const filterSortKey = selectedFilterSorts.join(",");
+
   // State derivation to reset page when filters change
   const [prevFilters, setPrevFilters] = useState({
-    filterSort,
+    filterSortKey,
     valueSort,
     debouncedSearchTerm,
     appliedMinValue,
@@ -89,14 +93,14 @@ export default function ValuesItemsGrid({
   });
 
   if (
-    prevFilters.filterSort !== filterSort ||
+    prevFilters.filterSortKey !== filterSortKey ||
     prevFilters.valueSort !== valueSort ||
     prevFilters.debouncedSearchTerm !== debouncedSearchTerm ||
     prevFilters.appliedMinValue !== appliedMinValue ||
     prevFilters.appliedMaxValue !== appliedMaxValue
   ) {
     setPrevFilters({
-      filterSort,
+      filterSortKey,
       valueSort,
       debouncedSearchTerm,
       appliedMinValue,
@@ -124,7 +128,8 @@ export default function ValuesItemsGrid({
     page * itemsPerPage,
   );
 
-  const hasCategoryActive = filterSort !== "name-all-items";
+  const hasCategoryActive = selectedFilterSorts.length > 0;
+  const categoryNames = getFilterSortsDisplayNames(selectedFilterSorts);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -134,7 +139,7 @@ export default function ValuesItemsGrid({
   };
 
   const getNoItemsMessage = () => {
-    const hasCategoryFilter = filterSort !== "name-all-items";
+    const hasCategoryFilter = hasCategoryActive;
     const hasDemandFilter =
       valueSort.startsWith("demand-") &&
       valueSort !== "demand-desc" &&
@@ -153,7 +158,7 @@ export default function ValuesItemsGrid({
     }
 
     if (hasCategoryFilter && hasDemandFilter) {
-      const categoryName = getFilterDisplayName(filterSort);
+      const categoryName = categoryNames;
       const demandLevel = valueSort.replace("demand-", "").replace(/-/g, " ");
       const formattedDemand = demandLevel
         .split(" ")
@@ -162,7 +167,7 @@ export default function ValuesItemsGrid({
 
       message += ` in ${categoryName} with ${formattedDemand} demand`;
     } else if (hasCategoryFilter && hasTrendFilter) {
-      const categoryName = getFilterDisplayName(filterSort);
+      const categoryName = categoryNames;
       const trendLevel = valueSort.replace("trend-", "").replace(/-/g, " ");
       const formattedTrend = trendLevel
         .split(" ")
@@ -171,7 +176,7 @@ export default function ValuesItemsGrid({
 
       message += ` in ${categoryName} with ${formattedTrend} trend`;
     } else if (hasCategoryFilter) {
-      const categoryName = getFilterDisplayName(filterSort);
+      const categoryName = categoryNames;
       message += ` in ${categoryName}`;
     } else if (hasDemandFilter) {
       const demandLevel = valueSort.replace("demand-", "").replace(/-/g, " ");
@@ -231,17 +236,15 @@ export default function ValuesItemsGrid({
               return `Found ${rangeFilteredItems.length} ${
                 rangeFilteredItems.length === 1 ? "item" : "items"
               } matching "${debouncedSearchTerm}"${rangeText}${
-                filterSort !== "name-all-items"
-                  ? ` in ${getFilterDisplayName(filterSort)}`
-                  : ""
+                hasCategoryActive ? ` in ${categoryNames}` : ""
               }`;
             }
 
-            return `Total ${
-              filterSort !== "name-all-items"
-                ? getFilterDisplayName(filterSort)
-                : "Items"
-            }${rangeText}: ${rangeFilteredItems.length}`;
+            if (hasCategoryActive) {
+              return `${rangeFilteredItems.length} of ${totalItemsCount} Items${rangeText} in ${categoryNames}`;
+            }
+
+            return `Total Items${rangeText}: ${rangeFilteredItems.length}`;
           })()}
         </p>
 

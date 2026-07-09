@@ -8,10 +8,7 @@ type FilterGroup = {
 export const filterGroups: FilterGroup[] = [
   {
     label: "General",
-    options: [
-      { value: "name-all-items", label: "All Items" },
-      { value: "favorites", label: "My Favorites" },
-    ],
+    options: [{ value: "favorites", label: "My Favorites" }],
   },
   {
     label: "Vehicle",
@@ -56,6 +53,10 @@ const filterLabelMap: Record<FilterSort, string> = filterOptions.reduce(
 );
 
 export function getFilterDisplayName(filterSort: string): string {
+  if (filterSort === "name-all-items" || !filterSort) {
+    return "All Items";
+  }
+
   const explicitLabel = filterLabelMap[filterSort as FilterSort];
   if (explicitLabel) {
     return explicitLabel;
@@ -66,4 +67,27 @@ export function getFilterDisplayName(filterSort: string): string {
     .replace("-items", "")
     .replace(/-/g, " ")
     .toLowerCase();
+}
+
+// Short label for the filter dropdown trigger button (space-constrained)
+export function getFilterSortsButtonLabel(values: FilterSort[]): string {
+  if (values.length === 0) return "All Items";
+  if (values.length === 1) return getFilterDisplayName(values[0]);
+  return `${values.length} Types Selected`;
+}
+
+const MAX_VISIBLE_FILTER_NAMES = 3;
+
+// Comma-joined display names for inline messages, capped with a "+N others"
+// suffix once past MAX_VISIBLE_FILTER_NAMES (mirrors the /robberies location filter)
+export function getFilterSortsDisplayNames(values: FilterSort[]): string {
+  const names = values.map((value) => getFilterDisplayName(value));
+  const visible = names.slice(0, MAX_VISIBLE_FILTER_NAMES);
+  const hiddenCount = names.length - visible.length;
+
+  return `${visible.join(", ")}${
+    hiddenCount > 0
+      ? ` +${hiddenCount} other ${hiddenCount === 1 ? "type" : "types"}`
+      : ""
+  }`;
 }

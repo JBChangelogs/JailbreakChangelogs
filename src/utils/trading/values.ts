@@ -372,46 +372,59 @@ export const getEffectiveTrend = (item: Item): string | null => {
   return item.trend;
 };
 
-export const filterByType = (
-  items: Item[],
-  filterSort: FilterSort,
-  userFavorites?: Array<{ item_id: string }>,
-): Item[] => {
+const matchesFilterSort = (item: Item, filterSort: FilterSort): boolean => {
   switch (filterSort) {
     case "name-limited-items":
-      return items.filter((item) => item.is_limited === 1);
+      return item.is_limited === 1;
     case "name-untradeable-items":
-      return items.filter((item) => item.tradable === 0);
+      return item.tradable === 0;
     case "name-seasonal-items":
-      return items.filter((item) => item.is_seasonal === 1);
+      return item.is_seasonal === 1;
     case "name-vehicles":
-      return items.filter((item) => item.type.toLowerCase() === "vehicle");
+      return item.type.toLowerCase() === "vehicle";
     case "name-spoilers":
-      return items.filter((item) => item.type.toLowerCase() === "spoiler");
+      return item.type.toLowerCase() === "spoiler";
     case "name-rims":
-      return items.filter((item) => item.type.toLowerCase() === "rim");
+      return item.type.toLowerCase() === "rim";
     case "name-body-colors":
-      return items.filter((item) => item.type.toLowerCase() === "body color");
+      return item.type.toLowerCase() === "body color";
     case "name-hyperchromes":
-      return items.filter((item) => item.type.toLowerCase() === "hyperchrome");
+      return item.type.toLowerCase() === "hyperchrome";
     case "name-textures":
-      return items.filter((item) => item.type.toLowerCase() === "texture");
+      return item.type.toLowerCase() === "texture";
     case "name-tire-stickers":
-      return items.filter((item) => item.type.toLowerCase() === "tire sticker");
+      return item.type.toLowerCase() === "tire sticker";
     case "name-tire-styles":
-      return items.filter((item) => item.type.toLowerCase() === "tire style");
+      return item.type.toLowerCase() === "tire style";
     case "name-drifts":
-      return items.filter((item) => item.type.toLowerCase() === "drift");
+      return item.type.toLowerCase() === "drift";
     case "name-furnitures":
-      return items.filter((item) => item.type.toLowerCase() === "furniture");
+      return item.type.toLowerCase() === "furniture";
     case "name-horns":
-      return items.filter((item) => item.type.toLowerCase() === "horn");
+      return item.type.toLowerCase() === "horn";
     case "name-weapon-skins":
-      return items.filter((item) => item.type.toLowerCase() === "weapon skin");
-    case "favorites":
-      if (userFavorites && Array.isArray(userFavorites)) {
-        // Create a Set of both direct IDs and parent IDs from variants
-        const favoriteIds = new Set(
+      return item.type.toLowerCase() === "weapon skin";
+    default:
+      return false;
+  }
+};
+
+export const filterByTypes = (
+  items: Item[],
+  filterSorts: FilterSort[],
+  userFavorites?: Array<{ item_id: string }>,
+): Item[] => {
+  if (!filterSorts || filterSorts.length === 0) return items;
+
+  const hasFavorites = filterSorts.includes("favorites");
+  const typeFilters = filterSorts.filter(
+    (filterSort) => filterSort !== "favorites",
+  );
+
+  // Create a Set of both direct IDs and parent IDs from variants
+  const favoriteIds =
+    hasFavorites && userFavorites && Array.isArray(userFavorites)
+      ? new Set(
           userFavorites
             .map((fav) => {
               const itemId = String(fav.item_id);
@@ -423,26 +436,34 @@ export const filterByType = (
               return [itemId];
             })
             .flat(),
-        );
-        return items.filter((item) => favoriteIds.has(String(item.id)));
-      }
-      return [];
-    default:
-      return items;
-  }
+        )
+      : null;
+
+  return items.filter((item) => {
+    const isFavorite = favoriteIds ? favoriteIds.has(String(item.id)) : false;
+    const matchesType = typeFilters.some((filterSort) =>
+      matchesFilterSort(item, filterSort),
+    );
+
+    // Favorites narrows down the selected types rather than adding to them
+    if (hasFavorites && typeFilters.length > 0)
+      return isFavorite && matchesType;
+    if (hasFavorites) return isFavorite;
+    return matchesType;
+  });
 };
 
 export const sortAndFilterItems = async (
   items: Item[],
-  filterSort: FilterSort,
+  filterSorts: FilterSort[],
   valueSort: ValueSort,
   searchTerm: string = "",
   userFavorites?: Array<{ item_id: string }>,
 ): Promise<Item[]> => {
   let result = [...items];
 
-  // Apply filter based on filterSort
-  result = filterByType(result, filterSort, userFavorites);
+  // Apply filter based on filterSorts
+  result = filterByTypes(result, filterSorts, userFavorites);
 
   // Apply search filter
   if (searchTerm) {

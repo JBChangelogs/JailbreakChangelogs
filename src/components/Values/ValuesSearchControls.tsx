@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
@@ -18,8 +19,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   filterGroups,
-  filterOptions,
-  getFilterDisplayName,
+  getFilterSortsButtonLabel,
+  getFilterSortsDisplayNames,
 } from "./valuesFilterOptions";
 import { valueSortGroups, getValueSortLabel } from "./valuesSortOptions";
 import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
@@ -27,8 +28,9 @@ import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
 interface ValuesSearchControlsProps {
   onDebouncedSearchChange: (term: string) => void;
   clearTrigger: number;
-  filterSort: FilterSort;
-  setFilterSort: (sort: FilterSort) => void;
+  selectedFilterSorts: FilterSort[];
+  onToggleFilterSort: (sort: FilterSort) => void;
+  onClearFilterSorts: () => void;
   valueSort: ValueSort;
   setValueSort: (sort: ValueSort) => void;
   rangeValue: number[];
@@ -43,8 +45,9 @@ interface ValuesSearchControlsProps {
 export default function ValuesSearchControls({
   onDebouncedSearchChange,
   clearTrigger,
-  filterSort,
-  setFilterSort,
+  selectedFilterSorts,
+  onToggleFilterSort,
+  onClearFilterSorts,
   valueSort,
   setValueSort,
   rangeValue,
@@ -131,9 +134,7 @@ export default function ValuesSearchControls({
     return Math.abs(nearest - value) <= snapDistance ? nearest : value;
   };
 
-  const filterLabel =
-    filterOptions.find((option) => option.value === filterSort)?.label ??
-    "Select category";
+  const filterLabel = getFilterSortsButtonLabel(selectedFilterSorts);
 
   const sortLabel = getValueSortLabel(valueSort);
 
@@ -171,7 +172,7 @@ export default function ValuesSearchControls({
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder={`Search ${getFilterDisplayName(filterSort)}...`}
+                  placeholder={`Search ${getFilterSortsDisplayNames(selectedFilterSorts) || "All Items"}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
@@ -222,38 +223,52 @@ export default function ValuesSearchControls({
                     align="start"
                     className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
-                    <DropdownMenuRadioGroup
-                      value={filterSort}
-                      onValueChange={(newValue) => {
-                        const nextValue = newValue as FilterSort;
-                        if (nextValue === "favorites" && !isAuthenticated) {
-                          toast.info("Please log in to view your favorites");
-                          return;
-                        }
-                        setFilterSort(nextValue);
-                        trackFilterSortEvent("values", "filter", nextValue);
-                      }}
-                    >
-                      {filterGroups.map((group, groupIndex) => (
-                        <Fragment key={group.label}>
-                          <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                            {group.label}
-                          </DropdownMenuLabel>
-                          {group.options.map((option) => (
-                            <DropdownMenuRadioItem
-                              key={option.value}
-                              value={option.value}
-                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                            >
-                              {option.label}
-                            </DropdownMenuRadioItem>
-                          ))}
-                          {groupIndex !== filterGroups.length - 1 && (
-                            <DropdownMenuSeparator className="bg-border-primary/60" />
-                          )}
-                        </Fragment>
-                      ))}
-                    </DropdownMenuRadioGroup>
+                    {selectedFilterSorts.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={onClearFilterSorts}
+                        className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
+                      >
+                        Clear Filters
+                      </button>
+                    )}
+                    {filterGroups.map((group, groupIndex) => (
+                      <Fragment key={group.label}>
+                        <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                          {group.label}
+                        </DropdownMenuLabel>
+                        {group.options.map((option) => (
+                          <DropdownMenuCheckboxItem
+                            key={option.value}
+                            checked={selectedFilterSorts.includes(option.value)}
+                            onSelect={(e) => e.preventDefault()}
+                            onCheckedChange={() => {
+                              if (
+                                option.value === "favorites" &&
+                                !isAuthenticated
+                              ) {
+                                toast.info(
+                                  "Please log in to view your favorites",
+                                );
+                                return;
+                              }
+                              onToggleFilterSort(option.value);
+                              trackFilterSortEvent(
+                                "values",
+                                "filter",
+                                option.value,
+                              );
+                            }}
+                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                          >
+                            {option.label}
+                          </DropdownMenuCheckboxItem>
+                        ))}
+                        {groupIndex !== filterGroups.length - 1 && (
+                          <DropdownMenuSeparator className="bg-border-primary/60" />
+                        )}
+                      </Fragment>
+                    ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
