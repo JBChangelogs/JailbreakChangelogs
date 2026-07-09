@@ -285,3 +285,10 @@ export interface DuplicateVariantsResponse {
   og: DupeFinderItem;
   duplicate: DupeFinderItem;
 }
+
+export interface DupeOwnerSearchResult {
+  id: string;
+  name: string;
+  displayName: string;
+  total_dupes: string;
+}

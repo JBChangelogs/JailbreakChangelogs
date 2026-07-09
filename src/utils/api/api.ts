@@ -52,6 +52,7 @@ import {
   ItemDetails,
   RobloxUser,
   DuplicateVariantsResponse,
+  DupeOwnerSearchResult,
 } from "@/types";
 import { UserData } from "@/types/auth";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
@@ -276,6 +277,32 @@ export const searchUsers = async (
   }
   const data = await response.json();
   return data;
+};
+
+export const searchDupeOwners = async (
+  query: string,
+  limit: number = 8,
+  signal?: AbortSignal,
+): Promise<DupeOwnerSearchResult[]> => {
+  const response = await fetch(
+    `${INVENTORY_API_URL}/dupes/search/owners?query=${encodeURIComponent(query)}&limit=${limit}`,
+    {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-DupeSearch/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+      cache: "no-store",
+      signal,
+    },
+  );
+  if (!response.ok) {
+    if (response.status === 404) return [];
+    const body = await response.json().catch(() => ({}));
+    log.error("searchDupeOwners failed", { status: response.status, body });
+    throw new Error("Failed to search dupe owners");
+  }
+  const data = await response.json();
+  return Array.isArray(data) ? data : [];
 };
 
 export async function fetchUserById(id: string) {
