@@ -905,6 +905,48 @@ export async function fetchTotalRobberiesLogged(): Promise<number> {
   }
 }
 
+export interface RobberyServerRegionStats {
+  total_servers: number;
+  top_countries: [string, number][];
+  top_regions: [string, number][];
+  top_cities: [string, number][];
+}
+
+export async function fetchRobberyServerRegionStats(): Promise<RobberyServerRegionStats | null> {
+  try {
+    if (!INVENTORY_API_URL) {
+      throw new Error("Missing INVENTORY_API_URL");
+    }
+    const url = `${INVENTORY_API_URL}/servers/regions/common`;
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchRobberyServerRegionStats failed", {
+        status: response.status,
+        body,
+      });
+      throw new Error(
+        `Failed to fetch robbery server region stats: ${response.status}`,
+      );
+    }
+
+    const data = await response.json();
+    return data as RobberyServerRegionStats;
+  } catch (err) {
+    log.error("Error fetching robbery server region stats", err);
+    return null;
+  }
+}
+
 export interface DuplicatedItem {
   name: string;
   type: string;

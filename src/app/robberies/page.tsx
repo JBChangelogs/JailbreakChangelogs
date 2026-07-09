@@ -8,6 +8,7 @@ import {
   useCallback,
   type CSSProperties,
 } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import {
   useRobberyTrackerWebSocket,
@@ -30,6 +31,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/Spinner";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -37,6 +39,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { safeSessionStorage } from "@/utils/storage/safeStorage";
+import { fetchRobberyServerRegionStats } from "@/utils/api/api";
 
 type TimeSort = "newest" | "oldest";
 type ServerSize = "all" | "big" | "small";
@@ -48,6 +51,7 @@ const ROBBERIES_SELECTED_TYPES_STORAGE_KEY = "robberiesSelectedTypes";
 const ROBBERIES_FILTER_MODE_STORAGE_KEY = "robberiesFilterMode";
 const ROBBERIES_COMBO_PRESET_IDS_STORAGE_KEY = "robberiesComboPresetIds";
 const ROBBERIES_DISPLAY_MODE_STORAGE_KEY = "robberiesDisplayMode";
+const ROBBERIES_SELECTED_COUNTRIES_STORAGE_KEY = "robberiesSelectedCountries";
 
 // Define all robbery types with their marker names
 const ROBBERY_TYPES = [
@@ -300,6 +304,24 @@ function RobberyTrackerContent() {
       );
       return storedDisplayMode === "grouped" ? "grouped" : "individual";
     });
+  const [selectedCountryCodes, setSelectedCountryCodes] = useState<string[]>(
+    () => {
+      const storedCountryCodes = safeSessionStorage.getItem(
+        ROBBERIES_SELECTED_COUNTRIES_STORAGE_KEY,
+      );
+      if (!storedCountryCodes) return [];
+
+      try {
+        const parsedCountryCodes = JSON.parse(storedCountryCodes);
+        if (!Array.isArray(parsedCountryCodes)) return [];
+        return parsedCountryCodes.filter(
+          (code): code is string => typeof code === "string",
+        );
+      } catch {
+        return [];
+      }
+    },
+  );
   const timeSort = robberiesTimeSort;
 
   const [serverRegionsByJobId, setServerRegionsByJobId] = useState<
@@ -343,6 +365,112 @@ function RobberyTrackerContent() {
     );
   }, [robberiesDisplayMode]);
 
+  useEffect(() => {
+    safeSessionStorage.setItem(
+      ROBBERIES_SELECTED_COUNTRIES_STORAGE_KEY,
+      JSON.stringify(selectedCountryCodes),
+    );
+  }, [selectedCountryCodes]);
+
+  const {
+    data: serverRegionStats,
+    isLoading: isLoadingServerRegionStats,
+    isError: isServerRegionStatsError,
+  } = useQuery({
+    queryKey: ["robberies-server-region-stats"],
+    queryFn: fetchRobberyServerRegionStats,
+    refetchInterval: 5 * 60_000,
+    refetchIntervalInBackground: true,
+    staleTime: 60_000,
+  });
+
+  const countryOptions = useMemo(() => {
+    const displayNames =
+      typeof Intl !== "undefined" && "DisplayNames" in Intl
+        ? new Intl.DisplayNames(["en"], { type: "region" })
+        : null;
+    return (serverRegionStats?.top_countries ?? []).map(
+      ([countryCode, count]) => ({
+        countryCode,
+        count,
+        label: displayNames?.of(countryCode) ?? countryCode,
+      }),
+    );
+  }, [serverRegionStats]);
+
+  const mergedServerRegionsByJobId = useMemo(() => {
+    let hasNew = false;
+    for (const robbery of robberies) {
+      const jobId = robbery.server?.job_id || robbery.job_id;
+      if (
+        isNonEmptyString(jobId) &&
+        robbery.region_data &&
+        serverRegionsByJobId[jobId] == null
+      ) {
+        hasNew = true;
+        break;
+      }
+    }
+    if (!hasNew) return serverRegionsByJobId;
+
+    const next = { ...serverRegionsByJobId };
+    for (const robbery of robberies) {
+      const jobId = robbery.server?.job_id || robbery.job_id;
+      if (!isNonEmptyString(jobId)) continue;
+      if (robbery.region_data && next[jobId] == null) {
+        next[jobId] = robbery.region_data;
+      }
+    }
+    return next;
+  }, [robberies, serverRegionsByJobId]);
+
+  const mergeRegionResults = useCallback(
+    (results: Record<string, ServerRegionData | null>) => {
+      setServerRegionsByJobId((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        for (const [id, data] of Object.entries(results)) {
+          if (!(id in next)) {
+            next[id] = data;
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const ids: string[] = [];
+    for (const robbery of robberies) {
+      if (robbery.region_data) continue;
+      const id = robbery.region_id || robbery.server?.job_id || robbery.job_id;
+      if (!id || fetchedRegionIdsRef.current.has(id)) continue;
+      ids.push(id);
+      fetchedRegionIdsRef.current.add(id);
+    }
+    if (ids.length === 0) return;
+    fetchRegionData(ids).then(mergeRegionResults);
+  }, [robberies, fetchRegionData, mergeRegionResults]);
+
+  const countryCodeSet = useMemo(
+    () => new Set(selectedCountryCodes),
+    [selectedCountryCodes],
+  );
+
+  const matchesCountryFilter = useCallback(
+    (robbery: RobberyData) => {
+      if (countryCodeSet.size === 0) return true;
+      const jobId = robbery.server?.job_id || robbery.job_id;
+      const countryCode =
+        robbery.region_data?.countryCode ??
+        (jobId ? mergedServerRegionsByJobId[jobId]?.countryCode : undefined);
+      return countryCode ? countryCodeSet.has(countryCode) : false;
+    },
+    [countryCodeSet, mergedServerRegionsByJobId],
+  );
+
   const serverSizeLabel =
     serverSize === "all"
       ? "All Server Sizes"
@@ -375,6 +503,8 @@ function RobberyTrackerContent() {
         if (!matchesServerSize) continue;
       }
 
+      if (!matchesCountryFilter(robbery)) continue;
+
       counts.set(
         robbery.marker_name,
         (counts.get(robbery.marker_name) || 0) + 1,
@@ -382,7 +512,7 @@ function RobberyTrackerContent() {
     }
 
     return counts;
-  }, [robberies, serverSize]);
+  }, [robberies, serverSize, matchesCountryFilter]);
 
   const activeComboPresetIds = useMemo(
     () =>
@@ -403,13 +533,14 @@ function RobberyTrackerContent() {
         return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
       });
     }
+    base = base.filter(matchesCountryFilter);
     const results = computeComboResults(base, ROBBERY_COMBO_PRESETS, query);
     const counts = new Map<string, number>();
     for (const result of results) {
       counts.set(result.comboId, (counts.get(result.comboId) ?? 0) + 1);
     }
     return counts;
-  }, [robberies, serverSize, searchQuery]);
+  }, [robberies, serverSize, searchQuery, matchesCountryFilter]);
 
   // Filter and sort robberies
   const filteredRobberies = useMemo(() => {
@@ -425,6 +556,8 @@ function RobberyTrackerContent() {
         return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
       });
     }
+
+    filtered = filtered.filter(matchesCountryFilter);
 
     if (typeSet.size > 0) {
       if (robberyFilterMode === "all" && typeSet.size > 1) {
@@ -483,6 +616,7 @@ function RobberyTrackerContent() {
     searchQuery,
     timeSort,
     serverSize,
+    matchesCountryFilter,
   ]);
 
   const groupedRobberies = useMemo(() => {
@@ -535,6 +669,7 @@ function RobberyTrackerContent() {
         return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
       });
     }
+    base = base.filter(matchesCountryFilter);
 
     const query = searchQuery.trim().toLowerCase();
     const activePresets = ROBBERY_COMBO_PRESETS.filter((preset) =>
@@ -553,63 +688,8 @@ function RobberyTrackerContent() {
     activeComboPresetIds,
     searchQuery,
     timeSort,
+    matchesCountryFilter,
   ]);
-
-  const mergedServerRegionsByJobId = useMemo(() => {
-    let hasNew = false;
-    for (const robbery of robberies) {
-      const jobId = robbery.server?.job_id || robbery.job_id;
-      if (
-        isNonEmptyString(jobId) &&
-        robbery.region_data &&
-        serverRegionsByJobId[jobId] == null
-      ) {
-        hasNew = true;
-        break;
-      }
-    }
-    if (!hasNew) return serverRegionsByJobId;
-
-    const next = { ...serverRegionsByJobId };
-    for (const robbery of robberies) {
-      const jobId = robbery.server?.job_id || robbery.job_id;
-      if (!isNonEmptyString(jobId)) continue;
-      if (robbery.region_data && next[jobId] == null) {
-        next[jobId] = robbery.region_data;
-      }
-    }
-    return next;
-  }, [robberies, serverRegionsByJobId]);
-
-  const mergeRegionResults = useCallback(
-    (results: Record<string, ServerRegionData | null>) => {
-      setServerRegionsByJobId((prev) => {
-        const next = { ...prev };
-        let changed = false;
-        for (const [id, data] of Object.entries(results)) {
-          if (!(id in next)) {
-            next[id] = data;
-            changed = true;
-          }
-        }
-        return changed ? next : prev;
-      });
-    },
-    [],
-  );
-
-  useEffect(() => {
-    const ids: string[] = [];
-    for (const robbery of robberies) {
-      if (robbery.region_data) continue;
-      const id = robbery.region_id || robbery.server?.job_id || robbery.job_id;
-      if (!id || fetchedRegionIdsRef.current.has(id)) continue;
-      ids.push(id);
-      fetchedRegionIdsRef.current.add(id);
-    }
-    if (ids.length === 0) return;
-    fetchRegionData(ids).then(mergeRegionResults);
-  }, [robberies, fetchRegionData, mergeRegionResults]);
 
   // Calculate robbery statistics
   const robberyStats = useMemo(() => {
@@ -844,7 +924,36 @@ function RobberyTrackerContent() {
   const hasActiveRobberyFilters =
     Boolean(searchQuery) ||
     selectedRobberyTypes.length > 0 ||
-    serverSize !== "all";
+    serverSize !== "all" ||
+    selectedCountryCodes.length > 0;
+
+  const isLocationFilterUnavailable =
+    !isLoadingServerRegionStats &&
+    (isServerRegionStatsError || countryOptions.length === 0);
+
+  const locationLabel = isLoadingServerRegionStats
+    ? "Loading Locations..."
+    : selectedCountryCodes.length === 0
+      ? isLocationFilterUnavailable
+        ? "Locations Unavailable"
+        : "All Locations"
+      : selectedCountryCodes.length === 1
+        ? (countryOptions.find(
+            (option) => option.countryCode === selectedCountryCodes[0],
+          )?.label ?? selectedCountryCodes[0])
+        : `${selectedCountryCodes.length} Locations Selected`;
+
+  const MAX_VISIBLE_COUNTRY_LABELS = 3;
+  const selectedCountryLabels = countryOptions
+    .filter((option) => countryCodeSet.has(option.countryCode))
+    .map((option) => option.label);
+  const visibleCountryLabels = selectedCountryLabels.slice(
+    0,
+    MAX_VISIBLE_COUNTRY_LABELS,
+  );
+  const hiddenCountryLabelCount =
+    selectedCountryLabels.length - visibleCountryLabels.length;
+
   const selectedTypeSetForRender = new Set(selectedRobberyTypes);
 
   return (
@@ -947,6 +1056,76 @@ function RobberyTrackerContent() {
                       </DropdownMenu>
                     </div>
 
+                    {/* Location Filter */}
+                    <div className="col-span-1 w-full lg:flex-1">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            disabled={
+                              isLoadingServerRegionStats ||
+                              (isLocationFilterUnavailable &&
+                                selectedCountryCodes.length === 0)
+                            }
+                            className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus disabled:hover:border-border-card flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label="Filter by server location"
+                          >
+                            <span className="truncate">{locationLabel}</span>
+                            <Icon
+                              icon="heroicons:chevron-down"
+                              className="text-secondary-text h-5 w-5"
+                            />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                        >
+                          {countryOptions.length === 0 ? (
+                            <div className="text-secondary-text px-3 py-2 text-sm">
+                              {isLoadingServerRegionStats
+                                ? "Loading locations..."
+                                : "Location data unavailable"}
+                            </div>
+                          ) : (
+                            <>
+                              {selectedCountryCodes.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedCountryCodes([])}
+                                  className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
+                                >
+                                  Clear Locations
+                                </button>
+                              )}
+                              {countryOptions.map((option) => (
+                                <DropdownMenuCheckboxItem
+                                  key={option.countryCode}
+                                  checked={selectedCountryCodes.includes(
+                                    option.countryCode,
+                                  )}
+                                  onSelect={(e) => e.preventDefault()}
+                                  onCheckedChange={(checked) => {
+                                    setSelectedCountryCodes((prev) =>
+                                      checked
+                                        ? [...prev, option.countryCode]
+                                        : prev.filter(
+                                            (code) =>
+                                              code !== option.countryCode,
+                                          ),
+                                    );
+                                  }}
+                                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                                >
+                                  {option.label}
+                                </DropdownMenuCheckboxItem>
+                              ))}
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
                     {/* Time Sort Dropdown */}
                     <div className="col-span-full w-full lg:col-span-1 lg:flex-1">
                       <DropdownMenu>
@@ -1001,7 +1180,7 @@ function RobberyTrackerContent() {
             {/* Statistics */}
             <div className="flex flex-wrap items-center gap-3 text-sm">
               <span className="text-primary-text font-semibold">
-                {searchQuery || selectedRobberyTypes.length > 0 ? (
+                {hasActiveRobberyFilters ? (
                   <>
                     Showing {robberyStats.total} of {robberyStats.baselineTotal}{" "}
                     {robberyStats.baselineTotal === 1
@@ -1029,6 +1208,20 @@ function RobberyTrackerContent() {
                 </div>
               )}
             </div>
+
+            {/* Active Location Filters */}
+            {selectedCountryCodes.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="text-secondary-text">Location:</span>
+                <span className="text-primary-text font-medium">
+                  {visibleCountryLabels.join(", ")}
+                  {hiddenCountryLabelCount > 0 &&
+                    ` +${hiddenCountryLabelCount} other ${
+                      hiddenCountryLabelCount === 1 ? "country" : "countries"
+                    }`}
+                </span>
+              </div>
+            )}
 
             {/* Connection Status */}
             <div className="flex items-center gap-2">
