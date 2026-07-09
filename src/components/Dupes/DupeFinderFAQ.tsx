@@ -30,10 +30,10 @@ const faqs = [
         trading, our system updates and marks it as{" "}
         <span className="text-primary-text font-semibold">duped</span>.
         That&apos;s why some items can change status over time. If you believe
-        your item has been falsely flagged as a dupe, please report it via
-        ModMail in our{" "}
+        your item has been falsely flagged as a dupe, please report it by
+        opening a ticket in our{" "}
         <a
-          href="https://discord.com/channels/1286064050135896064/1392693026865811518"
+          href="https://discord.jailbreakchangelogs.com"
           target="_blank"
           rel="noopener noreferrer"
           className="text-link hover:text-link-hover underline"
@@ -66,9 +66,10 @@ const faqs = [
         tool. This tool, accessible by clicking &quot;Compare&quot; on any item
         card, allows you to view the ownership history of your item side-by-side
         with its original variant to see exactly where they diverge. If you
-        still believe it is a false dupe, you can report it via ModMail in our{" "}
+        still believe it is a false dupe, you can report it by opening a ticket
+        in our{" "}
         <a
-          href="https://discord.com/channels/1286064050135896064/1392693026865811518"
+          href="https://discord.jailbreakchangelogs.com"
           target="_blank"
           rel="noopener noreferrer"
           className="text-link hover:text-link-hover underline"

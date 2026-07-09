@@ -72,9 +72,9 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         </p>
         <div className="bg-button-info/10 border-border-card text-primary-text mb-6 rounded-lg border p-4 text-sm">
           If you believe an item is incorrectly flagged, you can report the
-          false dupe via ModMail in our{" "}
+          false dupe by opening a ticket in our{" "}
           <Link
-            href="https://discord.com/channels/1286064050135896064/1392693026865811518"
+            href="https://discord.jailbreakchangelogs.com"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"
