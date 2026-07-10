@@ -13,8 +13,8 @@ interface DupeOwnerItemSearchProps {
   ownerDisplayName?: string;
 }
 
-const MIN_QUERY_LENGTH = 2;
-const RESULTS_LIMIT = 8;
+const MIN_QUERY_LENGTH = 1;
+const RESULTS_LIMIT = 25;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export default function DupeOwnerItemSearch({
