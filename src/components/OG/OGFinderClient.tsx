@@ -102,12 +102,17 @@ export default function OGFinderClient({
             <div className="relative flex items-center">
               <input
                 ref={searchInputRef}
-                type="text"
-                id="searchId"
+                type="search"
+                id="og-finder-search"
+                name="og-finder-search"
+                autoComplete="off"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
                 placeholder="Search by ID or username..."
-                className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+                className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
                 disabled={isLoading}
                 required
               />
