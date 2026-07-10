@@ -19,7 +19,7 @@ interface DupeSearchInputProps {
   className?: string;
 }
 
-const MIN_QUERY_LENGTH = 2;
+const MIN_QUERY_LENGTH = 1;
 const SUGGESTIONS_LIMIT = 8;
 const SUGGESTIONS_DEBOUNCE_MS = 300;
 
