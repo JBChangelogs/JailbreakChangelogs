@@ -2,6 +2,7 @@
 
 import { createLogger } from "@/services/logger";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const log = createLogger("UI");
 import Image from "next/image";
@@ -466,13 +467,7 @@ const MobileDrawer = memo(function MobileDrawer({
   );
 });
 
-export default function Header({
-  newsAnnouncement = null,
-  serviceAlert = null,
-}: {
-  newsAnnouncement?: NewsTickerAnnouncement | null;
-  serviceAlert?: ServiceAlert | null;
-}) {
+export default function Header() {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -499,6 +494,37 @@ export default function Header({
   const showAuth = mounted && !isLoading && isAuthenticated;
   const userData = showAuth ? authUser : null;
   useEscapeLogin();
+
+  const pathname = usePathname();
+  const [tickerFlags, setTickerFlags] = useState<{
+    newsAnnouncement: NewsTickerAnnouncement | null;
+    serviceAlert: ServiceAlert | null;
+  }>({ newsAnnouncement: null, serviceAlert: null });
+
+  // Fetched client-side so the tickers stay live on statically prerendered
+  // pages (the root layout bakes server flag reads in at build time) and
+  // refresh on SPA navigations.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/flags/tickers");
+        if (!response.ok) return;
+        const data = (await response.json()) as {
+          newsAnnouncement: NewsTickerAnnouncement | null;
+          serviceAlert: ServiceAlert | null;
+        };
+        if (cancelled) return;
+        setTickerFlags(data);
+      } catch {
+        // Tickers are non-critical; keep whatever we last showed.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -647,9 +673,9 @@ export default function Header({
         className={`sticky top-0 hidden xl:block ${desktopUserMenuOpen ? "z-[2147483647]" : "z-1300"}`}
         style={{ viewTransitionName: "navbar" } as React.CSSProperties}
       >
-        <ServiceAvailabilityTicker alert={serviceAlert} />
+        <ServiceAvailabilityTicker alert={tickerFlags.serviceAlert} />
         <OfflineDetector />
-        <NewsTicker announcement={newsAnnouncement} />
+        <NewsTicker announcement={tickerFlags.newsAnnouncement} />
         <div className="relative z-10">
           <NavbarModern
             unreadCount={unreadCount}
@@ -667,9 +693,9 @@ export default function Header({
         style={{ viewTransitionName: "navbar-mobile" } as React.CSSProperties}
       >
         <>
-          <ServiceAvailabilityTicker alert={serviceAlert} />
+          <ServiceAvailabilityTicker alert={tickerFlags.serviceAlert} />
           <OfflineDetector />
-          <NewsTicker announcement={newsAnnouncement} />
+          <NewsTicker announcement={tickerFlags.newsAnnouncement} />
           <div className="relative z-10">
             <div className="bg-primary-bg/75 border-border-card border-b backdrop-blur-lg">
               <div className="flex items-center justify-between px-4 py-2">

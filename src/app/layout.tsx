@@ -25,10 +25,6 @@ import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
 } from "@/utils/api/maintenance";
-import {
-  getNewsTickerAnnouncement,
-  getServiceAlert,
-} from "@/utils/api/runtimeFlags";
 import { getGitHubUrl } from "@/utils/trading/version";
 import { Suspense } from "react";
 import QueryProvider from "@/components/QueryProvider";
@@ -92,8 +88,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const { isMaintenanceMode } = await checkMaintenanceMode();
-  const newsAnnouncement = getNewsTickerAnnouncement();
-  const serviceAlert = getServiceAlert();
   const githubUrl = getGitHubUrl();
   const isRailwayDeployed = ["production", "testing"].includes(
     process.env.RAILWAY_ENVIRONMENT_NAME ?? "",
@@ -197,10 +191,7 @@ export default async function RootLayout({
                         }
                       >
                         <HideOnAccessDenied>
-                          <Header
-                            newsAnnouncement={newsAnnouncement}
-                            serviceAlert={serviceAlert}
-                          />
+                          <Header />
                         </HideOnAccessDenied>
                       </Suspense>
                       <main className="min-h-screen flex-1">
@@ -328,10 +319,7 @@ export default async function RootLayout({
                     }
                   >
                     <HideOnAccessDenied>
-                      <Header
-                        newsAnnouncement={newsAnnouncement}
-                        serviceAlert={serviceAlert}
-                      />
+                      <Header />
                     </HideOnAccessDenied>
                   </Suspense>
                   <main className="min-h-screen flex-1">
