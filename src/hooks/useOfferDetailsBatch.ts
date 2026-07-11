@@ -1,5 +1,5 @@
 import { createLogger } from "@/services/logger";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 
@@ -27,18 +27,30 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
     "idle",
   );
 
-  const payload = useMemo(
+  // Callers rebuild `events` every render, so key the fetch by content: the
+  // serialized payload only changes when the trade/offer pairs actually do.
+  const payloadJson = useMemo(
     () =>
-      events.map((entry) => [
-        Number(entry.trade ?? 0),
-        Number(entry.offer ?? 0),
-      ]),
+      JSON.stringify(
+        events.map((entry) => [
+          Number(entry.trade ?? 0),
+          Number(entry.offer ?? 0),
+        ]),
+      ),
     [events],
   );
 
+  const eventsRef = useRef(events);
   useEffect(() => {
+    eventsRef.current = events;
+  });
+
+  useEffect(() => {
+    let ignore = false;
+
     const run = async () => {
-      if (!events.length) {
+      const entries = eventsRef.current;
+      if (!entries.length) {
         setMap({});
         setStatus("idle");
         return;
@@ -62,10 +74,11 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
             "User-Agent": "JailbreakChangelogs-Messages/1.0",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(payload),
+          body: payloadJson,
         });
 
         const raw = await response.text();
+        if (ignore) return;
         const parsed = raw ? (parseJsonWithLargeIds(raw) as unknown) : null;
         const items = Array.isArray(parsed) ? parsed : [];
 
@@ -81,7 +94,7 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
           next[`${record.trade}:${record.id}`] = record;
         }
 
-        for (const entry of events) {
+        for (const entry of entries) {
           const key = `${entry.trade}:${entry.offer}`;
           if (!(key in next)) next[key] = null;
         }
@@ -89,6 +102,7 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
         setMap(next);
         setStatus("loaded");
       } catch (err) {
+        if (ignore) return;
         log.error("Batch offer details fetch error", err);
         setMap({});
         setStatus("error");
@@ -96,8 +110,10 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
     };
 
     void run();
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(payload)]);
+    return () => {
+      ignore = true;
+    };
+  }, [payloadJson]);
 
   return { map, setMap, status };
 }

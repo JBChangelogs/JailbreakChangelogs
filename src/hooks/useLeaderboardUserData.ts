@@ -21,7 +21,7 @@ export function useLeaderboardUserData(userIds: string[]) {
   // Fetch each batch separately with its own cache key
   const queries = useQueries({
     queries: batches.map((batch) => ({
-      queryKey: ["leaderboardUserData", batch.sort()],
+      queryKey: ["leaderboardUserData", [...batch].sort()],
       queryFn: async () => {
         const result = await fetchLeaderboardUserData(batch);
         return {

@@ -44,6 +44,27 @@ interface TradeAdsTabProps {
   embedded?: boolean;
 }
 
+function TradeAdItem({
+  ad,
+  render,
+}: {
+  ad: TradeAd;
+  render: (
+    ad: TradeAd & { createdTime: string; expiresTime: string },
+  ) => React.ReactNode;
+}) {
+  const createdTime = useOptimizedRealTimeRelativeDate(
+    ad.created_at,
+    `trade-ad-created-${ad.id}`,
+  );
+  const expiresTime = useOptimizedRealTimeRelativeDate(
+    ad.expires,
+    `trade-ad-expires-${ad.id}`,
+  );
+
+  return render({ ...ad, createdTime, expiresTime });
+}
+
 export default function TradeAdsTab({
   tradeAds: propTradeAds = [],
   isLoadingAdditionalData = false,
@@ -55,18 +76,6 @@ export default function TradeAdsTab({
   const tradeAds = propTradeAds;
   const loading = false;
   const error = null;
-  const TradeAdItem = ({ ad }: { ad: TradeAd }) => {
-    const createdTime = useOptimizedRealTimeRelativeDate(
-      ad.created_at,
-      `trade-ad-created-${ad.id}`,
-    );
-    const expiresTime = useOptimizedRealTimeRelativeDate(
-      ad.expires,
-      `trade-ad-expires-${ad.id}`,
-    );
-
-    return renderTradeAd({ ...ad, createdTime, expiresTime });
-  };
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
   };
@@ -258,7 +267,7 @@ export default function TradeAdsTab({
     <>
       <div className="space-y-4">
         {currentAds.map((ad) => (
-          <TradeAdItem key={ad.id} ad={ad} />
+          <TradeAdItem key={ad.id} ad={ad} render={renderTradeAd} />
         ))}
       </div>
 

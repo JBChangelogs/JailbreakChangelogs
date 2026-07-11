@@ -42,6 +42,42 @@ interface TradeHistoryModalProps {
   usersData?: Record<string, RobloxUser>;
 }
 
+const getUserAvatar = (userId: string) => {
+  return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+};
+
+const TradeAvatarImage = ({ userId }: { userId: string }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [avatarError, setAvatarError] = useState(false);
+  return (
+    <div className="bg-quaternary-bg relative h-10 w-10 overflow-hidden rounded-full">
+      {avatarError ? (
+        <DefaultAvatar name={userId} />
+      ) : (
+        <>
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Spinner className="h-5 w-5" />
+            </div>
+          )}
+          <Image
+            src={getUserAvatar(userId)}
+            alt="User Avatar"
+            width={40}
+            height={40}
+            className="rounded-full"
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setAvatarError(true);
+            }}
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
 export default function TradeHistoryModal({
   isOpen,
   onClose,
@@ -183,42 +219,6 @@ export default function TradeHistoryModal({
     }
 
     return false;
-  };
-
-  const getUserAvatar = (userId: string) => {
-    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
-  };
-
-  const TradeAvatarImage = ({ userId }: { userId: string }) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [avatarError, setAvatarError] = useState(false);
-    return (
-      <div className="bg-quaternary-bg relative h-10 w-10 overflow-hidden rounded-full">
-        {avatarError ? (
-          <DefaultAvatar name={userId} />
-        ) : (
-          <>
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Spinner className="h-5 w-5" />
-              </div>
-            )}
-            <Image
-              src={getUserAvatar(userId)}
-              alt="User Avatar"
-              width={40}
-              height={40}
-              className="rounded-full"
-              onLoad={() => setIsLoading(false)}
-              onError={() => {
-                setIsLoading(false);
-                setAvatarError(true);
-              }}
-            />
-          </>
-        )}
-      </div>
-    );
   };
 
   if (!item) return null;

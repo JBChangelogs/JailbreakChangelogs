@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -19,10 +19,9 @@ export default function RateLimitView({
   homeLabel = "Take me home",
   showGoBack = true,
 }: RateLimitViewProps) {
-  const until = useMemo(
-    () => (retryAfter ? Date.now() + retryAfter * 1000 : null),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+  // Snapshot the deadline once on mount; later retryAfter changes are ignored.
+  const [until] = useState(() =>
+    retryAfter ? Date.now() + retryAfter * 1000 : null,
   );
 
   return (

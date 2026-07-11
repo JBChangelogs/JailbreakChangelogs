@@ -93,9 +93,7 @@ const ServerList: React.FC<{
   const [servers, setServers] = React.useState<Server[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [loggedInUserId, setLoggedInUserId] = React.useState<string | null>(
-    null,
-  );
+  const loggedInUserId = user?.id ?? null;
   const [userData, setUserData] = React.useState<Record<string, UserData>>({});
   const [loadingUsers, setLoadingUsers] = React.useState<
     Record<string, boolean>
@@ -300,10 +298,8 @@ const ServerList: React.FC<{
   };
 
   React.useEffect(() => {
-    setLoggedInUserId(user?.id || null);
-  }, [user?.id]);
+    let ignore = false;
 
-  React.useEffect(() => {
     const fetchServers = async () => {
       setLoading(true);
       setError(null);
@@ -319,6 +315,7 @@ const ServerList: React.FC<{
           throw new Error("Failed to fetch servers");
         }
         const data = (await serversResponse.json()) as Server[];
+        if (ignore) return;
 
         // Filter out expired servers (but keep servers with "Never" expiry)
         const now = Date.now();
@@ -334,37 +331,23 @@ const ServerList: React.FC<{
         setServers(filteredServers);
         // User data fetching is now handled by the other useEffect dependent on currentServers
       } catch (serverErr) {
+        if (ignore) return;
         setError(
           serverErr instanceof Error
             ? serverErr.message
             : "An error occurred while fetching servers",
         );
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
 
     fetchServers();
 
-    const handleAuthChange = (event: CustomEvent) => {
-      const userData = event.detail;
-      if (!userData) {
-        setLoggedInUserId(null);
-      } else {
-        setLoggedInUserId(userData.id);
-      }
-    };
-
-    window.addEventListener(
-      "authStateChanged",
-      handleAuthChange as EventListener,
-    );
-
     return () => {
-      window.removeEventListener(
-        "authStateChanged",
-        handleAuthChange as EventListener,
-      );
+      ignore = true;
     };
   }, []);
 
