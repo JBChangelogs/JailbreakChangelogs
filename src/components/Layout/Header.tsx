@@ -38,6 +38,10 @@ const AnimatedThemeToggler = dynamic(
 import { NavbarModern } from "@/components/ui/navbar";
 import ServiceAvailabilityTicker from "./ServiceAvailabilityTicker";
 import NewsTicker from "./NewsTicker";
+import type {
+  NewsTickerAnnouncement,
+  ServiceAlert,
+} from "@/utils/api/runtimeFlags";
 import OfflineDetector from "../OfflineDetector";
 
 import { Icon } from "../ui/IconWrapper";
@@ -462,7 +466,13 @@ const MobileDrawer = memo(function MobileDrawer({
   );
 });
 
-export default function Header() {
+export default function Header({
+  newsAnnouncement = null,
+  serviceAlert = null,
+}: {
+  newsAnnouncement?: NewsTickerAnnouncement | null;
+  serviceAlert?: ServiceAlert | null;
+}) {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -637,9 +647,9 @@ export default function Header() {
         className={`sticky top-0 hidden xl:block ${desktopUserMenuOpen ? "z-[2147483647]" : "z-1300"}`}
         style={{ viewTransitionName: "navbar" } as React.CSSProperties}
       >
-        <ServiceAvailabilityTicker />
+        <ServiceAvailabilityTicker alert={serviceAlert} />
         <OfflineDetector />
-        <NewsTicker />
+        <NewsTicker announcement={newsAnnouncement} />
         <div className="relative z-10">
           <NavbarModern
             unreadCount={unreadCount}
@@ -657,9 +667,9 @@ export default function Header() {
         style={{ viewTransitionName: "navbar-mobile" } as React.CSSProperties}
       >
         <>
-          <ServiceAvailabilityTicker />
+          <ServiceAvailabilityTicker alert={serviceAlert} />
           <OfflineDetector />
-          <NewsTicker />
+          <NewsTicker announcement={newsAnnouncement} />
           <div className="relative z-10">
             <div className="bg-primary-bg/75 border-border-card border-b backdrop-blur-lg">
               <div className="flex items-center justify-between px-4 py-2">

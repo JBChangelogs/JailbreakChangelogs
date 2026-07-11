@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { isFeatureEnabled } from "@/utils/api/featureFlags";
+import type { ServiceAlert } from "@/utils/api/runtimeFlags";
 
-export default function ServiceAvailabilityTicker() {
-  // Check if service availability ticker should be shown using feature flags
-  const shouldShowTicker = isFeatureEnabled("SERVICE_AVAILABILITY_TICKER");
-
-  if (!shouldShowTicker) return null;
+export default function ServiceAvailabilityTicker({
+  alert,
+}: {
+  alert: ServiceAlert | null;
+}) {
+  if (!alert) return null;
 
   return (
     <div className="bg-secondary-bg border-status-warning/40 border-b">
@@ -21,19 +22,21 @@ export default function ServiceAvailabilityTicker() {
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              Inventories API is down — inventory lookups, OG finder, dupe
-              finder, robbery and bounty tracking are affected while we look
-              into it. Check{" "}
-              <Link
-                href="https://status.jailbreakchangelogs.com/"
-                prefetch={false}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:underline"
-              >
-                our status page
-              </Link>{" "}
-              for updates.
+              {alert.message}
+              {alert.linkText && alert.linkUrl && (
+                <>
+                  {" "}
+                  <Link
+                    href={alert.linkUrl}
+                    prefetch={false}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:underline"
+                  >
+                    {alert.linkText}
+                  </Link>
+                </>
+              )}
             </span>
           </div>
         </div>

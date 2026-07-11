@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import { getBooleanFlag } from "@/utils/api/runtimeFlags";
+
+// Maintenance switches are runtime flags evaluated per-request, so they can
+// be flipped from the Railway dashboard/CLI without a redeploy.
 
 export async function checkMaintenanceMode(): Promise<{
   isMaintenanceMode: boolean;
@@ -8,10 +12,8 @@ export async function checkMaintenanceMode(): Promise<{
     return { isMaintenanceMode: false };
   }
 
-  const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
-
   return {
-    isMaintenanceMode,
+    isMaintenanceMode: getBooleanFlag("maintenance-mode"),
   };
 }
 
@@ -65,11 +67,8 @@ export async function getMaintenanceMetadata(): Promise<Metadata | null> {
 export async function checkInventoryMaintenanceMode(): Promise<{
   isInventoryMaintenanceMode: boolean;
 }> {
-  const isInventoryMaintenanceMode =
-    process.env.NEXT_PUBLIC_INVENTORY_MAINTENANCE_MODE === "true";
-
   return {
-    isInventoryMaintenanceMode,
+    isInventoryMaintenanceMode: getBooleanFlag("inventory-maintenance-mode"),
   };
 }
 
@@ -121,11 +120,8 @@ export async function getInventoryMaintenanceMetadata(): Promise<Metadata | null
 export async function checkOGFinderMaintenanceMode(): Promise<{
   isOGFinderMaintenanceMode: boolean;
 }> {
-  const isOGFinderMaintenanceMode =
-    process.env.NEXT_PUBLIC_OG_FINDER_MAINTENANCE_MODE === "true";
-
   return {
-    isOGFinderMaintenanceMode,
+    isOGFinderMaintenanceMode: getBooleanFlag("og-finder-maintenance-mode"),
   };
 }
 
@@ -177,11 +173,8 @@ export async function getOGFinderMaintenanceMetadata(): Promise<Metadata | null>
 export async function checkDupeFinderMaintenanceMode(): Promise<{
   isDupeFinderMaintenanceMode: boolean;
 }> {
-  const isDupeFinderMaintenanceMode =
-    process.env.NEXT_PUBLIC_DUPE_FINDER_MAINTENANCE_MODE === "true";
-
   return {
-    isDupeFinderMaintenanceMode,
+    isDupeFinderMaintenanceMode: getBooleanFlag("dupe-finder-maintenance-mode"),
   };
 }
 
@@ -234,11 +227,10 @@ export async function getDupeFinderMaintenanceMetadata(): Promise<Metadata | nul
 export async function checkMoneyLeaderboardMaintenanceMode(): Promise<{
   isMoneyLeaderboardMaintenanceMode: boolean;
 }> {
-  const isMoneyLeaderboardMaintenanceMode =
-    process.env.NEXT_PUBLIC_MONEY_LEADERBOARD_MAINTENANCE_MODE === "true";
-
   return {
-    isMoneyLeaderboardMaintenanceMode,
+    isMoneyLeaderboardMaintenanceMode: getBooleanFlag(
+      "money-leaderboard-maintenance-mode",
+    ),
   };
 }
 

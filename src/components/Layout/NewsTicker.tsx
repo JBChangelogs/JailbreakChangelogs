@@ -2,55 +2,64 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { isFeatureEnabled } from "@/utils/api/featureFlags";
+import type { NewsTickerAnnouncement } from "@/utils/api/runtimeFlags";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
-export default function NewsTicker() {
-  const shouldShowTicker = isFeatureEnabled("NEWS_TICKER");
+export default function NewsTicker({
+  announcement,
+}: {
+  announcement: NewsTickerAnnouncement | null;
+}) {
   const [isVisible, setIsVisible] = useState<boolean | null>(null);
+  const storageKey = announcement
+    ? `news-ticker-${announcement.id}-dismissed`
+    : null;
 
   useEffect(() => {
+    if (!storageKey) return;
     // Only run on client after mount - check localStorage
-    const dismissed = safeLocalStorage.getItem(
-      "accounts-20k-giveaway-announcement-dismissed",
-    );
+    const dismissed = safeLocalStorage.getItem(storageKey);
     // eslint-disable-next-line
     setIsVisible(dismissed !== "true");
-  }, []);
+  }, [storageKey]);
+
+  if (!announcement || isVisible !== true) return null;
 
   const handleDismiss = () => {
     setIsVisible(false);
     // Store dismissal in localStorage to remember user's choice
-    safeLocalStorage.setItem(
-      "accounts-20k-giveaway-announcement-dismissed",
-      "true",
-    );
+    if (storageKey) safeLocalStorage.setItem(storageKey, "true");
   };
-
-  if (!shouldShowTicker || isVisible !== true) return null;
 
   return (
     <div className="from-status-info/15 to-secondary-bg bg-linear-to-r">
       <div className="container mx-auto px-4 py-2">
         <div className="relative flex flex-col items-center justify-center gap-2 pr-8 lg:flex-row lg:gap-3 lg:pr-12">
-          <div className="flex items-center gap-2">
-            <span className="text-warning text-xs font-semibold">
-              🎉 20K milestone
-            </span>
-          </div>
+          {announcement.label && (
+            <div className="flex items-center gap-2">
+              <span className="text-warning text-xs font-semibold">
+                {announcement.label}
+              </span>
+            </div>
+          )}
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              We’ve reached 20,000 sign-ups! Celebrate with our{" "}
-              <Link
-                href="https://discord.com/channels/1286064050135896064/1361921979036471476/1472344833266946049"
-                prefetch={false}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:text-link-hover font-semibold underline"
-              >
-                20,000 Robux Discord giveaway
-              </Link>
+              {announcement.message}
+              {announcement.linkText && announcement.linkUrl && (
+                <>
+                  {" "}
+                  <Link
+                    href={announcement.linkUrl}
+                    prefetch={false}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:text-link-hover font-semibold underline"
+                  >
+                    {announcement.linkText}
+                  </Link>
+                </>
+              )}
             </span>
           </div>
 

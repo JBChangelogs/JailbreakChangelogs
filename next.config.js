@@ -1,5 +1,8 @@
 const nextConfig = {
   output: "standalone",
+  // The railway SDK dynamically imports tsx/esbuild (IaC tooling), which
+  // breaks when bundled — load it from node_modules at runtime instead.
+  serverExternalPackages: ["railway"],
   compress: true,
   poweredByHeader: false,
   deploymentId: process.env.RAILWAY_DEPLOYMENT_ID,
