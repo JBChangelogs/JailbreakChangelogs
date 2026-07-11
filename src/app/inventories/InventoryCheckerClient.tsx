@@ -158,6 +158,8 @@ export default function InventoryCheckerClient({
   >(undefined);
 
   useEffect(() => {
+    let ignore = false;
+
     const loadSeason = async () => {
       if (!initialData || !PUBLIC_API_URL || externalIsLoading) return;
       try {
@@ -170,6 +172,7 @@ export default function InventoryCheckerClient({
             "User-Agent": "JailbreakChangelogs-Inventory/1.0",
           },
         });
+        if (ignore) return;
         if (!latestRes.ok) {
           if (latestRes.status === 429) {
             const raw = latestRes.headers.get("retry-after");
@@ -237,6 +240,7 @@ export default function InventoryCheckerClient({
           }
         }
 
+        if (ignore) return;
         setActiveSeason(resolved);
       } catch (e) {
         log.error("Error fetching season data", e);
@@ -244,6 +248,10 @@ export default function InventoryCheckerClient({
     };
 
     void loadSeason();
+
+    return () => {
+      ignore = true;
+    };
   }, [initialData, externalIsLoading]);
 
   // Check if current user is viewing their own inventory

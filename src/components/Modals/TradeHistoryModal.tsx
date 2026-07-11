@@ -146,6 +146,8 @@ export default function TradeHistoryModal({
       return;
     }
 
+    let ignore = false;
+
     const fetchUsers = async () => {
       try {
         const response = await fetch(
@@ -172,6 +174,7 @@ export default function TradeHistoryModal({
         }
 
         const userData = await response.json();
+        if (ignore) return;
         const processedUsers: Record<
           string,
           { name: string; displayName: string; hasVerifiedBadge: boolean }
@@ -196,11 +199,16 @@ export default function TradeHistoryModal({
 
         setFetchedUsers(processedUsers);
       } catch (error) {
+        if (ignore) return;
         log.error("Failed to fetch users", error);
       }
     };
 
     fetchUsers();
+
+    return () => {
+      ignore = true;
+    };
   }, [isOpen, tradeHistoryUserIds, usersData]);
 
   const getUsername = (userId: string) => {

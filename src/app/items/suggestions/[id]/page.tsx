@@ -229,6 +229,7 @@ export default function ValueSuggestionDetailPage() {
 
   useEffect(() => {
     if (!id) return;
+    let ignore = false;
     const run = async () => {
       setLoading(true);
       setError(null);
@@ -241,6 +242,7 @@ export default function ValueSuggestionDetailPage() {
           credentials: "include",
           headers: devTokenHeaders,
         });
+        if (ignore) return;
         if (!res.ok) {
           if (res.status === 404) {
             setShouldShowNotFound(true);
@@ -252,28 +254,36 @@ export default function ValueSuggestionDetailPage() {
               status: res.status,
               body,
             });
-            setError("Failed to load suggestion.");
+            if (!ignore) setError("Failed to load suggestion.");
           }
           return;
         }
         const data: Suggestion = await res.json();
+        if (ignore) return;
         setSuggestion(data);
         setVoteCounts({ up: data.upvotes, down: data.downvotes });
         if (data.item) {
           setItem(data.item);
         }
       } catch {
-        setError("Failed to load suggestion.");
+        if (!ignore) setError("Failed to load suggestion.");
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
     run();
+
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   const suggesterId = suggestion?.user.id;
   useEffect(() => {
     if (!suggesterId) return;
+    let ignore = false;
     const run = async () => {
       try {
         const { url, headers } = buildApiFetchRequest(
@@ -283,12 +293,17 @@ export default function ValueSuggestionDetailPage() {
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) return;
         const data = await res.json();
+        if (ignore) return;
         setSuggesterStats(data.stats ?? null);
       } catch {
         // stats are non-critical
       }
     };
     run();
+
+    return () => {
+      ignore = true;
+    };
   }, [suggesterId]);
 
   if (shouldShowNotFound) {
@@ -522,6 +537,7 @@ export default function ValueSuggestionDetailPage() {
 
   useEffect(() => {
     if (!item?.id || !isValueSuggestion) return;
+    let ignore = false;
     const run = async () => {
       setHistoryLoading(true);
       try {
@@ -532,14 +548,21 @@ export default function ValueSuggestionDetailPage() {
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) return;
         const data = await res.json();
+        if (ignore) return;
         setItemHistory(Array.isArray(data) ? data : null);
       } catch {
         // non-critical
       } finally {
-        setHistoryLoading(false);
+        if (!ignore) {
+          setHistoryLoading(false);
+        }
       }
     };
     run();
+
+    return () => {
+      ignore = true;
+    };
   }, [item?.id, isValueSuggestion]);
 
   const categoryIcon = item ? getCategoryIcon(item.type) : null;

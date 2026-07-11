@@ -39,6 +39,8 @@ export default function SeasonLeaderboardPage() {
   const [seasonRetryAfter, setSeasonRetryAfter] = useState<number | null>(null);
 
   useEffect(() => {
+    let ignore = false;
+
     const loadData = async () => {
       try {
         const { url: leaderboardSeasonUrl, headers: leaderboardSeasonHeaders } =
@@ -58,9 +60,11 @@ export default function SeasonLeaderboardPage() {
             },
           }),
         ]);
+        if (ignore) return;
 
         if (leaderboardRes.ok) {
           const data = await leaderboardRes.json();
+          if (ignore) return;
           setLeaderboard(data.data ?? []);
           setUpdatedAt(data.updated_at ?? 0);
         } else {
@@ -68,21 +72,30 @@ export default function SeasonLeaderboardPage() {
         }
 
         if (seasonRes.ok) {
-          setLatestSeason(await seasonRes.json());
+          const seasonData = await seasonRes.json();
+          if (ignore) return;
+          setLatestSeason(seasonData);
         } else if (seasonRes.status === 429) {
           const raw = seasonRes.headers.get("retry-after");
           setIsSeasonRateLimited(true);
           setSeasonRetryAfter(raw ? parseInt(raw, 10) : null);
         }
       } catch (error) {
+        if (ignore) return;
         log.error("Error loading leaderboard data", error);
         setLeaderboard([]);
       } finally {
-        setIsLoaded(true);
+        if (!ignore) {
+          setIsLoaded(true);
+        }
       }
     };
 
     void loadData();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   if (!isLoaded) {

@@ -358,6 +358,8 @@ export default function UserProfileClient({
 
   // Update following status when currentUserId changes
   useEffect(() => {
+    let isCancelled = false;
+
     const updateFollowingStatus = async () => {
       if (currentUserId && user && userId) {
         setIsLoadingFollow(true);
@@ -371,6 +373,7 @@ export default function UserProfileClient({
             },
           );
           const followingData: FollowingData[] | string = await response.json();
+          if (isCancelled) return;
 
           const isUserFollowing =
             Array.isArray(followingData) &&
@@ -383,12 +386,18 @@ export default function UserProfileClient({
         } catch (error: unknown) {
           log.error("Error fetching following status:", error);
         } finally {
-          setIsLoadingFollow(false);
+          if (!isCancelled) {
+            setIsLoadingFollow(false);
+          }
         }
       }
     };
 
     updateFollowingStatus();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [currentUserId, userId, user]);
 
   useEffect(() => {

@@ -271,6 +271,8 @@ export default function CommentsTab({
     );
     if (commentsNeedingDetails.length === 0) return;
 
+    let ignore = false;
+
     const fetchDetails = async () => {
       setDetailsLoading(true);
       try {
@@ -278,6 +280,7 @@ export default function CommentsTab({
           fetchCommentDetails(commentsNeedingDetails),
           fetchChangelogDetailsClient(commentsNeedingDetails),
         ]);
+        if (ignore) return;
         setCommentDetails({
           changelogs: { ...sharedItemDetails, ...changelogDetails },
           items: { ...sharedItemDetails, ...details.items },
@@ -286,13 +289,20 @@ export default function CommentsTab({
           inventories: { ...sharedItemDetails, ...details.inventories },
         });
       } catch (err) {
+        if (ignore) return;
         log.error("Error fetching comment details", err);
       } finally {
-        setDetailsLoading(false);
+        if (!ignore) {
+          setDetailsLoading(false);
+        }
       }
     };
 
     void fetchDetails();
+
+    return () => {
+      ignore = true;
+    };
   }, [comments, sharedItemDetails]);
 
   const profileComments = comments.filter(

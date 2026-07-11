@@ -199,6 +199,7 @@ export default function UserValueSuggestionsTab({
   }, [fetchSuggestions, page]);
 
   useEffect(() => {
+    let ignore = false;
     const run = async () => {
       try {
         const { url, headers } = buildApiFetchRequest(
@@ -208,12 +209,16 @@ export default function UserValueSuggestionsTab({
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) return;
         const data = await res.json();
+        if (ignore) return;
         setUserStats(data.stats ?? null);
       } catch {
         // stats are non-critical
       }
     };
     run();
+    return () => {
+      ignore = true;
+    };
   }, [userId]);
 
   useEffect(() => {

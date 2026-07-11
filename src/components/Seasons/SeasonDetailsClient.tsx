@@ -46,6 +46,8 @@ export default function SeasonDetailsClient({
   );
 
   useEffect(() => {
+    let ignore = false;
+
     const loadPageData = async () => {
       try {
         if (!PUBLIC_API_URL) {
@@ -61,6 +63,7 @@ export default function SeasonDetailsClient({
             "User-Agent": "JailbreakChangelogs-Seasons/1.0",
           },
         });
+        if (ignore) return;
 
         if (!response.ok) {
           if (response.status === 429) {
@@ -73,6 +76,7 @@ export default function SeasonDetailsClient({
         }
 
         const data = (await response.json()) as Season[];
+        if (ignore) return;
 
         const matched = data.find(
           (s) =>
@@ -98,12 +102,17 @@ export default function SeasonDetailsClient({
         setSeasonList(data);
         setCurrentSeasonState(matched);
       } catch (error) {
+        if (ignore) return;
         log.error("Error loading season data", error);
         setIsNotFound(true);
       }
     };
 
     void loadPageData();
+
+    return () => {
+      ignore = true;
+    };
     // router from nextjs-toploader/app returns a new object reference on every
     // render, so including it here would re-trigger the fetch in an infinite loop
     // oxlint-disable-next-line react-hooks/exhaustive-deps

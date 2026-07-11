@@ -2001,6 +2001,8 @@ export default function ValueSuggestionsPage() {
   }, [silentRefreshVotes]);
 
   useEffect(() => {
+    let ignore = false;
+
     const fetchItems = async () => {
       try {
         const { url, headers } = buildApiFetchRequest(
@@ -2014,17 +2016,26 @@ export default function ValueSuggestionsPage() {
           throw new Error("Failed to fetch items");
         }
         const data: Item[] = await res.json();
+        if (ignore) return;
         setItems(data);
       } catch {
         // silently fail — form can still show without items
       } finally {
-        setLoadingItems(false);
+        if (!ignore) {
+          setLoadingItems(false);
+        }
       }
     };
     fetchItems();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   useEffect(() => {
+    let ignore = false;
+
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       "/value-suggestions/sorts",
@@ -2032,6 +2043,7 @@ export default function ValueSuggestionsPage() {
     fetch(url, { credentials: "include", headers })
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
+        if (ignore) return;
         if (Array.isArray(data) && data.length > 0) {
           setAvailableSorts(data as string[]);
           if (initialSortRef.current === null) {
@@ -2044,9 +2056,15 @@ export default function ValueSuggestionsPage() {
         }
       })
       .catch(() => {});
+
+    return () => {
+      ignore = true;
+    };
   }, [setParams]);
 
   useEffect(() => {
+    let ignore = false;
+
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       "/value-suggestions/stats/leaderboard",
@@ -2054,6 +2072,7 @@ export default function ValueSuggestionsPage() {
     fetch(url, { credentials: "include", headers })
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
+        if (ignore) return;
         const entries = Array.isArray(data)
           ? data
           : Array.isArray(data?.leaderboard)
@@ -2062,7 +2081,15 @@ export default function ValueSuggestionsPage() {
         setLeaderboard(entries as LeaderboardEntry[]);
       })
       .catch(() => {})
-      .finally(() => setLoadingLeaderboard(false));
+      .finally(() => {
+        if (!ignore) {
+          setLoadingLeaderboard(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   useEffect(() => {

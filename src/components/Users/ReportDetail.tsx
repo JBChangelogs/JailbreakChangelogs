@@ -40,6 +40,7 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
 
   useEffect(() => {
     if (authLoading || !user) return;
+    let ignore = false;
     setLoading(true);
     setError(null);
 
@@ -57,12 +58,21 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
         }
         return res.json() as Promise<Report>;
       })
-      .then((data) => setReport(data))
+      .then((data) => {
+        if (!ignore) setReport(data);
+      })
       .catch((err) => {
+        if (ignore) return;
         log.error("Error fetching report detail:", err);
         setError(err instanceof Error ? err.message : "Failed to load report");
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [authLoading, user, reportId]);
 
   useEffect(() => {
@@ -70,15 +80,21 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
     const id = getReportedUserId(report);
     if (!id) return;
 
+    let ignore = false;
+
     fetch(`/api/users/batch?ids=${encodeURIComponent(id)}`, {
       cache: "no-store",
     })
       .then(async (res) => {
         if (!res.ok) return;
         const arr = (await res.json()) as UserData[];
-        if (arr.length > 0) setReportedUser(arr[0]);
+        if (!ignore && arr.length > 0) setReportedUser(arr[0]);
       })
       .catch(() => undefined);
+
+    return () => {
+      ignore = true;
+    };
   }, [report]);
 
   if (authLoading || (!report && loading)) {

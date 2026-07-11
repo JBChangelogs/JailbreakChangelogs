@@ -256,6 +256,8 @@ export default function TradeHistoryList({
     if (usersData) return;
     if (tradeHistoryUserIds.length === 0) return;
 
+    let ignore = false;
+
     const fetchUsers = async () => {
       try {
         const response = await fetch(
@@ -275,6 +277,7 @@ export default function TradeHistoryList({
         if (!response.ok) return;
 
         const userData = await response.json();
+        if (ignore) return;
         const processedUsers: Record<
           string,
           { name: string; displayName: string; hasVerifiedBadge: boolean }
@@ -298,11 +301,16 @@ export default function TradeHistoryList({
 
         setFetchedUsers(processedUsers);
       } catch (error) {
+        if (ignore) return;
         log.error("Failed to fetch users", error);
       }
     };
 
     fetchUsers();
+
+    return () => {
+      ignore = true;
+    };
   }, [tradeHistoryUserIds, usersData]);
 
   const getDisplayName = (userId: string) =>

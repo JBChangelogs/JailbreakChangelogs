@@ -93,6 +93,8 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
   }, [onCountUpdate, onClose, isOwnProfile, userData]);
 
   useEffect(() => {
+    let ignore = false;
+
     const fetchFollowers = async () => {
       if (!isOpen) return;
 
@@ -120,6 +122,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
             cache: "no-store",
           },
         );
+        if (ignore) return;
 
         if (response.status === 404) {
           setFollowers([]);
@@ -138,6 +141,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         }
 
         const data = await response.json();
+        if (ignore) return;
 
         if (!Array.isArray(data) || data.length === 0) {
           setFollowers([]);
@@ -173,10 +177,13 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 
         setFollowerDetails(detailsMap);
       } catch (err) {
+        if (ignore) return;
         log.error("Error fetching followers:", err);
         setError("Failed to load followers");
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
 
@@ -184,9 +191,15 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     if (isOpen) {
       fetchFollowers();
     }
+
+    return () => {
+      ignore = true;
+    };
   }, [isOpen, userId]);
 
   useEffect(() => {
+    let ignore = false;
+
     const fetchFollowingStatus = async () => {
       if (!isOpen || !currentUserId) return;
 
@@ -206,6 +219,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         if (!response.ok) return;
 
         const followingData = await response.json();
+        if (ignore) return;
         if (!Array.isArray(followingData)) return;
         const statusMap = followingData.reduce(
           (acc: { [key: string]: boolean }, follow: Following) => {
@@ -227,6 +241,10 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     if (isOpen) {
       fetchFollowingStatus();
     }
+
+    return () => {
+      ignore = true;
+    };
   }, [isOpen, currentUserId]);
 
   const handleFollow = async (followerId: string) => {

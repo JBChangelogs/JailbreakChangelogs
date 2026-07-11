@@ -87,6 +87,8 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
   }, [onCountUpdate, onClose, isOwnProfile, userData]);
 
   useEffect(() => {
+    let ignore = false;
+
     const fetchFollowing = async () => {
       if (!isOpen) return;
 
@@ -114,6 +116,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
             cache: "no-store",
           },
         );
+        if (ignore) return;
 
         if (response.status === 404) {
           setFollowing([]);
@@ -132,6 +135,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
         }
 
         const data = await response.json();
+        if (ignore) return;
 
         if (!Array.isArray(data) || data.length === 0) {
           setFollowing([]);
@@ -179,10 +183,13 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
 
         setFollowingDetails(detailsMap);
       } catch (err) {
+        if (ignore) return;
         log.error("Error fetching following", err);
         setError("Failed to load following");
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
 
@@ -190,6 +197,10 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
     if (isOpen) {
       fetchFollowing();
     }
+
+    return () => {
+      ignore = true;
+    };
   }, [isOpen, userId]);
 
   const handleFollowToggle = async (followingId: string) => {

@@ -19,6 +19,8 @@ export default function TimelinePage() {
   );
 
   useEffect(() => {
+    let ignore = false;
+
     const loadTimeline = async () => {
       try {
         if (!PUBLIC_API_URL) {
@@ -35,6 +37,7 @@ export default function TimelinePage() {
             "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
           },
         });
+        if (ignore) return;
 
         if (!response.ok) {
           if (response.status === 429) {
@@ -52,15 +55,21 @@ export default function TimelinePage() {
         }
 
         const data = (await response.json()) as Changelog[];
+        if (ignore) return;
         const sorted = [...data].sort((a, b) => b.id - a.id);
         setChangelogs(sorted);
       } catch (error) {
+        if (ignore) return;
         log.error("Error loading changelog timeline", error);
         setChangelogs([]);
       }
     };
 
     void loadTimeline();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   if (isRateLimited) {

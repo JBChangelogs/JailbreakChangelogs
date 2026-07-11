@@ -25,6 +25,8 @@ export default function VersionInfo({ initialData }: VersionInfoProps = {}) {
   );
 
   useEffect(() => {
+    let ignore = false;
+
     const fetchVersion = async () => {
       try {
         const response = await fetch("/api/version");
@@ -37,8 +39,10 @@ export default function VersionInfo({ initialData }: VersionInfoProps = {}) {
           throw new Error("Failed to fetch version info");
         }
         const data: VersionInfoState = await response.json();
+        if (ignore) return;
         setVersionInfo(data);
       } catch (error) {
+        if (ignore) return;
         log.error("Error fetching version info", error);
         const fallback: VersionInfoState = {
           version: "unknown",
@@ -53,6 +57,10 @@ export default function VersionInfo({ initialData }: VersionInfoProps = {}) {
     if (!versionInfo) {
       fetchVersion();
     }
+
+    return () => {
+      ignore = true;
+    };
   }, [versionInfo]);
 
   // Handle date formatting on client only to avoid hydration mismatch

@@ -93,36 +93,48 @@ export default function ValuesChangelogPage() {
   const [total, setTotal] = useState(0);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
-  const fetchChangelogs = useCallback(async (p: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL!,
-        `/value-changelogs?page=${p}`,
-      );
-      const res = await fetch(url, { credentials: "include", headers });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        log.error("fetch value changelogs failed", {
-          status: res.status,
-          body,
-        });
-        throw new Error("Failed to fetch changelogs");
+  const fetchChangelogs = useCallback(
+    async (p: number, isStale?: () => boolean) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL!,
+          `/value-changelogs?page=${p}`,
+        );
+        const res = await fetch(url, { credentials: "include", headers });
+        if (isStale?.()) return;
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          log.error("fetch value changelogs failed", {
+            status: res.status,
+            body,
+          });
+          throw new Error("Failed to fetch changelogs");
+        }
+        const data: ValueChangelogsResponse = await res.json();
+        if (isStale?.()) return;
+        setChangelogs(data.items ?? []);
+        setTotalPages(data.total_pages ?? 1);
+        setTotal(data.total ?? 0);
+      } catch (err) {
+        if (isStale?.()) return;
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        if (!isStale?.()) {
+          setLoading(false);
+        }
       }
-      const data: ValueChangelogsResponse = await res.json();
-      setChangelogs(data.items ?? []);
-      setTotalPages(data.total_pages ?? 1);
-      setTotal(data.total ?? 0);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
-    void fetchChangelogs(page);
+    let ignore = false;
+    void fetchChangelogs(page, () => ignore);
+    return () => {
+      ignore = true;
+    };
   }, [fetchChangelogs, page]);
 
   return (

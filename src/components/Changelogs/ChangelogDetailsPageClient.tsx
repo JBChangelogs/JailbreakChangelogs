@@ -36,6 +36,8 @@ export default function ChangelogDetailsPageClient({
   );
 
   useEffect(() => {
+    let ignore = false;
+
     const loadPageData = async () => {
       try {
         if (!PUBLIC_API_URL) {
@@ -54,6 +56,7 @@ export default function ChangelogDetailsPageClient({
             "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
           },
         });
+        if (ignore) return;
 
         if (!listResponse.ok) {
           if (listResponse.status === 429) {
@@ -66,6 +69,7 @@ export default function ChangelogDetailsPageClient({
         }
 
         const listData = (await listResponse.json()) as Changelog[];
+        if (ignore) return;
         const sortedChangelogList = [...listData].sort((a, b) => b.id - a.id);
 
         const matched = sortedChangelogList.find(
@@ -82,12 +86,17 @@ export default function ChangelogDetailsPageClient({
         setChangelogList(sortedChangelogList);
         setCurrentChangelog(matched);
       } catch (error) {
+        if (ignore) return;
         log.error("Error loading changelog page data", error);
         setIsNotFound(true);
       }
     };
 
     void loadPageData();
+
+    return () => {
+      ignore = true;
+    };
   }, [changelogId]);
 
   if (isRateLimited) {

@@ -24,6 +24,8 @@ export default function UserRankDisplay() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let ignore = false;
+
     const fetchUserRank = async () => {
       if (!isAuthenticated || !user?.roblox_id) {
         return;
@@ -36,19 +38,28 @@ export default function UserRankDisplay() {
         );
         if (response.ok) {
           const data = await response.json();
+          if (ignore) return;
           setUserRank(data);
         } else if (response.status === 404) {
+          if (ignore) return;
           // User doesn't have a rank, hide the component
           setUserRank(null);
         }
       } catch (error) {
+        if (ignore) return;
         log.error("Error fetching user rank", error);
       } finally {
-        setIsLoading(false);
+        if (!ignore) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchUserRank();
+
+    return () => {
+      ignore = true;
+    };
   }, [isAuthenticated, user?.roblox_id]);
 
   if (!isAuthenticated || !user?.roblox_id) {

@@ -28,6 +28,8 @@ export default function WillIMakeItPage() {
   );
 
   useEffect(() => {
+    let ignore = false;
+
     const loadData = async () => {
       try {
         if (!PUBLIC_API_URL) {
@@ -43,6 +45,7 @@ export default function WillIMakeItPage() {
             "User-Agent": "JailbreakChangelogs-Seasons/1.0",
           },
         });
+        if (ignore) return;
 
         if (!res.ok) {
           if (res.status === 429) {
@@ -56,16 +59,25 @@ export default function WillIMakeItPage() {
           throw new Error("Failed to fetch latest season");
         }
 
-        setSeason(await res.json());
+        const seasonData = await res.json();
+        if (ignore) return;
+        setSeason(seasonData);
       } catch (err) {
+        if (ignore) return;
         log.error("Error loading season data", err);
         setError("Failed to load season data");
       } finally {
-        setIsLoaded(true);
+        if (!ignore) {
+          setIsLoaded(true);
+        }
       }
     };
 
     void loadData();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   if (isRateLimited) {

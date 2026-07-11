@@ -41,6 +41,8 @@ export default function SeasonContractsPage() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    let ignore = false;
+
     const loadData = async () => {
       try {
         const { url: contractsSeasonUrl, headers: contractsSeasonHeaders } =
@@ -60,9 +62,11 @@ export default function SeasonContractsPage() {
             },
           }),
         ]);
+        if (ignore) return;
 
         if (contractsRes.ok) {
           const data = await contractsRes.json();
+          if (ignore) return;
           setContracts(data.data ?? []);
           setUpdatedAt(data.updated_at ?? 0);
         } else {
@@ -70,17 +74,26 @@ export default function SeasonContractsPage() {
         }
 
         if (seasonRes.ok) {
-          setLatestSeason(await seasonRes.json());
+          const seasonData = await seasonRes.json();
+          if (ignore) return;
+          setLatestSeason(seasonData);
         }
       } catch (error) {
+        if (ignore) return;
         log.error("Error loading contracts data", error);
         setContracts([]);
       } finally {
-        setIsLoaded(true);
+        if (!ignore) {
+          setIsLoaded(true);
+        }
       }
     };
 
     void loadData();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   if (!isLoaded) {

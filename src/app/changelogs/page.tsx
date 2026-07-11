@@ -17,6 +17,8 @@ export default function ChangelogsPage() {
   );
 
   useEffect(() => {
+    let ignore = false;
+
     const redirectToLatest = async () => {
       try {
         if (!PUBLIC_API_URL) {
@@ -34,6 +36,7 @@ export default function ChangelogsPage() {
           },
           cache: "no-store",
         });
+        if (ignore) return;
 
         if (!response.ok) {
           if (response.status === 429) {
@@ -51,14 +54,20 @@ export default function ChangelogsPage() {
         }
 
         const latestChangelog = await response.json();
+        if (ignore) return;
         router.replace(`/changelogs/${latestChangelog.id}`);
       } catch (error) {
+        if (ignore) return;
         log.error("Error fetching latest changelog", error);
         router.replace("/changelogs/timeline");
       }
     };
 
     void redirectToLatest();
+
+    return () => {
+      ignore = true;
+    };
     // router from nextjs-toploader/app returns a new object reference on every
     // render, so including it here would re-trigger the fetch in an infinite loop
     // (e.g. hammering the API on every render while rate limited)

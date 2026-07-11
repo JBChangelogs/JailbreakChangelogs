@@ -148,6 +148,8 @@ export default function ChangelogDetailsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let ignore = false;
+
     const fetchChangelog = async () => {
       try {
         const { url, headers } = buildApiFetchRequest(
@@ -155,6 +157,7 @@ export default function ChangelogDetailsPage() {
           `/value-changelogs/${id}`,
         );
         const res = await fetch(url, { credentials: "include", headers });
+        if (ignore) return;
         if (res.status === 404) {
           setNotFoundError(true);
           return;
@@ -168,15 +171,23 @@ export default function ChangelogDetailsPage() {
           throw new Error("Failed to fetch changelog");
         }
         const data: ValueChangelogDetail = await res.json();
+        if (ignore) return;
         setChangelog(transformToChangelogGroup(data));
       } catch (err) {
+        if (ignore) return;
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
 
     void fetchChangelog();
+
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   if (notFoundError) {
