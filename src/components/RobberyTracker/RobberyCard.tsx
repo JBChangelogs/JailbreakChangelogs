@@ -385,7 +385,7 @@ export default function RobberyCard({
                 robbery.metadata?.casino_time &&
                 casinoCountdown && (
                   <span className="text-secondary-text inline-flex items-center gap-1.5">
-                    <Icon icon="heroicons:hourglass" className="h-4 w-4" />
+                    <Icon icon="mdi:hourglass" className="h-4 w-4" />
                     <span>
                       Closes in{" "}
                       <span className="text-primary-text font-mono font-semibold tabular-nums">

@@ -1348,7 +1348,7 @@ function SuggestionGuidelinesDialog({
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
           <DialogTitle className="text-primary-text flex items-center justify-center gap-2 text-base font-bold">
             <Icon
-              icon="material-symbols:announcement-outline-rounded"
+              icon="material-symbols:campaign-outline-rounded"
               className="h-5 w-5 shrink-0 text-yellow-400"
               inline
             />

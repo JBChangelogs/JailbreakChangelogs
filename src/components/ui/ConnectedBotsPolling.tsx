@@ -14,7 +14,7 @@ import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import RetryErrorDisplay from "./RetryErrorDisplay";
-import { Icon } from "@iconify/react";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Tabs, TabsList, TabsTrigger } from "./tabs";
 import { Button } from "./button";
 import { toast } from "sonner";

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Icon } from "@iconify/react";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface DiscordTradeAdBannerProps {
   className?: string;

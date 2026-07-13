@@ -1,4 +1,4 @@
-import { Icon } from "@iconify/react";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface ExperimentalFeatureBannerProps {
   className?: string;

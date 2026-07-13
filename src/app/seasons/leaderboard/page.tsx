@@ -5,7 +5,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonLeaderboardClient from "@/components/Leaderboard/SeasonLeaderboardClient";
 import SeasonLeaderboardLoading from "@/app/seasons/leaderboard/loading";
 import Link from "next/link";
-import { Icon } from "@iconify/react";
+import { Icon } from "@/components/ui/IconWrapper";
 import SeasonHeader from "@/components/Leaderboard/SeasonLeaderboardHeader";
 import NitroSeasonsLeaderboardRailAd from "@/components/Ads/NitroSeasonsLeaderboardRailAd";
 import NitroSeasonsLeaderboardRightRailAd from "@/components/Ads/NitroSeasonsLeaderboardRightRailAd";

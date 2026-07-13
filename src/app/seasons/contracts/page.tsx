@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import SeasonContractsClient from "@/components/Seasons/SeasonContractsClient";
 import WeeklyContractsCountdown from "@/components/Seasons/WeeklyContractsCountdown";
 import ContractsLoading from "@/app/seasons/contracts/loading";
-import { Icon } from "@iconify/react";
+import { Icon } from "@/components/ui/IconWrapper";
 import {
   PUBLIC_API_URL,
   INVENTORY_API_URL,

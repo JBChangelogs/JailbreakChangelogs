@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Icon } from "@iconify/react";
+import { Icon } from "@/components/ui/IconWrapper";
 import DupeFinderDataStreamer from "@/components/Dupes/DupeFinderDataStreamer";
 import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";

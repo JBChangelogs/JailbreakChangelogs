@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Icon } from "@iconify/react";
+import { Icon } from "@/components/ui/IconWrapper";
 import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api/api";
 import CountUpNumber from "@/components/Home/CountUpNumber";
 
