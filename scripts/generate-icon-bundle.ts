@@ -15,7 +15,13 @@ import type { IconifyJSON } from "@iconify/types";
 
 const SRC_DIR = join(import.meta.dir, "..", "src");
 const OUT_FILE = join(SRC_DIR, "lib", "icon-bundle.generated.ts");
-const ICON_PATTERN = /icon="([a-z0-9-]+):([a-z0-9-]+)"/g;
+// Matches JSX attributes (icon="mdi:x") and object properties (icon: "mdi:x").
+// A missing set here fails the build, since these are unambiguously icons.
+const ICON_CONTEXT_PATTERN = /icon[=:]\s*["']([a-z0-9-]+):([a-z0-9-]+)["']/gi;
+// Matches any "set:name"-shaped string (ternaries, arrays, helper args), but
+// only prefixes with an installed @iconify-json package are treated as icons,
+// so lookalikes such as "og:image" never break the build.
+const ICON_STRING_PATTERN = /["']([a-z0-9-]+):([a-z0-9-]+)["']/g;
 
 function collectSourceFiles(dir: string): string[] {
   const files: string[] = [];
@@ -27,12 +33,23 @@ function collectSourceFiles(dir: string): string[] {
   return files;
 }
 
+const installedSets = new Set(
+  readdirSync(join(import.meta.dir, "..", "node_modules", "@iconify-json")),
+);
+
 const iconsByPrefix = new Map<string, Set<string>>();
+function addIcon(prefix: string, name: string) {
+  if (!iconsByPrefix.has(prefix)) iconsByPrefix.set(prefix, new Set());
+  iconsByPrefix.get(prefix)!.add(name);
+}
+
 for (const file of collectSourceFiles(SRC_DIR)) {
   const source = readFileSync(file, "utf8");
-  for (const [, prefix, name] of source.matchAll(ICON_PATTERN)) {
-    if (!iconsByPrefix.has(prefix)) iconsByPrefix.set(prefix, new Set());
-    iconsByPrefix.get(prefix)!.add(name);
+  for (const [, prefix, name] of source.matchAll(ICON_CONTEXT_PATTERN)) {
+    addIcon(prefix, name);
+  }
+  for (const [, prefix, name] of source.matchAll(ICON_STRING_PATTERN)) {
+    if (installedSets.has(prefix)) addIcon(prefix, name);
   }
 }
 
