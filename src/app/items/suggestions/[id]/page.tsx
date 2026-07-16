@@ -739,7 +739,7 @@ export default function ValueSuggestionDetailPage() {
               <div className="space-y-5">
                 {/* ── Hero ── */}
                 <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
-                  <div className="flex flex-col sm:flex-row">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap">
                     {/* Item image */}
                     <div
                       className="bg-secondary-bg relative w-full shrink-0 sm:w-56 lg:w-80"
@@ -914,7 +914,7 @@ export default function ValueSuggestionDetailPage() {
                       </div>
                     </div>
 
-                    {/* Video ad — 3rd column, desktop only */}
+                    {/* Video ad — wraps below details until there is room for a side column */}
                     <NitroValuesSuggestionDetailVideoPlayer />
                   </div>
                 </div>
