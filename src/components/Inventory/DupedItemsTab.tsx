@@ -7,6 +7,7 @@ import { InventoryItem } from "@/app/inventories/types";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import { Icon } from "../ui/IconWrapper";
+import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -120,57 +121,15 @@ export default function DupedItemsTab({
 
     // Filter by search term
     if (searchTerm.trim()) {
-      const normalize = (str: string) =>
-        str.toLowerCase().replace(/[^a-z0-9]/g, "");
-      const tokenize = (str: string) =>
-        str.toLowerCase().match(/[a-z0-9]+/g) || [];
-      const splitAlphaNum = (str: string) => {
-        return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
-      };
-
-      const searchNormalized = normalize(searchTerm);
-      const searchTokens = tokenize(searchTerm);
-      const searchAlphaNum = splitAlphaNum(searchTerm);
-
-      function isTokenSubsequence(
-        searchTokens: string[],
-        nameTokens: string[],
-      ) {
-        let i = 0,
-          j = 0;
-        while (i < searchTokens.length && j < nameTokens.length) {
-          if (nameTokens[j].includes(searchTokens[i])) {
-            i++;
-          }
-          j++;
-        }
-        return i === searchTokens.length;
-      }
-
       filtered = filtered.filter((item) => {
         const itemData = currentItemsData.find(
           (data) => data.id === item.item_id,
         );
         if (!itemData) return false;
 
-        const titleNormalized = normalize(item.title);
-        const categoryNormalized = normalize(item.categoryTitle);
-        const nameNormalized = normalize(itemData.name);
-        const typeNormalized = normalize(itemData.type);
-        const titleTokens = tokenize(item.title);
-        const titleAlphaNum = splitAlphaNum(item.title);
-        const nameTokens = tokenize(itemData.name);
-        const nameAlphaNum = splitAlphaNum(itemData.name);
-
-        return (
-          titleNormalized.includes(searchNormalized) ||
-          categoryNormalized.includes(searchNormalized) ||
-          nameNormalized.includes(searchNormalized) ||
-          typeNormalized.includes(searchNormalized) ||
-          isTokenSubsequence(searchTokens, titleTokens) ||
-          isTokenSubsequence(searchAlphaNum, titleAlphaNum) ||
-          isTokenSubsequence(searchTokens, nameTokens) ||
-          isTokenSubsequence(searchAlphaNum, nameAlphaNum)
+        return matchesTextSearch(
+          [item.title, item.categoryTitle, itemData.name, itemData.type],
+          searchTerm,
         );
       });
     }

@@ -27,6 +27,7 @@ import {
   handleImageError,
 } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { bangers } from "@/app/fonts";
 import { createLogger } from "@/services/logger";
 
@@ -404,14 +405,9 @@ export default function ProfileInventoryTab({
   }, [items]);
 
   const filteredItems = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
     return items.filter((item) => {
       if (typeFilter !== "all" && item.type !== typeFilter) return false;
-      if (!query) return true;
-      return (
-        item.name.toLowerCase().includes(query) ||
-        item.type.toLowerCase().includes(query)
-      );
+      return matchesTextSearch([item.name, item.type], searchQuery);
     });
   }, [items, searchQuery, typeFilter]);
 

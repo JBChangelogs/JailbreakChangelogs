@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { UserNetworthData } from "@/utils/api/api";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
@@ -151,12 +152,8 @@ const SearchableInventoryListSection = memo(
           : items.filter(
               (item) => item.type.toLowerCase() === normalizedTypeFilter,
             );
-      const query = deferredSearchTerm.trim().toLowerCase();
-      if (!query) return typeFiltered;
-      return typeFiltered.filter(
-        (item) =>
-          item.name.toLowerCase().includes(query) ||
-          item.type.toLowerCase().includes(query),
+      return typeFiltered.filter((item) =>
+        matchesTextSearch([item.name, item.type], deferredSearchTerm),
       );
     }, [deferredSearchTerm, items, typeFilter]);
 

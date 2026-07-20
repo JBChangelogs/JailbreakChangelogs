@@ -15,6 +15,7 @@ import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
 } from "@/utils/items/itemUnlockMetadata";
+import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 
 interface InventoryItemsProps {
   initialData: InventoryData;
@@ -630,50 +631,11 @@ export default function InventoryItems({
         if (excludedItemIds.has(itemData.id)) {
           return false;
         }
-        if (searchTerm) {
-          const normalize = (str: string) =>
-            str.toLowerCase().replace(/[^a-z0-9]/g, "");
-          const tokenize = (str: string) =>
-            str.toLowerCase().match(/[a-z0-9]+/g) || [];
-          const splitAlphaNum = (str: string) => {
-            return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) =>
-              s.toLowerCase(),
-            );
-          };
-
-          const searchNormalized = normalize(searchTerm);
-          const searchTokens = tokenize(searchTerm);
-          const searchAlphaNum = splitAlphaNum(searchTerm);
-
-          function isTokenSubsequence(
-            searchTokens: string[],
-            nameTokens: string[],
-          ) {
-            let i = 0,
-              j = 0;
-            while (i < searchTokens.length && j < nameTokens.length) {
-              if (nameTokens[j].includes(searchTokens[i])) {
-                i++;
-              }
-              j++;
-            }
-            return i === searchTokens.length;
-          }
-
-          const nameNormalized = normalize(itemData.name);
-          const typeNormalized = normalize(itemData.type);
-          const nameTokens = tokenize(itemData.name);
-          const nameAlphaNum = splitAlphaNum(itemData.name);
-
-          const matches =
-            nameNormalized.includes(searchNormalized) ||
-            typeNormalized.includes(searchNormalized) ||
-            isTokenSubsequence(searchTokens, nameTokens) ||
-            isTokenSubsequence(searchAlphaNum, nameAlphaNum);
-
-          if (!matches) {
-            return false;
-          }
+        if (
+          searchTerm &&
+          !matchesTextSearch([itemData.name, itemData.type], searchTerm)
+        ) {
+          return false;
         }
         if (selectedCategories.length > 0) {
           if (!selectedCategories.includes(itemData.type)) {
@@ -835,50 +797,11 @@ export default function InventoryItems({
       if (!itemData) return false;
 
       // Search filter
-      if (searchTerm) {
-        const normalize = (str: string) =>
-          str.toLowerCase().replace(/[^a-z0-9]/g, "");
-        const tokenize = (str: string) =>
-          str.toLowerCase().match(/[a-z0-9]+/g) || [];
-        const splitAlphaNum = (str: string) => {
-          return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) =>
-            s.toLowerCase(),
-          );
-        };
-
-        const searchNormalized = normalize(searchTerm);
-        const searchTokens = tokenize(searchTerm);
-        const searchAlphaNum = splitAlphaNum(searchTerm);
-
-        function isTokenSubsequence(
-          searchTokens: string[],
-          nameTokens: string[],
-        ) {
-          let i = 0,
-            j = 0;
-          while (i < searchTokens.length && j < nameTokens.length) {
-            if (nameTokens[j].includes(searchTokens[i])) {
-              i++;
-            }
-            j++;
-          }
-          return i === searchTokens.length;
-        }
-
-        const nameNormalized = normalize(itemData.name);
-        const typeNormalized = normalize(itemData.type);
-        const nameTokens = tokenize(itemData.name);
-        const nameAlphaNum = splitAlphaNum(itemData.name);
-
-        const matches =
-          nameNormalized.includes(searchNormalized) ||
-          typeNormalized.includes(searchNormalized) ||
-          isTokenSubsequence(searchTokens, nameTokens) ||
-          isTokenSubsequence(searchAlphaNum, nameAlphaNum);
-
-        if (!matches) {
-          return false;
-        }
+      if (
+        searchTerm &&
+        !matchesTextSearch([itemData.name, itemData.type], searchTerm)
+      ) {
+        return false;
       }
 
       // Category filter

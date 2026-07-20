@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import {
@@ -327,12 +328,11 @@ export default function OGNotificationSheet({
   const filteredItems = useMemo(() => {
     return items
       .filter((item) => {
-        const matchesSearch =
-          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.type.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesType =
           selectedType === "all" || item.type === selectedType;
-        return matchesSearch && matchesType;
+        return (
+          matchesType && matchesTextSearch([item.name, item.type], searchQuery)
+        );
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [items, searchQuery, selectedType]);

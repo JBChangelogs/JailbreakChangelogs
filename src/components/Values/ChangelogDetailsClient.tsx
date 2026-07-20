@@ -24,6 +24,7 @@ import {
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { formatFullValue, formatPrice } from "@/utils/trading/values";
+import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
@@ -311,11 +312,11 @@ export default function ChangelogDetailsClient({
 
           const searchLower = searchQuery.trim().toLowerCase();
 
-          // Search in item name
-          if (change.item.name.toLowerCase().includes(searchLower)) return true;
-
-          // Search in item type
-          if (change.item.type.toLowerCase().includes(searchLower)) return true;
+          // Search in item name/type
+          if (
+            matchesTextSearch([change.item.name, change.item.type], searchQuery)
+          )
+            return true;
 
           // Search in changed_by name
           if (change.changed_by.toLowerCase().includes(searchLower))

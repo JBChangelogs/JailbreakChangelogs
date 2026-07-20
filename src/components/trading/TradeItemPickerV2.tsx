@@ -13,6 +13,7 @@ import { formatCurrencyValue as formatCompactCurrencyValue } from "@/utils/tradi
 import { Pagination } from "@/components/ui/Pagination";
 import { FilterSort, ValueSort } from "@/types";
 import { filterByValueSort, sortByValueSort } from "@/utils/trading/values";
+import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -254,14 +255,9 @@ export default function TradeItemPickerV2({
   }, [selectedItems]);
 
   const filteredItems = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
     const tradeableItems = items.filter((item) => item.tradable === 1);
     const base = tradeableItems.filter((item) => {
-      const matchesSearch = query
-        ? item.name.toLowerCase().includes(query) ||
-          item.type.toLowerCase().includes(query)
-        : true;
-      if (!matchesSearch) return false;
+      if (!matchesTextSearch([item.name, item.type], searchQuery)) return false;
 
       switch (filterSort) {
         case "name-limited-items":

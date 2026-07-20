@@ -17,6 +17,7 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { formatFullValue } from "@/utils/trading/values";
+import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -236,8 +237,7 @@ function SuggestionForm({
   const filteredItems = items.filter(
     (item) =>
       (item.tradable === 1 || item.id === 587) &&
-      (item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
-        item.type.toLowerCase().includes(itemSearch.toLowerCase())),
+      matchesTextSearch([item.name, item.type], itemSearch),
   );
 
   const isAutoCalcItem = selectedItem?.id === 587;

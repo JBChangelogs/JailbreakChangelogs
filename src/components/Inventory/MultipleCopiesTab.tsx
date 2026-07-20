@@ -10,6 +10,7 @@ import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
 import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import { getCategoryIcon, getCategoryColor } from "@/utils/items/categoryIcons";
+import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -288,43 +289,12 @@ export default function DuplicatesTab({
       return items;
     }
 
-    const normalize = (str: string) =>
-      str.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const tokenize = (str: string) =>
-      str.toLowerCase().match(/[a-z0-9]+/g) || [];
-    const splitAlphaNum = (str: string) => {
-      return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
-    };
-
-    const searchNormalized = normalize(debouncedLeaderboardSearch);
-    const searchTokens = tokenize(debouncedLeaderboardSearch);
-    const searchAlphaNum = splitAlphaNum(debouncedLeaderboardSearch);
-
-    function isTokenSubsequence(searchTokens: string[], nameTokens: string[]) {
-      let i = 0,
-        j = 0;
-      while (i < searchTokens.length && j < nameTokens.length) {
-        if (nameTokens[j].includes(searchTokens[i])) {
-          i++;
-        }
-        j++;
-      }
-      return i === searchTokens.length;
-    }
-
-    return items.filter((item) => {
-      const titleNormalized = normalize(item.title);
-      const categoryNormalized = normalize(item.category);
-      const titleTokens = tokenize(item.title);
-      const titleAlphaNum = splitAlphaNum(item.title);
-
-      return (
-        titleNormalized.includes(searchNormalized) ||
-        categoryNormalized.includes(searchNormalized) ||
-        isTokenSubsequence(searchTokens, titleTokens) ||
-        isTokenSubsequence(searchAlphaNum, titleAlphaNum)
-      );
-    });
+    return items.filter((item) =>
+      matchesTextSearch(
+        [item.title, item.category],
+        debouncedLeaderboardSearch,
+      ),
+    );
   }, [
     multiCopyStats.allDuplicateItems,
     debouncedLeaderboardSearch,
@@ -366,55 +336,13 @@ export default function DuplicatesTab({
 
     // Filter by search term
     if (debouncedSearchTerm.trim()) {
-      const normalize = (str: string) =>
-        str.toLowerCase().replace(/[^a-z0-9]/g, "");
-      const tokenize = (str: string) =>
-        str.toLowerCase().match(/[a-z0-9]+/g) || [];
-      const splitAlphaNum = (str: string) => {
-        return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
-      };
-
-      const searchNormalized = normalize(debouncedSearchTerm);
-      const searchTokens = tokenize(debouncedSearchTerm);
-      const searchAlphaNum = splitAlphaNum(debouncedSearchTerm);
-
-      function isTokenSubsequence(
-        searchTokens: string[],
-        nameTokens: string[],
-      ) {
-        let i = 0,
-          j = 0;
-        while (i < searchTokens.length && j < nameTokens.length) {
-          if (nameTokens[j].includes(searchTokens[i])) {
-            i++;
-          }
-          j++;
-        }
-        return i === searchTokens.length;
-      }
-
       filtered = filtered.filter((item) => {
         const itemData = itemDataById.get(item.item_id);
         if (!itemData) return false;
 
-        const titleNormalized = normalize(item.title);
-        const categoryNormalized = normalize(item.categoryTitle);
-        const nameNormalized = normalize(itemData.name);
-        const typeNormalized = normalize(itemData.type);
-        const titleTokens = tokenize(item.title);
-        const titleAlphaNum = splitAlphaNum(item.title);
-        const nameTokens = tokenize(itemData.name);
-        const nameAlphaNum = splitAlphaNum(itemData.name);
-
-        return (
-          titleNormalized.includes(searchNormalized) ||
-          categoryNormalized.includes(searchNormalized) ||
-          nameNormalized.includes(searchNormalized) ||
-          typeNormalized.includes(searchNormalized) ||
-          isTokenSubsequence(searchTokens, titleTokens) ||
-          isTokenSubsequence(searchAlphaNum, titleAlphaNum) ||
-          isTokenSubsequence(searchTokens, nameTokens) ||
-          isTokenSubsequence(searchAlphaNum, nameAlphaNum)
+        return matchesTextSearch(
+          [item.title, item.categoryTitle, itemData.name, itemData.type],
+          debouncedSearchTerm,
         );
       });
     }
