@@ -555,7 +555,7 @@ addCollection({
       body: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/>',
     },
   },
-  lastModified: 1783920389,
+  lastModified: 1784351942,
   width: 24,
   height: 24,
 });
@@ -603,7 +603,7 @@ addCollection({
     "close-rounded": {
       body: '<path fill="currentColor" d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"/>',
     },
-    backup: {
+    "cloud-upload": {
       body: '<path fill="currentColor" d="M11 20H6.5q-2.275 0-3.887-1.575T1 14.575q0-1.95 1.175-3.475T5.25 9.15q.625-2.3 2.5-3.725T12 4q2.925 0 4.963 2.038T19 11q1.725.2 2.863 1.488T23 15.5q0 1.875-1.312 3.188T18.5 20H13v-7.15l1.6 1.55L16 13l-4-4l-4 4l1.4 1.4l1.6-1.55z"/>',
     },
     "content-copy-rounded": {
@@ -745,8 +745,7 @@ addCollection({
       body: '<path fill="currentColor" d="M2.7 17.625q-.3-.3-.288-.712t.288-.688l5.275-5.35Q8.55 10.3 9.4 10.3t1.425.575l2.575 2.6l5.2-5.15H17q-.425 0-.712-.288T16 7.326t.288-.712t.712-.288h4q.425 0 .713.288t.287.712v4q0 .425-.288.713t-.712.287t-.712-.287t-.288-.713v-1.6L14.825 14.9q-.575.575-1.425.575t-1.425-.575L9.4 12.325l-5.3 5.3q-.275.275-.7.275t-.7-.275"/>',
     },
   },
-  lastModified: 1783920447,
-  aliases: { "cloud-upload": { parent: "backup" } },
+  lastModified: 1784526060,
   width: 24,
   height: 24,
 });
@@ -1023,7 +1022,7 @@ addCollection({
       body: '<path fill="currentColor" d="M18.926 23.998L0 18.892L5.075.002L24 5.108ZM15.348 10.09l-5.282-1.453l-1.414 5.273l5.282 1.453z"/>',
     },
   },
-  lastModified: 1783920567,
+  lastModified: 1784468941,
   width: 24,
   height: 24,
 });
@@ -1068,7 +1067,7 @@ addCollection({
       body: '<path fill="#345d9d" d="m5.734 15.611l-1.609.63l.776-3.116l1.62-.652L8.86 3h5.772l-1.71 6.975l1.586-.642l-.765 3.083l-1.598.653l-.956 4.074h8.685L18.895 21H4.406z"/>',
     },
   },
-  lastModified: 1782882270,
+  lastModified: 1784091740,
   width: 24,
   height: 24,
 });
