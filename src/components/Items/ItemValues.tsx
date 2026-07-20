@@ -36,9 +36,8 @@ function ItemValues({
   recentChanges,
   placementLimit,
 }: ItemValuesProps) {
-  const isRobuxPrice = price.toLowerCase().includes("robux");
-  const isUSDPrice = price.includes("$");
   const hasNoPrice = price === "N/A";
+  const priceParts = hasNoPrice ? [] : formatPrice(price).split(" / ");
   const cashChange = getValueChange(recentChanges, "cash_value");
   const dupedChange = getValueChange(recentChanges, "duped_value");
 
@@ -107,28 +106,49 @@ function ItemValues({
               Original Price
             </h4>
           </div>
-          <div className="flex items-center gap-2">
-            {!hasNoPrice &&
-              (isRobuxPrice ? (
-                <Image
-                  src="/assets/icons/Robux_Icon.webp"
-                  alt="Robux"
-                  width={20}
-                  height={20}
-                  className="h-6 w-6"
-                />
-              ) : (
-                !isUSDPrice &&
-                price.toLowerCase() !== "free" && (
-                  <Icon
-                    icon="heroicons:banknotes"
-                    className="text-primary-text h-6 w-6"
-                  />
-                )
-              ))}
-            <p className="text-primary-text text-3xl font-bold">
-              {formatPrice(price)}
-            </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {hasNoPrice ? (
+              <p className="text-primary-text text-3xl font-bold">
+                {formatPrice(price)}
+              </p>
+            ) : (
+              priceParts.map((part, index) => {
+                const partIsRobux = part.toLowerCase().includes("robux");
+                const partIsUSD = part.includes("$");
+                const partIsFree = part.toLowerCase() === "free";
+                return (
+                  <React.Fragment key={index}>
+                    {index > 0 && (
+                      <span className="text-primary-text text-3xl font-bold">
+                        /
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-2">
+                      {partIsRobux ? (
+                        <Image
+                          src="/assets/icons/Robux_Icon.webp"
+                          alt="Robux"
+                          width={20}
+                          height={20}
+                          className="h-6 w-6"
+                        />
+                      ) : (
+                        !partIsUSD &&
+                        !partIsFree && (
+                          <Icon
+                            icon="heroicons:banknotes"
+                            className="text-primary-text h-6 w-6"
+                          />
+                        )
+                      )}
+                      <span className="text-primary-text text-3xl font-bold">
+                        {part}
+                      </span>
+                    </span>
+                  </React.Fragment>
+                );
+              })
+            )}
           </div>
         </div>
 

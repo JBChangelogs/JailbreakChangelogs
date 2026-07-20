@@ -877,6 +877,14 @@ export const formatFullValue = (value: string | null): string => {
 export const formatPrice = (price: string | null): string => {
   if (price === null || price === "N/A") return "N/A";
 
+  // Handle dual-currency prices (e.g., "Free / 499 Robux", "100k / 50 Robux")
+  if (price.includes(" / ")) {
+    return price
+      .split(" / ")
+      .map((part) => formatPricePart(part))
+      .join(" / ");
+  }
+
   // Handle price ranges (e.g., "100k - 10m")
   if (price.includes(" - ")) {
     const [minPrice, maxPrice] = price.split(" - ");
@@ -887,6 +895,16 @@ export const formatPrice = (price: string | null): string => {
 
   // Handle single prices
   return formatSinglePrice(price);
+};
+
+// Formats one side of a dual-currency price, preserving trailing labels like " Robux"
+const formatPricePart = (part: string): string => {
+  const trimmed = part.trim();
+  const match = trimmed.match(/^([\d.,]+[kmb]?)(\s.*)?$/i);
+  if (!match) return formatSinglePrice(trimmed);
+
+  const [, numeric, rest = ""] = match;
+  return `${formatSinglePrice(numeric)}${rest}`;
 };
 
 const formatSinglePrice = (price: string): string => {
