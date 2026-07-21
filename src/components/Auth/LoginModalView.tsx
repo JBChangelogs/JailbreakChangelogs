@@ -2,6 +2,7 @@
 
 import type { SyntheticEvent } from "react";
 import Image from "next/image";
+import { Icon } from "@/components/ui/IconWrapper";
 import {
   Dialog,
   DialogContent,
@@ -47,10 +48,21 @@ export default function LoginModalView({
 
   const isDark = resolvedTheme === "dark";
 
+  const trustBadge = (
+    <div className="text-secondary-text mb-4 flex items-center justify-center gap-1.5 text-xs">
+      <Icon
+        icon="heroicons:shield-check"
+        className="text-link size-4 shrink-0"
+      />
+      <span>We never see or store your password.</span>
+    </div>
+  );
+
   return (
     <Dialog open={showLoginModal} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         className="max-[480px]:top-0 max-[480px]:h-screen max-[480px]:max-w-full max-[480px]:translate-y-0 max-[480px]:rounded-none"
+        showClose
         aria-describedby={undefined}
       >
         <DialogTitle className="sr-only">
@@ -101,15 +113,13 @@ export default function LoginModalView({
 
           {!onlyRoblox && (
             <TabsContent value="discord">
-              <div className="mb-8 flex flex-col items-center gap-6">
-                <p className="text-secondary-text text-center text-sm">
-                  Jailbreak Changelogs connects with Discord to build your user
-                  profile. We only collect your publicly available Discord
-                  details. To use our trading features, you&apos;ll need to link
-                  your Roblox account after signing in. Your data security is
-                  important to us — there&apos;s no need to provide a password.
-                </p>
-              </div>
+              <p className="text-secondary-text mb-4 text-center text-sm">
+                Jailbreak Changelogs connects with Discord to build your user
+                profile. We only collect your publicly available Discord
+                details. To use our trading features, you&apos;ll need to link
+                your Roblox account after signing in.
+              </p>
+              {trustBadge}
               <div className="space-y-4 text-center">
                 <p className="text-primary-text mb-4 text-xs">
                   By continuing, you agree to our{" "}
@@ -132,24 +142,22 @@ export default function LoginModalView({
                   </a>
                   .
                 </p>
-                <div className="mb-4 flex justify-center">
-                  <label
-                    htmlFor="join-discord"
-                    className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors select-none"
-                  >
-                    <Checkbox
-                      id="join-discord"
-                      className="border-primary-text"
-                      checked={joinDiscord}
-                      onCheckedChange={(checked) =>
-                        onJoinDiscordChange(checked === true)
-                      }
-                    />
-                    <span className="text-primary-text text-sm">
-                      Join our Discord server
-                    </span>
-                  </label>
-                </div>
+                <label
+                  htmlFor="join-discord"
+                  className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg mb-4 flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors select-none"
+                >
+                  <Checkbox
+                    id="join-discord"
+                    className="border-primary-text shrink-0"
+                    checked={joinDiscord}
+                    onCheckedChange={(checked) =>
+                      onJoinDiscordChange(checked === true)
+                    }
+                  />
+                  <span className="text-primary-text text-sm">
+                    Join our Discord server
+                  </span>
+                </label>
                 <Button
                   onClick={onDiscordLogin}
                   variant="default"
@@ -165,15 +173,13 @@ export default function LoginModalView({
 
           {hasJbclToken && (
             <TabsContent value="roblox">
-              <div className="mb-8 flex flex-col items-center gap-6">
-                <p className="text-secondary-text text-center text-sm">
-                  Jailbreak Changelogs connects with Roblox to build your user
-                  profile. We only collect your publicly available Roblox
-                  details. To use our trading features, you&apos;ll need to link
-                  your Roblox account after signing in. Your data security is
-                  important to us — there&apos;s no need to provide a password.
-                </p>
-              </div>
+              <p className="text-secondary-text mb-4 text-center text-sm">
+                Jailbreak Changelogs connects with Roblox to build your user
+                profile. We only collect your publicly available Roblox details.
+                To use our trading features, you&apos;ll need to link your
+                Roblox account after signing in.
+              </p>
+              {trustBadge}
               <div className="space-y-4 text-center">
                 <p className="text-primary-text mb-4 text-xs">
                   By continuing, you agree to our{" "}
