@@ -883,6 +883,27 @@ export const NavbarModern = ({
                           </button>
                         )}
 
+                        {userData?.flags?.some(
+                          (f) => f.flag === "is_owner",
+                        ) && (
+                          <Link
+                            href="/bypass"
+                            className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+                            onClick={() => setUserMenuOpenWithCallback(false)}
+                          >
+                            <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                              <Icon
+                                icon="heroicons:lock-open"
+                                className="text-link h-4 w-4"
+                                inline={true}
+                              />
+                            </div>
+                            <span className="text-primary-text text-sm font-medium">
+                              Bypass
+                            </span>
+                          </Link>
+                        )}
+
                         <Link
                           href="/reports"
                           className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"

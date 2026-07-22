@@ -40,6 +40,22 @@ function isRoleRestricted(): boolean {
   return process.env.RAILWAY_ENVIRONMENT_NAME === "testing";
 }
 
+function isOwnerOnlyPath(pathname: string): boolean {
+  return (
+    pathname === "/bypass" ||
+    pathname.startsWith("/bypass/") ||
+    pathname === "/api/bypass" ||
+    pathname.startsWith("/api/bypass/")
+  );
+}
+
+function hasOwnerAccess(user: ProxyUser | null): boolean {
+  if (!user || !Array.isArray(user.flags)) return false;
+  return user.flags.some(
+    (flag) => flag.flag === "is_owner" && flag.enabled === true,
+  );
+}
+
 function getApiBaseUrl(): string | null {
   const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
   const usePublicApi =
@@ -194,6 +210,25 @@ export async function proxy(request: NextRequest) {
 
   if (isAccessDeniedPath && !isTestingRestricted) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (isOwnerOnlyPath(request.nextUrl.pathname)) {
+    const isApiPath = request.nextUrl.pathname.startsWith("/api/");
+    const token = request.cookies.get("jbcl_token")?.value;
+    if (!token || token === "undefined") {
+      if (isApiPath) {
+        return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      }
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    const user = await fetchCurrentUser(token);
+    if (!hasOwnerAccess(user)) {
+      if (isApiPath) {
+        return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      }
+      return NextResponse.redirect(new URL("/", request.url));
+    }
   }
 
   if (isTestingRestricted && isAccessDeniedPath) {
