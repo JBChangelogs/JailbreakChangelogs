@@ -18,7 +18,7 @@
     "format:check": "oxfmt --check src",
     "release": "bun --env-file=.env.local --bun release-it",
     "clean": "rm -rf .next node_modules && bun install",
-    "bump-nextjs": "bunx @next/codemod upgrade",
+    "bump-nextjs": "bunx @next/codemod upgrade latest",
     "prepare": "husky"
   },
   "dependencies": {
