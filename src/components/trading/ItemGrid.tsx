@@ -1,9 +1,8 @@
 import React from "react";
 import Image from "next/image";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import { Icon } from "@/components/ui/IconWrapper";
 import { TradeItem } from "@/types/trading";
 import { handleImageError, isVideoItem, getVideoPath } from "@/utils/ui/images";
-import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
 import {
   getTradeItemImagePath,
   isCustomTradeItem,
@@ -15,6 +14,7 @@ interface ItemGridProps {
   title: string;
   showTitle?: boolean;
   onRemove?: (item: TradeItem) => void;
+  onAdd?: (item: TradeItem) => void;
   disableInteraction?: boolean;
   variant?: "default" | "compact";
   onEmptyActivate?: () => void;
@@ -99,6 +99,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
   title,
   showTitle = true,
   onRemove,
+  onAdd,
   disableInteraction = false,
   variant = "default",
   onEmptyActivate,
@@ -130,10 +131,10 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
     return (
       <button
         type="button"
-        className={`w-full rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor} ${
+        className={`bg-tertiary-bg w-full rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor} ${
           disableInteraction
             ? "cursor-not-allowed opacity-60"
-            : "hover:bg-secondary-bg cursor-pointer"
+            : "cursor-pointer"
         }`}
         onClick={activateAdd}
         onKeyDown={(e) => {
@@ -191,7 +192,6 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
               ? getDisplayName(originalItem)
               : item.name;
             const isCustom = isCustomTradeItem(item);
-            const shouldShowTooltip = !isCustom;
 
             const rawValue = item.isDuped ? item.duped_value : item.cash_value;
             const hasValue = rawValue != null && rawValue !== "N/A";
@@ -199,44 +199,77 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
               ? formatTradeValue(parseTradeValue(rawValue) * item.count)
               : "N/A";
 
+            const stepperButtonClass =
+              "flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/70 text-white transition-colors hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-40";
+
             const content = (
-              <button
-                type="button"
-                onClick={() => {
-                  if (disableInteraction || !onRemove) return;
-                  onRemove(item);
-                }}
-                className="block w-full text-left"
-              >
+              <div className="block w-full text-left">
                 {/* Image row */}
-                <div
-                  className={`relative aspect-video overflow-hidden rounded-lg ${
-                    isCustom ? "bg-tertiary-bg" : ""
-                  }`}
-                >
-                  {isVideoItem(item.name) ? (
-                    <video
-                      src={getVideoPath(item.type, item.name)}
-                      className="h-full w-full object-cover"
-                      muted
-                      playsInline
-                      loop
-                      autoPlay
-                    />
-                  ) : (
-                    <Image
-                      src={getTradeItemImagePath(item, true)}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      draggable={false}
-                      onError={handleImageError}
-                    />
-                  )}
+                <div className="relative">
+                  <div
+                    className={`relative aspect-video overflow-hidden rounded-lg ${
+                      isCustom ? "bg-tertiary-bg" : ""
+                    }`}
+                  >
+                    {isVideoItem(item.name) ? (
+                      <video
+                        src={getVideoPath(item.type, item.name)}
+                        className="h-full w-full object-cover"
+                        muted
+                        playsInline
+                        loop
+                        autoPlay
+                      />
+                    ) : (
+                      <Image
+                        src={getTradeItemImagePath(item, true)}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        draggable={false}
+                        onError={handleImageError}
+                      />
+                    )}
+                  </div>
+                  {/* Hover/focus reveal on devices with real hover; always shown on touch
+                      (hover:none), since there's no hover gesture to reveal it there. */}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-2 rounded-b-lg bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-1.5 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-has-[:focus-visible]:pointer-events-auto group-has-[:focus-visible]:opacity-100 [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:opacity-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (disableInteraction || !onRemove) return;
+                        onRemove(item);
+                      }}
+                      disabled={disableInteraction || !onRemove}
+                      className={stepperButtonClass}
+                      aria-label={
+                        item.count > 1
+                          ? `Remove one ${displayName}`
+                          : `Remove ${displayName}`
+                      }
+                    >
+                      <Icon icon="heroicons:minus" className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="min-w-6 rounded-full bg-black/70 px-1.5 py-0.5 text-center text-xs font-bold text-white">
+                      {item.count}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (disableInteraction || !onAdd) return;
+                        onAdd(item);
+                      }}
+                      disabled={disableInteraction || !onAdd}
+                      className={stepperButtonClass}
+                      aria-label={`Add another ${displayName}`}
+                    >
+                      <Icon icon="heroicons:plus" className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Name row */}
-                <p className="text-primary-text hover:text-link mt-1.5 line-clamp-2 text-xs font-medium transition-colors">
+                <p className="text-primary-text mt-1.5 line-clamp-2 text-xs font-medium">
                   {displayName}
                 </p>
 
@@ -270,36 +303,17 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                     </span>
                   )}
                 </div>
-              </button>
+              </div>
             );
 
             return (
               <div
                 key={`${item.id}:${item.name}:${item.isDuped ? "duped" : "clean"}:${item.isOG ? "og" : "regular"}`}
                 className={`group relative ${
-                  disableInteraction
-                    ? "cursor-not-allowed opacity-60"
-                    : onRemove
-                      ? "cursor-pointer"
-                      : shouldShowTooltip
-                        ? "cursor-help"
-                        : "cursor-default"
+                  disableInteraction ? "cursor-not-allowed opacity-60" : ""
                 }`}
               >
-                {shouldShowTooltip ? (
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>{content}</TooltipTrigger>
-                    <TradeItemHoverTooltip
-                      item={{
-                        ...item,
-                        name: displayName,
-                        base_name: originalItem?.data?.name || item.name,
-                      }}
-                    />
-                  </Tooltip>
-                ) : (
-                  content
-                )}
+                {content}
               </div>
             );
           })}

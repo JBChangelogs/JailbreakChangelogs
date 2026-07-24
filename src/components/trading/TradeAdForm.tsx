@@ -600,7 +600,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       getTradeItemIdentifier(item) === getTradeItemIdentifier(itemToRemove);
 
     if (side === "offering") {
-      const index = offeringItems.findIndex(removePredicate);
+      // Remove the most recently added matching instance (not the first),
+      // so the item's original position in the grid doesn't shift when its
+      // count is decremented.
+      const index = offeringItems.findLastIndex(removePredicate);
       if (index !== -1) {
         const newOfferingItems = [
           ...offeringItems.slice(0, index),
@@ -611,7 +614,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         syncItemsToPreference(newOfferingItems, requestingItems);
       }
     } else {
-      const index = requestingItems.findIndex(removePredicate);
+      const index = requestingItems.findLastIndex(removePredicate);
       if (index !== -1) {
         const newRequestingItems = [
           ...requestingItems.slice(0, index),
@@ -1207,7 +1210,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             >
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-secondary-text font-medium">Offering</h3>
+                  <h3 className="text-status-success text-xs font-medium tracking-wide uppercase">
+                    Offering
+                  </h3>
                   <span className="text-secondary-text/70 text-sm">
                     ({offeringItems.length})
                   </span>
@@ -1234,6 +1239,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 title="Offering"
                 showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "offering")}
+                onAdd={(item) => handleAddItem(item, "offering")}
                 disableInteraction={submitting}
                 onEmptyActivate={() => setPickerActiveSide("offering")}
                 emptyScrollTargetSelector='[data-component="trade-ad-item-picker"]'
@@ -1249,7 +1255,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             >
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-secondary-text font-medium">
+                  <h3 className="text-status-error text-xs font-medium tracking-wide uppercase">
                     Requesting
                   </h3>
                   <span className="text-secondary-text/70 text-sm">
@@ -1278,6 +1284,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 title="Requesting"
                 showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "requesting")}
+                onAdd={(item) => handleAddItem(item, "requesting")}
                 disableInteraction={submitting}
                 onEmptyActivate={() => setPickerActiveSide("requesting")}
                 emptyScrollTargetSelector='[data-component="trade-ad-item-picker"]'
