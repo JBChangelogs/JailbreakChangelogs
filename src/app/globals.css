@@ -292,7 +292,10 @@
   --color-button-info-hover: hsl(210, 80%, 26%);
   --color-button-info-active: hsl(218, 55%, 28%);
   --color-button-info-disabled: hsl(214, 8%, 25%);
-  --color-button-success: hsl(155, 70%, 48%);
+  /* Same brightness issue as status-success below: green reads far brighter
+     than other hues at equal lightness, so keep this as dark as the regular
+     dark theme instead of "brightening for pure black contrast". */
+  --color-button-success: hsl(155, 65%, 30%);
   --color-button-success-hover: hsl(155, 65%, 40%);
   --color-button-danger: hsl(0, 95%, 72%);
   --color-button-danger-hover: hsl(0, 90%, 64%);
@@ -312,7 +315,10 @@
   --color-form-success: hsl(155, 61%, 44%);
 
   /* Status Colors - brightened from dark for pure black contrast */
-  --color-status-success: hsl(155, 65%, 45%);
+  /* status-success stays as dark as the regular dark theme (not brightened):
+     green reads far brighter than other hues at the same HSL lightness, so a
+     brightened value here made white badge/button text unreadable on top of it. */
+  --color-status-success: hsl(155, 61%, 30%);
   --color-status-success-vibrant: hsl(120, 61%, 50%);
   --color-status-warning: hsl(38, 100%, 61%);
   --color-status-error: hsl(0, 81%, 55%);

@@ -9,35 +9,29 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 interface TradeSidePanelProps {
   side: "offering" | "requesting";
   items: TradeItem[];
+  catalogItems: TradeItem[];
   onRemoveItem: (instanceId: string) => void;
+  onDuplicateItem: (item: TradeItem) => void;
   onValueTypeChange: (
     id: number,
     valueType: "cash" | "duped",
     instanceId?: string,
   ) => void;
-  getSelectedValueString: (item: TradeItem) => string;
   getSelectedValueType: (item: TradeItem) => "cash" | "duped";
+  getSelectedValue: (item: TradeItem) => number;
   onMirror: () => void;
-  onEmptyActivate?: () => void;
-  totals: {
-    cashValue: string;
-    breakdown: {
-      clean: { count: number; formatted: string };
-      duped: { count: number; formatted: string };
-    };
-  };
 }
 
 export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
   side,
   items,
+  catalogItems,
   onRemoveItem,
+  onDuplicateItem,
   onValueTypeChange,
-  getSelectedValueString,
   getSelectedValueType,
+  getSelectedValue,
   onMirror,
-  onEmptyActivate,
-  totals,
 }) => {
   const isOffering = side === "offering";
   const sideColor = isOffering ? "status-success" : "status-error";
@@ -47,12 +41,14 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
     <div
       className={`border-${sideColor} bg-secondary-bg flex-1 rounded-lg border p-4 transition-colors`}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-secondary-text font-medium">{sideLabel}</h3>
-          <span className="text-secondary-text/70 text-sm">
-            ({items.length})
-          </span>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-baseline gap-2">
+          <h3
+            className={`text-${sideColor} text-xs font-medium tracking-wide uppercase`}
+          >
+            {sideLabel}
+          </h3>
+          <span className="text-secondary-text text-sm">({items.length})</span>
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -68,29 +64,14 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
       </div>
       <CalculatorItemGrid
         items={items}
+        catalogItems={catalogItems}
         onRemove={onRemoveItem}
+        onDuplicate={onDuplicateItem}
         onValueTypeChange={onValueTypeChange}
-        getSelectedValueString={getSelectedValueString}
         getSelectedValueType={getSelectedValueType}
+        getSelectedValue={getSelectedValue}
         side={side}
-        onEmptyActivate={onEmptyActivate}
       />
-      <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
-        <span>
-          Total:{" "}
-          <span className="text-secondary-text font-bold">
-            {totals.cashValue}
-          </span>
-        </span>
-        <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-          {totals.breakdown.clean.count} clean •{" "}
-          {totals.breakdown.clean.formatted}
-        </span>
-        <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-          {totals.breakdown.duped.count} duped •{" "}
-          {totals.breakdown.duped.formatted}
-        </span>
-      </div>
     </div>
   );
 };

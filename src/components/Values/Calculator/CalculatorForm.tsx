@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useQueryState } from "nuqs";
+import React, { useState, useEffect, useRef } from "react";
 import { TradeItem } from "@/types/trading";
 import TradeItemPickerV2 from "../../trading/TradeItemPickerV2";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -28,12 +27,9 @@ import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCach
 
 // Import extracted components and utilities
 import { parseValueString, formatTotalValue } from "./calculatorUtils";
-import { CalculatorValueComparison } from "./CalculatorValueComparison";
 import { ClearConfirmModal } from "./ClearConfirmModal";
-import { ActionButtons } from "./ActionButtons";
+import { TradeSummaryBar } from "./TradeSummaryBar";
 import { TradeSidePanel } from "./TradeSidePanel";
-import { SimilarItemsTab } from "./SimilarItemsTab";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScanTradeFromImage } from "./ScanTradeFromImage";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
@@ -77,25 +73,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const [pickerActiveSide, setPickerActiveSide] = useState<
     "offering" | "requesting"
   >("offering");
-  const [tabParam, setTabParam] = useQueryState("calc", {
-    defaultValue: "",
-    history: "push",
-    shallow: true,
-  });
-  const activeTab = useMemo<"items" | "values" | "similar">(() => {
-    if (tabParam === "comparison") return "values";
-    if (tabParam === "similar") return "similar";
-    return "items";
-  }, [tabParam]);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
-  const [totalBasis, setTotalBasis] = useState<"offering" | "requesting">(
-    "offering",
-  );
-  const [offeringSimilarItemsRange, setOfferingSimilarItemsRange] =
-    useState<number>(2_500_000);
-  const [requestingSimilarItemsRange, setRequestingSimilarItemsRange] =
-    useState<number>(2_500_000);
 
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
@@ -113,17 +92,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const requestingItemsRef = useRef<TradeItem[]>([]);
   // Prevents re-broadcasting when items are applied from a WS event (avoids sync loop)
   const appliedFromWSRef = useRef(false);
-  // Skip the sync useEffect on the very first render (items start empty, nothing to sync)
-  const syncMountedRef = useRef(false);
+  // Tracks whether either side has ever held items, so the "cleared" branch of the
+  // sync effect only fires on a real had-items-then-emptied transition — never on
+  // mount. A boolean "skip the first render" ref is not safe here: React Strict
+  // Mode's dev-only mount/cleanup/remount replay keeps ref values across the
+  // replay, so a "first render" latch sees the replayed run as "not first" while
+  // items are still empty, spuriously firing the clear+broadcast-delete branch.
+  const hadItemsRef = useRef(false);
 
   const robloxId = (user?.roblox_id ?? "").trim();
   const hasValidRobloxId = /^\d+$/.test(robloxId);
   const canLoadInventory = Boolean(isAuthenticated && hasValidRobloxId);
-
-  const focusItemsForSide = (side: "offering" | "requesting") => {
-    setPickerActiveSide(side);
-    void setTabParam(null);
-  };
 
   useEffect(() => {
     offeringItemsRef.current = offeringItems;
@@ -355,16 +334,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     };
   }, [itemsInputMode, canLoadInventory, robloxId, initialItems]);
 
-  const DYNAMIC_MAX_VALUE = useMemo(() => {
-    return initialItems.reduce((currentMax, item) => {
-      if (item.tradable === 1) {
-        const val = parseValueString(item.cash_value);
-        return val > currentMax ? val : currentMax;
-      }
-      return currentMax;
-    }, 10_000_000);
-  }, [initialItems]);
-
   useLockBodyScroll(showClearConfirmModal);
 
   /**
@@ -434,12 +403,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleTabChange = (tab: "items" | "values" | "similar") => {
-    if (tab === "values") void setTabParam("comparison");
-    else if (tab === "similar") void setTabParam("similar");
-    else void setTabParam(null);
-  };
-
   /**
    * Persist current selections to localStorage so users can resume later.
    * Schema: { offering: TradeItem[], requesting: TradeItem[] }
@@ -476,20 +439,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   };
 
   useEffect(() => {
-    // Skip the initial mount — items start empty, nothing to persist or broadcast
-    if (!syncMountedRef.current) {
-      syncMountedRef.current = true;
-      return;
-    }
-
     const fromWS = appliedFromWSRef.current;
     appliedFromWSRef.current = false;
 
     if (offeringItems.length > 0 || requestingItems.length > 0) {
+      hadItemsRef.current = true;
       saveItemsToLocalStorage(offeringItems, requestingItems);
       if (!fromWS) syncItemsToPreference(offeringItems, requestingItems);
-    } else {
-      // All items cleared — remove localStorage and broadcast delete so other devices clear too
+    } else if (hadItemsRef.current) {
+      // Items existed and just became empty (real clear/remove-last transition) —
+      // remove localStorage and broadcast delete so other devices clear too.
+      hadItemsRef.current = false;
       safeLocalStorage.removeItem("calculatorItems");
       if (!fromWS) {
         if (calcSyncDebounceRef.current)
@@ -503,6 +463,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         }, 1000);
       }
     }
+    // else: still empty and never had items (e.g. initial mount) — no-op.
   }, [offeringItems, requestingItems]);
 
   // Live sync: silently apply calculator_items preference from other devices
@@ -633,42 +594,16 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
    * Respects per-item selection but coerces to Clean if Duped value is not available.
    */
   const calculateTotals = (items: TradeItem[]) => {
-    let totalValue = 0;
-    let cleanSum = 0;
-    let dupedSum = 0;
-    let cleanCount = 0;
-    let dupedCount = 0;
-
-    items.forEach((item) => {
-      const effectiveType = item.isDuped ? "duped" : "cash";
+    const totalValue = items.reduce((sum, item) => {
       const value = parseValueString(
-        effectiveType === "cash" ? item.cash_value : item.duped_value,
+        item.isDuped ? item.duped_value : item.cash_value,
       );
-      totalValue += value;
-      if (effectiveType === "duped") {
-        dupedSum += value;
-        dupedCount += 1;
-      } else {
-        cleanSum += value;
-        cleanCount += 1;
-      }
-    });
+      return sum + value;
+    }, 0);
 
     return {
       cashValue: formatTotalValue(totalValue),
       total: totalValue,
-      breakdown: {
-        clean: {
-          count: cleanCount,
-          sum: cleanSum,
-          formatted: formatTotalValue(cleanSum),
-        },
-        duped: {
-          count: dupedCount,
-          sum: dupedSum,
-          formatted: formatTotalValue(dupedSum),
-        },
-      },
     };
   };
 
@@ -739,24 +674,38 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     toast.success(
       `Filled ${newOffering.length} offering and ${newRequesting.length} requesting items.`,
     );
-    if (activeTab !== "values") {
-      handleTabChange("values");
-    }
   };
 
   const handleRemoveItem = (
     instanceId: string,
     side: "offering" | "requesting",
   ) => {
-    if (side === "offering") {
-      setOfferingItems((prev) =>
-        prev.filter((item) => item.instanceId !== instanceId),
-      );
-    } else {
-      setRequestingItems((prev) =>
-        prev.filter((item) => item.instanceId !== instanceId),
-      );
-    }
+    const setItems =
+      side === "offering" ? setOfferingItems : setRequestingItems;
+    const currentItems =
+      side === "offering"
+        ? offeringItemsRef.current
+        : requestingItemsRef.current;
+    const removedIndex = currentItems.findIndex(
+      (item) => item.instanceId === instanceId,
+    );
+    if (removedIndex === -1) return;
+    const removedItem = currentItems[removedIndex];
+
+    setItems((prev) => prev.filter((item) => item.instanceId !== instanceId));
+
+    toast(`Removed ${removedItem.name}`, {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setItems((prev) => {
+            const next = [...prev];
+            next.splice(Math.min(removedIndex, next.length), 0, removedItem);
+            return next;
+          });
+        },
+      },
+    });
   };
 
   const handleSwapSides = () => {
@@ -796,12 +745,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     return parseValueString(!isDuped ? item.cash_value : item.duped_value);
   };
 
-  // Helper function to get selected value string for display
-  const getSelectedValueString = (item: TradeItem): string => {
-    const isDuped = item.isDuped;
-    return !isDuped ? item.cash_value : item.duped_value;
-  };
-
   const updateItemValueType = (
     itemId: number,
     valueType: "cash" | "duped",
@@ -831,6 +774,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     }
   };
 
+  // Same catalog TradeItemPickerV2 browses below — reused by the quick-add
+  // popover so it can search/add without needing its own item source.
+  const catalogItems =
+    itemsInputMode === "picker"
+      ? initialItems.filter((i) => !i.is_sub)
+      : inventoryItems;
+
   return (
     <div className="space-y-6">
       {/* Restore Modal */}
@@ -859,7 +809,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       {/* Trade Sides */}
       <div className="space-y-4">
         <ScanTradeFromImage onScanSuccess={handleScanTradeSuccess} />
-        <ActionButtons
+
+        <TradeSummaryBar
+          offeringTotal={calculateTotals(offeringItems).total}
+          requestingTotal={calculateTotals(requestingItems).total}
+          offeringCount={offeringItems.length}
+          requestingCount={requestingItems.length}
           onSwapSides={handleSwapSides}
           onClearSides={handleClearSides}
         />
@@ -869,32 +824,32 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           <TradeSidePanel
             side="offering"
             items={offeringItems}
+            catalogItems={catalogItems}
             onRemoveItem={(instanceId) =>
               handleRemoveItem(instanceId, "offering")
             }
+            onDuplicateItem={(item) => handleAddItem(item, "offering")}
             onValueTypeChange={(id, valueType, instanceId) =>
               updateItemValueType(id, valueType, "offering", instanceId)
             }
-            getSelectedValueString={getSelectedValueString}
             getSelectedValueType={getSelectedValueType}
+            getSelectedValue={getSelectedValue}
             onMirror={() => handleMirrorItems("offering")}
-            onEmptyActivate={() => focusItemsForSide("offering")}
-            totals={calculateTotals(offeringItems)}
           />
           <TradeSidePanel
             side="requesting"
             items={requestingItems}
+            catalogItems={catalogItems}
             onRemoveItem={(instanceId) =>
               handleRemoveItem(instanceId, "requesting")
             }
+            onDuplicateItem={(item) => handleAddItem(item, "requesting")}
             onValueTypeChange={(id, valueType, instanceId) =>
               updateItemValueType(id, valueType, "requesting", instanceId)
             }
-            getSelectedValueString={getSelectedValueString}
             getSelectedValueType={getSelectedValueType}
+            getSelectedValue={getSelectedValue}
             onMirror={() => handleMirrorItems("requesting")}
-            onEmptyActivate={() => focusItemsForSide("requesting")}
-            totals={calculateTotals(requestingItems)}
           />
         </div>
       </div>
@@ -902,237 +857,146 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       {/* Visible after trade sides; avoids pinning the slot to the very end of the page */}
       <NitroCalculatorAd className="mt-8" />
 
-      {/* Browse / analysis — full width below panels (matches /trading#create item picker placement) */}
+      {/* Browse — full width below panels (matches /trading#create item picker placement) */}
       <div className="mt-6 w-full min-w-0">
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) =>
-            handleTabChange(v as "items" | "values" | "similar")
-          }
-        >
-          <TabsList fullWidth>
-            <TabsTrigger
-              value="items"
-              fullWidth
-              aria-controls="calculator-tabpanel-items"
-              id="calculator-tab-items"
-            >
-              {itemsInputMode === "inventory"
-                ? "Browse Inventory Items"
-                : "Browse Items"}
-            </TabsTrigger>
-            <TabsTrigger
-              value="similar"
-              fullWidth
-              aria-controls="calculator-tabpanel-similar"
-              id="calculator-tab-similar"
-            >
-              Similar by Total
-            </TabsTrigger>
-            <TabsTrigger
-              value="values"
-              fullWidth
-              aria-controls="calculator-tabpanel-values"
-              id="calculator-tab-values"
-            >
-              Value Comparison
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <h2 className="text-primary-text mb-5 text-xl font-semibold md:mb-6">
+          {itemsInputMode === "inventory"
+            ? "Browse Inventory Items"
+            : "Browse Items"}
+        </h2>
 
-        {/* Tab Content — spaced below tab triggers so labels aren’t flush with panels */}
-        <div className="mt-5 min-w-0 md:mt-6">
-          <div
-            role="tabpanel"
-            hidden={activeTab !== "items"}
-            id="calculator-tabpanel-items"
-            aria-labelledby="calculator-tab-items"
-          >
-            {activeTab === "items" && (
-              <div
-                className="mb-8 w-full min-w-0"
-                data-component="calculator-items-panel"
-              >
-                {itemsInputMode === "picker" ? (
-                  <TradeItemPickerV2
-                    items={initialItems.filter((i) => !i.is_sub)}
-                    onSelect={handleAddItem}
-                    selectedItems={[...offeringItems, ...requestingItems]}
-                    customTypes={[]}
-                    onAddCustomType={() => {}}
-                    allowOg={false}
-                    activeSide={pickerActiveSide}
-                    onActiveSideChange={setPickerActiveSide}
-                    showOfferRequestButtons
-                    favoriteIds={favoriteIds}
-                    onToggleFavorite={handleToggleFavorite}
-                  />
-                ) : (
-                  <div>
-                    {isAuthLoading ? (
-                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                        <p className="text-secondary-text text-sm">
-                          Loading your account...
-                        </p>
-                      </div>
-                    ) : !isAuthenticated ? (
-                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                        <p className="text-secondary-text text-sm">
-                          Log in to load your Roblox inventory.
-                        </p>
-                        <div className="mt-4 flex justify-center">
-                          <Button
-                            type="button"
-                            onClick={() => setLoginModal({ open: true })}
-                          >
-                            Log In
-                          </Button>
+        <div
+          className="mb-8 w-full min-w-0"
+          data-component="calculator-items-panel"
+        >
+          {itemsInputMode === "picker" ? (
+            <TradeItemPickerV2
+              items={catalogItems}
+              onSelect={handleAddItem}
+              selectedItems={[...offeringItems, ...requestingItems]}
+              customTypes={[]}
+              onAddCustomType={() => {}}
+              allowOg={false}
+              activeSide={pickerActiveSide}
+              onActiveSideChange={setPickerActiveSide}
+              showOfferRequestButtons
+              favoriteIds={favoriteIds}
+              onToggleFavorite={handleToggleFavorite}
+            />
+          ) : (
+            <div>
+              {isAuthLoading ? (
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    Loading your account...
+                  </p>
+                </div>
+              ) : !isAuthenticated ? (
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    Log in to load your Roblox inventory.
+                  </p>
+                  <div className="mt-4 flex justify-center">
+                    <Button
+                      type="button"
+                      onClick={() => setLoginModal({ open: true })}
+                    >
+                      Log In
+                    </Button>
+                  </div>
+                </div>
+              ) : !hasValidRobloxId ? (
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    Connect your Roblox account to load your inventory items.
+                  </p>
+                  <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        setLoginModal({ open: true, tab: "roblox" })
+                      }
+                    >
+                      Connect Roblox
+                    </Button>
+                    <Link
+                      href="/inventories"
+                      prefetch={false}
+                      className="text-link text-sm"
+                    >
+                      View Inventories
+                    </Link>
+                  </div>
+                </div>
+              ) : inventoryStatus === "loading" ? (
+                <div className="animate-pulse">
+                  <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+                    {Array.from({ length: 14 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="border-border-card bg-secondary-bg w-full rounded-lg border p-1.5 md:p-2"
+                      >
+                        {/* Name + badges */}
+                        <div className="mb-2">
+                          <div className="bg-tertiary-bg mb-1.5 h-3 w-3/4 rounded" />
+                          <div className="flex gap-1">
+                            <div className="bg-tertiary-bg h-4 w-10 rounded" />
+                            <div className="bg-tertiary-bg h-4 w-10 rounded" />
+                          </div>
                         </div>
-                      </div>
-                    ) : !hasValidRobloxId ? (
-                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                        <p className="text-secondary-text text-sm">
-                          Connect your Roblox account to load your inventory
-                          items.
-                        </p>
-                        <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                          <Button
-                            type="button"
-                            onClick={() =>
-                              setLoginModal({ open: true, tab: "roblox" })
-                            }
-                          >
-                            Connect Roblox
-                          </Button>
-                          <Link
-                            href="/inventories"
-                            prefetch={false}
-                            className="text-link text-sm"
-                          >
-                            View Inventories
-                          </Link>
-                        </div>
-                      </div>
-                    ) : inventoryStatus === "loading" ? (
-                      <div className="animate-pulse">
-                        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
-                          {Array.from({ length: 14 }).map((_, i) => (
+                        {/* Image */}
+                        <div className="bg-tertiary-bg mb-1.5 aspect-video w-full rounded-lg" />
+                        {/* Value rows */}
+                        <div className="space-y-1">
+                          {Array.from({ length: 4 }).map((_, j) => (
                             <div
-                              key={i}
-                              className="border-border-card bg-secondary-bg w-full rounded-lg border p-1.5 md:p-2"
+                              key={j}
+                              className="bg-tertiary-bg flex items-center justify-between rounded-lg p-1.5"
                             >
-                              {/* Name + badges */}
-                              <div className="mb-2">
-                                <div className="bg-tertiary-bg mb-1.5 h-3 w-3/4 rounded" />
-                                <div className="flex gap-1">
-                                  <div className="bg-tertiary-bg h-4 w-10 rounded" />
-                                  <div className="bg-tertiary-bg h-4 w-10 rounded" />
-                                </div>
-                              </div>
-                              {/* Image */}
-                              <div className="bg-tertiary-bg mb-1.5 aspect-video w-full rounded-lg" />
-                              {/* Value rows */}
-                              <div className="space-y-1">
-                                {Array.from({ length: 4 }).map((_, j) => (
-                                  <div
-                                    key={j}
-                                    className="bg-tertiary-bg flex items-center justify-between rounded-lg p-1.5"
-                                  >
-                                    <div className="bg-quaternary-bg h-3 w-10 rounded" />
-                                    <div className="bg-quaternary-bg h-5 w-14 rounded-lg" />
-                                  </div>
-                                ))}
-                              </div>
-                              {/* Offer/Request buttons */}
-                              <div className="mt-2 grid grid-cols-2 gap-1.5">
-                                <div className="bg-tertiary-bg h-7 rounded-lg" />
-                                <div className="bg-tertiary-bg h-7 rounded-lg" />
-                              </div>
+                              <div className="bg-quaternary-bg h-3 w-10 rounded" />
+                              <div className="bg-quaternary-bg h-5 w-14 rounded-lg" />
                             </div>
                           ))}
                         </div>
+                        {/* Offer/Request buttons */}
+                        <div className="mt-2 grid grid-cols-2 gap-1.5">
+                          <div className="bg-tertiary-bg h-7 rounded-lg" />
+                          <div className="bg-tertiary-bg h-7 rounded-lg" />
+                        </div>
                       </div>
-                    ) : inventoryStatus === "error" ? (
-                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                        <p className="text-secondary-text text-sm">
-                          {inventoryError || "Failed to load inventory items."}
-                        </p>
-                      </div>
-                    ) : inventoryItems.length === 0 ? (
-                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                        <p className="text-secondary-text text-sm">
-                          No tradable inventory items found.
-                        </p>
-                      </div>
-                    ) : (
-                      <TradeItemPickerV2
-                        items={inventoryItems}
-                        onSelect={handleAddItem}
-                        selectedItems={[...offeringItems, ...requestingItems]}
-                        customTypes={[]}
-                        onAddCustomType={() => {}}
-                        allowOg={false}
-                        activeSide={pickerActiveSide}
-                        onActiveSideChange={setPickerActiveSide}
-                        showOfferRequestButtons
-                        inventoryCopies={inventoryCopies}
-                        favoriteIds={favoriteIds}
-                        onToggleFavorite={handleToggleFavorite}
-                      />
-                    )}
+                    ))}
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div
-            role="tabpanel"
-            hidden={activeTab !== "values"}
-            id="calculator-tabpanel-values"
-            aria-labelledby="calculator-tab-values"
-          >
-            {activeTab === "values" && (
-              <div className="mb-8">
-                <CalculatorValueComparison
-                  offering={offeringItems}
-                  requesting={requestingItems}
-                  getSelectedValueString={getSelectedValueString}
-                  getSelectedValue={getSelectedValue}
-                  getSelectedValueType={getSelectedValueType}
-                  onBrowseItems={() => handleTabChange("items")}
+                </div>
+              ) : inventoryStatus === "error" ? (
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    {inventoryError || "Failed to load inventory items."}
+                  </p>
+                </div>
+              ) : inventoryItems.length === 0 ? (
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    No tradable inventory items found.
+                  </p>
+                </div>
+              ) : (
+                <TradeItemPickerV2
+                  items={catalogItems}
+                  onSelect={handleAddItem}
+                  selectedItems={[...offeringItems, ...requestingItems]}
+                  customTypes={[]}
+                  onAddCustomType={() => {}}
+                  allowOg={false}
+                  activeSide={pickerActiveSide}
+                  onActiveSideChange={setPickerActiveSide}
+                  showOfferRequestButtons
+                  inventoryCopies={inventoryCopies}
+                  favoriteIds={favoriteIds}
+                  onToggleFavorite={handleToggleFavorite}
                 />
-              </div>
-            )}
-          </div>
-
-          <div
-            role="tabpanel"
-            hidden={activeTab !== "similar"}
-            id="calculator-tabpanel-similar"
-            aria-labelledby="calculator-tab-similar"
-          >
-            {activeTab === "similar" && (
-              <div className="mb-8">
-                <SimilarItemsTab
-                  offeringItems={offeringItems}
-                  requestingItems={requestingItems}
-                  totalBasis={totalBasis}
-                  setTotalBasis={setTotalBasis}
-                  offeringSimilarItemsRange={offeringSimilarItemsRange}
-                  requestingSimilarItemsRange={requestingSimilarItemsRange}
-                  setOfferingSimilarItemsRange={setOfferingSimilarItemsRange}
-                  setRequestingSimilarItemsRange={
-                    setRequestingSimilarItemsRange
-                  }
-                  MAX_SIMILAR_ITEMS_RANGE={DYNAMIC_MAX_VALUE}
-                  initialItems={initialItems}
-                  getSelectedValue={getSelectedValue}
-                  onBrowseItems={() => handleTabChange("items")}
-                />
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
