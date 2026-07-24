@@ -16,6 +16,7 @@ import { filterByValueSort, sortByValueSort } from "@/utils/trading/values";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
@@ -26,6 +27,7 @@ import {
 import {
   filterGroups,
   filterOptions,
+  getFilterSortsButtonLabel,
 } from "@/components/Values/valuesFilterOptions";
 import {
   valueSortGroups,
@@ -37,6 +39,8 @@ import {
   getTradeItemImagePath,
   isCustomTradeItem,
   getTradeItemIdentifier,
+  matchesAnyCategoryFilterSort,
+  matchesCategoryFilterSort,
 } from "@/utils/trading/tradeItems";
 import { handleImageError } from "@/utils/ui/images";
 import {
@@ -71,6 +75,12 @@ interface TradeItemPickerV2Props {
   inventoryCopies?: Record<number, number>;
   favoriteIds?: number[];
   onToggleFavorite?: (itemId: number, isFavorited: boolean) => void;
+  /**
+   * Opt-in multi-select category filtering (+ Clear Filters), matching
+   * /values. Off by default so /trading's ad-creation flow and the Make
+   * Offer dialog keep today's single-select filter behavior unchanged.
+   */
+  multiSelectFilters?: boolean;
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
@@ -145,6 +155,7 @@ export default function TradeItemPickerV2({
   inventoryCopies,
   favoriteIds,
   onToggleFavorite,
+  multiSelectFilters = false,
 }: TradeItemPickerV2Props) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -182,6 +193,15 @@ export default function TradeItemPickerV2({
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
+  // Multi-select mode only (opt-in via multiSelectFilters) — mirrors /values'
+  // selectedFilterSorts: an empty array means "All Items".
+  const [filterSorts, setFilterSorts] = useState<FilterSort[]>([]);
+  const toggleFilterSort = (value: FilterSort) => {
+    setFilterSorts((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
+    );
+    setPage(1);
+  };
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
 
   const supportedFilterSorts = useMemo(
@@ -219,9 +239,10 @@ export default function TradeItemPickerV2({
     [supportedFilterSorts],
   );
 
-  const filterLabel =
-    filterOptions.find((option) => option.value === filterSort)?.label ??
-    "Select category";
+  const filterLabel = multiSelectFilters
+    ? getFilterSortsButtonLabel(filterSorts)
+    : (filterOptions.find((option) => option.value === filterSort)?.label ??
+      "Select category");
   const sortLabel = getValueSortLabel(valueSort);
 
   const validValueSorts = useMemo(
@@ -259,38 +280,9 @@ export default function TradeItemPickerV2({
     const base = tradeableItems.filter((item) => {
       if (!matchesTextSearch([item.name, item.type], searchQuery)) return false;
 
-      switch (filterSort) {
-        case "name-limited-items":
-          return item.is_limited === 1;
-        case "name-seasonal-items":
-          return item.is_seasonal === 1;
-        case "name-vehicles":
-          return item.type.toLowerCase() === "vehicle";
-        case "name-spoilers":
-          return item.type.toLowerCase() === "spoiler";
-        case "name-rims":
-          return item.type.toLowerCase() === "rim";
-        case "name-body-colors":
-          return item.type.toLowerCase() === "body color";
-        case "name-hyperchromes":
-          return item.type.toLowerCase() === "hyperchrome";
-        case "name-textures":
-          return item.type.toLowerCase() === "texture";
-        case "name-tire-stickers":
-          return item.type.toLowerCase() === "tire sticker";
-        case "name-tire-styles":
-          return item.type.toLowerCase() === "tire style";
-        case "name-drifts":
-          return item.type.toLowerCase() === "drift";
-        case "name-horns":
-          return item.type.toLowerCase() === "horn";
-        case "name-furnitures":
-          return item.type.toLowerCase() === "furniture";
-        case "name-weapon-skins":
-          return item.type.toLowerCase() === "weapon skin";
-        default:
-          return true;
-      }
+      return multiSelectFilters
+        ? matchesAnyCategoryFilterSort(item, filterSorts)
+        : matchesCategoryFilterSort(item, filterSort);
     });
 
     const filteredByValue = filterByValueSort(base, valueSort, {
@@ -316,7 +308,16 @@ export default function TradeItemPickerV2({
       ...sorted.filter((item) => favSet.has(item.id)),
       ...sorted.filter((item) => !favSet.has(item.id)),
     ];
-  }, [items, searchQuery, filterSort, valueSort, validValueSorts, favoriteIds]);
+  }, [
+    items,
+    searchQuery,
+    filterSort,
+    filterSorts,
+    multiSelectFilters,
+    valueSort,
+    validValueSorts,
+    favoriteIds,
+  ]);
 
   const totalPages = Math.max(
     1,
@@ -543,33 +544,70 @@ export default function TradeItemPickerV2({
                   align="start"
                   className="border-border-card bg-tertiary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
-                  <DropdownMenuRadioGroup
-                    value={filterSort}
-                    onValueChange={(val) => {
-                      setFilterSort(val as FilterSort);
-                      setPage(1);
-                    }}
-                  >
-                    {availableFilterGroups.map((group, index) => (
-                      <Fragment key={group.label}>
-                        <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                          {group.label}
-                        </DropdownMenuLabel>
-                        {group.options.map((option) => (
-                          <DropdownMenuRadioItem
-                            key={option.value}
-                            value={option.value}
-                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                          >
-                            {option.label}
-                          </DropdownMenuRadioItem>
-                        ))}
-                        {index !== availableFilterGroups.length - 1 && (
-                          <DropdownMenuSeparator className="bg-border-primary/60" />
-                        )}
-                      </Fragment>
-                    ))}
-                  </DropdownMenuRadioGroup>
+                  {multiSelectFilters ? (
+                    <>
+                      {filterSorts.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setFilterSorts([])}
+                          className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
+                        >
+                          Clear Filters
+                        </button>
+                      )}
+                      {availableFilterGroups.map((group, index) => (
+                        <Fragment key={group.label}>
+                          <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                            {group.label}
+                          </DropdownMenuLabel>
+                          {group.options.map((option) => (
+                            <DropdownMenuCheckboxItem
+                              key={option.value}
+                              checked={filterSorts.includes(option.value)}
+                              onSelect={(e) => e.preventDefault()}
+                              onCheckedChange={() =>
+                                toggleFilterSort(option.value)
+                              }
+                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                            >
+                              {option.label}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                          {index !== availableFilterGroups.length - 1 && (
+                            <DropdownMenuSeparator className="bg-border-primary/60" />
+                          )}
+                        </Fragment>
+                      ))}
+                    </>
+                  ) : (
+                    <DropdownMenuRadioGroup
+                      value={filterSort}
+                      onValueChange={(val) => {
+                        setFilterSort(val as FilterSort);
+                        setPage(1);
+                      }}
+                    >
+                      {availableFilterGroups.map((group, index) => (
+                        <Fragment key={group.label}>
+                          <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                            {group.label}
+                          </DropdownMenuLabel>
+                          {group.options.map((option) => (
+                            <DropdownMenuRadioItem
+                              key={option.value}
+                              value={option.value}
+                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                            >
+                              {option.label}
+                            </DropdownMenuRadioItem>
+                          ))}
+                          {index !== availableFilterGroups.length - 1 && (
+                            <DropdownMenuSeparator className="bg-border-primary/60" />
+                          )}
+                        </Fragment>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

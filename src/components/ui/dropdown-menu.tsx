@@ -8,10 +8,12 @@ import { Icon } from "@/components/ui/IconWrapper";
 
 const DropdownMenu = ({
   onOpenChange,
+  modal = false,
   ...props
 }: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>) => {
   return (
     <DropdownMenuPrimitive.Root
+      modal={modal}
       onOpenChange={(open) => {
         if (!open) {
           const activeElement = document.activeElement;

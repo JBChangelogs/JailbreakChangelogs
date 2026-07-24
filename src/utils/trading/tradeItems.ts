@@ -1,4 +1,5 @@
 import { getItemImagePath } from "@/utils/ui/images";
+import { FilterSort } from "@/types";
 
 type TradeItemLike = {
   id?: string | number | null;
@@ -6,6 +7,13 @@ type TradeItemLike = {
   type?: string | null;
   name?: string | null;
   base_name?: string | null;
+};
+
+type CategoryFilterableItem = {
+  type: string;
+  is_limited?: number | null;
+  is_seasonal?: number | null;
+  data?: { is_limited?: number | null; is_seasonal?: number | null };
 };
 
 const TRADE_ICON_BASE_URL =
@@ -74,3 +82,55 @@ export const getTradeItemIdentifier = (item: {
   instanceId?: string | null;
 }): string =>
   item.instanceId ? String(item.instanceId) : String(item.id ?? "");
+
+/**
+ * Category/type filter matching shared by every trade item picker (main
+ * picker, calculator quick-add popover). Only the "name-*" category
+ * dimension — no demand/trend/favorites, which don't apply to trade
+ * pickers today.
+ */
+export const matchesCategoryFilterSort = (
+  item: CategoryFilterableItem,
+  filterSort: FilterSort,
+): boolean => {
+  switch (filterSort) {
+    case "name-limited-items":
+      return item.is_limited === 1 || item.data?.is_limited === 1;
+    case "name-seasonal-items":
+      return item.is_seasonal === 1 || item.data?.is_seasonal === 1;
+    case "name-vehicles":
+      return item.type.toLowerCase() === "vehicle";
+    case "name-spoilers":
+      return item.type.toLowerCase() === "spoiler";
+    case "name-rims":
+      return item.type.toLowerCase() === "rim";
+    case "name-body-colors":
+      return item.type.toLowerCase() === "body color";
+    case "name-hyperchromes":
+      return item.type.toLowerCase() === "hyperchrome";
+    case "name-textures":
+      return item.type.toLowerCase() === "texture";
+    case "name-tire-stickers":
+      return item.type.toLowerCase() === "tire sticker";
+    case "name-tire-styles":
+      return item.type.toLowerCase() === "tire style";
+    case "name-drifts":
+      return item.type.toLowerCase() === "drift";
+    case "name-horns":
+      return item.type.toLowerCase() === "horn";
+    case "name-furnitures":
+      return item.type.toLowerCase() === "furniture";
+    case "name-weapon-skins":
+      return item.type.toLowerCase() === "weapon skin";
+    default:
+      return true;
+  }
+};
+
+/** Empty/undefined filterSorts means "all items" (no filtering applied). */
+export const matchesAnyCategoryFilterSort = (
+  item: CategoryFilterableItem,
+  filterSorts: FilterSort[],
+): boolean =>
+  filterSorts.length === 0 ||
+  filterSorts.some((filterSort) => matchesCategoryFilterSort(item, filterSort));

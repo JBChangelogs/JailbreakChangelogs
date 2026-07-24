@@ -28,19 +28,22 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
     combinedTotal > 0 ? (offeringTotal / combinedTotal) * 100 : 50;
   const requestingShare = 100 - offeringShare;
 
+  // Framed from the trader's own perspective: giving away more value than you
+  // receive is the unfavorable outcome (red), receiving more than you give is
+  // favorable (green) — not simply "whichever side has the bigger number".
   const netLabel =
     difference === 0
       ? "Even trade"
       : difference > 0
-        ? `Offering leads by ${formatCurrencyValue(Math.abs(difference))}`
-        : `Requesting leads by ${formatCurrencyValue(Math.abs(difference))}`;
+        ? `You're giving ${formatCurrencyValue(Math.abs(difference))} more`
+        : `You're getting ${formatCurrencyValue(Math.abs(difference))} more`;
 
   const netColorClass =
     difference === 0
       ? "border-border-card bg-tertiary-bg text-secondary-text"
       : difference > 0
-        ? "border-status-success/40 bg-status-success/80 text-form-button-text"
-        : "border-status-error/40 bg-status-error/80 text-form-button-text";
+        ? "border-status-error/40 bg-status-error/80 text-form-button-text"
+        : "border-status-success/40 bg-status-success/80 text-form-button-text";
 
   return (
     <div

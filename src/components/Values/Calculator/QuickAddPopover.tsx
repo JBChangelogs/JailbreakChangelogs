@@ -25,7 +25,10 @@ import {
 import { Icon } from "../../ui/IconWrapper";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { sortByValueSort } from "@/utils/trading/values";
-import { getTradeItemImagePath } from "@/utils/trading/tradeItems";
+import {
+  getTradeItemImagePath,
+  matchesCategoryFilterSort,
+} from "@/utils/trading/tradeItems";
 import { handleImageError } from "@/utils/ui/images";
 
 interface QuickAddPopoverProps {
@@ -65,41 +68,6 @@ const availableFilterGroups = filterGroups
   }))
   .filter((group) => group.options.length > 0);
 
-const matchesCategoryFilter = (item: TradeItem, filterSort: FilterSort) => {
-  switch (filterSort) {
-    case "name-limited-items":
-      return item.is_limited === 1;
-    case "name-seasonal-items":
-      return item.is_seasonal === 1;
-    case "name-vehicles":
-      return item.type.toLowerCase() === "vehicle";
-    case "name-spoilers":
-      return item.type.toLowerCase() === "spoiler";
-    case "name-rims":
-      return item.type.toLowerCase() === "rim";
-    case "name-body-colors":
-      return item.type.toLowerCase() === "body color";
-    case "name-hyperchromes":
-      return item.type.toLowerCase() === "hyperchrome";
-    case "name-textures":
-      return item.type.toLowerCase() === "texture";
-    case "name-tire-stickers":
-      return item.type.toLowerCase() === "tire sticker";
-    case "name-tire-styles":
-      return item.type.toLowerCase() === "tire style";
-    case "name-drifts":
-      return item.type.toLowerCase() === "drift";
-    case "name-horns":
-      return item.type.toLowerCase() === "horn";
-    case "name-furnitures":
-      return item.type.toLowerCase() === "furniture";
-    case "name-weapon-skins":
-      return item.type.toLowerCase() === "weapon skin";
-    default:
-      return true;
-  }
-};
-
 /**
  * Fast, inline alternative to scrolling down to the full item picker: search
  * + pick without leaving the current spot. Stays open after a pick so
@@ -125,7 +93,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
     const matched = tradable.filter(
       (item) =>
         matchesTextSearch([item.name, item.type], searchQuery) &&
-        matchesCategoryFilter(item, filterSort),
+        matchesCategoryFilterSort(item, filterSort),
     );
     const sorted = sortByValueSort(matched, "cash-desc", {
       getCashValue: (item) => item.cash_value ?? "N/A",

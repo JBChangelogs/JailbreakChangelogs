@@ -882,6 +882,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               showOfferRequestButtons
               favoriteIds={favoriteIds}
               onToggleFavorite={handleToggleFavorite}
+              multiSelectFilters
             />
           ) : (
             <div>
@@ -993,6 +994,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                   inventoryCopies={inventoryCopies}
                   favoriteIds={favoriteIds}
                   onToggleFavorite={handleToggleFavorite}
+                  multiSelectFilters
                 />
               )}
             </div>
