@@ -140,7 +140,7 @@
     ]
   },
   "browserslist": "> 1%",
-  "version": "0.43.0",
+  "version": "0.44.0",
   "engines": {
     "node": "24.x"
   },
