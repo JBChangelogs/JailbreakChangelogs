@@ -7,6 +7,7 @@ const log = createLogger("UI");
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Spinner } from "@/components/ui/Spinner";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 export interface ScannedTradeItem {
@@ -271,43 +272,51 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
     <div data-component="scan-trade-from-image">
       <div
         className={[
-          "border-border-card bg-secondary-bg rounded-lg border p-6 text-center transition-colors",
+          "border-border-card hover:border-border-focus bg-secondary-bg flex items-center gap-3 rounded-lg border-2 border-dashed p-4 text-left transition-colors",
           isDragActive ? "border-border-focus bg-tertiary-bg" : "",
           isScanning ? "cursor-progress opacity-80" : "cursor-pointer",
         ].join(" ")}
         {...getRootProps({ role: "button", tabIndex: 0 })}
       >
         <input {...getInputProps()} />
-        <div className="mb-3 flex justify-center">
+        {isScanning ? (
+          <Spinner className="text-secondary-text h-6 w-6 shrink-0" />
+        ) : (
           <Icon
             icon="material-symbols:cloud-upload"
-            className="text-secondary-text h-8 w-8"
+            className="text-secondary-text h-6 w-6 shrink-0"
           />
+        )}
+        <div className="min-w-0">
+          {isScanning ? (
+            <p className="text-primary-text text-sm font-semibold">
+              Scanning{lastFileName ? ` ${lastFileName}` : ""}...
+              <span className="text-secondary-text ml-2 font-normal">
+                This can take a few seconds
+              </span>
+            </p>
+          ) : (
+            <p className="text-primary-text text-sm font-semibold">
+              Scan a trade screenshot
+              <span className="text-secondary-text ml-2 font-normal">
+                — {helpText}
+              </span>
+            </p>
+          )}
+          <p className="text-secondary-text mt-0.5 text-xs">
+            Click, drop, or paste (Ctrl+V / ⌘V) · {acceptedTypesText}
+          </p>
+
+          {lastErrorMessage && (
+            <p className="mt-1 text-xs text-red-400">{lastErrorMessage}</p>
+          )}
+
+          {lastFileName && !isScanning && (
+            <p className="text-secondary-text/70 mt-1 text-xs">
+              Last uploaded file: {lastFileName}
+            </p>
+          )}
         </div>
-        <h3 className="text-primary-text mb-2 text-lg font-semibold">
-          Scan a trade screenshot
-        </h3>
-        <p className="text-secondary-text mx-auto mb-4 max-w-140 text-sm">
-          {helpText}
-        </p>
-        <p className="text-secondary-text mx-auto mb-4 max-w-140 text-xs">
-          Tip: Click to upload, or paste an image (Ctrl+V / ⌘V).
-        </p>
-        <p className="text-secondary-text/80 mx-auto mb-4 max-w-140 text-xs">
-          {acceptedTypesText}
-        </p>
-
-        {lastErrorMessage && (
-          <p className="mx-auto mb-4 max-w-140 text-xs text-red-400">
-            {lastErrorMessage}
-          </p>
-        )}
-
-        {lastFileName && (
-          <p className="text-secondary-text/70 mt-4 text-xs">
-            Last uploaded file: {lastFileName}
-          </p>
-        )}
       </div>
     </div>
   );
