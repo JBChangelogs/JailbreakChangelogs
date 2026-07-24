@@ -30,19 +30,11 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === "object" && !Array.isArray(value);
 
 const isSupportedImage = (file: File): boolean => {
-  const supportedTypes = new Set([
-    "image/png",
-    "image/jpeg",
-    "image/jpg",
-    "image/webp",
-  ]);
+  const supportedTypes = new Set(["image/png", "image/jpeg", "image/jpg"]);
   if (supportedTypes.has(file.type)) return true;
   const name = file.name.toLowerCase();
   return (
-    name.endsWith(".png") ||
-    name.endsWith(".jpg") ||
-    name.endsWith(".jpeg") ||
-    name.endsWith(".webp")
+    name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg")
   );
 };
 
@@ -101,7 +93,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
     [],
   );
   const acceptedTypesText = useMemo(
-    () => "Accepted formats: PNG, JPG/JPEG, WEBP.",
+    () => "Accepted formats: PNG, JPG/JPEG.",
     [],
   );
 
@@ -115,8 +107,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
       }
 
       if (!isSupportedImage(file)) {
-        const message =
-          "Unsupported image type. Please upload a PNG, JPG, or WEBP.";
+        const message = "Unsupported image type. Please upload a PNG or JPG.";
         setLastErrorMessage(message);
         toast.error(message);
         return;
@@ -227,7 +218,6 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
       "image/png": [".png"],
       "image/jpeg": [".jpg", ".jpeg"],
       "image/jpg": [".jpg"],
-      "image/webp": [".webp"],
     },
     onDrop: (acceptedFiles, _rejected, event) => {
       const file = acceptedFiles[0];
