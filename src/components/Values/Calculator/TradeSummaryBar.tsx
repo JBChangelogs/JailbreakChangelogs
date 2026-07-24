@@ -99,16 +99,19 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
         </div>
       </div>
 
-      {/* Proportion bar */}
+      {/* Proportion bar: colored by favorability (same framing as netLabel
+          above), not by side — a larger offering share means you're giving
+          away more, so it's red; a larger requesting share means you're
+          getting more, so it's green. */}
       <div className="bg-tertiary-bg mt-3 flex h-1.5 w-full overflow-hidden rounded-full">
         {hasItems ? (
           <>
             <div
-              className="bg-status-success h-full transition-all duration-300"
+              className="bg-status-error h-full transition-all duration-300"
               style={{ width: `${offeringShare}%` }}
             />
             <div
-              className="bg-status-error h-full transition-all duration-300"
+              className="bg-status-success h-full transition-all duration-300"
               style={{ width: `${requestingShare}%` }}
             />
           </>

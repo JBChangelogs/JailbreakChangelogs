@@ -10,6 +10,7 @@ import { trackEvent } from "@/utils/analytics/rybbit";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
+import { TradeSummaryBar } from "@/components/Values/Calculator/TradeSummaryBar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -267,41 +268,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     }
   };
 
-  const formatTotalValue = (value: string): string => {
-    if (!value || value === "N/A") return "0";
-
-    const numValue = parseFloat(value);
-    if (isNaN(numValue)) return "0";
-
-    return numValue.toLocaleString();
-  };
-
-  const calculateTotals = (items: TradeItem[]) => {
-    let cleanCount = 0;
-    let dupedCount = 0;
-    let cleanTotal = 0;
-    let dupedTotal = 0;
-
-    items.forEach((item) => {
-      const cleanValue = parseValueString(item.cash_value);
-      const dupedValue = parseValueString(item.duped_value);
-      if (item.isDuped) {
-        dupedCount += 1;
-        dupedTotal += dupedValue;
-        return;
-      }
-
-      cleanCount += 1;
-      cleanTotal += cleanValue;
-    });
-
-    return {
-      totalValue: formatTotalValue(String(cleanTotal + dupedTotal)),
-      cleanCount,
-      cleanValue: formatTotalValue(String(cleanTotal)),
-      dupedCount,
-      dupedValue: formatTotalValue(String(dupedTotal)),
-    };
+  const calculateTotalValue = (items: TradeItem[]): number => {
+    return items.reduce((sum, item) => {
+      const value = item.isDuped ? item.duped_value : item.cash_value;
+      return sum + parseValueString(value);
+    }, 0);
   };
 
   const saveItemsToLocalStorage = useCallback(
@@ -978,8 +949,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     );
   }
 
-  const offeringTotals = calculateTotals(offeringItems);
-  const requestingTotals = calculateTotals(requestingItems);
+  const offeringTotal = calculateTotalValue(offeringItems);
+  const requestingTotal = calculateTotalValue(requestingItems);
 
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -1202,35 +1173,15 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-center gap-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <UiButton onClick={handleSwapSides} variant="default">
-                  <Icon
-                    icon="heroicons:arrows-right-left"
-                    className="mr-1 h-5 w-5"
-                  />
-                  Swap Sides
-                </UiButton>
-              </TooltipTrigger>
-              <TooltipContent>Swap sides</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <UiButton onClick={handleClearSides} variant="destructive">
-                  <Icon
-                    icon="heroicons-outline:trash"
-                    className="mr-1 h-5 w-5"
-                  />
-                  Clear
-                </UiButton>
-              </TooltipTrigger>
-              <TooltipContent>
-                Clear all items (hold Shift to clear both sides instantly)
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          {/* Trade Summary */}
+          <TradeSummaryBar
+            offeringTotal={offeringTotal}
+            requestingTotal={requestingTotal}
+            offeringCount={offeringItems.length}
+            requestingCount={requestingItems.length}
+            onSwapSides={handleSwapSides}
+            onClearSides={handleClearSides}
+          />
 
           {/* Helpful tip about Shift+Clear */}
           <div className="text-center">
@@ -1288,22 +1239,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 emptyScrollTargetSelector='[data-component="trade-ad-item-picker"]'
                 emptyScrollOffsetPx={140}
               />
-              <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
-                <span>
-                  Total:{" "}
-                  <span className="text-secondary-text font-bold">
-                    {offeringTotals.totalValue}
-                  </span>
-                </span>
-                <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                  {offeringTotals.cleanCount} clean •{" "}
-                  {offeringTotals.cleanValue}
-                </span>
-                <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                  {offeringTotals.dupedCount} duped •{" "}
-                  {offeringTotals.dupedValue}
-                </span>
-              </div>
             </DroppableZone>
 
             {/* Requesting Items */}
@@ -1348,22 +1283,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 emptyScrollTargetSelector='[data-component="trade-ad-item-picker"]'
                 emptyScrollOffsetPx={140}
               />
-              <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
-                <span>
-                  Total:{" "}
-                  <span className="text-secondary-text font-bold">
-                    {requestingTotals.totalValue}
-                  </span>
-                </span>
-                <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                  {requestingTotals.cleanCount} clean •{" "}
-                  {requestingTotals.cleanValue}
-                </span>
-                <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                  {requestingTotals.dupedCount} duped •{" "}
-                  {requestingTotals.dupedValue}
-                </span>
-              </div>
             </DroppableZone>
           </div>
 

@@ -76,6 +76,24 @@ const groupItems = (items: TradeItem[]) => {
   return Object.values(grouped);
 };
 
+const parseTradeValue = (value: string | number | null | undefined): number => {
+  if (value === null || value === undefined) return 0;
+  const normalized = String(value).trim().toLowerCase().replace(/,/g, "");
+  if (!normalized || normalized === "n/a") return 0;
+  if (normalized.endsWith("m")) {
+    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000_000;
+  }
+  if (normalized.endsWith("k")) {
+    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000;
+  }
+  return parseFloat(normalized) || 0;
+};
+
+const formatTradeValue = (value: number): string => {
+  if (!Number.isFinite(value)) return "0";
+  return Math.round(value).toLocaleString();
+};
+
 export const ItemGrid: React.FC<ItemGridProps> = ({
   items,
   title,
@@ -87,28 +105,28 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
   emptyScrollTargetSelector = '[data-component="available-items-grid"]',
   emptyScrollOffsetPx = 140,
 }) => {
+  const isOffering = title.toLowerCase() === "offering";
+  const borderColor = isOffering
+    ? "border-status-success/30 hover:border-status-success/60"
+    : "border-status-error/30 hover:border-status-error/60";
+
+  const activateAdd = () => {
+    if (disableInteraction) return;
+    onEmptyActivate?.();
+    // Scroll after a short delay to ensure any tab switch completes.
+    setTimeout(() => {
+      const target = document.querySelector(emptyScrollTargetSelector);
+      if (target) {
+        const top =
+          target.getBoundingClientRect().top +
+          (window.scrollY || window.pageYOffset) -
+          emptyScrollOffsetPx;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      }
+    }, 100);
+  };
+
   if (items.length === 0) {
-    const isOffering = title.toLowerCase() === "offering";
-    const borderColor = isOffering
-      ? "border-status-success/30 hover:border-status-success/60"
-      : "border-status-error/30 hover:border-status-error/60";
-
-    const activateEmpty = () => {
-      if (disableInteraction) return;
-      onEmptyActivate?.();
-      // Scroll after a short delay to ensure any tab switch completes.
-      setTimeout(() => {
-        const target = document.querySelector(emptyScrollTargetSelector);
-        if (target) {
-          const top =
-            target.getBoundingClientRect().top +
-            (window.scrollY || window.pageYOffset) -
-            emptyScrollOffsetPx;
-          window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-        }
-      }, 100);
-    };
-
     return (
       <button
         type="button"
@@ -117,12 +135,12 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             ? "cursor-not-allowed opacity-60"
             : "hover:bg-secondary-bg cursor-pointer"
         }`}
-        onClick={activateEmpty}
+        onClick={activateAdd}
         onKeyDown={(e) => {
           if (disableInteraction) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            activateEmpty();
+            activateAdd();
           }
         }}
       >
@@ -172,7 +190,14 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             const displayName = originalItem
               ? getDisplayName(originalItem)
               : item.name;
-            const shouldShowTooltip = !isCustomTradeItem(item);
+            const isCustom = isCustomTradeItem(item);
+            const shouldShowTooltip = !isCustom;
+
+            const rawValue = item.isDuped ? item.duped_value : item.cash_value;
+            const hasValue = rawValue != null && rawValue !== "N/A";
+            const displayValue = hasValue
+              ? formatTradeValue(parseTradeValue(rawValue) * item.count)
+              : "N/A";
 
             const content = (
               <button
@@ -183,56 +208,67 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                 }}
                 className="block w-full text-left"
               >
-                <div className="relative aspect-square">
-                  <div className="relative h-full w-full overflow-hidden rounded-lg">
-                    {isVideoItem(item.name) ? (
-                      <video
-                        src={getVideoPath(item.type, item.name)}
-                        className="h-full w-full object-cover"
-                        muted
-                        playsInline
-                        loop
-                        autoPlay
-                      />
-                    ) : (
-                      <Image
-                        src={getTradeItemImagePath(item, true)}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                        draggable={false}
-                        onError={handleImageError}
-                      />
-                    )}
-                    {(item.count > 1 || item.isDuped || item.isOG) && (
-                      <div className="absolute top-1 right-1 z-10 flex flex-col items-end gap-1">
-                        {item.count > 1 && (
-                          <div className="rounded-full border border-white/20 bg-black/70 px-2 py-0.5 text-xs leading-none font-semibold text-white shadow-sm backdrop-blur-sm [text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_0_4px_rgba(0,0,0,0.85)]">
-                            ×{item.count}
-                          </div>
-                        )}
-                        <div className="flex gap-1">
-                          {item.isDuped && (
-                            <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
-                              Duped
-                            </span>
-                          )}
-                          {item.isOG && (
-                            <span className="bg-tertiary-bg/80 text-primary-text rounded px-1 py-0.5 text-[9px] leading-none font-semibold">
-                              OG
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                {/* Image row */}
+                <div
+                  className={`relative aspect-video overflow-hidden rounded-lg ${
+                    isCustom ? "bg-tertiary-bg" : ""
+                  }`}
+                >
+                  {isVideoItem(item.name) ? (
+                    <video
+                      src={getVideoPath(item.type, item.name)}
+                      className="h-full w-full object-cover"
+                      muted
+                      playsInline
+                      loop
+                      autoPlay
+                    />
+                  ) : (
+                    <Image
+                      src={getTradeItemImagePath(item, true)}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                      draggable={false}
+                      onError={handleImageError}
+                    />
+                  )}
                 </div>
 
-                {/* Item Name */}
-                <div className="mt-2 text-center">
-                  <p className="text-primary-text hover:text-link line-clamp-2 text-xs font-medium transition-colors">
-                    {displayName}
+                {/* Name row */}
+                <p className="text-primary-text hover:text-link mt-1.5 line-clamp-2 text-xs font-medium transition-colors">
+                  {displayName}
+                </p>
+
+                {/* Value row */}
+                {!isCustom && (
+                  <p className="text-primary-text mt-0.5 truncate text-sm font-bold">
+                    {displayValue}
+                    {item.count > 1 && (
+                      <span className="text-secondary-text ml-1 text-xs font-semibold">
+                        ×{item.count}
+                      </span>
+                    )}
                   </p>
+                )}
+
+                {/* Badge row */}
+                <div className="mt-1 flex flex-wrap items-center gap-1">
+                  {item.isOG ? (
+                    <span className="bg-tertiary-bg text-primary-text inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold">
+                      OG
+                    </span>
+                  ) : (
+                    <span
+                      className={`inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold ${
+                        item.isDuped
+                          ? "bg-status-error text-form-button-text"
+                          : "bg-status-success text-form-button-text"
+                      }`}
+                    >
+                      {item.isDuped ? "Duped" : "Clean"}
+                    </span>
+                  )}
                 </div>
               </button>
             );
@@ -267,6 +303,36 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
               </div>
             );
           })}
+
+          {/* Persistent add slot — scrolls to the item picker below. */}
+          <button
+            type="button"
+            onClick={activateAdd}
+            disabled={disableInteraction}
+            className={`border-border-card bg-tertiary-bg hover:border-border-focus flex aspect-video w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors ${borderColor} ${
+              disableInteraction
+                ? "cursor-not-allowed opacity-60"
+                : "cursor-pointer"
+            }`}
+            aria-label="Add another item"
+          >
+            <svg
+              className="text-secondary-text/50 h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+            <span className="text-secondary-text/70 text-xs font-medium">
+              Add item
+            </span>
+          </button>
         </div>
       </div>
     </div>
