@@ -21,6 +21,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { NotificationPopover } from "@/components/notifications/NotificationPopover";
+import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
+import { Spinner } from "@/components/ui/Spinner";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -241,6 +243,8 @@ export const NavbarModern = ({
     logout,
     wsConnected,
   } = useAuthContext();
+  const { isPending: wsTogglePending, toggleConnection: toggleWsConnection } =
+    useWsConnectionPending(wsConnected);
 
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
@@ -689,26 +693,27 @@ export const NavbarModern = ({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    onClick={() =>
-                      window.dispatchEvent(
-                        new CustomEvent(
-                          wsConnected
-                            ? "realtimeManualDisconnect"
-                            : "realtimeManualConnect",
-                        ),
-                      )
-                    }
-                    className="border-border-card bg-secondary-bg hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200"
+                    onClick={toggleWsConnection}
+                    disabled={wsTogglePending}
+                    className="border-border-card bg-secondary-bg hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
-                    />
+                    {wsTogglePending ? (
+                      <Spinner className="h-4 w-4" />
+                    ) : (
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
+                      />
+                    )}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {wsConnected
-                    ? "WebSocket connected — click to disconnect"
-                    : "WebSocket disconnected — click to reconnect"}
+                  {wsTogglePending
+                    ? wsConnected
+                      ? "Disconnecting…"
+                      : "Connecting…"
+                    : wsConnected
+                      ? "WebSocket connected — click to disconnect"
+                      : "WebSocket disconnected — click to reconnect"}
                 </TooltipContent>
               </Tooltip>
             )}

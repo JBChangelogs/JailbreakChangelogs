@@ -21,6 +21,8 @@ import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
 import type { UserData } from "@/types/auth";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
+import { Spinner } from "@/components/ui/Spinner";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -506,6 +508,8 @@ export default function Header() {
     isLoading,
     wsConnected,
   } = useAuthContext();
+  const { isPending: wsTogglePending, toggleConnection: toggleWsConnection } =
+    useWsConnectionPending(wsConnected);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -741,25 +745,26 @@ export default function Header() {
                     userData?.flags?.some((f) => f.flag === "is_owner") && (
                       <button
                         type="button"
-                        onClick={() =>
-                          window.dispatchEvent(
-                            new CustomEvent(
-                              wsConnected
-                                ? "realtimeManualDisconnect"
-                                : "realtimeManualConnect",
-                            ),
-                          )
-                        }
+                        onClick={toggleWsConnection}
+                        disabled={wsTogglePending}
                         title={
-                          wsConnected
-                            ? "WebSocket connected — click to disconnect"
-                            : "WebSocket disconnected — click to reconnect"
+                          wsTogglePending
+                            ? wsConnected
+                              ? "Disconnecting…"
+                              : "Connecting…"
+                            : wsConnected
+                              ? "WebSocket connected — click to disconnect"
+                              : "WebSocket disconnected — click to reconnect"
                         }
-                        className="border-border-card bg-secondary-bg hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                        className="border-border-card bg-secondary-bg hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
                       >
-                        <span
-                          className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
-                        />
+                        {wsTogglePending ? (
+                          <Spinner className="h-4 w-4" />
+                        ) : (
+                          <span
+                            className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
+                          />
+                        )}
                       </button>
                     )}
                   {/* Notification icon */}
