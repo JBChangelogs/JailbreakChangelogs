@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { createLogger } from "@/services/logger";
 
@@ -14,9 +15,16 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const router = useRouter();
+
   useEffect(() => {
     log.error("Changelog details error", error);
   }, [error]);
+
+  const handleRetry = () => {
+    router.refresh();
+    reset();
+  };
 
   return (
     <main className="mb-8 min-h-screen">
@@ -49,7 +57,7 @@ export default function Error({
             </p>
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <button
-                onClick={reset}
+                onClick={handleRetry}
                 className="border-border-card bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-6 py-3 font-medium transition-colors"
               >
                 Try again

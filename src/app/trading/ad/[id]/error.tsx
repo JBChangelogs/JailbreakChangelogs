@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { createLogger } from "@/services/logger";
@@ -16,9 +17,16 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const router = useRouter();
+
   useEffect(() => {
     log.error("Trade ad error", error);
   }, [error]);
+
+  const handleRetry = () => {
+    router.refresh();
+    reset();
+  };
 
   return (
     <section className="bg-primary-bg">
@@ -39,7 +47,7 @@ export default function Error({
               <Button
                 variant="secondary"
                 size="md"
-                onClick={reset}
+                onClick={handleRetry}
                 className="w-full sm:w-auto"
               >
                 <Icon icon="heroicons-outline:arrow-path" className="h-5 w-5" />
