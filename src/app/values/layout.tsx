@@ -2,7 +2,7 @@ export const metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: {
     template: "%s | Jailbreak Changelogs",
-    default: "Values | Jailbreak Changelogs",
+    default: "Values",
   },
   description: `Regularly updated Roblox Jailbreak values for vehicles, textures, colors, rims, spoilers, hyperchromes, and more. Community driven.`,
   keywords: [

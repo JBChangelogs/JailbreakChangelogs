@@ -4,7 +4,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: {
     template: "%s | Jailbreak Changelogs",
-    default: "View Trade Ads | Jailbreak Changelogs",
+    default: "View Trade Ads",
   },
   description:
     "Browse and create trade offers. Find the best deals and connect with other traders.",

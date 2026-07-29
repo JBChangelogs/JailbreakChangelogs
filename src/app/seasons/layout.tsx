@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: {
     template: "%s | Jailbreak Changelogs",
-    default: "Seasons | Jailbreak Changelogs",
+    default: "Seasons",
   },
   description:
     "Explore every season of Roblox Jailbreak! Each season brings exciting limited-time rewards, exclusive vehicles, and unique customization items.",
