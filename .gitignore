@@ -24,6 +24,9 @@ oxlint-report.txt
 coverage/
 dist/
 
+# Generated at build time by `bun run generate:icons`
+src/lib/icon-bundle.generated.ts
+
 # Lockfiles (non-Bun)
 pnpm-lock.yaml
 package-lock.json
