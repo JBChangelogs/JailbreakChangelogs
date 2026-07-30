@@ -354,8 +354,11 @@ export async function fetchUserById(id: string) {
         throwUserAccessErrorFrom403(data);
       }
 
-      // Handle 404 errors specifically
-      if (response.status === 404) {
+      // Handle 404 errors specifically. A non-numeric id (e.g. "sasa") fails
+      // the backend's integer parse with a 422 — treat that the same as a 404
+      // so it renders the custom not-found page instead of the generic
+      // "Failed to load user data" error.
+      if (response.status === 404 || response.status === 422) {
         throw new Error(`NOT_FOUND: User not found with id ${id}`);
       }
 
@@ -482,8 +485,11 @@ export async function fetchUserByIdForMetadata(id: string) {
         throwUserAccessErrorFrom403(data);
       }
 
-      // Handle 404 errors specifically
-      if (response.status === 404) {
+      // Handle 404 errors specifically. A non-numeric id (e.g. "sasa") fails
+      // the backend's integer parse with a 422 — treat that the same as a 404
+      // so it renders the custom not-found page instead of the generic
+      // "Failed to load user data" error.
+      if (response.status === 404 || response.status === 422) {
         throw new Error(`NOT_FOUND: User not found with id ${id}`);
       }
 
