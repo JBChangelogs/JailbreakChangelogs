@@ -77,10 +77,12 @@ function SnapshotTile({
   label,
   value,
   accentColor,
+  isLoading,
 }: {
   label: string;
   value?: string;
   accentColor: string;
+  isLoading: boolean;
 }) {
   return (
     <div className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border p-3">
@@ -98,12 +100,12 @@ function SnapshotTile({
             (Last 24 hours)
           </span>
         </div>
-        {value ? (
-          <p className="text-primary-text truncate font-mono text-lg font-semibold tabular-nums">
-            {value}
-          </p>
-        ) : (
+        {isLoading ? (
           <Skeleton className="mt-1 h-5 w-20" />
+        ) : (
+          <p className="text-primary-text truncate font-mono text-lg font-semibold tabular-nums">
+            {value ?? "???"}
+          </p>
         )}
       </div>
     </div>
@@ -224,7 +226,7 @@ export default function NetworthCapHistoryChart() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: capStats } = useQuery({
+  const { data: capStats, isLoading: isCapStatsLoading } = useQuery({
     queryKey: ["networth-cap"],
     queryFn: fetchNetworthCap,
     staleTime: 5 * 60 * 1000,
@@ -355,6 +357,16 @@ export default function NetworthCapHistoryChart() {
         </DropdownMenu>
       </div>
 
+      <p className="text-status-warning flex items-center gap-1.5 text-xs">
+        <Icon
+          icon="heroicons:exclamation-triangle"
+          className="h-3.5 w-3.5 shrink-0"
+          inline={true}
+        />
+        Scanning is currently paused, so these figures and the chart below
+        won&apos;t reflect new data until it resumes.
+      </p>
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {SNAPSHOT_TILES.map((tile) => (
           <SnapshotTile
@@ -362,6 +374,7 @@ export default function NetworthCapHistoryChart() {
             label={tile.label}
             value={capStats?.[tile.key]}
             accentColor={tile.accentColor}
+            isLoading={isCapStatsLoading}
           />
         ))}
       </div>
