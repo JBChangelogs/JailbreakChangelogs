@@ -6,6 +6,7 @@ import { createLogger } from "@/services/logger";
 const log = createLogger("INVENTORY");
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
+import InventoryLoggingAlertBanner from "@/components/ui/InventoryLoggingAlertBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
 import OfficialBotsSection from "@/components/ui/OfficialBotsSection";
@@ -46,6 +47,8 @@ export default async function InventoriesPage() {
       <NitroInventoriesRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
+
+        <InventoryLoggingAlertBanner className="mb-6" />
 
         <ExperimentalFeatureBanner className="mb-6" />
 

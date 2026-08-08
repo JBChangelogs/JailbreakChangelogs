@@ -4,6 +4,7 @@ import InventoryCheckerClient from "../InventoryCheckerClient";
 import InventoryDataStreamer from "../InventoryDataStreamer";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
+import InventoryLoggingAlertBanner from "@/components/ui/InventoryLoggingAlertBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
@@ -53,6 +54,8 @@ export default async function InventoryCheckerPage({
       <NitroInventoryDetailRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
+
+        <InventoryLoggingAlertBanner className="mb-6" />
 
         <ExperimentalFeatureBanner className="mb-6" />
 

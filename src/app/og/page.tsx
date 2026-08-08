@@ -3,6 +3,7 @@ import OGFinderDescription from "@/components/OG/OGFinderDescription";
 import OGFinderFAQ from "@/components/OG/OGFinderFAQ";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
+import InventoryLoggingAlertBanner from "@/components/ui/InventoryLoggingAlertBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
 import OfficialBotsSection from "@/components/ui/OfficialBotsSection";
@@ -41,6 +42,8 @@ export default async function OGFinderPage() {
       <NitroOGRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
+
+        <InventoryLoggingAlertBanner className="mb-6" />
 
         <ExperimentalFeatureBanner className="mb-6" />
 
