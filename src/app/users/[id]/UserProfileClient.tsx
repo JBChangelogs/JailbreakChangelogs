@@ -37,7 +37,11 @@ import {
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
-import { formatShortDate, formatCustomDate } from "@/utils/helpers/timestamp";
+import {
+  formatShortDate,
+  formatCustomDate,
+  formatDayMonthYearTime,
+} from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileTabs from "@/components/Profile/ProfileTabs";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -1167,9 +1171,7 @@ export default function UserProfileClient({
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                              {formatCustomDate(
-                                parseInt(user.created_at) * 1000,
-                              )}
+                              {formatDayMonthYearTime(user.created_at)}
                             </TooltipContent>
                           </Tooltip>
                         </p>

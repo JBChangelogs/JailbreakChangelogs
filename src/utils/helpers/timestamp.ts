@@ -11,6 +11,16 @@ interface FormatOptions {
 }
 
 /**
+ * Converts a Unix timestamp (seconds or milliseconds) into a Date
+ */
+const toDate = (timestamp: string | number): Date => {
+  const timestampNum =
+    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
+  const isMilliseconds = timestampNum > 1000000000000; // If timestamp is after year 2001, assume milliseconds
+  return new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+};
+
+/**
  * Formats a Unix timestamp into a human-readable date string
  * @param timestamp Unix timestamp in seconds or milliseconds
  * @param options Formatting options
@@ -22,13 +32,7 @@ export const formatTimestamp = (
 ): string => {
   const { format = "long", includeTime = false, relative = false } = options;
 
-  // Convert timestamp to number and determine if it's in seconds or milliseconds
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000; // If timestamp is after year 2001, assume milliseconds
-
-  // Create date object, multiplying by 1000 only if the timestamp is in seconds
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
 
   if (relative) {
     return formatRelativeTime(date);
@@ -107,10 +111,7 @@ export const formatProfileDate = (timestamp: string | number): string => {
  * @returns Formatted date string with time (e.g., "January 1, 2024, 3:45 PM")
  */
 export const formatMessageDate = (timestamp: string | number): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000;
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
   return new Intl.DateTimeFormat(undefined, {
     year: "numeric",
     month: "long",
@@ -135,10 +136,7 @@ export const formatRelativeDate = (timestamp: string | number): string =>
  * @returns Formatted date string with full details (e.g., "Monday, January 1, 2024, 3:45 PM")
  */
 export const formatFullDate = (timestamp: string | number): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000;
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
 
   const options: Intl.DateTimeFormatOptions = {
     weekday: "long",
@@ -159,10 +157,7 @@ export const formatFullDate = (timestamp: string | number): string => {
  * @returns Formatted date string in short format
  */
 export const formatShortDate = (timestamp: string | number): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000;
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
 
   // Get day, month, and year
   const day = date.getDate();
@@ -179,10 +174,7 @@ export const formatShortDate = (timestamp: string | number): string => {
  * @returns Formatted date string in custom format
  */
 export const formatCustomDate = (timestamp: string | number): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000;
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
 
   const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
   const day = date.getDate();
@@ -202,10 +194,7 @@ export const formatCustomDate = (timestamp: string | number): string => {
  * @returns Formatted date string in compact format
  */
 export const formatCompactDateTime = (timestamp: string | number): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000;
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
 
   const month = date.getMonth() + 1; // getMonth() is 0-indexed
   const day = date.getDate();
@@ -230,16 +219,10 @@ export const formatDiscordTimestamp = (
   timestamp: string | number | Date,
   locale?: string,
 ): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
   const date =
     timestamp instanceof Date
       ? timestamp
-      : new Date(
-          (typeof timestampNum === "number" && timestampNum > 1000000000000
-            ? timestampNum
-            : (timestampNum as number) * 1000) || Date.now(),
-        );
+      : new Date(toDate(timestamp).getTime() || Date.now());
 
   const resolvedLocale =
     locale ?? (typeof navigator !== "undefined" ? navigator.language : "en-US");
@@ -289,10 +272,7 @@ export const formatDiscordTimestamp = (
  * @returns Formatted date string with month, day, year, and time
  */
 export const formatShortDateTime = (timestamp: string | number): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000;
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
 
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -309,10 +289,7 @@ export const formatShortDateTime = (timestamp: string | number): string => {
  * @returns Formatted date string with month, day, and year
  */
 export const formatMonthDayYear = (timestamp: string | number): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000;
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
 
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -327,10 +304,7 @@ export const formatMonthDayYear = (timestamp: string | number): string => {
  * @returns Formatted date string with month and day only
  */
 export const formatMonthDay = (timestamp: string | number): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000;
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
 
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -344,10 +318,7 @@ export const formatMonthDay = (timestamp: string | number): string => {
  * @returns Formatted date string with short weekday, month, day, and year
  */
 export const formatWeekdayShortDate = (timestamp: string | number): string => {
-  const timestampNum =
-    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
-  const isMilliseconds = timestampNum > 1000000000000;
-  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+  const date = toDate(timestamp);
 
   return date.toLocaleDateString("en-US", {
     weekday: "short",
@@ -358,8 +329,24 @@ export const formatWeekdayShortDate = (timestamp: string | number): string => {
 };
 
 /**
+ * Formats a Unix timestamp as "5 Jan 2026, 19:30"
+ * @param timestamp Unix timestamp in seconds or milliseconds
+ * @returns Formatted date string with day, month, year, and 24-hour time
+ */
+export const formatDayMonthYearTime = (timestamp: string | number): string => {
+  const date = toDate(timestamp);
+
+  const day = date.getDate();
+  const month = date.toLocaleString("en-US", { month: "short" });
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  return `${day} ${month} ${year}, ${hours}:${minutes}`;
+};
+
+/**
  * Returns the current Unix timestamp in seconds
-...
  * @returns Current timestamp in seconds
  */
 export const getCurrentTimestamp = (): number => Math.floor(Date.now() / 1000);
