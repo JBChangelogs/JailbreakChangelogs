@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { bangers } from "@/app/fonts";
+import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 
 interface DupeItemCardProps {
   item: DupeFinderItem;
@@ -105,15 +106,6 @@ export default function DupeItemCard({
   // Helper function to format numbers with commas
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat().format(num);
-  };
-
-  // Helper function to format date only (matches old implementation)
-  const formatDateOnly = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
   };
 
   /* oxlint-disable jsx-a11y/prefer-tag-over-role */
@@ -379,7 +371,7 @@ export default function DupeItemCard({
         <div>
           <div className="text-secondary-text text-sm">LOGGED ON</div>
           <div className="text-primary-text text-xl font-bold">
-            {formatDateOnly(item.logged_at)}
+            {formatMonthDayYear(item.logged_at)}
           </div>
         </div>
       </div>

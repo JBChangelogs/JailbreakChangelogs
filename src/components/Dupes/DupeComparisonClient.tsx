@@ -12,7 +12,7 @@ import {
   getCategoryColor,
   getCategoryIcon,
 } from "@/utils/items/categoryIcons";
-import { formatCustomDate } from "@/utils/helpers/timestamp";
+import { formatCustomDate, formatProfileDate } from "@/utils/helpers/timestamp";
 import TradeHistoryList from "./TradeHistoryList";
 import DupeOwnerItemSearch from "./DupeOwnerItemSearch";
 import {
@@ -102,11 +102,7 @@ function VariantColumn({
             Logged On
           </div>
           <div className="text-primary-text font-bold">
-            {new Date(item.logged_at * 1000).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+            {formatProfileDate(item.logged_at)}
           </div>
         </div>
       </div>

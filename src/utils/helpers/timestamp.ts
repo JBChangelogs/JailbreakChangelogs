@@ -284,6 +284,80 @@ export const formatDiscordTimestamp = (
 };
 
 /**
+ * Formats a Unix timestamp as "Jan 8, 2025, 03:45 PM"
+ * @param timestamp Unix timestamp in seconds or milliseconds
+ * @returns Formatted date string with month, day, year, and time
+ */
+export const formatShortDateTime = (timestamp: string | number): string => {
+  const timestampNum =
+    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
+  const isMilliseconds = timestampNum > 1000000000000;
+  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+/**
+ * Formats a Unix timestamp as "Jan 8, 2025"
+ * @param timestamp Unix timestamp in seconds or milliseconds
+ * @returns Formatted date string with month, day, and year
+ */
+export const formatMonthDayYear = (timestamp: string | number): string => {
+  const timestampNum =
+    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
+  const isMilliseconds = timestampNum > 1000000000000;
+  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+/**
+ * Formats a Unix timestamp as "Jul 12"
+ * @param timestamp Unix timestamp in seconds or milliseconds
+ * @returns Formatted date string with month and day only
+ */
+export const formatMonthDay = (timestamp: string | number): string => {
+  const timestampNum =
+    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
+  const isMilliseconds = timestampNum > 1000000000000;
+  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+};
+
+/**
+ * Formats a Unix timestamp as "Mon, Jan 8, 2025"
+ * @param timestamp Unix timestamp in seconds or milliseconds
+ * @returns Formatted date string with short weekday, month, day, and year
+ */
+export const formatWeekdayShortDate = (timestamp: string | number): string => {
+  const timestampNum =
+    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
+  const isMilliseconds = timestampNum > 1000000000000;
+  const date = new Date(isMilliseconds ? timestampNum : timestampNum * 1000);
+
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+/**
  * Returns the current Unix timestamp in seconds
 ...
  * @returns Current timestamp in seconds

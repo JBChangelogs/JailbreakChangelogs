@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 
 interface TimeLeft {
   days: number;
@@ -96,14 +97,6 @@ export default function XpImportantDates({
     return () => clearInterval(interval);
   }, [doubleXpStart, seasonEnds]);
 
-  const formatDate = (timestamp: number): string => {
-    return new Date(timestamp * 1000).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   return (
     <div>
       {/* Season Info Header */}
@@ -113,7 +106,7 @@ export default function XpImportantDates({
         </h2>
         <div className="text-secondary-text space-y-1">
           <p className="text-lg">
-            {formatDate(startDate)} - {formatDate(endDate)}
+            {formatMonthDayYear(startDate)} - {formatMonthDayYear(endDate)}
           </p>
           <p className="text-base">
             Duration: {Math.ceil((endDate - startDate) / (24 * 60 * 60))} days •

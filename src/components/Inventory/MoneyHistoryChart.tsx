@@ -28,6 +28,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { MoneyHistory } from "@/utils/api/api";
+import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 
 interface MoneyHistoryChartProps {
   userId: string;
@@ -250,15 +251,7 @@ const MoneyHistoryChart = ({
 
   const getRangeLabel = (rangeData: typeof moneyChartData) => {
     if (rangeData.length === 0) return null;
-    const first = new Date(rangeData[0].timestamp);
-    const last = new Date(rangeData[rangeData.length - 1].timestamp);
-    const format = (date: Date) =>
-      date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    return `${format(first)} - ${format(last)}`;
+    return `${formatMonthDayYear(rangeData[0].timestamp)} - ${formatMonthDayYear(rangeData[rangeData.length - 1].timestamp)}`;
   };
 
   const getTrendSummary = (rangeData: typeof moneyChartData) => {

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import XpCalculatorForm from "./XpCalculatorForm";
 import XpResultsSummary from "./XpResultsSummary";
 import { Season, CalculationResults, DoubleXpResult } from "@/types/seasons";
+import { formatWeekdayShortDate } from "@/utils/helpers/timestamp";
 
 interface XpCalculatorProps {
   season: Season;
@@ -233,25 +234,11 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
     doubleXpResults = {
       noPass: {
         achievable: doubleXpNoPass.completionDate < constants.SEASON_ENDS,
-        completionDate: new Date(
-          doubleXpNoPass.completionDate * 1000,
-        ).toLocaleDateString("en-US", {
-          weekday: "short",
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }),
+        completionDate: formatWeekdayShortDate(doubleXpNoPass.completionDate),
       },
       withPass: {
         achievable: doubleXpWithPass.completionDate < constants.SEASON_ENDS,
-        completionDate: new Date(
-          doubleXpWithPass.completionDate * 1000,
-        ).toLocaleDateString("en-US", {
-          weekday: "short",
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }),
+        completionDate: formatWeekdayShortDate(doubleXpWithPass.completionDate),
       },
     };
 
@@ -262,25 +249,11 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
       xpNeeded,
       timeNoPass: {
         days: howLongNoGamePassDays,
-        completionDate: new Date(
-          targetLevelDateNoGamePass * 1000,
-        ).toLocaleDateString("en-US", {
-          weekday: "short",
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }),
+        completionDate: formatWeekdayShortDate(targetLevelDateNoGamePass),
       },
       timeWithPass: {
         days: howLongWithGamePassDays,
-        completionDate: new Date(
-          targetLevelDateWithGamePass * 1000,
-        ).toLocaleDateString("en-US", {
-          weekday: "short",
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }),
+        completionDate: formatWeekdayShortDate(targetLevelDateWithGamePass),
       },
       achievableNoPass,
       achievableWithPass,

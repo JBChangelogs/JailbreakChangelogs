@@ -18,6 +18,7 @@ import { DefaultAvatar } from "@/utils/ui/avatar";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { RobloxUser } from "@/types";
+import { formatShortDateTime } from "@/utils/helpers/timestamp";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -447,15 +448,7 @@ export default function TradeHistoryModal({
                         </div>
 
                         <div className="text-secondary-text w-full text-center text-xs sm:w-auto sm:shrink-0 sm:text-right sm:text-sm">
-                          {new Date(
-                            trade.toUser.TradeTime * 1000,
-                          ).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {formatShortDateTime(trade.toUser.TradeTime)}
                         </div>
                       </div>
                     );
@@ -506,16 +499,7 @@ export default function TradeHistoryModal({
                     </div>
                   </div>
                   <div className="text-secondary-text text-xs sm:shrink-0 sm:text-right sm:text-sm">
-                    {new Date(firstOwner.TradeTime * 1000).toLocaleDateString(
-                      "en-US",
-                      {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      },
-                    )}
+                    {formatShortDateTime(firstOwner.TradeTime)}
                   </div>
                 </div>
 
@@ -609,15 +593,7 @@ export default function TradeHistoryModal({
                       </div>
 
                       <div className="text-secondary-text w-full text-center text-xs sm:w-auto sm:shrink-0 sm:text-right sm:text-sm">
-                        {new Date(
-                          trade.toUser.TradeTime * 1000,
-                        ).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatShortDateTime(trade.toUser.TradeTime)}
                       </div>
                     </div>
                   );
