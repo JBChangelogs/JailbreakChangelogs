@@ -317,55 +317,57 @@ export default function NetworthCapHistoryChart() {
 
   return (
     <div className="border-border-card bg-secondary-bg mb-8 space-y-4 rounded-lg border p-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-primary-text text-lg font-semibold">
-          Global Inventory Networth
-          <span className="text-secondary-text mt-0.5 block font-normal sm:mt-0 sm:ml-1 sm:inline">
-            (Past 30 Days)
-          </span>
-        </h2>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus inline-flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm transition-colors sm:max-w-[160px]"
-              aria-label="Select date range"
+      <div className="space-y-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-primary-text text-lg font-semibold">
+            Global Inventory Networth
+            <span className="text-secondary-text mt-0.5 block font-normal sm:mt-0 sm:ml-1 sm:inline">
+              (Past 30 Days)
+            </span>
+          </h2>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus inline-flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm transition-colors sm:max-w-[160px]"
+                aria-label="Select date range"
+              >
+                <span className="truncate">{currentLabel}</span>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className="text-secondary-text h-4 w-4"
+                  inline={true}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-(--radix-dropdown-menu-trigger-width)"
             >
-              <span className="truncate">{currentLabel}</span>
-              <Icon
-                icon="heroicons:chevron-down"
-                className="text-secondary-text h-4 w-4"
-                inline={true}
-              />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-(--radix-dropdown-menu-trigger-width)"
-          >
-            <DropdownMenuRadioGroup
-              value={dateRange}
-              onValueChange={(v) => setDateRange(v as DateRange)}
-            >
-              {DATE_RANGE_OPTIONS.map(({ value, label }) => (
-                <DropdownMenuRadioItem key={value} value={value}>
-                  {label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+              <DropdownMenuRadioGroup
+                value={dateRange}
+                onValueChange={(v) => setDateRange(v as DateRange)}
+              >
+                {DATE_RANGE_OPTIONS.map(({ value, label }) => (
+                  <DropdownMenuRadioItem key={value} value={value}>
+                    {label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-      <p className="text-status-warning flex items-center gap-1.5 text-xs">
-        <Icon
-          icon="heroicons:exclamation-triangle"
-          className="h-3.5 w-3.5 shrink-0"
-          inline={true}
-        />
-        Scanning is currently paused, so these figures and the chart below
-        won&apos;t reflect new data until it resumes.
-      </p>
+        <p className="text-status-warning flex items-center gap-1.5 text-xs">
+          <Icon
+            icon="heroicons:exclamation-triangle"
+            className="h-3.5 w-3.5 shrink-0"
+            inline={true}
+          />
+          Scanning is currently paused, so these figures and the chart below
+          won&apos;t reflect new data until it resumes.
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {SNAPSHOT_TILES.map((tile) => (

@@ -222,7 +222,7 @@ export default async function Home() {
       label: "Total Networth",
       icon: "mdi:cash-multiple",
       value: networthCap?.total_networth ?? 0,
-      valueStr: networthCap?.total_networth_str,
+      valueStr: networthCap?.total_networth_str ?? "???",
       badge: "Last 24 hours",
     },
   ];
