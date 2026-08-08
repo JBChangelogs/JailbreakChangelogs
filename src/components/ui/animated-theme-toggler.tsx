@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import {
   Popover,
   PopoverContent,
@@ -83,7 +84,12 @@ export const AnimatedThemeToggler = ({
   ...props
 }: AnimatedThemeTogglerProps) => {
   const { theme, setTheme } = useTheme();
+  const { showLoginModal } = useAuthContext();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (showLoginModal) setOpen(false);
+  }, [showLoginModal]);
 
   const selectTheme = (newTheme: "light" | "dark" | "amoled") => {
     setTheme(newTheme);
@@ -111,7 +117,11 @@ export const AnimatedThemeToggler = ({
           <CurrentIcon className={cn("text-primary-text", iconSize)} />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-44 p-1">
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        className="z-[2147483647] w-44 p-1"
+      >
         {THEMES.map(({ value, label, Icon }) => (
           <button
             key={value}
