@@ -2854,6 +2854,10 @@ export async function fetchNetworthCap(): Promise<NetworthCapStats | null> {
       },
     });
 
+    if (response.status === 404) {
+      return null;
+    }
+
     if (!response.ok) {
       throw new Error(`Failed to fetch networth/cap: ${response.status}`);
     }
