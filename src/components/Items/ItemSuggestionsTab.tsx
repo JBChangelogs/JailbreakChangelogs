@@ -8,7 +8,10 @@ import { UserAvatar } from "@/utils/ui/avatar";
 // RE-ADD: voting — import { useAuthContext } from "@/contexts/AuthContext";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { formatMessageDate } from "@/utils/helpers/timestamp";
+import {
+  formatMessageDate,
+  formatShortDateTime,
+} from "@/utils/helpers/timestamp";
 import { formatFullValue } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -773,15 +776,7 @@ export default function ItemSuggestionsTab({
                                 </Link>
                               </div>
                               <div className="text-tertiary-text text-sm">
-                                {new Date(
-                                  v.created_at * 1000,
-                                ).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {formatShortDateTime(v.created_at)}
                               </div>
                             </div>
                           </div>

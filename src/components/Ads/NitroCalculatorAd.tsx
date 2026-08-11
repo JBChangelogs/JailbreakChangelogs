@@ -20,6 +20,7 @@ const CALCULATOR_CONFIG = {
   video: {
     mobile: "compact",
     hidePlaylist: true,
+    float: "never",
   },
 };
 

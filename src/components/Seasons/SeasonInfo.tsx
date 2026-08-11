@@ -1,3 +1,5 @@
+import { formatMonthDay } from "@/utils/helpers/timestamp";
+
 interface SeasonInfoProps {
   season: number;
   title: string;
@@ -44,10 +46,7 @@ export default function SeasonInfo({
         <div className="text-center">
           <div className="text-muted mb-1 text-sm">Season Ends</div>
           <div className="text-primary-text text-sm font-medium">
-            {new Date(endDate * 1000).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            })}
+            {formatMonthDay(endDate)}
           </div>
         </div>
       </div>

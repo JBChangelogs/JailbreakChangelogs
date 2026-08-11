@@ -8,6 +8,7 @@ import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { DupeFinderHistoryEntry } from "@/types";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
+import { formatShortDateTime } from "@/utils/helpers/timestamp";
 
 interface UserData {
   id: number;
@@ -140,13 +141,7 @@ function ChainCard({
       </div>
 
       <div className="text-secondary-text w-full text-center text-xs sm:w-auto sm:shrink-0 sm:text-right sm:text-sm">
-        {new Date(toUser.TradeTime * 1000).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
+        {formatShortDateTime(toUser.TradeTime)}
       </div>
     </div>
   );
@@ -404,13 +399,7 @@ export default function TradeHistoryList({
           </div>
         </div>
         <div className="text-secondary-text text-xs sm:shrink-0 sm:text-right sm:text-sm">
-          {new Date(firstOwner.TradeTime * 1000).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          {formatShortDateTime(firstOwner.TradeTime)}
         </div>
       </div>
 

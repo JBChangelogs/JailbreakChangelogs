@@ -31,6 +31,7 @@ import {
   fetchNetworthCapHistory,
   NetworthCapSnapshot,
 } from "@/utils/api/api";
+import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 
 type DateRange = "7" | "14" | "30";
 
@@ -305,15 +306,7 @@ export default function NetworthCapHistoryChart() {
     DATE_RANGE_OPTIONS.find((o) => o.value === dateRange)?.label ??
     "Last 30 days";
 
-  const first = new Date(chartData[0].timestamp);
-  const last = new Date(chartData[chartData.length - 1].timestamp);
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  const rangeLabel = `${fmt(first)} - ${fmt(last)}`;
+  const rangeLabel = `${formatMonthDayYear(chartData[0].timestamp)} - ${formatMonthDayYear(chartData[chartData.length - 1].timestamp)}`;
 
   return (
     <div className="border-border-card bg-secondary-bg mb-8 space-y-4 rounded-lg border p-4">
@@ -524,11 +517,7 @@ export default function NetworthCapHistoryChart() {
                         ? row.timestamp
                         : Number(row?.timestamp);
                     if (!Number.isFinite(ts)) return "Unknown Date";
-                    return new Date(ts).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    });
+                    return formatMonthDayYear(ts);
                   }}
                 />
               }

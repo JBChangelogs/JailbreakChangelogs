@@ -16,7 +16,10 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { formatFullValue, formatPrice } from "@/utils/trading/values";
-import { formatCustomDate } from "@/utils/helpers/timestamp";
+import {
+  formatCustomDate,
+  formatShortDateTime,
+} from "@/utils/helpers/timestamp";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import type { UserData } from "@/types/auth";
@@ -500,15 +503,7 @@ export default function ItemChangelogs({
                                 </a>
                               </div>
                               <div className="text-tertiary-text text-sm font-medium">
-                                {new Date(
-                                  voter.timestamp * 1000,
-                                ).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {formatShortDateTime(voter.timestamp)}
                               </div>
                             </div>
                           </div>

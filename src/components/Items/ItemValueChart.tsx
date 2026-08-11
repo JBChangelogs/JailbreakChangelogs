@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 import {
   ChartContainer,
   ChartTooltip,
@@ -411,15 +412,7 @@ const ItemValueChart = ({
 
   const getRangeLabel = (rangeData: typeof valueChartData) => {
     if (rangeData.length === 0) return null;
-    const first = new Date(rangeData[0].timestamp);
-    const last = new Date(rangeData[rangeData.length - 1].timestamp);
-    const format = (date: Date) =>
-      date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    return `${format(first)} - ${format(last)}`;
+    return `${formatMonthDayYear(rangeData[0].timestamp)} - ${formatMonthDayYear(rangeData[rangeData.length - 1].timestamp)}`;
   };
 
   const getTrendSummary = (
@@ -505,15 +498,7 @@ const ItemValueChart = ({
 
   const getTradingRangeLabel = (rangeData: typeof tradingChartData) => {
     if (rangeData.length === 0) return null;
-    const first = new Date(rangeData[0].timestamp);
-    const last = new Date(rangeData[rangeData.length - 1].timestamp);
-    const format = (date: Date) =>
-      date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    return `${format(first)} - ${format(last)}`;
+    return `${formatMonthDayYear(rangeData[0].timestamp)} - ${formatMonthDayYear(rangeData[rangeData.length - 1].timestamp)}`;
   };
 
   const tradedTrend = getTradingTrendSummary(tradingChartData, "traded");

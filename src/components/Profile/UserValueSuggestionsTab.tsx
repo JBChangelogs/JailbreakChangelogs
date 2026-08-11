@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { formatMessageDate, formatCustomDate } from "@/utils/helpers/timestamp";
+import {
+  formatMessageDate,
+  formatCustomDate,
+  formatShortDateTime,
+} from "@/utils/helpers/timestamp";
 import {
   Tooltip,
   TooltipContent,
@@ -934,15 +938,7 @@ export default function UserValueSuggestionsTab({
                                 </Link>
                               </div>
                               <div className="text-tertiary-text text-sm">
-                                {new Date(
-                                  v.created_at * 1000,
-                                ).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {formatShortDateTime(v.created_at)}
                               </div>
                             </div>
                           </div>

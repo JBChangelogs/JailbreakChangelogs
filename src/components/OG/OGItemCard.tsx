@@ -39,20 +39,11 @@ import {
 } from "@/components/ui/tooltip";
 
 import { bangers } from "@/app/fonts";
+import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 
 // Helper function to format numbers with commas
 const formatNumber = (num: number) => {
   return new Intl.NumberFormat().format(num);
-};
-
-// Helper function to format date
-const formatDateOnly = (timestamp: number) => {
-  const date = new Date(timestamp * 1000);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 };
 
 interface OGItem {
@@ -402,7 +393,7 @@ export default function OGItemCard({
         <div>
           <div className="text-secondary-text text-sm">LOGGED ON</div>
           <div className="text-primary-text text-xl font-bold">
-            {formatDateOnly(item.logged_at)}
+            {formatMonthDayYear(item.logged_at)}
           </div>
         </div>
       </div>

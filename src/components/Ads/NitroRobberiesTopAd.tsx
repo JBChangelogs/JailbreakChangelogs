@@ -19,6 +19,7 @@ const CONFIG = {
   video: {
     mobile: "compact",
     hidePlaylist: true,
+    float: "never",
   },
 };
 

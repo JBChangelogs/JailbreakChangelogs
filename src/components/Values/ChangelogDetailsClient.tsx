@@ -22,7 +22,10 @@ import {
   getVideoPath,
 } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import { formatMessageDate } from "@/utils/helpers/timestamp";
+import {
+  formatMessageDate,
+  formatShortDateTime,
+} from "@/utils/helpers/timestamp";
 import { formatFullValue, formatPrice } from "@/utils/trading/values";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import ReactMarkdown from "react-markdown";
@@ -1330,15 +1333,7 @@ export default function ChangelogDetailsClient({
                                 </Link>
                               </div>
                               <div className="text-tertiary-text text-sm font-medium">
-                                {new Date(
-                                  voter.timestamp * 1000,
-                                ).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {formatShortDateTime(voter.timestamp)}
                               </div>
                             </div>
                           </div>
