@@ -86,10 +86,10 @@ export default function ConnectedBotsPolling() {
           </h2>
           <div className="flex items-center gap-2">
             <Icon
-              icon="fluent:live-off-24-filled"
-              className="text-status-neutral h-4 w-4"
+              icon="heroicons:signal-slash"
+              className="text-secondary-text h-4 w-4"
             />
-            <span className="text-status-neutral text-xs font-medium tracking-wide uppercase">
+            <span className="text-secondary-text text-xs font-medium tracking-wide uppercase">
               OFFLINE
             </span>
           </div>
@@ -157,39 +157,43 @@ export default function ConnectedBotsPolling() {
           </h2>
           <div className="flex items-center gap-2">
             <Icon
-              icon="fluent:live-off-24-filled"
-              className="text-status-neutral h-4 w-4"
+              icon="heroicons:signal-slash"
+              className="text-secondary-text h-4 w-4"
             />
-            <span className="text-status-neutral text-xs font-medium tracking-wide uppercase">
+            <span className="text-secondary-text text-xs font-medium tracking-wide uppercase">
               OFFLINE
             </span>
           </div>
         </div>
-        <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-          <div className="py-8 text-center">
-            <div className="text-secondary-text mb-2 text-lg font-medium">
-              {pollingStopped ? "Bots offline" : "No bots active"}
-            </div>
-            <div className="text-tertiary-text text-sm">
-              {pollingStopped
-                ? "No inventory scanning bots have been active for 2+ minutes. Please check back in a bit."
-                : "No inventory scanning bots have been active in the last 30 seconds"}
-            </div>
-            <div className="mt-3 flex flex-col items-center gap-2">
-              <p className="text-secondary-text text-sm">
-                If this takes longer than usual, check our status page.
-              </p>
-              <Button asChild variant="secondary" size="sm">
-                <a
-                  href="https://status.jailbreakchangelogs.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Icon icon="heroicons:signal" className="h-4 w-4" />
-                  View Uptime
-                </a>
-              </Button>
-            </div>
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+          <div className="border-status-neutral/30 bg-status-neutral/20 mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border">
+            <Icon
+              icon="heroicons:signal-slash"
+              className="text-secondary-text h-7 w-7"
+            />
+          </div>
+          <h4 className="text-primary-text mb-1 text-lg font-semibold">
+            {pollingStopped ? "Bots offline" : "No bots active"}
+          </h4>
+          <p className="text-secondary-text mx-auto max-w-sm text-sm">
+            {pollingStopped
+              ? "No bots scanning inventories or logging robberies have been active for 2+ minutes. Please check back in a bit."
+              : "No bots scanning inventories or logging robberies have been active in the last 30 seconds."}
+          </p>
+          <div className="mt-4 flex flex-col items-center gap-1.5">
+            <p className="text-secondary-text text-xs">
+              Taking longer than usual? Check our status page.
+            </p>
+            <Button asChild size="sm">
+              <a
+                href="https://status.jailbreakchangelogs.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon icon="heroicons:signal" className="h-4 w-4" />
+                View Uptime
+              </a>
+            </Button>
           </div>
         </div>
       </div>
