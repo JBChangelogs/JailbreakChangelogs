@@ -6,7 +6,7 @@
     "dev": "bun run generate:icons && next dev -p 5500",
     "build": "bun run generate:icons && next build",
     "build:analyze": "ANALYZE=true next build",
-    "generate:icons": "bun scripts/generate-icon-bundle.ts && oxfmt src/lib/icon-bundle.generated.ts",
+    "generate:icons": "bun scripts/generate-icon-bundle.ts && oxfmt --no-error-on-unmatched-pattern src/lib/icon-bundle.generated.ts",
     "analyze": "next experimental-analyze",
     "start": "next start -p 5500",
     "start:cf": "sh ./scripts/start-with-tunnel.sh",
