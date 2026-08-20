@@ -245,19 +245,21 @@ export default function ValuesClient({
             </p>
 
             <div className="mb-4 flex flex-wrap gap-2">
-              <Button asChild>
+              <Button asChild variant="outline" size="sm">
                 <Link href="/dupes" prefetch={false}>
                   <Icon icon="heroicons:magnifying-glass" inline={true} />
                   Dupe Finder
                 </Link>
               </Button>
-              <Button asChild>
+              <Button asChild variant="outline" size="sm">
                 <Link href="/hyperchrome-pity" prefetch={false}>
+                  <Icon icon="heroicons:calculator" inline={true} />
                   Hyperchrome Pity Calculator
                 </Link>
               </Button>
-              <Button asChild>
+              <Button asChild variant="outline" size="sm">
                 <Link href="/items/suggestions" prefetch={false}>
+                  <Icon icon="heroicons:light-bulb" inline={true} />
                   Item Suggestions
                 </Link>
               </Button>
@@ -266,7 +268,7 @@ export default function ValuesClient({
             <Link
               href="/items/suggestions"
               prefetch={false}
-              className="border-border-card bg-tertiary-bg mb-4 flex flex-col gap-1 rounded-lg border px-4 py-3 transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+              className="border-border-card bg-tertiary-bg mb-4 flex flex-col gap-1 rounded-lg border px-4 py-3 transition-colors xl:flex-row xl:items-center xl:justify-between xl:gap-3"
             >
               <p className="text-secondary-text text-sm">
                 Think a value is wrong?{" "}
