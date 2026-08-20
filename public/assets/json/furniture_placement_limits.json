@@ -1,0 +1,341 @@
+{
+
+    "furniture_placement_limits": [
+        {
+            "id": 588,
+            "name": "80s Cassette Table",
+            "placement_limit": 1
+        },
+        {
+            "id": 589,
+            "name": "Air Hockey Table",
+            "placement_limit": 1
+        },
+        {
+            "id": 590,
+            "name": "Arcade Sports Machine",
+            "placement_limit": 2
+        },
+        {
+            "id": 591,
+            "name": "Aurora Chandelier",
+            "placement_limit": 2
+        },
+        {
+            "id": 592,
+            "name": "Beach Hammock",
+            "placement_limit": 2
+        },
+        {
+            "id": 593,
+            "name": "Bloxy Lisa",
+            "placement_limit": 3
+        },
+        {
+            "id": 594,
+            "name": "Car Pool Table",
+            "placement_limit": 1
+        },
+        {
+            "id": 595,
+            "name": "Cosmetic Safe",
+            "placement_limit": 1
+        },
+        {
+            "id": 596,
+            "name": "Cryo Chamber",
+            "placement_limit": 3
+        },
+        {
+            "id": 597,
+            "name": "CyberBlue Couch",
+            "placement_limit": 3
+        },
+        {
+            "id": 599,
+            "name": "Fabulous Sign",
+            "placement_limit": 1
+        },
+        {
+            "id": 600,
+            "name": "Foosball Table",
+            "placement_limit": 1
+        },
+        {
+            "id": 601,
+            "name": "French Croissant Sofa",
+            "placement_limit": 2
+        },
+        {
+            "id": 602,
+            "name": "Gamer Chair",
+            "placement_limit": 1
+        },
+        {
+            "id": 603,
+            "name": "Giant OG Snowman",
+            "placement_limit": 3
+        },
+        {
+            "id": 605,
+            "name": "Hero Zapper",
+            "placement_limit": 1
+        },
+        {
+            "id": 606,
+            "name": "Hot Chocolate Tub",
+            "placement_limit": 1
+        },
+        {
+            "id": 607,
+            "name": "If I Had One",
+            "placement_limit": 1
+        },
+        {
+            "id": 608,
+            "name": "Japanese Neon Sign",
+            "placement_limit": 3
+        },
+        {
+            "id": 609,
+            "name": "Liberty",
+            "placement_limit": 1
+        },
+        {
+            "id": 610,
+            "name": "London Telephone Sofa",
+            "placement_limit": 2
+        },
+        {
+            "id": 611,
+            "name": "Missile Bed",
+            "placement_limit": 1
+        },
+        {
+            "id": 612,
+            "name": "Missile Sofa",
+            "placement_limit": 1
+        },
+        {
+            "id": 613,
+            "name": "Noob Scream",
+            "placement_limit": 1
+        },
+        {
+            "id": 614,
+            "name": "Nukamo Fridge",
+            "placement_limit": 1
+        },
+        {
+            "id": 615,
+            "name": "OG Snow Machine",
+            "placement_limit": 2
+        },
+        {
+            "id": 616,
+            "name": "Picnic Table",
+            "placement_limit": 1
+        },
+        {
+            "id": 617,
+            "name": "Puzzle Couch",
+            "placement_limit": 3
+        },
+        {
+            "id": 618,
+            "name": "Race Car Bed",
+            "placement_limit": 1
+        },
+        {
+            "id": 619,
+            "name": "Race Simulator",
+            "placement_limit": 1
+        },
+        {
+            "id": 620,
+            "name": "Radiation Radio",
+            "placement_limit": 1
+        },
+        {
+            "id": 621,
+            "name": "RGB Wall",
+            "placement_limit": 3
+        },
+        {
+            "id": 622,
+            "name": "Royal Throne",
+            "placement_limit": 1
+        },
+        {
+            "id": 623,
+            "name": "Sakura Tree",
+            "placement_limit": 2
+        },
+        {
+            "id": 624,
+            "name": "Sarcophagus Bed",
+            "placement_limit": 1
+        },
+        {
+            "id": 625,
+            "name": "Sci-Fi Kitchen",
+            "placement_limit": 1
+        },
+        {
+            "id": 626,
+            "name": "Super Star Rug",
+            "placement_limit": 2
+        },
+        {
+            "id": 627,
+            "name": "Teleporters",
+            "placement_limit": 1
+        },
+        {
+            "id": 628,
+            "name": "Tiger Rug",
+            "placement_limit": 2
+        },
+        {
+            "id": 629,
+            "name": "Tiki Tea Bar",
+            "placement_limit": 1
+        },
+        {
+            "id": 631,
+            "name": "Toy Plane",
+            "placement_limit": 2
+        },
+        {
+            "id": 632,
+            "name": "Track Car Bed",
+            "placement_limit": 1
+        },
+        {
+            "id": 633,
+            "name": "Trapped Bookshelf",
+            "placement_limit": 3
+        },
+        {
+            "id": 635,
+            "name": "Walk Of Fame",
+            "placement_limit": 1
+        },
+        {
+            "id": 636,
+            "name": "Wanted Background",
+            "placement_limit": 3
+        },
+        {
+            "id": 637,
+            "name": "Wild West Wagon",
+            "placement_limit": 2
+        },
+        {
+            "id": 638,
+            "name": "Winter Rally Lamp",
+            "placement_limit": 2
+        },
+        {
+            "id": 666,
+            "name": "Arcade Portal",
+            "placement_limit": 1
+        },
+        {
+            "id": 675,
+            "name": "Pixel Campfire",
+            "placement_limit": 1
+        },
+        {
+            "id": 731,
+            "name": "Tiki Stack Of Badimo",
+            "placement_limit": 4
+        },
+        {
+            "id": 735,
+            "name": "Banana Chandelier",
+            "placement_limit": 2
+        },
+        {
+            "id": 736,
+            "name": "Rally Signage",
+            "placement_limit": 1
+        },
+        {
+            "id": 744,
+            "name": "Pirate Figurehead",
+            "placement_limit": 6
+        },
+        {
+            "id": 745,
+            "name": "Sloopwreck Bed",
+            "placement_limit": 2
+        },
+        {
+            "id": 756,
+            "name": "Captain Chandelier",
+            "placement_limit": 3
+        },
+        {
+            "id": 757,
+            "name": "Captain Table",
+            "placement_limit": 5
+        },
+        {
+            "id": 760,
+            "name": "Neon Vein Wall-Art",
+            "placement_limit": 2
+        },
+        {
+            "id": 771,
+            "name": "Hologram Donut Vendor",
+            "placement_limit": 1
+        },
+        {
+            "id": 772,
+            "name": "Wanted Hologram Signage",
+            "placement_limit": 6
+        },
+        {
+            "id": 793,
+            "name": "Spawn Rug",
+            "placement_limit": 2
+        },
+        {
+            "id": 794,
+            "name": "Avatar Wardrobe",
+            "placement_limit": 2
+        },
+        {
+            "id": 809,
+            "name": "Haunting Door",
+            "placement_limit": 1
+        },
+        {
+            "id": 950,
+            "name": "Tuner AC",
+            "placement_limit": 2
+        },
+        {
+            "id": 968,
+            "name": "Moycc",
+            "placement_limit": 6
+        },
+        {
+            "id": 975,
+            "name": "3D Rex",
+            "placement_limit": 1
+        },
+        {
+            "id": 969,
+            "name": "Mammoth Bed",
+            "placement_limit": 2
+        },
+        {
+            "id": 974,
+            "name": "Pablo",
+            "placement_limit": 3
+        }
+    ]
+
+}

@@ -1,0 +1,2357 @@
+{
+  "items": [
+    {
+      "item_id": 593,
+      "type": "Furniture",
+      "name": "Bloxy Lisa",
+      "level": 3
+    },
+    {
+      "item_id": 626,
+      "type": "Furniture",
+      "name": "Super Star Rug",
+      "level": 5
+    },
+    {
+      "item_id": 88,
+      "type": "Rim",
+      "name": "Spider Leg",
+      "season": 1
+    },
+    {
+      "item_id": 94,
+      "type": "Rim",
+      "name": "Star Badge",
+      "season": 1
+    },
+    {
+      "item_id": 361,
+      "type": "Spoiler",
+      "name": "5 Star",
+      "season": 1
+    },
+    {
+      "item_id": 388,
+      "type": "Spoiler",
+      "name": "Eight Leg",
+      "season": 1
+    },
+    {
+      "item_id": 703,
+      "type": "Weapon Skin",
+      "name": "Snowstorm",
+      "season": 1,
+      "level": 3
+    },
+    {
+      "item_id": 695,
+      "type": "Weapon Skin",
+      "name": "Fire",
+      "season": 1,
+      "level": 4
+    },
+    {
+      "item_id": 339,
+      "type": "Texture",
+      "name": "Snowstorm",
+      "season": 1,
+      "level": 5
+    },
+    {
+      "item_id": 17,
+      "type": "Rim",
+      "name": "Bull",
+      "season": 1,
+      "level": 6
+    },
+    {
+      "item_id": 306,
+      "type": "Texture",
+      "name": "Fire",
+      "season": 1,
+      "level": 8
+    },
+    {
+      "item_id": 108,
+      "type": "Rim",
+      "name": "Void",
+      "season": 1,
+      "level": 9
+    },
+    {
+      "item_id": 137,
+      "type": "Vehicle",
+      "name": "Beam Hybrid",
+      "season": 1,
+      "level": 10
+    },
+    {
+      "item_id": 133,
+      "type": "Vehicle",
+      "name": "Arachnid",
+      "season": 2
+    },
+    {
+      "item_id": 222,
+      "type": "Vehicle",
+      "name": "Torpedo",
+      "season": 2
+    },
+    {
+      "item_id": 57,
+      "type": "Rim",
+      "name": "Planetary",
+      "season": 2,
+      "level": 3
+    },
+    {
+      "item_id": 433,
+      "type": "Spoiler",
+      "name": "Star Wing",
+      "season": 2,
+      "level": 4
+    },
+    {
+      "item_id": 526,
+      "type": "Body Color",
+      "name": "Vantablack",
+      "season": 2,
+      "level": 5
+    },
+    {
+      "item_id": 697,
+      "type": "Weapon Skin",
+      "name": "Galactic Carbon",
+      "season": 2,
+      "level": 6
+    },
+    {
+      "item_id": 310,
+      "type": "Texture",
+      "name": "Galactic Carbon",
+      "season": 2,
+      "level": 8
+    },
+    {
+      "item_id": 441,
+      "type": "Spoiler",
+      "name": "Thrusters",
+      "season": 2,
+      "level": 9
+    },
+    {
+      "item_id": 150,
+      "type": "Vehicle",
+      "name": "Crew Capsule",
+      "season": 2,
+      "level": 10
+    },
+    {
+      "item_id": 13,
+      "type": "Rim",
+      "name": "Blue Eyes",
+      "season": 3
+    },
+    {
+      "item_id": 26,
+      "type": "Rim",
+      "name": "Distorted",
+      "season": 3
+    },
+    {
+      "item_id": 54,
+      "type": "Rim",
+      "name": "Nemesis",
+      "season": 3
+    },
+    {
+      "item_id": 68,
+      "type": "Rim",
+      "name": "Red Eyes",
+      "season": 3
+    },
+    {
+      "item_id": 168,
+      "type": "Vehicle",
+      "name": "JB8",
+      "season": 3
+    },
+    {
+      "item_id": 198,
+      "type": "Vehicle",
+      "name": "Raptor",
+      "season": 3
+    },
+    {
+      "item_id": 691,
+      "type": "Weapon Skin",
+      "name": "Digital Confetti",
+      "season": 3,
+      "level": 3
+    },
+    {
+      "item_id": 298,
+      "type": "Texture",
+      "name": "Digital Confetti",
+      "season": 3,
+      "level": 4
+    },
+    {
+      "item_id": 618,
+      "type": "Furniture",
+      "name": "Race Car Bed",
+      "season": 3,
+      "level": 5
+    },
+    {
+      "item_id": 621,
+      "type": "Furniture",
+      "name": "RGB Wall",
+      "season": 3,
+      "level": 8
+    },
+    {
+      "item_id": 457,
+      "type": "Spoiler",
+      "name": "Volt Wing",
+      "season": 3,
+      "level": 9
+    },
+    {
+      "item_id": 227,
+      "type": "Vehicle",
+      "name": "Volt 4x4",
+      "season": 3,
+      "level": 10
+    },
+    {
+      "item_id": 369,
+      "type": "Spoiler",
+      "name": "Blue Chute",
+      "season": 4
+    },
+    {
+      "item_id": 387,
+      "type": "Spoiler",
+      "name": "Dual Rockets",
+      "season": 4
+    },
+    {
+      "item_id": 412,
+      "type": "Spoiler",
+      "name": "Orange Chute",
+      "season": 4
+    },
+    {
+      "item_id": 419,
+      "type": "Spoiler",
+      "name": "Robo Wing",
+      "season": 4
+    },
+    {
+      "item_id": 448,
+      "type": "Spoiler",
+      "name": "Triple Fin",
+      "season": 4
+    },
+    {
+      "item_id": 454,
+      "type": "Spoiler",
+      "name": "UFO",
+      "season": 4
+    },
+    {
+      "item_id": 694,
+      "type": "Weapon Skin",
+      "name": "Earthquake",
+      "season": 4,
+      "level": 2
+    },
+    {
+      "item_id": 633,
+      "type": "Furniture",
+      "name": "Trapped Bookshelf",
+      "season": 4,
+      "level": 3
+    },
+    {
+      "item_id": 628,
+      "type": "Furniture",
+      "name": "Tiger Rug",
+      "season": 4,
+      "level": 4
+    },
+    {
+      "item_id": 303,
+      "type": "Texture",
+      "name": "Earthquake",
+      "season": 4,
+      "level": 5
+    },
+    {
+      "item_id": 382,
+      "type": "Spoiler",
+      "name": "Death Trap",
+      "season": 4,
+      "level": 6
+    },
+    {
+      "item_id": 624,
+      "type": "Furniture",
+      "name": "Sarcophagus Bed",
+      "season": 4,
+      "level": 7
+    },
+    {
+      "item_id": 21,
+      "type": "Rim",
+      "name": "Compass",
+      "season": 4,
+      "level": 8
+    },
+    {
+      "item_id": 442,
+      "type": "Spoiler",
+      "name": "Tiki Torch",
+      "season": 4,
+      "level": 9
+    },
+    {
+      "item_id": 199,
+      "type": "Vehicle",
+      "name": "Rattler",
+      "season": 4,
+      "level": 10
+    },
+    {
+      "item_id": 602,
+      "type": "Furniture",
+      "name": "Gamer Chair",
+      "season": 5,
+      "level": 2
+    },
+    {
+      "item_id": 379,
+      "type": "Spoiler",
+      "name": "Clickbait",
+      "season": 5,
+      "level": 3
+    },
+    {
+      "item_id": 607,
+      "type": "Furniture",
+      "name": "If I Had One",
+      "season": 5,
+      "level": 4
+    },
+    {
+      "item_id": 693,
+      "type": "Weapon Skin",
+      "name": "Drip",
+      "season": 5,
+      "level": 5
+    },
+    {
+      "item_id": 452,
+      "type": "Spoiler",
+      "name": "Tuner",
+      "season": 5,
+      "level": 6
+    },
+    {
+      "item_id": 613,
+      "type": "Furniture",
+      "name": "Noob Scream",
+      "season": 5,
+      "level": 7
+    },
+    {
+      "item_id": 301,
+      "type": "Texture",
+      "name": "Drip",
+      "season": 5,
+      "level": 8
+    },
+    {
+      "item_id": 62,
+      "type": "Rim",
+      "name": "RTX",
+      "season": 5,
+      "level": 9
+    },
+    {
+      "item_id": 135,
+      "type": "Vehicle",
+      "name": "Banana Car",
+      "season": 5,
+      "level": 10
+    },
+    {
+      "item_id": 69,
+      "type": "Rim",
+      "name": "Retro Racer",
+      "season": 6,
+      "level": 2
+    },
+    {
+      "item_id": 696,
+      "type": "Weapon Skin",
+      "name": "Flaming",
+      "season": 6,
+      "level": 3
+    },
+    {
+      "item_id": 632,
+      "type": "Furniture",
+      "name": "Track Car Bed",
+      "season": 6,
+      "level": 4
+    },
+    {
+      "item_id": 455,
+      "type": "Spoiler",
+      "name": "Velocity",
+      "season": 6,
+      "level": 5
+    },
+    {
+      "item_id": 398,
+      "type": "Spoiler",
+      "name": "JDM",
+      "season": 6,
+      "level": 6
+    },
+    {
+      "item_id": 19,
+      "type": "Rim",
+      "name": "Center Lock",
+      "season": 6,
+      "level": 7
+    },
+    {
+      "item_id": 294,
+      "type": "Texture",
+      "name": "Crimson Racer",
+      "season": 6,
+      "level": 8
+    },
+    {
+      "item_id": 619,
+      "type": "Furniture",
+      "name": "Race Simulator",
+      "season": 6,
+      "level": 9
+    },
+    {
+      "item_id": 138,
+      "type": "Vehicle",
+      "name": "Beignet",
+      "season": 6,
+      "level": 10
+    },
+    {
+      "item_id": 307,
+      "type": "Texture",
+      "name": "Flaming",
+      "season": 6,
+      "placement": "5%"
+    },
+    {
+      "item_id": 314,
+      "type": "Texture",
+      "name": "Gulf",
+      "season": 6,
+      "placement": "10%"
+    },
+    {
+      "item_id": 594,
+      "type": "Furniture",
+      "name": "Car Pool Table",
+      "season": 6,
+      "placement": "25%"
+    },
+    {
+      "item_id": 686,
+      "type": "Weapon Skin",
+      "name": "Black Ice",
+      "season": 7,
+      "level": 2
+    },
+    {
+      "item_id": 606,
+      "type": "Furniture",
+      "name": "Hot Chocolate Tub",
+      "season": 7,
+      "level": 3
+    },
+    {
+      "item_id": 428,
+      "type": "Spoiler",
+      "name": "Snow Log",
+      "season": 7,
+      "level": 4
+    },
+    {
+      "item_id": 44,
+      "type": "Rim",
+      "name": "Icicle",
+      "season": 7,
+      "level": 5
+    },
+    {
+      "item_id": 589,
+      "type": "Furniture",
+      "name": "Air Hockey Table",
+      "season": 7,
+      "level": 6
+    },
+    {
+      "item_id": 429,
+      "type": "Spoiler",
+      "name": "Snow Shovel",
+      "season": 7,
+      "level": 7
+    },
+    {
+      "item_id": 279,
+      "type": "Texture",
+      "name": "Black Ice",
+      "season": 7,
+      "level": 8
+    },
+    {
+      "item_id": 83,
+      "type": "Rim",
+      "name": "Snow Face",
+      "season": 7,
+      "level": 9
+    },
+    {
+      "item_id": 166,
+      "type": "Vehicle",
+      "name": "Icebreaker",
+      "season": 7,
+      "level": 10
+    },
+    {
+      "item_id": 353,
+      "type": "Texture",
+      "name": "Winter Camo",
+      "season": 7,
+      "placement": "1%"
+    },
+    {
+      "item_id": 99,
+      "type": "Rim",
+      "name": "Trion",
+      "season": 8,
+      "level": 2
+    },
+    {
+      "item_id": 689,
+      "type": "Weapon Skin",
+      "name": "Circuit Board",
+      "season": 8,
+      "level": 3
+    },
+    {
+      "item_id": 413,
+      "type": "Spoiler",
+      "name": "Overdrive",
+      "season": 8,
+      "level": 4
+    },
+    {
+      "item_id": 407,
+      "type": "Spoiler",
+      "name": "Mecha Arm",
+      "season": 8,
+      "level": 5
+    },
+    {
+      "item_id": 627,
+      "type": "Furniture",
+      "name": "Teleporters",
+      "season": 8,
+      "level": 6
+    },
+    {
+      "item_id": 45,
+      "type": "Rim",
+      "name": "Ionize",
+      "season": 8,
+      "level": 7
+    },
+    {
+      "item_id": 287,
+      "type": "Texture",
+      "name": "Circuits",
+      "season": 8,
+      "level": 8
+    },
+    {
+      "item_id": 625,
+      "type": "Furniture",
+      "name": "Sci-Fi Kitchen",
+      "season": 8,
+      "level": 9
+    },
+    {
+      "item_id": 146,
+      "type": "Vehicle",
+      "name": "Celsior",
+      "season": 8,
+      "level": 10
+    },
+    {
+      "item_id": 31,
+      "type": "Rim",
+      "name": "Energized",
+      "season": 8,
+      "placement": "2%"
+    },
+    {
+      "item_id": 447,
+      "type": "Spoiler",
+      "name": "Travel Case",
+      "season": 9,
+      "level": 2
+    },
+    {
+      "item_id": 616,
+      "type": "Furniture",
+      "name": "Picnic Table",
+      "season": 9,
+      "level": 3
+    },
+    {
+      "item_id": 46,
+      "type": "Rim",
+      "name": "Iron Rock",
+      "season": 9,
+      "level": 5
+    },
+    {
+      "item_id": 7,
+      "type": "Rim",
+      "name": "Beadlock",
+      "season": 9,
+      "level": 6
+    },
+    {
+      "item_id": 394,
+      "type": "Spoiler",
+      "name": "Glider",
+      "season": 9,
+      "level": 7
+    },
+    {
+      "item_id": 169,
+      "type": "Vehicle",
+      "name": "Jackrabbit",
+      "season": 9,
+      "level": 8
+    },
+    {
+      "item_id": 367,
+      "type": "Spoiler",
+      "name": "Bicycle Rack",
+      "season": 9,
+      "level": 9
+    },
+    {
+      "item_id": 326,
+      "type": "Texture",
+      "name": "Old Town Road",
+      "season": 9,
+      "level": 10
+    },
+    {
+      "item_id": 642,
+      "type": "Horn",
+      "name": "Cucaracha",
+      "season": 9,
+      "placement": "5%"
+    },
+    {
+      "item_id": 449,
+      "type": "Spoiler",
+      "name": "Trophy Wings",
+      "season": 10,
+      "level": 2
+    },
+    {
+      "item_id": 635,
+      "type": "Furniture",
+      "name": "Walk Of Fame",
+      "season": 10,
+      "level": 3
+    },
+    {
+      "item_id": 73,
+      "type": "Rim",
+      "name": "Roll-X",
+      "season": 10,
+      "level": 4
+    },
+    {
+      "item_id": 705,
+      "type": "Weapon Skin",
+      "name": "White Marble",
+      "season": 10,
+      "level": 5
+    },
+    {
+      "item_id": 622,
+      "type": "Furniture",
+      "name": "Royal Throne",
+      "season": 10,
+      "level": 6
+    },
+    {
+      "item_id": 376,
+      "type": "Spoiler",
+      "name": "Cash Spitter",
+      "season": 10,
+      "level": 7
+    },
+    {
+      "item_id": 352,
+      "type": "Texture",
+      "name": "White Marble",
+      "season": 10,
+      "level": 8
+    },
+    {
+      "item_id": 24,
+      "type": "Rim",
+      "name": "Diamond Engrave",
+      "season": 10,
+      "level": 9
+    },
+    {
+      "item_id": 177,
+      "type": "Vehicle",
+      "name": "Macaron",
+      "season": 10,
+      "level": 10
+    },
+    {
+      "item_id": 342,
+      "type": "Texture",
+      "name": "Superstar",
+      "season": 10,
+      "placement": "2%"
+    },
+    {
+      "item_id": 96,
+      "type": "Rim",
+      "name": "Teddy Bear",
+      "season": 11,
+      "level": 2
+    },
+    {
+      "item_id": 617,
+      "type": "Furniture",
+      "name": "Puzzle Couch",
+      "season": 11,
+      "level": 3
+    },
+    {
+      "item_id": 416,
+      "type": "Spoiler",
+      "name": "RC Antenna",
+      "season": 11,
+      "level": 4
+    },
+    {
+      "item_id": 98,
+      "type": "Rim",
+      "name": "Track Toy",
+      "season": 11,
+      "level": 5
+    },
+    {
+      "item_id": 355,
+      "type": "Texture",
+      "name": "Wooden Toy",
+      "season": 11,
+      "level": 6
+    },
+    {
+      "item_id": 458,
+      "type": "Spoiler",
+      "name": "Water Gun",
+      "season": 11,
+      "level": 7
+    },
+    {
+      "item_id": 220,
+      "type": "Vehicle",
+      "name": "Tiny Toy",
+      "season": 11,
+      "level": 8
+    },
+    {
+      "item_id": 401,
+      "type": "Spoiler",
+      "name": "Jetpack",
+      "season": 11,
+      "level": 9
+    },
+    {
+      "item_id": 139,
+      "type": "Vehicle",
+      "name": "Bloxy",
+      "season": 11,
+      "level": 10
+    },
+    {
+      "item_id": 453,
+      "type": "Spoiler",
+      "name": "Turning Key",
+      "season": 11,
+      "placement": "2%"
+    },
+    {
+      "item_id": 438,
+      "type": "Spoiler",
+      "name": "Tank Wing",
+      "season": 12,
+      "level": 2
+    },
+    {
+      "item_id": 247,
+      "type": "Tire Sticker",
+      "name": "Jailbreak Army",
+      "season": 12,
+      "level": 3
+    },
+    {
+      "item_id": 79,
+      "type": "Rim",
+      "name": "Scope",
+      "season": 12,
+      "level": 4
+    },
+    {
+      "item_id": 611,
+      "type": "Furniture",
+      "name": "Missile Bed",
+      "season": 12,
+      "level": 5
+    },
+    {
+      "item_id": 614,
+      "type": "Furniture",
+      "name": "Nukamo Fridge",
+      "season": 12,
+      "level": 6
+    },
+    {
+      "item_id": 364,
+      "type": "Spoiler",
+      "name": "After Burner",
+      "season": 12,
+      "level": 7
+    },
+    {
+      "item_id": 282,
+      "type": "Texture",
+      "name": "Camo Radar",
+      "season": 12,
+      "level": 8
+    },
+    {
+      "item_id": 64,
+      "type": "Rim",
+      "name": "Radar",
+      "season": 12,
+      "level": 9
+    },
+    {
+      "item_id": 164,
+      "type": "Vehicle",
+      "name": "Goliath",
+      "season": 12,
+      "level": 10
+    },
+    {
+      "item_id": 662,
+      "type": "Horn",
+      "name": "Winner",
+      "season": 12,
+      "placement": "2%"
+    },
+    {
+      "item_id": 488,
+      "type": "Body Color",
+      "name": "Darkest Purple",
+      "season": 13,
+      "level": 2
+    },
+    {
+      "item_id": 381,
+      "type": "Spoiler",
+      "name": "Death Ray",
+      "season": 13,
+      "level": 3
+    },
+    {
+      "item_id": 605,
+      "type": "Furniture",
+      "name": "Hero Zapper",
+      "season": 13,
+      "level": 4
+    },
+    {
+      "item_id": 392,
+      "type": "Spoiler",
+      "name": "Flamethrower",
+      "season": 13,
+      "level": 5
+    },
+    {
+      "item_id": 104,
+      "type": "Rim",
+      "name": "Unknown Signal",
+      "season": 13,
+      "level": 6
+    },
+    {
+      "item_id": 596,
+      "type": "Furniture",
+      "name": "Cryo Chamber",
+      "season": 13,
+      "level": 7
+    },
+    {
+      "item_id": 318,
+      "type": "Texture",
+      "name": "Lava",
+      "season": 13,
+      "level": 8
+    },
+    {
+      "item_id": 49,
+      "type": "Rim",
+      "name": "Laser Cannon",
+      "season": 13,
+      "level": 9
+    },
+    {
+      "item_id": 136,
+      "type": "Vehicle",
+      "name": "Bandit",
+      "season": 13,
+      "level": 10
+    },
+    {
+      "item_id": 78,
+      "type": "Rim",
+      "name": "SawBlade",
+      "season": 13,
+      "placement": "2%"
+    },
+    {
+      "item_id": 236,
+      "type": "Tire Sticker",
+      "name": "Champion",
+      "season": 14,
+      "level": 2
+    },
+    {
+      "item_id": 5,
+      "type": "Rim",
+      "name": "Baller",
+      "season": 14,
+      "level": 3
+    },
+    {
+      "item_id": 346,
+      "type": "Texture",
+      "name": "Touchdown",
+      "season": 14,
+      "level": 4
+    },
+    {
+      "item_id": 600,
+      "type": "Furniture",
+      "name": "Foosball Table",
+      "season": 14,
+      "level": 5
+    },
+    {
+      "item_id": 383,
+      "type": "Spoiler",
+      "name": "DoYouLift",
+      "season": 14,
+      "level": 6
+    },
+    {
+      "item_id": 35,
+      "type": "Rim",
+      "name": "Fore",
+      "season": 14,
+      "level": 7
+    },
+    {
+      "item_id": 590,
+      "type": "Furniture",
+      "name": "Arcade Sports Machine",
+      "season": 14,
+      "level": 8
+    },
+    {
+      "item_id": 389,
+      "type": "Spoiler",
+      "name": "Endurance Wing",
+      "season": 14,
+      "level": 9
+    },
+    {
+      "item_id": 197,
+      "type": "Vehicle",
+      "name": "Proto-8",
+      "season": 14,
+      "level": 10
+    },
+    {
+      "item_id": 644,
+      "type": "Horn",
+      "name": "Champion Trumpets",
+      "season": 14,
+      "placement": "2%"
+    },
+    {
+      "item_id": 269,
+      "type": "Tire Sticker",
+      "name": "Tokyo",
+      "season": 15,
+      "level": 2
+    },
+    {
+      "item_id": 623,
+      "type": "Furniture",
+      "name": "Sakura Tree",
+      "season": 15,
+      "level": 3
+    },
+    {
+      "item_id": 445,
+      "type": "Spoiler",
+      "name": "Torii Gate",
+      "season": 15,
+      "level": 4
+    },
+    {
+      "item_id": 400,
+      "type": "Spoiler",
+      "name": "Japanese Lantern",
+      "season": 15,
+      "level": 5
+    },
+    {
+      "item_id": 608,
+      "type": "Furniture",
+      "name": "Japanese Neon Sign",
+      "season": 15,
+      "level": 6
+    },
+    {
+      "item_id": 92,
+      "type": "Rim",
+      "name": "Stance",
+      "season": 15,
+      "level": 7
+    },
+    {
+      "item_id": 322,
+      "type": "Texture",
+      "name": "Manga",
+      "season": 15,
+      "level": 8
+    },
+    {
+      "item_id": 77,
+      "type": "Rim",
+      "name": "Sakura",
+      "season": 15,
+      "level": 9
+    },
+    {
+      "item_id": 210,
+      "type": "Vehicle",
+      "name": "Shogun",
+      "season": 15,
+      "level": 10
+    },
+    {
+      "item_id": 249,
+      "type": "Tire Sticker",
+      "name": "Kanagawa",
+      "season": 15,
+      "placement": "2%"
+    },
+    {
+      "item_id": 235,
+      "type": "Tire Sticker",
+      "name": "Buoy",
+      "season": 16,
+      "level": 2
+    },
+    {
+      "item_id": 434,
+      "type": "Spoiler",
+      "name": "Surfboard Rack",
+      "season": 16,
+      "level": 3
+    },
+    {
+      "item_id": 109,
+      "type": "Rim",
+      "name": "VolleyBall",
+      "season": 16,
+      "level": 4
+    },
+    {
+      "item_id": 592,
+      "type": "Furniture",
+      "name": "Beach Hammock",
+      "season": 16,
+      "level": 5
+    },
+    {
+      "item_id": 272,
+      "type": "Texture",
+      "name": "Aquatic",
+      "season": 16,
+      "level": 6
+    },
+    {
+      "item_id": 75,
+      "type": "Rim",
+      "name": "Rubber Ducky",
+      "season": 16,
+      "level": 7
+    },
+    {
+      "item_id": 629,
+      "type": "Furniture",
+      "name": "Tiki Tea Bar",
+      "season": 16,
+      "level": 8
+    },
+    {
+      "item_id": 423,
+      "type": "Spoiler",
+      "name": "Shell Speaker",
+      "season": 16,
+      "level": 9
+    },
+    {
+      "item_id": 193,
+      "type": "Vehicle",
+      "name": "Poseidon",
+      "season": 16,
+      "level": 10
+    },
+    {
+      "item_id": 6,
+      "type": "Rim",
+      "name": "Beachball",
+      "season": 16,
+      "placement": "2%"
+    },
+    {
+      "item_id": 242,
+      "type": "Tire Sticker",
+      "name": "Flags Of Europe",
+      "season": 17,
+      "level": 2
+    },
+    {
+      "item_id": 610,
+      "type": "Furniture",
+      "name": "London Telephone Sofa",
+      "season": 17,
+      "level": 3
+    },
+    {
+      "item_id": 8,
+      "type": "Rim",
+      "name": "Belgian Waffle",
+      "season": 17,
+      "level": 4
+    },
+    {
+      "item_id": 102,
+      "type": "Rim",
+      "name": "UK Heritage",
+      "season": 17,
+      "level": 5
+    },
+    {
+      "item_id": 601,
+      "type": "Furniture",
+      "name": "French Croissant Sofa",
+      "season": 17,
+      "level": 6
+    },
+    {
+      "item_id": 32,
+      "type": "Rim",
+      "name": "Euro Clover Leaf",
+      "season": 17,
+      "level": 7
+    },
+    {
+      "item_id": 278,
+      "type": "Texture",
+      "name": "Berlin Graffiti",
+      "season": 17,
+      "level": 8
+    },
+    {
+      "item_id": 380,
+      "type": "Spoiler",
+      "name": "Colors Of Italy",
+      "season": 17,
+      "level": 9
+    },
+    {
+      "item_id": 195,
+      "type": "Vehicle",
+      "name": "Power 1",
+      "season": 17,
+      "level": 10
+    },
+    {
+      "item_id": 404,
+      "type": "Spoiler",
+      "name": "Leaning Wing Of Pisa",
+      "season": 17,
+      "placement": "2%"
+    },
+    {
+      "item_id": 409,
+      "type": "Spoiler",
+      "name": "Native",
+      "season": 18,
+      "level": 2
+    },
+    {
+      "item_id": 460,
+      "type": "Spoiler",
+      "name": "Windmill",
+      "season": 18,
+      "level": 3
+    },
+    {
+      "item_id": 636,
+      "type": "Furniture",
+      "name": "Wanted Background",
+      "season": 18,
+      "level": 4
+    },
+    {
+      "item_id": 373,
+      "type": "Spoiler",
+      "name": "Bull",
+      "season": 18,
+      "level": 5
+    },
+    {
+      "item_id": 38,
+      "type": "Rim",
+      "name": "Gun Fire",
+      "season": 18,
+      "level": 6
+    },
+    {
+      "item_id": 100,
+      "type": "Rim",
+      "name": "Tumble Weed",
+      "season": 18,
+      "level": 7
+    },
+    {
+      "item_id": 277,
+      "type": "Texture",
+      "name": "Bandana",
+      "season": 18,
+      "level": 8
+    },
+    {
+      "item_id": 110,
+      "type": "Rim",
+      "name": "Wagon Wheel",
+      "season": 18,
+      "level": 9
+    },
+    {
+      "item_id": 175,
+      "type": "Vehicle",
+      "name": "LongHorn",
+      "season": 18,
+      "level": 10
+    },
+    {
+      "item_id": 637,
+      "type": "Furniture",
+      "name": "Wild West Wagon",
+      "season": 18,
+      "placement": "2%"
+    },
+    {
+      "item_id": 426,
+      "type": "Spoiler",
+      "name": "Ski Wing",
+      "season": 19,
+      "level": 2
+    },
+    {
+      "item_id": 51,
+      "type": "Rim",
+      "name": "Marshmallow",
+      "season": 19,
+      "level": 3
+    },
+    {
+      "item_id": 591,
+      "type": "Furniture",
+      "name": "Aurora Chandelier",
+      "season": 19,
+      "level": 4
+    },
+    {
+      "item_id": 430,
+      "type": "Spoiler",
+      "name": "Snow Cannon",
+      "season": 19,
+      "level": 5
+    },
+    {
+      "item_id": 55,
+      "type": "Rim",
+      "name": "Peppermint",
+      "season": 19,
+      "level": 6
+    },
+    {
+      "item_id": 540,
+      "type": "Tire Style",
+      "name": "Snow Chain",
+      "season": 19,
+      "level": 7
+    },
+    {
+      "item_id": 274,
+      "type": "Texture",
+      "name": "Aurora",
+      "season": 19,
+      "level": 8
+    },
+    {
+      "item_id": 37,
+      "type": "Rim",
+      "name": "Frostburn",
+      "season": 19,
+      "level": 9
+    },
+    {
+      "item_id": 163,
+      "type": "Vehicle",
+      "name": "Frost Crawler",
+      "season": 19,
+      "level": 10
+    },
+    {
+      "item_id": 111,
+      "type": "Drift",
+      "name": "Aurora",
+      "season": 19,
+      "placement": "2%"
+    },
+    {
+      "item_id": 422,
+      "type": "Spoiler",
+      "name": "Scythes",
+      "season": 20,
+      "level": 2
+    },
+    {
+      "item_id": 10,
+      "type": "Rim",
+      "name": "Biohazard",
+      "season": 20,
+      "level": 3
+    },
+    {
+      "item_id": 620,
+      "type": "Furniture",
+      "name": "Radiation Radio",
+      "season": 20,
+      "level": 4
+    },
+    {
+      "item_id": 421,
+      "type": "Spoiler",
+      "name": "SawBlade",
+      "season": 20,
+      "level": 5
+    },
+    {
+      "item_id": 72,
+      "type": "Rim",
+      "name": "Road Warrior",
+      "season": 20,
+      "level": 6
+    },
+    {
+      "item_id": 126,
+      "type": "Drift",
+      "name": "Spark",
+      "season": 20,
+      "level": 7
+    },
+    {
+      "item_id": 336,
+      "type": "Texture",
+      "name": "Road Hazard",
+      "season": 20,
+      "level": 8
+    },
+    {
+      "item_id": 542,
+      "type": "Tire Style",
+      "name": "Spiked",
+      "season": 20,
+      "level": 9
+    },
+    {
+      "item_id": 216,
+      "type": "Vehicle",
+      "name": "Striker",
+      "season": 20,
+      "level": 10
+    },
+    {
+      "item_id": 427,
+      "type": "Spoiler",
+      "name": "Skull",
+      "season": 20,
+      "placement": "2%"
+    },
+    {
+      "item_id": 41,
+      "type": "Rim",
+      "name": "Heli Prop",
+      "season": 21,
+      "level": 2
+    },
+    {
+      "item_id": 615,
+      "type": "Furniture",
+      "name": "OG Snow Machine",
+      "season": 21,
+      "level": 3
+    },
+    {
+      "item_id": 411,
+      "type": "Spoiler",
+      "name": "OG Rocket Thrusters",
+      "season": 21,
+      "level": 4
+    },
+    {
+      "item_id": 40,
+      "type": "Rim",
+      "name": "Handcuff",
+      "season": 21,
+      "level": 5
+    },
+    {
+      "item_id": 603,
+      "type": "Furniture",
+      "name": "Giant OG Snowman",
+      "season": 21,
+      "level": 6
+    },
+    {
+      "item_id": 395,
+      "type": "Spoiler",
+      "name": "Glider Shop",
+      "season": 21,
+      "level": 7
+    },
+    {
+      "item_id": 325,
+      "type": "Texture",
+      "name": "Ogre 2017",
+      "season": 21,
+      "level": 8
+    },
+    {
+      "item_id": 535,
+      "type": "Tire Style",
+      "name": "Donut",
+      "season": 21,
+      "level": 9
+    },
+    {
+      "item_id": 189,
+      "type": "Vehicle",
+      "name": "OG Monster",
+      "season": 21,
+      "level": 10
+    },
+    {
+      "item_id": 122,
+      "type": "Drift",
+      "name": "OG Fuel",
+      "season": 21,
+      "placement": "2%"
+    },
+    {
+      "item_id": 599,
+      "type": "Furniture",
+      "name": "Fabulous Sign",
+      "season": 22,
+      "level": 2
+    },
+    {
+      "item_id": 459,
+      "type": "Spoiler",
+      "name": "Waving Flag",
+      "season": 22,
+      "level": 3
+    },
+    {
+      "item_id": 60,
+      "type": "Rim",
+      "name": "Quarter Dollar",
+      "season": 22,
+      "level": 4
+    },
+    {
+      "item_id": 609,
+      "type": "Furniture",
+      "name": "Liberty",
+      "season": 22,
+      "level": 5
+    },
+    {
+      "item_id": 456,
+      "type": "Spoiler",
+      "name": "Vintage Wings",
+      "season": 22,
+      "level": 6
+    },
+    {
+      "item_id": 529,
+      "type": "Tire Style",
+      "name": "America",
+      "season": 22,
+      "level": 7
+    },
+    {
+      "item_id": 341,
+      "type": "Texture",
+      "name": "Star Spangled",
+      "season": 22,
+      "level": 8
+    },
+    {
+      "item_id": 87,
+      "type": "Rim",
+      "name": "Sparkler",
+      "season": 22,
+      "level": 9
+    },
+    {
+      "item_id": 179,
+      "type": "Vehicle",
+      "name": "Maverick",
+      "season": 22,
+      "level": 10
+    },
+    {
+      "item_id": 125,
+      "type": "Drift",
+      "name": "Shooting Star",
+      "season": 22,
+      "placement": "2%"
+    },
+    {
+      "item_id": 127,
+      "type": "Drift",
+      "name": "Synth",
+      "season": 23,
+      "level": 2
+    },
+    {
+      "item_id": 81,
+      "type": "Rim",
+      "name": "Shutter Shade",
+      "season": 23,
+      "level": 3
+    },
+    {
+      "item_id": 444,
+      "type": "Spoiler",
+      "name": "Torero",
+      "season": 23,
+      "level": 4
+    },
+    {
+      "item_id": 588,
+      "type": "Furniture",
+      "name": "80s Cassette Table",
+      "season": 23,
+      "level": 5
+    },
+    {
+      "item_id": 18,
+      "type": "Rim",
+      "name": "Cassette",
+      "season": 23,
+      "level": 6
+    },
+    {
+      "item_id": 396,
+      "type": "Spoiler",
+      "name": "Guitar Riff",
+      "season": 23,
+      "level": 7
+    },
+    {
+      "item_id": 335,
+      "type": "Texture",
+      "name": "Retrowave",
+      "season": 23,
+      "level": 8
+    },
+    {
+      "item_id": 70,
+      "type": "Rim",
+      "name": "Retrowave",
+      "season": 23,
+      "level": 9
+    },
+    {
+      "item_id": 228,
+      "type": "Vehicle",
+      "name": "Wedge",
+      "season": 23,
+      "level": 10
+    },
+    {
+      "item_id": 539,
+      "type": "Tire Style",
+      "name": "Rollerblade",
+      "season": 23,
+      "placement": "2%"
+    },
+    {
+      "item_id": 477,
+      "type": "Rim",
+      "name": "Ice Crystal",
+      "season": 24,
+      "level": 2
+    },
+    {
+      "item_id": 480,
+      "type": "Spoiler",
+      "name": "Hazards",
+      "season": 24,
+      "level": 3
+    },
+    {
+      "item_id": 638,
+      "type": "Furniture",
+      "name": "Winter Rally Lamp",
+      "season": 24,
+      "level": 4
+    },
+    {
+      "item_id": 476,
+      "type": "Rim",
+      "name": "Sled Void",
+      "season": 24,
+      "level": 5
+    },
+    {
+      "item_id": 475,
+      "type": "Texture",
+      "name": "Alpine Racer",
+      "season": 24,
+      "level": 6
+    },
+    {
+      "item_id": 478,
+      "type": "Drift",
+      "name": "Ice Spike",
+      "season": 24,
+      "level": 7
+    },
+    {
+      "item_id": 479,
+      "type": "Spoiler",
+      "name": "Rally Spotlight",
+      "season": 24,
+      "level": 8
+    },
+    {
+      "item_id": 541,
+      "type": "Tire Style",
+      "name": "Snow Trail",
+      "season": 24,
+      "level": 9
+    },
+    {
+      "item_id": 474,
+      "type": "Vehicle",
+      "name": "Stormrider",
+      "season": 24,
+      "level": 10
+    },
+    {
+      "item_id": 536,
+      "type": "Tire Style",
+      "name": "Glacier",
+      "season": 24,
+      "placement": "2%"
+    },
+    {
+      "item_id": 682,
+      "type": "Spoiler",
+      "name": "Voxel",
+      "season": 25,
+      "level": 2
+    },
+    {
+      "item_id": 666,
+      "type": "Furniture",
+      "name": "Arcade Portal",
+      "season": 25,
+      "level": 3
+    },
+    {
+      "item_id": 664,
+      "type": "Rim",
+      "name": "8-Bit",
+      "season": 25,
+      "level": 4
+    },
+    {
+      "item_id": 679,
+      "type": "Spoiler",
+      "name": "Arcade Racer",
+      "season": 25,
+      "level": 5
+    },
+    {
+      "item_id": 675,
+      "type": "Furniture",
+      "name": "Pixel Campfire",
+      "season": 25,
+      "level": 6
+    },
+    {
+      "item_id": 680,
+      "type": "Rim",
+      "name": "Spixel",
+      "season": 25,
+      "level": 7
+    },
+    {
+      "item_id": 668,
+      "type": "Texture",
+      "name": "Blue Pixel Racer",
+      "season": 25,
+      "level": 8
+    },
+    {
+      "item_id": 676,
+      "type": "Rim",
+      "name": "Pixeltary",
+      "season": 25,
+      "level": 9
+    },
+    {
+      "item_id": 678,
+      "type": "Vehicle",
+      "name": "Revox",
+      "season": 25,
+      "level": 10
+    },
+    {
+      "item_id": 683,
+      "type": "Drift",
+      "name": "PixelCoin",
+      "season": 25,
+      "placement": "2%"
+    },
+    {
+      "item_id": 717,
+      "type": "Rim",
+      "name": "Python",
+      "season": 26,
+      "level": 2
+    },
+    {
+      "item_id": 735,
+      "type": "Furniture",
+      "name": "Banana Chandelier",
+      "season": 26,
+      "level": 3
+    },
+    {
+      "item_id": 725,
+      "type": "Tire Style",
+      "name": "Jungle Ruins",
+      "season": 26,
+      "level": 4
+    },
+    {
+      "item_id": 733,
+      "type": "Drift",
+      "name": "Jungle Vine",
+      "season": 26,
+      "level": 5
+    },
+    {
+      "item_id": 721,
+      "type": "Spoiler",
+      "name": "Snake Guard",
+      "season": 26,
+      "level": 6
+    },
+    {
+      "item_id": 716,
+      "type": "Rim",
+      "name": "Jungle Palm",
+      "season": 26,
+      "level": 7
+    },
+    {
+      "item_id": 723,
+      "type": "Texture",
+      "name": "Snake Skin",
+      "season": 26,
+      "level": 8
+    },
+    {
+      "item_id": 719,
+      "type": "Spoiler",
+      "name": "Bamboo Shooters",
+      "season": 26,
+      "level": 9
+    },
+    {
+      "item_id": 728,
+      "type": "Vehicle",
+      "name": "Cobra",
+      "season": 26,
+      "level": 10
+    },
+    {
+      "item_id": 726,
+      "type": "Tire Style",
+      "name": "Rok",
+      "season": 26,
+      "placement": "2%"
+    },
+    {
+      "item_id": 752,
+      "type": "Tire Sticker",
+      "name": "Skull And Sails",
+      "season": 27,
+      "level": 2
+    },
+    {
+      "item_id": 748,
+      "type": "Rim",
+      "name": "Kraken",
+      "season": 27,
+      "level": 3
+    },
+    {
+      "item_id": 741,
+      "type": "Spoiler",
+      "name": "Yarg Cap",
+      "season": 27,
+      "level": 4
+    },
+    {
+      "item_id": 744,
+      "type": "Furniture",
+      "name": "Pirate Figurehead",
+      "season": 27,
+      "level": 5
+    },
+    {
+      "item_id": 747,
+      "type": "Rim",
+      "name": "Brig Bone",
+      "season": 27,
+      "level": 6
+    },
+    {
+      "item_id": 759,
+      "type": "Drift",
+      "name": "Ocean Water",
+      "season": 27,
+      "level": 7
+    },
+    {
+      "item_id": 753,
+      "type": "Texture",
+      "name": "Buccaneer",
+      "season": 27,
+      "level": 8
+    },
+    {
+      "item_id": 737,
+      "type": "Spoiler",
+      "name": "Cannonfire",
+      "season": 27,
+      "level": 9
+    },
+    {
+      "item_id": 742,
+      "type": "Vehicle",
+      "name": "Blackbeard",
+      "season": 27,
+      "level": 10
+    },
+    {
+      "item_id": 738,
+      "type": "Spoiler",
+      "name": "Kraken Attack",
+      "season": 27,
+      "placement": "1%"
+    },
+    {
+      "item_id": 761,
+      "type": "Rim",
+      "name": "P-100I",
+      "season": 28,
+      "level": 2
+    },
+    {
+      "item_id": 764,
+      "type": "Spoiler",
+      "name": "Cyberpunk",
+      "season": 28,
+      "level": 3
+    },
+    {
+      "item_id": 760,
+      "type": "Furniture",
+      "name": "Neon Vein Wall-Art",
+      "season": 28,
+      "level": 4
+    },
+    {
+      "item_id": 763,
+      "type": "Rim",
+      "name": "Neo-Runner",
+      "season": 28,
+      "level": 5
+    },
+    {
+      "item_id": 765,
+      "type": "Spoiler",
+      "name": "Stacked Cyberwing",
+      "season": 28,
+      "level": 6
+    },
+    {
+      "item_id": 779,
+      "type": "Drift",
+      "name": "Neo-Static",
+      "season": 28,
+      "level": 7
+    },
+    {
+      "item_id": 776,
+      "type": "Texture",
+      "name": "Vibrant Hologram",
+      "season": 28,
+      "level": 8
+    },
+    {
+      "item_id": 762,
+      "type": "Rim",
+      "name": "Inf1n1ty",
+      "season": 28,
+      "level": 9
+    },
+    {
+      "item_id": 766,
+      "type": "Vehicle",
+      "name": "Katana",
+      "season": 28,
+      "level": 10
+    },
+    {
+      "item_id": 777,
+      "type": "Tire Sticker",
+      "name": "Arch9000 Glow",
+      "season": 28,
+      "placement": "2%"
+    },
+    {
+      "item_id": 791,
+      "type": "Spoiler",
+      "name": "Roblox R",
+      "season": 29,
+      "level": 2
+    },
+    {
+      "item_id": 794,
+      "type": "Furniture",
+      "name": "Avatar Wardrobe",
+      "season": 29,
+      "level": 3
+    },
+    {
+      "item_id": 798,
+      "type": "Tire Style",
+      "name": "R2008",
+      "season": 29,
+      "level": 4
+    },
+    {
+      "item_id": 797,
+      "type": "Rim",
+      "name": "Truss",
+      "season": 29,
+      "level": 5
+    },
+    {
+      "item_id": 793,
+      "type": "Furniture",
+      "name": "Spawn Rug",
+      "season": 29,
+      "level": 6
+    },
+    {
+      "item_id": 800,
+      "type": "Drift",
+      "name": "Bloxxer",
+      "season": 29,
+      "level": 7
+    },
+    {
+      "item_id": 795,
+      "type": "Texture",
+      "name": "RobloxStud",
+      "season": 29,
+      "level": 8
+    },
+    {
+      "item_id": 792,
+      "type": "Spoiler",
+      "name": "Bloxxer Launcher",
+      "season": 29,
+      "level": 9
+    },
+    {
+      "item_id": 790,
+      "type": "Vehicle",
+      "name": "Brick Kar-1",
+      "season": 29,
+      "level": 10
+    },
+    {
+      "item_id": 796,
+      "type": "Rim",
+      "name": "Speed Coil",
+      "season": 29,
+      "placement": "2%"
+    },
+    {
+      "item_id": 804,
+      "type": "Rim",
+      "name": "Bad Omen",
+      "season": 30,
+      "level": 2
+    },
+    {
+      "item_id": 808,
+      "type": "Rim",
+      "name": "Scythes",
+      "season": 30,
+      "level": 3
+    },
+    {
+      "item_id": 803,
+      "type": "Spoiler",
+      "name": "Reaper",
+      "season": 30,
+      "level": 4
+    },
+    {
+      "item_id": 809,
+      "type": "Furniture",
+      "name": "Haunting Door",
+      "season": 30,
+      "level": 5
+    },
+    {
+      "item_id": 819,
+      "type": "Tire Sticker",
+      "name": "Thing",
+      "season": 30,
+      "level": 6
+    },
+    {
+      "item_id": 806,
+      "type": "Spoiler",
+      "name": "Ghost Catcher",
+      "season": 30,
+      "level": 7
+    },
+    {
+      "item_id": 805,
+      "type": "Texture",
+      "name": "Chilling",
+      "season": 30,
+      "level": 8
+    },
+    {
+      "item_id": 820,
+      "type": "Drift",
+      "name": "Nemesis",
+      "season": 30,
+      "level": 9
+    },
+    {
+      "item_id": 807,
+      "type": "Vehicle",
+      "name": "Black Widow",
+      "season": 30,
+      "level": 10
+    },
+    {
+      "item_id": 810,
+      "type": "Spoiler",
+      "name": "King Reaper",
+      "season": 30,
+      "placement": "2%"
+    },
+    {
+      "item_id": 914,
+      "type": "Rim",
+      "name": "Theory",
+      "season": 31,
+      "level": 2
+    },
+    {
+      "item_id": 911,
+      "type": "Tire Style",
+      "name": "VoltLine",
+      "season": 31,
+      "level": 3
+    },
+    {
+      "item_id": 913,
+      "type": "Tire Sticker",
+      "name": "FreeStyle",
+      "season": 31,
+      "level": 4
+    },
+    {
+      "item_id": 915,
+      "type": "Quicksilver",
+      "name": "Rim",
+      "season": 31,
+      "level": 5
+    },
+    {
+      "item_id": 908,
+      "type": "Spoiler",
+      "name": "Skyline",
+      "season": 31,
+      "level": 6
+    },
+    {
+      "item_id": 916,
+      "type": "Drift",
+      "name": "Dark Matter",
+      "season": 31,
+      "level": 7
+    },
+    {
+      "item_id": 910,
+      "type": "Texture",
+      "name": "Digital RGB",
+      "season": 31,
+      "level": 8
+    },
+    {
+      "item_id": 906,
+      "type": "Spoiler",
+      "name": "Stinger Scythe",
+      "season": 31,
+      "level": 9
+    },
+    {
+      "item_id": 912,
+      "type": "Vehicle",
+      "name": "JBX-0031",
+      "season": 31,
+      "level": 10
+    },
+    {
+      "item_id": 909,
+      "type": "Spoiler",
+      "name": "Holo",
+      "season": 31,
+      "placement": "2%"
+    },
+    {
+      "item_id": 932,
+      "type": "Spoiler",
+      "name": "X-Treme Aero",
+      "season": 32,
+      "level": 2
+    },
+    {
+      "item_id": 950,
+      "type": "Furniture",
+      "name": "Tuner AC",
+      "season": 32,
+      "level": 3
+    },
+    {
+      "item_id": 948,
+      "type": "Rim",
+      "name": "Underground",
+      "season": 32,
+      "level": 4
+    },
+    {
+      "item_id": 935,
+      "type": "Spoiler",
+      "name": "Gap Cam",
+      "season": 32,
+      "level": 5
+    },
+    {
+      "item_id": 952,
+      "type": "Texture",
+      "name": "Slipstream",
+      "season": 32,
+      "level": 6
+    },
+    {
+      "item_id": 955,
+      "type": "Drift",
+      "name": "Nitro Spark",
+      "season": 32,
+      "level": 7
+    },
+    {
+      "item_id": 928,
+      "type": "Spoiler",
+      "name": "Turbocharged",
+      "season": 32,
+      "level": 8
+    },
+    {
+      "item_id": 947,
+      "type": "Rim",
+      "name": "TRX-3",
+      "season": 32,
+      "level": 9
+    },
+    {
+      "item_id": 953,
+      "type": "Vehicle",
+      "name": "Samurai",
+      "season": 32,
+      "level": 10
+    },
+    {
+      "item_id": 930,
+      "type": "Spoiler",
+      "name": "Stoplight",
+      "season": 32,
+      "placement": "2%"
+    },
+    {
+      "item_id": 964,
+      "type": "Spoiler",
+      "name": "Boneclaw",
+      "season": 33,
+      "level": 2
+    },
+    {
+      "item_id": 973,
+      "type": "Rim",
+      "name": "Amber",
+      "season": 33,
+      "level": 3
+    },
+    {
+      "item_id": 975,
+      "type": "Furniture",
+      "name": "3D Rex",
+      "season": 33,
+      "level": 4
+    },
+    {
+      "item_id": 976,
+      "type": "Drift",
+      "name": "Extinction Event",
+      "season": 33,
+      "level": 5
+    },
+    {
+      "item_id": 962,
+      "type": "Rim",
+      "name": "Marrow",
+      "season": 33,
+      "level": 6
+    },
+    {
+      "item_id": 965,
+      "type": "Spoiler",
+      "name": "Ankylosaurus",
+      "season": 33,
+      "level": 7
+    },
+    {
+      "item_id": 970,
+      "type": "Texture",
+      "name": "Caveman",
+      "season": 33,
+      "level": 8
+    },
+    {
+      "item_id": 963,
+      "type": "Tire Style",
+      "name": "Dino Egg",
+      "season": 33,
+      "level": 9
+    },
+    {
+      "item_id": 960,
+      "type": "Vehicle",
+      "name": "Velociraptor",
+      "season": 33,
+      "level": 10
+    },
+    {
+      "item_id": 971,
+      "type": "Rim",
+      "name": "Burning Meteor",
+      "season": 33,
+      "level": "2%"
+    }
+  ]
+}

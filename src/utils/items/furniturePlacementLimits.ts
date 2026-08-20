@@ -15,9 +15,7 @@ export async function fetchFurniturePlacementLimits(): Promise<
 > {
   if (placementLimitsPromise) return placementLimitsPromise;
 
-  placementLimitsPromise = fetch(
-    "https://assets.jailbreakchangelogs.com/assets/json/furniture_placement_limits.json",
-  )
+  placementLimitsPromise = fetch("/assets/json/furniture_placement_limits.json")
     .then(async (response) => {
       if (!response.ok) {
         throw new Error(
