@@ -15,8 +15,6 @@ import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import RetryErrorDisplay from "./RetryErrorDisplay";
 import { Icon } from "@/components/ui/IconWrapper";
-import InventoryLoggingAlertBanner from "./InventoryLoggingAlertBanner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 import { Tabs, TabsList, TabsTrigger } from "./tabs";
 import { Button } from "./button";
 import { toast } from "sonner";
@@ -230,22 +228,11 @@ export default function ConnectedBotsPolling() {
         <span className="text-tertiary-text" aria-hidden="true">
           |
         </span>
-        <span className="flex items-center gap-1">
+        <span>
           <span className="font-semibold">
             {tradeWorldBotsCount.toLocaleString()}
           </span>{" "}
           trade world bots
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Icon
-                icon="heroicons:exclamation-triangle"
-                className="text-status-warning h-3.5 w-3.5 cursor-help"
-              />
-            </TooltipTrigger>
-            <TooltipContent>
-              Trade world scanning is currently paused — see the notice above.
-            </TooltipContent>
-          </Tooltip>
         </span>
       </div>
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
@@ -385,14 +372,10 @@ export default function ConnectedBotsPolling() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="trade"
-                    className="h-8 gap-1 px-3 text-xs"
+                    className="h-8 px-3 text-xs"
                     fullWidth
                   >
                     Trade World
-                    <Icon
-                      icon="heroicons:exclamation-triangle"
-                      className="text-status-warning h-3.5 w-3.5"
-                    />
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -407,8 +390,6 @@ export default function ConnectedBotsPolling() {
                     usersData={botRobloxData?.usersData || null}
                   />
                 ))
-              ) : botFilter === "trade" ? (
-                <InventoryLoggingAlertBanner />
               ) : (
                 <div className="text-secondary-text border-border-card bg-tertiary-bg rounded-lg border p-3 text-center text-sm">
                   No bots active in this mode.

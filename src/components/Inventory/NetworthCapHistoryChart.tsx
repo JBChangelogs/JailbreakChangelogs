@@ -262,51 +262,31 @@ export default function NetworthCapHistoryChart() {
     duplicates_percentage: item.duplicates_percentage,
   }));
 
-  if (chartData.length === 0) {
-    return (
-      <div className="bg-secondary-bg rounded-lg p-8 text-center">
-        <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-          <svg
-            className="text-button-info h-8 w-8"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
-          </svg>
-        </div>
-        <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          No Data Available
-        </h3>
-        <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-          No cap networth history available for the selected period.
-        </p>
-      </div>
-    );
-  }
+  const hasChartData = chartData.length > 0;
 
-  const [yMin, yMax] = getYAxisDomain(
-    chartData.flatMap((d) => [d.total_networth, d.total_duped_networth]),
-  );
+  const [yMin, yMax] = hasChartData
+    ? getYAxisDomain(
+        chartData.flatMap((d) => [d.total_networth, d.total_duped_networth]),
+      )
+    : [0, 1];
 
-  const networthTrend = getTrendSummary(chartData.map((d) => d.total_networth));
-  const dupedTrend = getTrendSummary(
-    chartData.map((d) => d.total_duped_networth),
-  );
-  const dupesPctTrend = getTrendSummary(
-    chartData.map((d) => d.duplicates_percentage),
-  );
+  const networthTrend = hasChartData
+    ? getTrendSummary(chartData.map((d) => d.total_networth))
+    : null;
+  const dupedTrend = hasChartData
+    ? getTrendSummary(chartData.map((d) => d.total_duped_networth))
+    : null;
+  const dupesPctTrend = hasChartData
+    ? getTrendSummary(chartData.map((d) => d.duplicates_percentage))
+    : null;
 
   const currentLabel =
     DATE_RANGE_OPTIONS.find((o) => o.value === dateRange)?.label ??
     "Last 30 days";
 
-  const rangeLabel = `${formatMonthDayYear(chartData[0].timestamp)} - ${formatMonthDayYear(chartData[chartData.length - 1].timestamp)}`;
+  const rangeLabel = hasChartData
+    ? `${formatMonthDayYear(chartData[0].timestamp)} - ${formatMonthDayYear(chartData[chartData.length - 1].timestamp)}`
+    : null;
 
   return (
     <div className="border-border-card bg-secondary-bg mb-8 space-y-4 rounded-lg border p-4">
@@ -350,16 +330,6 @@ export default function NetworthCapHistoryChart() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
-        <p className="text-status-warning flex items-center gap-1.5 text-xs">
-          <Icon
-            icon="heroicons:exclamation-triangle"
-            className="h-3.5 w-3.5 shrink-0"
-            inline={true}
-          />
-          Scanning is currently paused, so these figures and the chart below
-          won&apos;t reflect new data until it resumes.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -374,227 +344,265 @@ export default function NetworthCapHistoryChart() {
         ))}
       </div>
 
-      <div className="h-87.5">
-        <ChartContainer config={chartConfig} className="h-full w-full">
-          <AreaChart
-            accessibilityLayer
-            data={chartData}
-            margin={{ left: 6, right: isSmallScreen ? 6 : 48 }}
-          >
-            <defs>
-              <linearGradient
-                id={networthGradientId}
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
+      {!hasChartData ? (
+        <div className="bg-tertiary-bg rounded-lg p-8 text-center">
+          <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
+            <svg
+              className="text-button-info h-8 w-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-primary-text mb-2 text-xl font-semibold">
+            No Data Available
+          </h3>
+          <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
+            No cap networth history available for the selected period.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="h-87.5">
+            <ChartContainer config={chartConfig} className="h-full w-full">
+              <AreaChart
+                accessibilityLayer
+                data={chartData}
+                margin={{ left: 6, right: isSmallScreen ? 6 : 48 }}
               >
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-total_networth)"
-                  stopOpacity={0.45}
+                <defs>
+                  <linearGradient
+                    id={networthGradientId}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-total_networth)"
+                      stopOpacity={0.45}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-total_networth)"
+                      stopOpacity={0.04}
+                    />
+                  </linearGradient>
+                  <linearGradient
+                    id={dupedGradientId}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-total_duped_networth)"
+                      stopOpacity={0.45}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-total_duped_networth)"
+                      stopOpacity={0.04}
+                    />
+                  </linearGradient>
+                  <linearGradient
+                    id={dupesPercentGradientId}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-duplicates_percentage)"
+                      stopOpacity={0.3}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-duplicates_percentage)"
+                      stopOpacity={0.02}
+                    />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  vertical={false}
+                  stroke="var(--color-border-card)"
+                  strokeOpacity={0.5}
                 />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-total_networth)"
-                  stopOpacity={0.04}
+                <XAxis
+                  dataKey="timestamp"
+                  type="number"
+                  scale="time"
+                  domain={["dataMin", "dataMax"]}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={false}
                 />
-              </linearGradient>
-              <linearGradient id={dupedGradientId} x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-total_duped_networth)"
-                  stopOpacity={0.45}
+                <YAxis
+                  yAxisId="networth"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={isSmallScreen ? 0 : 8}
+                  width={isSmallScreen ? 0 : 56}
+                  domain={[yMin, yMax]}
+                  tick={
+                    isSmallScreen
+                      ? false
+                      : { fill: "var(--color-secondary-text)", fontSize: 12 }
+                  }
+                  tickFormatter={(v: number) => formatValue(Number(v))}
                 />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-total_duped_networth)"
-                  stopOpacity={0.04}
+                <YAxis
+                  yAxisId="percentage"
+                  orientation="right"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={isSmallScreen ? 0 : 8}
+                  width={isSmallScreen ? 0 : 44}
+                  domain={[0, 20]}
+                  tick={
+                    isSmallScreen
+                      ? false
+                      : {
+                          fill: "var(--color-duplicates_percentage)",
+                          fontSize: 12,
+                        }
+                  }
+                  tickFormatter={(v: number) => `${v}%`}
                 />
-              </linearGradient>
-              <linearGradient
-                id={dupesPercentGradientId}
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-duplicates_percentage)"
-                  stopOpacity={0.3}
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      className="min-w-52 px-3 py-2"
+                      formatter={(value, name) => {
+                        const isPercentage = name === "Dupes %";
+                        const colorMap: Record<string, string> = {
+                          "Total Networth": "var(--color-total_networth)",
+                          "Duped Networth": "var(--color-total_duped_networth)",
+                          "Dupes %": "var(--color-duplicates_percentage)",
+                        };
+                        const color =
+                          colorMap[name as string] ?? "currentColor";
+                        const label = String(name);
+                        const formatted = isPercentage
+                          ? `${Number(value).toFixed(2)}%`
+                          : value === null || value === undefined
+                            ? "N/A"
+                            : formatValue(Number(value));
+                        return (
+                          <div className="flex w-full items-center justify-between gap-3">
+                            <span className="text-secondary-text flex items-center gap-2">
+                              <span
+                                className="h-2.5 w-2.5 shrink-0 rounded-xs"
+                                style={{ backgroundColor: color }}
+                              />
+                              {label}
+                            </span>
+                            <span className="text-primary-text font-mono font-semibold tabular-nums">
+                              {formatted}
+                            </span>
+                          </div>
+                        );
+                      }}
+                      labelFormatter={(_, payload) => {
+                        const row = payload?.[0]?.payload as
+                          | { timestamp?: number }
+                          | undefined;
+                        const ts =
+                          typeof row?.timestamp === "number"
+                            ? row.timestamp
+                            : Number(row?.timestamp);
+                        if (!Number.isFinite(ts)) return "Unknown Date";
+                        return formatMonthDayYear(ts);
+                      }}
+                    />
+                  }
                 />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-duplicates_percentage)"
-                  stopOpacity={0.02}
+                <RechartsLegend
+                  verticalAlign="bottom"
+                  formatter={(value) => (
+                    <span style={{ color: "var(--color-secondary-text)" }}>
+                      {value}
+                    </span>
+                  )}
                 />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              vertical={false}
-              stroke="var(--color-border-card)"
-              strokeOpacity={0.5}
-            />
-            <XAxis
-              dataKey="timestamp"
-              type="number"
-              scale="time"
-              domain={["dataMin", "dataMax"]}
-              tickLine={false}
-              axisLine={false}
-              tick={false}
-            />
-            <YAxis
-              yAxisId="networth"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={isSmallScreen ? 0 : 8}
-              width={isSmallScreen ? 0 : 56}
-              domain={[yMin, yMax]}
-              tick={
-                isSmallScreen
-                  ? false
-                  : { fill: "var(--color-secondary-text)", fontSize: 12 }
-              }
-              tickFormatter={(v: number) => formatValue(Number(v))}
-            />
-            <YAxis
-              yAxisId="percentage"
-              orientation="right"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={isSmallScreen ? 0 : 8}
-              width={isSmallScreen ? 0 : 44}
-              domain={[0, 20]}
-              tick={
-                isSmallScreen
-                  ? false
-                  : { fill: "var(--color-duplicates_percentage)", fontSize: 12 }
-              }
-              tickFormatter={(v: number) => `${v}%`}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  className="min-w-52 px-3 py-2"
-                  formatter={(value, name) => {
-                    const isPercentage = name === "Dupes %";
-                    const colorMap: Record<string, string> = {
-                      "Total Networth": "var(--color-total_networth)",
-                      "Duped Networth": "var(--color-total_duped_networth)",
-                      "Dupes %": "var(--color-duplicates_percentage)",
-                    };
-                    const color = colorMap[name as string] ?? "currentColor";
-                    const label = String(name);
-                    const formatted = isPercentage
-                      ? `${Number(value).toFixed(2)}%`
-                      : value === null || value === undefined
-                        ? "N/A"
-                        : formatValue(Number(value));
-                    return (
-                      <div className="flex w-full items-center justify-between gap-3">
-                        <span className="text-secondary-text flex items-center gap-2">
-                          <span
-                            className="h-2.5 w-2.5 shrink-0 rounded-xs"
-                            style={{ backgroundColor: color }}
-                          />
-                          {label}
-                        </span>
-                        <span className="text-primary-text font-mono font-semibold tabular-nums">
-                          {formatted}
-                        </span>
-                      </div>
-                    );
+                <Area
+                  yAxisId="networth"
+                  type="monotone"
+                  dataKey="total_networth"
+                  name="Total Networth"
+                  fill={`url(#${networthGradientId})`}
+                  fillOpacity={1}
+                  stroke="var(--color-total_networth)"
+                  strokeWidth={3}
+                  dot={false}
+                  isAnimationActive={false}
+                  activeDot={{
+                    r: 5,
+                    fill: "var(--color-secondary-bg)",
+                    stroke: "var(--color-total_networth)",
+                    strokeWidth: 2,
                   }}
-                  labelFormatter={(_, payload) => {
-                    const row = payload?.[0]?.payload as
-                      | { timestamp?: number }
-                      | undefined;
-                    const ts =
-                      typeof row?.timestamp === "number"
-                        ? row.timestamp
-                        : Number(row?.timestamp);
-                    if (!Number.isFinite(ts)) return "Unknown Date";
-                    return formatMonthDayYear(ts);
+                />
+                <Area
+                  yAxisId="networth"
+                  type="monotone"
+                  dataKey="total_duped_networth"
+                  name="Duped Networth"
+                  fill={`url(#${dupedGradientId})`}
+                  fillOpacity={1}
+                  stroke="var(--color-total_duped_networth)"
+                  strokeWidth={3}
+                  dot={false}
+                  isAnimationActive={false}
+                  activeDot={{
+                    r: 5,
+                    fill: "var(--color-secondary-bg)",
+                    stroke: "var(--color-total_duped_networth)",
+                    strokeWidth: 2,
                   }}
                 />
-              }
-            />
-            <RechartsLegend
-              verticalAlign="bottom"
-              formatter={(value) => (
-                <span style={{ color: "var(--color-secondary-text)" }}>
-                  {value}
-                </span>
-              )}
-            />
-            <Area
-              yAxisId="networth"
-              type="monotone"
-              dataKey="total_networth"
-              name="Total Networth"
-              fill={`url(#${networthGradientId})`}
-              fillOpacity={1}
-              stroke="var(--color-total_networth)"
-              strokeWidth={3}
-              dot={false}
-              isAnimationActive={false}
-              activeDot={{
-                r: 5,
-                fill: "var(--color-secondary-bg)",
-                stroke: "var(--color-total_networth)",
-                strokeWidth: 2,
-              }}
-            />
-            <Area
-              yAxisId="networth"
-              type="monotone"
-              dataKey="total_duped_networth"
-              name="Duped Networth"
-              fill={`url(#${dupedGradientId})`}
-              fillOpacity={1}
-              stroke="var(--color-total_duped_networth)"
-              strokeWidth={3}
-              dot={false}
-              isAnimationActive={false}
-              activeDot={{
-                r: 5,
-                fill: "var(--color-secondary-bg)",
-                stroke: "var(--color-total_duped_networth)",
-                strokeWidth: 2,
-              }}
-            />
-            <Area
-              yAxisId="percentage"
-              type="monotone"
-              dataKey="duplicates_percentage"
-              name="Dupes %"
-              fill={`url(#${dupesPercentGradientId})`}
-              fillOpacity={1}
-              stroke="var(--color-duplicates_percentage)"
-              strokeWidth={2}
-              strokeDasharray="4 2"
-              dot={false}
-              isAnimationActive={false}
-              activeDot={{
-                r: 5,
-                fill: "var(--color-secondary-bg)",
-                stroke: "var(--color-duplicates_percentage)",
-                strokeWidth: 2,
-              }}
-            />
-          </AreaChart>
-        </ChartContainer>
-      </div>
+                <Area
+                  yAxisId="percentage"
+                  type="monotone"
+                  dataKey="duplicates_percentage"
+                  name="Dupes %"
+                  fill={`url(#${dupesPercentGradientId})`}
+                  fillOpacity={1}
+                  stroke="var(--color-duplicates_percentage)"
+                  strokeWidth={2}
+                  strokeDasharray="4 2"
+                  dot={false}
+                  isAnimationActive={false}
+                  activeDot={{
+                    r: 5,
+                    fill: "var(--color-secondary-bg)",
+                    stroke: "var(--color-duplicates_percentage)",
+                    strokeWidth: 2,
+                  }}
+                />
+              </AreaChart>
+            </ChartContainer>
+          </div>
 
-      <div className="space-y-1 text-sm">
-        <TrendLine trend={networthTrend} label="Total Networth" />
-        <TrendLine trend={dupedTrend} label="Duped Networth" />
-        <TrendLine trend={dupesPctTrend} label="Dupes %" />
-        <div className="text-secondary-text">{rangeLabel}</div>
-      </div>
+          <div className="space-y-1 text-sm">
+            <TrendLine trend={networthTrend} label="Total Networth" />
+            <TrendLine trend={dupedTrend} label="Duped Networth" />
+            <TrendLine trend={dupesPctTrend} label="Dupes %" />
+            <div className="text-secondary-text">{rangeLabel}</div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

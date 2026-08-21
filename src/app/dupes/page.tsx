@@ -4,7 +4,7 @@ import MostDuplicatedItemsServer from "@/components/Dupes/MostDuplicatedItemsSer
 import MostDuplicatedItemsSkeleton from "@/components/Dupes/MostDuplicatedItemsSkeleton";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
-import InventoryLoggingAlertBanner from "@/components/ui/InventoryLoggingAlertBanner";
+import ScanningResumedBanner from "@/components/ui/ScanningResumedBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
 import OfficialBotsSection from "@/components/ui/OfficialBotsSection";
@@ -48,7 +48,7 @@ export default async function DupeFinderPage() {
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 
-        <InventoryLoggingAlertBanner className="mb-6" />
+        <ScanningResumedBanner className="mb-6" />
 
         <ExperimentalFeatureBanner className="mb-6" />
 
