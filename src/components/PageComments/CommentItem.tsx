@@ -1171,7 +1171,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                 ) : (
                                   <>
                                     <div className="flex flex-wrap items-center gap-1.5">
-                                      <div className="flex items-center gap-1">
+                                      <div className="flex flex-wrap items-center gap-1">
                                         <CommentAuthorName
                                           userId={reply.user_id}
                                           name={replyDisplayName}
