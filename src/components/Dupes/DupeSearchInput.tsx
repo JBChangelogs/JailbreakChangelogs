@@ -144,9 +144,7 @@ export default function DupeSearchInput({
     router.push(`/dupes/${owner.id}`);
   };
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const input = searchId.trim();
+  const performSearch = async (input: string) => {
     if (!input) return;
 
     setIsSuggestionsOpen(false);
@@ -182,6 +180,11 @@ export default function DupeSearchInput({
       toast.error(msg);
       setSearchError(msg);
     }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    performSearch(searchId.trim());
   };
 
   // Use internal loading state or external loading state
@@ -325,8 +328,25 @@ export default function DupeSearchInput({
                   Searching...
                 </li>
               ) : suggestions.length === 0 ? (
-                <li className="text-secondary-text px-4 py-3 text-sm">
-                  No matching duped users found
+                <li role="option" aria-selected={false}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => performSearch(searchId.trim())}
+                    className="hover:bg-tertiary-bg flex w-full cursor-pointer flex-col items-start gap-0.5 px-4 py-3 text-left transition-colors"
+                  >
+                    <span className="text-primary-text text-sm font-medium">
+                      No autofill match for &quot;
+                      {searchId.trim().length > 50
+                        ? `${searchId.trim().substring(0, 47)}...`
+                        : searchId.trim()}
+                      &quot; — search anyway
+                    </span>
+                    <span className="text-secondary-text text-xs">
+                      Autofill needs the exact start of a name (Roblox usernames
+                      often have numbers after) and can lag behind new results
+                    </span>
+                  </button>
                 </li>
               ) : (
                 suggestions.map((owner, index) => (
