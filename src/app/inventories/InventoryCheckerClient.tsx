@@ -189,56 +189,11 @@ export default function InventoryCheckerClient({
         }
         const latest = (await latestRes.json()) as Season;
 
-        let resolved = latest;
+        // Past seasons' xp_data is often missing from the API, so only show
+        // the bar for scans from the currently active season.
         const updatedAt = initialData?.updated_at;
-
-        if (updatedAt && updatedAt < latest.start_date) {
-          try {
-            const datesRes = await fetch(
-              "https://assets.jailbreakchangelogs.com/assets/json/season_dates.json",
-            );
-            if (datesRes.ok) {
-              const seasonDates = (await datesRes.json()) as {
-                season: number;
-                start_date: number;
-                end_date: number;
-              }[];
-              const matched = seasonDates.find(
-                (s) => updatedAt >= s.start_date && updatedAt <= s.end_date,
-              );
-              if (matched && matched.season !== latest.season) {
-                const {
-                  url: historicalSeasonUrl,
-                  headers: historicalDevTokenHeaders,
-                } = buildApiFetchRequest(
-                  PUBLIC_API_URL,
-                  `/seasons/${matched.season}`,
-                );
-                const historicalRes = await fetch(historicalSeasonUrl, {
-                  credentials: "include",
-                  headers: {
-                    ...historicalDevTokenHeaders,
-                    "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-                  },
-                });
-                if (historicalRes.ok) {
-                  const historical = await historicalRes.json();
-                  let parsedXpData = historical.xp_data;
-                  if (typeof parsedXpData === "string") {
-                    try {
-                      parsedXpData = JSON.parse(parsedXpData);
-                    } catch {
-                      // keep unparsed
-                    }
-                  }
-                  resolved = { ...historical, xp_data: parsedXpData } as Season;
-                }
-              }
-            }
-          } catch (e) {
-            log.error("Failed to fetch historical season", e);
-          }
-        }
+        const resolved =
+          updatedAt && updatedAt >= latest.start_date ? latest : null;
 
         if (ignore) return;
         setActiveSeason(resolved);
