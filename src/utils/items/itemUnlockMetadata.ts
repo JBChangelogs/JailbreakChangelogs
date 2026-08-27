@@ -20,6 +20,8 @@ interface ItemUnlockMetadataResponse {
   items?: RawItemUnlockMetadataEntry[];
 }
 
+const ITEM_UNLOCK_METADATA_VERSION = "2026-08-27";
+
 let itemUnlockMetadataPromise: Promise<
   Map<number, ItemUnlockMetadataEntry>
 > | null = null;
@@ -31,7 +33,9 @@ export async function fetchItemUnlockMetadataById(): Promise<
     return itemUnlockMetadataPromise;
   }
 
-  itemUnlockMetadataPromise = fetch("/assets/json/season_items_v2.json")
+  itemUnlockMetadataPromise = fetch(
+    `/assets/json/season_items_v2.json?v=${ITEM_UNLOCK_METADATA_VERSION}`,
+  )
     .then(async (response) => {
       if (!response.ok) {
         throw new Error(
