@@ -5,7 +5,7 @@ on:
 
 jobs:
   purge:
-    if: github.event.deployment_status.state == 'success' && github.event.deployment.ref == 'main'
+    if: github.event.deployment_status.state == 'success' && contains(github.event.deployment.environment, 'production')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
