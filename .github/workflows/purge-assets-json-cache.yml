@@ -1,0 +1,33 @@
+name: Purge assets/json cache after deploy
+
+on:
+  deployment_status
+
+jobs:
+  purge:
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+          fetch-depth: 2
+
+      - name: Find changed files under /assets/json
+        id: diff
+        run: |
+          git diff --name-only HEAD~1 HEAD -- public/assets/json/ > changed.txt
+          if [ -s changed.txt ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Purge changed files from Cloudflare
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          urls=$(sed 's|^public/|https://jailbreakchangelogs.com/|' changed.txt | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          curl -sf -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data "{\"files\":$urls}"
