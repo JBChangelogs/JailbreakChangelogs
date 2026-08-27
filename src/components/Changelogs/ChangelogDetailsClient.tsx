@@ -265,6 +265,7 @@ export default function ChangelogDetailsClient({
 
       // Update the current changelog data directly
       setCurrentChangelogState(selectedChangelog);
+      document.title = `${selectedChangelog.title} | Jailbreak Changelogs`;
     } else {
       // If the changelog is not in our list, navigate to fetch it
       router.replace(`/changelogs/${selectedId}`);

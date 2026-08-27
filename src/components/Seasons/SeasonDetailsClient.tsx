@@ -154,6 +154,10 @@ export default function SeasonDetailsClient({
   const nextSeasonForHeader =
     seasonList.find((s: Season) => s.season === latestSeasonNumber + 1) || null;
 
+  const setSeasonDocumentTitle = (s: Pick<Season, "season" | "title">) => {
+    document.title = `Season ${s.season}: ${s.title} | Jailbreak Changelogs`;
+  };
+
   const handleSeasonSelect = async (selectedId: string) => {
     const selectedSeason = seasonList.find(
       (s) =>
@@ -173,6 +177,7 @@ export default function SeasonDetailsClient({
 
       window.history.pushState({}, "", `/seasons/${selectedId}`);
       setCurrentSeasonState(selectedSeason);
+      setSeasonDocumentTitle(selectedSeason);
     } else {
       router.replace(`/seasons/${selectedId}`);
     }
@@ -184,6 +189,7 @@ export default function SeasonDetailsClient({
     if (currentSeason) {
       window.history.pushState({}, "", `/seasons/${currentSeason.season}`);
       setCurrentSeasonState(currentSeason);
+      setSeasonDocumentTitle(currentSeason);
     } else {
       router.push(`/seasons/${latestSeasonNumber}`);
     }

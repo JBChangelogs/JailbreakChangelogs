@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { fetchSeasonsList, Season, Reward } from "@/utils/api/api";
+import { fetchSeason, Reward } from "@/utils/api/api";
 import { getMaintenanceMetadata } from "@/utils/api/maintenance";
 
 interface Props {
@@ -15,8 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const { id } = await params;
-    const seasons = await fetchSeasonsList();
-    const season = seasons.find((s: Season) => s.season.toString() === id);
+    const season = await fetchSeason(id);
 
     if (!season) {
       return {
@@ -30,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     // Get all level rewards with images
-    const validRewards = season.rewards.filter(
+    const validRewards = (season.rewards ?? []).filter(
       (reward: Reward) =>
         reward.requirement.startsWith("Level") &&
         reward.link !== "N/A" &&
