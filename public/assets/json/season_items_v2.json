@@ -16,25 +16,29 @@
       "item_id": 88,
       "type": "Rim",
       "name": "Spider Leg",
-      "season": 1
+      "season": 1,
+      "level": 10
     },
     {
       "item_id": 94,
       "type": "Rim",
       "name": "Star Badge",
-      "season": 1
+      "season": 1,
+      "level": 10
     },
     {
       "item_id": 361,
       "type": "Spoiler",
       "name": "5 Star",
-      "season": 1
+      "season": 1,
+      "level": 45
     },
     {
       "item_id": 388,
       "type": "Spoiler",
       "name": "Eight Leg",
-      "season": 1
+      "season": 1,
+      "level": 45
     },
     {
       "item_id": 703,
@@ -89,13 +93,15 @@
       "item_id": 133,
       "type": "Vehicle",
       "name": "Arachnid",
-      "season": 2
+      "season": 2,
+      "level": 30
     },
     {
       "item_id": 222,
       "type": "Vehicle",
       "name": "Torpedo",
-      "season": 2
+      "season": 2,
+      "level": 30
     },
     {
       "item_id": 57,
@@ -150,37 +156,43 @@
       "item_id": 13,
       "type": "Rim",
       "name": "Blue Eyes",
-      "season": 3
+      "season": 3,
+      "level": 40
     },
     {
       "item_id": 26,
       "type": "Rim",
       "name": "Distorted",
-      "season": 3
+      "season": 3,
+      "level": 20
     },
     {
       "item_id": 54,
       "type": "Rim",
       "name": "Nemesis",
-      "season": 3
+      "season": 3,
+      "level": 20
     },
     {
       "item_id": 68,
       "type": "Rim",
       "name": "Red Eyes",
-      "season": 3
+      "season": 3,
+      "level": 40
     },
     {
       "item_id": 168,
       "type": "Vehicle",
       "name": "JB8",
-      "season": 3
+      "season": 3,
+      "level": 30
     },
     {
       "item_id": 198,
       "type": "Vehicle",
       "name": "Raptor",
-      "season": 3
+      "season": 3,
+      "level": 30
     },
     {
       "item_id": 691,
@@ -228,37 +240,43 @@
       "item_id": 369,
       "type": "Spoiler",
       "name": "Blue Chute",
-      "season": 4
+      "season": 4,
+      "level": 25
     },
     {
       "item_id": 387,
       "type": "Spoiler",
       "name": "Dual Rockets",
-      "season": 4
+      "season": 4,
+      "level": 50
     },
     {
       "item_id": 412,
       "type": "Spoiler",
       "name": "Orange Chute",
-      "season": 4
+      "season": 4,
+      "level": 25
     },
     {
       "item_id": 419,
       "type": "Spoiler",
       "name": "Robo Wing",
-      "season": 4
+      "season": 4,
+      "level": 15
     },
     {
       "item_id": 448,
       "type": "Spoiler",
       "name": "Triple Fin",
-      "season": 4
+      "season": 4,
+      "level": 15
     },
     {
       "item_id": 454,
       "type": "Spoiler",
       "name": "UFO",
-      "season": 4
+      "season": 4,
+      "level": 50
     },
     {
       "item_id": 694,
