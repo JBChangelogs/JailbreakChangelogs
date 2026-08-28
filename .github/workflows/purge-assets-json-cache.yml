@@ -16,12 +16,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           CURRENT_ID: ${{ github.event.deployment.id }}
+          ENVIRONMENT: ${{ github.event.deployment.environment }}
         run: |
           set -euo pipefail
           base_sha=""
           page=1
           while :; do
-            batch=$(gh api "repos/$REPO/deployments?environment=production&per_page=100&page=$page")
+            batch=$(gh api "repos/$REPO/deployments" -f environment="$ENVIRONMENT" -F per_page=100 -F page=$page)
             [ "$(echo "$batch" | jq 'length')" -eq 0 ] && break
             sorted=$(echo "$batch" | jq --arg cur "$CURRENT_ID" 'map(select((.id|tostring) != $cur)) | sort_by(.created_at) | reverse')
             while IFS=$'\t' read -r id sha; do
