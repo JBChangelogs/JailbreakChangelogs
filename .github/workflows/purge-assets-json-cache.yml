@@ -7,16 +7,47 @@ jobs:
   purge:
     if: github.event.deployment_status.state == 'success' && contains(github.event.deployment.environment, 'production')
     runs-on: ubuntu-latest
+    permissions:
+      deployments: read
     steps:
+      - name: Find previous successful production deployment
+        id: prev
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          CURRENT_ID: ${{ github.event.deployment.id }}
+        run: |
+          set -euo pipefail
+          base_sha=""
+          page=1
+          while :; do
+            batch=$(gh api "repos/$REPO/deployments?environment=production&per_page=100&page=$page")
+            [ "$(echo "$batch" | jq 'length')" -eq 0 ] && break
+            sorted=$(echo "$batch" | jq --arg cur "$CURRENT_ID" 'map(select((.id|tostring) != $cur)) | sort_by(.created_at) | reverse')
+            while IFS=$'\t' read -r id sha; do
+              [ -z "$id" ] && continue
+              state=$(gh api "repos/$REPO/deployments/$id/statuses?per_page=1" | jq -r '.[0].state // empty')
+              if [ "$state" = "success" ]; then
+                base_sha="$sha"
+                break 2
+              fi
+            done < <(echo "$sorted" | jq -r '.[] | [.id, .sha] | @tsv')
+            page=$((page + 1))
+          done
+          echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.deployment.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Find changed files under /assets/json
         id: diff
+        env:
+          BASE_SHA: ${{ steps.prev.outputs.base_sha }}
         run: |
-          git diff --name-only HEAD~1 HEAD -- public/assets/json/ > changed.txt
+          base="${BASE_SHA:-HEAD~1}"
+          git diff --name-only "$base" HEAD -- public/assets/json/ > changed.txt
           if [ -s changed.txt ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
