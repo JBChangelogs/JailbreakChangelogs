@@ -7,20 +7,32 @@ jobs:
   purge:
     if: github.event.deployment_status.state == 'success' && contains(github.event.deployment.environment, 'production')
     runs-on: ubuntu-latest
-    permissions:
-      deployments: read
     steps:
-      - name: Find previous production deployment
+      - name: Find previous successful production deployment
         id: prev
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.DEPLOY_READ_TOKEN }}
           REPO: ${{ github.repository }}
           CURRENT_ID: ${{ github.event.deployment.id }}
           ENVIRONMENT: ${{ github.event.deployment.environment }}
         run: |
           set -euo pipefail
-          base_sha=$(gh api "repos/$REPO/deployments" -f environment="$ENVIRONMENT" -F per_page=10 \
-            | jq -r --arg cur "$CURRENT_ID" 'map(select((.id|tostring) != $cur)) | sort_by(.created_at) | reverse | .[0].sha // empty')
+          base_sha=""
+          page=1
+          while :; do
+            batch=$(gh api "repos/$REPO/deployments" -f environment="$ENVIRONMENT" -F per_page=100 -F page=$page)
+            [ "$(echo "$batch" | jq 'length')" -eq 0 ] && break
+            sorted=$(echo "$batch" | jq --arg cur "$CURRENT_ID" 'map(select((.id|tostring) != $cur)) | sort_by(.created_at) | reverse')
+            while IFS=$'\t' read -r id sha; do
+              [ -z "$id" ] && continue
+              state=$(gh api "repos/$REPO/deployments/$id/statuses" -F per_page=1 | jq -r '.[0].state // empty')
+              if [ "$state" = "success" ]; then
+                base_sha="$sha"
+                break 2
+              fi
+            done < <(echo "$sorted" | jq -r '.[] | [.id, .sha] | @tsv')
+            page=$((page + 1))
+          done
           echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v7
