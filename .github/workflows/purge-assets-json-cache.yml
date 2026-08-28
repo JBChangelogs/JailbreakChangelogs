@@ -54,6 +54,10 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Wait for old deployment teardown
+        if: steps.diff.outputs.changed == 'true'
+        run: sleep 55
+
       - name: Purge changed files from Cloudflare
         if: steps.diff.outputs.changed == 'true'
         run: |
