@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
+import { getAuthToken } from "@/utils/api/routeAuth";
 
 const log = createLogger("API");
 
 export async function DELETE() {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("jbcl_token")?.value;
+    const token = await getAuthToken();
     if (!token)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 

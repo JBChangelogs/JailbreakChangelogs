@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
+import { getAuthToken } from "@/utils/api/routeAuth";
+import { proxyPassthroughResponse } from "@/utils/api/routeProxy";
 
 const log = createLogger("API");
 
 export async function POST(request: Request) {
   const { id } = (await request.json()) as { id?: number };
-  const cookieStore = await cookies();
-  const token = cookieStore.get("jbcl_token")?.value;
+  const token = await getAuthToken();
   if (!token || !id) {
     return NextResponse.json(
       { message: "Unauthorized or missing id" },
@@ -23,29 +23,9 @@ export async function POST(request: Request) {
     cache: "no-store",
   });
 
-  const text = await upstream.text();
-
-  if (!upstream.ok) {
-    // Don't log 404 or 403 as errors
-    if (upstream.status !== 404 && upstream.status !== 403) {
-      const isHtml =
-        text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html");
-      const loggedText = isHtml
-        ? `HTML Error Page (Status ${upstream.status})`
-        : text.slice(0, 100);
-      log.error("Trade offer failed:", loggedText);
-    }
-    return NextResponse.json(
-      { message: "Failed to make trade offer" },
-      { status: upstream.status },
-    );
-  }
-
-  return new NextResponse(text, {
-    status: upstream.status,
-    headers: {
-      "content-type":
-        upstream.headers.get("content-type") || "application/json",
-    },
+  return proxyPassthroughResponse(upstream, {
+    log,
+    logLabel: "Trade offer failed",
+    errorMessage: "Failed to make trade offer",
   });
 }

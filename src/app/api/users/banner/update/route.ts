@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api/api";
+import { getAuthToken } from "@/utils/api/routeAuth";
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("jbcl_token")?.value;
+    const token = await getAuthToken();
     if (!token)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
