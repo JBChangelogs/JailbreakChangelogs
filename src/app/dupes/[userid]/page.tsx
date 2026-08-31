@@ -7,7 +7,6 @@ import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
-import ScanningResumedBanner from "@/components/ui/ScanningResumedBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkDupeFinderMaintenanceMode } from "@/utils/api/maintenance";
@@ -61,8 +60,6 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
       <NitroDupeDetailRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
-
-        <ScanningResumedBanner className="mb-6" />
 
         <ExperimentalFeatureBanner className="mb-6" />
 

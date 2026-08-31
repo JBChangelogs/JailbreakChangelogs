@@ -4,7 +4,6 @@ import OGFinderDescription from "@/components/OG/OGFinderDescription";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
-import ScanningResumedBanner from "@/components/ui/ScanningResumedBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkOGFinderMaintenanceMode } from "@/utils/api/maintenance";
@@ -49,8 +48,6 @@ export default async function OGFinderUserPage({
       <NitroOGDetailRightRailAd />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
-
-        <ScanningResumedBanner className="mb-6" />
 
         <ExperimentalFeatureBanner className="mb-6" />
 
