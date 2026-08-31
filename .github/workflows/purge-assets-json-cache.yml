@@ -8,19 +8,6 @@ jobs:
     if: github.event.deployment_status.state == 'success' && contains(github.event.deployment.environment, 'production')
     runs-on: ubuntu-latest
     steps:
-      - name: Find previous production deployment
-        id: prev
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-          CURRENT_ID: ${{ github.event.deployment.id }}
-          ENVIRONMENT: ${{ github.event.deployment.environment }}
-        run: |
-          set -euo pipefail
-          base_sha=$(gh api "repos/$REPO/deployments" -f environment="$ENVIRONMENT" -F per_page=10 \
-            | jq -r --arg cur "$CURRENT_ID" 'map(select((.id|tostring) != $cur)) | sort_by(.created_at) | reverse | .[0].sha // empty')
-          echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
-
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.deployment.sha }}
@@ -28,11 +15,8 @@ jobs:
 
       - name: Find changed files under /assets/json
         id: diff
-        env:
-          BASE_SHA: ${{ steps.prev.outputs.base_sha }}
         run: |
-          base="${BASE_SHA:-HEAD~1}"
-          git diff --name-only "$base" HEAD -- public/assets/json/ > changed.txt
+          git diff --name-only HEAD~1 HEAD -- public/assets/json/ > changed.txt
           if [ -s changed.txt ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
