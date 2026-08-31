@@ -15,15 +15,15 @@ export const HYPERCHROME_PITY_SMALL = HYPERCHROME_CHANCE_DENOMINATORS.map(
     ),
 );
 
+// The Mansion (CEO) robbery only doubles the natural drop chance
+// (1/500 vs. the normal Level 5 rate of 1/1068). Pity is tracked per
+// HyperChrome color, not per robbery source, so the guaranteed-by-pity
+// threshold is the same Level 5 total regardless of where the roll came from.
 export const HYPERCHROME_MANSION_CHANCE_DENOMINATOR = 500;
-export const HYPERCHROME_MANSION_PITY_PUBLIC = Math.ceil(
-  HYPERCHROME_MANSION_CHANCE_DENOMINATOR * HYPERCHROME_PITY_MULTIPLIER,
-);
-export const HYPERCHROME_MANSION_PITY_SMALL = Math.ceil(
-  (HYPERCHROME_MANSION_CHANCE_DENOMINATOR /
-    HYPERCHROME_SMALL_SERVER_ODDS_MULTIPLIER) *
-    HYPERCHROME_PITY_MULTIPLIER,
-);
+export const HYPERCHROME_MANSION_PITY_PUBLIC =
+  HYPERCHROME_PITY_PUBLIC[HYPERCHROME_PITY_PUBLIC.length - 1];
+export const HYPERCHROME_MANSION_PITY_SMALL =
+  HYPERCHROME_PITY_SMALL[HYPERCHROME_PITY_SMALL.length - 1];
 
 export type HyperchromeLevel = 0 | 1 | 2 | 3 | 4;
 

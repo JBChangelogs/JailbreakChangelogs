@@ -17,7 +17,7 @@ const Slider = React.forwardRef<
     )}
     {...props}
   >
-    <SliderPrimitive.Track className="bg-tertiary-bg relative h-1.5 w-full grow overflow-hidden rounded-full">
+    <SliderPrimitive.Track className="bg-tertiary-bg relative h-1.5 w-full grow cursor-pointer overflow-hidden rounded-full">
       <SliderPrimitive.Range className="bg-button-info absolute h-full" />
     </SliderPrimitive.Track>
     {Array.from({
@@ -25,7 +25,7 @@ const Slider = React.forwardRef<
     }).map((_, i) => (
       <SliderPrimitive.Thumb
         key={i}
-        className="border-button-info bg-primary-bg focus-visible:ring-border-focus block h-5 w-5 rounded-full border-2 shadow-md transition-all hover:scale-110 focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+        className="border-button-info bg-primary-bg focus-visible:ring-border-focus block h-5 w-5 cursor-grab rounded-full border-2 shadow-md transition-all hover:scale-110 focus-visible:ring-2 focus-visible:outline-none active:cursor-grabbing disabled:pointer-events-none disabled:opacity-50"
       />
     ))}
   </SliderPrimitive.Root>
