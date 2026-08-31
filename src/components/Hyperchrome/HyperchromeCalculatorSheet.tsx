@@ -178,6 +178,7 @@ export default function HyperchromeCalculatorModal({
       isSmallServer,
     );
     const mansionRobberies = calculateRobberiesToMansionWildcard(
+      lvl,
       pityPercent,
       isSmallServer,
     );

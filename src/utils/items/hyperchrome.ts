@@ -73,13 +73,17 @@ export function calculateAllLevelPercentages(
 }
 
 export function calculateRobberiesToMansionWildcard(
+  currentLevel: HyperchromeLevel,
   currentPityPercent: number,
   isSmallServer: boolean,
 ): number {
-  const pityBase = isSmallServer
+  const currentPityBase = isSmallServer
+    ? HYPERCHROME_PITY_SMALL[currentLevel]
+    : HYPERCHROME_PITY_PUBLIC[currentLevel];
+  const robberiesDone = (currentPityPercent / 100) * currentPityBase;
+  const mansionGoal = isSmallServer
     ? HYPERCHROME_MANSION_PITY_SMALL
     : HYPERCHROME_MANSION_PITY_PUBLIC;
-  const remainingPercent =
-    (100 - Math.min(Math.max(currentPityPercent, 0), 100)) / 100;
-  return Math.ceil(pityBase * remainingPercent);
+
+  return Math.max(0, Math.ceil(mansionGoal - robberiesDone));
 }
