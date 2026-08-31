@@ -12,6 +12,7 @@ import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkDupeFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +21,6 @@ interface DupeFinderPageProps {
     userid: string;
   }>;
 }
-
-import NitroDupeDetailRailAd from "@/components/Ads/NitroDupeDetailRailAd";
-import NitroDupeDetailRightRailAd from "@/components/Ads/NitroDupeDetailRightRailAd";
 
 export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
   // Check for Dupe Finder maintenance mode
@@ -56,8 +54,15 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
 
   return (
     <>
-      <NitroDupeDetailRailAd />
-      <NitroDupeDetailRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-rail-left-dupe-detail"
+        adIdWide="np-rail-left-dupe-detail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-rail-right-dupe-detail"
+        adIdWide="np-rail-right-dupe-detail-wide"
+        side="right"
+      />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
-import NitroValuesChangelogDetailVideoPlayer from "@/components/Ads/NitroValuesChangelogDetailVideoPlayer";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 
 interface UserData {
   id: string;
@@ -121,7 +121,10 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
           </div>
         </div>
 
-        <NitroValuesChangelogDetailVideoPlayer className="w-full self-center lg:self-start" />
+        <NitroInlineVideoPlayer
+          slotId="np-values-changelog-detail-video"
+          className="w-full self-center lg:self-start"
+        />
       </div>
     </div>
   );

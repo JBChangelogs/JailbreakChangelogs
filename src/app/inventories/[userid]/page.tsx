@@ -9,6 +9,7 @@ import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +18,6 @@ interface InventoryCheckerPageProps {
     userid: string;
   }>;
 }
-
-import NitroInventoryDetailRailAd from "@/components/Ads/NitroInventoryDetailRailAd";
-import NitroInventoryDetailRightRailAd from "@/components/Ads/NitroInventoryDetailRightRailAd";
 
 export default async function InventoryCheckerPage({
   params,
@@ -49,8 +47,15 @@ export default async function InventoryCheckerPage({
 
   return (
     <>
-      <NitroInventoryDetailRailAd />
-      <NitroInventoryDetailRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-inventory-detail-rail"
+        adIdWide="np-inventory-detail-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-inventory-detail-rail-right"
+        adIdWide="np-inventory-detail-rail-right-wide"
+        side="right"
+      />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

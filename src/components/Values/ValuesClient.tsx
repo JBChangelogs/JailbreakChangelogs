@@ -23,7 +23,7 @@ import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import { useValueSortState } from "@/hooks/useValueSortState";
 import { filterOptions } from "./valuesFilterOptions";
 import { valueSortOptions } from "./valuesSortOptions";
-import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatRelativeDate } from "@/utils/helpers/timestamp";
@@ -286,7 +286,10 @@ export default function ValuesClient({
             </Link>
           </div>
 
-          <NitroValuesVideoPlayer className="w-full self-center lg:self-start" />
+          <NitroInlineVideoPlayer
+            slotId="values-header-video"
+            className="w-full self-center lg:self-start"
+          />
         </div>
 
         <CategoryIcons

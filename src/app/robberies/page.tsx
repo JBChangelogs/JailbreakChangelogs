@@ -23,9 +23,8 @@ import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTracke
 import { useServerRegions } from "@/hooks/useServerRegions";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { Button } from "@/components/ui/button";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 import NitroRobberiesTopAd from "@/components/Ads/NitroRobberiesTopAd";
-import NitroRobberiesRailAd from "@/components/Ads/NitroRobberiesRailAd";
-import NitroRobberiesRightRailAd from "@/components/Ads/NitroRobberiesRightRailAd";
 import TotalRobberiesLoggedPolling from "@/components/RobberyTracker/TotalRobberiesLoggedPolling";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/Spinner";
@@ -958,8 +957,25 @@ function RobberyTrackerContent() {
 
   return (
     <>
-      <NitroRobberiesRailAd />
-      <NitroRobberiesRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-rail-left-robberies"
+        adIdWide="np-rail-left-robberies-wide"
+        wideSizes={[
+          ["300", "600"],
+          ["300", "250"],
+          ["160", "600"],
+        ]}
+      />
+      <NitroRailAd
+        adIdSmall="np-rail-right-robberies"
+        adIdWide="np-rail-right-robberies-wide"
+        side="right"
+        wideSizes={[
+          ["300", "600"],
+          ["300", "250"],
+          ["160", "600"],
+        ]}
+      />
       <main className="text-primary-text min-h-screen">
         <div className="container mx-auto mb-8 px-4">
           <Breadcrumb />

@@ -12,11 +12,9 @@ import { checkOGFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 export const dynamic = "force-dynamic";
-
-import NitroOGRailAd from "@/components/Ads/NitroOGRailAd";
-import NitroOGRightRailAd from "@/components/Ads/NitroOGRightRailAd";
 
 export default async function OGFinderPage() {
   // Check for OG Finder maintenance mode
@@ -37,8 +35,12 @@ export default async function OGFinderPage() {
 
   return (
     <>
-      <NitroOGRailAd />
-      <NitroOGRightRailAd />
+      <NitroRailAd adIdSmall="np-og-rail" adIdWide="np-og-rail-wide" />
+      <NitroRailAd
+        adIdSmall="np-og-rail-right"
+        adIdWide="np-og-rail-right-wide"
+        side="right"
+      />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

@@ -9,6 +9,7 @@ import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkOGFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +18,6 @@ interface OGFinderUserPageProps {
     userid: string;
   }>;
 }
-
-import NitroOGDetailRailAd from "@/components/Ads/NitroOGDetailRailAd";
-import NitroOGDetailRightRailAd from "@/components/Ads/NitroOGDetailRightRailAd";
 
 export default async function OGFinderUserPage({
   params,
@@ -44,8 +42,15 @@ export default async function OGFinderUserPage({
 
   return (
     <>
-      <NitroOGDetailRailAd />
-      <NitroOGDetailRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-og-detail-rail"
+        adIdWide="np-og-detail-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-og-detail-rail-right"
+        adIdWide="np-og-detail-rail-right-wide"
+        side="right"
+      />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

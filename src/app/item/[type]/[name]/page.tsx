@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import ItemCommentsServer from "@/components/Items/SuspenseWrapper/ItemCommentsServer";
 import SimilarItems from "@/components/Items/SimilarItems";
 import FavoriteButtonWrapper from "@/components/Items/SuspenseWrapper/FavoriteButtonWrapper";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 interface Props {
   params: Promise<{
@@ -12,9 +13,6 @@ interface Props {
     name: string;
   }>;
 }
-
-import NitroItemRailAd from "@/components/Ads/NitroItemRailAd";
-import NitroItemRightRailAd from "@/components/Ads/NitroItemRightRailAd";
 
 export const revalidate = 0;
 
@@ -60,8 +58,12 @@ export default async function ItemDetailsPage({ params }: Props) {
 
   return (
     <>
-      <NitroItemRailAd />
-      <NitroItemRightRailAd />
+      <NitroRailAd adIdSmall="np-item-rail" adIdWide="np-item-rail-wide" />
+      <NitroRailAd
+        adIdSmall="np-item-rail-right"
+        adIdWide="np-item-rail-right-wide"
+        side="right"
+      />
       <ItemDetailsClient
         item={item}
         initialFavoriteCount={null}

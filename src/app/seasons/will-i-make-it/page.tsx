@@ -11,10 +11,9 @@ import WillIMakeItLoading from "@/app/seasons/will-i-make-it/loading";
 import { Season } from "@/types/seasons";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import NitroSeasonsCalculatorRailAd from "@/components/Ads/NitroSeasonsCalculatorRailAd";
-import NitroSeasonsCalculatorRightRailAd from "@/components/Ads/NitroSeasonsCalculatorRightRailAd";
 import RateLimitView from "@/components/Layout/RateLimitView";
 import { createLogger } from "@/services/logger";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 const log = createLogger("UI");
 
@@ -83,8 +82,15 @@ export default function WillIMakeItPage() {
   if (isRateLimited) {
     return (
       <>
-        <NitroSeasonsCalculatorRailAd />
-        <NitroSeasonsCalculatorRightRailAd />
+        <NitroRailAd
+          adIdSmall="np-seasons-calculator-rail"
+          adIdWide="np-seasons-calculator-rail-wide"
+        />
+        <NitroRailAd
+          adIdSmall="np-seasons-calculator-rail-right"
+          adIdWide="np-seasons-calculator-rail-right-wide"
+          side="right"
+        />
         <RateLimitView retryAfter={rateLimitRetryAfter} />
       </>
     );
@@ -93,8 +99,15 @@ export default function WillIMakeItPage() {
   if (!isLoaded) {
     return (
       <>
-        <NitroSeasonsCalculatorRailAd />
-        <NitroSeasonsCalculatorRightRailAd />
+        <NitroRailAd
+          adIdSmall="np-seasons-calculator-rail"
+          adIdWide="np-seasons-calculator-rail-wide"
+        />
+        <NitroRailAd
+          adIdSmall="np-seasons-calculator-rail-right"
+          adIdWide="np-seasons-calculator-rail-right-wide"
+          side="right"
+        />
         <WillIMakeItLoading />
       </>
     );
@@ -103,8 +116,15 @@ export default function WillIMakeItPage() {
   if (error || !season) {
     return (
       <>
-        <NitroSeasonsCalculatorRailAd />
-        <NitroSeasonsCalculatorRightRailAd />
+        <NitroRailAd
+          adIdSmall="np-seasons-calculator-rail"
+          adIdWide="np-seasons-calculator-rail-wide"
+        />
+        <NitroRailAd
+          adIdSmall="np-seasons-calculator-rail-right"
+          adIdWide="np-seasons-calculator-rail-right-wide"
+          side="right"
+        />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-primary-text text-xl">
             Error: {error || "Season data not available"}
@@ -116,8 +136,15 @@ export default function WillIMakeItPage() {
 
   return (
     <>
-      <NitroSeasonsCalculatorRailAd />
-      <NitroSeasonsCalculatorRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-seasons-calculator-rail"
+        adIdWide="np-seasons-calculator-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-seasons-calculator-rail-right"
+        adIdWide="np-seasons-calculator-rail-right-wide"
+        side="right"
+      />
       <div className="mb-8 min-h-screen">
         <div className="container mx-auto px-4">
           <Breadcrumb />

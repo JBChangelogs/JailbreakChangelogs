@@ -60,9 +60,8 @@ import { BanBanner } from "@/components/ui/BanBanner";
 import { parseBan, showBanToast } from "@/utils/api/ban";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import type { Item } from "@/types/index";
-import NitroValuesSuggestionsRailAd from "@/components/Ads/NitroValuesSuggestionsRailAd";
-import NitroValuesSuggestionsRightRailAd from "@/components/Ads/NitroValuesSuggestionsRightRailAd";
-import NitroValuesSuggestionsVideoPlayer from "@/components/Ads/NitroValuesSuggestionsVideoPlayer";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 
 interface SuggestionLimits {
   min_characters: number;
@@ -2333,8 +2332,15 @@ export default function ValueSuggestionsPage() {
 
   return (
     <>
-      <NitroValuesSuggestionsRailAd />
-      <NitroValuesSuggestionsRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-values-suggestions-rail"
+        adIdWide="np-values-suggestions-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-values-suggestions-rail-right"
+        adIdWide="np-values-suggestions-rail-right-wide"
+        side="right"
+      />
       <main className="min-h-screen">
         <div className="container mx-auto mb-8 px-4 sm:px-6">
           <Breadcrumb />
@@ -2411,7 +2417,10 @@ export default function ValueSuggestionsPage() {
                   )}
                 </div>
               </div>
-              <NitroValuesSuggestionsVideoPlayer className="w-full self-center lg:self-start" />
+              <NitroInlineVideoPlayer
+                slotId="np-values-suggestions-video"
+                className="w-full self-center lg:self-start"
+              />
             </div>
           </div>
 

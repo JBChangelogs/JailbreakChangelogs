@@ -10,7 +10,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import NitroItemsVideoPlayer from "@/components/Ads/NitroItemsVideoPlayer";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import NitroItemMobileAd from "@/components/Ads/NitroItemMobileAd";
 import {
   Tooltip,
@@ -349,7 +349,10 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
         )}
       </div>
       <div className="mt-4 hidden justify-center xl:flex">
-        <NitroItemsVideoPlayer className="min-h-45 w-full max-w-xs sm:max-w-sm md:max-w-md" />
+        <NitroInlineVideoPlayer
+          slotId="np-item-video"
+          className="min-h-45 w-full max-w-xs sm:max-w-sm md:max-w-md"
+        />
       </div>
       <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-0.5 shadow-lg">
         <div className="bg-tertiary-bg rounded-md p-4 text-center">

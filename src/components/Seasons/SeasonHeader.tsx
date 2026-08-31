@@ -1,6 +1,6 @@
 import React from "react";
 import SeasonCountdown from "./SeasonCountdown";
-import NitroSeasonVideoPlayer from "@/components/Ads/NitroSeasonVideoPlayer";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 
 interface Reward {
   id: number;
@@ -51,7 +51,10 @@ const SeasonHeader: React.FC<SeasonHeaderProps> = ({
             nextSeason={nextSeason}
           />
         </div>
-        <NitroSeasonVideoPlayer className="min-h-52.5 w-full max-w-xs self-center sm:max-w-sm lg:self-start" />
+        <NitroInlineVideoPlayer
+          slotId="np-seasons-video"
+          className="min-h-52.5 w-full max-w-xs self-center sm:max-w-sm lg:self-start"
+        />
       </div>
     </div>
   );

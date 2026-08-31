@@ -18,11 +18,9 @@ import MostScannedLeaderboardClient from "@/components/Inventory/MostScannedLead
 import InventoryFAQ from "@/components/Inventory/InventoryFAQ";
 import NetworthCapHistoryChart from "@/components/Inventory/NetworthCapHistoryChart";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 export const dynamic = "force-dynamic";
-
-import NitroInventoriesRailAd from "@/components/Ads/NitroInventoriesRailAd";
-import NitroInventoriesRightRailAd from "@/components/Ads/NitroInventoriesRightRailAd";
 
 export default async function InventoriesPage() {
   // Check for inventory maintenance mode
@@ -42,8 +40,15 @@ export default async function InventoriesPage() {
 
   return (
     <>
-      <NitroInventoriesRailAd />
-      <NitroInventoriesRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-inventories-rail"
+        adIdWide="np-inventories-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-inventories-rail-right"
+        adIdWide="np-inventories-rail-right-wide"
+        side="right"
+      />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

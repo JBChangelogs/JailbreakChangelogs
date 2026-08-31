@@ -3,7 +3,7 @@
 import React from "react";
 import { Changelog } from "@/utils/api/api";
 import UpdateStatisticsCard from "@/components/common/UpdateStatisticsCard";
-import NitroChangelogVideoPlayer from "@/components/Ads/NitroChangelogVideoPlayer";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 
 interface ChangelogHeaderProps {
   changelogs?: Changelog[];
@@ -28,7 +28,10 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
           <UpdateStatisticsCard changelogs={changelogs} />
         </div>
 
-        <NitroChangelogVideoPlayer className="min-h-52.5 w-full max-w-xs self-center sm:max-w-sm lg:self-start" />
+        <NitroInlineVideoPlayer
+          slotId="np-changelogs-video"
+          className="min-h-52.5 w-full max-w-xs self-center sm:max-w-sm lg:self-start"
+        />
       </div>
     </div>
   );

@@ -7,8 +7,6 @@ import SeasonLeaderboardLoading from "@/app/seasons/leaderboard/loading";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import SeasonHeader from "@/components/Leaderboard/SeasonLeaderboardHeader";
-import NitroSeasonsLeaderboardRailAd from "@/components/Ads/NitroSeasonsLeaderboardRailAd";
-import NitroSeasonsLeaderboardRightRailAd from "@/components/Ads/NitroSeasonsLeaderboardRightRailAd";
 import { Season } from "@/types/seasons";
 import {
   PUBLIC_API_URL,
@@ -17,6 +15,7 @@ import {
 } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 const log = createLogger("UI");
 
@@ -101,8 +100,15 @@ export default function SeasonLeaderboardPage() {
   if (!isLoaded) {
     return (
       <>
-        <NitroSeasonsLeaderboardRailAd />
-        <NitroSeasonsLeaderboardRightRailAd />
+        <NitroRailAd
+          adIdSmall="np-seasons-leaderboard-rail"
+          adIdWide="np-seasons-leaderboard-rail-wide"
+        />
+        <NitroRailAd
+          adIdSmall="np-seasons-leaderboard-rail-right"
+          adIdWide="np-seasons-leaderboard-rail-right-wide"
+          side="right"
+        />
         <SeasonLeaderboardLoading />
       </>
     );
@@ -111,8 +117,15 @@ export default function SeasonLeaderboardPage() {
   if (!leaderboard || leaderboard.length === 0) {
     return (
       <>
-        <NitroSeasonsLeaderboardRailAd />
-        <NitroSeasonsLeaderboardRightRailAd />
+        <NitroRailAd
+          adIdSmall="np-seasons-leaderboard-rail"
+          adIdWide="np-seasons-leaderboard-rail-wide"
+        />
+        <NitroRailAd
+          adIdSmall="np-seasons-leaderboard-rail-right"
+          adIdWide="np-seasons-leaderboard-rail-right-wide"
+          side="right"
+        />
         <div className="min-h-screen">
           <div className="container mx-auto px-4 pb-16">
             <Breadcrumb />
@@ -157,8 +170,15 @@ export default function SeasonLeaderboardPage() {
 
   return (
     <>
-      <NitroSeasonsLeaderboardRailAd />
-      <NitroSeasonsLeaderboardRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-seasons-leaderboard-rail"
+        adIdWide="np-seasons-leaderboard-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-seasons-leaderboard-rail-right"
+        adIdWide="np-seasons-leaderboard-rail-right-wide"
+        side="right"
+      />
       <main className="mb-8 min-h-screen">
         <div className="container mx-auto px-4">
           <Breadcrumb />

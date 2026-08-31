@@ -5,14 +5,13 @@ import { useEffect, useState } from "react";
 
 const log = createLogger("UI");
 import ChangelogDetailsClient from "@/components/Changelogs/ChangelogDetailsClient";
-import NitroChangelogRailAd from "@/components/Ads/NitroChangelogRailAd";
-import NitroChangelogRightRailAd from "@/components/Ads/NitroChangelogRightRailAd";
 import { Changelog, CommentData, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { UserData } from "@/types/auth";
 import { notFound } from "next/navigation";
 import ChangelogRouteLoading from "@/app/changelogs/[id]/loading";
 import RateLimitView from "@/components/Layout/RateLimitView";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 interface ChangelogDetailsPageClientProps {
   changelogId: string;
@@ -110,8 +109,15 @@ export default function ChangelogDetailsPageClient({
   if (!changelogList || !currentChangelog) {
     return (
       <>
-        <NitroChangelogRailAd />
-        <NitroChangelogRightRailAd />
+        <NitroRailAd
+          adIdSmall="np-changelog-rail"
+          adIdWide="np-changelog-rail-wide"
+        />
+        <NitroRailAd
+          adIdSmall="np-changelog-rail-right"
+          adIdWide="np-changelog-rail-right-wide"
+          side="right"
+        />
         <ChangelogRouteLoading />
       </>
     );
@@ -119,8 +125,15 @@ export default function ChangelogDetailsPageClient({
 
   return (
     <>
-      <NitroChangelogRailAd />
-      <NitroChangelogRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-changelog-rail"
+        adIdWide="np-changelog-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-changelog-rail-right"
+        adIdWide="np-changelog-rail-right-wide"
+        side="right"
+      />
       <ChangelogDetailsClient
         changelogList={changelogList}
         currentChangelog={currentChangelog}

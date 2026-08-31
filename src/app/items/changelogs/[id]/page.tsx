@@ -6,10 +6,9 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import ChangelogDetailsClient from "@/components/Values/ChangelogDetailsClient";
-import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
-import NitroValuesChangelogsRightRailAd from "@/components/Ads/NitroValuesChangelogsRightRailAd";
 import Loading from "./loading";
 import { createLogger } from "@/services/logger";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 const log = createLogger("UI");
 
@@ -196,8 +195,15 @@ export default function ChangelogDetailsPage() {
 
   return (
     <>
-      <NitroValuesChangelogsRailAd />
-      <NitroValuesChangelogsRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-values-changelogs-rail"
+        adIdWide="np-values-changelogs-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-values-changelogs-rail-right"
+        adIdWide="np-values-changelogs-rail-right-wide"
+        side="right"
+      />
       <main className="mb-8 min-h-screen">
         <div className="container mx-auto px-4">
           <Breadcrumb />

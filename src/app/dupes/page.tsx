@@ -16,11 +16,9 @@ import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 export const dynamic = "force-dynamic";
-
-import NitroDupesRailAd from "@/components/Ads/NitroDupesRailAd";
-import NitroDupesRightRailAd from "@/components/Ads/NitroDupesRightRailAd";
 
 export default async function DupeFinderPage() {
   // Check for Dupe Finder maintenance mode
@@ -42,8 +40,15 @@ export default async function DupeFinderPage() {
 
   return (
     <>
-      <NitroDupesRailAd />
-      <NitroDupesRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-rail-left-dupes"
+        adIdWide="np-rail-left-dupes-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-rail-right-dupes"
+        adIdWide="np-rail-right-dupes-wide"
+        side="right"
+      />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

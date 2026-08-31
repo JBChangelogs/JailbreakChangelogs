@@ -2,8 +2,7 @@ import { fetchDuplicateVariants, fetchItems } from "@/utils/api/api";
 import DupeComparisonClient from "@/components/Dupes/DupeComparisonClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { notFound } from "next/navigation";
-import NitroDupeCompareRailAd from "@/components/Ads/NitroDupeCompareRailAd";
-import NitroDupeCompareRightRailAd from "@/components/Ads/NitroDupeCompareRightRailAd";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +28,15 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <NitroDupeCompareRailAd />
-      <NitroDupeCompareRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-rail-left-dupe-compare"
+        adIdWide="np-rail-left-dupe-compare-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-rail-right-dupe-compare"
+        adIdWide="np-rail-right-dupe-compare-wide"
+        side="right"
+      />
       <div className="container mx-auto px-4 pb-8">
         <Breadcrumb />
 

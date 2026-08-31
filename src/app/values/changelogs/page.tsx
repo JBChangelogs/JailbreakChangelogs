@@ -17,9 +17,8 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { UserAvatar } from "@/utils/ui/avatar";
-import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
-import NitroValuesChangelogsRightRailAd from "@/components/Ads/NitroValuesChangelogsRightRailAd";
 import { createLogger } from "@/services/logger";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 const log = createLogger("UI");
 
@@ -139,8 +138,15 @@ export default function ValuesChangelogPage() {
 
   return (
     <>
-      <NitroValuesChangelogsRailAd />
-      <NitroValuesChangelogsRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-values-changelogs-rail"
+        adIdWide="np-values-changelogs-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-values-changelogs-rail-right"
+        adIdWide="np-values-changelogs-rail-right-wide"
+        side="right"
+      />
       <main className="min-h-screen">
         <div className="container mx-auto mb-8 px-4 sm:px-6">
           <Breadcrumb />

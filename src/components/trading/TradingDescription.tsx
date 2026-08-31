@@ -1,5 +1,5 @@
 import React from "react";
-import NitroTradingVideoPlayer from "@/components/Ads/NitroTradingVideoPlayer";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 
 const TradingDescription: React.FC = () => {
   return (
@@ -18,7 +18,10 @@ const TradingDescription: React.FC = () => {
           </p>
         </div>
 
-        <NitroTradingVideoPlayer className="w-full self-center lg:self-start" />
+        <NitroInlineVideoPlayer
+          slotId="np-trading-video"
+          className="w-full self-center lg:self-start"
+        />
       </div>
     </div>
   );

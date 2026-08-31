@@ -38,9 +38,8 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import type { Item } from "@/types/index";
-import NitroValuesSuggestionDetailRailAd from "@/components/Ads/NitroValuesSuggestionDetailRailAd";
-import NitroValuesSuggestionDetailRightRailAd from "@/components/Ads/NitroValuesSuggestionDetailRightRailAd";
-import NitroValuesSuggestionDetailVideoPlayer from "@/components/Ads/NitroValuesSuggestionDetailVideoPlayer";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import ItemValueChart, {
   type ValueHistory,
 } from "@/components/Items/ItemValueChart";
@@ -569,8 +568,15 @@ export default function ValueSuggestionDetailPage() {
 
   return (
     <>
-      <NitroValuesSuggestionDetailRailAd />
-      <NitroValuesSuggestionDetailRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-values-suggestion-detail-rail"
+        adIdWide="np-values-suggestion-detail-rail-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-values-suggestion-detail-rail-right"
+        adIdWide="np-values-suggestion-detail-rail-right-wide"
+        side="right"
+      />
       <main className="min-h-screen">
         <div className="container mx-auto px-4 pb-10 sm:px-6">
           <Breadcrumb />
@@ -915,7 +921,10 @@ export default function ValueSuggestionDetailPage() {
                     </div>
 
                     {/* Video ad — wraps below details until there is room for a side column */}
-                    <NitroValuesSuggestionDetailVideoPlayer />
+                    <NitroInlineVideoPlayer
+                      slotId="np-values-suggestion-detail-video"
+                      variant="wide"
+                    />
                   </div>
                 </div>
 

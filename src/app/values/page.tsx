@@ -3,8 +3,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { fetchItems, fetchLastUpdated } from "@/utils/api/api";
 import ValuesClient from "@/components/Values/ValuesClient";
 import Loading from "./loading";
-import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
-import NitroValuesRightRailAd from "@/components/Ads/NitroValuesRightRailAd";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 export const revalidate = 0;
 
@@ -16,8 +15,15 @@ export default async function ValuesPage() {
 
   return (
     <>
-      <NitroValuesRailAd />
-      <NitroValuesRightRailAd />
+      <NitroRailAd
+        adIdSmall="np-rail-left-values"
+        adIdWide="np-rail-left-values-wide"
+      />
+      <NitroRailAd
+        adIdSmall="np-rail-right-values"
+        adIdWide="np-rail-right-values-wide"
+        side="right"
+      />
       <main className="mb-8 min-h-screen">
         <div className="container mx-auto px-4">
           <Breadcrumb />
