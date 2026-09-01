@@ -10,9 +10,6 @@ import {
   calculateRobberiesToLevelUp,
   calculateAllLevelPercentages,
   calculateRobberiesToPublicPityGoal,
-  calculateRobberiesToMansionWildcard,
-  HYPERCHROME_MANSION_PITY_PUBLIC,
-  HYPERCHROME_MANSION_PITY_SMALL,
   HYPERCHROME_PITY_PUBLIC,
   HYPERCHROME_PITY_SMALL,
 } from "@/utils/items/hyperchrome";
@@ -120,8 +117,6 @@ export default function HyperchromeCalculatorModal({
   const [resultLevel, setResultLevel] = useState<number>(0);
   const [resultPity, setResultPity] = useState<number>(0);
   const [resultTipRobberies, setResultTipRobberies] = useState<number>(0);
-  const [resultMansionRobberies, setResultMansionRobberies] =
-    useState<number>(0);
   const [isSmallServer, setIsSmallServer] = useState(false);
 
   useEffect(() => {
@@ -138,7 +133,6 @@ export default function HyperchromeCalculatorModal({
     setResultLevel(0);
     setResultPity(0);
     setResultTipRobberies(0);
-    setResultMansionRobberies(0);
     setIsSmallServer(false);
     onClose?.();
   }, [onClose]);
@@ -177,11 +171,6 @@ export default function HyperchromeCalculatorModal({
       pityPercent,
       isSmallServer,
     );
-    const mansionRobberies = calculateRobberiesToMansionWildcard(
-      lvl,
-      pityPercent,
-      isSmallServer,
-    );
     const others = calculateAllLevelPercentages(
       lvl,
       pityPercent,
@@ -194,7 +183,6 @@ export default function HyperchromeCalculatorModal({
     setResultLevel(lvl);
     setResultPity(pityPercent);
     setHasCalculated(true);
-    setResultMansionRobberies(mansionRobberies);
   };
 
   // Keep results in sync if server type is toggled at result stage
@@ -523,22 +511,6 @@ export default function HyperchromeCalculatorModal({
                     </div>
                   </div>
 
-                  <div
-                    className={
-                      asPage
-                        ? "text-primary-text mb-3 text-sm leading-relaxed"
-                        : "text-primary-text mb-3 text-[13px] leading-relaxed"
-                    }
-                  >
-                    Defeating the CEO gives a{" "}
-                    <span className="font-semibold">1/500 (0.2%)</span> natural
-                    chance at a HyperChrome, better than the normal Level 5 rate
-                    of <span className="font-semibold">1/1068 (~0.094%)</span>.
-                    Pity is tracked per color, not per robbery source, so the
-                    guaranteed pity total below is the same as a normal Level 5
-                    robbery.
-                  </div>
-
                   <div className="border-border-card bg-tertiary-bg mb-3 rounded-lg border p-5">
                     <div className="mb-2 flex items-center justify-center gap-3">
                       <div
@@ -548,7 +520,7 @@ export default function HyperchromeCalculatorModal({
                             : "text-primary-text text-4xl font-black"
                         }
                       >
-                        {resultMansionRobberies}
+                        {resultRobberiesNeeded}
                       </div>
                       <div
                         className={
@@ -592,7 +564,7 @@ export default function HyperchromeCalculatorModal({
                         Big/Public Guarantee
                       </div>
                       <div className="text-primary-text text-2xl font-black">
-                        {HYPERCHROME_MANSION_PITY_PUBLIC}
+                        {HYPERCHROME_PITY_PUBLIC[resultLevel]}
                       </div>
                       <div className="text-secondary-text text-xs">
                         total from 0% pity
@@ -603,7 +575,7 @@ export default function HyperchromeCalculatorModal({
                         Small/Private Guarantee
                       </div>
                       <div className="text-primary-text text-2xl font-black">
-                        {HYPERCHROME_MANSION_PITY_SMALL}
+                        {HYPERCHROME_PITY_SMALL[resultLevel]}
                       </div>
                       <div className="text-secondary-text text-xs">
                         total from 0% pity

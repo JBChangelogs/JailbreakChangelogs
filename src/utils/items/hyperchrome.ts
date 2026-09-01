@@ -15,15 +15,11 @@ export const HYPERCHROME_PITY_SMALL = HYPERCHROME_CHANCE_DENOMINATORS.map(
     ),
 );
 
-// The Mansion (CEO) robbery only doubles the natural drop chance
-// (1/500 vs. the normal Level 5 rate of 1/1068). Pity is tracked per
-// HyperChrome color, not per robbery source, so the guaranteed-by-pity
-// threshold is the same Level 5 total regardless of where the roll came from.
+// The Mansion (CEO) robbery only changes the per-roll drop chance to a flat
+// 1/500 regardless of current level. Pity is tracked per HyperChrome color,
+// not per robbery source, so CEO robberies count toward the exact same pity
+// threshold as normal robberies at the player's current level.
 export const HYPERCHROME_MANSION_CHANCE_DENOMINATOR = 500;
-export const HYPERCHROME_MANSION_PITY_PUBLIC =
-  HYPERCHROME_PITY_PUBLIC[HYPERCHROME_PITY_PUBLIC.length - 1];
-export const HYPERCHROME_MANSION_PITY_SMALL =
-  HYPERCHROME_PITY_SMALL[HYPERCHROME_PITY_SMALL.length - 1];
 
 export type HyperchromeLevel = 0 | 1 | 2 | 3 | 4;
 
@@ -70,20 +66,4 @@ export function calculateAllLevelPercentages(
     : HYPERCHROME_PITY_PUBLIC;
 
   return targetBases.map((value) => ((robberiesDone / value) * 100).toFixed(2));
-}
-
-export function calculateRobberiesToMansionWildcard(
-  currentLevel: HyperchromeLevel,
-  currentPityPercent: number,
-  isSmallServer: boolean,
-): number {
-  const currentPityBase = isSmallServer
-    ? HYPERCHROME_PITY_SMALL[currentLevel]
-    : HYPERCHROME_PITY_PUBLIC[currentLevel];
-  const robberiesDone = (currentPityPercent / 100) * currentPityBase;
-  const mansionGoal = isSmallServer
-    ? HYPERCHROME_MANSION_PITY_SMALL
-    : HYPERCHROME_MANSION_PITY_PUBLIC;
-
-  return Math.max(0, Math.ceil(mansionGoal - robberiesDone));
 }
