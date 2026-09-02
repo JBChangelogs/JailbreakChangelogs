@@ -885,40 +885,23 @@ export default function SettingsPage() {
             )}
           </SettingsCard>
 
-          <div
+          <SettingsCard
             id="connections"
-            className={`${cardClassName} text-primary-text mb-8 p-6`}
-            style={getSectionHighlightStyle("connections")}
-            ref={(el) => scrollHighlightedSectionIntoView("connections", el)}
+            title="Account Connections"
+            icon="heroicons:link"
+            isOwner={
+              userData.flags?.some((f) => f.flag === "is_owner") ?? false
+            }
+            highlightStyle={getSectionHighlightStyle("connections")}
+            scrollRef={(el) =>
+              scrollHighlightedSectionIntoView("connections", el)
+            }
+            onCopyLink={() =>
+              copySectionLink("connections", "Account Connections")
+            }
           >
-            <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
-              <Icon icon="heroicons:link" className="h-6 w-6" />
-              Account Connections
-              {userData?.flags?.some((f) => f.flag === "is_owner") && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() =>
-                        copySectionLink("connections", "Account Connections")
-                      }
-                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                      aria-label="Copy section link"
-                    >
-                      <Icon icon="heroicons:link" className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                  >
-                    <p>Copy URL</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </h2>
-            <div className="border-border-card mb-2 border-t" />
             <RobloxConnection userData={userData} />
-          </div>
+          </SettingsCard>
 
           <SettingsCard
             id="export"
