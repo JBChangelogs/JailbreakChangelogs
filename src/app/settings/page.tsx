@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   SupporterGift,
-  SupporterHistoryEntry,
   SupporterLevel,
   UserData,
   UserSettingsV2,
@@ -28,6 +27,7 @@ import { AvatarSettings } from "@/components/Settings/AvatarSettings";
 import ImageHostLinks from "@/components/Settings/ImageHostLinks";
 import SettingsCard from "@/components/Settings/SettingsCard";
 import SupporterLevelRow from "@/components/Settings/SupporterLevelRow";
+import SupporterHistorySection from "@/components/Settings/SupporterHistorySection";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button as CustomButton } from "@/components/ui/button";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
@@ -47,12 +47,12 @@ import { EmailNotificationSettings } from "@/components/Settings/EmailNotificati
 import {
   fetchSupporterGiftLevels,
   giftSupporterGift,
-  revertSupporterLevel,
 } from "@/services/settingsService";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { useUserSearch } from "@/hooks/useUserSearch";
 import { useSectionHighlight } from "@/hooks/useSectionHighlight";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
+import { useSupporterLevelActions } from "@/hooks/useSupporterLevelActions";
 import SettingsLoading from "./loading";
 
 const BADGE_BASE_URL =
@@ -100,6 +100,11 @@ export default function SettingsPage() {
     loading: settingsLoading,
     handleSettingChange,
   } = useSettings(userData, openModal);
+  const {
+    revertingSupporterLevel,
+    handleSupporterLevelUpdate,
+    handleRemoveSupporter,
+  } = useSupporterLevelActions({ userData, setSupporterHistory });
   const [giftingIds, setGiftingIds] = useState<Record<string, boolean>>({});
   const [giftModalOpen, setGiftModalOpen] = useState(false);
   const [giftModalStep, setGiftModalStep] = useState<"search" | "confirm">(
@@ -117,9 +122,6 @@ export default function SettingsPage() {
     useState(false);
   const [purchaseGiftLevelsError, setPurchaseGiftLevelsError] = useState<
     string | null
-  >(null);
-  const [revertingSupporterLevel, setRevertingSupporterLevel] = useState<
-    number | null
   >(null);
   const [purchaseGiftTab, setPurchaseGiftTab] = useState<"self" | "gift">(
     "gift",
@@ -242,88 +244,6 @@ export default function SettingsPage() {
         return "Supporter Three Gift";
       default:
         return `Supporter Gift ${level}`;
-    }
-  };
-  const getSupporterTierLabel = (level: number) => {
-    switch (level) {
-      case 1:
-        return "Supporter Tier 1";
-      case 2:
-        return "Supporter Tier 2";
-      case 3:
-        return "Supporter Tier 3";
-      default:
-        return `Supporter Tier ${level}`;
-    }
-  };
-  const getSupporterHistoryKey = (
-    entry: SupporterHistoryEntry,
-    index: number,
-  ) => `${entry.level}-${entry.created_at}-${index}`;
-  const handleSupporterLevelUpdate = async (level: number) => {
-    if (!userData) {
-      return;
-    }
-
-    setRevertingSupporterLevel(level);
-    try {
-      await revertSupporterLevel(level);
-
-      const updatedUser: UserData = {
-        ...userData,
-        premiumtype: level,
-      };
-      safeSetJSON("user", updatedUser);
-      window.dispatchEvent(
-        new CustomEvent("authStateChanged", { detail: updatedUser }),
-      );
-
-      setSupporterHistory((prev) => {
-        const nextEntry = {
-          level,
-          created_at: Math.floor(Date.now() / 1000),
-        };
-
-        const withoutSameLevel = prev.filter((entry) => entry.level !== level);
-        return [...withoutSameLevel, nextEntry];
-      });
-
-      toast.success("Supporter tier updated. Changes will be applied shortly.");
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to update supporter level",
-      );
-    } finally {
-      setRevertingSupporterLevel(null);
-    }
-  };
-  const handleRemoveSupporter = async () => {
-    if (!userData) {
-      return;
-    }
-
-    setRevertingSupporterLevel(0);
-    try {
-      await revertSupporterLevel(0);
-
-      const updatedUser: UserData = {
-        ...userData,
-        premiumtype: 0,
-      };
-      safeSetJSON("user", updatedUser);
-      window.dispatchEvent(
-        new CustomEvent("authStateChanged", { detail: updatedUser }),
-      );
-
-      toast.success("Supporter removed. Changes will be applied shortly.");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to remove supporter",
-      );
-    } finally {
-      setRevertingSupporterLevel(null);
     }
   };
   const openPurchaseGiftModal = () => {
@@ -759,82 +679,13 @@ export default function SettingsPage() {
               }
               dividerClassName="border-border-card mb-3 border-t"
             >
-              <div className="flex flex-col gap-3">
-                {sortedSupporterHistory.map((entry, index) => {
-                  const isCurrentTier = currentSupporterLevel === entry.level;
-                  const isUpgrade = entry.level > currentSupporterLevel;
-
-                  return (
-                    <div
-                      key={getSupporterHistoryKey(entry, index)}
-                      className="bg-tertiary-bg border-border-card rounded-lg border p-4"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="mb-1 flex items-center gap-2">
-                            {supporterIcons[entry.level] && (
-                              <Image
-                                src={supporterIcons[entry.level]}
-                                alt={getSupporterTierLabel(entry.level)}
-                                width={18}
-                                height={18}
-                                className="object-contain"
-                              />
-                            )}
-                            <p className="text-primary-text text-sm font-semibold">
-                              {getSupporterTierLabel(entry.level)}
-                            </p>
-                          </div>
-                        </div>
-                        {!isCurrentTier ? (
-                          <CustomButton
-                            type="button"
-                            size="sm"
-                            onClick={() =>
-                              handleSupporterLevelUpdate(entry.level)
-                            }
-                            disabled={revertingSupporterLevel !== null}
-                          >
-                            {revertingSupporterLevel === entry.level
-                              ? isUpgrade
-                                ? "Upgrading..."
-                                : "Downgrading..."
-                              : isUpgrade
-                                ? "Upgrade"
-                                : "Downgrade"}
-                          </CustomButton>
-                        ) : null}
-                      </div>
-                    </div>
-                  );
-                })}
-                {currentSupporterLevel > 0 && (
-                  <div className="bg-tertiary-bg border-border-card rounded-lg border p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="mb-1 flex items-center gap-2">
-                          <p className="text-primary-text text-sm font-semibold">
-                            Free Tier
-                          </p>
-                        </div>
-                        <p className="text-secondary-text text-xs">
-                          Remove your current supporter tier.
-                        </p>
-                      </div>
-                      <CustomButton
-                        type="button"
-                        size="sm"
-                        onClick={handleRemoveSupporter}
-                        disabled={revertingSupporterLevel !== null}
-                      >
-                        {revertingSupporterLevel === 0
-                          ? "Downgrading..."
-                          : "Downgrade"}
-                      </CustomButton>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <SupporterHistorySection
+                history={sortedSupporterHistory}
+                currentLevel={currentSupporterLevel}
+                revertingLevel={revertingSupporterLevel}
+                onUpdateLevel={handleSupporterLevelUpdate}
+                onRemove={handleRemoveSupporter}
+              />
             </SettingsCard>
           ) : null}
 
