@@ -36,7 +36,6 @@ export function useSectionHighlight() {
   const copySectionLink = (sectionId: string, sectionTitle: string) => {
     const url = new URL(window.location.href);
     url.searchParams.set("highlight", sectionId);
-    void setHighlightParam(sectionId);
     navigator.clipboard.writeText(url.toString());
     toast.success("Link Copied", {
       description: `The URL for the "${sectionTitle}" section is now on your clipboard.`,
