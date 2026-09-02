@@ -562,6 +562,7 @@ export default function ValueSuggestionsPage() {
                       f.enabled !== false,
                   ) ?? false
                 }
+                user={user}
                 onSubmit={handleFormSubmit}
                 onCancel={() => setShowForm(false)}
                 onOpenGuidelines={() => setGuidelinesOpen(true)}

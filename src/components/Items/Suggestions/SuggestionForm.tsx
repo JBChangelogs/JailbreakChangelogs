@@ -31,7 +31,18 @@ import {
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { getDemandHexColor, getTrendHexColor } from "@/utils/items/badgeColors";
 import { formatFullValue } from "@/utils/trading/values";
+import { UserAvatar } from "@/utils/ui/avatar";
 import type { Item } from "@/types/index";
+
+export interface SuggestionFormUser {
+  id: string;
+  username?: string;
+  roblox_id?: string;
+  roblox_username?: string;
+  roblox_display_name?: string;
+  roblox_avatar?: string;
+  premiumtype?: number;
+}
 
 export interface SuggestionFormProps {
   items: Item[];
@@ -39,6 +50,7 @@ export interface SuggestionFormProps {
   limits: SuggestionLimits | null;
   loadingLimits: boolean;
   isVtEligible: boolean;
+  user: SuggestionFormUser | null;
   onSubmit: (payload: {
     item: number;
     field: string;
@@ -56,6 +68,7 @@ export function SuggestionForm({
   limits,
   loadingLimits,
   isVtEligible,
+  user,
   onSubmit,
   onCancel,
   onOpenGuidelines,
@@ -770,6 +783,37 @@ export function SuggestionForm({
               <DialogTitle className="text-primary-text text-base font-bold">
                 Review your suggestion
               </DialogTitle>
+              {user && (
+                <a
+                  href={
+                    user.roblox_id
+                      ? `https://www.roblox.com/users/${user.roblox_id}/profile`
+                      : undefined
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1.5 flex w-fit items-center gap-1.5"
+                >
+                  <UserAvatar
+                    userId={user.id}
+                    avatarHash={null}
+                    username={user.roblox_username ?? user.username ?? ""}
+                    forceAvatarUrl={user.roblox_avatar ?? undefined}
+                    premiumType={user.premiumtype ?? 0}
+                    size={5}
+                    showBadge={false}
+                    bgClassName="bg-quaternary-bg"
+                  />
+                  <p className="text-secondary-text min-w-0 truncate text-xs">
+                    Posting as{" "}
+                    <span className="text-link hover:text-link-hover font-medium transition-colors">
+                      {user.roblox_display_name ||
+                        user.roblox_username ||
+                        `User #${user.id}`}
+                    </span>
+                  </p>
+                </a>
+              )}
             </DialogHeader>
 
             <div className="space-y-4 px-6 pt-2 pb-6">
