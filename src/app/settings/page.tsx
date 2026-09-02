@@ -32,6 +32,7 @@ import { SettingToggle } from "@/components/Settings/SettingToggle";
 import { BannerSettings } from "@/components/Settings/BannerSettings";
 import { AvatarSettings } from "@/components/Settings/AvatarSettings";
 import ImageHostLinks from "@/components/Settings/ImageHostLinks";
+import SettingsCard from "@/components/Settings/SettingsCard";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button as CustomButton } from "@/components/ui/button";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
@@ -991,38 +992,19 @@ export default function SettingsPage() {
             <RobloxConnection userData={userData} />
           </div>
 
-          <div
+          <SettingsCard
             id="export"
-            className={`${cardClassName} text-primary-text mb-8 p-6`}
-            style={getSectionHighlightStyle("export")}
-            ref={(el) => scrollHighlightedSectionIntoView("export", el)}
+            title="Export Data"
+            icon="heroicons:arrow-down-tray"
+            isOwner={
+              userData.flags?.some((f) => f.flag === "is_owner") ?? false
+            }
+            highlightStyle={getSectionHighlightStyle("export")}
+            scrollRef={(el) => scrollHighlightedSectionIntoView("export", el)}
+            onCopyLink={() => copySectionLink("export", "Export Data")}
           >
-            <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
-              <Icon icon="heroicons:arrow-down-tray" className="h-6 w-6" />
-              Export Data
-              {userData?.flags?.some((f) => f.flag === "is_owner") && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => copySectionLink("export", "Export Data")}
-                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                      aria-label="Copy section link"
-                    >
-                      <Icon icon="heroicons:link" className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                  >
-                    <p>Copy URL</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </h2>
-            <div className="border-border-card mb-2 border-t" />
             <ExportInventoryData />
-          </div>
+          </SettingsCard>
 
           {hasSupporterHistory ? (
             <div
