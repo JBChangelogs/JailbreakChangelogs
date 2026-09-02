@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "nextjs-toploader/app";
-import Image from "next/image";
 import Link from "next/link";
 import {
   Dialog,
@@ -12,12 +11,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import {
-  SupporterGift,
-  SupporterLevel,
-  UserData,
-  UserSettingsV2,
-} from "@/types/auth";
+import { SupporterLevel, UserData, UserSettingsV2 } from "@/types/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatSettingName } from "@/config/settings";
 import { useSettings } from "@/hooks/useSettings";
@@ -28,6 +22,8 @@ import ImageHostLinks from "@/components/Settings/ImageHostLinks";
 import SettingsCard from "@/components/Settings/SettingsCard";
 import SupporterLevelRow from "@/components/Settings/SupporterLevelRow";
 import SupporterHistorySection from "@/components/Settings/SupporterHistorySection";
+import PurchasedGiftsSection from "@/components/Settings/PurchasedGiftsSection";
+import GiftToUserDialog from "@/components/Settings/GiftToUserDialog";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button as CustomButton } from "@/components/ui/button";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
@@ -44,24 +40,12 @@ import { Spinner } from "@/components/ui/Spinner";
 import { NotificationPreferenceToggle } from "@/components/Settings/NotificationPreferenceToggle";
 import { DesktopNotificationToggle } from "@/components/Settings/DesktopNotificationToggle";
 import { EmailNotificationSettings } from "@/components/Settings/EmailNotificationSettings";
-import {
-  fetchSupporterGiftLevels,
-  giftSupporterGift,
-} from "@/services/settingsService";
-import { UserAvatar } from "@/utils/ui/avatar";
-import { useUserSearch } from "@/hooks/useUserSearch";
+import { fetchSupporterGiftLevels } from "@/services/settingsService";
 import { useSectionHighlight } from "@/hooks/useSectionHighlight";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 import { useSupporterLevelActions } from "@/hooks/useSupporterLevelActions";
+import { useSupporterGifting } from "@/hooks/useSupporterGifting";
 import SettingsLoading from "./loading";
-
-const BADGE_BASE_URL =
-  "https://assets.jailbreakchangelogs.com/assets/website_icons";
-const supporterIcons: Record<number, string> = {
-  1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
-  2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
-  3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
-};
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
@@ -105,15 +89,25 @@ export default function SettingsPage() {
     handleSupporterLevelUpdate,
     handleRemoveSupporter,
   } = useSupporterLevelActions({ userData, setSupporterHistory });
-  const [giftingIds, setGiftingIds] = useState<Record<string, boolean>>({});
-  const [giftModalOpen, setGiftModalOpen] = useState(false);
-  const [giftModalStep, setGiftModalStep] = useState<"search" | "confirm">(
-    "search",
-  );
-  const [activeGift, setActiveGift] = useState<SupporterGift | null>(null);
-  const [giftSearchQuery, setGiftSearchQuery] = useState("");
-  const [selectedGiftRecipient, setSelectedGiftRecipient] =
-    useState<UserData | null>(null);
+  const {
+    giftingIds,
+    giftModalOpen,
+    giftModalStep,
+    activeGift,
+    giftSearchQuery,
+    giftSearchResults,
+    giftSearchLoading,
+    selectedGiftRecipient,
+    handleGiftModalDismiss,
+    openGiftModalForGift,
+    handleGiftSearchQueryChange,
+    handleGiftRecipientSelect,
+    handleGiftSubmit,
+    handleRedeemForSelf,
+  } = useSupporterGifting({
+    userId: user?.id ?? null,
+    setSupporterGifts,
+  });
   const [purchaseGiftModalOpen, setPurchaseGiftModalOpen] = useState(false);
   const [purchaseGiftLevels, setPurchaseGiftLevels] = useState<
     SupporterLevel[]
@@ -126,11 +120,6 @@ export default function SettingsPage() {
   const [purchaseGiftTab, setPurchaseGiftTab] = useState<"self" | "gift">(
     "gift",
   );
-  const { results: giftSearchResults, isLoading: giftSearchLoading } =
-    useUserSearch(giftSearchQuery, user?.id ?? null, {
-      limit: 5,
-      enabled: giftModalOpen && !!activeGift,
-    });
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -234,18 +223,6 @@ export default function SettingsPage() {
     return (b.created_at ?? 0) - (a.created_at ?? 0);
   });
   const hasSupporterHistory = sortedSupporterHistory.length > 0;
-  const getSupporterGiftTierLabel = (level: number) => {
-    switch (level) {
-      case 1:
-        return "Supporter One Gift";
-      case 2:
-        return "Supporter Two Gift";
-      case 3:
-        return "Supporter Three Gift";
-      default:
-        return `Supporter Gift ${level}`;
-    }
-  };
   const openPurchaseGiftModal = () => {
     setPurchaseGiftTab("gift");
     setPurchaseGiftModalOpen(true);
@@ -263,73 +240,6 @@ export default function SettingsPage() {
   const giftPurchaseLevels = sortedPurchaseLevels.filter(
     (level) => level.is_gift,
   );
-  const closeGiftModal = () => {
-    setGiftModalOpen(false);
-    setGiftModalStep("search");
-    setActiveGift(null);
-    setGiftSearchQuery("");
-    setSelectedGiftRecipient(null);
-  };
-  const handleGiftModalDismiss = () => {
-    if (giftModalStep === "confirm") {
-      setGiftModalStep("search");
-      return;
-    }
-    closeGiftModal();
-  };
-  const openGiftModalForGift = (gift: SupporterGift) => {
-    setActiveGift(gift);
-    setGiftModalOpen(true);
-    setGiftModalStep("search");
-    setGiftSearchQuery("");
-    setSelectedGiftRecipient(null);
-  };
-  const handleGiftSubmit = async () => {
-    if (!activeGift || !selectedGiftRecipient?.id) {
-      toast.error("Select a user from search results first.");
-      return;
-    }
-
-    setGiftingIds((prev) => ({ ...prev, [activeGift.share_id]: true }));
-    try {
-      await giftSupporterGift(activeGift.share_id, selectedGiftRecipient.id);
-      setSupporterGifts((prev) =>
-        prev.filter((gift) => gift.share_id !== activeGift.share_id),
-      );
-      toast.success("Gift sent successfully.");
-      closeGiftModal();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to gift purchase",
-      );
-    } finally {
-      setGiftingIds((prev) => ({ ...prev, [activeGift.share_id]: false }));
-    }
-  };
-  const handleRedeemForSelf = async (shareId: string) => {
-    if (!userData?.id) {
-      toast.info("You must be logged in to redeem this gift.");
-      return;
-    }
-
-    setGiftingIds((prev) => ({ ...prev, [shareId]: true }));
-    try {
-      await giftSupporterGift(shareId, userData.id);
-      setSupporterGifts((prev) =>
-        prev.filter((gift) => gift.share_id !== shareId),
-      );
-      if (activeGift?.share_id === shareId) {
-        closeGiftModal();
-      }
-      toast.success("Gift redeemed successfully.");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to redeem gift",
-      );
-    } finally {
-      setGiftingIds((prev) => ({ ...prev, [shareId]: false }));
-    }
-  };
   return (
     <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
       <div className="-mt-2 mb-0">
@@ -719,86 +629,13 @@ export default function SettingsPage() {
             }
             dividerClassName="border-border-card mb-3 border-t"
           >
-            {supporterGifts.length === 0 ? (
-              <div className="flex flex-col gap-3">
-                <p className="text-secondary-text text-sm">
-                  No gifts purchased yet.
-                </p>
-                <div className="flex justify-start">
-                  <CustomButton
-                    type="button"
-                    size="sm"
-                    onClick={openPurchaseGiftModal}
-                  >
-                    Purchase Gift
-                  </CustomButton>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                <div className="max-h-[34rem] overflow-y-auto pr-1">
-                  <div className="flex flex-col gap-3">
-                    {sortedSupporterGifts.map((gift) => (
-                      <div
-                        key={gift.id}
-                        className="bg-tertiary-bg border-border-card rounded-lg border p-4"
-                      >
-                        <div className="flex flex-col gap-3">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="text-primary-text text-sm font-semibold">
-                                {getSupporterGiftTierLabel(gift.level)}
-                              </p>
-                              {supporterIcons[gift.level] && (
-                                <Image
-                                  src={supporterIcons[gift.level]}
-                                  alt={getSupporterGiftTierLabel(gift.level)}
-                                  width={18}
-                                  height={18}
-                                  className="object-contain"
-                                />
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            <CustomButton
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => handleRedeemForSelf(gift.share_id)}
-                              disabled={!!giftingIds[gift.share_id]}
-                            >
-                              {giftingIds[gift.share_id]
-                                ? "Processing..."
-                                : "Self Redeem"}
-                            </CustomButton>
-                            <CustomButton
-                              type="button"
-                              size="sm"
-                              onClick={() => openGiftModalForGift(gift)}
-                              disabled={!!giftingIds[gift.share_id]}
-                            >
-                              {giftingIds[gift.share_id]
-                                ? "Processing..."
-                                : "Gift to User"}
-                            </CustomButton>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex justify-start">
-                  <CustomButton
-                    type="button"
-                    size="sm"
-                    onClick={openPurchaseGiftModal}
-                  >
-                    Purchase Gift
-                  </CustomButton>
-                </div>
-              </div>
-            )}
+            <PurchasedGiftsSection
+              gifts={sortedSupporterGifts}
+              giftingIds={giftingIds}
+              onRedeemForSelf={handleRedeemForSelf}
+              onOpenGiftModal={openGiftModalForGift}
+              onPurchaseGift={openPurchaseGiftModal}
+            />
           </SettingsCard>
 
           <SettingsCard
@@ -826,232 +663,20 @@ export default function SettingsPage() {
             currentLimit={modalState.currentLimit}
             requiredLimit={modalState.requiredLimit}
           />
-          <Dialog
+          <GiftToUserDialog
             open={giftModalOpen}
-            onOpenChange={(open) => !open && handleGiftModalDismiss()}
-          >
-            <DialogContent
-              className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
-              showClose
-              aria-describedby={undefined}
-            >
-              <DialogHeader className="px-6 pt-6 pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="bg-button-info rounded-lg p-2">
-                    <Icon
-                      icon="heroicons:gift"
-                      className="text-form-button-text h-6 w-6"
-                    />
-                  </div>
-                  <div className="flex flex-col text-left">
-                    <DialogTitle className="text-primary-text text-xl font-semibold">
-                      {giftModalStep === "search"
-                        ? "Gift to User"
-                        : "Confirm Gift"}
-                    </DialogTitle>
-                    <p className="text-secondary-text mt-1 text-sm font-normal">
-                      {giftModalStep === "search"
-                        ? "Choose who should receive this gift."
-                        : "Review the recipient before sending."}
-                    </p>
-                  </div>
-                </div>
-              </DialogHeader>
-
-              <div className="max-h-[calc(100vh-200px)] overflow-y-auto px-6 pt-4 pb-6">
-                {giftModalStep === "search" ? (
-                  <div className="flex flex-col gap-4">
-                    {activeGift ? (
-                      <div className="bg-tertiary-bg border-border-card flex items-center gap-3 rounded-lg border p-4">
-                        {supporterIcons[activeGift.level] && (
-                          <Image
-                            src={supporterIcons[activeGift.level]}
-                            alt={getSupporterGiftTierLabel(activeGift.level)}
-                            width={24}
-                            height={24}
-                            className="object-contain"
-                          />
-                        )}
-                        <div>
-                          <p className="text-primary-text text-sm font-semibold">
-                            {getSupporterGiftTierLabel(activeGift.level)}
-                          </p>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    <div className="relative">
-                      <Icon
-                        icon="heroicons:magnifying-glass"
-                        className="text-secondary-text pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                      />
-                      <input
-                        type="text"
-                        value={giftSearchQuery}
-                        onChange={(event) => {
-                          setGiftSearchQuery(event.target.value);
-                          setSelectedGiftRecipient(null);
-                        }}
-                        placeholder="Search user to gift..."
-                        className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info h-10 w-full rounded-lg border py-2 pr-3 pl-9 text-sm outline-none"
-                        autoComplete="off"
-                        spellCheck={false}
-                      />
-                    </div>
-
-                    {giftSearchQuery.trim() ? (
-                      giftSearchLoading ? (
-                        <div className="flex items-center justify-center gap-2 py-2">
-                          <Spinner className="h-4 w-4" />
-                          <span className="text-secondary-text text-sm">
-                            Searching users...
-                          </span>
-                        </div>
-                      ) : giftSearchResults.length > 0 ? (
-                        <div className="border-border-card bg-tertiary-bg overflow-hidden rounded-lg border">
-                          {giftSearchResults.map((result) => (
-                            <button
-                              key={result.id}
-                              type="button"
-                              onClick={() => {
-                                setSelectedGiftRecipient(result);
-                                setGiftModalStep("confirm");
-                              }}
-                              className="border-border-card hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-3 border-b px-4 py-3 text-left transition-colors last:border-b-0"
-                            >
-                              <UserAvatar
-                                userId={result.id}
-                                avatarHash={result.avatar}
-                                username={result.username}
-                                custom_avatar={result.custom_avatar}
-                                size={8}
-                                showBadge={false}
-                                settings={result.settings_v2}
-                                premiumType={result.premiumtype}
-                              />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-primary-text truncate text-sm font-medium">
-                                  {result.global_name &&
-                                  result.global_name !== "None"
-                                    ? result.global_name
-                                    : result.username}
-                                </p>
-                                <p className="text-secondary-text truncate text-xs">
-                                  @{result.username}
-                                </p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-secondary-text text-sm">
-                          No users found.
-                        </p>
-                      )
-                    ) : (
-                      <p className="text-secondary-text text-sm">
-                        Search for a user to open the gift confirmation.
-                      </p>
-                    )}
-                  </div>
-                ) : activeGift && selectedGiftRecipient ? (
-                  <div className="flex flex-col gap-3">
-                    <div>
-                      <p className="text-secondary-text mb-1 text-xs font-semibold tracking-wide uppercase">
-                        Tier
-                      </p>
-                      <div className="bg-tertiary-bg border-border-card flex items-center gap-2 rounded-lg border p-3">
-                        {supporterIcons[activeGift.level] && (
-                          <Image
-                            src={supporterIcons[activeGift.level]}
-                            alt={getSupporterGiftTierLabel(activeGift.level)}
-                            width={20}
-                            height={20}
-                            className="object-contain"
-                          />
-                        )}
-                        <p className="text-primary-text text-sm font-semibold">
-                          {getSupporterGiftTierLabel(activeGift.level)}
-                        </p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-secondary-text mb-1 text-xs font-semibold tracking-wide uppercase">
-                        Recipient
-                      </p>
-                      <Link
-                        href={`/users/${selectedGiftRecipient.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        prefetch={false}
-                        className="bg-tertiary-bg border-border-card hover:bg-tertiary-bg/70 group flex items-center gap-3 rounded-lg border p-3 transition-colors"
-                      >
-                        <UserAvatar
-                          userId={selectedGiftRecipient.id}
-                          avatarHash={selectedGiftRecipient.avatar}
-                          username={selectedGiftRecipient.username}
-                          custom_avatar={selectedGiftRecipient.custom_avatar}
-                          size={10}
-                          showBadge={false}
-                          settings={selectedGiftRecipient.settings_v2}
-                          premiumType={selectedGiftRecipient.premiumtype}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-primary-text group-hover:text-link truncate text-sm font-semibold transition-colors">
-                            {selectedGiftRecipient.global_name &&
-                            selectedGiftRecipient.global_name !== "None"
-                              ? selectedGiftRecipient.global_name
-                              : selectedGiftRecipient.username}
-                          </p>
-                          <p className="text-secondary-text truncate text-sm">
-                            @{selectedGiftRecipient.username}
-                          </p>
-                        </div>
-                        <Icon
-                          icon="akar-icons:link-out"
-                          className="text-link h-4 w-4 shrink-0"
-                        />
-                      </Link>
-                    </div>
-                  </div>
-                ) : null}
-
-                <DialogFooter className="mt-4 gap-2 pt-2">
-                  <DialogClose asChild>
-                    <CustomButton
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        if (giftModalStep === "confirm") {
-                          e.preventDefault();
-                          handleGiftModalDismiss();
-                        }
-                      }}
-                    >
-                      {giftModalStep === "confirm" ? "Back" : "Cancel"}
-                    </CustomButton>
-                  </DialogClose>
-                  {giftModalStep === "confirm" ? (
-                    <CustomButton
-                      type="button"
-                      size="sm"
-                      onClick={handleGiftSubmit}
-                      disabled={
-                        !activeGift ||
-                        !selectedGiftRecipient?.id ||
-                        !!(activeGift && giftingIds[activeGift.share_id])
-                      }
-                    >
-                      {activeGift && giftingIds[activeGift.share_id]
-                        ? "Processing..."
-                        : "Confirm Gift"}
-                    </CustomButton>
-                  ) : null}
-                </DialogFooter>
-              </div>
-            </DialogContent>
-          </Dialog>
+            step={giftModalStep}
+            activeGift={activeGift}
+            searchQuery={giftSearchQuery}
+            onSearchQueryChange={handleGiftSearchQueryChange}
+            searchResults={giftSearchResults}
+            searchLoading={giftSearchLoading}
+            selectedRecipient={selectedGiftRecipient}
+            onSelectRecipient={handleGiftRecipientSelect}
+            giftingIds={giftingIds}
+            onDismiss={handleGiftModalDismiss}
+            onSubmit={handleGiftSubmit}
+          />
           <Dialog
             open={purchaseGiftModalOpen}
             onOpenChange={(open) => !open && closePurchaseGiftModal()}
