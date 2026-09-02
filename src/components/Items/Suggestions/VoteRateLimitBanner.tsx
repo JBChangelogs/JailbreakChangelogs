@@ -19,7 +19,7 @@ export function VoteRateLimitBanner({ until }: { until: number }) {
   if (secondsLeft === 0) return null;
 
   return (
-    <div className="border-border-card bg-tertiary-bg text-primary-text flex items-center justify-center gap-1.5 border-t px-3 py-1.5 text-xs">
+    <div className="border-warning-light/30 bg-warning-light/10 text-primary-text flex items-center justify-center gap-1.5 border-t px-3 py-1.5 text-xs">
       <Icon
         icon="material-symbols:hourglass-empty-rounded"
         className="h-3.5 w-3.5 shrink-0"
