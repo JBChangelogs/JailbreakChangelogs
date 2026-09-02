@@ -3,16 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { SupporterLevel, UserData, UserSettingsV2 } from "@/types/auth";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserData, UserSettingsV2 } from "@/types/auth";
 import { formatSettingName } from "@/config/settings";
 import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
@@ -20,12 +11,11 @@ import { BannerSettings } from "@/components/Settings/BannerSettings";
 import { AvatarSettings } from "@/components/Settings/AvatarSettings";
 import ImageHostLinks from "@/components/Settings/ImageHostLinks";
 import SettingsCard from "@/components/Settings/SettingsCard";
-import SupporterLevelRow from "@/components/Settings/SupporterLevelRow";
 import SupporterHistorySection from "@/components/Settings/SupporterHistorySection";
 import PurchasedGiftsSection from "@/components/Settings/PurchasedGiftsSection";
 import GiftToUserDialog from "@/components/Settings/GiftToUserDialog";
+import PurchaseGiftDialog from "@/components/Settings/PurchaseGiftDialog";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Button as CustomButton } from "@/components/ui/button";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { ExportInventoryData } from "@/components/Settings/ExportInventoryData";
@@ -36,15 +26,14 @@ import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { safeSetJSON } from "@/utils/storage/safeStorage";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { toast } from "sonner";
-import { Spinner } from "@/components/ui/Spinner";
 import { NotificationPreferenceToggle } from "@/components/Settings/NotificationPreferenceToggle";
 import { DesktopNotificationToggle } from "@/components/Settings/DesktopNotificationToggle";
 import { EmailNotificationSettings } from "@/components/Settings/EmailNotificationSettings";
-import { fetchSupporterGiftLevels } from "@/services/settingsService";
 import { useSectionHighlight } from "@/hooks/useSectionHighlight";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 import { useSupporterLevelActions } from "@/hooks/useSupporterLevelActions";
 import { useSupporterGifting } from "@/hooks/useSupporterGifting";
+import { usePurchaseGiftModal } from "@/hooks/usePurchaseGiftModal";
 import SettingsLoading from "./loading";
 
 export default function SettingsPage() {
@@ -108,18 +97,17 @@ export default function SettingsPage() {
     userId: user?.id ?? null,
     setSupporterGifts,
   });
-  const [purchaseGiftModalOpen, setPurchaseGiftModalOpen] = useState(false);
-  const [purchaseGiftLevels, setPurchaseGiftLevels] = useState<
-    SupporterLevel[]
-  >([]);
-  const [purchaseGiftLevelsLoading, setPurchaseGiftLevelsLoading] =
-    useState(false);
-  const [purchaseGiftLevelsError, setPurchaseGiftLevelsError] = useState<
-    string | null
-  >(null);
-  const [purchaseGiftTab, setPurchaseGiftTab] = useState<"self" | "gift">(
-    "gift",
-  );
+  const {
+    open: purchaseGiftModalOpen,
+    openModal: openPurchaseGiftModal,
+    closeModal: closePurchaseGiftModal,
+    tab: purchaseGiftTab,
+    setTab: setPurchaseGiftTab,
+    selfLevels: selfPurchaseLevels,
+    giftLevels: giftPurchaseLevels,
+    loading: purchaseGiftLevelsLoading,
+    error: purchaseGiftLevelsError,
+  } = usePurchaseGiftModal();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -162,39 +150,6 @@ export default function SettingsPage() {
     }
   };
 
-  useEffect(() => {
-    if (!purchaseGiftModalOpen) return;
-    if (purchaseGiftLevels.length > 0) return;
-
-    let mounted = true;
-    setPurchaseGiftLevelsLoading(true);
-    setPurchaseGiftLevelsError(null);
-
-    fetchSupporterGiftLevels()
-      .then((levels) => {
-        if (!mounted) return;
-        const sortedLevels = [...levels].sort((a, b) => a.level - b.level);
-        setPurchaseGiftLevels(sortedLevels);
-      })
-      .catch((error) => {
-        if (!mounted) return;
-        setPurchaseGiftLevelsError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch supporter levels",
-        );
-      })
-      .finally(() => {
-        if (mounted) {
-          setPurchaseGiftLevelsLoading(false);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [purchaseGiftLevels.length, purchaseGiftModalOpen]);
-
   if (loading || settingsLoading) {
     return <SettingsLoading />;
   }
@@ -223,23 +178,7 @@ export default function SettingsPage() {
     return (b.created_at ?? 0) - (a.created_at ?? 0);
   });
   const hasSupporterHistory = sortedSupporterHistory.length > 0;
-  const openPurchaseGiftModal = () => {
-    setPurchaseGiftTab("gift");
-    setPurchaseGiftModalOpen(true);
-  };
-  const closePurchaseGiftModal = () => {
-    setPurchaseGiftModalOpen(false);
-  };
-  const sortedPurchaseLevels = [...purchaseGiftLevels].sort(
-    (a, b) => a.level - b.level,
-  );
   const currentSupporterLevel = userData.premiumtype ?? 0;
-  const selfPurchaseLevels = sortedPurchaseLevels.filter(
-    (level) => !level.is_gift,
-  );
-  const giftPurchaseLevels = sortedPurchaseLevels.filter(
-    (level) => level.is_gift,
-  );
   return (
     <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
       <div className="-mt-2 mb-0">
@@ -677,140 +616,16 @@ export default function SettingsPage() {
             onDismiss={handleGiftModalDismiss}
             onSubmit={handleGiftSubmit}
           />
-          <Dialog
+          <PurchaseGiftDialog
             open={purchaseGiftModalOpen}
-            onOpenChange={(open) => !open && closePurchaseGiftModal()}
-          >
-            <DialogContent
-              className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
-              showClose
-              aria-describedby={undefined}
-            >
-              <DialogHeader className="px-6 pt-6 pb-2">
-                <DialogTitle className="text-primary-text text-left text-xl font-semibold">
-                  Purchase Gift
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="max-h-[calc(100vh-200px)] overflow-y-auto px-6 pt-4 pb-6">
-                <div className="flex flex-col gap-3">
-                  <div className="border-border-card bg-tertiary-bg/45 rounded-lg border p-4">
-                    <p className="text-primary-text text-sm font-medium">
-                      Buy a supporter tier for yourself or purchase a gift to
-                      redeem later or send to someone else. View supporter
-                      benefits{" "}
-                      <Link
-                        href="/supporting"
-                        prefetch={false}
-                        className="text-link hover:text-link-hover transition-colors"
-                      >
-                        here
-                      </Link>
-                      .
-                    </p>
-                  </div>
-                  {purchaseGiftLevelsLoading ? (
-                    <div className="flex items-center justify-center gap-2 py-6">
-                      <Spinner className="h-4 w-4" />
-                      <span className="text-secondary-text text-sm">
-                        Loading gift tiers...
-                      </span>
-                    </div>
-                  ) : purchaseGiftLevelsError ? (
-                    <p className="text-button-danger text-sm">
-                      {purchaseGiftLevelsError}
-                    </p>
-                  ) : purchaseGiftLevels.length === 0 ? (
-                    <p className="text-secondary-text text-sm">
-                      No gift tiers are available right now.
-                    </p>
-                  ) : (
-                    <Tabs
-                      value={purchaseGiftTab}
-                      onValueChange={(value) =>
-                        setPurchaseGiftTab(value as "self" | "gift")
-                      }
-                      className="w-full"
-                    >
-                      <TabsList fullWidth className="w-full">
-                        <TabsTrigger value="self" fullWidth>
-                          For Yourself
-                        </TabsTrigger>
-                        <TabsTrigger value="gift" fullWidth>
-                          As Gift
-                        </TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="self" className="mt-4">
-                        <div className="flex flex-col gap-3">
-                          {selfPurchaseLevels.map((level) => (
-                            <SupporterLevelRow
-                              key={level.id}
-                              level={level}
-                              buttonLabel="Buy Tier"
-                              onBuy={() =>
-                                window.open(
-                                  level.url,
-                                  "_blank",
-                                  "noopener,noreferrer",
-                                )
-                              }
-                            />
-                          ))}
-                        </div>
-                      </TabsContent>
-                      <TabsContent value="gift" className="mt-4">
-                        <div className="flex flex-col gap-3">
-                          {giftPurchaseLevels.map((level) => (
-                            <SupporterLevelRow
-                              key={level.id}
-                              level={level}
-                              buttonLabel="Buy Gift"
-                              onBuy={() =>
-                                window.open(
-                                  level.url,
-                                  "_blank",
-                                  "noopener,noreferrer",
-                                )
-                              }
-                            />
-                          ))}
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                  {!purchaseGiftLevelsLoading &&
-                  !purchaseGiftLevelsError &&
-                  purchaseGiftLevels.length > 0 ? (
-                    <p className="text-secondary-text pt-1 text-center text-sm">
-                      <Link
-                        href="/privacy"
-                        prefetch={false}
-                        className="text-link hover:text-link-hover transition-colors"
-                      >
-                        Privacy Policy
-                      </Link>
-                      {" | "}
-                      <Link
-                        href="/tos"
-                        prefetch={false}
-                        className="text-link hover:text-link-hover transition-colors"
-                      >
-                        Terms of Service
-                      </Link>
-                    </p>
-                  ) : null}
-                </div>
-
-                <DialogFooter className="mt-4 gap-2 pt-2">
-                  <DialogClose asChild>
-                    <CustomButton type="button" variant="ghost" size="sm">
-                      Cancel
-                    </CustomButton>
-                  </DialogClose>
-                </DialogFooter>
-              </div>
-            </DialogContent>
-          </Dialog>
+            onClose={closePurchaseGiftModal}
+            tab={purchaseGiftTab}
+            onTabChange={setPurchaseGiftTab}
+            selfLevels={selfPurchaseLevels}
+            giftLevels={giftPurchaseLevels}
+            loading={purchaseGiftLevelsLoading}
+            error={purchaseGiftLevelsError}
+          />
         </div>
       </div>
       <style jsx>{`
