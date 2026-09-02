@@ -792,60 +792,22 @@ export default function SettingsPage() {
             );
           })}
 
-          <div
+          <SettingsCard
             id="notifications"
-            className={`${cardClassName} text-primary-text mb-8 scroll-mt-24 p-6`}
-            style={
-              highlightSetting === "notifications" && showHighlight
-                ? {
-                    backgroundColor:
-                      "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                    transition: "background-color 0.5s ease",
-                  }
-                : undefined
+            title="Notification Preferences"
+            icon="heroicons:bell"
+            isOwner={
+              userData.flags?.some((f) => f.flag === "is_owner") ?? false
             }
-            ref={(el) => {
-              if (highlightSetting === "notifications" && showHighlight && el) {
-                // Scroll the highlighted section into view after a short delay
-                setTimeout(() => {
-                  (el as HTMLElement).scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
-                }, 100);
-              }
-            }}
+            highlightStyle={getSectionHighlightStyle("notifications")}
+            scrollRef={(el) =>
+              scrollHighlightedSectionIntoView("notifications", el)
+            }
+            onCopyLink={() =>
+              copySectionLink("notifications", "Notification Preferences")
+            }
+            className="scroll-mt-24"
           >
-            <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
-              <Icon icon="heroicons:bell" className="h-6 w-6" />
-              Notification Preferences
-              {userData?.flags?.some((f) => f.flag === "is_owner") && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() =>
-                        copySectionLink(
-                          "notifications",
-                          "Notification Preferences",
-                        )
-                      }
-                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                      aria-label="Copy section link"
-                    >
-                      <Icon icon="heroicons:link" className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                  >
-                    <p>Copy URL</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </h2>
-            <div className="border-border-card mb-2 border-t" />
-
             <DesktopNotificationToggle />
             <div className="border-border-card mb-2 border-t opacity-50" />
 
@@ -921,7 +883,7 @@ export default function SettingsPage() {
                 })}
               </div>
             )}
-          </div>
+          </SettingsCard>
 
           <div
             id="connections"
