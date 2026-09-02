@@ -20,11 +20,6 @@ import {
   UserData,
   UserSettingsV2,
 } from "@/types/auth";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatSettingName } from "@/config/settings";
 import { useSettings } from "@/hooks/useSettings";
@@ -1018,52 +1013,36 @@ export default function SettingsPage() {
             </SettingsCard>
           ) : null}
 
-          <div
+          <SettingsCard
             id="gifts"
-            className={`${cardClassName} text-primary-text mb-8 p-6`}
-            style={getSectionHighlightStyle("gifts")}
-            ref={(el) => scrollHighlightedSectionIntoView("gifts", el)}
-          >
-            <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
-              <Icon icon="heroicons:gift" className="h-6 w-6" />
-              Purchased Gifts
-              {userData?.flags?.some((f) => f.flag === "is_owner") && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() =>
-                        copySectionLink("gifts", "Purchased Gifts")
-                      }
-                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                      aria-label="Copy section link"
-                    >
-                      <Icon icon="heroicons:link" className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+            title="Purchased Gifts"
+            icon="heroicons:gift"
+            isOwner={
+              userData.flags?.some((f) => f.flag === "is_owner") ?? false
+            }
+            highlightStyle={getSectionHighlightStyle("gifts")}
+            scrollRef={(el) => scrollHighlightedSectionIntoView("gifts", el)}
+            onCopyLink={() => copySectionLink("gifts", "Purchased Gifts")}
+            headerAccessory={
+              <>
+                <p className="text-secondary-text mb-2 text-sm">
+                  Supporter gifts purchased on your account.
+                </p>
+                <p className="text-secondary-text mb-2 text-sm">
+                  Want to compare perks first?{" "}
+                  <Link
+                    href="/supporting"
+                    prefetch={false}
+                    className="text-link hover:text-link-hover transition-colors"
                   >
-                    <p>Copy URL</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </h2>
-            <p className="text-secondary-text mb-2 text-sm">
-              Supporter gifts purchased on your account.
-            </p>
-            <p className="text-secondary-text mb-2 text-sm">
-              Want to compare perks first?{" "}
-              <Link
-                href="/supporting"
-                prefetch={false}
-                className="text-link hover:text-link-hover transition-colors"
-              >
-                View supporter tier benefits
-              </Link>
-              .
-            </p>
-            <div className="border-border-card mb-3 border-t" />
+                    View supporter tier benefits
+                  </Link>
+                  .
+                </p>
+              </>
+            }
+            dividerClassName="border-border-card mb-3 border-t"
+          >
             {supporterGifts.length === 0 ? (
               <div className="flex flex-col gap-3">
                 <p className="text-secondary-text text-sm">
@@ -1144,7 +1123,7 @@ export default function SettingsPage() {
                 </div>
               </div>
             )}
-          </div>
+          </SettingsCard>
 
           <SettingsCard
             id="danger"
