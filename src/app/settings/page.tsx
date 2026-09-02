@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import Image from "next/image";
 import Link from "next/link";
-import { useQueryState } from "nuqs";
 import {
   Dialog,
   DialogContent,
@@ -57,6 +56,7 @@ import {
 } from "@/services/settingsService";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { useUserSearch } from "@/hooks/useUserSearch";
+import { useSectionHighlight } from "@/hooks/useSectionHighlight";
 import SettingsLoading from "./loading";
 
 const BADGE_BASE_URL =
@@ -72,13 +72,13 @@ export default function SettingsPage() {
   const { twemojiEnabled, setTwemojiEnabled } = useTwemoji();
   const { modalState, closeModal, openModal } = useSupporterModal();
   const router = useRouter();
-  const [highlightParam, setHighlightParam] = useQueryState("highlight", {
-    defaultValue: "",
-    history: "push",
-    shallow: true,
-  });
-  const [showHighlight, setShowHighlight] = useState(false);
-  const [highlightSetting, setHighlightSetting] = useState<string | null>(null);
+  const {
+    highlightSetting,
+    showHighlight,
+    copySectionLink,
+    getSectionHighlightStyle,
+    scrollHighlightedSectionIntoView,
+  } = useSectionHighlight();
   const [notificationPrefs, setNotificationPrefs] = useState<
     NotificationPreferenceEntry[] | null
   >(null);
@@ -98,26 +98,6 @@ export default function SettingsPage() {
   const loading = isLoading;
   const cardClassName =
     "border-border-card bg-secondary-bg rounded-xl border shadow-md";
-
-  useEffect(() => {
-    if (!highlightParam) return;
-
-    const timer = window.setTimeout(() => {
-      setHighlightSetting(highlightParam);
-      setShowHighlight(true);
-    }, 0);
-
-    const clearTimer = window.setTimeout(() => {
-      setShowHighlight(false);
-      setHighlightSetting(null);
-      void setHighlightParam(null);
-    }, 10000);
-
-    return () => {
-      window.clearTimeout(timer);
-      window.clearTimeout(clearTimer);
-    };
-  }, [highlightParam, setHighlightParam]);
 
   const {
     settings,
@@ -554,37 +534,6 @@ export default function SettingsPage() {
       setGiftingIds((prev) => ({ ...prev, [shareId]: false }));
     }
   };
-  const copySectionLink = (sectionId: string, sectionTitle: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("highlight", sectionId);
-    void setHighlightParam(sectionId);
-    navigator.clipboard.writeText(url.toString());
-    toast.success("Link Copied", {
-      description: `The URL for the "${sectionTitle}" section is now on your clipboard.`,
-    });
-  };
-  const getSectionHighlightStyle = (sectionId: string) =>
-    highlightSetting === sectionId && showHighlight
-      ? {
-          backgroundColor:
-            "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-          transition: "background-color 0.5s ease",
-        }
-      : undefined;
-  const scrollHighlightedSectionIntoView = (
-    sectionId: string,
-    el: HTMLElement | null,
-  ) => {
-    if (highlightSetting === sectionId && showHighlight && el) {
-      setTimeout(() => {
-        el.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }, 100);
-    }
-  };
-
   return (
     <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
       <div className="-mt-2 mb-0">
