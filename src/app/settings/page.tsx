@@ -31,6 +31,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
 import { BannerSettings } from "@/components/Settings/BannerSettings";
 import { AvatarSettings } from "@/components/Settings/AvatarSettings";
+import ImageHostLinks from "@/components/Settings/ImageHostLinks";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button as CustomButton } from "@/components/ui/button";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
@@ -817,93 +818,7 @@ export default function SettingsPage() {
                     isSettingEnabled("custom_avatar")) && (
                     <>
                       <div className="border-border-card my-2 border-t" />
-                      <div className="flex flex-wrap gap-1.5">
-                        <CustomButton
-                          variant="default"
-                          size="sm"
-                          onClick={() =>
-                            window.open(
-                              "https://imgbb.com/",
-                              "_blank",
-                              "noopener,noreferrer",
-                            )
-                          }
-                        >
-                          <Icon
-                            icon="akar-icons:link-out"
-                            className="h-4 w-4"
-                          />
-                          ImgBB
-                        </CustomButton>
-                        <CustomButton
-                          variant="default"
-                          size="sm"
-                          onClick={() =>
-                            window.open(
-                              "https://postimages.org/",
-                              "_blank",
-                              "noopener,noreferrer",
-                            )
-                          }
-                        >
-                          <Icon
-                            icon="akar-icons:link-out"
-                            className="h-4 w-4"
-                          />
-                          PostImages
-                        </CustomButton>
-                        <CustomButton
-                          variant="default"
-                          size="sm"
-                          onClick={() =>
-                            window.open(
-                              "https://tenor.com/",
-                              "_blank",
-                              "noopener,noreferrer",
-                            )
-                          }
-                        >
-                          <Icon
-                            icon="akar-icons:link-out"
-                            className="h-4 w-4"
-                          />
-                          Tenor
-                        </CustomButton>
-                        <CustomButton
-                          variant="default"
-                          size="sm"
-                          onClick={() =>
-                            window.open(
-                              "https://imgur.com/",
-                              "_blank",
-                              "noopener,noreferrer",
-                            )
-                          }
-                        >
-                          <Icon
-                            icon="akar-icons:link-out"
-                            className="h-4 w-4"
-                          />
-                          Imgur
-                        </CustomButton>
-                        <CustomButton
-                          variant="default"
-                          size="sm"
-                          onClick={() =>
-                            window.open(
-                              "https://vgy.me/",
-                              "_blank",
-                              "noopener,noreferrer",
-                            )
-                          }
-                        >
-                          <Icon
-                            icon="akar-icons:link-out"
-                            className="h-4 w-4"
-                          />
-                          vgy.me
-                        </CustomButton>
-                      </div>
+                      <ImageHostLinks />
                     </>
                   )}
               </div>
