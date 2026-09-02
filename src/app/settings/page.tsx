@@ -27,6 +27,7 @@ import { BannerSettings } from "@/components/Settings/BannerSettings";
 import { AvatarSettings } from "@/components/Settings/AvatarSettings";
 import ImageHostLinks from "@/components/Settings/ImageHostLinks";
 import SettingsCard from "@/components/Settings/SettingsCard";
+import SupporterLevelRow from "@/components/Settings/SupporterLevelRow";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button as CustomButton } from "@/components/ui/button";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
@@ -1391,86 +1392,36 @@ export default function SettingsPage() {
                       <TabsContent value="self" className="mt-4">
                         <div className="flex flex-col gap-3">
                           {selfPurchaseLevels.map((level) => (
-                            <div
+                            <SupporterLevelRow
                               key={level.id}
-                              className="bg-tertiary-bg border-border-card flex items-center justify-between gap-3 rounded-lg border p-4"
-                            >
-                              <div className="min-w-0">
-                                <div className="mb-1 flex items-center gap-2">
-                                  {supporterIcons[level.level] && (
-                                    <Image
-                                      src={supporterIcons[level.level]}
-                                      alt={level.name}
-                                      width={18}
-                                      height={18}
-                                      className="object-contain"
-                                    />
-                                  )}
-                                  <p className="text-primary-text text-sm font-semibold">
-                                    {level.name}
-                                  </p>
-                                </div>
-                                <p className="text-secondary-text text-sm">
-                                  ${level.price_str}
-                                </p>
-                              </div>
-                              <CustomButton
-                                type="button"
-                                size="sm"
-                                onClick={() =>
-                                  window.open(
-                                    level.url,
-                                    "_blank",
-                                    "noopener,noreferrer",
-                                  )
-                                }
-                              >
-                                Buy Tier
-                              </CustomButton>
-                            </div>
+                              level={level}
+                              buttonLabel="Buy Tier"
+                              onBuy={() =>
+                                window.open(
+                                  level.url,
+                                  "_blank",
+                                  "noopener,noreferrer",
+                                )
+                              }
+                            />
                           ))}
                         </div>
                       </TabsContent>
                       <TabsContent value="gift" className="mt-4">
                         <div className="flex flex-col gap-3">
                           {giftPurchaseLevels.map((level) => (
-                            <div
+                            <SupporterLevelRow
                               key={level.id}
-                              className="bg-tertiary-bg border-border-card flex items-center justify-between gap-3 rounded-lg border p-4"
-                            >
-                              <div className="min-w-0">
-                                <div className="mb-1 flex items-center gap-2">
-                                  {supporterIcons[level.level] && (
-                                    <Image
-                                      src={supporterIcons[level.level]}
-                                      alt={level.name}
-                                      width={18}
-                                      height={18}
-                                      className="object-contain"
-                                    />
-                                  )}
-                                  <p className="text-primary-text text-sm font-semibold">
-                                    {level.name}
-                                  </p>
-                                </div>
-                                <p className="text-secondary-text text-sm">
-                                  ${level.price_str}
-                                </p>
-                              </div>
-                              <CustomButton
-                                type="button"
-                                size="sm"
-                                onClick={() =>
-                                  window.open(
-                                    level.url,
-                                    "_blank",
-                                    "noopener,noreferrer",
-                                  )
-                                }
-                              >
-                                Buy Gift
-                              </CustomButton>
-                            </div>
+                              level={level}
+                              buttonLabel="Buy Gift"
+                              onBuy={() =>
+                                window.open(
+                                  level.url,
+                                  "_blank",
+                                  "noopener,noreferrer",
+                                )
+                              }
+                            />
                           ))}
                         </div>
                       </TabsContent>
