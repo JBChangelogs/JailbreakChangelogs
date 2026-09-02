@@ -5,16 +5,10 @@ import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { UserNetworthData } from "@/utils/api/api";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Cell, Pie, PieChart } from "recharts";
 import type { Item } from "@/types";
 import type { InventoryData } from "@/app/inventories/types";
 import {
@@ -998,106 +992,34 @@ export default function InventoryBreakdown({
             </div>
 
             <div className="xl:col-span-4">
-              <div
-                className="inventory-breakdown-sticky-card border-border-card bg-secondary-bg rounded-lg border p-4"
-                style={{ top: "calc(var(--header-height, 0px) + 16px)" }}
-              >
-                <div className="mb-2 text-center">
-                  <div className="text-primary-text text-sm font-semibold">
-                    Duplicate Inventory Breakdown Pie Chart
-                  </div>
-                </div>
-                {renderCharts && (
-                  <>
-                    <ChartContainer
-                      config={categoryChartConfig}
-                      className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
-                    >
-                      <PieChart>
-                        <ChartTooltip
-                          content={
-                            <ChartTooltipContent
-                              hideLabel={true}
-                              formatter={(value, name, item) => {
-                                const payloadData = item?.payload as
-                                  | { fill?: string; amount?: number }
-                                  | undefined;
-                                const swatchColor =
-                                  item?.color ||
-                                  payloadData?.fill ||
-                                  "var(--color-primary-text)";
+              <CategoryPieCard
+                title="Duplicate Inventory Breakdown Pie Chart"
+                chartConfig={categoryChartConfig}
+                data={duplicatesChartData}
+                renderCharts={renderCharts}
+                renderTooltipRows={(payload, value) => {
+                  const payloadData = payload as
+                    | { amount?: number }
+                    | undefined;
 
-                                return (
-                                  <div className="flex min-w-40 flex-col gap-1.5 text-xs">
-                                    <div className="flex items-center gap-1.5">
-                                      <span
-                                        className="h-2.5 w-2.5 rounded-xs"
-                                        style={{ backgroundColor: swatchColor }}
-                                      />
-                                      <span className="text-primary-text font-medium">
-                                        {name}
-                                      </span>
-                                    </div>
-                                    <div className="flex w-full items-center justify-between">
-                                      <span className="text-secondary-text">
-                                        Percentage
-                                      </span>
-                                      <span className="text-primary-text font-mono font-medium tabular-nums">
-                                        {formatPercentage(Number(value))}%
-                                      </span>
-                                    </div>
-                                    <div className="flex w-full items-center justify-between">
-                                      <span className="text-secondary-text">
-                                        Value
-                                      </span>
-                                      <span className="text-primary-text font-mono font-medium tabular-nums">
-                                        $
-                                        {formatNetworth(
-                                          payloadData?.amount || 0,
-                                        )}
-                                      </span>
-                                    </div>
-                                  </div>
-                                );
-                              }}
-                            />
-                          }
-                        />
-                        <Pie
-                          data={duplicatesChartData}
-                          dataKey="value"
-                          nameKey="category"
-                          innerRadius="58%"
-                          outerRadius="88%"
-                          strokeWidth={2}
-                          isAnimationActive={false}
-                        >
-                          {duplicatesChartData.map((entry) => (
-                            <Cell key={entry.category} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ChartContainer>
-                    <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-                      {duplicatesChartData.map((entry) => (
-                        <div
-                          key={entry.category}
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <span
-                            className="h-3 w-3 shrink-0 rounded-full"
-                            style={{ backgroundColor: entry.fill }}
-                            aria-hidden="true"
-                          />
-                          <span className="text-primary-text">
-                            {entry.category}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+                  return (
+                    <>
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-secondary-text">Percentage</span>
+                        <span className="text-primary-text font-mono font-medium tabular-nums">
+                          {formatPercentage(Number(value))}%
+                        </span>
+                      </div>
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-secondary-text">Value</span>
+                        <span className="text-primary-text font-mono font-medium tabular-nums">
+                          ${formatNetworth(payloadData?.amount || 0)}
+                        </span>
+                      </div>
+                    </>
+                  );
+                }}
+              />
             </div>
           </div>
         )}
