@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,12 +58,9 @@ import {
   giftSupporterGift,
   revertSupporterLevel,
 } from "@/services/settingsService";
-import { searchUsers } from "@/utils/api/api";
 import { UserAvatar } from "@/utils/ui/avatar";
-import { createLogger } from "@/services/logger";
+import { useUserSearch } from "@/hooks/useUserSearch";
 import SettingsLoading from "./loading";
-
-const log = createLogger("UI");
 
 const BADGE_BASE_URL =
   "https://assets.jailbreakchangelogs.com/assets/website_icons";
@@ -141,8 +138,6 @@ export default function SettingsPage() {
   );
   const [activeGift, setActiveGift] = useState<SupporterGift | null>(null);
   const [giftSearchQuery, setGiftSearchQuery] = useState("");
-  const [giftSearchResults, setGiftSearchResults] = useState<UserData[]>([]);
-  const [giftSearchLoading, setGiftSearchLoading] = useState(false);
   const [selectedGiftRecipient, setSelectedGiftRecipient] =
     useState<UserData | null>(null);
   const [purchaseGiftModalOpen, setPurchaseGiftModalOpen] = useState(false);
@@ -160,16 +155,11 @@ export default function SettingsPage() {
   const [purchaseGiftTab, setPurchaseGiftTab] = useState<"self" | "gift">(
     "gift",
   );
-  const giftSearchTimeoutRef = useRef<number | null>(null);
-  const giftSearchRequestIdRef = useRef(0);
-
-  useEffect(() => {
-    return () => {
-      if (giftSearchTimeoutRef.current) {
-        window.clearTimeout(giftSearchTimeoutRef.current);
-      }
-    };
-  }, []);
+  const { results: giftSearchResults, isLoading: giftSearchLoading } =
+    useUserSearch(giftSearchQuery, user?.id ?? null, {
+      limit: 5,
+      enabled: giftModalOpen && !!activeGift,
+    });
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -327,49 +317,6 @@ export default function SettingsPage() {
       );
     }
   };
-
-  useEffect(() => {
-    const trimmedQuery = giftSearchQuery.trim();
-    if (!giftModalOpen || !activeGift || !trimmedQuery) {
-      giftSearchRequestIdRef.current += 1;
-      setGiftSearchResults([]);
-      setGiftSearchLoading(false);
-      return;
-    }
-
-    const requestId = (giftSearchRequestIdRef.current += 1);
-    setGiftSearchLoading(true);
-
-    if (giftSearchTimeoutRef.current) {
-      window.clearTimeout(giftSearchTimeoutRef.current);
-    }
-
-    giftSearchTimeoutRef.current = window.setTimeout(async () => {
-      try {
-        const resultsRaw = await searchUsers(trimmedQuery, 5);
-        if (giftSearchRequestIdRef.current !== requestId) return;
-
-        const results = Array.isArray(resultsRaw)
-          ? resultsRaw.filter((result) => result?.id !== user?.id)
-          : [];
-        setGiftSearchResults(results);
-      } catch (error) {
-        if (giftSearchRequestIdRef.current !== requestId) return;
-        log.error("Error searching gift recipients", error);
-        setGiftSearchResults([]);
-      } finally {
-        if (giftSearchRequestIdRef.current === requestId) {
-          setGiftSearchLoading(false);
-        }
-      }
-    }, 300);
-
-    return () => {
-      if (giftSearchTimeoutRef.current) {
-        window.clearTimeout(giftSearchTimeoutRef.current);
-      }
-    };
-  }, [activeGift, giftModalOpen, giftSearchQuery, user?.id]);
 
   useEffect(() => {
     if (!purchaseGiftModalOpen) return;
@@ -548,8 +495,6 @@ export default function SettingsPage() {
     setGiftModalStep("search");
     setActiveGift(null);
     setGiftSearchQuery("");
-    setGiftSearchResults([]);
-    setGiftSearchLoading(false);
     setSelectedGiftRecipient(null);
   };
   const handleGiftModalDismiss = () => {
@@ -564,8 +509,6 @@ export default function SettingsPage() {
     setGiftModalOpen(true);
     setGiftModalStep("search");
     setGiftSearchQuery("");
-    setGiftSearchResults([]);
-    setGiftSearchLoading(false);
     setSelectedGiftRecipient(null);
   };
   const handleGiftSubmit = async () => {
