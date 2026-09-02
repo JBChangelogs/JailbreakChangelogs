@@ -1540,53 +1540,63 @@ export default function SettingsPage() {
                     )}
                   </div>
                 ) : activeGift && selectedGiftRecipient ? (
-                  <div className="flex flex-col gap-4">
-                    <div className="bg-tertiary-bg border-border-card flex items-center gap-3 rounded-lg border p-4">
-                      <UserAvatar
-                        userId={selectedGiftRecipient.id}
-                        avatarHash={selectedGiftRecipient.avatar}
-                        username={selectedGiftRecipient.username}
-                        custom_avatar={selectedGiftRecipient.custom_avatar}
-                        size={10}
-                        showBadge={false}
-                        settings={selectedGiftRecipient.settings_v2}
-                        premiumType={selectedGiftRecipient.premiumtype}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-2 flex items-center gap-2">
-                          {supporterIcons[activeGift.level] && (
-                            <Image
-                              src={supporterIcons[activeGift.level]}
-                              alt={getSupporterGiftTierLabel(activeGift.level)}
-                              width={20}
-                              height={20}
-                              className="object-contain"
-                            />
-                          )}
-                          <p className="text-primary-text text-sm font-semibold">
-                            {getSupporterGiftTierLabel(activeGift.level)}
-                          </p>
-                        </div>
-                        <p className="text-primary-text truncate text-base font-semibold">
-                          {selectedGiftRecipient.global_name &&
-                          selectedGiftRecipient.global_name !== "None"
-                            ? selectedGiftRecipient.global_name
-                            : selectedGiftRecipient.username}
-                        </p>
-                        <p className="text-secondary-text truncate text-sm">
-                          @{selectedGiftRecipient.username}
-                        </p>
-                        <p className="text-primary-text mt-2 text-sm">
-                          You&apos;re about to gift{" "}
-                          <span className="font-semibold">
-                            {getSupporterGiftTierLabel(activeGift.level)}
-                          </span>{" "}
-                          to this user.
-                        </p>
-                        <p className="text-secondary-text mt-1 text-sm">
-                          Confirm to send the gift.
+                  <div className="flex flex-col gap-3">
+                    <div>
+                      <p className="text-secondary-text mb-1 text-xs font-semibold tracking-wide uppercase">
+                        Tier
+                      </p>
+                      <div className="bg-tertiary-bg border-border-card flex items-center gap-2 rounded-lg border p-3">
+                        {supporterIcons[activeGift.level] && (
+                          <Image
+                            src={supporterIcons[activeGift.level]}
+                            alt={getSupporterGiftTierLabel(activeGift.level)}
+                            width={20}
+                            height={20}
+                            className="object-contain"
+                          />
+                        )}
+                        <p className="text-primary-text text-sm font-semibold">
+                          {getSupporterGiftTierLabel(activeGift.level)}
                         </p>
                       </div>
+                    </div>
+                    <div>
+                      <p className="text-secondary-text mb-1 text-xs font-semibold tracking-wide uppercase">
+                        Recipient
+                      </p>
+                      <Link
+                        href={`/users/${selectedGiftRecipient.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        prefetch={false}
+                        className="bg-tertiary-bg border-border-card hover:bg-tertiary-bg/70 group flex items-center gap-3 rounded-lg border p-3 transition-colors"
+                      >
+                        <UserAvatar
+                          userId={selectedGiftRecipient.id}
+                          avatarHash={selectedGiftRecipient.avatar}
+                          username={selectedGiftRecipient.username}
+                          custom_avatar={selectedGiftRecipient.custom_avatar}
+                          size={10}
+                          showBadge={false}
+                          settings={selectedGiftRecipient.settings_v2}
+                          premiumType={selectedGiftRecipient.premiumtype}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-primary-text group-hover:text-link truncate text-sm font-semibold transition-colors">
+                            {selectedGiftRecipient.global_name &&
+                            selectedGiftRecipient.global_name !== "None"
+                              ? selectedGiftRecipient.global_name
+                              : selectedGiftRecipient.username}
+                          </p>
+                          <p className="text-secondary-text truncate text-sm">
+                            @{selectedGiftRecipient.username}
+                          </p>
+                        </div>
+                        <Icon
+                          icon="akar-icons:link-out"
+                          className="text-link h-4 w-4 shrink-0"
+                        />
+                      </Link>
                     </div>
                   </div>
                 ) : null}
