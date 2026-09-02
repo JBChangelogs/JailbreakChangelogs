@@ -918,46 +918,27 @@ export default function SettingsPage() {
           </SettingsCard>
 
           {hasSupporterHistory ? (
-            <div
+            <SettingsCard
               id="supporter-history"
-              className={`${cardClassName} text-primary-text mb-8 p-6`}
-              style={getSectionHighlightStyle("supporter-history")}
-              ref={(el) =>
+              title="Supporter History"
+              icon="heroicons:clock"
+              isOwner={
+                userData.flags?.some((f) => f.flag === "is_owner") ?? false
+              }
+              highlightStyle={getSectionHighlightStyle("supporter-history")}
+              scrollRef={(el) =>
                 scrollHighlightedSectionIntoView("supporter-history", el)
               }
+              onCopyLink={() =>
+                copySectionLink("supporter-history", "Supporter History")
+              }
+              headerAccessory={
+                <p className="text-secondary-text mb-2 text-sm">
+                  Previous supporter tiers recorded on your account.
+                </p>
+              }
+              dividerClassName="border-border-card mb-3 border-t"
             >
-              <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
-                <Icon icon="heroicons:clock" className="h-6 w-6" />
-                Supporter History
-                {userData?.flags?.some((f) => f.flag === "is_owner") && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() =>
-                          copySectionLink(
-                            "supporter-history",
-                            "Supporter History",
-                          )
-                        }
-                        className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                        aria-label="Copy section link"
-                      >
-                        <Icon icon="heroicons:link" className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                    >
-                      <p>Copy URL</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </h2>
-              <p className="text-secondary-text mb-2 text-sm">
-                Previous supporter tiers recorded on your account.
-              </p>
-              <div className="border-border-card mb-3 border-t" />
               <div className="flex flex-col gap-3">
                 {sortedSupporterHistory.map((entry, index) => {
                   const isCurrentTier = currentSupporterLevel === entry.level;
@@ -1034,7 +1015,7 @@ export default function SettingsPage() {
                   </div>
                 )}
               </div>
-            </div>
+            </SettingsCard>
           ) : null}
 
           <div
