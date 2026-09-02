@@ -17,6 +17,7 @@ import {
   formatPercentage,
 } from "@/components/Inventory/Breakdown/constants";
 import CategoryPieCard from "@/components/Inventory/Breakdown/CategoryPieCard";
+import CategoryProgressBar from "@/components/Inventory/Breakdown/CategoryProgressBar";
 import SearchableInventoryListSection from "@/components/Inventory/Breakdown/SearchableInventoryListSection";
 import { useInventoryBreakdownStats } from "@/hooks/useInventoryBreakdownStats";
 
@@ -228,85 +229,76 @@ export default function InventoryBreakdown({
                     </button>
                   </div>
                 )}
-                <div className="bg-tertiary-bg flex h-8 w-full overflow-hidden rounded-lg">
-                  {overallProgress.total > 0 ? (
-                    typeProgress
-                      .filter((entry) => entry.total > 0)
-                      .map((entry) => {
-                        const totalCompletion = typeProgress.reduce(
-                          (sum, next) =>
-                            sum + (next.total > 0 ? next.percentage : 0),
-                          0,
-                        );
-                        const width =
-                          totalCompletion > 0
-                            ? (entry.percentage / totalCompletion) * 100
-                            : 0;
-                        return (
-                          <Tooltip key={entry.type}>
-                            <TooltipTrigger asChild>
-                              <div
-                                className="group relative"
-                                style={{
-                                  width: `${width}%`,
-                                  backgroundColor: getCategoryColor(entry.type),
-                                }}
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                              <div className="grid min-w-48 gap-1.5 text-xs">
-                                <div className="flex items-center gap-1.5">
-                                  <span
-                                    className="h-2.5 w-2.5 rounded-xs"
-                                    style={{
-                                      backgroundColor: getCategoryColor(
-                                        entry.type,
-                                      ),
-                                    }}
-                                  />
-                                  <span className="font-medium">
-                                    {entry.type}
-                                  </span>
+                <CategoryProgressBar
+                  entries={
+                    overallProgress.total > 0
+                      ? typeProgress
+                          .filter((entry) => entry.total > 0)
+                          .map((entry) => {
+                            const totalCompletion = typeProgress.reduce(
+                              (sum, next) =>
+                                sum + (next.total > 0 ? next.percentage : 0),
+                              0,
+                            );
+                            const width =
+                              totalCompletion > 0
+                                ? (entry.percentage / totalCompletion) * 100
+                                : 0;
+
+                            return {
+                              key: entry.type,
+                              label: entry.type,
+                              widthPercent: width,
+                              color: getCategoryColor(entry.type),
+                              tooltip: (
+                                <div className="grid min-w-48 gap-1.5 text-xs">
+                                  <div className="flex items-center gap-1.5">
+                                    <span
+                                      className="h-2.5 w-2.5 rounded-xs"
+                                      style={{
+                                        backgroundColor: getCategoryColor(
+                                          entry.type,
+                                        ),
+                                      }}
+                                    />
+                                    <span className="font-medium">
+                                      {entry.type}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-secondary-text">
+                                      Owned
+                                    </span>
+                                    <span className="text-primary-text font-mono font-medium tabular-nums">
+                                      {formatInventoryCount(entry.owned)}/
+                                      {formatInventoryCount(entry.total)}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-secondary-text">
+                                      Missing
+                                    </span>
+                                    <span className="text-primary-text font-mono font-medium tabular-nums">
+                                      {formatInventoryCount(entry.missingCount)}
+                                      /{formatInventoryCount(entry.total)}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-secondary-text">
+                                      Completion
+                                    </span>
+                                    <span className="text-primary-text font-mono font-medium tabular-nums">
+                                      {formatPercentage(entry.percentage)}%
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    Owned
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    {formatInventoryCount(entry.owned)}/
-                                    {formatInventoryCount(entry.total)}
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    Missing
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    {formatInventoryCount(entry.missingCount)}/
-                                    {formatInventoryCount(entry.total)}
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    Completion
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    {formatPercentage(entry.percentage)}%
-                                  </span>
-                                </div>
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        );
-                      })
-                  ) : (
-                    <div className="bg-tertiary-bg flex h-full w-full items-center justify-center">
-                      <span className="text-secondary-text text-xs">
-                        No items
-                      </span>
-                    </div>
-                  )}
-                </div>
+                              ),
+                            };
+                          })
+                      : []
+                  }
+                  emptyMessage="No items"
+                />
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
@@ -506,25 +498,18 @@ export default function InventoryBreakdown({
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="bg-tertiary-bg flex h-8 w-full overflow-hidden rounded-lg">
-                  {ogOwnedProgress.ogOwned > 0 ? (
-                    typeProgress
-                      .filter((entry) => entry.ogOwned > 0)
-                      .map((entry) => {
-                        const width =
-                          (entry.ogOwned / ogOwnedProgress.ogOwned) * 100;
-                        return (
-                          <Tooltip key={entry.type}>
-                            <TooltipTrigger asChild>
-                              <div
-                                className="group relative"
-                                style={{
-                                  width: `${width}%`,
-                                  backgroundColor: getCategoryColor(entry.type),
-                                }}
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
+                <CategoryProgressBar
+                  entries={
+                    ogOwnedProgress.ogOwned > 0
+                      ? typeProgress
+                          .filter((entry) => entry.ogOwned > 0)
+                          .map((entry) => ({
+                            key: entry.type,
+                            label: entry.type,
+                            widthPercent:
+                              (entry.ogOwned / ogOwnedProgress.ogOwned) * 100,
+                            color: getCategoryColor(entry.type),
+                            tooltip: (
                               <div className="grid min-w-48 gap-1.5 text-xs">
                                 <div className="flex items-center gap-1.5">
                                   <span
@@ -562,18 +547,12 @@ export default function InventoryBreakdown({
                                   </span>
                                 </div>
                               </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        );
-                      })
-                  ) : (
-                    <div className="bg-tertiary-bg flex h-full w-full items-center justify-center">
-                      <span className="text-secondary-text text-xs">
-                        No items owned
-                      </span>
-                    </div>
-                  )}
-                </div>
+                            ),
+                          }))
+                      : []
+                  }
+                  emptyMessage="No items owned"
+                />
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
@@ -750,19 +729,14 @@ export default function InventoryBreakdown({
             </div>
             {Object.keys(safePercentages).length > 0 ? (
               <>
-                <div className="bg-tertiary-bg mb-4 flex h-8 w-full overflow-hidden rounded-lg">
-                  {sortedCategoryEntries.map(([category, percentage]) => (
-                    <Tooltip key={category}>
-                      <TooltipTrigger asChild>
-                        <div
-                          className="group relative"
-                          style={{
-                            width: `${percentage}%`,
-                            backgroundColor: getCategoryColor(category),
-                          }}
-                        ></div>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">
+                <CategoryProgressBar
+                  entries={sortedCategoryEntries.map(
+                    ([category, percentage]) => ({
+                      key: category,
+                      label: category,
+                      widthPercent: percentage,
+                      color: getCategoryColor(category),
+                      tooltip: (
                         <div className="grid min-w-40 gap-1.5 text-xs">
                           <div className="flex items-center gap-1.5">
                             <span
@@ -788,10 +762,12 @@ export default function InventoryBreakdown({
                             </span>
                           </div>
                         </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  ))}
-                </div>
+                      ),
+                    }),
+                  )}
+                  emptyMessage="No breakdown available for this inventory"
+                  className="mb-4"
+                />
 
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                   {sortedCategoryEntries.map(([category, percentage]) => {
@@ -901,19 +877,14 @@ export default function InventoryBreakdown({
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <div className="bg-tertiary-bg flex h-8 w-full overflow-hidden rounded-lg">
-                  {sortedDuplicateEntries.map(([category, percentage]) => (
-                    <Tooltip key={category}>
-                      <TooltipTrigger asChild>
-                        <div
-                          className="group relative"
-                          style={{
-                            width: `${percentage}%`,
-                            backgroundColor: getCategoryColor(category),
-                          }}
-                        ></div>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">
+                <CategoryProgressBar
+                  entries={sortedDuplicateEntries.map(
+                    ([category, percentage]) => ({
+                      key: category,
+                      label: category,
+                      widthPercent: percentage,
+                      color: getCategoryColor(category),
+                      tooltip: (
                         <div className="grid min-w-40 gap-1.5 text-xs">
                           <div className="flex items-center gap-1.5">
                             <span
@@ -942,10 +913,11 @@ export default function InventoryBreakdown({
                             </span>
                           </div>
                         </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  ))}
-                </div>
+                      ),
+                    }),
+                  )}
+                  emptyMessage="No breakdown available for this inventory"
+                />
 
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                   {sortedDuplicateEntries.map(([category, percentage]) => {
