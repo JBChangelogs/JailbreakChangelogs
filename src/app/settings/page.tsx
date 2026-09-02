@@ -43,12 +43,6 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
 import { NotificationPreferenceToggle } from "@/components/Settings/NotificationPreferenceToggle";
 import { DesktopNotificationToggle } from "@/components/Settings/DesktopNotificationToggle";
-import {
-  fetchAvailableNotificationPreferences,
-  fetchUserNotificationPreferences,
-  updateUserNotificationPreferences,
-  type NotificationPreferenceEntry,
-} from "@/services/notificationPreferencesService";
 import { EmailNotificationSettings } from "@/components/Settings/EmailNotificationSettings";
 import {
   fetchSupporterGiftLevels,
@@ -58,6 +52,7 @@ import {
 import { UserAvatar } from "@/utils/ui/avatar";
 import { useUserSearch } from "@/hooks/useUserSearch";
 import { useSectionHighlight } from "@/hooks/useSectionHighlight";
+import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 import SettingsLoading from "./loading";
 
 const BADGE_BASE_URL =
@@ -80,17 +75,13 @@ export default function SettingsPage() {
     getSectionHighlightStyle,
     scrollHighlightedSectionIntoView,
   } = useSectionHighlight();
-  const [notificationPrefs, setNotificationPrefs] = useState<
-    NotificationPreferenceEntry[] | null
-  >(null);
-  const [notificationPrefsLoading, setNotificationPrefsLoading] =
-    useState<boolean>(true);
-  const [notificationPrefsSaving, setNotificationPrefsSaving] = useState<
-    Record<string, boolean>
-  >({});
-  const [notificationPrefsError, setNotificationPrefsError] = useState<
-    string | null
-  >(null);
+  const {
+    prefs: notificationPrefs,
+    loading: notificationPrefsLoading,
+    saving: notificationPrefsSaving,
+    error: notificationPrefsError,
+    handleToggle: handleNotificationPrefToggle,
+  } = useNotificationPreferences(!isLoading && user ? user.id : null);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [isBannerUploading, setIsBannerUploading] = useState(false);
 
@@ -145,122 +136,6 @@ export default function SettingsPage() {
       router.push("/");
     }
   }, [user, isLoading, router]);
-
-  useEffect(() => {
-    let mounted = true;
-    async function loadNotificationPrefs() {
-      setNotificationPrefsLoading(true);
-      setNotificationPrefsError(null);
-
-      let attempts = 0;
-      const MAX_ATTEMPTS = 3;
-
-      while (attempts < MAX_ATTEMPTS) {
-        try {
-          // These hit Next.js API routes (server-side calls upstream)
-          const [available, userPrefs] = await Promise.all([
-            fetchAvailableNotificationPreferences(),
-            fetchUserNotificationPreferences(user!.id),
-          ]);
-
-          const explicitMap = new Map(
-            (userPrefs.preferences ?? []).map((p) => [p.title, !!p.enabled]),
-          );
-
-          // Missing preference = ON by default
-          const merged: NotificationPreferenceEntry[] = available.map(
-            (title) => ({
-              title,
-              enabled: explicitMap.has(title)
-                ? (explicitMap.get(title) as boolean)
-                : true,
-            }),
-          );
-
-          if (mounted) {
-            setNotificationPrefs(merged);
-            setNotificationPrefsError(null);
-          }
-          break; // Success!
-        } catch (e) {
-          attempts++;
-          if (attempts >= MAX_ATTEMPTS || !mounted) {
-            if (mounted) {
-              setNotificationPrefs([]);
-              setNotificationPrefsError(
-                e instanceof Error
-                  ? e.message
-                  : "Failed to load notification preferences",
-              );
-            }
-            break;
-          }
-
-          // Exponential backoff: 1s, 2s, 4s
-          const delay = Math.pow(2, attempts - 1) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-      }
-
-      if (mounted) setNotificationPrefsLoading(false);
-    }
-
-    // Only attempt when auth is resolved and user is present
-    if (!isLoading && user) loadNotificationPrefs();
-    return () => {
-      mounted = false;
-    };
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, user?.id]);
-
-  const setSaving = (title: string, saving: boolean) => {
-    setNotificationPrefsSaving((prev) => ({ ...prev, [title]: saving }));
-  };
-
-  const handleNotificationPrefToggle = async (
-    title: string,
-    nextEnabled: boolean,
-  ) => {
-    if (!notificationPrefs) return;
-
-    // Optimistic UI update
-    const prev = notificationPrefs;
-    const next = prev.map((p) =>
-      p.title === title ? { ...p, enabled: nextEnabled } : p,
-    );
-    setNotificationPrefs(next);
-    setNotificationPrefsError(null);
-    setSaving(title, true);
-
-    const humanizedTitle = title
-      .split("_")
-      .filter(Boolean)
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-
-    try {
-      await updateUserNotificationPreferences([
-        { title, enabled: nextEnabled },
-      ]);
-      toast.success("Setting Updated", {
-        description: `Notification preference for "${humanizedTitle}" has been ${nextEnabled ? "enabled" : "disabled"}.`,
-      });
-
-      window.rybbit?.event("Update Notification Preference", {
-        preference: title,
-        enabled: nextEnabled,
-      });
-    } catch (e) {
-      // Revert on failure
-      setNotificationPrefs(prev);
-      const msg =
-        e instanceof Error ? e.message : "Failed to update preference";
-      setNotificationPrefsError(msg);
-      toast.error(msg);
-    } finally {
-      setSaving(title, false);
-    }
-  };
 
   const handleBannerUpdate = (newBannerUrl: string) => {
     if (userData) {
