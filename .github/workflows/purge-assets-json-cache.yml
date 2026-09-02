@@ -3,6 +3,9 @@ name: Purge assets/json cache after deploy
 on:
   deployment_status
 
+permissions:
+  contents: read
+
 jobs:
   purge:
     if: github.event.deployment_status.state == 'success' && contains(github.event.deployment.environment, 'production')

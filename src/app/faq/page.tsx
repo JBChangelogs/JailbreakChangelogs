@@ -207,12 +207,22 @@ const faqs: FAQ[] = [
   },
 ];
 
+function stripHtmlTags(input: string): string {
+  let previous;
+  let result = input;
+  do {
+    previous = result;
+    result = result.replace(/<[^>]*>/g, "");
+  } while (result !== previous);
+  return result;
+}
+
 // Fuzzy search index over questions and (HTML-stripped) answers. The FAQ list
 // is static, so the index can be built once at module load.
 const faqSearchIndex = new Fuse(
   faqs.map((faq) => ({
     question: faq.question,
-    plainAnswer: faq.answer.replace(/<[^>]+>/g, ""),
+    plainAnswer: stripHtmlTags(faq.answer),
   })),
   {
     keys: [
