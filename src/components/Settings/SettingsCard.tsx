@@ -19,6 +19,7 @@ interface SettingsCardProps {
   className?: string;
   dividerClassName?: string;
   copyAriaLabel?: string;
+  variant?: "default" | "danger";
 }
 
 export default function SettingsCard({
@@ -34,16 +35,28 @@ export default function SettingsCard({
   className,
   dividerClassName = "border-border-card mb-2 border-t",
   copyAriaLabel = "Copy section link",
+  variant = "default",
 }: SettingsCardProps) {
+  const isDanger = variant === "danger";
+
   return (
     <div
       id={id}
-      className={`border-border-card bg-secondary-bg text-primary-text mb-8 rounded-xl border p-6 shadow-md${className ? ` ${className}` : ""}`}
+      className={`border-border-card bg-secondary-bg text-primary-text mb-8 rounded-xl border p-6 shadow-md${isDanger ? " relative" : ""}${className ? ` ${className}` : ""}`}
       style={highlightStyle}
       ref={scrollRef}
     >
-      <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
-        <Icon icon={icon} className="h-6 w-6" />
+      {isDanger && (
+        <div className="bg-button-danger absolute top-0 right-0 left-0 h-1 rounded-t-xl" />
+      )}
+      <h2
+        className={`${isDanger ? "text-button-danger" : "text-primary-text"} mb-2 flex items-center gap-1.5 text-xl font-bold`}
+      >
+        <Icon
+          icon={icon}
+          className="h-6 w-6"
+          style={isDanger ? { color: "var(--color-button-danger)" } : undefined}
+        />
         {title}
         {isOwner && (
           <Tooltip>
@@ -66,7 +79,17 @@ export default function SettingsCard({
         )}
       </h2>
       {headerAccessory}
-      <div className={dividerClassName} />
+      <div
+        className={isDanger ? "mb-2 border-t" : dividerClassName}
+        style={
+          isDanger
+            ? {
+                borderColor: "var(--color-button-danger)",
+                opacity: 0.3,
+              }
+            : undefined
+        }
+      />
       {children}
     </div>
   );

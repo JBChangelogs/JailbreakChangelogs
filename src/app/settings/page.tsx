@@ -1254,49 +1254,20 @@ export default function SettingsPage() {
             )}
           </div>
 
-          <div
+          <SettingsCard
             id="danger"
-            className={`${cardClassName} text-primary-text relative mb-8 p-6`}
-            style={getSectionHighlightStyle("danger")}
-            ref={(el) => scrollHighlightedSectionIntoView("danger", el)}
+            title="Danger Zone"
+            icon="heroicons:exclamation-triangle"
+            isOwner={
+              userData.flags?.some((f) => f.flag === "is_owner") ?? false
+            }
+            highlightStyle={getSectionHighlightStyle("danger")}
+            scrollRef={(el) => scrollHighlightedSectionIntoView("danger", el)}
+            onCopyLink={() => copySectionLink("danger", "Danger Zone")}
+            variant="danger"
           >
-            <div className="bg-button-danger absolute top-0 right-0 left-0 h-1 rounded-t-xl" />
-            <h2 className="text-button-danger mb-2 flex items-center gap-1.5 text-xl font-bold">
-              <Icon
-                icon="heroicons:exclamation-triangle"
-                className="h-6 w-6"
-                style={{ color: "var(--color-button-danger)" }}
-              />
-              Danger Zone
-              {userData?.flags?.some((f) => f.flag === "is_owner") && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => copySectionLink("danger", "Danger Zone")}
-                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                      aria-label="Copy section link"
-                    >
-                      <Icon icon="heroicons:link" className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                  >
-                    <p>Copy URL</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </h2>
-            <div
-              className="mb-2 border-t"
-              style={{
-                borderColor: "var(--color-button-danger)",
-                opacity: 0.3,
-              }}
-            />
             <DeleteAccount />
-          </div>
+          </SettingsCard>
 
           {/* Supporter Modal */}
           <SupporterModal
