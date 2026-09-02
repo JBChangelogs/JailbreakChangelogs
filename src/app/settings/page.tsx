@@ -677,66 +677,32 @@ export default function SettingsPage() {
             );
             const isAppearanceCat = cat.name === "appearance";
             return (
-              <div
+              <SettingsCard
                 key={cat.name}
                 id={cat.name}
-                className={`${cardClassName} text-primary-text mb-8 p-6`}
-                style={
-                  highlightSetting === cat.name && showHighlight
-                    ? {
-                        backgroundColor:
-                          "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                        transition: "background-color 0.5s ease",
-                      }
-                    : undefined
+                title={categoryDisplayName}
+                icon={
+                  cat.name === "privacy"
+                    ? "heroicons:lock-closed"
+                    : "heroicons:sparkles"
                 }
-                ref={(el) => {
-                  if (highlightSetting === cat.name && showHighlight && el) {
-                    setTimeout(() => {
-                      (el as HTMLElement).scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                      });
-                    }, 100);
-                  }
-                }}
+                isOwner={
+                  userData.flags?.some((f) => f.flag === "is_owner") ?? false
+                }
+                highlightStyle={getSectionHighlightStyle(cat.name)}
+                scrollRef={(el) =>
+                  scrollHighlightedSectionIntoView(cat.name, el)
+                }
+                onCopyLink={() =>
+                  copySectionLink(cat.name, categoryDisplayName)
+                }
+                copyAriaLabel="Copy category link"
+                headerAccessory={
+                  <p className="text-secondary-text mb-2 text-sm">
+                    {cat.description}
+                  </p>
+                }
               >
-                <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
-                  <Icon
-                    icon={
-                      cat.name === "privacy"
-                        ? "heroicons:lock-closed"
-                        : "heroicons:sparkles"
-                    }
-                    className="h-6 w-6"
-                  />
-                  {categoryDisplayName}
-                  {userData?.flags?.some((f) => f.flag === "is_owner") && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() =>
-                            copySectionLink(cat.name, categoryDisplayName)
-                          }
-                          className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                          aria-label="Copy category link"
-                        >
-                          <Icon icon="heroicons:link" className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="top"
-                        className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                      >
-                        <p>Copy URL</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </h2>
-                <p className="text-secondary-text mb-2 text-sm">
-                  {cat.description}
-                </p>
-                <div className="border-border-card mb-2 border-t" />
                 <div>
                   {sortedSettings.map((entry) => {
                     const isHighlighted =
@@ -822,7 +788,7 @@ export default function SettingsPage() {
                       <ImageHostLinks />
                     </>
                   )}
-              </div>
+              </SettingsCard>
             );
           })}
 
