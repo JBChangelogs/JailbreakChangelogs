@@ -182,16 +182,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Refresh from token lookup in the background
       try {
-        const response = await fetch(
-          `${PUBLIC_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
-          {
-            cache: "no-store",
-            credentials: "include",
-          },
-        );
+        const fetchUser = () =>
+          fetch(
+            `${PUBLIC_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
+            {
+              cache: "no-store",
+              credentials: "include",
+            },
+          );
+
+        const response = await fetchUser();
 
         if (response.ok) {
-          const user = (await response.json()) as UserData;
+          let user = (await response.json()) as UserData;
+
+          // Roblox linking can lag behind the OAuth redirect on the backend, so poll briefly.
+          if (isReturnFromRobloxOAuth && !user.roblox_id) {
+            for (let attempt = 0; attempt < 4 && !user.roblox_id; attempt++) {
+              await new Promise((resolve) => setTimeout(resolve, 1500));
+              const retryResponse = await fetchUser();
+              if (!retryResponse.ok) break;
+              user = (await retryResponse.json()) as UserData;
+            }
+          }
+
           safeSetJSON("user", user);
           safeLocalStorage.setItem("userid", user.id);
           if (user.avatar) {
