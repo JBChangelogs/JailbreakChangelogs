@@ -21,12 +21,12 @@ import {
   prepareEmojiShortcodeContentForApi,
   prepareEmojiShortcodeDisplayContent,
 } from "@/utils/comments/emojiShortcodes";
-import type { UserData } from "@/types/auth";
 import { useTwemoji } from "@/contexts/TwemojiContext";
 import { MessageRow } from "@/components/Users/Messages/MessageRow";
 import { ChatHeaderPanel } from "@/components/Users/Messages/ChatHeaderPanel";
 import { ComposerFooter } from "@/components/Users/Messages/ComposerFooter";
 import { ConversationSidebar } from "@/components/Users/Messages/ConversationSidebar";
+import { NewConversationModal } from "@/components/Users/Messages/NewConversationModal";
 import { OfferAcceptedBanner } from "@/components/Users/Messages/OfferAcceptedBanner";
 import { useMessagesRealtime } from "@/hooks/useMessagesRealtime";
 import { useConversationList } from "@/hooks/useConversationList";
@@ -37,6 +37,7 @@ import { useMessageOffers } from "@/hooks/useMessageOffers";
 import { useMessageBlocking } from "@/hooks/useMessageBlocking";
 import { useLocalMessageOverlay } from "@/hooks/useLocalMessageOverlay";
 import { useMessageNavigationScroll } from "@/hooks/useMessageNavigationScroll";
+import { useUserSearch } from "@/hooks/useUserSearch";
 import type {
   ConversationSummary,
   Message,
@@ -107,8 +108,7 @@ export default function MessagesInbox() {
   const [currentUserEnriched, setCurrentUserEnriched] =
     useState<MessageUser | null>(null);
   const [userSearchQuery, setUserSearchQuery] = useState("");
-  const [userSearchResults, setUserSearchResults] = useState<UserData[]>([]);
-  const [isUserSearchLoading, setIsUserSearchLoading] = useState(false);
+  const [newConversationOpen, setNewConversationOpen] = useState(false);
   const userSearchInputRef = useRef<HTMLInputElement | null>(null);
   const [messagesPage, setMessagesPage] = useState(1);
   const [messagesTotalPages, setMessagesTotalPages] = useState<number | null>(
@@ -286,16 +286,15 @@ export default function MessagesInbox() {
     routeConversationId,
     routeConversationIdRef,
     conversations,
-    userSearchQuery,
     setConversations,
     setTotalConversations,
     setSelectedUserId,
     setIsLoadingConversations,
     setBlockedByMeByUserId,
     setCurrentUserEnriched,
-    setUserSearchResults,
-    setIsUserSearchLoading,
   });
+  const { results: userSearchResults, isLoading: isUserSearchLoading } =
+    useUserSearch(userSearchQuery, currentUserId);
   useMessageThread({
     selectedUserId,
     currentUserId,
@@ -425,15 +424,6 @@ export default function MessagesInbox() {
     ? `Message ${getDisplayName(selectedUser)}...`
     : "Select a conversation to start messaging.";
 
-  const focusUserSearch = () => {
-    if (selectedUserId) {
-      goToConversationList();
-    }
-    requestAnimationFrame(() => {
-      userSearchInputRef.current?.focus();
-    });
-  };
-
   return (
     <div className="h-[calc(100dvh-5rem)] overflow-hidden">
       <div className="flex h-full min-h-0 flex-col">
@@ -478,7 +468,7 @@ export default function MessagesInbox() {
                     Search for a user to start a chat.
                   </p>
                   <div className="mt-5 flex justify-center">
-                    <Button onClick={focusUserSearch}>
+                    <Button onClick={() => setNewConversationOpen(true)}>
                       Start a conversation
                     </Button>
                   </div>
@@ -718,6 +708,16 @@ export default function MessagesInbox() {
           </div>
         </div>
       </ConfirmDialog>
+
+      <NewConversationModal
+        open={newConversationOpen}
+        onOpenChange={setNewConversationOpen}
+        currentUserId={currentUserId}
+        onSelectUser={(id) => {
+          setNewConversationOpen(false);
+          selectConversation(id);
+        }}
+      />
     </div>
   );
 }

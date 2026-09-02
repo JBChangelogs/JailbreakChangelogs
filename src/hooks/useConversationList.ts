@@ -4,7 +4,6 @@ import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
-import type { UserData } from "@/types/auth";
 import type {
   ConversationSummary,
   Message,
@@ -17,11 +16,7 @@ import {
   toMessageUser,
 } from "@/utils/messages/parsing";
 import { hasAvatarSettingsData } from "@/utils/messages/formatting";
-import {
-  PUBLIC_API_URL,
-  getResponseErrorMessage,
-  searchUsers,
-} from "@/utils/api/api";
+import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 
@@ -36,15 +31,12 @@ interface UseConversationListOptions {
   routeConversationId: string | null;
   routeConversationIdRef: RefObject<string | null>;
   conversations: ConversationSummary[];
-  userSearchQuery: string;
   setConversations: Setter<ConversationSummary[]>;
   setTotalConversations: Setter<number | null>;
   setSelectedUserId: Setter<string | null>;
   setIsLoadingConversations: Setter<boolean>;
   setBlockedByMeByUserId: Setter<Record<string, boolean>>;
   setCurrentUserEnriched: Setter<MessageUser | null>;
-  setUserSearchResults: Setter<UserData[]>;
-  setIsUserSearchLoading: Setter<boolean>;
 }
 
 export function useConversationList({
@@ -55,21 +47,17 @@ export function useConversationList({
   routeConversationId,
   routeConversationIdRef,
   conversations,
-  userSearchQuery,
   setConversations,
   setTotalConversations,
   setSelectedUserId,
   setIsLoadingConversations,
   setBlockedByMeByUserId,
   setCurrentUserEnriched,
-  setUserSearchResults,
-  setIsUserSearchLoading,
 }: UseConversationListOptions) {
   const userLookupCacheRef = useRef<Map<string, MessageUser | null>>(new Map());
   const userLookupPendingRef = useRef<Map<string, Promise<MessageUser | null>>>(
     new Map(),
   );
-  const userSearchRequestIdRef = useRef(0);
 
   const loadUserById = async (
     id: string,
@@ -145,50 +133,6 @@ export function useConversationList({
       isCancelled = true;
     };
   }, [currentUserMessageUser, isAuthenticated, setCurrentUserEnriched]);
-
-  useEffect(() => {
-    const trimmedQuery = userSearchQuery.trim();
-    if (!trimmedQuery) {
-      userSearchRequestIdRef.current += 1;
-      setUserSearchResults([]);
-      setIsUserSearchLoading(false);
-      return;
-    }
-
-    const requestId = (userSearchRequestIdRef.current += 1);
-    setIsUserSearchLoading(true);
-
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        const resultsRaw = await searchUsers(trimmedQuery, 100);
-        if (userSearchRequestIdRef.current !== requestId) return;
-
-        const results = Array.isArray(resultsRaw) ? resultsRaw : [];
-        setUserSearchResults(
-          currentUserId
-            ? results.filter((result) => result?.id !== currentUserId)
-            : results,
-        );
-      } catch (error) {
-        if (userSearchRequestIdRef.current !== requestId) return;
-        log.error("Error searching users:", error);
-        setUserSearchResults([]);
-      } finally {
-        if (userSearchRequestIdRef.current === requestId) {
-          setIsUserSearchLoading(false);
-        }
-      }
-    }, 300);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [
-    currentUserId,
-    setIsUserSearchLoading,
-    setUserSearchResults,
-    userSearchQuery,
-  ]);
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) {
