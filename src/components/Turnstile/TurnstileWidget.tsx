@@ -4,7 +4,7 @@ import { createLogger } from "@/services/logger";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 
 const log = createLogger("UI");
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, type RefObject } from "react";
 import { TurnstileAction } from "@/utils/auth/turnstile";
 
 interface TurnstileWidgetProps {
@@ -16,6 +16,7 @@ interface TurnstileWidgetProps {
   theme?: "light" | "dark" | "auto";
   size?: "normal" | "compact";
   className?: string;
+  turnstileRef?: RefObject<TurnstileInstance | null>;
 }
 
 export default function TurnstileWidget({
@@ -27,8 +28,10 @@ export default function TurnstileWidget({
   theme = "auto",
   size = "normal",
   className = "",
+  turnstileRef: providedTurnstileRef,
 }: TurnstileWidgetProps) {
-  const turnstileRef = useRef<TurnstileInstance>(null);
+  const internalTurnstileRef = useRef<TurnstileInstance>(null);
+  const turnstileRef = providedTurnstileRef ?? internalTurnstileRef;
 
   const handleSuccess = useCallback(
     (token: string) => {
@@ -54,7 +57,7 @@ export default function TurnstileWidget({
         currentRef.remove();
       }
     };
-  }, []);
+  }, [turnstileRef]);
 
   return (
     <div className={className}>

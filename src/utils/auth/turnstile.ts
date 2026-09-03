@@ -15,7 +15,7 @@ export interface TurnstileValidationResponse {
   cdata?: string;
 }
 
-export type TurnstileAction = "inventory_scan";
+export type TurnstileAction = "inventory_scan" | "human_verification";
 
 export interface TurnstileValidationOptions {
   expectedAction?: TurnstileAction;
