@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
 import TurnstileWidget, {
   useTurnstileReset,
@@ -41,9 +40,6 @@ export default function HumanVerificationModal({
 
     try {
       await submitHumanVerification(token);
-      toast.success("Human verification complete", {
-        description: "Normal access has been restored for the next 24 hours.",
-      });
       onVerified();
     } catch (error) {
       setErrorMessage(
