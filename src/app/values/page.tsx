@@ -1,18 +1,10 @@
 import { Suspense } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { fetchItems, fetchLastUpdated } from "@/utils/api/api";
 import ValuesClient from "@/components/Values/ValuesClient";
 import Loading from "./loading";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 
-export const revalidate = 0;
-
-export default async function ValuesPage() {
-  const itemsPromise = fetchItems();
-  const lastUpdatedPromise = itemsPromise.then((items) =>
-    fetchLastUpdated(items),
-  );
-
+export default function ValuesPage() {
   return (
     <>
       <NitroRailAd
@@ -28,10 +20,7 @@ export default async function ValuesPage() {
         <div className="container mx-auto px-4">
           <Breadcrumb />
           <Suspense fallback={<Loading />}>
-            <ValuesClient
-              itemsPromise={itemsPromise}
-              lastUpdatedPromise={lastUpdatedPromise}
-            />
+            <ValuesClient />
           </Suspense>
         </div>
       </main>

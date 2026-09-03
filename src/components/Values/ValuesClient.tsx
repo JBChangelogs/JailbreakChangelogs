@@ -6,14 +6,18 @@ import { useSearchParams } from "next/navigation";
 
 const log = createLogger("UI");
 const EMPTY_FAVORITES: number[] = [];
+const EMPTY_ITEMS: Item[] = [];
 const FILTER_SORT_STORAGE_KEY = "valuesFilterSort";
-import { use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems, parseCashValue } from "@/utils/trading/values";
 import CategoryIcons from "@/components/Items/CategoryIcons";
-import { fetchUserFavorites, fetchItemsClient } from "@/utils/api/api";
+import {
+  fetchUserFavorites,
+  fetchItemsClient,
+  fetchLastUpdated,
+} from "@/utils/api/api";
 import { useAuthContext, useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeSessionStorage } from "@/utils/storage/safeStorage";
@@ -29,11 +33,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatRelativeDate } from "@/utils/helpers/timestamp";
 
-interface ValuesClientProps {
-  itemsPromise: Promise<Item[]>;
-  lastUpdatedPromise: Promise<number | null>;
-}
-
 const parseFilterSorts = (
   raw: string | null,
   validValues: FilterSort[],
@@ -46,20 +45,15 @@ const parseFilterSorts = (
         )
     : [];
 
-export default function ValuesClient({
-  itemsPromise,
-  lastUpdatedPromise,
-}: ValuesClientProps) {
+export default function ValuesClient() {
   const { user } = useAuthContext();
 
-  const initialItems = use(itemsPromise);
-  const lastUpdated = use(lastUpdatedPromise);
-
-  const { data: items = initialItems } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["values-items"],
     queryFn: fetchItemsClient,
-    initialData: initialItems,
   });
+  const items = data ?? EMPTY_ITEMS;
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [clearSearchTrigger, setClearSearchTrigger] = useState(0);
@@ -160,6 +154,32 @@ export default function ValuesClient({
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] =
     useState<number>(DYNAMIC_MAX_VALUE);
+  const previousMaxValueRef = useRef(DYNAMIC_MAX_VALUE);
+
+  useEffect(() => {
+    if (!data) return;
+
+    let cancelled = false;
+    fetchLastUpdated(data).then((timestamp) => {
+      if (!cancelled) setLastUpdated(timestamp);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [data]);
+
+  useEffect(() => {
+    const previousMaxValue = previousMaxValueRef.current;
+    setRangeValue(([min, max]) => [
+      min,
+      max === previousMaxValue ? DYNAMIC_MAX_VALUE : max,
+    ]);
+    setAppliedMaxValue((max) =>
+      max === previousMaxValue ? DYNAMIC_MAX_VALUE : max,
+    );
+    previousMaxValueRef.current = DYNAMIC_MAX_VALUE;
+  }, [DYNAMIC_MAX_VALUE]);
 
   const handleCategorySelect = (filter: FilterSort) => {
     handleToggleFilterSort(filter);
@@ -202,6 +222,8 @@ export default function ValuesClient({
     : EMPTY_FAVORITES;
 
   useEffect(() => {
+    if (isLoading) return;
+
     const updateSortedItems = async () => {
       const favoritesData = effectiveFavorites.map((id) => ({
         item_id: String(id),
@@ -223,6 +245,7 @@ export default function ValuesClient({
     selectedFilterSorts,
     valueSort,
     effectiveFavorites,
+    isLoading,
   ]);
 
   return (
@@ -363,7 +386,7 @@ export default function ValuesClient({
         <div className="space-y-6">
           <ValuesItemsGrid
             items={sortedItems}
-            isLoading={isInitialSortPending}
+            isLoading={isLoading || isInitialSortPending}
             favorites={favorites}
             onFavoriteChange={(itemId, isFavorited) => {
               setFavorites((prev) =>
