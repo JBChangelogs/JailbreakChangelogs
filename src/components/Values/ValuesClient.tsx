@@ -8,11 +8,12 @@ const log = createLogger("UI");
 const EMPTY_FAVORITES: number[] = [];
 const FILTER_SORT_STORAGE_KEY = "valuesFilterSort";
 import { use } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems, parseCashValue } from "@/utils/trading/values";
 import CategoryIcons from "@/components/Items/CategoryIcons";
-import { fetchUserFavorites } from "@/utils/api/api";
+import { fetchUserFavorites, fetchItemsClient } from "@/utils/api/api";
 import { useAuthContext, useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeSessionStorage } from "@/utils/storage/safeStorage";
@@ -51,8 +52,14 @@ export default function ValuesClient({
 }: ValuesClientProps) {
   const { user } = useAuthContext();
 
-  const items = use(itemsPromise);
+  const initialItems = use(itemsPromise);
   const lastUpdated = use(lastUpdatedPromise);
+
+  const { data: items = initialItems } = useQuery({
+    queryKey: ["values-items"],
+    queryFn: fetchItemsClient,
+    initialData: initialItems,
+  });
 
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [clearSearchTrigger, setClearSearchTrigger] = useState(0);

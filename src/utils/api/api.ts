@@ -610,6 +610,17 @@ export async function fetchItems() {
   }
 }
 
+export async function fetchItemsClient(): Promise<Item[]> {
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items/list");
+  const response = await fetch(url, { headers, credentials: "include" });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    log.error("fetchItemsClient failed", { status: response.status, body });
+    throw new Error("Failed to fetch items");
+  }
+  return (await response.json()) as Item[];
+}
+
 export async function fetchLastUpdated(items: Item[]) {
   try {
     if (!items || items.length === 0) {

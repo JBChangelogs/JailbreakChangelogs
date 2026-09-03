@@ -29,6 +29,7 @@ import { getGitHubUrl } from "@/utils/trading/version";
 import { Suspense } from "react";
 import QueryProvider from "@/components/QueryProvider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import HumanVerificationProvider from "@/components/HumanVerification/HumanVerificationProvider";
 
 export const viewport: Viewport = {
   themeColor: "#2462cd",
@@ -166,6 +167,7 @@ export default async function RootLayout({
                     right: "var(--toast-runtime-right, 16px)",
                   }}
                 />
+                <HumanVerificationProvider />
                 <MaintenanceBypass>
                   <NextTopLoader
                     color="var(--color-button-info)"
@@ -300,6 +302,7 @@ export default async function RootLayout({
                   right: "var(--toast-runtime-right, 16px)",
                 }}
               />
+              <HumanVerificationProvider />
               <NextTopLoader
                 color="var(--color-button-info)"
                 showSpinner={false}
