@@ -5,7 +5,6 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
-import OfficialBotsSection from "@/components/ui/OfficialBotsSection";
 import StatsPolling, { StatsSkeleton } from "@/components/ui/StatsPolling";
 import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkOGFinderMaintenanceMode } from "@/utils/api/maintenance";
@@ -56,8 +55,6 @@ export default async function OGFinderPage() {
           </Suspense>
 
           <ConnectedBotsPolling />
-
-          <OfficialBotsSection />
 
           <OGFinderFAQ />
         </PremiumAwareLayout>

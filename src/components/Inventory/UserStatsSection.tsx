@@ -3,12 +3,9 @@
 import React, { useState, useCallback } from "react";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
-import { RobloxUser } from "@/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
-import { useRobloxUserDataQuery } from "@/hooks/useRobloxDataQuery";
 import { INVENTORY_API_URL } from "@/utils/api/api";
-import { DefaultAvatar } from "@/utils/ui/avatar";
 import XpProgressBar from "./XpProgressBar";
 import Image from "next/image";
 import ScanHistoryModal from "../Modals/ScanHistoryModal";
@@ -90,7 +87,6 @@ interface UserStatsSectionProps {
   hasDupedValue?: boolean;
   totalItemsCount: number;
   duplicatesCount?: number;
-  robloxUsers?: Record<string, RobloxUser>;
 }
 
 // Helper functions
@@ -161,7 +157,6 @@ export default function UserStatsSection({
   hasDupedValue = false,
   totalItemsCount,
   duplicatesCount,
-  robloxUsers,
 }: UserStatsSectionProps) {
   const [isScanHistoryModalOpen, setIsScanHistoryModalOpen] = useState(false);
   const [isMetadataExpanded, setIsMetadataExpanded] = useState(true);
@@ -176,7 +171,6 @@ export default function UserStatsSection({
   const [isLoadingQueuePosition, setIsLoadingQueuePosition] = useState(false);
   const [queueError, setQueueError] = useState<string | null>(null);
   const [hasCheckedQueuePosition, setHasCheckedQueuePosition] = useState(false);
-  const [botAvatarError, setBotAvatarError] = useState(false);
   const createdRelativeTime = useRealTimeRelativeDate(
     currentData?.created_at || 0,
   );
@@ -184,18 +178,6 @@ export default function UserStatsSection({
     currentData?.updated_at || 0,
   );
   const tradeNote = (currentData?.trade_note?.note || "").trim();
-
-  // Fetch bot user data if needed
-  const { data: botRobloxData } = useRobloxUserDataQuery(
-    currentData?.bot_id || null,
-  );
-
-  // Determine bot user (check props first, then fetched data)
-  const botUser = currentData?.bot_id
-    ? robloxUsers?.[currentData.bot_id] ||
-      botRobloxData?.usersData?.[currentData.bot_id] ||
-      null
-    : null;
 
   const fetchScanHistory = async () => {
     setIsLoadingScanHistory(true);
@@ -801,62 +783,6 @@ export default function UserStatsSection({
                       </span>
                     </span>
                   </div>
-
-                  {/* Bot Info */}
-                  {currentData.bot_id && (
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span className="text-secondary-text">
-                        Last scanned by:
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {botUser ? (
-                          <>
-                            <div className="bg-quaternary-bg h-6 w-6 overflow-hidden rounded-full">
-                              {botAvatarError ? (
-                                <DefaultAvatar
-                                  name={
-                                    botUser.displayName ||
-                                    botUser.name ||
-                                    String(botUser.id)
-                                  }
-                                />
-                              ) : (
-                                <Image
-                                  src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botUser.id}/avatar-headshot`}
-                                  alt={
-                                    botUser.displayName ||
-                                    botUser.name ||
-                                    `Bot ${botUser.id} avatar`
-                                  }
-                                  width={24}
-                                  height={24}
-                                  className="h-full w-full object-cover"
-                                  onError={() => setBotAvatarError(true)}
-                                />
-                              )}
-                            </div>
-                            <a
-                              href={`https://www.roblox.com/users/${botUser.id}/profile`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-text hover:text-link font-medium transition-colors"
-                            >
-                              {botUser.displayName || botUser.name}
-                            </a>
-                          </>
-                        ) : (
-                          <a
-                            href={`https://www.roblox.com/users/${currentData.bot_id}/profile`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary-text hover:text-link font-medium transition-colors"
-                          >
-                            Bot {currentData.bot_id}
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Queue Position */}
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">

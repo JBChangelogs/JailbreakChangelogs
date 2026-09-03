@@ -1600,6 +1600,12 @@ export async function fetchInventoryData(robloxId: string) {
       });
     }
 
+    // Scanner account IDs are operational metadata and must not cross the
+    // server/client boundary with public inventory data.
+    if (data && typeof data === "object") {
+      delete data.bot_id;
+    }
+
     return data;
   } catch (err) {
     // console.error("[SERVER] Error fetching inventory data:", err);
@@ -2001,97 +2007,71 @@ export async function fetchUserMoneyHistory(
   }
 }
 
-export interface NetworthCapSnapshot {
-  snapshot_time: number;
-  total_networth: number;
-  total_duped_networth: number;
-  duplicates_percentage: number;
-}
-
-export async function fetchNetworthCapHistory(): Promise<
-  NetworthCapSnapshot[]
-> {
-  try {
-    const response = await fetch(
-      `${INVENTORY_API_URL}/networth/cap/history?limit=30`,
-      {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      return [];
-    }
-
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-}
-
-// Official scan bots
-export interface OfficialBotUser {
-  userId: number;
-  username: string;
-  displayName: string;
-  hasVerifiedBadge: boolean;
-}
-
-export async function fetchOfficialScanBots(): Promise<OfficialBotUser[]> {
-  try {
-    if (!INVENTORY_API_URL) {
-      throw new Error("Missing INVENTORY_API_URL");
-    }
-
-    const response = await fetch(`${INVENTORY_API_URL}/proxy/users/bots`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
-      },
-    });
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchOfficialScanBots: Failed", {
-        status: response.status,
-        body,
-      });
-      return [];
-    }
-
-    const data = await response.json();
-    if (Array.isArray(data)) {
-      return data as OfficialBotUser[];
-    }
-    log.warn("fetchOfficialScanBots: Unexpected response shape", data);
-    return [];
-  } catch (err) {
-    log.error("fetchOfficialScanBots: Unexpected error", err);
-    return [];
-  }
+export interface ConnectedBotCounts {
+  total: number;
+  main_game: number;
+  trade_world: number;
 }
 
 export interface ConnectedBot {
   id: string;
-  connected: boolean;
   client_state?: string;
   last_heartbeat: number;
   current_job: string;
   method?: number;
 }
 
-export interface ConnectedBotsResponse {
+export interface ConnectedBotsPublicResponse {
+  bots: ConnectedBotCounts;
+  recent_heartbeats: ConnectedBotCounts;
+}
+
+export interface ConnectedBotsPrivateResponse {
   bots: ConnectedBot[];
   recent_heartbeats: ConnectedBot[];
 }
 
-export async function fetchConnectedBots(
-  maxRetries: number = 3,
-): Promise<ConnectedBotsResponse | null> {
+export type ConnectedBotsResponse =
+  | ConnectedBotsPublicResponse
+  | ConnectedBotsPrivateResponse;
+
+interface BotDataFetchOptions {
+  includePrivate?: boolean;
+  maxRetries?: number;
+}
+
+function sanitizeBotCounts(value: unknown): ConnectedBotCounts {
+  if (Array.isArray(value)) {
+    const method = (bot: unknown) =>
+      typeof bot === "object" && bot !== null
+        ? (bot as Record<string, unknown>).method
+        : undefined;
+
+    return {
+      total: value.length,
+      main_game: value.filter((bot) => method(bot) === 2).length,
+      trade_world: value.filter((bot) => method(bot) === 1).length,
+    };
+  }
+
+  const counts =
+    typeof value === "object" && value !== null
+      ? (value as Record<string, unknown>)
+      : {};
+  const count = (key: string) =>
+    typeof counts[key] === "number" ? counts[key] : 0;
+
+  return {
+    total: count("total"),
+    main_game: count("main_game"),
+    trade_world: count("trade_world"),
+  };
+}
+
+export async function fetchConnectedBots({
+  includePrivate = false,
+  maxRetries = 3,
+}: BotDataFetchOptions = {}): Promise<ConnectedBotsResponse | null> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -2116,8 +2096,23 @@ export async function fetchConnectedBots(
         throw new Error(`Status ${response.status}: ${JSON.stringify(body)}`);
       }
 
-      const data = await response.json();
-      return data as ConnectedBotsResponse;
+      const data = (await response.json()) as Record<string, unknown>;
+
+      if (includePrivate) {
+        return {
+          bots: Array.isArray(data.bots) ? (data.bots as ConnectedBot[]) : [],
+          recent_heartbeats: Array.isArray(data.recent_heartbeats)
+            ? (data.recent_heartbeats as ConnectedBot[])
+            : [],
+        };
+      }
+
+      // Only aggregate counts may cross the server/client boundary. This also
+      // sanitizes the legacy API response, which contains bot and job IDs.
+      return {
+        bots: sanitizeBotCounts(data.bots),
+        recent_heartbeats: sanitizeBotCounts(data.recent_heartbeats),
+      };
     } catch (err) {
       lastError = err as Error;
 
@@ -2142,14 +2137,6 @@ export async function fetchConnectedBots(
   return null;
 }
 
-interface InventoryItem {
-  id: string;
-  title: string;
-  price: number;
-  categoryName: string;
-  itemType: string;
-}
-
 export interface QueueInfo {
   queue_length: number;
   worker_count: number;
@@ -2160,24 +2147,21 @@ export interface QueueInfo {
   };
   last_dequeue: {
     user_id: string;
-    data: {
-      job_id: string;
-      money: number;
-      data: InventoryItem[];
-      user_id: string;
-      last_updated: number;
-      has_season_pass: boolean;
-      gamepasses: string[];
-      level: number;
-      xp: number;
+    data?: {
       bot_id: string;
     };
   } | null;
 }
 
-export async function fetchQueueInfo(
-  maxRetries: number = 3,
-): Promise<QueueInfo | null> {
+interface QueueInfoFetchOptions {
+  includePrivate?: boolean;
+  maxRetries?: number;
+}
+
+export async function fetchQueueInfo({
+  includePrivate = false,
+  maxRetries = 3,
+}: QueueInfoFetchOptions = {}): Promise<QueueInfo | null> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -2202,8 +2186,27 @@ export async function fetchQueueInfo(
         throw new Error(`Status ${response.status}: ${JSON.stringify(body)}`);
       }
 
-      const data = await response.json();
-      return data as QueueInfo;
+      const data = (await response.json()) as QueueInfo;
+
+      const lastDequeue = data.last_dequeue
+        ? {
+            user_id: data.last_dequeue.user_id,
+            ...(includePrivate && data.last_dequeue.data?.bot_id
+              ? { data: { bot_id: data.last_dequeue.data.bot_id } }
+              : {}),
+          }
+        : null;
+
+      // Rebuild the response explicitly. Owners may receive the scanner ID;
+      // all other nested queue payload fields remain server-only.
+      return {
+        queue_length: data.queue_length,
+        worker_count: data.worker_count,
+        current_delay: data.current_delay,
+        running_since: data.running_since,
+        processed_counter: data.processed_counter,
+        last_dequeue: lastDequeue,
+      };
     } catch (err) {
       lastError = err as Error;
 

@@ -8,7 +8,6 @@ import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
-import OfficialBotsSection from "@/components/ui/OfficialBotsSection";
 import StatsPolling, { StatsSkeleton } from "@/components/ui/StatsPolling";
 import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import ScanOptionSection from "@/components/Inventory/ScanOptionSection";
@@ -16,7 +15,6 @@ import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import MostScannedLeaderboardClient from "@/components/Inventory/MostScannedLeaderboardClient";
 import InventoryFAQ from "@/components/Inventory/InventoryFAQ";
-import NetworthCapHistoryChart from "@/components/Inventory/NetworthCapHistoryChart";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 
@@ -75,11 +73,7 @@ export default async function InventoriesPage() {
             <StatsPolling />
           </Suspense>
 
-          <NetworthCapHistoryChart />
-
           <ConnectedBotsPolling />
-
-          <OfficialBotsSection />
 
           <Suspense fallback={<LeaderboardSkeleton />}>
             <LeaderboardSection />
