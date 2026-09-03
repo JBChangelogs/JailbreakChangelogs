@@ -248,7 +248,6 @@ export default function UserStats({
         }
         totalItemsCount={initialData.item_count + (initialData.dupe_count || 0)}
         duplicatesCount={initialData.dupe_count}
-        robloxUsers={robloxUsers}
       />
     </div>
   );

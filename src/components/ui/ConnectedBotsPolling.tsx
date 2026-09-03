@@ -33,16 +33,15 @@ export default function ConnectedBotsPolling() {
   const botsData = pollingData?.botsData;
   const queueInfo = pollingData?.queueInfo;
 
-  // Only show bots from recent heartbeats
-  const mergedBots = botsData?.recent_heartbeats || [];
+  const hasPrivateBotData = Array.isArray(botsData?.recent_heartbeats);
+  const mergedBots =
+    botsData && Array.isArray(botsData.recent_heartbeats)
+      ? botsData.recent_heartbeats
+      : [];
 
-  // Get bot IDs for fetching Roblox data
-  const botIds = (() => {
-    if (mergedBots.length === 0) return null;
-    return mergedBots.map((bot) => bot.id).sort();
-  })();
+  const botIds =
+    mergedBots.length > 0 ? mergedBots.map((bot) => bot.id).sort() : null;
 
-  // Fetch Roblox data for bots (cached)
   const { data: botRobloxData, isLoading: isBotDataLoading } =
     useRobloxBotsDataQuery(botIds);
 
@@ -53,26 +52,38 @@ export default function ConnectedBotsPolling() {
   const { data: lastProcessedRobloxData } =
     useRobloxUserDataQuery(lastProcessedUserId);
 
-  // Show all bots and sort by most recent heartbeat first
-  const allBots = (() => {
-    if (mergedBots.length === 0) return [];
+  const lastBotId = queueInfo?.last_dequeue?.data?.bot_id;
+  const lastBotUserData = lastBotId
+    ? botRobloxData?.usersData?.[lastBotId]
+    : null;
+  const lastBotDisplayName = lastBotId
+    ? lastBotUserData?.displayName ||
+      lastBotUserData?.name ||
+      `Bot ${lastBotId}`
+    : null;
 
-    return [...mergedBots].sort((a, b) => {
-      // Sort by most recent heartbeat (descending)
-      return b.last_heartbeat - a.last_heartbeat;
-    });
-  })();
-
+  const allBots = [...mergedBots].sort(
+    (a, b) => b.last_heartbeat - a.last_heartbeat,
+  );
   const filteredBots = allBots.filter((bot) => {
     if (botFilter === "main") return bot.method === 2;
     if (botFilter === "trade") return bot.method === 1;
     return true;
   });
-  const tradeWorldBotsCount = allBots.filter((bot) => bot.method === 1).length;
-  const mainGameBotsCount = allBots.filter((bot) => bot.method === 2).length;
+
+  const publicCounts =
+    botsData && !Array.isArray(botsData.recent_heartbeats)
+      ? botsData.recent_heartbeats
+      : null;
+  const botsCount = publicCounts?.total ?? allBots.length;
+  const mainGameBotsCount =
+    publicCounts?.main_game ?? allBots.filter((bot) => bot.method === 2).length;
+  const tradeWorldBotsCount =
+    publicCounts?.trade_world ??
+    allBots.filter((bot) => bot.method === 1).length;
 
   const error = pollingError?.message || null;
-  const isLoading = isPollingLoading || isBotDataLoading;
+  const isLoading = isPollingLoading || (hasPrivateBotData && isBotDataLoading);
   const pollingStopped = failureCount >= 3;
 
   if (error) {
@@ -146,7 +157,7 @@ export default function ConnectedBotsPolling() {
     );
   }
 
-  if (allBots.length === 0) {
+  if (botsCount === 0) {
     return (
       <div>
         <div className="mb-4 flex items-center gap-3">
@@ -211,9 +222,7 @@ export default function ConnectedBotsPolling() {
       </div>
       <div className="text-primary-text mb-2 flex flex-wrap items-center gap-2 text-sm">
         <span>
-          <span className="font-semibold">
-            {allBots.length.toLocaleString()}
-          </span>{" "}
+          <span className="font-semibold">{botsCount.toLocaleString()}</span>{" "}
           bots
         </span>
         <span className="text-tertiary-text" aria-hidden="true">
@@ -314,28 +323,20 @@ export default function ConnectedBotsPolling() {
                           queueInfo.last_dequeue!.user_id}
                       </Link>
                     </div>
-                    {(() => {
-                      const botId = queueInfo.last_dequeue!.data.bot_id;
-                      const botUserData = botRobloxData?.usersData?.[botId];
-                      const botDisplayName =
-                        botUserData?.displayName ||
-                        botUserData?.name ||
-                        `Bot ${botId}`;
-                      return (
-                        <span className="text-secondary-text text-xs">
-                          (scanned by{" "}
-                          <a
-                            href={`https://www.roblox.com/users/${botId}/profile`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary-text hover:text-link-hover transition-colors"
-                          >
-                            {botDisplayName}
-                          </a>
-                          )
-                        </span>
-                      );
-                    })()}
+                    {lastBotId && lastBotDisplayName && (
+                      <span className="text-secondary-text text-xs">
+                        (scanned by{" "}
+                        <a
+                          href={`https://www.roblox.com/users/${lastBotId}/profile`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary-text hover:text-link-hover transition-colors"
+                        >
+                          {lastBotDisplayName}
+                        </a>
+                        )
+                      </span>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -348,54 +349,74 @@ export default function ConnectedBotsPolling() {
               </div>
             )}
 
-            <div className="mb-3">
-              <Tabs
-                value={botFilter}
-                onValueChange={(v) =>
-                  setBotFilter(v as "all" | "main" | "trade")
-                }
-              >
-                <TabsList className="h-9 w-full" fullWidth>
-                  <TabsTrigger
-                    value="all"
-                    className="h-8 px-3 text-xs"
-                    fullWidth
+            {hasPrivateBotData ? (
+              <>
+                <div className="mb-3">
+                  <Tabs
+                    value={botFilter}
+                    onValueChange={(value) =>
+                      setBotFilter(value as "all" | "main" | "trade")
+                    }
                   >
-                    All
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="main"
-                    className="h-8 px-3 text-xs"
-                    fullWidth
-                  >
-                    Main Game
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="trade"
-                    className="h-8 px-3 text-xs"
-                    fullWidth
-                  >
-                    Trade World
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-
-            <div className="max-h-60 space-y-2 overflow-y-auto">
-              {filteredBots.length > 0 ? (
-                filteredBots.map((bot: ConnectedBot) => (
-                  <BotStatusCard
-                    key={bot.id}
-                    bot={bot}
-                    usersData={botRobloxData?.usersData || null}
-                  />
-                ))
-              ) : (
-                <div className="text-secondary-text border-border-card bg-tertiary-bg rounded-lg border p-3 text-center text-sm">
-                  No bots active in this mode.
+                    <TabsList className="h-9 w-full" fullWidth>
+                      <TabsTrigger
+                        value="all"
+                        className="h-8 px-3 text-xs"
+                        fullWidth
+                      >
+                        All
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="main"
+                        className="h-8 px-3 text-xs"
+                        fullWidth
+                      >
+                        Main Game
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="trade"
+                        className="h-8 px-3 text-xs"
+                        fullWidth
+                      >
+                        Trade World
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
-              )}
-            </div>
+
+                <div className="max-h-60 space-y-2 overflow-y-auto">
+                  {filteredBots.length > 0 ? (
+                    filteredBots.map((bot) => (
+                      <BotStatusCard
+                        key={bot.id}
+                        bot={bot}
+                        usersData={botRobloxData?.usersData || null}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-secondary-text border-border-card bg-tertiary-bg rounded-lg border p-3 text-center text-sm">
+                      No bots active in this mode.
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border p-3">
+                <Icon
+                  icon="heroicons:eye-slash"
+                  className="text-secondary-text h-5 w-5 shrink-0"
+                />
+                <div>
+                  <p className="text-primary-text text-sm font-semibold">
+                    Bot identities redacted
+                  </p>
+                  <p className="text-secondary-text text-xs">
+                    Account and server details are hidden for operational
+                    security.
+                  </p>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -437,13 +458,9 @@ function BotStatusCard({
     bot.last_heartbeat,
     `bot-${bot.id}-heartbeat`,
   );
-
   const fullDate = formatCustomDate(bot.last_heartbeat);
-
-  // Generate avatar URL directly
   const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${bot.id}/avatar-headshot`;
 
-  // Determine method text
   let methodText = "";
   if (bot.method === 1) methodText = "Trade World";
   else if (bot.method === 2) methodText = "Main Game";

@@ -41,7 +41,6 @@ export interface InventoryData {
   gamepasses: string[];
   has_season_pass: boolean;
   job_id: string;
-  bot_id: string;
   scan_count: number;
   scan_id: string;
   created_at: number;
