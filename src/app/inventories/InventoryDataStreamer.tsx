@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import {
   fetchInventoryData,
   fetchRobloxUserByUsername,
-  fetchComments,
   fetchItems,
   fetchUserNetworth,
   fetchUserMoneyHistory,
@@ -74,19 +73,16 @@ async function InventoryDataFetcher({
     );
   }
 
-  const [result, items, networthData, moneyHistoryData, commentsData] =
-    await Promise.all([
-      fetchInventoryData(actualRobloxId),
-      fetchItems(),
-      fetchUserNetworth(actualRobloxId),
-      fetchUserMoneyHistory(actualRobloxId),
-      !initialComments || initialComments.length === 0
-        ? fetchComments("inventory", actualRobloxId)
-        : Promise.resolve({
-            comments: initialComments || [],
-            userMap: initialCommentUserMap || {},
-          }),
-    ]);
+  const commentsData = {
+    comments: initialComments ?? [],
+    userMap: initialCommentUserMap ?? {},
+  };
+  const [result, items, networthData, moneyHistoryData] = await Promise.all([
+    fetchInventoryData(actualRobloxId),
+    fetchItems(),
+    fetchUserNetworth(actualRobloxId),
+    fetchUserMoneyHistory(actualRobloxId),
+  ]);
 
   // Check if the result contains an error
   if (

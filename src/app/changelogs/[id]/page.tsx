@@ -1,5 +1,4 @@
 import ChangelogDetailsPageClient from "@/components/Changelogs/ChangelogDetailsPageClient";
-import { fetchComments } from "@/utils/api/api";
 
 interface Props {
   params: Promise<{
@@ -9,13 +8,6 @@ interface Props {
 
 export default async function ChangelogDetailsPage({ params }: Props) {
   const { id } = await params;
-  const commentsData = await fetchComments("changelog", id);
 
-  return (
-    <ChangelogDetailsPageClient
-      changelogId={id}
-      initialComments={commentsData.comments}
-      initialUserMap={commentsData.userMap}
-    />
-  );
+  return <ChangelogDetailsPageClient changelogId={id} />;
 }

@@ -1,4 +1,3 @@
-import { fetchComments } from "@/utils/api/api";
 import SeasonDetailsClient from "@/components/Seasons/SeasonDetailsClient";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 
@@ -10,7 +9,6 @@ interface Props {
 
 export default async function SeasonDetailsPage({ params }: Props) {
   const { id } = await params;
-  const commentsData = await fetchComments("season", id);
 
   return (
     <>
@@ -23,11 +21,7 @@ export default async function SeasonDetailsPage({ params }: Props) {
         adIdWide="np-seasons-rail-right-wide"
         side="right"
       />
-      <SeasonDetailsClient
-        seasonId={id}
-        initialComments={commentsData.comments}
-        initialUserMap={commentsData.userMap}
-      />
+      <SeasonDetailsClient seasonId={id} />
     </>
   );
 }
