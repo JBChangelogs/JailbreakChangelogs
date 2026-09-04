@@ -116,6 +116,7 @@ function openValidatedExternalNotificationUrl(validatedExternalHref: string) {
 export function useRealtimeNotificationsWebSocket(
   enabled: boolean,
   locationPath?: string | null,
+  onWebsiteBan?: (reason?: string) => void,
 ): void {
   const isRealtimeNotificationsEnabled =
     enabled && ENABLE_REALTIME_NOTIFICATIONS_WS;
@@ -725,6 +726,10 @@ export function useRealtimeNotificationsWebSocket(
           }
 
           wsRef.current = null;
+          if (event.code === 4004) {
+            onWebsiteBan?.(event.reason || AUTH_WS_ERRORS[event.code]);
+            return;
+          }
           if (shouldReconnectOnFocusOnly(event.code, event.reason || "")) {
             reconnectOnFocusOnlyRef.current = true;
             if (reconnectTimeoutRef.current) {
@@ -844,5 +849,5 @@ export function useRealtimeNotificationsWebSocket(
       manuallyDisconnectedRef.current = false;
       connectRef.current = null;
     };
-  }, [isRealtimeNotificationsEnabled, ensureAudio]);
+  }, [isRealtimeNotificationsEnabled, ensureAudio, onWebsiteBan]);
 }

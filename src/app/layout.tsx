@@ -30,6 +30,7 @@ import { Suspense } from "react";
 import QueryProvider from "@/components/QueryProvider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import HumanVerificationProvider from "@/components/HumanVerification/HumanVerificationProvider";
+import { SiteBanGate } from "@/components/ui/SiteBanScreen";
 
 export const viewport: Viewport = {
   themeColor: "#2462cd",
@@ -176,42 +177,44 @@ export default async function RootLayout({
                   />
 
                   <AuthProvider>
-                    <RybbitIdentity />
-                    <AdErrorBoundary>
-                      <NitroBottomAnchor />
-                      <NitroVideoPlayer />
-                      <NitroAnchorCloseSupporterModal />
-                      <NitroVideoCloseSupporterModal />
-                    </AdErrorBoundary>
-                    <div
-                      id="main-layout"
-                      className="flex min-h-screen flex-col"
-                    >
-                      <Suspense
-                        fallback={
-                          <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
-                        }
+                    <SiteBanGate>
+                      <RybbitIdentity />
+                      <AdErrorBoundary>
+                        <NitroBottomAnchor />
+                        <NitroVideoPlayer />
+                        <NitroAnchorCloseSupporterModal />
+                        <NitroVideoCloseSupporterModal />
+                      </AdErrorBoundary>
+                      <div
+                        id="main-layout"
+                        className="flex min-h-screen flex-col"
                       >
-                        <HideOnAccessDenied>
-                          <Header />
-                        </HideOnAccessDenied>
-                      </Suspense>
-                      <main className="min-h-screen flex-1">
-                        <NuqsAdapter>
-                          <Suspense>{children}</Suspense>
-                        </NuqsAdapter>
-                      </main>
-                      <HideOnAccessDenied>
-                        <Footer
-                          githubUrl={githubUrl}
-                          versionInfo={
-                            <Suspense fallback={<VersionInfoSkeleton />}>
-                              <VersionInfoWrapper />
-                            </Suspense>
+                        <Suspense
+                          fallback={
+                            <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
                           }
-                        />
-                      </HideOnAccessDenied>
-                    </div>
+                        >
+                          <HideOnAccessDenied>
+                            <Header />
+                          </HideOnAccessDenied>
+                        </Suspense>
+                        <main className="min-h-screen flex-1">
+                          <NuqsAdapter>
+                            <Suspense>{children}</Suspense>
+                          </NuqsAdapter>
+                        </main>
+                        <HideOnAccessDenied>
+                          <Footer
+                            githubUrl={githubUrl}
+                            versionInfo={
+                              <Suspense fallback={<VersionInfoSkeleton />}>
+                                <VersionInfoWrapper />
+                              </Suspense>
+                            }
+                          />
+                        </HideOnAccessDenied>
+                      </div>
+                    </SiteBanGate>
                   </AuthProvider>
                 </MaintenanceBypass>
               </QueryProvider>
@@ -310,37 +313,39 @@ export default async function RootLayout({
               />
 
               <AuthProvider>
-                <RybbitIdentity />
-                <NitroBottomAnchor />
-                <NitroVideoPlayer />
-                <NitroAnchorCloseSupporterModal />
-                <NitroVideoCloseSupporterModal />
-                <div className="flex min-h-screen flex-col">
-                  <Suspense
-                    fallback={
-                      <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
-                    }
-                  >
-                    <HideOnAccessDenied>
-                      <Header />
-                    </HideOnAccessDenied>
-                  </Suspense>
-                  <main className="min-h-screen flex-1">
-                    <NuqsAdapter>
-                      <Suspense>{children}</Suspense>
-                    </NuqsAdapter>
-                  </main>
-                  <HideOnAccessDenied>
-                    <Footer
-                      githubUrl={githubUrl}
-                      versionInfo={
-                        <Suspense fallback={<VersionInfoSkeleton />}>
-                          <VersionInfoWrapper />
-                        </Suspense>
+                <SiteBanGate>
+                  <RybbitIdentity />
+                  <NitroBottomAnchor />
+                  <NitroVideoPlayer />
+                  <NitroAnchorCloseSupporterModal />
+                  <NitroVideoCloseSupporterModal />
+                  <div className="flex min-h-screen flex-col">
+                    <Suspense
+                      fallback={
+                        <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
                       }
-                    />
-                  </HideOnAccessDenied>
-                </div>
+                    >
+                      <HideOnAccessDenied>
+                        <Header />
+                      </HideOnAccessDenied>
+                    </Suspense>
+                    <main className="min-h-screen flex-1">
+                      <NuqsAdapter>
+                        <Suspense>{children}</Suspense>
+                      </NuqsAdapter>
+                    </main>
+                    <HideOnAccessDenied>
+                      <Footer
+                        githubUrl={githubUrl}
+                        versionInfo={
+                          <Suspense fallback={<VersionInfoSkeleton />}>
+                            <VersionInfoWrapper />
+                          </Suspense>
+                        }
+                      />
+                    </HideOnAccessDenied>
+                  </div>
+                </SiteBanGate>
               </AuthProvider>
             </QueryProvider>
           </TwemojiProvider>

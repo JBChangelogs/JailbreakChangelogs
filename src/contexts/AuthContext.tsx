@@ -22,7 +22,7 @@ import {
 } from "@/utils/storage/safeStorage";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { trackEvent, trackClearUserId } from "@/utils/analytics/rybbit";
-import type { BanInfo } from "@/utils/api/ban";
+import { parseBan, type BanInfo } from "@/utils/api/ban";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 import { createLogger } from "@/services/logger";
@@ -42,6 +42,8 @@ interface AuthContextType extends AuthState {
   setShowLoginModal: (show: boolean) => void;
   bans: Record<string, BanInfo>;
   setBan: (ban: BanInfo) => void;
+  siteBan: BanInfo | null;
+  setSiteBan: (ban: BanInfo | null) => void;
   wsConnected: boolean;
 }
 
@@ -90,8 +92,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
   const [loginModalOnlyRoblox, setLoginModalOnlyRoblox] = useState(false);
   const [bans, setBansMap] = useState<Record<string, BanInfo>>({});
+  const [siteBan, setSiteBanState] = useState<BanInfo | null>(null);
+  const siteBanRef = useRef<BanInfo | null>(null);
   const [hasToken, setHasToken] = useState(() => !!getJbclToken());
   const [wsConnected, setWsConnected] = useState(false);
+  const setSiteBan = useCallback((ban: BanInfo | null) => {
+    const nextBan =
+      ban?.expiresAt && ban.expiresAt > 0
+        ? ban.expiresAt * 1000 > Date.now()
+          ? ban
+          : null
+        : ban;
+    siteBanRef.current = nextBan;
+    setSiteBanState(nextBan);
+  }, []);
   const setBan = useCallback((ban: BanInfo) => {
     if (ban.expiresAt > 0) {
       const ms = ban.expiresAt * 1000 - Date.now();
@@ -132,17 +146,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       );
   }, [authState.isAuthenticated]);
 
-  useRealtimeNotificationsWebSocket(
-    (authState.isAuthenticated && !authState.isLoading) || hasToken,
-    locationString,
-  );
-
   const initializeAuth = useCallback(async () => {
     try {
       const token = getJbclToken();
       setHasToken(!!token);
 
       if (!token) {
+        setSiteBan(null);
         setAuthState({
           isAuthenticated: false,
           user: null,
@@ -207,6 +217,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
 
           safeSetJSON("user", user);
+          setSiteBan(null);
           safeLocalStorage.setItem("userid", user.id);
           if (user.avatar) {
             safeLocalStorage.setItem(
@@ -221,8 +232,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
             error: null,
           });
         } else {
+          const ban = parseBan(response);
+          if (ban?.banType === "website") {
+            setSiteBan(ban);
+            setAuthState((current) => ({
+              ...current,
+              isLoading: false,
+              error: null,
+            }));
+            return;
+          }
+
+          // A 4004 websocket close is authoritative enough to keep the app
+          // locked while the API catches up or returns a transient error. Only
+          // a successful token lookup should dismiss this provisional state.
+          if (
+            siteBanRef.current?.banType === "website" &&
+            siteBanRef.current.expiresAt < 0
+          ) {
+            setAuthState((current) => ({
+              ...current,
+              isLoading: false,
+              error: null,
+            }));
+            return;
+          }
+
           // Token is invalid — clear state
           safeSetJSON("user", null);
+          setSiteBan(null);
           setHasToken(false);
           setAuthState({
             isAuthenticated: false,
@@ -260,7 +298,57 @@ export function AuthProvider({ children }: AuthProviderProps) {
         error: "Failed to initialize auth",
       });
     }
-  }, []);
+  }, [setSiteBan]);
+
+  const handleRealtimeSiteBan = useCallback(
+    (reason?: string) => {
+      setSiteBan({
+        banType: "website",
+        reason: reason || "Your account has been banned.",
+        // The websocket does not include expiry headers. A negative value lets
+        // the lockout distinguish pending details from a permanent ban.
+        expiresAt: -1,
+      });
+      void initializeAuth();
+    },
+    [initializeAuth, setSiteBan],
+  );
+
+  useRealtimeNotificationsWebSocket(
+    ((authState.isAuthenticated && !authState.isLoading) || hasToken) &&
+      !siteBan,
+    locationString,
+    handleRealtimeSiteBan,
+  );
+
+  useEffect(() => {
+    if (!siteBan || siteBan.expiresAt <= 0) return;
+
+    let timeout: ReturnType<typeof setTimeout>;
+    const waitForExpiry = () => {
+      const remaining = siteBan.expiresAt * 1000 - Date.now();
+      if (remaining <= 0) {
+        if (siteBanRef.current?.expiresAt !== siteBan.expiresAt) return;
+        setSiteBan(null);
+        void initializeAuth();
+        return;
+      }
+      timeout = setTimeout(waitForExpiry, Math.min(remaining, 2_147_483_647));
+    };
+
+    waitForExpiry();
+    return () => clearTimeout(timeout);
+  }, [initializeAuth, setSiteBan, siteBan]);
+
+  useEffect(() => {
+    if (!siteBan || siteBan.expiresAt >= 0) return;
+
+    const retry = setInterval(() => {
+      void initializeAuth();
+    }, 10_000);
+
+    return () => clearInterval(retry);
+  }, [initializeAuth, siteBan]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -292,7 +380,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       authInterval = setInterval(() => {
-        if (isUserActiveRef.current) {
+        if (isUserActiveRef.current && !siteBanRef.current) {
           initializeAuth().catch((error) => {
             log.error("Auth validation error", error);
           });
@@ -423,6 +511,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         error: null,
       });
       setBansMap({});
+      setSiteBan(null);
       setHasToken(false);
       setWsConnected(false);
 
@@ -434,7 +523,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       log.error("Logout error", err);
       // Errors are now handled by toast.promise in authLogout()
     }
-  }, [router]);
+  }, [router, setSiteBan]);
 
   const setLoginModal = useCallback(
     ({
@@ -466,6 +555,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setShowLoginModal,
       bans,
       setBan,
+      siteBan,
+      setSiteBan,
       wsConnected,
     }),
     [
@@ -477,6 +568,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       showLoginModal,
       bans,
       setBan,
+      siteBan,
+      setSiteBan,
       wsConnected,
     ],
   );
