@@ -594,7 +594,6 @@ export default function InventoryCheckerClient({
     void setTabParam(tabIndexToName[newValue] ?? null);
   };
 
-  // Comments are provided server-side via initialComments prop
   // Helper function to get user display name with progressive loading
   const getUserDisplay = useCallback(
     (userId: string) => {

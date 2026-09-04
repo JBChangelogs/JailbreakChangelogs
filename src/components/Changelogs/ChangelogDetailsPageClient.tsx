@@ -16,14 +16,14 @@ import RateLimitView from "@/components/Layout/RateLimitView";
 
 interface ChangelogDetailsPageClientProps {
   changelogId: string;
-  initialComments: CommentData[];
-  initialUserMap: Record<string, UserData>;
+  initialComments?: CommentData[];
+  initialUserMap?: Record<string, UserData>;
 }
 
 export default function ChangelogDetailsPageClient({
   changelogId,
-  initialComments,
-  initialUserMap,
+  initialComments = [],
+  initialUserMap = {},
 }: ChangelogDetailsPageClientProps) {
   const [changelogList, setChangelogList] = useState<Changelog[] | null>(null);
   const [currentChangelog, setCurrentChangelog] = useState<Changelog | null>(
