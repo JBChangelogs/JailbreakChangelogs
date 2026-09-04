@@ -243,21 +243,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             return;
           }
 
-          // A 4004 websocket close is authoritative enough to keep the app
-          // locked while the API catches up or returns a transient error. Only
-          // a successful token lookup should dismiss this provisional state.
-          if (
-            siteBanRef.current?.banType === "website" &&
-            siteBanRef.current.expiresAt < 0
-          ) {
-            setAuthState((current) => ({
-              ...current,
-              isLoading: false,
-              error: null,
-            }));
-            return;
-          }
-
           // Token is invalid — clear state
           safeSetJSON("user", null);
           setSiteBan(null);
@@ -339,16 +324,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     waitForExpiry();
     return () => clearTimeout(timeout);
   }, [initializeAuth, setSiteBan, siteBan]);
-
-  useEffect(() => {
-    if (!siteBan || siteBan.expiresAt >= 0) return;
-
-    const retry = setInterval(() => {
-      void initializeAuth();
-    }, 10_000);
-
-    return () => clearInterval(retry);
-  }, [initializeAuth, siteBan]);
 
   useEffect(() => {
     setTimeout(() => {
