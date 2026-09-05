@@ -21,11 +21,16 @@ import {
   safeLocalStorage,
 } from "@/utils/storage/safeStorage";
 import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { trackEvent, trackClearUserId } from "@/utils/analytics/rybbit";
 import { parseBan, type BanInfo } from "@/utils/api/ban";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 import { createLogger } from "@/services/logger";
+import {
+  normalizeMeResponse,
+  type MeResponse,
+} from "@/utils/auth/normalizeMeResponse";
 
 const log = createLogger("AUTH");
 
@@ -190,21 +195,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
       }
 
-      // Refresh from token lookup in the background
+      // Refresh from the current-user endpoint in the background
       try {
-        const fetchUser = () =>
-          fetch(
-            `${PUBLIC_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
-            {
-              cache: "no-store",
-              credentials: "include",
-            },
+        const fetchUser = () => {
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL,
+            "/users/me",
           );
+          return fetch(url, {
+            cache: "no-store",
+            credentials: "include",
+            headers,
+          });
+        };
 
         const response = await fetchUser();
 
         if (response.ok) {
-          let user = (await response.json()) as UserData;
+          let user = normalizeMeResponse((await response.json()) as MeResponse);
 
           // Roblox linking can lag behind the OAuth redirect on the backend, so poll briefly.
           if (isReturnFromRobloxOAuth && !user.roblox_id) {
@@ -212,7 +220,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
               await new Promise((resolve) => setTimeout(resolve, 1500));
               const retryResponse = await fetchUser();
               if (!retryResponse.ok) break;
-              user = (await retryResponse.json()) as UserData;
+              user = normalizeMeResponse(
+                (await retryResponse.json()) as MeResponse,
+              );
             }
           }
 
@@ -220,10 +230,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setSiteBan(null);
           safeLocalStorage.setItem("userid", user.id);
           if (user.avatar) {
-            safeLocalStorage.setItem(
-              "avatar",
-              `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=4096`,
-            );
+            safeLocalStorage.setItem("avatar", user.avatar);
           }
           setAuthState({
             isAuthenticated: true,

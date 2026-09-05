@@ -96,15 +96,13 @@ async function fetchCurrentUser(token: string): Promise<ProxyUser | null> {
   if (!apiBaseUrl) return null;
 
   try {
-    const response = await fetch(
-      `${apiBaseUrl}/users/get/token?token=${encodeURIComponent(token)}`,
-      {
-        cache: "no-store",
-        headers: {
-          "User-Agent": "JailbreakChangelogs-Proxy/1.0",
-        },
+    const response = await fetch(`${apiBaseUrl}/users/me`, {
+      cache: "no-store",
+      headers: {
+        Authorization: token,
+        "User-Agent": "JailbreakChangelogs-Proxy/1.0",
       },
-    );
+    });
 
     if (!response.ok) return null;
     return (await response.json()) as ProxyUser;

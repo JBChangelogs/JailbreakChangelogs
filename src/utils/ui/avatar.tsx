@@ -152,7 +152,9 @@ const UserAvatarImpl = ({
 
     if (!imageError && avatarHash && avatarHash !== "None") {
       return {
-        src: `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`,
+        src: /^https?:\/\//i.test(avatarHash)
+          ? avatarHash
+          : `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`,
         alt: username ? `${username}'s profile picture` : "User avatar",
         onError: () => setImageError(true),
       };

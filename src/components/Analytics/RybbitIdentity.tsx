@@ -16,7 +16,6 @@ export default function RybbitIdentity() {
       const traits: Record<string, string | number> = {
         username: user.username,
         premium_type: user.premiumtype,
-        created_at: user.created_at,
       };
 
       if (user.global_name && user.global_name !== "None") {

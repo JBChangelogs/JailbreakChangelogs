@@ -4,6 +4,10 @@ import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
 // import { PUBLIC_API_URL } from '@/utils/api/api';
 import { safeLocalStorage, safeSetJSON } from "@/utils/storage/safeStorage";
+import {
+  normalizeMeResponse,
+  type MeResponse,
+} from "@/utils/auth/normalizeMeResponse";
 
 const log = createLogger("AUTH");
 
@@ -66,9 +70,10 @@ export function useEscapeLogin() {
     const result = await validateToken(token);
     if (result.success) {
       // Extract just the user data from the result
-      const userData = Array.isArray(result.data)
+      const rawUserData = Array.isArray(result.data)
         ? result.data[0]
         : result.data;
+      const userData = normalizeMeResponse(rawUserData as MeResponse);
 
       // Store user data in localStorage
       safeSetJSON("user", userData);
@@ -76,12 +81,6 @@ export function useEscapeLogin() {
       safeLocalStorage.setItem("avatar", userData.avatar);
 
       // Cookie is set by server route
-
-      // Set avatar if available
-      if (userData.avatar) {
-        const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}?size=4096`;
-        safeLocalStorage.setItem("avatar", avatarURL);
-      }
 
       // Dispatch custom event for components to listen to
       window.dispatchEvent(

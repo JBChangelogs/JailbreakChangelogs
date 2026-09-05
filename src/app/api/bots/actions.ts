@@ -16,10 +16,10 @@ async function canViewPrivateBotData() {
   if (!token || !BASE_API_URL) return false;
 
   try {
-    const response = await fetch(
-      `${BASE_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
-      { cache: "no-store" },
-    );
+    const response = await fetch(`${BASE_API_URL}/users/me`, {
+      cache: "no-store",
+      headers: { Authorization: token },
+    });
     if (!response.ok) return false;
 
     const user = (await response.json()) as {

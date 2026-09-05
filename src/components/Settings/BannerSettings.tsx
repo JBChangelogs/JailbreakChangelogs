@@ -18,6 +18,8 @@ import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import { UPLOAD_CONFIG } from "@/config/settings";
 import { validateFile } from "@/utils/storage/fileValidation";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 const log = createLogger("UI");
 
@@ -106,13 +108,38 @@ export const BannerSettings = ({
   }, []);
 
   useEffect(() => {
-    if (userData?.custom_banner && userData.custom_banner !== "N/A") {
-      setCustomBannerUrl(userData.custom_banner);
-      validateBannerUrl(userData.custom_banner);
-    } else {
-      setCustomBannerUrl("");
-    }
-  }, [userData, validateBannerUrl]);
+    const controller = new AbortController();
+
+    const loadCurrentBanner = async () => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/users/banner/get?user=${encodeURIComponent(userData.id)}&nocache=true`,
+      );
+
+      try {
+        const response = await fetch(url, {
+          cache: "no-store",
+          credentials: "include",
+          headers,
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Failed to fetch current banner");
+
+        const data = (await response.json()) as { image_url?: string | null };
+        const bannerUrl =
+          data.image_url && data.image_url !== "N/A" ? data.image_url : "";
+        setCustomBannerUrl(bannerUrl);
+        validateBannerUrl(bannerUrl);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        log.error("Error fetching current banner:", error);
+        setCustomBannerUrl("");
+      }
+    };
+
+    void loadCurrentBanner();
+    return () => controller.abort();
+  }, [userData.id, validateBannerUrl]);
 
   const handleCustomBannerChange = (
     event: React.ChangeEvent<HTMLInputElement>,

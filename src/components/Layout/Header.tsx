@@ -175,7 +175,6 @@ const MobileDrawer = memo(function MobileDrawer({
               avatarHash={userData.avatar}
               username={userData.username}
               size={10}
-              custom_avatar={userData.custom_avatar}
               showBadge={false}
               settings={userData.settings_v2}
               premiumType={userData.premiumtype}

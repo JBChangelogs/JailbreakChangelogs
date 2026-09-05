@@ -11,13 +11,11 @@ export async function POST(request: Request) {
       });
     }
 
-    const resp = await fetch(
-      `${PUBLIC_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
-      {
-        cache: "no-store",
-        credentials: "include",
-      },
-    );
+    const resp = await fetch(`${PUBLIC_API_URL}/users/me`, {
+      cache: "no-store",
+      credentials: "include",
+      headers: { Authorization: token },
+    });
     if (!resp.ok) {
       return new Response(JSON.stringify({ message: "Invalid token" }), {
         status: 401,
