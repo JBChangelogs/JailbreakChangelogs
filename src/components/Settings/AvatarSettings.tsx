@@ -108,13 +108,13 @@ export const AvatarSettings = ({
   }, []);
 
   useEffect(() => {
-    if (userData?.custom_avatar && userData.custom_avatar !== "N/A") {
-      setCustomAvatarUrl(userData.custom_avatar);
-      validateAvatarUrl(userData.custom_avatar);
-    } else {
-      setCustomAvatarUrl("");
-    }
-  }, [userData, validateAvatarUrl]);
+    // /me resolves the active custom avatar into avatar; there is no endpoint
+    // for retrieving a saved custom avatar while that setting is disabled.
+    const avatarUrl =
+      userData.avatar && userData.avatar !== "N/A" ? userData.avatar : "";
+    setCustomAvatarUrl(avatarUrl);
+    validateAvatarUrl(avatarUrl);
+  }, [userData.avatar, validateAvatarUrl]);
 
   const handleCustomAvatarChange = (
     event: React.ChangeEvent<HTMLInputElement>,

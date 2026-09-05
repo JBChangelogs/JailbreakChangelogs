@@ -229,7 +229,6 @@ export default function MessagesInbox() {
       custom_banner: currentUser.custom_banner ?? null,
       accent_color: currentUser.accent_color ?? null,
       usernumber: currentUser.usernumber,
-      custom_avatar: currentUser.custom_avatar,
       flags: currentUser.flags,
       primary_guild: currentUser.primary_guild,
       premiumtype: currentUser.premiumtype,
