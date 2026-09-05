@@ -31,6 +31,8 @@ import {
   normalizeMeResponse,
   type MeResponse,
 } from "@/utils/auth/normalizeMeResponse";
+import { installBanReferenceInterceptor } from "@/utils/api/humanVerification";
+import { subscribeSiteBan } from "@/utils/api/siteBanInterceptor";
 
 const log = createLogger("AUTH");
 
@@ -132,6 +134,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isUserActiveRef = useRef(true);
 
   useEffect(() => {
+    const unsubscribe = subscribeSiteBan(setSiteBan);
+    const uninstall = installBanReferenceInterceptor();
+
+    return () => {
+      unsubscribe();
+      uninstall();
+    };
+  }, [setSiteBan]);
+
+  useEffect(() => {
     if (!authState.isAuthenticated) {
       setWsConnected(false);
       return;
@@ -157,7 +169,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setHasToken(!!token);
 
       if (!token) {
-        setSiteBan(null);
+        // Site bans may be IP-based and are maintained independently by the
+        // public API response interceptor, including for logged-out visitors.
         setAuthState({
           isAuthenticated: false,
           user: null,

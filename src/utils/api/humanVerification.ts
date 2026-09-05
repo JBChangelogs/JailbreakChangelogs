@@ -1,5 +1,6 @@
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { observeSiteBanResponse } from "@/utils/api/siteBanInterceptor";
 
 export const BAN_REFERENCE_HEADER = "Ban-Reference";
 
@@ -54,6 +55,7 @@ export function installBanReferenceInterceptor(): () => void {
     const response = await originalFetch.call(window, input, init);
 
     if (isPublicApiResponse(response)) {
+      observeSiteBanResponse(response);
       const banRef = response.headers.get(BAN_REFERENCE_HEADER);
       if (banRef) notifyBanReference(banRef);
     }
