@@ -76,10 +76,8 @@ const SimilarItems = ({
         score += 0.3; // Both have N/A values - perfect match
       } else if (value1 > 0 && value2 > 0) {
         const ratio = Math.min(value1, value2) / Math.max(value1, value2);
-        if (ratio >= 0.9)
-          score += 0.3; // Within 10%
-        else if (ratio >= 0.7)
-          score += 0.2; // Within 30%
+        if (ratio >= 0.9) score += 0.3; // Within 10%
+        else if (ratio >= 0.7) score += 0.2; // Within 30%
         else if (ratio >= 0.5) score += 0.1; // Within 50%
       } else if (
         (item1.cash_value === "N/A") !==
@@ -113,8 +111,7 @@ const SimilarItems = ({
         score += 0.1; // Both have N/A demand
       } else if (demand1Index !== -1 && demand2Index !== -1) {
         const demandDiff = Math.abs(demand1Index - demand2Index);
-        if (demandDiff === 0)
-          score += 0.1; // Exact match
+        if (demandDiff === 0) score += 0.1; // Exact match
         else if (demandDiff === 1) score += 0.05; // One level difference
       } else if ((item1.demand === "N/A") !== (item2.demand === "N/A")) {
         // One has N/A, other has demand - slight penalty
@@ -143,12 +140,9 @@ const SimilarItems = ({
         const ratio =
           Math.min(metrics1.TimesTraded, metrics2.TimesTraded) /
           Math.max(metrics1.TimesTraded, metrics2.TimesTraded);
-        if (ratio >= 0.9)
-          score += 0.4; // Within 10%
-        else if (ratio >= 0.7)
-          score += 0.3; // Within 30%
-        else if (ratio >= 0.5)
-          score += 0.2; // Within 50%
+        if (ratio >= 0.9) score += 0.4; // Within 10%
+        else if (ratio >= 0.7) score += 0.3; // Within 30%
+        else if (ratio >= 0.5) score += 0.2; // Within 50%
         else if (ratio >= 0.3) score += 0.1; // Within 70%
       }
 
@@ -157,10 +151,8 @@ const SimilarItems = ({
         const ratio =
           Math.min(metrics1.UniqueCirculation, metrics2.UniqueCirculation) /
           Math.max(metrics1.UniqueCirculation, metrics2.UniqueCirculation);
-        if (ratio >= 0.9)
-          score += 0.3; // Within 10%
-        else if (ratio >= 0.7)
-          score += 0.2; // Within 30%
+        if (ratio >= 0.9) score += 0.3; // Within 10%
+        else if (ratio >= 0.7) score += 0.2; // Within 30%
         else if (ratio >= 0.5) score += 0.1; // Within 50%
       }
 
@@ -169,10 +161,8 @@ const SimilarItems = ({
         const ratio =
           Math.min(metrics1.DemandMultiple, metrics2.DemandMultiple) /
           Math.max(metrics1.DemandMultiple, metrics2.DemandMultiple);
-        if (ratio >= 0.9)
-          score += 0.3; // Within 10%
-        else if (ratio >= 0.7)
-          score += 0.2; // Within 30%
+        if (ratio >= 0.9) score += 0.3; // Within 10%
+        else if (ratio >= 0.7) score += 0.2; // Within 30%
         else if (ratio >= 0.5) score += 0.1; // Within 50%
       }
 
