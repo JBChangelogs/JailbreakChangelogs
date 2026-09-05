@@ -37,7 +37,7 @@ import { usePurchaseGiftModal } from "@/hooks/usePurchaseGiftModal";
 import SettingsLoading from "./loading";
 
 export default function SettingsPage() {
-  const { user, isLoading } = useAuthContext();
+  const { user, isLoading, refreshUser } = useAuthContext();
   const { twemojiEnabled, setTwemojiEnabled } = useTwemoji();
   const { modalState, closeModal, openModal } = useSupporterModal();
   const router = useRouter();
@@ -72,7 +72,7 @@ export default function SettingsPage() {
     setSupporterHistory,
     loading: settingsLoading,
     handleSettingChange,
-  } = useSettings(userData, openModal);
+  } = useSettings(userData, openModal, refreshUser);
   const {
     revertingSupporterLevel,
     handleSupporterLevelUpdate,

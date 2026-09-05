@@ -24,6 +24,7 @@ export const useSettings = (
     currentLimit?: string | number;
     requiredLimit?: string | number;
   }) => void,
+  refreshUser?: () => Promise<void>,
 ) => {
   const [settings, setSettings] = useState<ApiSettingsResponse | null>(null);
   const [supporterGifts, setSupporterGifts] = useState<SupporterGift[]>([]);
@@ -153,22 +154,28 @@ export const useSettings = (
     try {
       await updateUserSettings(name, value);
 
-      const updatedUser = {
-        ...userData,
-        settings_v2: {
-          ...userData.settings_v2,
-          [name]: value,
-        },
-      };
-      safeSetJSON("user", updatedUser);
-      window.dispatchEvent(
-        new CustomEvent("authStateChanged", { detail: updatedUser }),
-      );
-
       toast.success("Setting Updated", {
         id: loadingToast,
         description: `"${displayName}" has been ${value ? "enabled" : "disabled"}.`,
       });
+
+      if (name === "custom_avatar" && refreshUser) {
+        // /users/me returns the effective avatar in `avatar`, so refresh it
+        // in the background after the setting itself has been saved.
+        void refreshUser();
+      } else {
+        const updatedUser = {
+          ...userData,
+          settings_v2: {
+            ...userData.settings_v2,
+            [name]: value,
+          },
+        };
+        safeSetJSON("user", updatedUser);
+        window.dispatchEvent(
+          new CustomEvent("authStateChanged", { detail: updatedUser }),
+        );
+      }
 
       window.rybbit?.event("Update Setting", { setting: name, value });
     } catch (error) {

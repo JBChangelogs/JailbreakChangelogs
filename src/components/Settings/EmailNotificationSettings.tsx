@@ -28,6 +28,7 @@ const log = createLogger("UI");
 export const EmailNotificationSettings = ({
   userData,
 }: EmailNotificationSettingsProps) => {
+  const userId = userData?.id;
   const [enabled, setEnabled] = useState(false);
   const [isLinked, setIsLinked] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
@@ -36,7 +37,7 @@ export const EmailNotificationSettings = ({
 
   useEffect(() => {
     const checkStatus = async () => {
-      if (!userData) return;
+      if (!userId) return;
       setCheckingStatus(true);
       try {
         const [linkedData, enabledData] = await Promise.all([
@@ -52,7 +53,7 @@ export const EmailNotificationSettings = ({
       }
     };
     checkStatus();
-  }, [userData]);
+  }, [userId]);
 
   const handleToggle = async (checked: boolean) => {
     if (!userData) return;

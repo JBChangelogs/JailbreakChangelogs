@@ -38,6 +38,7 @@ const log = createLogger("AUTH");
 
 interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   loginModalTab: "discord" | "roblox";
   setLoginModal: (config: {
     open: boolean;
@@ -543,6 +544,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     () => ({
       ...authState,
       logout: handleLogout,
+      refreshUser: initializeAuth,
       loginModalTab,
       loginModalOnlyRoblox,
       setLoginModal,
@@ -557,6 +559,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [
       authState,
       handleLogout,
+      initializeAuth,
       loginModalTab,
       loginModalOnlyRoblox,
       setLoginModal,
