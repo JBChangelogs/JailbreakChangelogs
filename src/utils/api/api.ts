@@ -1347,7 +1347,6 @@ export interface CommentAuthor {
     hide_favorites: boolean;
     custom_banner: boolean;
     custom_avatar: boolean;
-    hide_connections: boolean;
     hide_presence: boolean;
     dms_allowed: boolean;
     allow_gifting: boolean;

@@ -15,7 +15,6 @@ export interface UserSettings {
   hide_presence?: boolean | number;
   profile_public?: boolean | number;
   custom_banner?: boolean;
-  hide_connections?: boolean;
   dms_allowed?: boolean | number;
   allow_gifting?: boolean;
   show_recent_comments?: boolean | number;
