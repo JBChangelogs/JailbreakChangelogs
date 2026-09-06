@@ -293,6 +293,15 @@ export function SuggestionForm({
           setCommonTradesError(
             "One or more selected common-trade items are invalid or no longer tradable. Remove them and select valid items.",
           );
+        } else if (
+          responseErr.response?.data?.error === "common_trades_required" ||
+          responseErr.response?.data?.error === "invalid_common_trade"
+        ) {
+          const message =
+            responseErr.response?.data?.message ||
+            "Common trades are invalid or missing.";
+          setCommonTradesError(message);
+          toast.error(message);
         } else if (responseErr.response?.data?.field === field) {
           setSuggestedValueError(
             responseErr.response?.data?.message || "Invalid value.",
