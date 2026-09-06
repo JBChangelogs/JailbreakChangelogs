@@ -29,7 +29,6 @@ import {
   stripHtml,
 } from "@/components/Items/Suggestions/shared";
 import type { Suggestion } from "@/components/Items/Suggestions/types";
-import { CommonTradesDisplay } from "@/components/Items/Suggestions/CommonTrades";
 import { VoteRateLimitBanner } from "@/components/Items/Suggestions/VoteRateLimitBanner";
 
 interface SuggestionCardProps {
@@ -363,7 +362,17 @@ export function SuggestionCard({
           )}
         </div>
 
-        <CommonTradesDisplay trades={suggestion.common_trades} />
+        {!!suggestion.common_trades?.length && (
+          <div className="text-link flex items-center gap-1.5 text-xs font-medium">
+            <Icon
+              icon="material-symbols:swap-horiz-rounded"
+              className="h-3.5 w-3.5"
+              inline
+            />
+            {suggestion.common_trades.length} Common Trade
+            {suggestion.common_trades.length > 1 ? "s" : ""} — view details
+          </div>
+        )}
 
         {/* Footer */}
         <div className="relative z-10 mt-auto pt-1">

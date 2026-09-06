@@ -1117,6 +1117,10 @@ export default function ValueSuggestionDetailPage() {
                         <CommonTradesDisplay
                           trades={suggestion.common_trades}
                           className="border-border-card mt-5 border-t pt-5"
+                          headingClassName="text-primary-text mb-3 text-sm font-semibold"
+                          headingIcon="material-symbols:swap-horiz-rounded"
+                          showTradeLabels
+                          showItemTypes
                         />
                       </div>
                     </div>

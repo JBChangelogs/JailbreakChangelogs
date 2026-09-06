@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { getTextSearchRank } from "@/utils/helpers/itemSearch";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
@@ -117,9 +118,13 @@ function TradeItemSummary({
   const isDuped = item.duped ?? item.isDuped ?? false;
   const categoryIcon = item.type ? getCategoryIcon(item.type) : null;
   const categoryColor = item.type ? getCategoryColor(item.type) : null;
+  const itemHref =
+    item.name && item.type
+      ? `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`
+      : null;
 
-  return (
-    <div className="border-border-card bg-tertiary-bg flex min-w-0 items-center gap-2 rounded-lg border p-1.5">
+  const content = (
+    <>
       {showImage && (
         <div className="bg-quaternary-bg relative h-9 w-12 shrink-0 overflow-hidden rounded">
           <Image
@@ -133,7 +138,9 @@ function TradeItemSummary({
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-primary-text truncate text-xs font-medium">
+        <p
+          className={`truncate text-xs font-medium ${itemHref ? "text-primary-text hover:text-link" : "text-primary-text"}`}
+        >
           {item.name ?? `Item #${item.id ?? "Unknown"}`}
           {amount > 1 && (
             <span className="text-secondary-text"> ×{amount}</span>
@@ -171,6 +178,23 @@ function TradeItemSummary({
           </div>
         )}
       </div>
+    </>
+  );
+
+  if (itemHref) {
+    return (
+      <Link
+        href={itemHref}
+        className="border-border-card bg-tertiary-bg hover:border-button-info/50 flex min-w-0 items-center gap-2 rounded-lg border p-1.5 transition-colors"
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="border-border-card bg-tertiary-bg flex min-w-0 items-center gap-2 rounded-lg border p-1.5">
+      {content}
     </div>
   );
 }
@@ -181,18 +205,29 @@ export function CommonTradesDisplay({
   showTradeLabels = false,
   showItemImages = true,
   showItemTypes = false,
+  headingIcon,
+  headingClassName = "text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase",
 }: {
   trades: CommonTrade[] | CommonTradeDraft[] | null | undefined;
   className?: string;
   showTradeLabels?: boolean;
   showItemImages?: boolean;
   showItemTypes?: boolean;
+  headingIcon?: string;
+  headingClassName?: string;
 }) {
   if (!trades?.length) return null;
 
   return (
     <div className={className}>
-      <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
+      <p className={`flex items-center gap-2 ${headingClassName}`}>
+        {headingIcon && (
+          <Icon
+            icon={headingIcon}
+            className="text-secondary-text h-4 w-4 shrink-0"
+            inline
+          />
+        )}
         Common Trades ({trades.length})
       </p>
       <div className="space-y-2">
@@ -206,7 +241,7 @@ export function CommonTradesDisplay({
                 Trade {index + 1}
               </p>
             )}
-            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2">
               <div className="min-w-0 space-y-1.5">
                 <p className="text-secondary-text text-[10px] font-semibold uppercase">
                   Requesting
@@ -220,11 +255,13 @@ export function CommonTradesDisplay({
                   />
                 ))}
               </div>
-              <Icon
-                icon="material-symbols:arrow-forward-rounded"
-                className="text-tertiary-text h-5 w-5"
-                inline
-              />
+              <div className="flex h-full items-center self-stretch">
+                <Icon
+                  icon="material-symbols:arrow-forward-rounded"
+                  className="text-tertiary-text h-5 w-5"
+                  inline
+                />
+              </div>
               <div className="min-w-0 space-y-1.5">
                 <p className="text-secondary-text text-[10px] font-semibold uppercase">
                   Offering
