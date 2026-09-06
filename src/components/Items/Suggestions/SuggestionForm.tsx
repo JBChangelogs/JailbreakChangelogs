@@ -244,153 +244,169 @@ export function SuggestionForm({
               Only tradable items are shown in search results.
             </span>
           </div>
-          {selectedItem ? (
-            <button
-              type="button"
-              className="border-border-card bg-tertiary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border px-3 py-2.5"
-              onClick={() => {
-                setSelectedItem(null);
-                setItemSearch("");
+          <div className="relative">
+            <input
+              id="item-search"
+              type="text"
+              placeholder={
+                loadingItems ? "Loading items..." : "Search for an item..."
+              }
+              disabled={loadingItems}
+              value={itemSearch}
+              onFocus={(e) => {
+                setShowItemDropdown(true);
+                e.target.select();
               }}
-            >
-              <span className="flex items-center gap-2 text-sm">
-                <span className="text-primary-text">{selectedItem.name}</span>
-                {(() => {
-                  const icon = getCategoryIcon(selectedItem.type);
-                  return (
-                    <span
-                      className={`${badgeBase} text-primary-text`}
-                      style={{
-                        borderColor: getCategoryColor(selectedItem.type),
-                        backgroundColor: `${getCategoryColor(selectedItem.type)}22`,
-                      }}
-                    >
-                      {icon && (
-                        <icon.Icon
-                          className="mr-1 h-3 w-3"
-                          style={{
-                            color: getCategoryColor(selectedItem.type),
-                          }}
-                        />
-                      )}
-                      {selectedItem.type}
-                    </span>
-                  );
-                })()}
-              </span>
-              <Icon
-                icon="material-symbols:close-rounded"
-                className="text-secondary-text h-4 w-4 shrink-0"
-                inline
-              />
-            </button>
-          ) : (
-            <>
-              <div className="relative">
-                <input
-                  id="item-search"
-                  type="text"
-                  placeholder={
-                    loadingItems ? "Loading items..." : "Search for an item..."
+              onChange={(e) => {
+                const value = e.target.value;
+                setItemSearch(value);
+                setShowItemDropdown(true);
+                if (selectedItem && value !== selectedItem.name) {
+                  setSelectedItem(null);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setShowItemDropdown(false);
+                  e.currentTarget.blur();
+                } else if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (showItemDropdown && filteredItems.length > 0) {
+                    const top = filteredItems[0];
+                    setSelectedItem(top);
+                    setItemSearch(top.name);
+                    setShowItemDropdown(false);
                   }
-                  disabled={loadingItems}
-                  value={itemSearch}
-                  onChange={(e) => {
-                    setItemSearch(e.target.value);
-                    setShowItemDropdown(true);
+                }
+              }}
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 pr-16 text-sm transition-colors outline-none disabled:opacity-50"
+            />
+            <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+              {itemSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setItemSearch("");
+                    setSelectedItem(null);
+                    setShowItemDropdown(false);
                   }}
-                  onFocus={() => setShowItemDropdown(true)}
-                  className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 pr-16 text-sm transition-colors outline-none disabled:opacity-50"
-                />
-                <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
-                  {itemSearch && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setItemSearch("");
-                        setShowItemDropdown(false);
-                      }}
-                      className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
-                      aria-label="Clear search"
-                    >
-                      <Icon icon="heroicons:x-mark" className="h-4 w-4" />
-                    </button>
-                  )}
-                  {itemSearch && (
-                    <div className="border-primary-text h-4 border-l opacity-30" />
-                  )}
-                  <Icon
-                    icon="heroicons:magnifying-glass"
-                    className={`h-4 w-4 ${itemSearch ? "text-link" : "text-secondary-text"}`}
-                  />
-                </div>
-              </div>
-              {showItemDropdown && itemSearch.length > 0 && (
-                <div className="border-border-card bg-tertiary-bg absolute z-10 mt-1 w-full overflow-hidden rounded-lg border shadow-lg">
-                  <div className="border-border-card border-b px-3 py-1.5">
-                    <p className="text-secondary-text text-xs">
-                      Results matching &quot;{itemSearch}&quot;
-                    </p>
-                  </div>
-                  <div className="max-h-56 overflow-y-auto">
-                    {filteredItems.length === 0 ? (
-                      <p className="text-secondary-text flex items-center px-3 py-6 text-sm">
-                        No items found
-                      </p>
-                    ) : (
-                      <>
-                        {filteredItems.slice(0, 50).map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedItem(item);
-                              setItemSearch("");
-                              setShowItemDropdown(false);
-                            }}
-                            className="hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
-                          >
-                            <span className="text-primary-text min-w-0 flex-1 truncate">
-                              {item.name}
-                            </span>
-                            {(() => {
-                              const icon = getCategoryIcon(item.type);
-                              return (
-                                <span
-                                  className={`${badgeBase} text-primary-text shrink-0`}
-                                  style={{
-                                    borderColor: getCategoryColor(item.type),
-                                    backgroundColor: `${getCategoryColor(item.type)}22`,
-                                  }}
-                                >
-                                  {icon && (
-                                    <icon.Icon
-                                      className="mr-1 h-3 w-3"
-                                      style={{
-                                        color: getCategoryColor(item.type),
-                                      }}
-                                    />
-                                  )}
-                                  {item.type}
-                                </span>
-                              );
-                            })()}
-                          </button>
-                        ))}
-                        {filteredItems.length > 50 && (
-                          <div className="border-border-card border-t px-3 py-1.5">
-                            <p className="text-secondary-text text-xs">
-                              Showing 50 of {filteredItems.length} — refine your
-                              search
-                            </p>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
+                  className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                  aria-label="Clear item"
+                >
+                  <Icon icon="heroicons:x-mark" className="h-4 w-4" />
+                </button>
               )}
-            </>
+              {itemSearch && (
+                <div className="border-primary-text h-4 border-l opacity-30" />
+              )}
+              <Icon
+                icon="heroicons:magnifying-glass"
+                className={`h-4 w-4 ${itemSearch ? "text-link" : "text-secondary-text"}`}
+              />
+            </div>
+          </div>
+          {showItemDropdown && itemSearch.length > 0 && (
+            <div className="border-border-card bg-tertiary-bg absolute z-10 mt-1 w-full overflow-hidden rounded-lg border shadow-lg">
+              <div className="border-border-card border-b px-3 py-1.5">
+                <p className="text-secondary-text text-xs">
+                  Results matching &quot;{itemSearch}&quot;
+                </p>
+              </div>
+              <div className="max-h-56 overflow-y-auto">
+                {filteredItems.length === 0 ? (
+                  <p className="text-secondary-text flex items-center px-3 py-6 text-sm">
+                    No items found
+                  </p>
+                ) : (
+                  <>
+                    {filteredItems.slice(0, 50).map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setItemSearch(item.name);
+                          setShowItemDropdown(false);
+                        }}
+                        className="hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
+                      >
+                        <span className="flex min-w-0 flex-1 items-center gap-1">
+                          <span className="text-primary-text min-w-0 truncate">
+                            {item.name}
+                          </span>
+                          {item.id === selectedItem?.id && (
+                            <Icon
+                              icon="heroicons:check"
+                              className="text-link h-4 w-4 shrink-0"
+                            />
+                          )}
+                        </span>
+                        {(() => {
+                          const icon = getCategoryIcon(item.type);
+                          return (
+                            <span
+                              className={`${badgeBase} text-primary-text shrink-0`}
+                              style={{
+                                borderColor: getCategoryColor(item.type),
+                                backgroundColor: `${getCategoryColor(item.type)}22`,
+                              }}
+                            >
+                              {icon && (
+                                <icon.Icon
+                                  className="mr-1 h-3 w-3"
+                                  style={{
+                                    color: getCategoryColor(item.type),
+                                  }}
+                                />
+                              )}
+                              {item.type}
+                            </span>
+                          );
+                        })()}
+                      </button>
+                    ))}
+                    {filteredItems.length > 50 && (
+                      <div className="border-border-card border-t px-3 py-1.5">
+                        <p className="text-secondary-text text-xs">
+                          Showing 50 of {filteredItems.length} — refine your
+                          search
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+          {selectedItem && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-secondary-text">Selected:</span>
+              {(() => {
+                const icon = getCategoryIcon(selectedItem.type);
+                return (
+                  <span
+                    className={`${badgeBase} text-primary-text`}
+                    style={{
+                      borderColor: getCategoryColor(selectedItem.type),
+                      backgroundColor: `${getCategoryColor(selectedItem.type)}22`,
+                    }}
+                  >
+                    {icon && (
+                      <icon.Icon
+                        className="mr-1 h-3 w-3"
+                        style={{
+                          color: getCategoryColor(selectedItem.type),
+                        }}
+                      />
+                    )}
+                    {selectedItem.type}
+                  </span>
+                );
+              })()}
+              <span className="text-secondary-text">
+                Edit the field above to pick a different item.
+              </span>
+            </div>
           )}
         </div>
 
