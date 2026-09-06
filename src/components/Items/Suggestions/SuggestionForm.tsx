@@ -111,11 +111,12 @@ export function SuggestionForm({
 
   const filteredItems = items.filter(
     (item) =>
-      (item.tradable === 1 || item.id === 587) &&
+      (item.tradable === 1 || item.id === 587 || item.id === 713) &&
       matchesTextSearch([item.name, item.type], itemSearch),
   );
 
-  const isAutoCalcItem = selectedItem?.id === 587;
+  const isAutoCalcItem = selectedItem?.id === 587 || selectedItem?.id === 713;
+  const autoCalcHyperChromeLevel = selectedItem?.id === 713 ? 4 : 5;
   const effectiveValidFields = isAutoCalcItem
     ? validFields.filter((f) => f !== "cash_value" && f !== "duped_value")
     : validFields;
@@ -389,14 +390,14 @@ export function SuggestionForm({
           )}
         </div>
 
-        {/* Auto-calc banner for item 587 */}
+        {/* Auto-calc banner for HyperShift reference items (587, 713) */}
         {isAutoCalcItem && (
           <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
             <span className="text-primary-text">
               Cash Value and Duped Value for this item are automatically
-              calculated as the sum of accepted suggestions from other
-              HyperChrome Level 5 items — they can&apos;t be suggested directly.
-              You can still suggest other fields below.
+              calculated as the sum of the values of all Level{" "}
+              {autoCalcHyperChromeLevel} HyperChromes. They can&apos;t be
+              suggested directly. You can still suggest other fields below.
             </span>
           </div>
         )}
