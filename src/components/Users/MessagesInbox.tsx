@@ -14,6 +14,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Spinner } from "@/components/ui/Spinner";
 import { ChatEventTime } from "@/components/chat/chat-event";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useEmojiStringMap } from "@/hooks/useEmojiStringMap";
@@ -49,6 +50,8 @@ import { formatMessageText, getDisplayName } from "@/utils/messages/formatting";
 export default function MessagesInbox() {
   const pathname = usePathname();
   const router = useRouter();
+
+  useLockBodyScroll(true);
 
   const {
     user: currentUser,
