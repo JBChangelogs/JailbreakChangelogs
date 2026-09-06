@@ -44,7 +44,9 @@ import ItemValueChart, {
   type ValueHistory,
 } from "@/components/Items/ItemValueChart";
 import { CommonTradesDisplay } from "@/components/Items/Suggestions/CommonTrades";
+import { ReportSuggestionModal } from "@/components/Items/Suggestions/ReportSuggestionModal";
 import type { CommonTrade } from "@/components/Items/Suggestions/types";
+import { useSuggestionReporting } from "@/hooks/useSuggestionReporting";
 
 interface UserSettings {
   custom_avatar?: boolean;
@@ -174,6 +176,20 @@ export default function ValueSuggestionDetailPage() {
     setBan,
   } = useAuthContext();
   const ban = bans["value_suggestions"] ?? null;
+  const {
+    reportModalOpen,
+    reportReason,
+    reportTarget,
+    setReportReason,
+    openReportModal,
+    closeReportModal,
+    handleReportSubmit,
+  } = useSuggestionReporting({
+    isAuthenticated,
+    user,
+    setLoginModal,
+    setBan,
+  });
 
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [item, setItem] = useState<Item | null>(null);
@@ -916,6 +932,21 @@ export default function ValueSuggestionDetailPage() {
                                 />
                                 View Inventory
                               </Link>
+                            </Button>
+                          )}
+                          {user?.id !== suggestion.user.id && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => openReportModal(suggestion)}
+                              className="text-button-danger! hover:bg-button-danger/10!"
+                            >
+                              <Icon
+                                icon="material-symbols:flag-outline-rounded"
+                                className="h-3.5 w-3.5"
+                                inline
+                              />
+                              Report
                             </Button>
                           )}
                         </div>
@@ -1815,6 +1846,14 @@ export default function ValueSuggestionDetailPage() {
             )}
         </div>
       </main>
+      <ReportSuggestionModal
+        open={reportModalOpen}
+        onClose={closeReportModal}
+        onSubmit={handleReportSubmit}
+        reportReason={reportReason}
+        setReportReason={setReportReason}
+        suggestion={reportTarget}
+      />
     </>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "nextjs-toploader/app";
+import Link from "next/link";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
 import { PUBLIC_API_URL } from "@/utils/api/api";
@@ -165,6 +166,18 @@ export interface ReportMetadataMessage {
   recipient_id: string | number;
 }
 
+export interface ReportMetadataSuggestion {
+  id: number;
+  field: string;
+  current_value: string;
+  suggested_value: string;
+  author: string;
+  user_id: string;
+  item_id: number;
+  item_name: string;
+  item_type: string;
+}
+
 export interface ReportMetadataUsername {
   username: string;
   global_name: string;
@@ -180,6 +193,7 @@ export interface ReportMetadata {
   custom_banner?: string;
   description?: ReportMetadataDescription;
   message?: ReportMetadataMessage;
+  suggestion?: ReportMetadataSuggestion;
 }
 
 export interface ReportUser {
@@ -219,6 +233,7 @@ const TYPE_LABELS: Record<string, string> = {
   username: "Username",
   message: "Message",
   comment: "Comment",
+  value_suggestions: "Value Suggestion",
 };
 
 export function getTypeLabel(type: string) {
@@ -265,6 +280,8 @@ export function getReportedUserId(report: Report): string | null {
       return report.metadata.comment?.user_id ?? null;
     case "message":
       return report.metadata.message?.user_id ?? null;
+    case "value_suggestions":
+      return report.metadata.suggestion?.user_id ?? null;
     case "description":
       return report.metadata.description?.user_id ?? null;
     default:
@@ -382,6 +399,42 @@ export function ReportContext({ report }: { report: Report }) {
               {metadata.message.content}
             </p>
           </div>
+        );
+      }
+      return null;
+
+    case "value_suggestions":
+      if (metadata.suggestion) {
+        return (
+          <Link
+            href={`/items/suggestions/${metadata.suggestion.id}`}
+            prefetch={false}
+            onClick={(event) => event.stopPropagation()}
+            className="border-border-card bg-tertiary-bg hover:border-border-focus mt-2 block rounded-lg border p-3 transition-colors"
+          >
+            <p className="text-secondary-text mb-1 text-xs">
+              Value suggestion for {metadata.suggestion.item_name}
+            </p>
+            <p className="text-primary-text text-sm font-medium">
+              {metadata.suggestion.field
+                .split("_")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ")}
+            </p>
+            <div className="mt-1 flex min-w-0 items-center gap-1.5 text-sm">
+              <span className="text-button-danger min-w-0 truncate line-through">
+                {metadata.suggestion.current_value || "N/A"}
+              </span>
+              <Icon
+                icon="material-symbols:arrow-forward-rounded"
+                className="text-secondary-text h-3.5 w-3.5 shrink-0"
+                inline
+              />
+              <span className="text-button-success min-w-0 truncate font-medium">
+                {metadata.suggestion.suggested_value}
+              </span>
+            </div>
+          </Link>
         );
       }
       return null;
@@ -593,6 +646,10 @@ export default function MyReports() {
                       { value: "description", label: "Description" },
                       { value: "message", label: "Message" },
                       { value: "username", label: "Username" },
+                      {
+                        value: "value_suggestions",
+                        label: "Value Suggestion",
+                      },
                     ].map((opt) => (
                       <DropdownMenuRadioItem
                         key={opt.value}

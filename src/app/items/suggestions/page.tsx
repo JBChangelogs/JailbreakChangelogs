@@ -26,10 +26,12 @@ import { SuggestionsToolbar } from "@/components/Items/Suggestions/SuggestionsTo
 import { SuggestionGuidelinesDialog } from "@/components/Items/Suggestions/SuggestionGuidelinesDialog";
 import { SuggesterLeaderboard } from "@/components/Items/Suggestions/SuggesterLeaderboard";
 import { VotersModal } from "@/components/Items/Suggestions/VotersModal";
+import { ReportSuggestionModal } from "@/components/Items/Suggestions/ReportSuggestionModal";
 import { useSuggestionFilters } from "@/hooks/useSuggestionFilters";
 import { useSuggestionEditing } from "@/hooks/useSuggestionEditing";
 import { useSuggestionSort } from "@/hooks/useSuggestionSort";
 import { useSuggestionVoting } from "@/hooks/useSuggestionVoting";
+import { useSuggestionReporting } from "@/hooks/useSuggestionReporting";
 import { useSuggestionsFeed } from "@/hooks/useSuggestionsFeed";
 import type {
   CommonTradeSubmission,
@@ -104,6 +106,20 @@ export default function ValueSuggestionsPage() {
     closeEditModal,
     handleEditSave,
   } = useSuggestionEditing({ setSuggestions, setBan });
+  const {
+    reportModalOpen,
+    reportReason,
+    reportTarget,
+    setReportReason,
+    openReportModal,
+    closeReportModal,
+    handleReportSubmit,
+  } = useSuggestionReporting({
+    isAuthenticated,
+    user,
+    setLoginModal,
+    setBan,
+  });
 
   // Items state (for form dropdown)
   const [items, setItems] = useState<Item[]>([]);
@@ -655,6 +671,7 @@ export default function ValueSuggestionsPage() {
             onVote={handleVote}
             onOpenVoters={openVotersModal}
             onOpenEdit={openEditModal}
+            onOpenReport={openReportModal}
           />
         </div>
 
@@ -672,6 +689,15 @@ export default function ValueSuggestionsPage() {
           item={editTarget ? (editTarget.item ?? null) : null}
           onSave={handleEditSave}
           limits={limits}
+        />
+
+        <ReportSuggestionModal
+          open={reportModalOpen}
+          onClose={closeReportModal}
+          onSubmit={handleReportSubmit}
+          reportReason={reportReason}
+          setReportReason={setReportReason}
+          suggestion={reportTarget}
         />
 
         <VotersModal

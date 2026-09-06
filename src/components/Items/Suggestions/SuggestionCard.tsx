@@ -41,6 +41,7 @@ interface SuggestionCardProps {
   onVote: (type: "upvote" | "downvote", event: MouseEvent) => void;
   onOpenVoters: (tab: "up" | "down", event: MouseEvent) => void;
   onOpenEdit: (event: MouseEvent) => void;
+  onOpenReport: (event: MouseEvent) => void;
 }
 
 export function SuggestionCard({
@@ -53,6 +54,7 @@ export function SuggestionCard({
   onVote,
   onOpenVoters,
   onOpenEdit,
+  onOpenReport,
 }: SuggestionCardProps) {
   const item = suggestion.item;
   const categoryIcon = item ? getCategoryIcon(item.type) : null;
@@ -380,24 +382,45 @@ export function SuggestionCard({
             <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
               Suggested by
             </p>
-            {canEdit && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={onOpenEdit}
-                    className="text-secondary-text hover:text-primary-text shrink-0 cursor-pointer rounded p-1 transition-colors"
-                  >
-                    <Icon
-                      icon="material-symbols:edit-outline-rounded"
-                      className="h-4 w-4"
-                      inline
-                    />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Update reason</TooltipContent>
-              </Tooltip>
-            )}
+            <div className="flex items-center gap-1">
+              {canEdit && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={onOpenEdit}
+                      className="text-secondary-text hover:text-primary-text shrink-0 cursor-pointer rounded p-1 transition-colors"
+                    >
+                      <Icon
+                        icon="material-symbols:edit-outline-rounded"
+                        className="h-4 w-4"
+                        inline
+                      />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Update reason</TooltipContent>
+                </Tooltip>
+              )}
+              {suggestion.user.id !== userId && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={onOpenReport}
+                      className="text-button-danger hover:bg-button-danger/10 shrink-0 cursor-pointer rounded p-1 transition-colors"
+                      aria-label="Report suggestion"
+                    >
+                      <Icon
+                        icon="material-symbols:flag-outline-rounded"
+                        className="h-4 w-4"
+                        inline
+                      />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Report suggestion</TooltipContent>
+                </Tooltip>
+              )}
+            </div>
           </div>
           <div className="flex items-start gap-2">
             <UserAvatar
