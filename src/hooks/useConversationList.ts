@@ -23,6 +23,24 @@ import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 const log = createLogger("UI");
 type Setter<T> = Dispatch<SetStateAction<T>>;
 
+const USER_LOOKUP_FIELDS = [
+  "id",
+  "username",
+  "global_name",
+  "avatar",
+  "banner",
+  "custom_avatar",
+  "custom_banner",
+  "accent_color",
+  "usernumber",
+  "premiumtype",
+  "settings",
+  "presence",
+  "last_seen",
+  "flags",
+  "primary_guild",
+].join(",");
+
 interface UseConversationListOptions {
   isAuthenticated: boolean;
   currentUserId: string | null;
@@ -78,10 +96,19 @@ export function useConversationList({
 
     const request = (async () => {
       try {
-        const response = await fetch(
-          `/api/users/get?id=${encodeURIComponent(id)}`,
-          { cache: "no-store" },
+        if (!PUBLIC_API_URL) {
+          return null;
+        }
+
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/users/get?id=${encodeURIComponent(id)}&fields=${USER_LOOKUP_FIELDS}`,
         );
+        const response = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+          headers,
+        });
 
         if (!response.ok) {
           return null;
@@ -100,6 +127,48 @@ export function useConversationList({
     userLookupPendingRef.current.set(id, request);
     const result = await request;
     userLookupCacheRef.current.set(id, result);
+    return result;
+  };
+
+  const loadUsersBatch = async (
+    ids: string[],
+  ): Promise<Map<string, MessageUser>> => {
+    const result = new Map<string, MessageUser>();
+    if (ids.length === 0 || !PUBLIC_API_URL) {
+      return result;
+    }
+
+    try {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/users/get/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
+      );
+      const response = await fetch(url, {
+        method: "GET",
+        cache: "no-store",
+        headers,
+      });
+
+      if (!response.ok) {
+        return result;
+      }
+
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        return result;
+      }
+
+      for (const raw of data) {
+        const user = toMessageUser(raw);
+        if (user) {
+          userLookupCacheRef.current.set(user.id, user);
+          result.set(user.id, user);
+        }
+      }
+    } catch (error) {
+      log.error("Error loading users batch:", error);
+    }
+
     return result;
   };
 
@@ -227,12 +296,10 @@ export function useConversationList({
           const hinted = userHints.get(id);
           return !hinted || !hasAvatarSettingsData(hinted);
         });
-        const loadedUsers = await Promise.all(
-          missingUserIds.map((id) => loadUserById(id)),
-        );
+        const loadedUsers = await loadUsersBatch(missingUserIds);
 
-        missingUserIds.forEach((id, index) => {
-          const loaded = loadedUsers[index];
+        missingUserIds.forEach((id) => {
+          const loaded = loadedUsers.get(id);
           if (loaded) {
             const previous = userHints.get(id);
             userHints.set(id, {

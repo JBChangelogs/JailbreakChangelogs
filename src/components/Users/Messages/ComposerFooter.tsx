@@ -46,7 +46,7 @@ export function ComposerFooter({
   onSend,
 }: ComposerFooterProps) {
   return (
-    <div className="bg-secondary-bg border-border-card sticky bottom-0 border-t p-3">
+    <div className="bg-secondary-bg border-border-card shrink-0 border-t p-3">
       {messageBan && <BanBanner ban={messageBan} className="mb-3" />}
       {replyingToMessage && (
         <div className="bg-tertiary-bg border-border-card flex w-full items-center justify-between rounded-t-md border-x border-t px-3 py-2 text-xs">

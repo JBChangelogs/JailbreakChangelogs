@@ -383,7 +383,7 @@ export default function MessagesInbox() {
   });
   if (isLoading) {
     return (
-      <div className="h-[calc(100dvh-5rem)] overflow-hidden px-4 pb-4">
+      <div className="h-[calc(100svh-5rem)] overflow-hidden px-4 pb-4 lg:h-[calc(100dvh-5rem)]">
         <div className="flex h-full min-h-0 flex-col">
           <Breadcrumb loading={true} containerClassName="py-4" />
           <div className="border-border-card bg-secondary-bg mt-0 flex min-h-0 flex-1 items-center justify-center rounded-lg border shadow-md">
@@ -396,7 +396,7 @@ export default function MessagesInbox() {
 
   if (!isAuthenticated) {
     return (
-      <div className="h-[calc(100dvh-5rem)] overflow-hidden px-4 pb-4">
+      <div className="h-[calc(100svh-5rem)] overflow-hidden px-4 pb-4 lg:h-[calc(100dvh-5rem)]">
         <div className="flex h-full min-h-0 flex-col">
           <Breadcrumb containerClassName="py-4" />
           <div className="border-border-card bg-secondary-bg mt-0 flex min-h-0 w-full flex-1 items-center justify-center rounded-lg border p-6 shadow-md sm:p-8">
@@ -424,7 +424,7 @@ export default function MessagesInbox() {
     : "Select a conversation to start messaging.";
 
   return (
-    <div className="h-[calc(100dvh-5rem)] overflow-hidden">
+    <div className="h-[calc(100svh-5rem)] overflow-hidden lg:h-[calc(100dvh-5rem)]">
       <div className="flex h-full min-h-0 flex-col">
         <Breadcrumb containerClassName="px-4 py-4" />
 
