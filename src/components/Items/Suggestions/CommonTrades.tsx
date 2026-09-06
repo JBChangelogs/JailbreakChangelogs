@@ -26,7 +26,10 @@ export interface CommonTradeDraft {
   offering: CommonTradeDraftItem[];
 }
 
-const MAX_ITEMS_PER_SIDE = 3;
+const MAX_ITEMS_PER_SIDE = 8;
+const MAX_QTY_PER_SIDE = 8;
+const MIN_COMMON_TRADES = 2;
+const MAX_COMMON_TRADES = 5;
 
 export const createEmptyCommonTrade = (): CommonTradeDraft => ({
   requesting: [],
@@ -298,7 +301,12 @@ function TradeSideEditor({
 }) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
-  const atItemLimit = selected.length >= MAX_ITEMS_PER_SIDE;
+  const totalQty = selected.reduce(
+    (sum, entry) => sum + (Number(entry.amount) || 0),
+    0,
+  );
+  const atItemLimit =
+    selected.length >= MAX_ITEMS_PER_SIDE || totalQty >= MAX_QTY_PER_SIDE;
   const results = useMemo(() => {
     const selectedIds = new Set(selected.map((item) => item.id));
     return items
@@ -325,90 +333,107 @@ function TradeSideEditor({
       <div className="flex items-center justify-between gap-2">
         <p className="text-primary-text text-xs font-semibold">{label}</p>
         <p className="text-secondary-text text-xs">
-          {selected.length}/{MAX_ITEMS_PER_SIDE} items
+          {selected.length}/{MAX_ITEMS_PER_SIDE} items · {totalQty}/
+          {MAX_QTY_PER_SIDE} qty
         </p>
       </div>
-      {selected.map((item) => (
-        <div
-          key={item.id}
-          className="border-border-card bg-tertiary-bg rounded-lg border p-2"
-        >
-          <div className="flex items-center gap-2">
-            <div className="bg-quaternary-bg relative h-9 w-12 shrink-0 overflow-hidden rounded">
-              <Image
-                src={getItemImagePath(item.type, item.name, true)}
-                alt={item.name}
-                fill
-                sizes="48px"
-                className="object-cover"
-                onError={handleImageError}
-              />
-            </div>
-            <p className="text-primary-text min-w-0 flex-1 truncate text-xs font-medium">
-              {item.name}
-            </p>
-            <button
-              type="button"
-              onClick={() =>
-                onChange(selected.filter((entry) => entry.id !== item.id))
-              }
-              className="text-secondary-text hover:text-form-error cursor-pointer p-1"
-              aria-label={`Remove ${item.name}`}
-            >
-              <Icon icon="heroicons:x-mark" className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <label className="text-secondary-text flex items-center gap-1 text-xs">
-              Qty
-              <input
-                type="number"
-                min={1}
-                max={99}
-                value={item.amount}
-                onChange={(event) => {
-                  const amount = Math.min(
-                    99,
-                    Math.max(1, Number(event.target.value) || 1),
-                  );
-                  onChange(
-                    selected.map((entry) =>
-                      entry.id === item.id ? { ...entry, amount } : entry,
-                    ),
-                  );
-                }}
-                className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info h-7 w-14 rounded border px-1.5 text-xs outline-none"
-              />
-            </label>
-            {(["og", "duped"] as const).map((condition) => (
+      {selected.map((item) => {
+        const categoryIcon = getCategoryIcon(item.type);
+        const categoryColor = getCategoryColor(item.type);
+        return (
+          <div
+            key={item.id}
+            className="border-border-card bg-secondary-bg rounded-lg border p-2"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-primary-text truncate text-sm font-medium">
+                  {item.name}
+                </p>
+                <span
+                  className={`${badgeBase} text-primary-text mt-1 h-5 px-1.5 text-[10px]`}
+                  style={{
+                    borderColor: categoryColor,
+                    backgroundColor: `${categoryColor}22`,
+                  }}
+                >
+                  {categoryIcon && (
+                    <categoryIcon.Icon
+                      className="mr-1 h-2.5 w-2.5"
+                      style={{ color: categoryColor }}
+                    />
+                  )}
+                  {item.type}
+                </span>
+              </div>
               <button
-                key={condition}
                 type="button"
                 onClick={() =>
-                  onChange(
-                    selected.map((entry) =>
-                      entry.id === item.id
-                        ? {
-                            ...entry,
-                            [condition]: !entry[condition],
-                            [condition === "og" ? "duped" : "og"]: false,
-                          }
-                        : entry,
-                    ),
-                  )
+                  onChange(selected.filter((entry) => entry.id !== item.id))
                 }
-                className={`h-7 cursor-pointer rounded border px-2 text-xs font-medium capitalize transition-colors ${
-                  item[condition]
-                    ? "border-button-info bg-button-info/15 text-link"
-                    : "border-border-card bg-secondary-bg text-secondary-text hover:border-button-info/50"
-                }`}
+                className="text-secondary-text hover:text-form-error shrink-0 cursor-pointer p-1"
+                aria-label={`Remove ${item.name}`}
               >
-                {condition === "og" ? "OG" : "Duped"}
+                <Icon icon="heroicons:x-mark" className="h-4 w-4" />
               </button>
-            ))}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <label className="text-secondary-text flex items-center gap-1 text-xs">
+                Qty
+                <input
+                  type="number"
+                  min={1}
+                  max={
+                    MAX_QTY_PER_SIDE - (totalQty - (Number(item.amount) || 0))
+                  }
+                  value={item.amount}
+                  onChange={(event) => {
+                    const maxForItem =
+                      MAX_QTY_PER_SIDE -
+                      (totalQty - (Number(item.amount) || 0));
+                    const amount = Math.min(
+                      maxForItem,
+                      Math.max(1, Number(event.target.value) || 1),
+                    );
+                    onChange(
+                      selected.map((entry) =>
+                        entry.id === item.id ? { ...entry, amount } : entry,
+                      ),
+                    );
+                  }}
+                  className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-14 rounded border px-1.5 text-xs outline-none"
+                />
+              </label>
+              {(["og", "duped"] as const).map((condition) => (
+                <button
+                  key={condition}
+                  type="button"
+                  onClick={() =>
+                    onChange(
+                      selected.map((entry) =>
+                        entry.id === item.id
+                          ? {
+                              ...entry,
+                              [condition]: !entry[condition],
+                              [condition === "og" ? "duped" : "og"]: false,
+                            }
+                          : entry,
+                      ),
+                    )
+                  }
+                  className={`h-7 cursor-pointer rounded border px-2 text-xs font-medium capitalize transition-colors ${
+                    item[condition]
+                      ? "border-button-info bg-button-info/15 text-link"
+                      : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
+                  }`}
+                >
+                  {condition === "og" ? "OG" : "Duped"}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
       {!atItemLimit && (
         <div className="relative">
           <input
@@ -506,27 +531,20 @@ export function CommonTradesEditor({
 
   return (
     <div>
-      <div className="mb-2 flex items-start justify-between gap-3">
-        <div>
-          <p className="text-primary-text text-sm font-medium">
-            Common Trades ({completedTradeCount})
-          </p>
-          <p className="text-secondary-text mt-0.5 text-xs">
-            Add at least two real examples. Each trade must include{" "}
-            <span className="text-primary-text font-medium">
-              {suggestedItem.name}
-            </span>{" "}
-            on either side.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => onChange([...trades, createEmptyCommonTrade()])}
-          className="text-link hover:text-link-hover flex shrink-0 cursor-pointer items-center gap-1 text-xs font-medium"
-        >
-          <Icon icon="heroicons:plus" className="h-3.5 w-3.5" />
-          Add trade
-        </button>
+      <div className="mb-2">
+        <p className="text-primary-text text-sm font-medium">
+          Common Trades ({completedTradeCount})
+        </p>
+        <p className="text-secondary-text mt-0.5 text-xs">
+          Add {MIN_COMMON_TRADES}-{MAX_COMMON_TRADES} real examples. Each trade
+          must include{" "}
+          <span className="text-primary-text font-medium">
+            {suggestedItem.name}
+          </span>{" "}
+          on either side. Each side is capped at {MAX_QTY_PER_SIDE} items
+          combined (quantity counts toward this), matching the in-game trade
+          limit.
+        </p>
       </div>
       <div className="space-y-3">
         {trades.map((trade, index) => (
@@ -547,7 +565,7 @@ export function CommonTradesEditor({
                   </p>
                 )}
               </div>
-              {trades.length > 1 && (
+              {trades.length > MIN_COMMON_TRADES && (
                 <button
                   type="button"
                   onClick={() =>
@@ -592,6 +610,16 @@ export function CommonTradesEditor({
             </div>
           </div>
         ))}
+        {trades.length < MAX_COMMON_TRADES && (
+          <button
+            type="button"
+            onClick={() => onChange([...trades, createEmptyCommonTrade()])}
+            className="border-border-card bg-tertiary-bg hover:border-button-info/50 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border-2 border-dashed py-3 text-sm font-medium transition-colors"
+          >
+            <Icon icon="heroicons:plus" className="text-link h-4 w-4" />
+            <span className="text-link">Add common trade example</span>
+          </button>
+        )}
       </div>
       {error && <p className="text-form-error mt-1.5 text-xs">{error}</p>}
     </div>
