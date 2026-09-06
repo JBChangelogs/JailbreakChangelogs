@@ -99,14 +99,68 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
 
   if (authLoading || (!report && loading)) {
     return (
-      <main className="min-h-screen">
+      <main className="min-h-screen pb-8">
         <div className="container mx-auto max-w-4xl px-4 py-4">
-          <Breadcrumb />
-          <div className="mt-4 space-y-3">
-            <Skeleton style={{ height: 32 }} />
-            <Skeleton style={{ height: 100 }} />
-            <Skeleton style={{ height: 80 }} />
-            <Skeleton style={{ height: 60 }} />
+          <Breadcrumb loading />
+
+          <div className="mt-4 mb-4 flex items-center gap-2">
+            <Skeleton style={{ width: 100, height: 32 }} />
+          </div>
+
+          <div className="border-border-card bg-secondary-bg space-y-4 rounded-lg border p-5 shadow-sm">
+            {/* Header */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Skeleton style={{ width: 90, height: 22 }} />
+                <Skeleton style={{ width: 80, height: 22 }} />
+                <Skeleton style={{ width: 40, height: 14 }} />
+              </div>
+              <Skeleton style={{ width: 100, height: 14 }} />
+            </div>
+
+            {/* Reported content preview */}
+            <div className="border-border-card bg-tertiary-bg/50 rounded-lg border p-3">
+              <div className="flex items-center gap-3">
+                <Skeleton
+                  style={{ width: 80, height: 56 }}
+                  className="rounded-md"
+                />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton style={{ width: "60%", height: 14 }} />
+                  <Skeleton style={{ width: 70, height: 20 }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Reason */}
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+              <Skeleton style={{ width: 50, height: 12 }} className="mb-2" />
+              <Skeleton style={{ width: "100%", height: 14 }} />
+              <Skeleton style={{ width: "80%", height: 14 }} className="mt-1" />
+            </div>
+
+            {/* Metadata rows */}
+            <div className="border-border-card bg-tertiary-bg divide-border-card divide-y rounded-lg border">
+              <div className="flex items-center justify-between px-3 py-2">
+                <Skeleton style={{ width: 90, height: 12 }} />
+                <div className="flex items-center gap-1.5">
+                  <Skeleton
+                    style={{ width: 28, height: 28 }}
+                    className="rounded-full"
+                  />
+                  <Skeleton style={{ width: 80, height: 12 }} />
+                </div>
+              </div>
+              {[70, 90, 60].map((width, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between px-3 py-2"
+                >
+                  <Skeleton style={{ width, height: 12 }} />
+                  <Skeleton style={{ width: 110, height: 12 }} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </main>
