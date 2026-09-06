@@ -415,24 +415,33 @@ export function ReportContext({ report }: { report: Report }) {
             <p className="text-secondary-text mb-1 text-xs">
               Value suggestion for {metadata.suggestion.item_name}
             </p>
-            <p className="text-primary-text text-sm font-medium">
-              {metadata.suggestion.field
-                .split("_")
-                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ")}
-            </p>
-            <div className="mt-1 flex min-w-0 items-center gap-1.5 text-sm">
-              <span className="text-button-danger min-w-0 truncate line-through">
-                {metadata.suggestion.current_value || "N/A"}
-              </span>
-              <Icon
-                icon="material-symbols:arrow-forward-rounded"
-                className="text-secondary-text h-3.5 w-3.5 shrink-0"
-                inline
-              />
-              <span className="text-button-success min-w-0 truncate font-medium">
-                {metadata.suggestion.suggested_value}
-              </span>
+            <div className="mt-2 grid grid-cols-2 gap-3">
+              <div className="min-w-0">
+                <p className="text-button-danger mb-1 flex items-center gap-1 text-xs font-semibold tracking-wide uppercase">
+                  <Icon icon="mdi:minus-circle" className="h-3 w-3" inline />
+                  Old{" "}
+                  {metadata.suggestion.field
+                    .split("_")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                </p>
+                <p className="text-secondary-text text-sm font-bold [overflow-wrap:anywhere] break-words line-through">
+                  {metadata.suggestion.current_value || "N/A"}
+                </p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-button-success mb-1 flex items-center gap-1 text-xs font-semibold tracking-wide uppercase">
+                  <Icon icon="mdi:plus-circle" className="h-3 w-3" inline />
+                  New{" "}
+                  {metadata.suggestion.field
+                    .split("_")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                </p>
+                <p className="text-primary-text text-sm font-bold [overflow-wrap:anywhere] break-words">
+                  {metadata.suggestion.suggested_value}
+                </p>
+              </div>
             </div>
           </Link>
         );
