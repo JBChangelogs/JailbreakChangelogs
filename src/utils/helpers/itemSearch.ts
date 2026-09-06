@@ -32,32 +32,53 @@ function hasFuzzyTokenMatch(
   );
 }
 
-function matchesField(
+// Lower is more relevant. null means no match at all.
+function getFieldMatchRank(
   fieldValue: string,
   searchNormalized: string,
   searchTokens: string[],
   searchAlphaNum: string[],
-) {
+): number | null {
+  const fieldNormalized = normalize(fieldValue);
+  if (fieldNormalized === searchNormalized) return 0;
+  if (fieldNormalized.startsWith(searchNormalized)) return 1;
+  if (fieldNormalized.includes(searchNormalized)) return 2;
+
   const fieldTokens = tokenize(fieldValue);
-  return (
-    normalize(fieldValue).includes(searchNormalized) ||
-    isTokenSubsequence(searchTokens, fieldTokens) ||
-    isTokenSubsequence(searchAlphaNum, splitAlphaNum(fieldValue)) ||
-    hasFuzzyTokenMatch(searchTokens, fieldTokens)
-  );
+  if (isTokenSubsequence(searchTokens, fieldTokens)) return 3;
+  if (isTokenSubsequence(searchAlphaNum, splitAlphaNum(fieldValue))) return 4;
+  if (hasFuzzyTokenMatch(searchTokens, fieldTokens)) return 5;
+
+  return null;
+}
+
+// Lower is more relevant. Infinity means no match across any field.
+export function getTextSearchRank(
+  fields: Array<string | null | undefined>,
+  searchTerm: string,
+): number {
+  if (!searchTerm.trim()) return 0;
+
+  const searchNormalized = normalize(searchTerm);
+  const searchTokens = tokenize(searchTerm);
+  const searchAlphaNum = splitAlphaNum(searchTerm);
+
+  let best = Infinity;
+  for (const field of fields) {
+    const rank = getFieldMatchRank(
+      field ?? "",
+      searchNormalized,
+      searchTokens,
+      searchAlphaNum,
+    );
+    if (rank !== null && rank < best) best = rank;
+  }
+  return best;
 }
 
 export function matchesTextSearch(
   fields: Array<string | null | undefined>,
   searchTerm: string,
 ): boolean {
-  if (!searchTerm.trim()) return true;
-
-  const searchNormalized = normalize(searchTerm);
-  const searchTokens = tokenize(searchTerm);
-  const searchAlphaNum = splitAlphaNum(searchTerm);
-
-  return fields.some((field) =>
-    matchesField(field ?? "", searchNormalized, searchTokens, searchAlphaNum),
-  );
+  return getTextSearchRank(fields, searchTerm) !== Infinity;
 }

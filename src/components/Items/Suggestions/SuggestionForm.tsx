@@ -21,7 +21,7 @@ import {
 } from "@/components/Items/Suggestions/errors";
 import { badgeBase, fieldLabel } from "@/components/Items/Suggestions/shared";
 import type { SuggestionLimits } from "@/components/Items/Suggestions/types";
-import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { getTextSearchRank } from "@/utils/helpers/itemSearch";
 import {
   getItemImagePath,
   getVideoPath,
@@ -109,11 +109,15 @@ export function SuggestionForm({
   const maxNoteLength = limits?.max_note_length ?? 300;
   const validFields = limits?.valid_fields ?? ["cash_value", "duped_value"];
 
-  const filteredItems = items.filter(
-    (item) =>
-      (item.tradable === 1 || item.id === 587 || item.id === 713) &&
-      matchesTextSearch([item.name, item.type], itemSearch),
-  );
+  const filteredItems = items
+    .filter((item) => item.tradable === 1 || item.id === 587 || item.id === 713)
+    .map((item) => ({
+      item,
+      rank: getTextSearchRank([item.name, item.type], itemSearch),
+    }))
+    .filter(({ rank }) => rank !== Infinity)
+    .sort((a, b) => a.rank - b.rank)
+    .map(({ item }) => item);
 
   const isAutoCalcItem = selectedItem?.id === 587 || selectedItem?.id === 713;
   const autoCalcHyperChromeLevel = selectedItem?.id === 713 ? 4 : 5;
