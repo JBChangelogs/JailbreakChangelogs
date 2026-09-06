@@ -41,6 +41,10 @@ export interface TradeItem {
   duped_demand?: string | null;
   isDuped?: boolean;
   isOG?: boolean;
+  /** Wire-format fields returned by trade and suggestion APIs. */
+  amount?: number;
+  duped?: boolean;
+  og?: boolean;
   instanceId?: string;
 }
 

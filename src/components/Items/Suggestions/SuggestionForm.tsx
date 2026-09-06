@@ -20,7 +20,18 @@ import {
   RateLimitError,
 } from "@/components/Items/Suggestions/errors";
 import { badgeBase, fieldLabel } from "@/components/Items/Suggestions/shared";
-import type { SuggestionLimits } from "@/components/Items/Suggestions/types";
+import type {
+  CommonTradeSubmission,
+  SuggestionLimits,
+} from "@/components/Items/Suggestions/types";
+import {
+  CommonTradesDisplay,
+  CommonTradesEditor,
+  createEmptyCommonTrade,
+  serializeCommonTrades,
+  SuggestionItemSearchResult,
+  type CommonTradeDraft,
+} from "@/components/Items/Suggestions/CommonTrades";
 import { getTextSearchRank } from "@/utils/helpers/itemSearch";
 import {
   getItemImagePath,
@@ -57,6 +68,7 @@ export interface SuggestionFormProps {
     value: string;
     reason: string;
     isVt: boolean;
+    commonTrades?: CommonTradeSubmission[];
   }) => Promise<void>;
   onCancel: () => void;
   onOpenGuidelines: () => void;
@@ -82,6 +94,13 @@ export function SuggestionForm({
   );
   const [reason, setReason] = useState("");
   const [reasonError, setReasonError] = useState<string | null>(null);
+  const [commonTrades, setCommonTrades] = useState<CommonTradeDraft[]>(() => [
+    createEmptyCommonTrade(),
+    createEmptyCommonTrade(),
+  ]);
+  const [commonTradesError, setCommonTradesError] = useState<string | null>(
+    null,
+  );
   const [submitting, setSubmitting] = useState(false);
   const [showItemDropdown, setShowItemDropdown] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
@@ -92,6 +111,16 @@ export function SuggestionForm({
     if (isVtEligible) setIsVt(true);
   }, [isVtEligible]);
   const itemSearchRef = useRef<HTMLDivElement>(null);
+  const itemSearchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (loadingItems) return;
+    const frame = requestAnimationFrame(() => {
+      itemSearchInputRef.current?.focus();
+      setShowItemDropdown(true);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [loadingItems]);
 
   useEffect(() => {
     if (!rateLimitUntil) return;
@@ -124,6 +153,25 @@ export function SuggestionForm({
   const effectiveValidFields = isAutoCalcItem
     ? validFields.filter((f) => f !== "cash_value" && f !== "duped_value")
     : validFields;
+  const requiresCommonTrades = ["cash_value", "duped_value"].includes(field);
+  const selectedItemId = selectedItem ? String(selectedItem.id) : null;
+  const commonTradesValid =
+    !requiresCommonTrades ||
+    (commonTrades.length >= 2 &&
+      commonTrades.every(
+        (trade) =>
+          trade.requesting.length > 0 &&
+          trade.offering.length > 0 &&
+          selectedItemId !== null &&
+          [...trade.requesting, ...trade.offering].filter(
+            (item) => item.id === selectedItemId,
+          ).length === 1,
+      ));
+
+  useEffect(() => {
+    setCommonTrades([createEmptyCommonTrade(), createEmptyCommonTrade()]);
+    setCommonTradesError(null);
+  }, [selectedItem?.id]);
 
   useEffect(() => {
     if (isAutoCalcItem && (field === "cash_value" || field === "duped_value")) {
@@ -157,6 +205,20 @@ export function SuggestionForm({
       toast.error(`Reason must be at least ${minChars} characters.`);
       return;
     }
+    if (!commonTradesValid) {
+      const message =
+        commonTrades.length < 2
+          ? "Add at least two common trades."
+          : commonTrades.some(
+                (trade) =>
+                  trade.requesting.length === 0 || trade.offering.length === 0,
+              )
+            ? "Each common trade needs at least one requesting and one offering item."
+            : `Each common trade must include ${selectedItem.name} on exactly one side.`;
+      setCommonTradesError(message);
+      toast.error(message);
+      return;
+    }
     setConfirmOpen(true);
   };
 
@@ -173,6 +235,9 @@ export function SuggestionForm({
         value: suggestedValue,
         reason: reason.trim(),
         isVt,
+        commonTrades: requiresCommonTrades
+          ? serializeCommonTrades(commonTrades)
+          : undefined,
       });
       setSelectedItem(null);
       setItemSearch("");
@@ -180,6 +245,8 @@ export function SuggestionForm({
       setSuggestedValueError(null);
       setReason("");
       setReasonError(null);
+      setCommonTrades([createEmptyCommonTrade(), createEmptyCommonTrade()]);
+      setCommonTradesError(null);
       setField("cash_value");
       setRateLimitUntil(null);
       setAccountAgeError(null);
@@ -212,9 +279,21 @@ export function SuggestionForm({
         );
       } else if (typeof err === "object" && err !== null && "response" in err) {
         const responseErr = err as {
-          response: { data: { field?: string; message?: string } };
+          response: {
+            data: {
+              error?: string;
+              field?: string;
+              message?: string;
+              invalid_requesting?: unknown[];
+              invalid_offering?: unknown[];
+            };
+          };
         };
-        if (responseErr.response?.data?.field === field) {
+        if (responseErr.response?.data?.error === "invalid_items") {
+          setCommonTradesError(
+            "One or more selected common-trade items are invalid or no longer tradable. Remove them and select valid items.",
+          );
+        } else if (responseErr.response?.data?.field === field) {
           setSuggestedValueError(
             responseErr.response?.data?.message || "Invalid value.",
           );
@@ -246,6 +325,7 @@ export function SuggestionForm({
           </div>
           <div className="relative">
             <input
+              ref={itemSearchInputRef}
               id="item-search"
               type="text"
               placeholder={
@@ -288,7 +368,8 @@ export function SuggestionForm({
                   onClick={() => {
                     setItemSearch("");
                     setSelectedItem(null);
-                    setShowItemDropdown(false);
+                    setShowItemDropdown(true);
+                    itemSearchInputRef.current?.focus();
                   }}
                   className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
                   aria-label="Clear item"
@@ -305,11 +386,13 @@ export function SuggestionForm({
               />
             </div>
           </div>
-          {showItemDropdown && itemSearch.length > 0 && (
+          {showItemDropdown && (
             <div className="border-border-card bg-tertiary-bg absolute z-10 mt-1 w-full overflow-hidden rounded-lg border shadow-lg">
               <div className="border-border-card border-b px-3 py-1.5">
                 <p className="text-secondary-text text-xs">
-                  Results matching &quot;{itemSearch}&quot;
+                  {itemSearch
+                    ? `Results matching “${itemSearch}”`
+                    : "Tradable items"}
                 </p>
               </div>
               <div className="max-h-56 overflow-y-auto">
@@ -320,50 +403,16 @@ export function SuggestionForm({
                 ) : (
                   <>
                     {filteredItems.slice(0, 50).map((item) => (
-                      <button
+                      <SuggestionItemSearchResult
                         key={item.id}
-                        type="button"
-                        onClick={() => {
+                        item={item}
+                        selected={item.id === selectedItem?.id}
+                        onSelect={() => {
                           setSelectedItem(item);
                           setItemSearch(item.name);
                           setShowItemDropdown(false);
                         }}
-                        className="hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
-                      >
-                        <span className="flex min-w-0 flex-1 items-center gap-1">
-                          <span className="text-primary-text min-w-0 truncate">
-                            {item.name}
-                          </span>
-                          {item.id === selectedItem?.id && (
-                            <Icon
-                              icon="heroicons:check"
-                              className="text-link h-4 w-4 shrink-0"
-                            />
-                          )}
-                        </span>
-                        {(() => {
-                          const icon = getCategoryIcon(item.type);
-                          return (
-                            <span
-                              className={`${badgeBase} text-primary-text shrink-0`}
-                              style={{
-                                borderColor: getCategoryColor(item.type),
-                                backgroundColor: `${getCategoryColor(item.type)}22`,
-                              }}
-                            >
-                              {icon && (
-                                <icon.Icon
-                                  className="mr-1 h-3 w-3"
-                                  style={{
-                                    color: getCategoryColor(item.type),
-                                  }}
-                                />
-                              )}
-                              {item.type}
-                            </span>
-                          );
-                        })()}
-                      </button>
+                      />
                     ))}
                     {filteredItems.length > 50 && (
                       <div className="border-border-card border-t px-3 py-1.5">
@@ -410,382 +459,417 @@ export function SuggestionForm({
           )}
         </div>
 
-        {/* Auto-calc banner for HyperShift reference items (587, 713) */}
-        {isAutoCalcItem && (
-          <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-            <span className="text-primary-text">
-              Cash Value and Duped Value for this item are automatically
-              calculated as the sum of the values of all Level{" "}
-              {autoCalcHyperChromeLevel} HyperChromes. They can&apos;t be
-              suggested directly. You can still suggest other fields below.
-            </span>
-          </div>
-        )}
-
-        {/* Field */}
-        <div>
-          <p className="text-primary-text mb-1.5 block text-sm font-medium">
-            Field
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {loadingLimits ? (
-              <div className="text-secondary-text text-sm">
-                Loading fields...
-              </div>
-            ) : (
-              effectiveValidFields.map((f) => (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => {
-                    if (f === field) return;
-                    setField(f);
-                    setSuggestedValue("");
-                    setSuggestedValueError(null);
-                  }}
-                  className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                    field === f
-                      ? "bg-button-info border-button-info text-form-button-text"
-                      : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
-                  }`}
-                >
-                  {fieldLabel(f)}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Current value display */}
         {selectedItem && (
-          <div className="border-border-card bg-tertiary-bg/50 flex items-center gap-3 overflow-hidden rounded-lg border">
-            <div className="bg-tertiary-bg relative h-16 w-24 shrink-0 overflow-hidden">
-              {isVideoItem(selectedItem.name) ? (
-                <video
-                  src={getVideoPath(selectedItem.type, selectedItem.name)}
-                  className="h-full w-full object-cover"
-                  muted
-                  loop
-                />
-              ) : (
-                <Image
-                  src={getItemImagePath(
-                    selectedItem.type,
-                    selectedItem.name,
-                    true,
-                  )}
-                  alt={selectedItem.name}
-                  fill
-                  className="object-cover"
-                  onError={handleImageError}
-                />
-              )}
-            </div>
-            <div className="min-w-0 flex-1 py-3 pr-3">
-              <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
-                Current {fieldLabel(field)}
+          <>
+            {/* Auto-calc banner for HyperShift reference items (587, 713) */}
+            {isAutoCalcItem && (
+              <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                <span className="text-primary-text">
+                  Cash Value and Duped Value for this item are automatically
+                  calculated as the sum of the values of all Level{" "}
+                  {autoCalcHyperChromeLevel} HyperChromes. They can&apos;t be
+                  suggested directly. You can still suggest other fields below.
+                </span>
+              </div>
+            )}
+
+            {/* Field */}
+            <div>
+              <p className="text-primary-text mb-1.5 block text-sm font-medium">
+                Field
               </p>
-              {field === "trend" ? (
-                (() => {
-                  const val =
-                    (selectedItem[field as keyof Item] as string) || "N/A";
-                  const hex = getTrendHexColor(val);
-                  return (
-                    <span
-                      className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border-2 px-2.5 text-xs leading-none font-semibold"
-                      style={{ borderColor: hex }}
+              <div className="flex flex-wrap gap-2">
+                {loadingLimits ? (
+                  <div className="text-secondary-text text-sm">
+                    Loading fields...
+                  </div>
+                ) : (
+                  effectiveValidFields.map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => {
+                        if (f === field) return;
+                        setField(f);
+                        setSuggestedValue("");
+                        setSuggestedValueError(null);
+                      }}
+                      className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                        field === f
+                          ? "bg-button-info border-button-info text-form-button-text"
+                          : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
+                      }`}
                     >
-                      {val}
-                    </span>
-                  );
-                })()
-              ) : ["demand", "duped_demand"].includes(field) ? (
-                (() => {
-                  const val =
-                    (selectedItem[field as keyof Item] as string) || "N/A";
-                  const hex = getDemandHexColor(val);
-                  return (
-                    <span
-                      className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border-2 px-2.5 text-xs leading-none font-semibold"
-                      style={{ borderColor: hex }}
-                    >
-                      {val}
-                    </span>
-                  );
-                })()
-              ) : (
-                <p className="text-primary-text truncate text-base font-bold">
-                  {formatFullValue(
-                    (selectedItem[field as keyof Item] as string) || "N/A",
+                      {fieldLabel(f)}
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Current value display */}
+            {selectedItem && (
+              <div className="border-border-card bg-tertiary-bg/50 flex items-center gap-3 overflow-hidden rounded-lg border">
+                <div className="bg-tertiary-bg relative h-16 w-24 shrink-0 overflow-hidden">
+                  {isVideoItem(selectedItem.name) ? (
+                    <video
+                      src={getVideoPath(selectedItem.type, selectedItem.name)}
+                      className="h-full w-full object-cover"
+                      muted
+                      loop
+                    />
+                  ) : (
+                    <Image
+                      src={getItemImagePath(
+                        selectedItem.type,
+                        selectedItem.name,
+                        true,
+                      )}
+                      alt={selectedItem.name}
+                      fill
+                      className="object-cover"
+                      onError={handleImageError}
+                    />
                   )}
+                </div>
+                <div className="min-w-0 flex-1 py-3 pr-3">
+                  <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
+                    Current {fieldLabel(field)}
+                  </p>
+                  {field === "trend" ? (
+                    (() => {
+                      const val =
+                        (selectedItem[field as keyof Item] as string) || "N/A";
+                      const hex = getTrendHexColor(val);
+                      return (
+                        <span
+                          className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border-2 px-2.5 text-xs leading-none font-semibold"
+                          style={{ borderColor: hex }}
+                        >
+                          {val}
+                        </span>
+                      );
+                    })()
+                  ) : ["demand", "duped_demand"].includes(field) ? (
+                    (() => {
+                      const val =
+                        (selectedItem[field as keyof Item] as string) || "N/A";
+                      const hex = getDemandHexColor(val);
+                      return (
+                        <span
+                          className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border-2 px-2.5 text-xs leading-none font-semibold"
+                          style={{ borderColor: hex }}
+                        >
+                          {val}
+                        </span>
+                      );
+                    })()
+                  ) : (
+                    <p className="text-primary-text truncate text-base font-bold">
+                      {formatFullValue(
+                        (selectedItem[field as keyof Item] as string) || "N/A",
+                      )}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Suggested value */}
+            <div>
+              <label className="text-primary-text mb-1.5 block text-sm font-medium">
+                Suggested {fieldLabel(field)}
+              </label>
+              {field === "trend" ? (
+                loadingLimits ? (
+                  <div className="text-secondary-text text-sm">
+                    Loading options...
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                      <span className="text-primary-text">
+                        Select one of the options below as your suggested trend.
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {(limits?.valid_trends ?? []).map((t) => {
+                        const hex = getTrendHexColor(t);
+                        return (
+                          <button
+                            key={t}
+                            type="button"
+                            onClick={() => setSuggestedValue(t)}
+                            className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                              suggestedValue === t
+                                ? "ring-2"
+                                : "opacity-60 hover:opacity-90"
+                            }`}
+                            style={
+                              {
+                                borderColor: hex,
+                                "--tw-ring-color": hex,
+                              } as React.CSSProperties
+                            }
+                          >
+                            {t}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )
+              ) : ["demand", "duped_demand"].includes(field) ? (
+                loadingLimits ? (
+                  <div className="text-secondary-text text-sm">
+                    Loading options...
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                      <span className="text-primary-text">
+                        Select one of the options below as your suggested{" "}
+                        {fieldLabel(field).toLowerCase()}.
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {(limits?.valid_demands ?? []).map((d) => {
+                        const hex = getDemandHexColor(d);
+                        return (
+                          <button
+                            key={d}
+                            type="button"
+                            onClick={() => setSuggestedValue(d)}
+                            className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                              suggestedValue === d
+                                ? "ring-2"
+                                : "opacity-60 hover:opacity-90"
+                            }`}
+                            style={
+                              {
+                                borderColor: hex,
+                                "--tw-ring-color": hex,
+                              } as React.CSSProperties
+                            }
+                          >
+                            {d}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )
+              ) : field === "notes" ? (
+                <div className="space-y-2">
+                  <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                    <span className="text-primary-text">
+                      Enter the note text you want to suggest for this item.
+                    </span>
+                  </div>
+                  <div>
+                    <textarea
+                      placeholder="Enter the suggested note..."
+                      value={suggestedValue}
+                      onChange={(e) => setSuggestedValue(e.target.value)}
+                      required
+                      rows={3}
+                      className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
+                    />
+                    <div className="mt-1 flex justify-end">
+                      <span
+                        className={`text-xs ${suggestedValue.length > maxNoteLength ? "text-red-400" : "text-secondary-text"}`}
+                      >
+                        {suggestedValue.length} / {maxNoteLength}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {["cash_value", "duped_value"].includes(field) && (
+                    <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                      <span className="text-primary-text">
+                        Enter a numeric value. Supported formats: 50m, 500k,
+                        10,000,000.
+                      </span>
+                    </div>
+                  )}
+                  <input
+                    type="text"
+                    placeholder={
+                      ["cash_value", "duped_value"].includes(field)
+                        ? "e.g. 50m, 500m, 500k, 10,000,000"
+                        : `Enter suggested ${fieldLabel(field).toLowerCase()}...`
+                    }
+                    value={suggestedValue}
+                    onChange={(e) => {
+                      setSuggestedValue(e.target.value);
+                      const isNumericField = [
+                        "cash_value",
+                        "duped_value",
+                      ].includes(field);
+                      setSuggestedValueError(
+                        isNumericField && e.target.value.trim()
+                          ? (parseValueInput(e.target.value, limits?.max_cash)
+                              .error ?? null)
+                          : null,
+                      );
+                    }}
+                    required
+                    className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
+                  />
+                </div>
+              )}
+              {suggestedValueError && (
+                <p className="mt-1 text-xs text-red-400">
+                  {suggestedValueError}
                 </p>
               )}
             </div>
-          </div>
-        )}
 
-        {/* Suggested value */}
-        <div>
-          <label className="text-primary-text mb-1.5 block text-sm font-medium">
-            Suggested {fieldLabel(field)}
-          </label>
-          {field === "trend" ? (
-            loadingLimits ? (
-              <div className="text-secondary-text text-sm">
-                Loading options...
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                  <span className="text-primary-text">
-                    Select one of the options below as your suggested trend.
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {(limits?.valid_trends ?? []).map((t) => {
-                    const hex = getTrendHexColor(t);
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setSuggestedValue(t)}
-                        className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
-                          suggestedValue === t
-                            ? "ring-2"
-                            : "opacity-60 hover:opacity-90"
-                        }`}
-                        style={
-                          {
-                            borderColor: hex,
-                            "--tw-ring-color": hex,
-                          } as React.CSSProperties
-                        }
-                      >
-                        {t}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )
-          ) : ["demand", "duped_demand"].includes(field) ? (
-            loadingLimits ? (
-              <div className="text-secondary-text text-sm">
-                Loading options...
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                  <span className="text-primary-text">
-                    Select one of the options below as your suggested{" "}
-                    {fieldLabel(field).toLowerCase()}.
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {(limits?.valid_demands ?? []).map((d) => {
-                    const hex = getDemandHexColor(d);
-                    return (
-                      <button
-                        key={d}
-                        type="button"
-                        onClick={() => setSuggestedValue(d)}
-                        className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
-                          suggestedValue === d
-                            ? "ring-2"
-                            : "opacity-60 hover:opacity-90"
-                        }`}
-                        style={
-                          {
-                            borderColor: hex,
-                            "--tw-ring-color": hex,
-                          } as React.CSSProperties
-                        }
-                      >
-                        {d}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )
-          ) : field === "notes" ? (
-            <div className="space-y-2">
-              <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                <span className="text-primary-text">
-                  Enter the note text you want to suggest for this item.
-                </span>
-              </div>
-              <div>
-                <textarea
-                  placeholder="Enter the suggested note..."
-                  value={suggestedValue}
-                  onChange={(e) => setSuggestedValue(e.target.value)}
-                  required
-                  rows={3}
-                  className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
-                />
-                <div className="mt-1 flex justify-end">
-                  <span
-                    className={`text-xs ${suggestedValue.length > maxNoteLength ? "text-red-400" : "text-secondary-text"}`}
-                  >
-                    {suggestedValue.length} / {maxNoteLength}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {["cash_value", "duped_value"].includes(field) && (
-                <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                  <span className="text-primary-text">
-                    Enter a numeric value. Supported formats: 50m, 500k,
-                    10,000,000.
-                  </span>
-                </div>
-              )}
-              <input
-                type="text"
-                placeholder={
-                  ["cash_value", "duped_value"].includes(field)
-                    ? "e.g. 50m, 500m, 500k, 10,000,000"
-                    : `Enter suggested ${fieldLabel(field).toLowerCase()}...`
-                }
-                value={suggestedValue}
+            {requiresCommonTrades && (
+              <CommonTradesEditor
+                items={items}
+                trades={commonTrades}
+                suggestedItem={selectedItem}
+                onChange={(nextTrades) => {
+                  setCommonTrades(nextTrades);
+                  setCommonTradesError(null);
+                }}
+                error={commonTradesError}
+              />
+            )}
+
+            {/* Reason */}
+            <div>
+              <label className="text-primary-text mb-1.5 block text-sm font-medium">
+                Reason for Suggested {fieldLabel(field)}
+              </label>
+              <textarea
+                placeholder="Explain why this value should change. Include evidence, market observations, or trade history. Must be at least 350 characters."
+                value={reason}
                 onChange={(e) => {
-                  setSuggestedValue(e.target.value);
-                  const isNumericField = ["cash_value", "duped_value"].includes(
-                    field,
-                  );
-                  setSuggestedValueError(
-                    isNumericField && e.target.value.trim()
-                      ? (parseValueInput(e.target.value, limits?.max_cash)
-                          .error ?? null)
-                      : null,
-                  );
+                  setReason(e.target.value);
+                  setReasonError(null);
                 }}
                 required
-                className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
+                rows={5}
+                className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none${reasonError ? " border-border-error!" : ""}`}
               />
+              <div className="mt-1 flex items-center justify-between">
+                {reasonError ? (
+                  <p className="text-form-error text-xs">{reasonError}</p>
+                ) : (
+                  <span />
+                )}
+                <span
+                  className={`text-xs ${reason.length > maxChars ? "text-red-400" : "text-secondary-text"}`}
+                >
+                  {reason.length} / {minChars}–{maxChars}
+                </span>
+              </div>
             </div>
-          )}
-          {suggestedValueError && (
-            <p className="mt-1 text-xs text-red-400">{suggestedValueError}</p>
-          )}
-        </div>
 
-        {/* Reason */}
-        <div>
-          <label className="text-primary-text mb-1.5 block text-sm font-medium">
-            Reason for Suggested {fieldLabel(field)}
-          </label>
-          <textarea
-            placeholder="Explain why this value should change. Include evidence, market observations, or trade history. Must be at least 350 characters."
-            value={reason}
-            onChange={(e) => {
-              setReason(e.target.value);
-              setReasonError(null);
-            }}
-            required
-            rows={5}
-            className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none${reasonError ? " border-border-error!" : ""}`}
-          />
-          <div className="mt-1 flex items-center justify-between">
-            {reasonError ? (
-              <p className="text-form-error text-xs">{reasonError}</p>
-            ) : (
-              <span />
-            )}
-            <span
-              className={`text-xs ${reason.length > maxChars ? "text-red-400" : "text-secondary-text"}`}
-            >
-              {reason.length} / {minChars}–{maxChars}
-            </span>
-          </div>
-        </div>
-
-        {accountAgeError && (
-          <div className="border-border-error bg-button-danger/10 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
-            <Icon
-              icon="material-symbols:error-outline-rounded"
-              className="h-4 w-4 shrink-0 text-red-400"
-              inline
-            />
-            <span className="text-primary-text">{accountAgeError}</span>
-          </div>
-        )}
-
-        <RateLimitBanner
-          until={rateLimitUntil}
-          label="You're submitting too fast."
-        />
-
-        {isVtEligible && (
-          <div>
-            <p className="text-primary-text mb-1.5 block text-sm font-medium">
-              Visibility
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setIsVt(false)}
-                className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                  !isVt
-                    ? "bg-button-info border-button-info text-form-button-text"
-                    : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
-                }`}
-              >
-                Public
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsVt(true)}
-                className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                  isVt
-                    ? "bg-button-info border-button-info text-form-button-text"
-                    : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
-                }`}
-              >
-                VT Only
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            size="sm"
-            disabled={
-              submitting ||
-              !!rateLimitUntil ||
-              !selectedItem ||
-              !suggestedValue.trim() ||
-              (field === "notes" && suggestedValue.length > maxNoteLength) ||
-              reason.length < minChars ||
-              reason.length > maxChars
-            }
-            className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
-          >
-            {submitting ? (
-              <>
-                <Spinner className="h-4 w-4" />
-                Submitting...
-              </>
-            ) : (
-              <>
+            {accountAgeError && (
+              <div className="border-border-error bg-button-danger/10 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
                 <Icon
-                  icon="material-symbols:send-rounded"
-                  className="h-4 w-4"
+                  icon="material-symbols:error-outline-rounded"
+                  className="h-4 w-4 shrink-0 text-red-400"
                   inline
                 />
-                Submit Suggestion
-              </>
+                <span className="text-primary-text">{accountAgeError}</span>
+              </div>
             )}
-          </Button>
-        </div>
+
+            <RateLimitBanner
+              until={rateLimitUntil}
+              label="You're submitting too fast."
+            />
+
+            {isVtEligible && (
+              <div>
+                <p className="text-primary-text mb-1.5 block text-sm font-medium">
+                  Visibility
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsVt(false)}
+                    className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                      !isVt
+                        ? "bg-button-info border-button-info text-form-button-text"
+                        : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
+                    }`}
+                  >
+                    Public
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsVt(true)}
+                    className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                      isVt
+                        ? "bg-button-info border-button-info text-form-button-text"
+                        : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
+                    }`}
+                  >
+                    VT Only
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onCancel}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={
+                  submitting ||
+                  !!rateLimitUntil ||
+                  !selectedItem ||
+                  !suggestedValue.trim() ||
+                  (field === "notes" &&
+                    suggestedValue.length > maxNoteLength) ||
+                  reason.length < minChars ||
+                  reason.length > maxChars ||
+                  !commonTradesValid
+                }
+                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
+              >
+                {submitting ? (
+                  <>
+                    <Spinner className="h-4 w-4" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Icon
+                      icon="material-symbols:send-rounded"
+                      className="h-4 w-4"
+                      inline
+                    />
+                    Submit Suggestion
+                  </>
+                )}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {!selectedItem && (
+          <div className="flex justify-end">
+            <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
 
       {/* Confirmation dialog */}
@@ -795,7 +879,7 @@ export function SuggestionForm({
       >
         <DialogContent
           showClose
-          className="bg-secondary-bg flex max-h-[90dvh] max-w-lg flex-col overflow-hidden rounded-lg p-0 backdrop-blur-none"
+          className="bg-secondary-bg flex max-h-[90dvh] max-w-2xl flex-col overflow-hidden rounded-lg p-0 backdrop-blur-none"
           aria-describedby={undefined}
         >
           {/* Scrollable area */}
@@ -854,48 +938,76 @@ export function SuggestionForm({
               </div>
 
               {/* Item + type + field + visibility meta */}
-              <div className="space-y-1.5">
-                <p className="text-primary-text font-semibold">
-                  {selectedItem?.name ?? "—"}
-                </p>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {selectedItem &&
-                    (() => {
-                      const icon = getCategoryIcon(selectedItem.type);
-                      const color = getCategoryColor(selectedItem.type);
-                      return (
-                        <span
-                          className={`${badgeBase} text-primary-text`}
-                          style={{
-                            borderColor: color,
-                            backgroundColor: `${color}22`,
-                          }}
-                        >
-                          {icon && (
-                            <icon.Icon
-                              className="mr-1.5 h-3 w-3"
-                              style={{ color }}
-                            />
-                          )}
-                          {selectedItem.type}
-                        </span>
-                      );
-                    })()}
-                  <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium">
-                    {fieldLabel(field)}
-                  </span>
-                  {isVtEligible && isVt && (
-                    <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium">
-                      <Image
-                        src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
-                        alt="VT"
-                        width={14}
-                        height={14}
-                        className="shrink-0"
+              <div className="flex items-center gap-3">
+                {selectedItem && (
+                  <div className="bg-tertiary-bg border-border-card relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border">
+                    {isVideoItem(selectedItem.name) ? (
+                      <video
+                        src={getVideoPath(selectedItem.type, selectedItem.name)}
+                        className="h-full w-full object-cover"
+                        muted
+                        loop
+                        autoPlay
                       />
-                      VT Only
+                    ) : (
+                      <Image
+                        src={getItemImagePath(
+                          selectedItem.type,
+                          selectedItem.name,
+                          true,
+                        )}
+                        alt={selectedItem.name}
+                        fill
+                        sizes="96px"
+                        className="object-cover"
+                        onError={handleImageError}
+                      />
+                    )}
+                  </div>
+                )}
+                <div className="min-w-0 space-y-1.5">
+                  <p className="text-primary-text truncate font-semibold">
+                    {selectedItem?.name ?? "—"}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {selectedItem &&
+                      (() => {
+                        const icon = getCategoryIcon(selectedItem.type);
+                        const color = getCategoryColor(selectedItem.type);
+                        return (
+                          <span
+                            className={`${badgeBase} text-primary-text`}
+                            style={{
+                              borderColor: color,
+                              backgroundColor: `${color}22`,
+                            }}
+                          >
+                            {icon && (
+                              <icon.Icon
+                                className="mr-1.5 h-3 w-3"
+                                style={{ color }}
+                              />
+                            )}
+                            {selectedItem.type}
+                          </span>
+                        );
+                      })()}
+                    <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium">
+                      {fieldLabel(field)}
                     </span>
-                  )}
+                    {isVtEligible && isVt && (
+                      <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium">
+                        <Image
+                          src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
+                          alt="VT"
+                          width={14}
+                          height={14}
+                          className="shrink-0"
+                        />
+                        VT Only
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -949,6 +1061,15 @@ export function SuggestionForm({
                   {reason.trim()}
                 </p>
               </div>
+
+              {requiresCommonTrades && (
+                <CommonTradesDisplay
+                  trades={commonTrades}
+                  showTradeLabels
+                  showItemImages={false}
+                  showItemTypes
+                />
+              )}
             </div>
           </div>
 

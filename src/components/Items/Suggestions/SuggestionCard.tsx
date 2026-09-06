@@ -29,6 +29,7 @@ import {
   stripHtml,
 } from "@/components/Items/Suggestions/shared";
 import type { Suggestion } from "@/components/Items/Suggestions/types";
+import { CommonTradesDisplay } from "@/components/Items/Suggestions/CommonTrades";
 import { VoteRateLimitBanner } from "@/components/Items/Suggestions/VoteRateLimitBanner";
 
 interface SuggestionCardProps {
@@ -361,6 +362,8 @@ export function SuggestionCard({
             <span>No reason provided.</span>
           )}
         </div>
+
+        <CommonTradesDisplay trades={suggestion.common_trades} />
 
         {/* Footer */}
         <div className="relative z-10 mt-auto pt-1">

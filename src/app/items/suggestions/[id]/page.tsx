@@ -43,6 +43,8 @@ import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import ItemValueChart, {
   type ValueHistory,
 } from "@/components/Items/ItemValueChart";
+import { CommonTradesDisplay } from "@/components/Items/Suggestions/CommonTrades";
+import type { CommonTrade } from "@/components/Items/Suggestions/types";
 
 interface UserSettings {
   custom_avatar?: boolean;
@@ -92,6 +94,7 @@ interface Suggestion {
   current_value: string;
   suggested_value: string;
   reason: string;
+  common_trades?: CommonTrade[] | null;
   status: string;
   upvotes: number;
   downvotes: number;
@@ -1111,6 +1114,10 @@ export default function ValueSuggestionDetailPage() {
                             No reason provided.
                           </p>
                         )}
+                        <CommonTradesDisplay
+                          trades={suggestion.common_trades}
+                          className="border-border-card mt-5 border-t pt-5"
+                        />
                       </div>
                     </div>
                   </div>

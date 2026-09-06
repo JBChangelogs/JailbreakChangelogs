@@ -32,6 +32,7 @@ import { useSuggestionSort } from "@/hooks/useSuggestionSort";
 import { useSuggestionVoting } from "@/hooks/useSuggestionVoting";
 import { useSuggestionsFeed } from "@/hooks/useSuggestionsFeed";
 import type {
+  CommonTradeSubmission,
   LeaderboardEntry,
   SuggestionLimits,
 } from "@/components/Items/Suggestions/types";
@@ -306,6 +307,7 @@ export default function ValueSuggestionsPage() {
     value: string;
     reason: string;
     isVt: boolean;
+    commonTrades?: CommonTradeSubmission[];
   }) => {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
@@ -319,6 +321,9 @@ export default function ValueSuggestionsPage() {
         reason: payload.reason,
       },
     };
+    if (payload.commonTrades?.length) {
+      body.common_trades = payload.commonTrades;
+    }
     if (payload.isVt) body.is_vt = true;
     const res = await fetch(url, {
       method: "POST",
@@ -359,6 +364,12 @@ export default function ValueSuggestionsPage() {
       }
       if (data?.error === "profanity_detected") {
         throw new ProfanityError(data.flagged || [], data.message);
+      }
+      if (data?.error === "invalid_items") {
+        toast.error(
+          "Some common-trade items are invalid or no longer tradable.",
+        );
+        throw { response: { status: res.status, data } };
       }
       toast.error(
         data?.message ?? data?.error ?? "Failed to submit suggestion.",

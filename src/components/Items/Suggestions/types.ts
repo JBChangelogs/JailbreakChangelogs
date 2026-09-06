@@ -1,4 +1,22 @@
 import type { Item } from "@/types/index";
+import type { TradeItem } from "@/types/trading";
+
+export interface CommonTradeSubmissionItem {
+  id: string;
+  amount: number;
+  og?: boolean;
+  duped?: boolean;
+}
+
+export interface CommonTradeSubmission {
+  requesting: CommonTradeSubmissionItem[];
+  offering: CommonTradeSubmissionItem[];
+}
+
+export interface CommonTrade {
+  requesting: TradeItem[];
+  offering: TradeItem[];
+}
 
 export interface SuggestionLimits {
   min_characters: number;
@@ -45,6 +63,7 @@ export interface Suggestion {
   current_value: string;
   suggested_value: string;
   reason: string;
+  common_trades?: CommonTrade[] | null;
   status: string;
   upvotes: number;
   downvotes: number;
