@@ -33,6 +33,7 @@ import type { UserData } from "@/types/auth";
 import { Button } from "@/components/ui/button";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -247,12 +248,14 @@ const ServerList: React.FC<{
       });
 
       try {
-        const userResponse = await fetch(
-          `/api/users/batch?ids=${encodeURIComponent(idsToFetch.join(","))}`,
-          {
-            cache: "no-store",
-          },
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/users/get/batch?ids=${idsToFetch.map(encodeURIComponent).join(",")}`,
         );
+        const userResponse = await fetch(url, {
+          cache: "no-store",
+          headers,
+        });
 
         if (userResponse.ok) {
           const userDataArray = (await userResponse.json()) as UserData[];

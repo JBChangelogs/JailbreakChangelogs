@@ -82,8 +82,13 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
 
     let ignore = false;
 
-    fetch(`/api/users/batch?ids=${encodeURIComponent(id)}`, {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      `/users/get/batch?ids=${encodeURIComponent(id)}`,
+    );
+    fetch(url, {
       cache: "no-store",
+      headers,
     })
       .then(async (res) => {
         if (!res.ok) return;

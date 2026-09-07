@@ -541,10 +541,11 @@ export default function MyReports() {
       ];
       if (ids.length > 0) {
         try {
-          const usersRes = await fetch(
-            `/api/users/batch?ids=${encodeURIComponent(ids.join(","))}`,
-            { cache: "no-store" },
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL,
+            `/users/get/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
           );
+          const usersRes = await fetch(url, { cache: "no-store", headers });
           if (usersRes.ok) {
             const usersArr = (await usersRes.json()) as UserData[];
             setReportedUsers(
