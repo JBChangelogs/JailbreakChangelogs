@@ -491,6 +491,8 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
                           />
 
+                          {/* TODO: priority/description are arbitrary until comments API's
+                          _attach_flags joins feature_flags for index/description */}
                           <UserBadges
                             usernumber={
                               userData[comment.user_id]?.usernumber ?? 0
@@ -1170,6 +1172,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                           user={replyUser}
                                           className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
                                         />
+                                        {/* TODO: see priority/description TODO above */}
                                         <UserBadges
                                           usernumber={
                                             replyUser?.usernumber ?? 0
