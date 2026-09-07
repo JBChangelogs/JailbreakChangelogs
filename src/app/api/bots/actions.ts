@@ -1,46 +1,19 @@
 "use server";
 
 import {
-  BASE_API_URL,
   fetchConnectedBots,
   fetchQueueInfo,
   fetchRobloxUsersBatch,
 } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
-import { getAuthToken } from "@/utils/api/routeAuth";
 
 const log = createLogger("API");
 
-async function canViewPrivateBotData() {
-  const token = await getAuthToken();
-  if (!token || !BASE_API_URL) return false;
-
-  try {
-    const response = await fetch(`${BASE_API_URL}/users/me`, {
-      cache: "no-store",
-      headers: { Authorization: token },
-    });
-    if (!response.ok) return false;
-
-    const user = (await response.json()) as {
-      flags?: Array<{ flag?: string | null; enabled?: boolean }>;
-    };
-    return (
-      user.flags?.some(
-        (flag) => flag.flag === "is_owner" && flag.enabled !== false,
-      ) ?? false
-    );
-  } catch {
-    return false;
-  }
-}
-
 export async function pollBotsData() {
   try {
-    const includePrivate = await canViewPrivateBotData();
     const [botsData, queueInfo] = await Promise.all([
-      fetchConnectedBots({ includePrivate }),
-      fetchQueueInfo({ includePrivate }),
+      fetchConnectedBots({ includePrivate: false }),
+      fetchQueueInfo({ includePrivate: false }),
     ]);
 
     return {
@@ -127,8 +100,7 @@ export async function fetchRobloxDataForUser(userId: string) {
 
 export async function pollConnectedBots() {
   try {
-    const includePrivate = await canViewPrivateBotData();
-    const botsData = await fetchConnectedBots({ includePrivate });
+    const botsData = await fetchConnectedBots({ includePrivate: false });
 
     return {
       success: true,
@@ -145,8 +117,7 @@ export async function pollConnectedBots() {
 
 export async function pollQueueInfo() {
   try {
-    const includePrivate = await canViewPrivateBotData();
-    const queueInfo = await fetchQueueInfo({ includePrivate });
+    const queueInfo = await fetchQueueInfo({ includePrivate: false });
 
     return {
       success: true,
