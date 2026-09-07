@@ -39,6 +39,8 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { RejectionInfo } from "@/components/Items/Suggestions/RejectionInfo";
+import type { CommonTrade } from "@/components/Items/Suggestions/types";
 
 const log = createLogger("UI");
 
@@ -72,7 +74,11 @@ interface Suggestion {
   current_value: string;
   suggested_value: string;
   reason: string;
+  common_trades?: CommonTrade[] | null;
   status: string;
+  rejection_reason?: string | null;
+  rejection_proof?: string[] | null;
+  is_vt: number;
   upvotes: number;
   downvotes: number;
   created_at: number;
@@ -612,13 +618,31 @@ export default function UserValueSuggestionsTab({
                         )}
                       </Link>
                       <div className="relative z-10 min-w-0">
-                        <Link
-                          href={`/items/suggestions/${suggestion.id}`}
-                          prefetch={false}
-                          className="text-primary-text hover:text-link text-base font-bold transition-colors"
-                        >
-                          {item ? item.name : `Item #${suggestion.item_id}`}
-                        </Link>
+                        <div className="flex items-center gap-1.5">
+                          <Link
+                            href={`/items/suggestions/${suggestion.id}`}
+                            prefetch={false}
+                            className="text-primary-text hover:text-link text-base font-bold transition-colors"
+                          >
+                            {item ? item.name : `Item #${suggestion.item_id}`}
+                          </Link>
+                          {suggestion.is_vt === 1 && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Image
+                                  src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
+                                  alt="Value Team"
+                                  width={18}
+                                  height={18}
+                                  className="shrink-0"
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Value Team Suggestion
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
                         <p className="text-secondary-text text-xs">
                           Suggestion #{suggestion.id}
                         </p>
@@ -793,6 +817,32 @@ export default function UserValueSuggestionsTab({
                           {isExpanded ? "Show Less" : "Read More"}
                         </button>
                       )}
+                    </div>
+                  )}
+
+                  {!!suggestion.common_trades?.length && (
+                    <Link
+                      href={`/items/suggestions/${suggestion.id}`}
+                      prefetch={false}
+                      className="text-link hover:text-link-hover relative z-10 flex items-center gap-1.5 text-xs font-medium transition-colors"
+                    >
+                      <Icon
+                        icon="material-symbols:swap-horiz-rounded"
+                        className="h-3.5 w-3.5"
+                        inline
+                      />
+                      {suggestion.common_trades.length} Common Trade
+                      {suggestion.common_trades.length > 1 ? "s" : ""} — view
+                      details
+                    </Link>
+                  )}
+
+                  {suggestion.status === "rejected" && (
+                    <div className="relative z-10">
+                      <RejectionInfo
+                        reason={suggestion.rejection_reason}
+                        proof={suggestion.rejection_proof}
+                      />
                     </div>
                   )}
 

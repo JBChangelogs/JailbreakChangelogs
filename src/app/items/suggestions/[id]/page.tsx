@@ -44,6 +44,7 @@ import ItemValueChart, {
   type ValueHistory,
 } from "@/components/Items/ItemValueChart";
 import { CommonTradesDisplay } from "@/components/Items/Suggestions/CommonTrades";
+import { RejectionInfo } from "@/components/Items/Suggestions/RejectionInfo";
 import { ReportSuggestionModal } from "@/components/Items/Suggestions/ReportSuggestionModal";
 import type { CommonTrade } from "@/components/Items/Suggestions/types";
 import { useSuggestionReporting } from "@/hooks/useSuggestionReporting";
@@ -98,6 +99,8 @@ interface Suggestion {
   reason: string;
   common_trades?: CommonTrade[] | null;
   status: string;
+  rejection_reason?: string | null;
+  rejection_proof?: string[] | null;
   upvotes: number;
   downvotes: number;
   is_vt: number;
@@ -960,6 +963,13 @@ export default function ValueSuggestionDetailPage() {
                     />
                   </div>
                 </div>
+
+                {suggestion.status === "rejected" && (
+                  <RejectionInfo
+                    reason={suggestion.rejection_reason}
+                    proof={suggestion.rejection_proof}
+                  />
+                )}
 
                 {/* ── Content + Sidebar ── */}
                 <div className="space-y-5">

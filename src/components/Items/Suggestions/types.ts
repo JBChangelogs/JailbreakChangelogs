@@ -65,6 +65,8 @@ export interface Suggestion {
   reason: string;
   common_trades?: CommonTrade[] | null;
   status: string;
+  rejection_reason?: string | null;
+  rejection_proof?: string[] | null;
   upvotes: number;
   downvotes: number;
   is_vt: number;
