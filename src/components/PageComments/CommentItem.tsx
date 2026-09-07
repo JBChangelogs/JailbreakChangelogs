@@ -10,7 +10,6 @@ import React, {
 import { CommentData } from "@/utils/api/api";
 import { Icon } from "../ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
-import Image from "next/image";
 import {
   Tooltip,
   TooltipContent,
@@ -36,6 +35,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "../ui/button";
 import { UserAvatar } from "@/utils/ui/avatar";
+import { UserBadges } from "@/components/Profile/UserBadges";
 import Link from "next/link";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
@@ -491,24 +491,16 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
                           />
 
-                          {userData[comment.user_id]?.premiumtype >= 1 &&
-                            userData[comment.user_id]?.premiumtype <= 3 && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Image
-                                    src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${userData[comment.user_id].premiumtype}.svg`}
-                                    alt={`Supporter Type ${userData[comment.user_id].premiumtype}`}
-                                    width={16}
-                                    height={16}
-                                    className="shrink-0 cursor-pointer"
-                                  />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  Supporter Type{" "}
-                                  {userData[comment.user_id].premiumtype}
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
+                          <UserBadges
+                            usernumber={
+                              userData[comment.user_id]?.usernumber ?? 0
+                            }
+                            premiumType={userData[comment.user_id]?.premiumtype}
+                            flags={userData[comment.user_id]?.flags}
+                            size="sm"
+                            noContainer
+                            limit={1}
+                          />
 
                           {/* OP badge for trade ad authors and value suggestion submitters */}
                           {type === "tradev2" &&
@@ -1177,6 +1169,16 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                           name={replyDisplayName}
                                           user={replyUser}
                                           className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                        />
+                                        <UserBadges
+                                          usernumber={
+                                            replyUser?.usernumber ?? 0
+                                          }
+                                          premiumType={replyUser?.premiumtype}
+                                          flags={replyUser?.flags}
+                                          size="sm"
+                                          noContainer
+                                          limit={1}
                                         />
                                         {type === "vsuggestion" &&
                                           suggestion &&

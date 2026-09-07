@@ -55,7 +55,7 @@ import {
   DupeOwnerSearchResult,
   DupeItemSearchResult,
 } from "@/types";
-import { UserData } from "@/types/auth";
+import { UserData, UserFlag } from "@/types/auth";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
@@ -1351,7 +1351,7 @@ export interface CommentAuthor {
     dms_allowed: boolean;
     allow_gifting: boolean;
   } | null;
-  flags?: Array<{ flag: string | null; enabled?: boolean }>;
+  flags?: UserFlag[];
 }
 
 export interface ReactionUser {

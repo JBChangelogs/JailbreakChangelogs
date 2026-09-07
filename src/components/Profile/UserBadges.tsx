@@ -25,6 +25,7 @@ interface UserBadgesProps {
   disableTooltips?: boolean;
   customBgClass?: string;
   noContainer?: boolean;
+  limit?: number;
 }
 
 const BADGE_BASE_URL =
@@ -40,6 +41,7 @@ export const UserBadges = ({
   disableTooltips = false,
   customBgClass,
   noContainer = false,
+  limit,
 }: UserBadgesProps) => {
   const [failedFlagCount, setFailedFlagCount] = useState(0);
   const badgeSize = { sm: 16, md: 20, lg: 24 }[size];
@@ -219,18 +221,21 @@ export const UserBadges = ({
     );
   }
 
-  if (badges.length === 0 && !guildBadge) return null;
+  const visibleBadges =
+    typeof limit === "number" ? badges.slice(0, limit) : badges;
+
+  if (visibleBadges.length === 0 && !guildBadge) return null;
 
   return (
     <div className={`inline-flex items-stretch gap-2 ${className}`}>
-      {badges.length - failedFlagCount > 0 &&
+      {visibleBadges.length - failedFlagCount > 0 &&
         (noContainer ? (
-          <div className="flex items-center gap-1">{badges}</div>
+          <div className="flex items-center gap-1">{visibleBadges}</div>
         ) : (
           <div
             className={`${customBgClass || "bg-tertiary-bg"} border-border-card inline-flex items-center gap-2 rounded-lg border px-2.5 ${containerHeight}`}
           >
-            {badges}
+            {visibleBadges}
           </div>
         ))}
       {guildBadge}
