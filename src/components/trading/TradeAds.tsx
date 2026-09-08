@@ -466,7 +466,7 @@ export default function TradeAds({
     : items;
 
   const normalizeCreatedTrade = useCallback(
-    (raw: unknown): TradeAd | null => {
+    (raw: unknown, allowCurrentUserFallback = false): TradeAd | null => {
       if (!raw || typeof raw !== "object") return null;
       const payload = raw as Record<string, unknown>;
       const nestedTradeCandidate =
@@ -598,29 +598,41 @@ export default function TradeAds({
                 roblox_id:
                   typeof rawUser.roblox_id === "string"
                     ? rawUser.roblox_id
-                    : user?.roblox_id,
+                    : allowCurrentUserFallback
+                      ? user?.roblox_id
+                      : undefined,
                 roblox_username:
                   typeof rawUser.roblox_username === "string"
                     ? rawUser.roblox_username
-                    : user?.roblox_username,
+                    : allowCurrentUserFallback
+                      ? user?.roblox_username
+                      : undefined,
                 roblox_display_name:
                   typeof rawUser.roblox_display_name === "string"
                     ? rawUser.roblox_display_name
-                    : user?.roblox_display_name,
+                    : allowCurrentUserFallback
+                      ? user?.roblox_display_name
+                      : undefined,
                 roblox_avatar:
                   typeof rawUser.roblox_avatar === "string"
                     ? rawUser.roblox_avatar
-                    : user?.roblox_avatar,
+                    : allowCurrentUserFallback
+                      ? user?.roblox_avatar
+                      : undefined,
                 premiumtype:
                   typeof rawUser.premiumtype === "number"
                     ? rawUser.premiumtype
-                    : (user?.premiumtype ?? 0),
+                    : allowCurrentUserFallback
+                      ? (user?.premiumtype ?? 0)
+                      : 0,
                 usernumber:
                   typeof rawUser.usernumber === "number"
                     ? rawUser.usernumber
-                    : user?.usernumber,
+                    : allowCurrentUserFallback
+                      ? user?.usernumber
+                      : undefined,
               }
-            : user
+            : allowCurrentUserFallback && user
               ? {
                   id: user.id,
                   username: user.username,
@@ -648,7 +660,7 @@ export default function TradeAds({
         lastFetchedTradeAdsPageRef.current = 1;
         await refreshTradeAds(1);
       } catch {
-        const normalized = normalizeCreatedTrade(createdTradeRaw);
+        const normalized = normalizeCreatedTrade(createdTradeRaw, true);
         if (normalized) {
           setTradeAds((prev) => {
             const withoutDuplicate = prev.filter(

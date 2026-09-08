@@ -138,6 +138,9 @@ export default function TradeDetailsDataClient({
   const [status, setStatus] = useState<
     "loading" | "not_found" | "error" | "unauthorized" | "forbidden"
   >("loading");
+  const [notFoundReason, setNotFoundReason] = useState<
+    "expired" | "unavailable" | null
+  >(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -165,7 +168,10 @@ export default function TradeDetailsDataClient({
         });
 
         if (response.status === 404) {
-          if (!isCancelled) setStatus("not_found");
+          if (!isCancelled) {
+            setNotFoundReason(null);
+            setStatus("not_found");
+          }
           return;
         }
 
@@ -194,7 +200,12 @@ export default function TradeDetailsDataClient({
           !normalizedTrade.user.roblox_id ||
           !normalizedTrade.user.roblox_username
         ) {
-          if (!isCancelled) setStatus("not_found");
+          if (!isCancelled) {
+            setNotFoundReason(
+              normalizedTrade.expired === 1 ? "expired" : "unavailable",
+            );
+            setStatus("not_found");
+          }
           return;
         }
 
@@ -238,7 +249,9 @@ export default function TradeDetailsDataClient({
 
     const description =
       status === "not_found"
-        ? "This trade is unavailable or has expired. Here are some helpful links:"
+        ? notFoundReason === "expired"
+          ? "This trade has expired. Here are some helpful links:"
+          : "This trade is unavailable. Here are some helpful links:"
         : status === "unauthorized"
           ? "You need to sign in to view trade ads. Here are some helpful links:"
           : status === "forbidden"
