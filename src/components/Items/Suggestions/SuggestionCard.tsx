@@ -37,10 +37,8 @@ interface SuggestionCardProps {
   isVoting: boolean;
   votingType?: "upvote" | "downvote";
   voteRateLimitUntil?: number;
-  canEdit: boolean;
   onVote: (type: "upvote" | "downvote", event: MouseEvent) => void;
   onOpenVoters: (tab: "up" | "down", event: MouseEvent) => void;
-  onOpenEdit: (event: MouseEvent) => void;
   onOpenReport: (event: MouseEvent) => void;
 }
 
@@ -50,10 +48,8 @@ export function SuggestionCard({
   isVoting,
   votingType,
   voteRateLimitUntil,
-  canEdit,
   onVote,
   onOpenVoters,
-  onOpenEdit,
   onOpenReport,
 }: SuggestionCardProps) {
   const item = suggestion.item;
@@ -383,24 +379,6 @@ export function SuggestionCard({
               Suggested by
             </p>
             <div className="flex items-center gap-1">
-              {canEdit && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={onOpenEdit}
-                      className="text-secondary-text hover:text-primary-text shrink-0 cursor-pointer rounded p-1 transition-colors"
-                    >
-                      <Icon
-                        icon="material-symbols:edit-outline-rounded"
-                        className="h-4 w-4"
-                        inline
-                      />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Update reason</TooltipContent>
-                </Tooltip>
-              )}
               {suggestion.user.id !== userId && (
                 <Tooltip>
                   <TooltipTrigger asChild>

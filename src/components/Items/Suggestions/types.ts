@@ -1,5 +1,4 @@
 import type { Item } from "@/types/index";
-import type { TradeItem } from "@/types/trading";
 
 export interface CommonTradeSubmissionItem {
   id: string;
@@ -13,9 +12,20 @@ export interface CommonTradeSubmission {
   offering: CommonTradeSubmissionItem[];
 }
 
+export interface CommonTradeItem {
+  id: string | number;
+  name?: string;
+  type?: string;
+  amount?: number;
+  og?: boolean;
+  duped?: boolean;
+  isOG?: boolean;
+  isDuped?: boolean;
+}
+
 export interface CommonTrade {
-  requesting: TradeItem[];
-  offering: TradeItem[];
+  requesting: CommonTradeItem[];
+  offering: CommonTradeItem[];
 }
 
 export interface SuggestionLimits {

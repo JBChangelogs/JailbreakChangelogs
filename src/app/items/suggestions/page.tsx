@@ -19,7 +19,6 @@ import { trackEvent } from "@/utils/analytics/rybbit";
 import type { Item } from "@/types/index";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
-import { EditReasonModal } from "@/components/Items/Suggestions/EditReasonModal";
 import { SuggestionForm } from "@/components/Items/Suggestions/SuggestionForm";
 import { SuggestionResults } from "@/components/Items/Suggestions/SuggestionResults";
 import { SuggestionsToolbar } from "@/components/Items/Suggestions/SuggestionsToolbar";
@@ -28,7 +27,6 @@ import { SuggesterLeaderboard } from "@/components/Items/Suggestions/SuggesterLe
 import { VotersModal } from "@/components/Items/Suggestions/VotersModal";
 import { ReportSuggestionModal } from "@/components/Items/Suggestions/ReportSuggestionModal";
 import { useSuggestionFilters } from "@/hooks/useSuggestionFilters";
-import { useSuggestionEditing } from "@/hooks/useSuggestionEditing";
 import { useSuggestionSort } from "@/hooks/useSuggestionSort";
 import { useSuggestionVoting } from "@/hooks/useSuggestionVoting";
 import { useSuggestionReporting } from "@/hooks/useSuggestionReporting";
@@ -99,13 +97,6 @@ export default function ValueSuggestionsPage() {
     sort,
     page,
   });
-  const {
-    editModalOpen,
-    editTarget,
-    openEditModal,
-    closeEditModal,
-    handleEditSave,
-  } = useSuggestionEditing({ setSuggestions, setBan });
   const {
     reportModalOpen,
     reportReason,
@@ -670,7 +661,6 @@ export default function ValueSuggestionsPage() {
             onPageChange={handlePageChange}
             onVote={handleVote}
             onOpenVoters={openVotersModal}
-            onOpenEdit={openEditModal}
             onOpenReport={openReportModal}
           />
         </div>
@@ -679,16 +669,6 @@ export default function ValueSuggestionsPage() {
         <SuggestionGuidelinesDialog
           open={guidelinesOpen}
           onConfirm={handleGuidelinesConfirm}
-        />
-
-        {/* Edit Reason Modal */}
-        <EditReasonModal
-          open={editModalOpen}
-          onClose={closeEditModal}
-          suggestion={editTarget}
-          item={editTarget ? (editTarget.item ?? null) : null}
-          onSave={handleEditSave}
-          limits={limits}
         />
 
         <ReportSuggestionModal

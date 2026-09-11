@@ -582,19 +582,6 @@ export function CommonTradesEditor({
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <TradeSideEditor
-                label="Requesting"
-                items={items}
-                selected={trade.requesting}
-                excludedItemIds={
-                  trade.offering.some((item) => item.id === suggestedItemId)
-                    ? new Set([suggestedItemId])
-                    : undefined
-                }
-                onChange={(selected) =>
-                  updateTrade(index, "requesting", selected)
-                }
-              />
-              <TradeSideEditor
                 label="Offering"
                 items={items}
                 selected={trade.offering}
@@ -605,6 +592,19 @@ export function CommonTradesEditor({
                 }
                 onChange={(selected) =>
                   updateTrade(index, "offering", selected)
+                }
+              />
+              <TradeSideEditor
+                label="Requesting"
+                items={items}
+                selected={trade.requesting}
+                excludedItemIds={
+                  trade.offering.some((item) => item.id === suggestedItemId)
+                    ? new Set([suggestedItemId])
+                    : undefined
+                }
+                onChange={(selected) =>
+                  updateTrade(index, "requesting", selected)
                 }
               />
             </div>

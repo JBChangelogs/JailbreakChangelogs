@@ -43,7 +43,13 @@ import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import ItemValueChart, {
   type ValueHistory,
 } from "@/components/Items/ItemValueChart";
-import { CommonTradesDisplay } from "@/components/Items/Suggestions/CommonTrades";
+import {
+  CommonTradesDisplay,
+  CommonTradesEditor,
+  createEmptyCommonTrade,
+  serializeCommonTrades,
+  type CommonTradeDraft,
+} from "@/components/Items/Suggestions/CommonTrades";
 import { RejectionInfo } from "@/components/Items/Suggestions/RejectionInfo";
 import { ReportSuggestionModal } from "@/components/Items/Suggestions/ReportSuggestionModal";
 import type { CommonTrade } from "@/components/Items/Suggestions/types";
@@ -134,6 +140,39 @@ const voterListClassName =
   "max-h-96 space-y-2 overflow-y-auto scrollbar-thin pr-1";
 
 const MAX_REASON_LENGTH = 400;
+const MIN_COMMON_TRADES = 2;
+
+const toCommonTradeDrafts = (
+  trades: CommonTrade[] | CommonTradeDraft[] | null | undefined,
+  items: Item[] = [],
+): CommonTradeDraft[] => {
+  if (!trades?.length) {
+    return Array.from({ length: MIN_COMMON_TRADES }, createEmptyCommonTrade);
+  }
+
+  const itemsById = new Map(items.map((entry) => [String(entry.id), entry]));
+  const hydrateSide = (
+    side: CommonTrade["requesting"] | CommonTradeDraft["requesting"],
+  ) =>
+    side.map((entry) => {
+      const id = String(entry.id);
+      const catalogItem = itemsById.get(id);
+      return {
+        id,
+        name: entry.name ?? catalogItem?.name ?? `Item #${id}`,
+        type: entry.type ?? catalogItem?.type ?? "Unknown",
+        amount: Math.max(1, Number(entry.amount) || 1),
+        og: entry.og ?? ("isOG" in entry ? entry.isOG : false) ?? false,
+        duped:
+          entry.duped ?? ("isDuped" in entry ? entry.isDuped : false) ?? false,
+      };
+    });
+
+  return trades.map((trade) => ({
+    requesting: hydrateSide(trade.requesting),
+    offering: hydrateSide(trade.offering),
+  }));
+};
 
 function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
   return (
@@ -224,7 +263,17 @@ export default function ValueSuggestionDetailPage() {
     return () => clearInterval(id);
   }, [voteRateLimit]);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingCommonTrades, setIsEditingCommonTrades] = useState(false);
   const [editReason, setEditReason] = useState("");
+  const [editCommonTrades, setEditCommonTrades] = useState<CommonTradeDraft[]>(
+    [],
+  );
+  const [editCommonTradesError, setEditCommonTradesError] = useState<
+    string | null
+  >(null);
+  const [tradeItems, setTradeItems] = useState<Item[]>([]);
+  const [tradeItemsLoading, setTradeItemsLoading] = useState(false);
+  const [tradeItemsError, setTradeItemsError] = useState<string | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [editRateLimitUntil, setEditRateLimitUntil] = useState<number | null>(
     null,
@@ -246,6 +295,43 @@ export default function ValueSuggestionDetailPage() {
   const [refreshType, setRefreshType] = useState<string | null>(null);
   const [itemHistory, setItemHistory] = useState<ValueHistory[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isEditingCommonTrades || tradeItems.length > 0) return;
+    if (
+      suggestion?.field !== "cash_value" &&
+      suggestion?.field !== "duped_value"
+    ) {
+      return;
+    }
+
+    let ignore = false;
+    const fetchTradeItems = async () => {
+      setTradeItemsLoading(true);
+      setTradeItemsError(null);
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL!,
+          "/items/list",
+        );
+        const res = await fetch(url, { headers });
+        if (!res.ok) throw new Error("Failed to load items.");
+        const data: Item[] = await res.json();
+        if (ignore) return;
+        setTradeItems(data);
+        setEditCommonTrades((current) => toCommonTradeDrafts(current, data));
+      } catch {
+        if (!ignore) setTradeItemsError("Failed to load tradable items.");
+      } finally {
+        if (!ignore) setTradeItemsLoading(false);
+      }
+    };
+    void fetchTradeItems();
+
+    return () => {
+      ignore = true;
+    };
+  }, [isEditingCommonTrades, suggestion?.field, tradeItems.length]);
 
   useEffect(() => {
     if (!id) return;
@@ -489,12 +575,7 @@ export default function ValueSuggestionDetailPage() {
     }
   };
 
-  const handleEditSave = async () => {
-    if (!suggestion) return;
-    if (editReason.trim().length < 350) {
-      toast.error("Reason must be at least 350 characters.");
-      return;
-    }
+  const patchSuggestion = async (body: Record<string, unknown>) => {
     setEditSaving(true);
     try {
       const { url, headers } = buildApiFetchRequest(
@@ -505,10 +586,7 @@ export default function ValueSuggestionDetailPage() {
         method: "PATCH",
         credentials: "include",
         headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          item: suggestion.item_id,
-          suggestion: { reason: editReason.trim() },
-        }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         if (res.status === 429) {
@@ -517,24 +595,74 @@ export default function ValueSuggestionDetailPage() {
             10,
           );
           setEditRateLimitUntil(Date.now() + retryAfter * 1000);
-          return;
+          return false;
         }
         const data = await res.json().catch(() => ({}));
         toast.error(
           data?.message ?? data?.error ?? "Failed to update suggestion.",
         );
-        return;
+        return false;
       }
-      setSuggestion((prev) =>
-        prev ? { ...prev, reason: editReason.trim() } : prev,
-      );
-      setIsEditing(false);
-      toast.success("Suggestion updated.");
+      return true;
     } catch {
       toast.error("Failed to update suggestion.");
+      return false;
     } finally {
       setEditSaving(false);
     }
+  };
+
+  const handleEditSave = async () => {
+    if (!suggestion) return;
+    const reason = editReason.trim();
+    if (reason.length < 350) {
+      toast.error("Reason must be at least 350 characters.");
+      return;
+    }
+
+    const saved = await patchSuggestion({ suggestion: { reason } });
+    if (!saved) return;
+    setSuggestion((prev) => (prev ? { ...prev, reason } : prev));
+    setIsEditing(false);
+    toast.success("Reason updated.");
+  };
+
+  const handleCommonTradesSave = async () => {
+    if (!suggestion || !item) return;
+    const suggestedItemId = String(item.id);
+    const commonTradesError =
+      editCommonTrades.length < MIN_COMMON_TRADES
+        ? "Add at least two common trades."
+        : editCommonTrades.some(
+              (trade) =>
+                trade.requesting.length === 0 || trade.offering.length === 0,
+            )
+          ? "Each common trade needs at least one requesting and one offering item."
+          : editCommonTrades.some(
+                (trade) =>
+                  [...trade.requesting, ...trade.offering].filter(
+                    (tradeItem) => tradeItem.id === suggestedItemId,
+                  ).length !== 1,
+              )
+            ? `Each common trade must include ${item.name} on exactly one side.`
+            : null;
+    if (commonTradesError) {
+      setEditCommonTradesError(commonTradesError);
+      toast.error(commonTradesError);
+      return;
+    }
+
+    setEditCommonTradesError(null);
+    const saved = await patchSuggestion({
+      suggestion: { reason: suggestion.reason },
+      common_trades: serializeCommonTrades(editCommonTrades),
+    });
+    if (!saved) return;
+    setSuggestion((prev) =>
+      prev ? { ...prev, common_trades: editCommonTrades } : prev,
+    );
+    setIsEditingCommonTrades(false);
+    toast.success("Common trades updated.");
   };
 
   useEffect(() => {
@@ -997,6 +1125,7 @@ export default function ValueSuggestionDetailPage() {
                                   setIsEditing(false);
                                 } else {
                                   setEditReason(suggestion.reason);
+                                  setIsEditingCommonTrades(false);
                                   setIsEditing(true);
                                 }
                               }}
@@ -1155,16 +1284,127 @@ export default function ValueSuggestionDetailPage() {
                             No reason provided.
                           </p>
                         )}
-                        <CommonTradesDisplay
-                          trades={suggestion.common_trades}
-                          className="border-border-card mt-5 border-t pt-5"
-                          headingClassName="text-primary-text mb-3 text-sm font-semibold"
-                          headingIcon="material-symbols:swap-horiz-rounded"
-                          showTradeLabels
-                          showItemTypes
-                        />
                       </div>
                     </div>
+
+                    {isValueSuggestion && item && (
+                      <div className="border-border-card bg-secondary-bg rounded-xl border">
+                        <div className="border-border-card flex items-center justify-between border-b px-5 py-3.5">
+                          <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                            <Icon
+                              icon="material-symbols:swap-horiz-rounded"
+                              className="text-secondary-text h-4 w-4"
+                              inline
+                            />
+                            Common Trades
+                          </h2>
+                          {isAuthenticated &&
+                            user?.id === suggestion.user.id &&
+                            suggestion.status === "pending" && (
+                              <Button
+                                size="sm"
+                                variant={
+                                  isEditingCommonTrades
+                                    ? "destructive"
+                                    : "default"
+                                }
+                                onClick={() => {
+                                  if (isEditingCommonTrades) {
+                                    setIsEditingCommonTrades(false);
+                                    setEditCommonTradesError(null);
+                                  } else {
+                                    setEditCommonTrades(
+                                      toCommonTradeDrafts(
+                                        suggestion.common_trades,
+                                        tradeItems,
+                                      ),
+                                    );
+                                    setEditCommonTradesError(null);
+                                    setIsEditing(false);
+                                    setIsEditingCommonTrades(true);
+                                  }
+                                }}
+                              >
+                                <Icon
+                                  icon={
+                                    isEditingCommonTrades
+                                      ? "material-symbols:close-rounded"
+                                      : "material-symbols:edit-outline-rounded"
+                                  }
+                                  className="h-3.5 w-3.5"
+                                  inline
+                                />
+                                {isEditingCommonTrades ? "Cancel" : "Edit"}
+                              </Button>
+                            )}
+                        </div>
+                        <div className="p-5">
+                          {isEditingCommonTrades ? (
+                            <div className="space-y-3">
+                              {tradeItemsLoading && tradeItems.length === 0 ? (
+                                <div className="text-secondary-text flex items-center gap-2 py-3 text-sm">
+                                  <Spinner className="h-4 w-4" />
+                                  Loading tradable items...
+                                </div>
+                              ) : (
+                                <CommonTradesEditor
+                                  items={tradeItems}
+                                  trades={editCommonTrades}
+                                  suggestedItem={item}
+                                  onChange={(trades) => {
+                                    setEditCommonTrades(trades);
+                                    setEditCommonTradesError(null);
+                                  }}
+                                  error={editCommonTradesError}
+                                />
+                              )}
+                              {tradeItemsError && (
+                                <p className="text-form-error text-xs">
+                                  {tradeItemsError} Existing trade items can
+                                  still be adjusted, but search is unavailable.
+                                </p>
+                              )}
+                              <RateLimitBanner
+                                until={editRateLimitUntil}
+                                label="You're updating too fast."
+                              />
+                              <div className="flex justify-end">
+                                <button
+                                  type="button"
+                                  onClick={handleCommonTradesSave}
+                                  disabled={
+                                    editSaving ||
+                                    !!editRateLimitUntil ||
+                                    tradeItemsLoading
+                                  }
+                                  className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {editSaving ? (
+                                    <>
+                                      <Spinner className="h-3.5 w-3.5" />
+                                      Saving...
+                                    </>
+                                  ) : (
+                                    "Save common trades"
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          ) : suggestion.common_trades?.length ? (
+                            <CommonTradesDisplay
+                              trades={suggestion.common_trades}
+                              headingClassName="sr-only"
+                              showTradeLabels
+                              showItemTypes
+                            />
+                          ) : (
+                            <p className="text-secondary-text text-sm">
+                              No common trades provided.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* ── Mobile layout (< lg): tabs — Details | Discussion ── */}

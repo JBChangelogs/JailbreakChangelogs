@@ -43,7 +43,6 @@ interface SuggestionResultsProps {
     tab: "up" | "down",
     event: MouseEvent,
   ) => void;
-  onOpenEdit: (suggestion: Suggestion, event: MouseEvent) => void;
   onOpenReport: (suggestion: Suggestion, event: MouseEvent) => void;
 }
 
@@ -72,7 +71,6 @@ export function SuggestionResults({
   onPageChange,
   onVote,
   onOpenVoters,
-  onOpenEdit,
   onOpenReport,
 }: SuggestionResultsProps) {
   return (
@@ -212,16 +210,10 @@ export function SuggestionResults({
                   }
                   votingType={votingTypes.get(suggestion.id)}
                   voteRateLimitUntil={voteRateLimits.get(suggestion.id)}
-                  canEdit={
-                    isAuthenticated &&
-                    userId === suggestion.user.id &&
-                    suggestion.status === "pending"
-                  }
                   onVote={(type, event) => onVote(suggestion, type, event)}
                   onOpenVoters={(tab, event) =>
                     onOpenVoters(suggestion, tab, event)
                   }
-                  onOpenEdit={(event) => onOpenEdit(suggestion, event)}
                   onOpenReport={(event) => onOpenReport(suggestion, event)}
                 />
               ))}
