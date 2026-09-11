@@ -129,12 +129,12 @@ function TradeItemSummary({
   const content = (
     <>
       {showImage && (
-        <div className="bg-quaternary-bg relative h-9 w-12 shrink-0 overflow-hidden rounded">
+        <div className="bg-quaternary-bg relative h-14 w-20 shrink-0 overflow-hidden rounded-md sm:h-16 sm:w-24 lg:h-20 lg:w-32">
           <Image
             src={itemImage(item)}
             alt={item.name ?? `Item ${item.id ?? ""}`}
             fill
-            sizes="48px"
+            sizes="(min-width: 1024px) 128px, (min-width: 640px) 96px, 80px"
             className="object-cover"
             onError={handleImageError}
           />
@@ -142,7 +142,7 @@ function TradeItemSummary({
       )}
       <div className="min-w-0 flex-1">
         <p
-          className={`truncate text-xs font-medium ${itemHref ? "text-primary-text hover:text-link" : "text-primary-text"}`}
+          className={`truncate text-sm font-medium ${itemHref ? "text-primary-text hover:text-link" : "text-primary-text"}`}
         >
           {item.name ?? `Item #${item.id ?? "Unknown"}`}
           {amount > 1 && (
@@ -188,7 +188,7 @@ function TradeItemSummary({
     return (
       <Link
         href={itemHref}
-        className="border-border-card bg-tertiary-bg hover:border-button-info/50 flex min-w-0 items-center gap-2 rounded-lg border p-1.5 transition-colors"
+        className="border-border-card bg-tertiary-bg hover:border-button-info/50 flex min-w-0 items-center gap-2.5 rounded-lg border p-2 transition-colors"
       >
         {content}
       </Link>
@@ -196,7 +196,7 @@ function TradeItemSummary({
   }
 
   return (
-    <div className="border-border-card bg-tertiary-bg flex min-w-0 items-center gap-2 rounded-lg border p-1.5">
+    <div className="border-border-card bg-tertiary-bg flex min-w-0 items-center gap-2.5 rounded-lg border p-2">
       {content}
     </div>
   );
@@ -244,12 +244,12 @@ export function CommonTradesDisplay({
                 Trade {index + 1}
               </p>
             )}
-            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2">
+            <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
               <div className="min-w-0 space-y-1.5">
-                <p className="text-secondary-text text-[10px] font-semibold uppercase">
-                  Requesting
+                <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
+                  Offering
                 </p>
-                {trade.requesting.map((item, itemIndex) => (
+                {trade.offering.map((item, itemIndex) => (
                   <TradeItemSummary
                     key={`${String(item.id)}-${itemIndex}`}
                     item={item}
@@ -258,18 +258,18 @@ export function CommonTradesDisplay({
                   />
                 ))}
               </div>
-              <div className="flex h-full items-center self-stretch">
+              <div className="flex items-center justify-center sm:h-full sm:self-stretch">
                 <Icon
                   icon="material-symbols:arrow-forward-rounded"
-                  className="text-tertiary-text h-5 w-5"
+                  className="text-tertiary-text h-5 w-5 rotate-90 sm:rotate-0"
                   inline
                 />
               </div>
               <div className="min-w-0 space-y-1.5">
-                <p className="text-secondary-text text-[10px] font-semibold uppercase">
-                  Offering
+                <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
+                  Requesting
                 </p>
-                {trade.offering.map((item, itemIndex) => (
+                {trade.requesting.map((item, itemIndex) => (
                   <TradeItemSummary
                     key={`${String(item.id)}-${itemIndex}`}
                     item={item}
