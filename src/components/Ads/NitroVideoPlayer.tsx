@@ -44,9 +44,11 @@ export default function NitroVideoPlayer() {
       pathname.startsWith("/item/") ||
       isChangelogDetailRoute ||
       isSeasonDetailRoute;
+    const isMessagesRoute =
+      pathname === "/messages" || pathname.startsWith("/messages/");
 
     const shouldSuppressFloatingPlayer =
-      isSupporter || hasDedicatedVideoNcPlayer;
+      isSupporter || hasDedicatedVideoNcPlayer || isMessagesRoute;
 
     const removeFloatingPlayer = () => {
       const el = document.getElementById(VIDEO_PLAYER_ID);

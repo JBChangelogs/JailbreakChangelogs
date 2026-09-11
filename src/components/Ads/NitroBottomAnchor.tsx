@@ -19,6 +19,8 @@ export default function NitroBottomAnchor() {
   const pathname = usePathname();
   const createdRef = useRef(false);
   const isAccessDeniedRoute = pathname === "/access-denied";
+  const isMessagesRoute =
+    pathname === "/messages" || pathname.startsWith("/messages/");
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
@@ -26,7 +28,7 @@ export default function NitroBottomAnchor() {
 
     if (isLoading) return;
 
-    if (isAccessDeniedRoute) {
+    if (isAccessDeniedRoute || isMessagesRoute) {
       const el = document.getElementById(ANCHOR_ID);
       if (el) {
         el.remove();
@@ -113,7 +115,7 @@ export default function NitroBottomAnchor() {
     return () => {
       removeAdReference(ANCHOR_ID);
     };
-  }, [user?.premiumtype, isLoading, isAccessDeniedRoute]);
+  }, [user?.premiumtype, isLoading, isAccessDeniedRoute, isMessagesRoute]);
 
   return null;
 }
