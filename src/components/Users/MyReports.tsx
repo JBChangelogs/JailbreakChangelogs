@@ -184,6 +184,11 @@ export interface ReportMetadataUsername {
   last_updated: number;
 }
 
+export interface ReportMetadataUser {
+  username: string;
+  global_name: string;
+}
+
 export interface ReportMetadata {
   comment?: ReportMetadataComment;
   avatar?: string;
@@ -194,6 +199,7 @@ export interface ReportMetadata {
   description?: ReportMetadataDescription;
   message?: ReportMetadataMessage;
   suggestion?: ReportMetadataSuggestion;
+  user?: ReportMetadataUser;
 }
 
 export interface ReportUser {
@@ -233,6 +239,7 @@ const TYPE_LABELS: Record<string, string> = {
   username: "Username",
   message: "Message",
   comment: "Comment",
+  user: "User",
   value_suggestions: "Value Suggestion",
 };
 
@@ -320,6 +327,32 @@ export function ReportContext({ report }: { report: Report }) {
         );
       }
       return null;
+
+    case "user": {
+      const reportedUser = metadata.user;
+      if (!reportedUser) return null;
+
+      const hasGlobalName =
+        reportedUser.global_name && reportedUser.global_name !== "None";
+      return (
+        <div className="border-border-card bg-tertiary-bg mt-2 flex items-center gap-3 rounded-lg border p-3">
+          <div className="bg-button-danger/10 text-button-danger flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+            <Icon icon="heroicons:user" className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-secondary-text text-xs">Reported user</p>
+            <p className="text-primary-text truncate text-sm font-medium">
+              {hasGlobalName ? reportedUser.global_name : reportedUser.username}
+            </p>
+            {hasGlobalName && (
+              <p className="text-secondary-text truncate text-xs">
+                @{reportedUser.username}
+              </p>
+            )}
+          </div>
+        </div>
+      );
+    }
 
     case "avatar":
       if (metadata.avatar) {
@@ -655,6 +688,7 @@ export default function MyReports() {
                       { value: "comment", label: "Comment" },
                       { value: "description", label: "Description" },
                       { value: "message", label: "Message" },
+                      { value: "user", label: "User" },
                       { value: "username", label: "Username" },
                       {
                         value: "value_suggestions",

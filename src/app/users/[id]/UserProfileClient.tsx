@@ -315,6 +315,9 @@ export default function UserProfileClient({
   const [reportUsernameReason, setReportUsernameReason] = useState("");
   const [isSubmittingUsernameReport, setIsSubmittingUsernameReport] =
     useState(false);
+  const [isReportUserOpen, setIsReportUserOpen] = useState(false);
+  const [reportUserReason, setReportUserReason] = useState("");
+  const [isSubmittingUserReport, setIsSubmittingUserReport] = useState(false);
 
   const parseJsonWithLargeIds = (raw: string): unknown =>
     JSON.parse(
@@ -752,6 +755,44 @@ export default function UserProfileClient({
       );
     } finally {
       setIsSubmittingUsernameReport(false);
+    }
+  };
+
+  const handleReportUser = async () => {
+    if (!user || !reportUserReason.trim()) return;
+
+    setIsSubmittingUserReport(true);
+    const toastId = toast.loading("Submitting report...");
+    try {
+      const { url: reportUserUrl, headers: devTokenHeaders } =
+        buildApiFetchRequest(PUBLIC_API_URL, "/users/report");
+      const response = await fetch(reportUserUrl, {
+        method: "POST",
+        credentials: "include",
+        headers: { ...devTokenHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          reason: reportUserReason.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to submit report"),
+        );
+      }
+
+      toast.success("Report submitted", { id: toastId });
+      setIsReportUserOpen(false);
+      setReportUserReason("");
+    } catch (error) {
+      log.error("Error reporting user:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit report",
+        { id: toastId },
+      );
+    } finally {
+      setIsSubmittingUserReport(false);
     }
   };
 
@@ -1334,7 +1375,21 @@ export default function UserProfileClient({
                                 Message
                               </DropdownMenuItem>
                             )}
-                            {/* Mobile (< sm): flat items — alphabetical */}
+                            {/* Mobile (< sm): flat report actions */}
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setIsReportUserOpen(true);
+                                setReportUserReason("");
+                              }}
+                              className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
+                            >
+                              <Icon
+                                icon="heroicons:flag"
+                                className="mr-2 h-4 w-4"
+                              />
+                              Report User
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="my-0 sm:hidden" />
                             <DropdownMenuItem
                               onClick={() => {
                                 setIsReportAvatarOpen(true);
@@ -1402,6 +1457,25 @@ export default function UserProfileClient({
                                   Report
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuSubContent className="p-0">
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setIsReportUserOpen(true);
+                                      setReportUserReason("");
+                                    }}
+                                    className="rounded-none px-3 py-2"
+                                  >
+                                    <Icon
+                                      icon="heroicons:user"
+                                      className="mr-2 h-4 w-4"
+                                    />
+                                    <div className="flex flex-col">
+                                      <span>User or behavior</span>
+                                      <span className="text-secondary-text text-xs font-normal">
+                                        General report
+                                      </span>
+                                    </div>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator className="my-0" />
                                   <DropdownMenuItem
                                     onClick={() => {
                                       setIsReportAvatarOpen(true);
@@ -1559,6 +1633,75 @@ export default function UserProfileClient({
         }}
         userData={user}
       />
+      <ConfirmDialog
+        isOpen={isReportUserOpen}
+        onClose={() => {
+          setIsReportUserOpen(false);
+          setReportUserReason("");
+        }}
+        onConfirm={() => void handleReportUser()}
+        title="Report User"
+        confirmText="Submit Report"
+        confirmVariant="destructive"
+        confirmDisabled={!reportUserReason.trim() || isSubmittingUserReport}
+        closeOnConfirm={false}
+      >
+        <div className="space-y-4">
+          <div className="border-border-card bg-tertiary-bg/50 flex items-center gap-3 rounded-lg border p-3">
+            <UserAvatar
+              userId={user.id}
+              avatarHash={user.avatar}
+              username={user.username}
+              custom_avatar={user.custom_avatar}
+              size={9}
+              showBadge={false}
+              settings={user.settings_v2}
+              premiumType={user.premiumtype}
+            />
+            <div className="min-w-0">
+              <p className="text-primary-text truncate text-sm font-medium">
+                {user.global_name && user.global_name !== "None"
+                  ? user.global_name
+                  : user.username}
+              </p>
+              <p className="text-secondary-text truncate text-xs">
+                @{user.username}
+              </p>
+            </div>
+          </div>
+          <div className="bg-button-info/10 border-button-info flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+            <div className="relative z-10">
+              <div className="text-secondary-text">
+                Use this for behavior or activity that is not covered by a
+                specific content report.
+              </div>
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="report-user-reason"
+              className="text-primary-text mb-1.5 block text-sm font-medium"
+            >
+              Reason for reporting
+            </label>
+            <textarea
+              id="report-user-reason"
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+              rows={4}
+              maxLength={500}
+              autoFocus
+              placeholder="Describe what happened and include any useful context..."
+              value={reportUserReason}
+              onChange={(e) => setReportUserReason(e.target.value)}
+            />
+            <p
+              className={`mt-1 text-right text-xs ${reportUserReason.length >= 500 ? "text-red-500" : "text-secondary-text"}`}
+            >
+              {reportUserReason.length}/500
+            </p>
+          </div>
+        </div>
+      </ConfirmDialog>
       <ConfirmDialog
         isOpen={isReportDescriptionOpen}
         onClose={() => {
