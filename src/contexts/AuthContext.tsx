@@ -12,6 +12,7 @@ import React, {
   Suspense,
 } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useRouter } from "nextjs-toploader/app";
 import { AuthState, UserData } from "@/types/auth";
 import { logout as authLogout, trackLogoutSource } from "@/utils/auth/auth";
@@ -27,6 +28,8 @@ import { parseBan, type BanInfo } from "@/utils/api/ban";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 import { createLogger } from "@/services/logger";
+import { SUPPORTER_TIER_NAMES } from "@/config/supporter";
+import { celebrateSupporterTier } from "@/utils/ui/supporterCelebration";
 import {
   normalizeMeResponse,
   type MeResponse,
@@ -35,6 +38,8 @@ import { installBanReferenceInterceptor } from "@/utils/api/humanVerification";
 import { subscribeSiteBan } from "@/utils/api/siteBanInterceptor";
 
 const log = createLogger("AUTH");
+const SUPPORTER_BADGE_BASE_URL =
+  "https://assets.jailbreakchangelogs.com/assets/website_icons";
 
 interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
@@ -94,6 +99,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading: true,
     error: null,
   });
+  const authStateRef = useRef(authState);
+  authStateRef.current = authState;
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginModalTab, setLoginModalTab] = useState<"discord" | "roblox">(
     "discord",
@@ -320,11 +327,62 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [initializeAuth, setSiteBan],
   );
 
+  const handleRealtimeSupporterUpdate = useCallback((level: number) => {
+    const current = authStateRef.current;
+    if (!current.user || current.user.premiumtype === level) return;
+
+    const previousLevel = current.user.premiumtype ?? 0;
+    const updatedUser = { ...current.user, premiumtype: level };
+    const updatedState = { ...current, user: updatedUser };
+
+    authStateRef.current = updatedState;
+    safeSetJSON("user", updatedUser);
+    setAuthState(updatedState);
+
+    if (level > previousLevel) {
+      const tierName =
+        SUPPORTER_TIER_NAMES[level as keyof typeof SUPPORTER_TIER_NAMES] ??
+        `Supporter Tier ${level}`;
+      toast.success(`${tierName} unlocked!`, {
+        description: "Your new supporter benefits are now active.",
+        duration: 8_000,
+        icon: (
+          <Image
+            src={`${SUPPORTER_BADGE_BASE_URL}/jbcl_supporter_${level}.svg`}
+            alt={`${tierName} badge`}
+            width={24}
+            height={24}
+            className="object-contain"
+          />
+        ),
+      });
+      void celebrateSupporterTier(level).catch((error) => {
+        log.error("Failed to show supporter celebration", error);
+      });
+      return;
+    }
+
+    if (level === 0) {
+      toast.info("Supporter status updated", {
+        description: "Your supporter benefits are no longer active.",
+      });
+      return;
+    }
+
+    const tierName =
+      SUPPORTER_TIER_NAMES[level as keyof typeof SUPPORTER_TIER_NAMES] ??
+      `Supporter Tier ${level}`;
+    toast.info("Supporter tier updated", {
+      description: `Your account is now ${tierName}.`,
+    });
+  }, []);
+
   useRealtimeNotificationsWebSocket(
     ((authState.isAuthenticated && !authState.isLoading) || hasToken) &&
       !siteBan,
     locationString,
     handleRealtimeSiteBan,
+    handleRealtimeSupporterUpdate,
   );
 
   useEffect(() => {

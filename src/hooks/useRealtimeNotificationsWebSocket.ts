@@ -33,6 +33,7 @@ interface RealtimeNotificationContent {
 
 interface RealtimeNotificationMessage {
   action?: string;
+  supporter?: number;
   code?: number;
   message?: string;
   total_notifications?: number;
@@ -121,6 +122,7 @@ export function useRealtimeNotificationsWebSocket(
   enabled: boolean,
   locationPath?: string | null,
   onWebsiteBan?: (reason?: string) => void,
+  onSupporterUpdated?: (level: number) => void,
 ): void {
   const isRealtimeNotificationsEnabled =
     enabled && ENABLE_REALTIME_NOTIFICATIONS_WS;
@@ -451,6 +453,17 @@ export function useRealtimeNotificationsWebSocket(
             }
 
             if (payload.action === "pong") return;
+
+            if (
+              payload.action === "supporter_updated" &&
+              typeof payload.supporter === "number" &&
+              Number.isInteger(payload.supporter) &&
+              payload.supporter >= 0 &&
+              payload.supporter <= 3
+            ) {
+              onSupporterUpdated?.(payload.supporter);
+              return;
+            }
 
             if (payload.action === "error" && payload.code) {
               const errorMessage =
@@ -913,5 +926,10 @@ export function useRealtimeNotificationsWebSocket(
       connectedAtRef.current = null;
       connectRef.current = null;
     };
-  }, [isRealtimeNotificationsEnabled, ensureAudio, onWebsiteBan]);
+  }, [
+    isRealtimeNotificationsEnabled,
+    ensureAudio,
+    onWebsiteBan,
+    onSupporterUpdated,
+  ]);
 }
