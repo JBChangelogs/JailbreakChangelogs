@@ -1,7 +1,5 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Icon } from "@/components/ui/IconWrapper";
 import DupeFinderDataStreamer from "@/components/Dupes/DupeFinderDataStreamer";
 import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
@@ -77,17 +75,9 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         </p>
         <div className="bg-button-info/10 border-border-card text-primary-text mb-6 rounded-lg border p-4 text-sm">
           If you believe an item is incorrectly flagged, you can report the
-          false dupe by opening a ticket in our{" "}
-          <Link
-            href="https://discord.jailbreakchangelogs.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"
-          >
-            <Icon icon="akar-icons:link-out" className="h-4 w-4" />
-            Discord support channel
-          </Link>
-          .
+          false dupe after reviewing its variants. Select the item, choose
+          &quot;Compare Variants,&quot; then use &quot;Report False Dupe&quot;
+          on the comparison page.
         </div>
 
         <PremiumAwareLayout>

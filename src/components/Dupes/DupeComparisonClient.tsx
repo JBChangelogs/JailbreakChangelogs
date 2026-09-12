@@ -6,7 +6,11 @@ import Link from "next/link";
 import { DupeFinderItem, Item, RobloxUser } from "@/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
+import ReportFalseDupeModal from "@/components/Dupes/ReportFalseDupeModal";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import {
   CategoryIconBadge,
   getCategoryColor,
@@ -130,11 +134,28 @@ export default function DupeComparisonClient({
 }: DupeComparisonClientProps) {
   const [selectedItem, setSelectedItem] = useState<DupeFinderItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportState, setReportState] = useState<
+    "submitted" | "already_reported" | null
+  >(null);
+  const { isAuthenticated, setLoginModal } = useAuthContext();
+
+  const openReportModal = () => {
+    if (!isAuthenticated) {
+      toast.info("You must be logged in to report a false dupe.");
+      setLoginModal({ open: true });
+      return;
+    }
+    setReportModalOpen(true);
+  };
 
   // Get Original Owner ID from OG item info
   const originalOwnerId =
     ogItem.info?.find((i) => i.title === "Original Owner")?.value ||
     ogItem.user_id;
+  const normalizedOriginalOwnerId = originalOwnerId
+    ? String(originalOwnerId)
+    : null;
 
   // Collect user IDs to fetch
   const userIds = [
@@ -426,6 +447,54 @@ export default function DupeComparisonClient({
           </div>
         </div>
 
+        {reportState ? (
+          <div className="border-button-success/30 bg-button-success/10 mx-auto mt-4 flex max-w-7xl items-start gap-3 rounded-lg border p-4 text-left">
+            <Icon
+              icon="mdi:check-circle-outline"
+              className="text-button-success mt-0.5 size-5 shrink-0"
+            />
+            <div>
+              <p className="text-primary-text text-sm font-semibold">
+                {reportState === "submitted"
+                  ? "False dupe report received"
+                  : "False dupe already reported"}
+              </p>
+              <p className="text-secondary-text mt-1 text-sm">
+                This item is queued for review. You don&apos;t need to submit
+                another report.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-tertiary-bg/50 border-border-card mx-auto mt-4 flex max-w-7xl flex-col items-start justify-between gap-3 rounded-lg border p-4 text-left sm:flex-row sm:items-center">
+            <div className="flex items-start gap-3">
+              <Icon
+                icon="mdi:flag-outline"
+                className="text-secondary-text mt-0.5 size-5 shrink-0"
+              />
+              <div>
+                <p className="text-primary-text text-sm font-semibold">
+                  Think we flagged this item as a dupe by mistake?
+                </p>
+                <p className="text-secondary-text mt-1 text-sm">
+                  Review both ownership histories below. If the histories
+                  don&apos;t support the dupe detection, report it as a false
+                  dupe.
+                </p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              className="w-full shrink-0 sm:w-auto"
+              onClick={openReportModal}
+            >
+              Report False Dupe
+            </Button>
+          </div>
+        )}
+
         {originalOwnerId && (
           <DupeOwnerItemSearch
             ownerId={originalOwnerId}
@@ -465,6 +534,27 @@ export default function DupeComparisonClient({
           usersData={robloxUsers}
         />
       )}
+      <ReportFalseDupeModal
+        open={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        item={{
+          id: duplicateItem.id,
+          item_id: duplicateItem.item_id,
+          title: duplicateItem.title,
+          categoryTitle: duplicateItem.categoryTitle,
+        }}
+        originalOwner={
+          normalizedOriginalOwnerId
+            ? {
+                displayName:
+                  robloxUsers[normalizedOriginalOwnerId]?.displayName ||
+                  robloxUsers[normalizedOriginalOwnerId]?.name ||
+                  normalizedOriginalOwnerId,
+              }
+            : undefined
+        }
+        onReportResolved={setReportState}
+      />
     </div>
   );
 }

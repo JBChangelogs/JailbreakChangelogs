@@ -19,6 +19,7 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import type { UserData } from "@/types/auth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/button";
+import { humanizeIdentifier } from "@/utils/humanizeIdentifier";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -232,22 +233,8 @@ interface ReportsResponse {
   size: number;
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  avatar: "Avatar",
-  banner: "Banner",
-  description: "Description",
-  username: "Username",
-  message: "Message",
-  comment: "Comment",
-  user: "User",
-  value_suggestions: "Value Suggestion",
-};
-
 export function getTypeLabel(type: string) {
-  return (
-    TYPE_LABELS[type.toLowerCase()] ??
-    type.charAt(0).toUpperCase() + type.slice(1)
-  );
+  return humanizeIdentifier(type);
 }
 
 export function getStatusStyle(status: string): {

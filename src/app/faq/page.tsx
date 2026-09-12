@@ -165,6 +165,12 @@ const faqs: FAQ[] = [
   },
   {
     category: "trading",
+    question: "How can I report an item that was incorrectly marked as duped?",
+    answer:
+      'Open the <a href="/dupes" class="text-link hover:text-link-hover underline">Dupe Finder</a>, select the incorrectly flagged item, and click <strong>Compare Variants</strong>. On the comparison page, review both ownership histories, use <strong>Report False Dupe</strong>, explain why the detection is incorrect, and submit the report. You must be logged in with Discord.',
+  },
+  {
+    category: "trading",
     question: "How can I suggest new values for items on the Values page?",
     answer:
       "Not happy with a value you see? You can suggest and vote on value changes directly on the website:<br>1. Visit the <a href='/items/suggestions' class=\"text-link hover:text-link-hover underline\">Item Suggestions</a> page<br>2. Submit a suggestion for any item with your proposed value and reasoning<br>3. Vote on existing suggestions from the community<br><br>Approved suggestions will be reflected in the value list. Not all suggestions with a high upvote count will be accepted.",

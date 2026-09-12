@@ -30,16 +30,8 @@ const faqs = [
         trading, our system updates and marks it as{" "}
         <span className="text-primary-text font-semibold">duped</span>.
         That&apos;s why some items can change status over time. If you believe
-        your item has been falsely flagged as a dupe, please report it by
-        opening a ticket in our{" "}
-        <a
-          href="https://discord.jailbreakchangelogs.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-link hover:text-link-hover underline"
-        >
-          support channel
-        </a>
+        your item has been falsely flagged as a dupe, compare its variants and
+        choose &quot;Report False Dupe&quot; on the comparison page.
       </>
     ),
   },
@@ -54,7 +46,7 @@ const faqs = [
       "The data should be highly accurate for the most part. While this is a beta feature, we're confident in the reliability of the information displayed.",
   },
   {
-    question: "Can I report incorrect detections or missed dupes?",
+    question: "Can I report an incorrect dupe detection?",
     answer: (
       <>
         Yes. While the detection is still fully automated based on our collected
@@ -66,17 +58,8 @@ const faqs = [
         tool. This tool, accessible by clicking &quot;Compare&quot; on any item
         card, allows you to view the ownership history of your item side-by-side
         with its original variant to see exactly where they diverge. If you
-        still believe it is a false dupe, you can report it by opening a ticket
-        in our{" "}
-        <a
-          href="https://discord.jailbreakchangelogs.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-link hover:text-link-hover underline"
-        >
-          Discord support channel
-        </a>
-        .
+        still believe it is a false dupe, choose &quot;Report False Dupe&quot;
+        on the comparison page and explain why the detection is incorrect.
       </>
     ),
   },

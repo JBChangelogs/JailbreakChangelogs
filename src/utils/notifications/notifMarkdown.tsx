@@ -1,8 +1,15 @@
 import React from "react";
+import { humanizeIdentifier } from "@/utils/humanizeIdentifier";
 
 /** Normalize escaped newlines from API payloads into real line breaks. */
 export function normalizeNotificationText(text: string): string {
-  return text.replace(/\\n/g, "\n");
+  return text
+    .replace(/\\n/g, "\n")
+    .replace(
+      /(\bYour\s+)([a-z][a-z0-9_-]*)(\s+report status\b)/gi,
+      (_match, prefix: string, type: string, suffix: string) =>
+        `${prefix}${humanizeIdentifier(type)}${suffix}`,
+    );
 }
 
 const QUOTE_LINE_RE = /^>\s?(.*)$/;

@@ -3,6 +3,7 @@ import DupeComparisonClient from "@/components/Dupes/DupeComparisonClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { notFound } from "next/navigation";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
+import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,7 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
           duplicateItem={variantsData.duplicate}
           itemsData={itemsData}
         />
+        <DupeFinderFAQ />
       </div>
     </>
   );
