@@ -20,6 +20,7 @@ import type { UserData } from "@/types/auth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/button";
 import { humanizeIdentifier } from "@/utils/humanizeIdentifier";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -149,13 +150,13 @@ export interface ReportMetadataComment {
   content: string;
   item_id: number;
   item_type: string;
-  user_id: string;
+  user_id: string | number;
   edited_at: number | null;
   parent_id: number | null;
 }
 
 export interface ReportMetadataDescription {
-  user_id: string;
+  user_id: string | number;
   description: string;
   last_updated: string;
 }
@@ -163,7 +164,7 @@ export interface ReportMetadataDescription {
 export interface ReportMetadataMessage {
   id: number | string;
   content: string;
-  user_id: string;
+  user_id: string | number;
   recipient_id: string | number;
 }
 
@@ -173,7 +174,7 @@ export interface ReportMetadataSuggestion {
   current_value: string;
   suggested_value: string;
   author: string;
-  user_id: string;
+  user_id: string | number;
   item_id: number;
   item_name: string;
   item_type: string;
@@ -190,6 +191,12 @@ export interface ReportMetadataUser {
   global_name: string;
 }
 
+export interface ReportMetadataItem {
+  id: string | number;
+  name: string;
+  type: string;
+}
+
 export interface ReportMetadata {
   comment?: ReportMetadataComment;
   avatar?: string;
@@ -201,6 +208,7 @@ export interface ReportMetadata {
   message?: ReportMetadataMessage;
   suggestion?: ReportMetadataSuggestion;
   user?: ReportMetadataUser;
+  item?: ReportMetadataItem;
 }
 
 export interface ReportUser {
@@ -237,6 +245,29 @@ export function getTypeLabel(type: string) {
   return humanizeIdentifier(type);
 }
 
+function ItemTypeBadge({ type }: { type: string }) {
+  const categoryColor = getCategoryColor(type);
+  const categoryIcon = getCategoryIcon(type);
+
+  return (
+    <span
+      className="text-primary-text bg-tertiary-bg/40 inline-flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
+      style={{
+        borderColor: categoryColor,
+        backgroundColor: `${categoryColor}22`,
+      }}
+    >
+      {categoryIcon && (
+        <categoryIcon.Icon
+          className="mr-1.5 h-3 w-3"
+          style={{ color: categoryColor }}
+        />
+      )}
+      {type}
+    </span>
+  );
+}
+
 export function getStatusStyle(status: string): {
   label: string;
   className: string;
@@ -268,19 +299,34 @@ export function getStatusStyle(status: string): {
   };
 }
 
+function normalizeUserId(value: unknown): string | null {
+  if (typeof value === "string") return value.trim() || null;
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return null;
+}
+
 export function getReportedUserId(report: Report): string | null {
   switch (report.type) {
     case "comment":
-      return report.metadata.comment?.user_id ?? null;
+      return normalizeUserId(report.metadata.comment?.user_id);
     case "message":
-      return report.metadata.message?.user_id ?? null;
+      return normalizeUserId(report.metadata.message?.user_id);
     case "value_suggestions":
-      return report.metadata.suggestion?.user_id ?? null;
+      return normalizeUserId(report.metadata.suggestion?.user_id);
     case "description":
-      return report.metadata.description?.user_id ?? null;
+      return normalizeUserId(
+        report.metadata.description?.user_id ?? report.ref,
+      );
+    case "avatar":
+    case "banner":
+    case "username":
+    case "user":
+      return normalizeUserId(report.ref);
+    case "item_info":
+    case "false_dupe":
+      return null;
     default:
-      // avatar, banner, username — ref is the reported user's Discord ID
-      return report.ref;
+      return null;
   }
 }
 
@@ -432,9 +478,12 @@ export function ReportContext({ report }: { report: Report }) {
             onClick={(event) => event.stopPropagation()}
             className="border-border-card bg-tertiary-bg hover:border-border-focus mt-2 block rounded-lg border p-3 transition-colors"
           >
-            <p className="text-secondary-text mb-1 text-xs">
-              Value suggestion for {metadata.suggestion.item_name}
-            </p>
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              <p className="text-secondary-text text-xs">
+                Value suggestion for {metadata.suggestion.item_name}
+              </p>
+              <ItemTypeBadge type={metadata.suggestion.item_type} />
+            </div>
             <div className="mt-2 grid grid-cols-2 gap-3">
               <div className="min-w-0">
                 <p className="text-button-danger mb-1 flex items-center gap-1 text-xs font-semibold tracking-wide uppercase">
@@ -468,6 +517,39 @@ export function ReportContext({ report }: { report: Report }) {
       }
       return null;
 
+    case "item_info":
+    case "false_dupe": {
+      const item = metadata.item;
+      if (!item) return null;
+
+      return (
+        <Link
+          href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+          prefetch={false}
+          onClick={(event) => event.stopPropagation()}
+          className="border-border-card bg-tertiary-bg hover:border-border-focus mt-2 flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors"
+        >
+          <div className="min-w-0">
+            <p className="text-secondary-text text-xs">
+              {type === "false_dupe"
+                ? "Item duplicate dispute"
+                : "Reported item information"}
+            </p>
+            <p className="text-primary-text truncate text-sm font-semibold">
+              {item.name}
+            </p>
+            <div className="mt-1">
+              <ItemTypeBadge type={item.type} />
+            </div>
+          </div>
+          <Icon
+            icon="heroicons:arrow-top-right-on-square"
+            className="text-secondary-text h-4 w-4 shrink-0"
+          />
+        </Link>
+      );
+    }
+
     default:
       return null;
   }
@@ -494,12 +576,12 @@ export default function MyReports() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [reportTypes, setReportTypes] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
-      if (typeFilter !== "all" && report.type !== typeFilter) return false;
       if (
         statusFilter !== "all" &&
         report.status.toLowerCase() !== statusFilter
@@ -510,7 +592,10 @@ export default function MyReports() {
         const reportedId = getReportedUserId(report);
         const reportedUser = reportedId ? reportedUsers[reportedId] : undefined;
         const matches =
+          report.report_id.toLowerCase().includes(q) ||
           report.ref.toLowerCase().includes(q) ||
+          (report.metadata.item?.name.toLowerCase().includes(q) ?? false) ||
+          (report.metadata.item?.type.toLowerCase().includes(q) ?? false) ||
           (reportedId?.toLowerCase().includes(q) ?? false) ||
           (reportedUser?.username.toLowerCase().includes(q) ?? false) ||
           (reportedUser?.global_name?.toLowerCase().includes(q) ?? false);
@@ -518,78 +603,111 @@ export default function MyReports() {
       }
       return true;
     });
-  }, [reports, typeFilter, statusFilter, debouncedSearch, reportedUsers]);
+  }, [reports, statusFilter, debouncedSearch, reportedUsers]);
 
-  const fetchReports = useCallback(async (currentPage: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL,
-        `/reports/me?page=${currentPage}`,
-      );
-      const response = await fetch(url, {
-        credentials: "include",
-        cache: "no-store",
-        headers,
-      });
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        if (response.status === 404) {
-          setReports([]);
-          setTotalPages(1);
-          setTotal(0);
-          return;
-        }
-        log.error("Failed to fetch reports", { status: response.status, body });
-        throw new Error(
-          (body as { message?: string })?.message ?? "Failed to load reports",
+  const fetchReports = useCallback(
+    async (currentPage: number, reportType: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const typeQuery =
+          reportType === "all"
+            ? ""
+            : `&report_type=${encodeURIComponent(reportType)}`;
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/reports/me?page=${currentPage}${typeQuery}`,
         );
-      }
+        const response = await fetch(url, {
+          credentials: "include",
+          cache: "no-store",
+          headers,
+        });
 
-      const data: ReportsResponse = await response.json();
-      const items = data.items ?? [];
-      setReports(items);
-      setTotalPages(data.total_pages ?? 1);
-      setTotal(data.total ?? 0);
-
-      const ids = [
-        ...new Set(
-          items.map(getReportedUserId).filter((id): id is string => !!id),
-        ),
-      ];
-      if (ids.length > 0) {
-        try {
-          const { url, headers } = buildApiFetchRequest(
-            PUBLIC_API_URL,
-            `/users/get/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
-          );
-          const usersRes = await fetch(url, { cache: "no-store", headers });
-          if (usersRes.ok) {
-            const usersArr = (await usersRes.json()) as UserData[];
-            setReportedUsers(
-              usersArr.reduce<Record<string, UserData>>((acc, u) => {
-                acc[u.id] = u;
-                return acc;
-              }, {}),
-            );
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          if (response.status === 404) {
+            setReports([]);
+            setTotalPages(1);
+            setTotal(0);
+            return;
           }
-        } catch {
-          // non-critical
+          log.error("Failed to fetch reports", {
+            status: response.status,
+            body,
+          });
+          throw new Error(
+            (body as { message?: string })?.message ?? "Failed to load reports",
+          );
         }
+
+        const data: ReportsResponse = await response.json();
+        const items = data.items ?? [];
+        setReports(items);
+        setTotalPages(data.total_pages ?? 1);
+        setTotal(data.total ?? 0);
+
+        const ids = [
+          ...new Set(
+            items.map(getReportedUserId).filter((id): id is string => !!id),
+          ),
+        ];
+        if (ids.length > 0) {
+          try {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              `/users/get/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
+            );
+            const usersRes = await fetch(url, { cache: "no-store", headers });
+            if (usersRes.ok) {
+              const usersArr = (await usersRes.json()) as UserData[];
+              setReportedUsers(
+                usersArr.reduce<Record<string, UserData>>((acc, u) => {
+                  acc[u.id] = u;
+                  return acc;
+                }, {}),
+              );
+            }
+          } catch {
+            // non-critical
+          }
+        }
+      } catch (err) {
+        log.error("Error fetching reports:", err);
+        setError(err instanceof Error ? err.message : "Failed to load reports");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      log.error("Error fetching reports:", err);
-      setError(err instanceof Error ? err.message : "Failed to load reports");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
-    void fetchReports(page);
-  }, [page, fetchReports]);
+    void fetchReports(page, typeFilter);
+  }, [page, typeFilter, fetchReports]);
+
+  useEffect(() => {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      "/reports/types",
+    );
+
+    fetch(url, { credentials: "include", cache: "no-store", headers })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json() as Promise<{ types?: string[] }>;
+      })
+      .then((data) => {
+        setReportTypes(
+          [...(data.types ?? [])].sort((a, b) =>
+            getTypeLabel(a).localeCompare(getTypeLabel(b)),
+          ),
+        );
+      })
+      .catch((error) => {
+        log.error("Failed to fetch report types:", error);
+      });
+  }, []);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     void setPageParam(String(value));
@@ -611,14 +729,14 @@ export default function MyReports() {
           )}
         </div>
 
-        {/* Search and filter controls */}
+        {/* Search and status controls */}
         <div className="mb-6 flex flex-col gap-4 lg:flex-row">
           {/* Search input */}
           <div className="w-full lg:w-1/3">
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search by ref ID, user ID, or username..."
+                placeholder="Search by report ID, user ID, or username..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none"
@@ -639,64 +757,8 @@ export default function MyReports() {
             </div>
           </div>
 
-          {/* Type and status dropdowns */}
-          <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:gap-4">
-            {/* Type filter */}
-            <div className="col-span-1 w-full lg:w-1/2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:outline-none"
-                  >
-                    <span className="truncate">
-                      {typeFilter === "all"
-                        ? "All Types"
-                        : getTypeLabel(typeFilter)}
-                    </span>
-                    <Icon
-                      icon="heroicons:chevron-down"
-                      className="text-secondary-text h-5 w-5 shrink-0"
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
-                >
-                  <DropdownMenuRadioGroup
-                    value={typeFilter}
-                    onValueChange={setTypeFilter}
-                  >
-                    {[
-                      { value: "all", label: "All Types" },
-                      { value: "avatar", label: "Avatar" },
-                      { value: "banner", label: "Banner" },
-                      { value: "comment", label: "Comment" },
-                      { value: "description", label: "Description" },
-                      { value: "message", label: "Message" },
-                      { value: "user", label: "User" },
-                      { value: "username", label: "Username" },
-                      {
-                        value: "value_suggestions",
-                        label: "Value Suggestion",
-                      },
-                    ].map((opt) => (
-                      <DropdownMenuRadioItem
-                        key={opt.value}
-                        value={opt.value}
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                      >
-                        {opt.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Status filter */}
-            <div className="col-span-1 w-full lg:w-1/2">
+          <div className="w-full lg:flex-1">
+            <div className="w-full">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
@@ -747,6 +809,36 @@ export default function MyReports() {
           </div>
         </div>
 
+        <div className="mb-6">
+          <p className="text-secondary-text mb-3 text-sm font-medium">
+            Filter by Report Type
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {["all", ...reportTypes].map((type) => {
+              const active = typeFilter === type;
+              return (
+                <Button
+                  key={type}
+                  type="button"
+                  onClick={() => {
+                    setTypeFilter(active && type !== "all" ? "all" : type);
+                    void setPageParam("1");
+                  }}
+                  aria-pressed={active}
+                  variant={active ? "default" : "secondary"}
+                  size="sm"
+                  className="gap-2"
+                >
+                  {active && (
+                    <Icon icon="heroicons:check" className="h-4 w-4" />
+                  )}
+                  <span>{type === "all" ? "All" : getTypeLabel(type)}</span>
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+
         {loading ? (
           <>
             {/* Search controls skeleton */}
@@ -754,8 +846,7 @@ export default function MyReports() {
               <div className="w-full lg:w-1/3">
                 <Skeleton style={{ height: 56 }} />
               </div>
-              <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:gap-4">
-                <Skeleton style={{ height: 56 }} />
+              <div className="w-full lg:flex-1">
                 <Skeleton style={{ height: 56 }} />
               </div>
             </div>
@@ -816,7 +907,7 @@ export default function MyReports() {
             </p>
             <p className="text-secondary-text mt-1 text-sm">{error}</p>
             <button
-              onClick={() => void fetchReports(page)}
+              onClick={() => void fetchReports(page, typeFilter)}
               className="text-link hover:text-link-hover mt-3 cursor-pointer text-sm transition-colors"
             >
               Try again
@@ -892,8 +983,7 @@ export default function MyReports() {
                 return (
                   <div
                     key={String(report.id)}
-                    onClick={() => router.push(`/reports/${report.report_id}`)}
-                    className="border-border-card bg-secondary-bg hover:bg-tertiary-bg flex cursor-pointer flex-col rounded-lg border p-4 shadow-sm transition-colors"
+                    className="border-border-card bg-secondary-bg flex flex-col rounded-lg border p-4 shadow-sm"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
@@ -957,8 +1047,8 @@ export default function MyReports() {
                     <div className="mt-1 space-y-0.5 text-xs">
                       <p className="text-secondary-text">
                         Reference ID:{" "}
-                        <span className="text-primary-text truncate font-mono">
-                          {report.ref}
+                        <span className="text-primary-text font-mono break-all">
+                          {report.report_id}
                         </span>
                       </p>
                     </div>
