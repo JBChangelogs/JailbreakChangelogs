@@ -48,12 +48,22 @@ const parseFilterSorts = (
 export default function ValuesClient() {
   const { user } = useAuthContext();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["values-items"],
     queryFn: fetchItemsClient,
   });
   const items = data ?? EMPTY_ITEMS;
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleRealtimeValues = () => {
+      void refetch();
+    };
+
+    window.addEventListener("realtimeValues", handleRealtimeValues);
+    return () =>
+      window.removeEventListener("realtimeValues", handleRealtimeValues);
+  }, [refetch]);
 
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [clearSearchTrigger, setClearSearchTrigger] = useState(0);

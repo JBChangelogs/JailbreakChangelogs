@@ -717,6 +717,31 @@ export async function fetchItemById(id: string): Promise<ItemDetails | null> {
   }
 }
 
+export async function fetchItemByIdClient(
+  id: string,
+): Promise<ItemDetails | null> {
+  try {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      `/items/get?id=${encodeURIComponent(id)}`,
+    );
+    const response = await fetch(url, {
+      headers,
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as ItemDetails;
+  } catch (err) {
+    log.error("Error fetching item by ID client-side", err);
+    return null;
+  }
+}
+
 export async function fetchChangelogList(): Promise<Changelog[]> {
   const response = await fetch(`${BASE_API_URL}/changelogs`, {
     credentials: "include",

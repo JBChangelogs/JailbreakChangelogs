@@ -50,6 +50,7 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
+import { fetchItemByIdClient } from "@/utils/api/api";
 import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
@@ -410,7 +411,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
 });
 
 export default function ItemDetailsClient({
-  item,
+  item: initialItem,
   commentsSlot,
   similarItemsSlot,
   historyPromise,
@@ -418,6 +419,7 @@ export default function ItemDetailsClient({
 }: ItemDetailsClientProps) {
   "use memo";
   const { resolvedTheme } = useTheme();
+  const [item, setItem] = useState(initialItem);
   const [visibleLength, setVisibleLength] = useState(500);
   const [tabParam, setTabParam] = useQueryState("tab", {
     defaultValue: "",
@@ -432,6 +434,28 @@ export default function ItemDetailsClient({
   const [itemMetadata, setItemMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
   const [placementLimit, setPlacementLimit] = useState<number | null>(null);
+
+  useEffect(() => {
+    setItem(initialItem);
+  }, [initialItem]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const handleRealtimeItem = () => {
+      void fetchItemByIdClient(String(initialItem.id)).then((updatedItem) => {
+        if (!cancelled && updatedItem) {
+          setItem(updatedItem);
+        }
+      });
+    };
+
+    window.addEventListener("realtimeItem", handleRealtimeItem);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("realtimeItem", handleRealtimeItem);
+    };
+  }, [initialItem.id]);
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(

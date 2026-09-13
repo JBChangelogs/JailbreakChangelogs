@@ -624,6 +624,24 @@ export function useRealtimeNotificationsWebSocket(
               return;
             }
 
+            if (payload.action === "refresh_values") {
+              window.dispatchEvent(
+                new CustomEvent("realtimeValues", {
+                  detail: { action: "refresh_values" },
+                }),
+              );
+              return;
+            }
+
+            if (payload.action === "refresh_item") {
+              window.dispatchEvent(
+                new CustomEvent("realtimeItem", {
+                  detail: { action: "refresh_item" },
+                }),
+              );
+              return;
+            }
+
             if (payload.action === "refresh_trades") {
               window.dispatchEvent(
                 new CustomEvent("realtimeTrades", {
