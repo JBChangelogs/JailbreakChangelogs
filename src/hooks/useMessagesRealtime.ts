@@ -341,17 +341,19 @@ export function useMessagesRealtime({
 
       if (selectedUserIdRef.current !== counterpartId) {
         setConversations((prev) =>
-          prev.map((conversation) =>
-            conversation.user.id === counterpartId
-              ? {
-                  ...conversation,
-                  lastMessage: realtimeMessage,
-                  unreadCount:
-                    action === "message_received"
-                      ? (conversation.unreadCount ?? 0) + 1
-                      : conversation.unreadCount,
-                }
-              : conversation,
+          sortConversationsByLatestMessage(
+            prev.map((conversation) =>
+              conversation.user.id === counterpartId
+                ? {
+                    ...conversation,
+                    lastMessage: realtimeMessage,
+                    unreadCount:
+                      action === "message_received"
+                        ? (conversation.unreadCount ?? 0) + 1
+                        : conversation.unreadCount,
+                  }
+                : conversation,
+            ),
           ),
         );
         return;
@@ -425,10 +427,12 @@ export function useMessagesRealtime({
       });
 
       setConversations((prev) =>
-        prev.map((conversation) =>
-          conversation.user.id === counterpartId
-            ? { ...conversation, lastMessage: realtimeMessage }
-            : conversation,
+        sortConversationsByLatestMessage(
+          prev.map((conversation) =>
+            conversation.user.id === counterpartId
+              ? { ...conversation, lastMessage: realtimeMessage }
+              : conversation,
+          ),
         ),
       );
     };

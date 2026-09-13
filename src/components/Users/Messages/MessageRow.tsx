@@ -195,14 +195,7 @@ export function MessageRow({
   const isLatestSeenOwnMessage =
     isOwnMessage &&
     typeof message.readAt === "number" &&
-    !messages
-      .slice(index + 1)
-      .some(
-        (candidate) =>
-          candidate.type !== "system" &&
-          asId(candidate.senderId) === currentUserId &&
-          typeof candidate.readAt === "number",
-      );
+    !messages.slice(index + 1).some((candidate) => candidate.type !== "system");
 
   const renderMenuItems = (
     Item: React.ComponentType<{
