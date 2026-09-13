@@ -11,6 +11,7 @@ import type {
 } from "@/utils/messages/types";
 import {
   asId,
+  asNumber,
   extractItems,
   parseMessageRecord,
   toMessageUser,
@@ -55,6 +56,7 @@ interface UseConversationListOptions {
   setIsLoadingConversations: Setter<boolean>;
   setBlockedByMeByUserId: Setter<Record<string, boolean>>;
   setCurrentUserEnriched: Setter<MessageUser | null>;
+  refreshKey: number;
 }
 
 export function useConversationList({
@@ -71,6 +73,7 @@ export function useConversationList({
   setIsLoadingConversations,
   setBlockedByMeByUserId,
   setCurrentUserEnriched,
+  refreshKey,
 }: UseConversationListOptions) {
   const userLookupCacheRef = useRef<Map<string, MessageUser | null>>(new Map());
   const userLookupPendingRef = useRef<Map<string, Promise<MessageUser | null>>>(
@@ -254,6 +257,7 @@ export function useConversationList({
 
         const groupedConversations = new Map<string, Message>();
         const messageCountByUserId = new Map<string, number>();
+        const unreadCountByUserId = new Map<string, number>();
         const userHints = new Map<string, MessageUser>();
 
         for (const item of items) {
@@ -280,6 +284,11 @@ export function useConversationList({
           const recordMessageCount = record.message_count;
           if (typeof recordMessageCount === "number") {
             messageCountByUserId.set(otherId, recordMessageCount);
+          }
+
+          const recordUnreadCount = asNumber(record.unread_count);
+          if (recordUnreadCount !== null) {
+            unreadCountByUserId.set(otherId, Math.max(0, recordUnreadCount));
           }
 
           const existing = groupedConversations.get(otherId);
@@ -317,6 +326,7 @@ export function useConversationList({
             user,
             lastMessage: groupedConversations.get(id),
             messageCount: messageCountByUserId.get(id),
+            unreadCount: unreadCountByUserId.get(id),
           });
         }
         summaries.sort(
@@ -366,6 +376,7 @@ export function useConversationList({
   }, [
     currentUserId,
     isAuthenticated,
+    refreshKey,
     routeConversationIdRef,
     setConversations,
     setIsLoadingConversations,

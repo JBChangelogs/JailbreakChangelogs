@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
+import { toast } from "sonner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -43,9 +44,13 @@ import type {
   ConversationSummary,
   Message,
   MessageUser,
+  RealtimeMessageEventDetail,
 } from "@/utils/messages/types";
 import { asId } from "@/utils/messages/parsing";
 import { formatMessageText, getDisplayName } from "@/utils/messages/formatting";
+import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { sortConversationsByLatestMessage } from "@/utils/messages/sorting";
 
 export default function MessagesInbox() {
   const pathname = usePathname();
@@ -102,6 +107,8 @@ export default function MessagesInbox() {
     null,
   );
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+  const [conversationListRefreshKey, setConversationListRefreshKey] =
+    useState(0);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isUnmessageable, setIsUnmessageable] = useState(false);
@@ -244,6 +251,43 @@ export default function MessagesInbox() {
   const selectedUser = selectedConversation?.user ?? null;
   const currentUserId = currentUser ? asId(currentUser.id) : null;
 
+  useEffect(() => {
+    if (!isAuthenticated || !currentUserId) return;
+
+    const handleRealtimeConversation = (event: Event) => {
+      const detail = (event as CustomEvent<RealtimeMessageEventDetail>).detail;
+      if (
+        (detail?.action !== "message_received" &&
+          detail?.action !== "message_sent") ||
+        !detail.data ||
+        typeof detail.data.user_id !== "string" ||
+        typeof detail.data.recipient_id !== "string"
+      ) {
+        return;
+      }
+
+      const senderId = detail.data.user_id;
+      const recipientId = detail.data.recipient_id;
+      if (senderId !== currentUserId && recipientId !== currentUserId) return;
+
+      const counterpartId = senderId === currentUserId ? recipientId : senderId;
+      if (
+        conversations.some(
+          (conversation) => conversation.user.id === counterpartId,
+        )
+      ) {
+        return;
+      }
+
+      setConversationListRefreshKey((key) => key + 1);
+    };
+
+    window.addEventListener("realtimeMessage", handleRealtimeConversation);
+    return () => {
+      window.removeEventListener("realtimeMessage", handleRealtimeConversation);
+    };
+  }, [conversations, currentUserId, isAuthenticated]);
+
   const {
     offerAcceptedEvents,
     visibleOfferAcceptedEvents,
@@ -294,6 +338,7 @@ export default function MessagesInbox() {
     setIsLoadingConversations,
     setBlockedByMeByUserId,
     setCurrentUserEnriched,
+    refreshKey: conversationListRefreshKey,
   });
   const { results: userSearchResults, isLoading: isUserSearchLoading } =
     useUserSearch(userSearchQuery, currentUserId);
@@ -309,6 +354,7 @@ export default function MessagesInbox() {
     prependScrollRestoreRef,
     localThreadMessagesByUserIdRef,
     setMessages,
+    setConversations,
     setMessagesPage,
     setMessagesTotalPages,
     setIsLoadingMessages,
@@ -330,6 +376,55 @@ export default function MessagesInbox() {
     setRouteConversationId(null);
     setMessages([]);
     window.history.pushState({}, "", "/messages");
+  };
+
+  const hideConversation = async (conversation: ConversationSummary) => {
+    const userId = conversation.user.id;
+    setConversations((prev) => prev.filter((item) => item.user.id !== userId));
+    setTotalConversations((prev) =>
+      prev === null ? null : Math.max(0, prev - 1),
+    );
+
+    if (selectedUserId === userId) {
+      goToConversationList();
+    }
+
+    try {
+      if (!PUBLIC_API_URL) {
+        throw new Error("Public API URL is not configured");
+      }
+
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/messages/${encodeURIComponent(userId)}/hide`,
+      );
+      const response = await fetch(url, {
+        method: "POST",
+        credentials: "include",
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(
+            response,
+            "Failed to hide conversation",
+          ),
+        );
+      }
+    } catch (error) {
+      setConversations((prev) =>
+        sortConversationsByLatestMessage(
+          prev.some((item) => item.user.id === userId)
+            ? prev
+            : [...prev, conversation],
+        ),
+      );
+      setTotalConversations((prev) => (prev === null ? null : prev + 1));
+      toast.error(
+        error instanceof Error ? error.message : "Failed to hide conversation",
+      );
+    }
   };
 
   const { handleSendMessage } = useSendMessage({
@@ -446,6 +541,9 @@ export default function MessagesInbox() {
             twemojiEnabled={twemojiEnabled}
             userSearchInputRef={userSearchInputRef}
             selectConversation={selectConversation}
+            hideConversation={(conversation) =>
+              void hideConversation(conversation)
+            }
           />
 
           <section

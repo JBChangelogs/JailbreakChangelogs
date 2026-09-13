@@ -4,7 +4,7 @@ import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useCallback, useEffect, useLayoutEffect } from "react";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
-import type { Message } from "@/utils/messages/types";
+import type { ConversationSummary, Message } from "@/utils/messages/types";
 import {
   extractItems,
   extractPagination,
@@ -33,6 +33,7 @@ interface UseMessageThreadOptions {
   } | null>;
   localThreadMessagesByUserIdRef: RefObject<Map<string, Message[]>>;
   setMessages: Setter<Message[]>;
+  setConversations: Setter<ConversationSummary[]>;
   setMessagesPage: Setter<number>;
   setMessagesTotalPages: Setter<number | null>;
   setIsLoadingMessages: Setter<boolean>;
@@ -53,6 +54,7 @@ export function useMessageThread({
   prependScrollRestoreRef,
   localThreadMessagesByUserIdRef,
   setMessages,
+  setConversations,
   setMessagesPage,
   setMessagesTotalPages,
   setIsLoadingMessages,
@@ -235,6 +237,13 @@ export function useMessageThread({
             ...local.filter((m) => !serverIds.has(m.id)),
           ].sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
           setMessages(merged);
+          setConversations((prev) =>
+            prev.map((conversation) =>
+              conversation.user.id === selectedUserId
+                ? { ...conversation, unreadCount: 0 }
+                : conversation,
+            ),
+          );
           window.dispatchEvent(new CustomEvent("messageThreadRead"));
         }
       } catch (error) {
@@ -268,6 +277,7 @@ export function useMessageThread({
     setIsLoadingMessages,
     setIsLoadingOlderMessages,
     setIsUnmessageable,
+    setConversations,
     setMessages,
     setMessagesPage,
     setMessagesTotalPages,

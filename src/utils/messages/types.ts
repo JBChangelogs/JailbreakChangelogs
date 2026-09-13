@@ -52,6 +52,7 @@ export type ConversationSummary = {
   user: MessageUser;
   lastMessage?: Message;
   messageCount?: number;
+  unreadCount?: number;
 };
 
 export const MESSAGE_CHAR_LIMIT = 350;

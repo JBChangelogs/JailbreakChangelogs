@@ -30,6 +30,7 @@ interface ConversationSidebarProps {
   twemojiEnabled: boolean;
   userSearchInputRef: RefObject<HTMLInputElement | null>;
   selectConversation: (userId: string) => void;
+  hideConversation: (conversation: ConversationSummary) => void;
 }
 
 export function ConversationSidebar({
@@ -46,6 +47,7 @@ export function ConversationSidebar({
   twemojiEnabled,
   userSearchInputRef,
   selectConversation,
+  hideConversation,
 }: ConversationSidebarProps) {
   return (
     <aside
@@ -150,6 +152,8 @@ export function ConversationSidebar({
         ) : (
           conversations.map((conversation) => {
             const isActive = selectedUserId === conversation.user.id;
+            const unreadCount = isActive ? 0 : (conversation.unreadCount ?? 0);
+            const isUnread = unreadCount > 0;
             const isSystemPreview = conversation.lastMessage?.type === "system";
             const isOwnPreview =
               !!currentUserId &&
@@ -168,45 +172,51 @@ export function ConversationSidebar({
                   : conversation.lastMessage.content
               : "No messages yet";
             return (
-              <button
+              <div
                 key={conversation.user.id}
-                onClick={() => selectConversation(conversation.user.id)}
-                aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "border-border-card hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 border-b border-l-2 border-l-transparent px-4 py-3 text-left transition-colors",
+                  "border-border-card hover:bg-tertiary-bg group flex items-start gap-3 border-b border-l-2 border-l-transparent px-4 py-3 transition-colors",
                   isActive ? "bg-tertiary-bg border-l-button-info" : "",
+                  isUnread && !isActive ? "border-l-primary-text" : "",
                   isSystemPreview && !isActive ? "bg-tertiary-bg/40" : "",
                 )}
               >
-                <UserAvatar
-                  userId={conversation.user.id}
-                  avatarHash={conversation.user.avatar}
-                  username={conversation.user.username}
-                  custom_avatar={conversation.user.custom_avatar}
-                  size={9}
-                  showBadge={false}
-                  settings={conversation.user.settings_v2}
-                  premiumType={conversation.user.premiumtype}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => selectConversation(conversation.user.id)}
+                  aria-current={isActive ? "page" : undefined}
+                  className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left"
+                >
+                  <UserAvatar
+                    userId={conversation.user.id}
+                    avatarHash={conversation.user.avatar}
+                    username={conversation.user.username}
+                    custom_avatar={conversation.user.custom_avatar}
+                    size={9}
+                    showBadge={false}
+                    settings={conversation.user.settings_v2}
+                    premiumType={conversation.user.premiumtype}
+                  />
+                  <div className="min-w-0 flex-1">
                     <p
                       className={cn(
-                        "text-primary-text min-w-0 truncate text-sm font-medium",
+                        "truncate text-sm",
+                        isUnread
+                          ? "text-primary-text font-semibold"
+                          : "text-secondary-text font-medium",
                         isActive ? "text-link" : "",
                       )}
                     >
                       {getDisplayName(conversation.user)}
                     </p>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <ConversationRowTime
-                        timestamp={conversation.lastMessage?.createdAt}
-                        cacheKey={`conversation-row-${conversation.user.id}-${conversation.lastMessage?.id ?? "none"}`}
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
-                    <p className="text-secondary-text min-w-0 truncate text-xs">
+                    <p
+                      className={cn(
+                        "mt-0.5 truncate text-xs",
+                        isUnread
+                          ? "text-primary-text font-medium"
+                          : "text-secondary-text",
+                      )}
+                    >
                       {twemojiEnabled ? (
                         <Twemoji tag="span" options={{ className: "twemoji" }}>
                           {formatMessageText(previewText)}
@@ -216,8 +226,28 @@ export function ConversationSidebar({
                       )}
                     </p>
                   </div>
+                </button>
+                <div className="relative -mt-1 -mr-1 flex h-5 shrink-0 items-center md:mt-0 md:mr-0">
+                  <div className="transition-opacity md:group-focus-within:opacity-0 md:group-hover:opacity-0">
+                    <ConversationRowTime
+                      timestamp={conversation.lastMessage?.createdAt}
+                      cacheKey={`conversation-row-${conversation.user.id}-${conversation.lastMessage?.id ?? "none"}`}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => hideConversation(conversation)}
+                    className="text-secondary-text hover:bg-tertiary-bg hover:text-primary-text ml-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded opacity-70 transition-all hover:opacity-100 focus:opacity-100 md:absolute md:top-1/2 md:right-0 md:ml-0 md:h-6 md:w-6 md:-translate-y-1/2 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                    aria-label={`Hide conversation with ${getDisplayName(conversation.user)}`}
+                    title="Hide conversation"
+                  >
+                    <Icon
+                      icon="heroicons:x-mark"
+                      className="h-3.5 w-3.5 shrink-0"
+                    />
+                  </button>
                 </div>
-              </button>
+              </div>
             );
           })
         )}

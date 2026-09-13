@@ -297,7 +297,14 @@ export function useMessagesRealtime({
         setConversations((prev) =>
           prev.map((conversation) =>
             conversation.user.id === counterpartId
-              ? { ...conversation, lastMessage: realtimeMessage }
+              ? {
+                  ...conversation,
+                  lastMessage: realtimeMessage,
+                  unreadCount:
+                    action === "message_received"
+                      ? (conversation.unreadCount ?? 0) + 1
+                      : conversation.unreadCount,
+                }
               : conversation,
           ),
         );
