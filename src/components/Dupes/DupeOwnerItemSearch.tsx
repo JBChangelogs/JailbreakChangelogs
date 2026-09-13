@@ -92,7 +92,7 @@ export default function DupeOwnerItemSearch({
   const showPanel = query.trim().length >= MIN_QUERY_LENGTH;
 
   return (
-    <div className="border-border-card mx-auto max-w-7xl border-t pt-6">
+    <div className="border-border-card mx-auto mt-6 max-w-7xl border-t pt-6">
       <h3 className="text-primary-text text-lg font-bold">
         Search {ownerDisplayName || "this player"}&apos;s Duped Items
       </h3>
