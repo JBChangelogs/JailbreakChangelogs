@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type {
   ConversationSummary,
   Message,
@@ -12,6 +12,11 @@ import {
   getLatestMessage,
   sortConversationsByLatestMessage,
 } from "@/utils/messages/sorting";
+import {
+  getRealtimeConnectionServerSnapshot,
+  getRealtimeConnectionSnapshot,
+  subscribeRealtimeConnection,
+} from "@/services/realtimeConnection";
 
 interface UseMessagesRealtimeOptions {
   currentUserId: string | null;
@@ -47,35 +52,17 @@ export function useMessagesRealtime({
   setConversations,
   setReplyingToMessage,
 }: UseMessagesRealtimeOptions) {
-  const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
+  const realtimeTransportConnected = useSyncExternalStore(
+    subscribeRealtimeConnection,
+    getRealtimeConnectionSnapshot,
+    getRealtimeConnectionServerSnapshot,
+  );
+  const isRealtimeConnected = isAuthenticated && realtimeTransportConnected;
   const [typingUserIds, setTypingUserIds] = useState<Set<string>>(
     () => new Set(),
   );
   const typingTimeoutsRef = useRef<Map<string, number>>(new Map());
   const recentRealtimeEventKeysRef = useRef<Map<string, number>>(new Map());
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setIsRealtimeConnected(false);
-      return;
-    }
-
-    const handleConnectionChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
-      setIsRealtimeConnected(detail?.connected === true);
-    };
-
-    window.addEventListener(
-      "realtimeNotificationsConnection",
-      handleConnectionChange,
-    );
-    return () => {
-      window.removeEventListener(
-        "realtimeNotificationsConnection",
-        handleConnectionChange,
-      );
-    };
-  }, [isAuthenticated]);
 
   useEffect(() => {
     const typingTimeouts = typingTimeoutsRef.current;

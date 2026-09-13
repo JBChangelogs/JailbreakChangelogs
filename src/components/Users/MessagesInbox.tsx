@@ -221,7 +221,7 @@ export default function MessagesInbox() {
   });
 
   const handleTyping = useCallback(() => {
-    if (!selectedUserId || !isRealtimeConnected) return;
+    if (!selectedUserId) return;
     const now = Date.now();
     const lastSent = typingSentAtByUserIdRef.current.get(selectedUserId) ?? 0;
     if (now - lastSent < 3000) return;
@@ -231,7 +231,7 @@ export default function MessagesInbox() {
         detail: { recipient_id: selectedUserId },
       }),
     );
-  }, [isRealtimeConnected, selectedUserId]);
+  }, [selectedUserId]);
 
   const selectedConversation = useMemo(
     () =>

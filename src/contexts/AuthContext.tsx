@@ -9,6 +9,7 @@ import React, {
   useCallback,
   useMemo,
   useRef,
+  useSyncExternalStore,
   Suspense,
 } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -36,6 +37,11 @@ import {
 } from "@/utils/auth/normalizeMeResponse";
 import { installBanReferenceInterceptor } from "@/utils/api/humanVerification";
 import { subscribeSiteBan } from "@/utils/api/siteBanInterceptor";
+import {
+  getRealtimeConnectionServerSnapshot,
+  getRealtimeConnectionSnapshot,
+  subscribeRealtimeConnection,
+} from "@/services/realtimeConnection";
 
 const log = createLogger("AUTH");
 const SUPPORTER_BADGE_BASE_URL =
@@ -110,7 +116,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [siteBan, setSiteBanState] = useState<BanInfo | null>(null);
   const siteBanRef = useRef<BanInfo | null>(null);
   const [hasToken, setHasToken] = useState(() => !!getJbclToken());
-  const [wsConnected, setWsConnected] = useState(false);
+  const realtimeTransportConnected = useSyncExternalStore(
+    subscribeRealtimeConnection,
+    getRealtimeConnectionSnapshot,
+    getRealtimeConnectionServerSnapshot,
+  );
+  const wsConnected = authState.isAuthenticated && realtimeTransportConnected;
   const setSiteBan = useCallback((ban: BanInfo | null) => {
     const nextBan =
       ban?.expiresAt && ban.expiresAt > 0
@@ -150,26 +161,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       uninstall();
     };
   }, [setSiteBan]);
-
-  useEffect(() => {
-    if (!authState.isAuthenticated) {
-      setWsConnected(false);
-      return;
-    }
-    const handleConnectionChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
-      setWsConnected(detail?.connected === true);
-    };
-    window.addEventListener(
-      "realtimeNotificationsConnection",
-      handleConnectionChange,
-    );
-    return () =>
-      window.removeEventListener(
-        "realtimeNotificationsConnection",
-        handleConnectionChange,
-      );
-  }, [authState.isAuthenticated]);
 
   const initializeAuth = useCallback(async () => {
     try {
@@ -567,8 +558,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setBansMap({});
       setSiteBan(null);
       setHasToken(false);
-      setWsConnected(false);
-
       trackEvent("User Logout");
       trackClearUserId();
 

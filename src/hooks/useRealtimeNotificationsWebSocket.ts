@@ -21,6 +21,7 @@ import {
   setCachedPreference,
   updatePreferencesCache,
 } from "@/utils/preferences/realtimePreferencesCache";
+import { setRealtimeConnectionState } from "@/services/realtimeConnection";
 
 const log = createLogger("WS");
 
@@ -71,6 +72,15 @@ const SOUND_COOLDOWN_MS = 800;
 const OFFLINE_NOTICE_ATTEMPT = 3;
 const FOCUS_ONLY_RECONNECT_CODES = new Set([4000, 4001]);
 const TERMINAL_RECONNECT_CODES = new Set([4001, 4002, 4004]);
+
+function publishRealtimeConnectionState(connected: boolean): void {
+  setRealtimeConnectionState(connected);
+  window.dispatchEvent(
+    new CustomEvent("realtimeNotificationsConnection", {
+      detail: { connected },
+    }),
+  );
+}
 
 function shouldReconnectOnFocusOnly(code: number, reason: string): boolean {
   if (!FOCUS_ONLY_RECONNECT_CODES.has(code)) return false;
@@ -246,11 +256,7 @@ export function useRealtimeNotificationsWebSocket(
         wsRef.current.close(1000, "manual-disconnect");
         wsRef.current = null;
       }
-      window.dispatchEvent(
-        new CustomEvent("realtimeNotificationsConnection", {
-          detail: { connected: false },
-        }),
-      );
+      publishRealtimeConnectionState(false);
     };
 
     const handleManualConnect = () => {
@@ -283,6 +289,7 @@ export function useRealtimeNotificationsWebSocket(
 
   useEffect(() => {
     if (!isRealtimeNotificationsEnabled) {
+      publishRealtimeConnectionState(false);
       toast.dismiss("realtime-notifications-reconnecting");
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -395,11 +402,7 @@ export function useRealtimeNotificationsWebSocket(
         openedForAttemptRef.current = false;
 
         ws.addEventListener("open", () => {
-          window.dispatchEvent(
-            new CustomEvent("realtimeNotificationsConnection", {
-              detail: { connected: true },
-            }),
-          );
+          publishRealtimeConnectionState(true);
           openedForAttemptRef.current = true;
           connectedAtRef.current = Date.now();
           terminalCloseRef.current = false;
@@ -886,11 +889,7 @@ export function useRealtimeNotificationsWebSocket(
         ws.addEventListener("close", (event) => {
           if (wsRef.current && wsRef.current !== ws) return;
 
-          window.dispatchEvent(
-            new CustomEvent("realtimeNotificationsConnection", {
-              detail: { connected: false },
-            }),
-          );
+          publishRealtimeConnectionState(false);
           if (pingIntervalRef.current) {
             clearInterval(pingIntervalRef.current);
             pingIntervalRef.current = null;
@@ -990,6 +989,7 @@ export function useRealtimeNotificationsWebSocket(
 
     return () => {
       unmounted = true;
+      publishRealtimeConnectionState(false);
       toast.dismiss("realtime-notifications-reconnecting");
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleWindowFocus);
