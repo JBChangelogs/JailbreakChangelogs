@@ -48,6 +48,10 @@ export function useMessagesRealtime({
   setReplyingToMessage,
 }: UseMessagesRealtimeOptions) {
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
+  const [typingUserIds, setTypingUserIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const typingTimeoutsRef = useRef<Map<string, number>>(new Map());
   const recentRealtimeEventKeysRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
@@ -74,6 +78,16 @@ export function useMessagesRealtime({
   }, [isAuthenticated]);
 
   useEffect(() => {
+    const typingTimeouts = typingTimeoutsRef.current;
+    return () => {
+      for (const timeoutId of typingTimeouts.values()) {
+        window.clearTimeout(timeoutId);
+      }
+      typingTimeouts.clear();
+    };
+  }, []);
+
+  useEffect(() => {
     const fallbackTimeouts = wsSendFallbackTimeoutsRef.current;
 
     return () => {
@@ -93,6 +107,34 @@ export function useMessagesRealtime({
       const detail = (event as CustomEvent<RealtimeMessageEventDetail>).detail;
       const action = detail?.action;
       const payload = detail?.data;
+
+      if (
+        action === "typing" &&
+        payload &&
+        typeof payload.user_id === "string"
+      ) {
+        const typingUserId = asId(payload.user_id);
+        const existingTimeout = typingTimeoutsRef.current.get(typingUserId);
+        if (existingTimeout !== undefined) {
+          window.clearTimeout(existingTimeout);
+        }
+        setTypingUserIds((prev) => {
+          const next = new Set(prev);
+          next.add(typingUserId);
+          return next;
+        });
+        const timeoutId = window.setTimeout(() => {
+          typingTimeoutsRef.current.delete(typingUserId);
+          setTypingUserIds((prev) => {
+            if (!prev.has(typingUserId)) return prev;
+            const next = new Set(prev);
+            next.delete(typingUserId);
+            return next;
+          });
+        }, 5000);
+        typingTimeoutsRef.current.set(typingUserId, timeoutId);
+        return;
+      }
 
       if (
         action === "messages_read" &&
@@ -184,6 +226,20 @@ export function useMessagesRealtime({
 
       const counterpartId = senderId === currentUserId ? receiverId : senderId;
       const messageId = asId(payload.id);
+
+      if (action === "message_received") {
+        const typingTimeout = typingTimeoutsRef.current.get(counterpartId);
+        if (typingTimeout !== undefined) {
+          window.clearTimeout(typingTimeout);
+          typingTimeoutsRef.current.delete(counterpartId);
+        }
+        setTypingUserIds((prev) => {
+          if (!prev.has(counterpartId)) return prev;
+          const next = new Set(prev);
+          next.delete(counterpartId);
+          return next;
+        });
+      }
 
       if (action === "message_deleted") {
         removeLocalThreadMessage(counterpartId, (m) => m.id === messageId);
@@ -454,5 +510,5 @@ export function useMessagesRealtime({
     setReplyingToMessage,
   ]);
 
-  return { isRealtimeConnected };
+  return { isRealtimeConnected, typingUserIds };
 }

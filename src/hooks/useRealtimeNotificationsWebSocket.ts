@@ -212,6 +212,29 @@ export function useRealtimeNotificationsWebSocket(
   }, []);
 
   useEffect(() => {
+    const handleSendTyping = (event: Event) => {
+      const detail = (event as CustomEvent<{ recipient_id?: string }>).detail;
+      if (
+        typeof detail?.recipient_id !== "string" ||
+        wsRef.current?.readyState !== WebSocket.OPEN
+      ) {
+        return;
+      }
+      wsRef.current.send(
+        JSON.stringify({
+          action: "typing",
+          recipient_id: detail.recipient_id,
+        }),
+      );
+    };
+
+    window.addEventListener("sendRealtimeTyping", handleSendTyping);
+    return () => {
+      window.removeEventListener("sendRealtimeTyping", handleSendTyping);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleManualDisconnect = () => {
       manuallyDisconnectedRef.current = true;
       toast.dismiss("realtime-notifications-reconnecting");
@@ -506,6 +529,22 @@ export function useRealtimeNotificationsWebSocket(
 
             if (payload.data && typeof payload.data === "object") {
               const dmData = payload.data as RealtimeDmMessageData;
+              if (
+                payload.action === "typing" &&
+                (typeof dmData.user_id === "string" ||
+                  typeof dmData.user_id === "number")
+              ) {
+                window.dispatchEvent(
+                  new CustomEvent("realtimeMessage", {
+                    detail: {
+                      action: "typing",
+                      data: { user_id: String(dmData.user_id) },
+                    },
+                  }),
+                );
+                return;
+              }
+
               if (
                 payload.action === "messages_read" &&
                 (typeof dmData.reader_id === "string" ||

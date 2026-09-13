@@ -30,6 +30,7 @@ export interface MessageComposerProps {
   isSending: boolean;
   disabled?: boolean;
   onSend: (message: string) => void | Promise<void>;
+  onTyping?: () => void;
 }
 
 export function MessageComposer({
@@ -39,6 +40,7 @@ export function MessageComposer({
   isSending,
   disabled = false,
   onSend,
+  onTyping,
 }: MessageComposerProps) {
   const [draft, setDraft] = React.useState("");
   const [emojiOpen, setEmojiOpen] = React.useState(false);
@@ -92,6 +94,9 @@ export function MessageComposer({
       onChange={(event) => {
         setDraft(event.target.value);
         cursorPosRef.current = event.target.selectionStart;
+        if (event.target.value.trim()) {
+          onTyping?.();
+        }
       }}
       onSubmit={submit}
       placeholder={placeholder}

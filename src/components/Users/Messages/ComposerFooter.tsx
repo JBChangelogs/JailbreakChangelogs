@@ -28,7 +28,9 @@ interface ComposerFooterProps {
   messagePlaceholder: string;
   isSending: boolean;
   isUnmessageable: boolean;
+  isTyping: boolean;
   onSend: (message: string) => void;
+  onTyping: () => void;
 }
 
 export function ComposerFooter({
@@ -43,10 +45,31 @@ export function ComposerFooter({
   messagePlaceholder,
   isSending,
   isUnmessageable,
+  isTyping,
   onSend,
+  onTyping,
 }: ComposerFooterProps) {
   return (
     <div className="bg-secondary-bg border-border-card shrink-0 border-t p-3">
+      <div
+        className="text-secondary-text flex h-5 items-center gap-1.5 px-1 text-xs"
+        aria-live="polite"
+      >
+        {isTyping ? (
+          <>
+            <Icon
+              icon="svg-spinners:3-dots-bounce"
+              className="h-4 w-4 shrink-0"
+            />
+            <span>
+              <span className="text-primary-text font-medium">
+                {getDisplayName(selectedUser)}
+              </span>{" "}
+              is typing…
+            </span>
+          </>
+        ) : null}
+      </div>
       {messageBan && <BanBanner ban={messageBan} className="mb-3" />}
       {replyingToMessage && (
         <div className="bg-tertiary-bg border-border-card flex w-full items-center justify-between rounded-t-md border-x border-t px-3 py-2 text-xs">
@@ -93,6 +116,7 @@ export function ComposerFooter({
           isSending={isSending}
           disabled={!!messageBan || isUnmessageable}
           onSend={onSend}
+          onTyping={onTyping}
         />
       </div>
     </div>

@@ -84,7 +84,8 @@ export type RealtimeMessageEventDetail = {
     | "message_sent"
     | "message_edited"
     | "message_deleted"
-    | "messages_read";
+    | "messages_read"
+    | "typing";
   data?: {
     id?: string;
     parent_id?: string | null;

@@ -23,6 +23,7 @@ interface ConversationSidebarProps {
   userSearchResults: UserData[];
   totalConversations: number | null;
   conversations: ConversationSummary[];
+  typingUserIds: Set<string>;
   selectedUserId: string | null;
   currentUserId: string | null;
   isLoadingConversations: boolean;
@@ -40,6 +41,7 @@ export function ConversationSidebar({
   userSearchResults,
   totalConversations,
   conversations,
+  typingUserIds,
   selectedUserId,
   currentUserId,
   isLoadingConversations,
@@ -154,6 +156,7 @@ export function ConversationSidebar({
             const isActive = selectedUserId === conversation.user.id;
             const unreadCount = isActive ? 0 : (conversation.unreadCount ?? 0);
             const isUnread = unreadCount > 0;
+            const isTyping = typingUserIds.has(conversation.user.id);
             const isSystemPreview = conversation.lastMessage?.type === "system";
             const isOwnPreview =
               !!currentUserId &&
@@ -209,22 +212,35 @@ export function ConversationSidebar({
                     >
                       {getDisplayName(conversation.user)}
                     </p>
-                    <p
-                      className={cn(
-                        "mt-0.5 truncate text-xs",
-                        isUnread
-                          ? "text-primary-text font-medium"
-                          : "text-secondary-text",
-                      )}
-                    >
-                      {twemojiEnabled ? (
-                        <Twemoji tag="span" options={{ className: "twemoji" }}>
-                          {formatMessageText(previewText)}
-                        </Twemoji>
-                      ) : (
-                        formatMessageText(previewText)
-                      )}
-                    </p>
+                    {isTyping ? (
+                      <div className="text-link mt-0.5 flex items-center gap-1 text-xs font-medium">
+                        <Icon
+                          icon="svg-spinners:3-dots-bounce"
+                          className="h-3.5 w-3.5 shrink-0"
+                        />
+                        <span>typing…</span>
+                      </div>
+                    ) : (
+                      <p
+                        className={cn(
+                          "mt-0.5 truncate text-xs",
+                          isUnread
+                            ? "text-primary-text font-medium"
+                            : "text-secondary-text",
+                        )}
+                      >
+                        {twemojiEnabled ? (
+                          <Twemoji
+                            tag="span"
+                            options={{ className: "twemoji" }}
+                          >
+                            {formatMessageText(previewText)}
+                          </Twemoji>
+                        ) : (
+                          formatMessageText(previewText)
+                        )}
+                      </p>
+                    )}
                   </div>
                 </button>
                 <div className="relative -mt-1 -mr-1 flex h-5 shrink-0 items-center md:mt-0 md:mr-0">

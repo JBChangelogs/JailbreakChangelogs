@@ -176,6 +176,7 @@ export default function MessagesInbox() {
     };
   }, []);
   const wsSendFallbackTimeoutsRef = useRef<Set<number>>(new Set());
+  const typingSentAtByUserIdRef = useRef<Map<string, number>>(new Map());
 
   const insertEditEmoji = useCallback(
     (emoji: string, keepOpen = false) => {
@@ -205,7 +206,7 @@ export default function MessagesInbox() {
     removeLocalThreadMessage,
   } = useLocalMessageOverlay();
 
-  const { isRealtimeConnected } = useMessagesRealtime({
+  const { isRealtimeConnected, typingUserIds } = useMessagesRealtime({
     currentUserId: currentUser ? asId(currentUser.id) : null,
     isAuthenticated,
     selectedUserIdRef,
@@ -218,6 +219,19 @@ export default function MessagesInbox() {
     setConversations,
     setReplyingToMessage,
   });
+
+  const handleTyping = useCallback(() => {
+    if (!selectedUserId || !isRealtimeConnected) return;
+    const now = Date.now();
+    const lastSent = typingSentAtByUserIdRef.current.get(selectedUserId) ?? 0;
+    if (now - lastSent < 3000) return;
+    typingSentAtByUserIdRef.current.set(selectedUserId, now);
+    window.dispatchEvent(
+      new CustomEvent("sendRealtimeTyping", {
+        detail: { recipient_id: selectedUserId },
+      }),
+    );
+  }, [isRealtimeConnected, selectedUserId]);
 
   const selectedConversation = useMemo(
     () =>
@@ -534,6 +548,7 @@ export default function MessagesInbox() {
             userSearchResults={userSearchResults}
             totalConversations={totalConversations}
             conversations={conversations}
+            typingUserIds={typingUserIds}
             selectedUserId={selectedUserId}
             currentUserId={currentUserId}
             isLoadingConversations={isLoadingConversations}
@@ -708,7 +723,9 @@ export default function MessagesInbox() {
                   messagePlaceholder={messagePlaceholder}
                   isSending={isSending}
                   isUnmessageable={isUnmessageable}
+                  isTyping={typingUserIds.has(selectedUser.id)}
                   onSend={(message) => void handleSendMessage(message)}
+                  onTyping={handleTyping}
                 />
               </Chat>
             )}
