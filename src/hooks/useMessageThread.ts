@@ -235,6 +235,7 @@ export function useMessageThread({
             ...local.filter((m) => !serverIds.has(m.id)),
           ].sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
           setMessages(merged);
+          window.dispatchEvent(new CustomEvent("messageThreadRead"));
         }
       } catch (error) {
         if (!isCancelled) {

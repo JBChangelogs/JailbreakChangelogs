@@ -42,7 +42,7 @@ interface NotificationPopoverProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-const UnreadBadge = ({
+export const UnreadBadge = ({
   count,
   variant,
 }: {
@@ -55,8 +55,9 @@ const UnreadBadge = ({
     const wide = count > 9;
     return (
       <span
+        aria-hidden="true"
         className={cn(
-          "absolute top-0 right-0 z-10 flex translate-x-1/4 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white",
+          "ring-primary-bg pointer-events-none absolute -top-1 -right-1 z-10 flex items-center justify-center rounded-full bg-red-500 text-[9px] leading-none font-bold text-white tabular-nums shadow-sm ring-2",
           wide ? "h-4 min-w-4 px-1" : "h-4 w-4",
         )}
       >
@@ -64,8 +65,15 @@ const UnreadBadge = ({
       </span>
     );
   }
+  const wide = count > 9;
   return (
-    <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
+    <span
+      aria-hidden="true"
+      className={cn(
+        "ring-primary-bg pointer-events-none absolute -top-1.5 -right-1.5 z-10 flex items-center justify-center rounded-full bg-red-500 text-[10px] leading-none font-bold tracking-tight text-white tabular-nums shadow-sm ring-2",
+        wide ? "h-5 min-w-6 px-1" : "h-5 w-5",
+      )}
+    >
       {displayCount}
     </span>
   );

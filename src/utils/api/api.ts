@@ -2602,6 +2602,31 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
   }
 }
 
+export async function fetchUnreadMessageCount(): Promise<number | null> {
+  try {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL!,
+      "/messages/unread",
+    );
+    const response = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      headers,
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as { unread?: unknown };
+    return typeof data.unread === "number" ? Math.max(0, data.unread) : null;
+  } catch (error) {
+    log.error("Error fetching unread message count", error);
+    return null;
+  }
+}
+
 export async function clearNotificationHistory(): Promise<boolean> {
   try {
     const { url, headers } = buildApiFetchRequest(

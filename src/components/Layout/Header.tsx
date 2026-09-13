@@ -49,10 +49,16 @@ import OfflineDetector from "../OfflineDetector";
 
 import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
-import { fetchUnreadNotificationCount } from "@/utils/api/api";
+import {
+  fetchUnreadMessageCount,
+  fetchUnreadNotificationCount,
+} from "@/utils/api/api";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
-import { NotificationPopover } from "@/components/notifications/NotificationPopover";
+import {
+  NotificationPopover,
+  UnreadBadge,
+} from "@/components/notifications/NotificationPopover";
 
 const MobileNavSection = ({
   title,
@@ -151,6 +157,9 @@ const MobileDrawer = memo(function MobileDrawer({
   onClose,
   onLogout,
   setUtmModalOpen,
+  wsConnected,
+  wsTogglePending,
+  onToggleWsConnection,
 }: {
   userData: UserData | null;
   openNavSection: string;
@@ -158,6 +167,9 @@ const MobileDrawer = memo(function MobileDrawer({
   onClose: () => void;
   onLogout: () => void;
   setUtmModalOpen: (open: boolean) => void;
+  wsConnected: boolean;
+  wsTogglePending: boolean;
+  onToggleWsConnection: () => void;
 }) {
   const { setLoginModal } = useAuthContext();
 
@@ -228,25 +240,56 @@ const MobileDrawer = memo(function MobileDrawer({
               </span>
             </Link>
             {userData?.flags?.some((f) => f.flag === "is_owner") && (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  setUtmModalOpen(true);
-                }}
-                className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-              >
-                <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                  <Icon
-                    icon="heroicons:link"
-                    className="text-link h-4 w-4"
-                    inline={true}
-                  />
-                </div>
-                <span className="text-primary-text text-sm font-medium">
-                  Generate UTM Link
-                </span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={onToggleWsConnection}
+                  disabled={wsTogglePending}
+                  aria-label={
+                    wsConnected
+                      ? "Disconnect realtime connection"
+                      : "Connect realtime connection"
+                  }
+                  title={
+                    wsConnected
+                      ? "Disconnect realtime connection"
+                      : "Connect realtime connection"
+                  }
+                  className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                    {wsTogglePending ? (
+                      <Spinner className="h-4 w-4" />
+                    ) : (
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
+                      />
+                    )}
+                  </div>
+                  <span className="text-primary-text min-w-0 flex-1 text-sm font-medium">
+                    Realtime connection
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    setUtmModalOpen(true);
+                  }}
+                  className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+                >
+                  <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                    <Icon
+                      icon="heroicons:link"
+                      className="text-link h-4 w-4"
+                      inline={true}
+                    />
+                  </div>
+                  <span className="text-primary-text text-sm font-medium">
+                    Generate UTM Link
+                  </span>
+                </button>
+              </>
             )}
             <Link
               href="/reports"
@@ -481,7 +524,11 @@ export default function Header() {
   const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const hasWsUnreadSeedRef = useRef(false);
+  const seenRealtimeMessageIdsRef = useRef(new Set<string>());
+  const messageCountRefreshTimeoutRef = useRef<number | null>(null);
+  const messageCountRequestRef = useRef(0);
 
   const {
     user: authUser,
@@ -542,6 +589,82 @@ export default function Header() {
     return () => {
       cancelled = true;
     };
+  }, [isAuthenticated]);
+
+  const refreshUnreadMessageCount = useCallback(async () => {
+    const requestId = ++messageCountRequestRef.current;
+    const count = await fetchUnreadMessageCount();
+    if (requestId === messageCountRequestRef.current && count !== null) {
+      setUnreadMessageCount(count);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    void refreshUnreadMessageCount();
+
+    const scheduleRefresh = () => {
+      if (messageCountRefreshTimeoutRef.current !== null) {
+        window.clearTimeout(messageCountRefreshTimeoutRef.current);
+      }
+      messageCountRefreshTimeoutRef.current = window.setTimeout(() => {
+        messageCountRefreshTimeoutRef.current = null;
+        void refreshUnreadMessageCount();
+      }, 500);
+    };
+
+    const handleRealtimeMessage = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{
+          action?: unknown;
+          data?: { id?: unknown };
+        }>
+      ).detail;
+
+      if (detail?.action === "message_received") {
+        messageCountRequestRef.current += 1;
+        const messageId = detail.data?.id;
+        if (
+          typeof messageId === "string" &&
+          seenRealtimeMessageIdsRef.current.has(messageId)
+        ) {
+          return;
+        }
+        if (typeof messageId === "string") {
+          if (seenRealtimeMessageIdsRef.current.size >= 500) {
+            seenRealtimeMessageIdsRef.current.clear();
+          }
+          seenRealtimeMessageIdsRef.current.add(messageId);
+        }
+        setUnreadMessageCount((count) => count + 1);
+        return;
+      }
+
+      if (detail?.action === "message_deleted") {
+        scheduleRefresh();
+      }
+    };
+
+    window.addEventListener("realtimeMessage", handleRealtimeMessage);
+    window.addEventListener("messageThreadRead", scheduleRefresh);
+    window.addEventListener("focus", scheduleRefresh);
+    return () => {
+      window.removeEventListener("realtimeMessage", handleRealtimeMessage);
+      window.removeEventListener("messageThreadRead", scheduleRefresh);
+      window.removeEventListener("focus", scheduleRefresh);
+      if (messageCountRefreshTimeoutRef.current !== null) {
+        window.clearTimeout(messageCountRefreshTimeoutRef.current);
+        messageCountRefreshTimeoutRef.current = null;
+      }
+    };
+  }, [isAuthenticated, refreshUnreadMessageCount]);
+
+  useEffect(() => {
+    if (isAuthenticated) return;
+    messageCountRequestRef.current += 1;
+    seenRealtimeMessageIdsRef.current.clear();
+    setUnreadMessageCount(0);
   }, [isAuthenticated]);
 
   useToastRuntimeRightOffset({
@@ -682,6 +805,7 @@ export default function Header() {
         <div className="relative z-10">
           <NavbarModern
             unreadCount={unreadCount}
+            unreadMessageCount={unreadMessageCount}
             setUnreadCount={setUnreadCount}
             onUserMenuOpenChange={setDesktopUserMenuOpen}
             setUtmModalOpen={setUtmModalOpen}
@@ -722,32 +846,6 @@ export default function Header() {
                   </Link>
                 </div>
                 <div className="flex items-center gap-2">
-                  {showAuth &&
-                    userData?.flags?.some((f) => f.flag === "is_owner") && (
-                      <button
-                        type="button"
-                        onClick={toggleWsConnection}
-                        disabled={wsTogglePending}
-                        title={
-                          wsTogglePending
-                            ? wsConnected
-                              ? "Disconnecting…"
-                              : "Connecting…"
-                            : wsConnected
-                              ? "WebSocket connected — click to disconnect"
-                              : "WebSocket disconnected — click to reconnect"
-                        }
-                        className="border-border-card bg-secondary-bg hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
-                      >
-                        {wsTogglePending ? (
-                          <Spinner className="h-4 w-4" />
-                        ) : (
-                          <span
-                            className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
-                          />
-                        )}
-                      </button>
-                    )}
                   {/* Notification icon */}
                   <NotificationPopover
                     unreadCount={unreadCount}
@@ -763,14 +861,20 @@ export default function Header() {
                       aria-label="Messages"
                     >
                       <button
-                        className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
-                        aria-label="Messages"
+                        className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                        aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
                       >
                         <Icon
                           icon="ic:baseline-message"
                           className="text-primary-text h-4 w-4"
                           inline={true}
                         />
+                        {unreadMessageCount > 0 && (
+                          <UnreadBadge
+                            count={unreadMessageCount}
+                            variant="mobile"
+                          />
+                        )}
                       </button>
                     </Link>
                   )}
@@ -805,6 +909,9 @@ export default function Header() {
                 onClose={handleDrawerToggle}
                 onLogout={handleLogout}
                 setUtmModalOpen={setUtmModalOpen}
+                wsConnected={wsConnected}
+                wsTogglePending={wsTogglePending}
+                onToggleWsConnection={toggleWsConnection}
               />
             </SheetContent>
           </Sheet>

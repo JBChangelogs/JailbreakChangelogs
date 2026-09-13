@@ -20,7 +20,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { NotificationPopover } from "@/components/notifications/NotificationPopover";
+import {
+  NotificationPopover,
+  UnreadBadge,
+} from "@/components/notifications/NotificationPopover";
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -108,12 +111,14 @@ export const NavDropdownItem = ({
 export const NavbarModern = ({
   className,
   unreadCount,
+  unreadMessageCount,
   setUnreadCount,
   onUserMenuOpenChange,
   setUtmModalOpen,
 }: {
   className?: string;
   unreadCount: number;
+  unreadMessageCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
   onUserMenuOpenChange?: (open: boolean) => void;
   setUtmModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -731,14 +736,17 @@ export const NavbarModern = ({
             <TooltipTrigger asChild>
               <Link href="/messages" prefetch={false}>
                 <button
-                  className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200"
-                  aria-label="Messages"
+                  className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200"
+                  aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
                 >
                   <Icon
                     icon="ic:baseline-message"
                     className="text-primary-text h-5 w-5"
                     inline={true}
                   />
+                  {unreadMessageCount > 0 && (
+                    <UnreadBadge count={unreadMessageCount} variant="desktop" />
+                  )}
                 </button>
               </Link>
             </TooltipTrigger>
