@@ -546,6 +546,7 @@ export default function DupeComparisonClient({
         originalOwner={
           normalizedOriginalOwnerId
             ? {
+                id: normalizedOriginalOwnerId,
                 displayName:
                   robloxUsers[normalizedOriginalOwnerId]?.displayName ||
                   robloxUsers[normalizedOriginalOwnerId]?.name ||

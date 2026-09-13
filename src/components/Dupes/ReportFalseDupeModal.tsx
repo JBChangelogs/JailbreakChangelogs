@@ -24,6 +24,7 @@ type ReportFalseDupeModalProps = {
   onClose: () => void;
   item: FalseDupeTarget;
   originalOwner?: {
+    id: string;
     displayName: string;
   };
   onReportResolved: (status: "submitted" | "already_reported") => void;
@@ -66,6 +67,7 @@ export default function ReportFalseDupeModal({
         body: JSON.stringify({
           reason: sanitizedReason,
           item_id: item.item_id,
+          original_owner: originalOwner?.id ?? "",
         }),
       });
 
