@@ -17,6 +17,12 @@ import {
   getRealtimeConnectionSnapshot,
   subscribeRealtimeConnection,
 } from "@/services/realtimeConnection";
+import { createLogger } from "@/services/logger";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+
+const log = createLogger("UI");
+const MARK_THREAD_READ_DEBOUNCE_MS = 150;
 
 interface UseMessagesRealtimeOptions {
   currentUserId: string | null;
@@ -62,6 +68,8 @@ export function useMessagesRealtime({
     () => new Set(),
   );
   const typingTimeoutsRef = useRef<Map<string, number>>(new Map());
+  const markThreadAsReadTimeoutRef = useRef<number | null>(null);
+  const pendingThreadReadUserIdRef = useRef<string | null>(null);
   const recentRealtimeEventKeysRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
@@ -73,6 +81,15 @@ export function useMessagesRealtime({
       typingTimeouts.clear();
     };
   }, []);
+
+  useEffect(
+    () => () => {
+      if (markThreadAsReadTimeoutRef.current !== null) {
+        window.clearTimeout(markThreadAsReadTimeoutRef.current);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const fallbackTimeouts = wsSendFallbackTimeoutsRef.current;
@@ -89,6 +106,59 @@ export function useMessagesRealtime({
     if (!isAuthenticated || !currentUserId) {
       return;
     }
+
+    const markPendingThreadAsRead = () => {
+      const userId = pendingThreadReadUserIdRef.current;
+      if (!userId || !PUBLIC_API_URL) return;
+      if (document.visibilityState !== "visible") return;
+      if (selectedUserIdRef.current !== userId) {
+        pendingThreadReadUserIdRef.current = null;
+        return;
+      }
+
+      if (markThreadAsReadTimeoutRef.current !== null) {
+        window.clearTimeout(markThreadAsReadTimeoutRef.current);
+      }
+      markThreadAsReadTimeoutRef.current = window.setTimeout(() => {
+        markThreadAsReadTimeoutRef.current = null;
+        if (
+          document.visibilityState !== "visible" ||
+          selectedUserIdRef.current !== userId
+        ) {
+          return;
+        }
+
+        pendingThreadReadUserIdRef.current = null;
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/messages/${encodeURIComponent(userId)}`,
+        );
+        void fetch(url, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          headers,
+        })
+          .then(async (response) => {
+            if (!response.ok) {
+              throw new Error(
+                `Failed to mark thread as read (${response.status})`,
+              );
+            }
+            await response.text();
+            window.dispatchEvent(new CustomEvent("messageThreadRead"));
+          })
+          .catch((error) => {
+            log.error("Error marking realtime message as read:", error);
+          });
+      }, MARK_THREAD_READ_DEBOUNCE_MS);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        markPendingThreadAsRead();
+      }
+    };
 
     const handleRealtimeMessage = (event: Event) => {
       const detail = (event as CustomEvent<RealtimeMessageEventDetail>).detail;
@@ -215,6 +285,11 @@ export function useMessagesRealtime({
       const messageId = asId(payload.id);
 
       if (action === "message_received") {
+        if (selectedUserIdRef.current === counterpartId && PUBLIC_API_URL) {
+          pendingThreadReadUserIdRef.current = counterpartId;
+          markPendingThreadAsRead();
+        }
+
         const typingTimeout = typingTimeoutsRef.current.get(counterpartId);
         if (typingTimeout !== undefined) {
           window.clearTimeout(typingTimeout);
@@ -481,8 +556,10 @@ export function useMessagesRealtime({
     };
 
     window.addEventListener("realtimeMessage", handleRealtimeMessage);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       window.removeEventListener("realtimeMessage", handleRealtimeMessage);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [
     currentUserId,
