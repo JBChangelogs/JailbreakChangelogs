@@ -36,6 +36,7 @@ export type Message = {
   metadata?: Record<string, unknown> | null;
   createdAt?: number;
   updatedAt?: number;
+  readAt?: number;
   type?: "user" | "system";
   status?: "pending" | "sent" | "failed";
 };
@@ -82,7 +83,8 @@ export type RealtimeMessageEventDetail = {
     | "message_received"
     | "message_sent"
     | "message_edited"
-    | "message_deleted";
+    | "message_deleted"
+    | "messages_read";
   data?: {
     id?: string;
     parent_id?: string | null;
@@ -90,6 +92,8 @@ export type RealtimeMessageEventDetail = {
     recipient_id?: string;
     content?: string;
     metadata?: unknown | null;
+    reader_id?: string;
+    message_ids?: string[];
   };
 };
 export const WS_SEND_FALLBACK_MS = 1200;

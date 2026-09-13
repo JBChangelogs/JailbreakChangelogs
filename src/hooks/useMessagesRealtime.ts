@@ -95,6 +95,52 @@ export function useMessagesRealtime({
       const payload = detail?.data;
 
       if (
+        action === "messages_read" &&
+        payload &&
+        typeof payload.reader_id === "string" &&
+        Array.isArray(payload.message_ids)
+      ) {
+        const readerId = asId(payload.reader_id);
+        const readMessageIds = new Set(payload.message_ids.map(asId));
+        const readAt = Date.now();
+
+        for (const messageId of readMessageIds) {
+          updateLocalThreadMessage(
+            readerId,
+            (message) =>
+              message.id === messageId &&
+              asId(message.senderId) === currentUserId,
+            (message) => ({ ...message, readAt }),
+          );
+        }
+
+        setConversations((prev) =>
+          prev.map((conversation) =>
+            conversation.user.id === readerId &&
+            conversation.lastMessage &&
+            readMessageIds.has(conversation.lastMessage.id)
+              ? {
+                  ...conversation,
+                  lastMessage: { ...conversation.lastMessage, readAt },
+                }
+              : conversation,
+          ),
+        );
+
+        if (selectedUserIdRef.current === readerId) {
+          setMessages((prev) =>
+            prev.map((message) =>
+              readMessageIds.has(message.id) &&
+              asId(message.senderId) === currentUserId
+                ? { ...message, readAt }
+                : message,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (
         (action !== "message_received" &&
           action !== "message_sent" &&
           action !== "message_edited" &&

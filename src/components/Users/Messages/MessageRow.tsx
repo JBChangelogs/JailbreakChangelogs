@@ -192,6 +192,17 @@ export function MessageRow({
   })();
 
   const isMessageMenuActive = activeMessageId === message.id;
+  const isLatestSeenOwnMessage =
+    isOwnMessage &&
+    typeof message.readAt === "number" &&
+    !messages
+      .slice(index + 1)
+      .some(
+        (candidate) =>
+          candidate.type !== "system" &&
+          asId(candidate.senderId) === currentUserId &&
+          typeof candidate.readAt === "number",
+      );
 
   const renderMenuItems = (
     Item: React.ComponentType<{
@@ -659,6 +670,14 @@ export function MessageRow({
                     </div>
                   </div>
                 )}
+                {isLatestSeenOwnMessage &&
+                  message.status !== "pending" &&
+                  message.status !== "failed" && (
+                    <div className="text-secondary-text mt-1 flex items-center gap-1.5 text-xs leading-tight">
+                      <Icon icon="heroicons:eye" className="h-3.5 w-3.5" />
+                      <span>Seen</span>
+                    </div>
+                  )}
               </ChatEventBody>
               {editingMessageId !== message.id &&
                 message.status !== "pending" && (

@@ -73,6 +73,9 @@ export function parseMessageRecord(item: unknown): Message | null {
   const updatedRaw = source.updated_at;
   const updatedAt =
     typeof updatedRaw === "number" ? normalizeTimestamp(updatedRaw) : undefined;
+  const readRaw = source.read_at;
+  const readAt =
+    typeof readRaw === "number" ? normalizeTimestamp(readRaw) : undefined;
 
   return {
     id: asId(sourceId),
@@ -88,6 +91,7 @@ export function parseMessageRecord(item: unknown): Message | null {
           : undefined,
     createdAt,
     updatedAt,
+    readAt,
     type:
       sourceMetadata && typeof sourceMetadata === "object" ? "system" : "user",
   };

@@ -60,6 +60,8 @@ interface RealtimeDmMessageData {
   recipient_id?: string | number;
   content?: string;
   metadata?: unknown | null;
+  reader_id?: string | number;
+  message_ids?: Array<string | number>;
 }
 
 const PING_INTERVAL_MS = 30000;
@@ -107,10 +109,16 @@ function getReconnectDelay(attempt: number): number {
 
 function parseRealtimeMessagePayload(raw: string): RealtimeNotificationMessage {
   // Preserve large snowflake-like IDs from websocket payloads.
-  const normalized = raw.replace(
-    /"(id|parent_id|user_id|recipient_id|sender_id|receiver_id)"\s*:\s*(\d{16,})/g,
-    '"$1":"$2"',
-  );
+  const normalized = raw
+    .replace(
+      /"(id|parent_id|user_id|recipient_id|sender_id|receiver_id|reader_id)"\s*:\s*(\d{16,})/g,
+      '"$1":"$2"',
+    )
+    .replace(
+      /("message_ids"\s*:\s*\[)([\d,"\s]*)(\])/g,
+      (_match, start: string, values: string, end: string) =>
+        `${start}${values.replace(/(?<!["\d])(\d{16,})(?!["\d])/g, '"$1"')}${end}`,
+    );
   return JSON.parse(normalized) as RealtimeNotificationMessage;
 }
 
@@ -498,6 +506,31 @@ export function useRealtimeNotificationsWebSocket(
 
             if (payload.data && typeof payload.data === "object") {
               const dmData = payload.data as RealtimeDmMessageData;
+              if (
+                payload.action === "messages_read" &&
+                (typeof dmData.reader_id === "string" ||
+                  typeof dmData.reader_id === "number") &&
+                Array.isArray(dmData.message_ids)
+              ) {
+                window.dispatchEvent(
+                  new CustomEvent("realtimeMessage", {
+                    detail: {
+                      action: "messages_read",
+                      data: {
+                        reader_id: String(dmData.reader_id),
+                        message_ids: dmData.message_ids
+                          .filter(
+                            (id): id is string | number =>
+                              typeof id === "string" || typeof id === "number",
+                          )
+                          .map(String),
+                      },
+                    },
+                  }),
+                );
+                return;
+              }
+
               const hasValidIds =
                 (typeof dmData.id === "string" ||
                   typeof dmData.id === "number") &&
