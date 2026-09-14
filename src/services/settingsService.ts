@@ -7,6 +7,7 @@ import {
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
+import type { UserConnectionsResponse } from "@/types/userConnections";
 
 const log = createLogger("API");
 
@@ -26,6 +27,33 @@ export const fetchUserSettings = async (): Promise<ApiSettingsResponse> => {
   }
   return resp.json();
 };
+
+export const fetchUserConnections =
+  async (): Promise<UserConnectionsResponse> => {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL!,
+      "/users/me/connections",
+    );
+    const resp = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      headers,
+    });
+
+    if (!resp.ok) {
+      throw new Error(
+        await getResponseErrorMessage(resp, "Failed to fetch connections"),
+      );
+    }
+
+    const data = (await resp.json()) as UserConnectionsResponse;
+    return {
+      online: Boolean(data.online),
+      has_app_connection: Boolean(data.has_app_connection),
+      connections: Array.isArray(data.connections) ? data.connections : [],
+    };
+  };
 
 export const fetchSupporterGifts = async (): Promise<SupporterGift[]> => {
   const { url, headers } = buildApiFetchRequest(

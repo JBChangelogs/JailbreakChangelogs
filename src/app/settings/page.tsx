@@ -18,6 +18,7 @@ import PurchaseGiftDialog from "@/components/Settings/PurchaseGiftDialog";
 import { Icon } from "@/components/ui/IconWrapper";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
+import { ActiveConnections } from "@/components/Settings/ActiveConnections";
 import { ExportInventoryData } from "@/components/Settings/ExportInventoryData";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTwemoji } from "@/contexts/TwemojiContext";
@@ -490,6 +491,8 @@ export default function SettingsPage() {
             }
           >
             <RobloxConnection userData={userData} />
+            <div className="border-border-card my-6 border-t" />
+            <ActiveConnections />
           </SettingsCard>
 
           <SettingsCard
