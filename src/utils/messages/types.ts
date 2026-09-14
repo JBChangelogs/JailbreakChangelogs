@@ -84,7 +84,6 @@ export type RealtimeMessageEventDetail = {
     | "message_sent"
     | "message_edited"
     | "message_deleted"
-    | "messages_read"
     | "typing";
   data?: {
     id?: string;
@@ -93,8 +92,6 @@ export type RealtimeMessageEventDetail = {
     recipient_id?: string;
     content?: string;
     metadata?: unknown | null;
-    reader_id?: string;
-    message_ids?: string[];
   };
 };
 export const WS_SEND_FALLBACK_MS = 1200;
