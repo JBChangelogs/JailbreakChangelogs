@@ -20,6 +20,7 @@ import { createLogger } from "@/services/logger";
 import {
   AvatarUploadDialog,
   BannerUploadDialog,
+  getImageUploadRequirements,
 } from "@/components/Settings/AvatarUploadDialog";
 import { safeSetJSON } from "@/utils/storage/safeStorage";
 import { cn } from "@/lib/utils";
@@ -1190,7 +1191,7 @@ export default function UserProfileClient({
                     type="button"
                     onClick={openFilePicker}
                     disabled={isUploading}
-                    className="bg-secondary-bg/85 text-primary-text border-border-card hover:bg-tertiary-bg absolute top-3 right-3 z-20 hidden cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium opacity-0 shadow-md backdrop-blur-sm transition-all group-hover/banner:opacity-100 focus-visible:opacity-100 md:flex"
+                    className="bg-secondary-bg/85 text-primary-text border-border-card hover:bg-tertiary-bg absolute top-3 right-3 z-20 hidden cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-left opacity-0 shadow-md backdrop-blur-sm transition-all group-hover/banner:opacity-100 focus-visible:opacity-100 md:flex"
                   >
                     <Icon
                       icon={
@@ -1200,7 +1201,16 @@ export default function UserProfileClient({
                       }
                       className="size-4"
                     />
-                    {isUploading ? "Uploading..." : "Change Banner"}
+                    <span className="flex flex-col">
+                      <span className="text-sm font-medium">
+                        {isUploading ? "Uploading..." : "Change Banner"}
+                      </span>
+                      {!isUploading && (
+                        <span className="text-secondary-text text-[10px] font-normal">
+                          {getImageUploadRequirements("banner")}
+                        </span>
+                      )}
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -1253,7 +1263,7 @@ export default function UserProfileClient({
                           disabled={isUploading}
                           aria-label="Change profile avatar"
                           className={cn(
-                            "absolute inset-0 z-30 hidden cursor-pointer items-center justify-center bg-black/55 text-white opacity-0 backdrop-blur-[1px] transition-opacity group-hover/avatar:opacity-100 focus-visible:opacity-100 md:flex",
+                            "absolute inset-0 z-30 hidden cursor-pointer flex-col items-center justify-center gap-1 bg-black/55 px-2 text-center text-white opacity-0 backdrop-blur-[1px] transition-opacity group-hover/avatar:opacity-100 focus-visible:opacity-100 md:flex",
                             user.premiumtype === 3
                               ? "rounded-sm"
                               : "rounded-full",
@@ -1265,8 +1275,18 @@ export default function UserProfileClient({
                                 ? "svg-spinners:ring-resize"
                                 : "heroicons:pencil"
                             }
-                            className="size-8"
+                            className="size-6"
                           />
+                          {!isUploading && (
+                            <>
+                              <span className="text-xs font-medium">
+                                Change Avatar
+                              </span>
+                              <span className="text-[9px] leading-tight text-white/80">
+                                {getImageUploadRequirements("avatar")}
+                              </span>
+                            </>
+                          )}
                         </button>
                         <button
                           type="button"

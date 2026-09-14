@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -36,6 +37,15 @@ const ALLOWED_IMAGE_TYPES = [
   "image/gif",
 ];
 
+export const IMAGE_UPLOAD_FORMATS = "PNG, JPG, WebP, or GIF";
+export const IMAGE_UPLOAD_MAX_SIZE_MB = {
+  avatar: 8,
+  banner: 10,
+} as const;
+
+export const getImageUploadRequirements = (imageType: "avatar" | "banner") =>
+  `${IMAGE_UPLOAD_FORMATS} up to ${IMAGE_UPLOAD_MAX_SIZE_MB[imageType]} MB.`;
+
 interface ImageUploadDialogProps {
   userData: {
     premiumtype?: number;
@@ -62,6 +72,7 @@ const ImageUploadDialog = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const selectedSourceRef = useRef<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadPromptOpen, setIsUploadPromptOpen] = useState(false);
   const [isCropOpen, setIsCropOpen] = useState(false);
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -72,7 +83,7 @@ const ImageUploadDialog = ({
     useSupporterModal();
   const isAvatar = imageType === "avatar";
   const label = isAvatar ? "avatar" : "banner";
-  const maxFileSizeMb = isAvatar ? 8 : 10;
+  const maxFileSizeMb = IMAGE_UPLOAD_MAX_SIZE_MB[imageType];
   const settingName = isAvatar ? "custom_avatar" : "custom_banner";
   const hasCropEdits =
     crop.x !== 0 || crop.y !== 0 || zoom !== 1 || rotation !== 0;
@@ -109,8 +120,22 @@ const ImageUploadDialog = ({
       ? checkAvatarAccess(userData.premiumtype ?? 0)
       : checkBannerAccess(userData.premiumtype ?? 0);
     if (!hasAccess) return;
+
+    const needsUploadPrompt =
+      window.matchMedia("(max-width: 767px)").matches ||
+      window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (needsUploadPrompt) {
+      setIsUploadPromptOpen(true);
+      return;
+    }
+
     fileInputRef.current?.click();
   }, [checkAvatarAccess, checkBannerAccess, isAvatar, userData.premiumtype]);
+
+  const chooseImage = () => {
+    setIsUploadPromptOpen(false);
+    fileInputRef.current?.click();
+  };
 
   const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -201,6 +226,28 @@ const ImageUploadDialog = ({
         disabled={isUploading}
       />
       {children(openFilePicker, isUploading)}
+
+      <Dialog open={isUploadPromptOpen} onOpenChange={setIsUploadPromptOpen}>
+        <DialogContent className="max-w-[480px] rounded-lg p-0" showClose>
+          <DialogHeader className="px-6 pt-6 pb-2">
+            <DialogTitle>Upload a custom {label}</DialogTitle>
+            <DialogDescription>
+              {getImageUploadRequirements(imageType)}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
+            <DialogClose asChild>
+              <Button variant="ghost" size="sm">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button onClick={chooseImage} size="sm">
+              <Icon icon="material-symbols:photo-library-outline" />
+              Choose Image
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={isCropOpen}

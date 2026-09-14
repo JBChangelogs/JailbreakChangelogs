@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-import { BannerUploadDialog } from "@/components/Settings/AvatarUploadDialog";
+import {
+  BannerUploadDialog,
+  getImageUploadRequirements,
+} from "@/components/Settings/AvatarUploadDialog";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
@@ -50,7 +53,7 @@ export const BannerSettings = ({
   return (
     <div className="mt-3 mb-5">
       <p className="text-secondary-text mb-3 text-xs">
-        PNG, JPG, WebP, or GIF up to 10 MB.
+        {getImageUploadRequirements("banner")}
       </p>
 
       <BannerUploadDialog
