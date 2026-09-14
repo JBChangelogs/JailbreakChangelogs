@@ -321,20 +321,24 @@ export default function SettingsPage() {
                           disabled={isAppearanceCat && isAppearanceUploadBusy}
                           userData={userData}
                         />
-                        {isAppearanceCat && entry.name === "custom_banner" && (
-                          <BannerSettings
-                            userData={userData}
-                            onBannerUpdate={handleBannerUpdate}
-                            onUploadStateChange={setIsBannerUploading}
-                          />
-                        )}
-                        {isAppearanceCat && entry.name === "custom_avatar" && (
-                          <AvatarSettings
-                            userData={userData}
-                            onAvatarUpdate={handleAvatarUpdate}
-                            onUploadStateChange={setIsAvatarUploading}
-                          />
-                        )}
+                        {isAppearanceCat &&
+                          entry.name === "custom_banner" &&
+                          entry.value && (
+                            <BannerSettings
+                              userData={userData}
+                              onBannerUpdate={handleBannerUpdate}
+                              onUploadStateChange={setIsBannerUploading}
+                            />
+                          )}
+                        {isAppearanceCat &&
+                          entry.name === "custom_avatar" &&
+                          entry.value && (
+                            <AvatarSettings
+                              userData={userData}
+                              onAvatarUpdate={handleAvatarUpdate}
+                              onUploadStateChange={setIsAvatarUploading}
+                            />
+                          )}
                       </div>
                     );
                   })}

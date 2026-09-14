@@ -4,11 +4,7 @@ import Image from "next/image";
 import { AvatarUploadDialog } from "@/components/Settings/AvatarUploadDialog";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { cn } from "@/lib/utils";
 import { createLogger } from "@/services/logger";
 import { fetchCustomAvatar } from "@/services/settingsService";
@@ -31,7 +27,6 @@ export const AvatarSettings = ({
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isLoadingAvatar, setIsLoadingAvatar] = useState(true);
   const supporterTier = userData.premiumtype ?? 0;
-  const hasAvatarAccess = supporterTier >= 2 && supporterTier <= 3;
   const usesSquareAvatar = supporterTier === 3;
 
   useEffect(() => {
@@ -56,36 +51,9 @@ export const AvatarSettings = ({
   }, []);
 
   return (
-    <div className="mt-4 mb-6">
-      <div className="mb-2 flex items-center gap-2">
-        <div className="text-primary-text text-base font-medium">
-          Custom Avatar
-        </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Image
-              src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_2.svg"
-              alt="Supporter Tier II"
-              width={24}
-              height={24}
-              className="cursor-pointer object-contain hover:opacity-90"
-            />
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            <p>Supporter Tier II</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-
-      <p
-        className={cn(
-          "mb-3 text-sm",
-          hasAvatarAccess ? "text-secondary-text" : "text-button-danger",
-        )}
-      >
-        {hasAvatarAccess
-          ? "Choose an image, crop it, and upload it. PNG, JPG, WebP, or GIF up to 8 MB."
-          : "🔒 Upgrade to Supporter Tier 2 to unlock custom avatars"}
+    <div className="mt-3 mb-5">
+      <p className="text-secondary-text mb-3 text-xs">
+        PNG, JPG, WebP, or GIF up to 8 MB.
       </p>
 
       <AvatarUploadDialog
@@ -105,14 +73,24 @@ export const AvatarSettings = ({
               )}
             >
               {customAvatarUrl ? (
-                <Image
+                <ImageLightbox
                   src={customAvatarUrl}
                   alt="Your saved custom avatar"
-                  fill
-                  sizes="64px"
-                  unoptimized
-                  className="object-cover"
-                />
+                  compact
+                  previewRadius={
+                    usesSquareAvatar ? "rounded-sm" : "rounded-full"
+                  }
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={customAvatarUrl}
+                    alt="Your saved custom avatar"
+                    fill
+                    sizes="64px"
+                    unoptimized
+                    className="object-cover"
+                  />
+                </ImageLightbox>
               ) : (
                 <Icon
                   icon={
@@ -125,17 +103,9 @@ export const AvatarSettings = ({
               )}
             </div>
 
-            <Button
-              onClick={openFilePicker}
-              disabled={isUploading}
-              className={cn(!hasAvatarAccess && "opacity-50")}
-            >
+            <Button onClick={openFilePicker} disabled={isUploading}>
               <Icon icon="material-symbols:cloud-upload" />
-              {isUploading
-                ? "Uploading..."
-                : customAvatarUrl
-                  ? "Choose New Image"
-                  : "Choose Image"}
+              {isUploading ? "Uploading..." : "Change Avatar"}
             </Button>
           </div>
         )}
