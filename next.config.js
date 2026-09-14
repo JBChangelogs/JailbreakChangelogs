@@ -135,6 +135,10 @@ const nextConfig = {
         destination:
           "https://assets.jailbreakchangelogs.com/assets/logos/apple-touch-icon.png",
       },
+      {
+        source: "/insights/:path*",
+        destination: "https://rybbit-api.jailbreakchangelogs.com/api/:path*",
+      },
     ];
   },
   async headers() {

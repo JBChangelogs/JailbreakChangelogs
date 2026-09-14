@@ -107,7 +107,7 @@ export default async function RootLayout({
           {/* Rybbit Analytics */}
           {isRailwayDeployed && (
             <Script
-              src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
+              src="/insights/script.js"
               data-site-id="0d25b013fe3a"
               defer
             />
@@ -242,11 +242,7 @@ export default async function RootLayout({
         />
         {/* Rybbit Analytics */}
         {isRailwayDeployed && (
-          <Script
-            src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
-            data-site-id="0d25b013fe3a"
-            defer
-          />
+          <Script src="/insights/script.js" data-site-id="0d25b013fe3a" defer />
         )}
         {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
         <Script
