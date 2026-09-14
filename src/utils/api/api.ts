@@ -2567,7 +2567,7 @@ export async function fetchUnreadNotifications(
   }
 }
 
-export async function fetchUnreadNotificationCount(): Promise<number> {
+export async function fetchUnreadNotificationCount(): Promise<number | null> {
   try {
     const cookieMatch =
       typeof document !== "undefined"
@@ -2589,7 +2589,7 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
     });
 
     if (!response.ok) {
-      return 0;
+      return null;
     }
 
     const data = (await response.json()) as { unread_count?: unknown };
@@ -2598,7 +2598,7 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
       : 0;
   } catch (error) {
     log.error("Error fetching unread notification count", error);
-    return 0;
+    return null;
   }
 }
 

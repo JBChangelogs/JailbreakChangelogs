@@ -527,6 +527,8 @@ export default function Header() {
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const hasWsUnreadSeedRef = useRef(false);
   const seenRealtimeMessageIdsRef = useRef(new Set<string>());
+  const notificationCountRefreshTimeoutRef = useRef<number | null>(null);
+  const notificationCountRequestRef = useRef(0);
   const messageCountRefreshTimeoutRef = useRef<number | null>(null);
   const messageCountRequestRef = useRef(0);
 
@@ -576,20 +578,38 @@ export default function Header() {
     };
   }, [pathname]);
 
+  const refreshUnreadNotificationCount = useCallback(async () => {
+    const requestId = ++notificationCountRequestRef.current;
+    const count = await fetchUnreadNotificationCount();
+    if (requestId === notificationCountRequestRef.current && count !== null) {
+      setUnreadCount(count);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    let cancelled = false;
-    void (async () => {
-      const count = await fetchUnreadNotificationCount();
-      if (cancelled) return;
-      setUnreadCount(count);
-    })();
+    void refreshUnreadNotificationCount();
 
-    return () => {
-      cancelled = true;
+    const scheduleRefresh = () => {
+      if (notificationCountRefreshTimeoutRef.current !== null) {
+        window.clearTimeout(notificationCountRefreshTimeoutRef.current);
+      }
+      notificationCountRefreshTimeoutRef.current = window.setTimeout(() => {
+        notificationCountRefreshTimeoutRef.current = null;
+        void refreshUnreadNotificationCount();
+      }, 500);
     };
-  }, [isAuthenticated]);
+
+    window.addEventListener("focus", scheduleRefresh);
+    return () => {
+      window.removeEventListener("focus", scheduleRefresh);
+      if (notificationCountRefreshTimeoutRef.current !== null) {
+        window.clearTimeout(notificationCountRefreshTimeoutRef.current);
+        notificationCountRefreshTimeoutRef.current = null;
+      }
+    };
+  }, [isAuthenticated, refreshUnreadNotificationCount]);
 
   const refreshUnreadMessageCount = useCallback(async () => {
     const requestId = ++messageCountRequestRef.current;
@@ -692,6 +712,9 @@ export default function Header() {
         typeof rawType === "string" &&
         rawType.trim().toLowerCase() === "broadcast";
 
+      if (!isBroadcast) {
+        notificationCountRequestRef.current += 1;
+      }
       setUnreadCount((prev) => {
         if (isBroadcast) return prev;
         if (totalNotifications !== null && !hasWsUnreadSeedRef.current) {
@@ -713,6 +736,7 @@ export default function Header() {
 
   useEffect(() => {
     if (isAuthenticated) return;
+    notificationCountRequestRef.current += 1;
     const timeoutId = setTimeout(() => {
       hasWsUnreadSeedRef.current = false;
       setUnreadCount(0);
