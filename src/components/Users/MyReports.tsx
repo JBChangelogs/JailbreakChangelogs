@@ -9,6 +9,7 @@ import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import { Icon } from "@/components/ui/IconWrapper";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -41,105 +42,70 @@ function SpoilerImage({
   rounded?: boolean;
 }) {
   const [revealed, setRevealed] = useState(false);
-  const [lightbox, setLightbox] = useState(false);
 
-  function handleClick(e: React.MouseEvent) {
-    e.stopPropagation();
-    if (!revealed) {
-      setRevealed(true);
-    } else {
-      setLightbox(true);
-    }
-  }
+  const imageProps = rounded
+    ? { width: 64, height: 64 }
+    : {
+        width: 0,
+        height: 0,
+        sizes: "100vw",
+        style: { width: "100%", height: "auto" },
+      };
 
-  return (
-    <>
-      <div
-        className={`relative cursor-pointer overflow-hidden ${rounded ? "inline-block rounded-full" : "rounded-lg"}`}
-        onClick={handleClick}
+  if (revealed) {
+    return (
+      <ImageLightbox
+        src={src}
+        alt={alt}
+        compact={rounded}
+        showUrl
+        stopPropagation
+        previewRadius={rounded ? "rounded-full" : "rounded-lg"}
+        className={rounded ? "inline-block" : undefined}
       >
         <Image
           src={src}
           alt={alt}
-          {...(rounded
-            ? { width: 64, height: 64 }
-            : {
-                width: 0,
-                height: 0,
-                sizes: "100vw",
-                style: { width: "100%", height: "auto" },
-              })}
-          className={`transition-all duration-500 ${rounded ? "rounded-full object-cover" : "rounded-lg"} ${!revealed ? "scale-110 blur-2xl" : "blur-0 scale-100"}`}
+          {...imageProps}
+          className={
+            rounded ? "rounded-full object-cover" : "w-full rounded-lg"
+          }
           unoptimized
         />
-        {!revealed ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-            {rounded ? (
-              <Icon
-                icon="solar:eye-outline"
-                className="h-6 w-6 text-white drop-shadow"
-              />
-            ) : (
-              <span className="rounded-md border border-white/30 bg-white/20 px-2 py-0.5 text-xs font-semibold tracking-widest text-white uppercase backdrop-blur-md">
-                Spoiler
-              </span>
-            )}
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-opacity hover:bg-black/20 hover:opacity-100">
-            <Icon
-              icon="mdi:magnify-plus-outline"
-              className="h-6 w-6 text-white drop-shadow"
-            />
-          </div>
-        )}
-      </div>
+      </ImageLightbox>
+    );
+  }
 
-      {lightbox && (
-        <div
-          className="fixed inset-0 z-[10000] flex cursor-default flex-col items-center justify-center gap-3 bg-black/90 p-4"
-          onClick={(e) => {
-            e.stopPropagation();
-            setLightbox(false);
-          }}
-        >
-          <button
-            className="absolute top-4 right-4 cursor-pointer rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightbox(false);
-            }}
-          >
-            <Icon icon="mdi:close" className="h-5 w-5" />
-          </button>
-          <Image
-            src={src}
-            alt={alt}
-            width={0}
-            height={0}
-            sizes="100vw"
-            style={{
-              width: rounded ? "min(80vh, 80vw)" : "min(95vw, 1400px)",
-              height: rounded ? "min(80vh, 80vw)" : "auto",
-              maxHeight: "80vh",
-              objectFit: "contain",
-            }}
-            className={rounded ? "rounded-full" : "rounded-lg"}
-            unoptimized
-            onClick={(e) => e.stopPropagation()}
+  return (
+    <button
+      type="button"
+      aria-label={`Reveal ${alt}`}
+      className={`relative cursor-pointer overflow-hidden ${rounded ? "inline-block rounded-full" : "rounded-lg"}`}
+      onClick={(event) => {
+        event.stopPropagation();
+        setRevealed(true);
+      }}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        {...imageProps}
+        className={`scale-110 blur-2xl transition-all duration-500 ${rounded ? "rounded-full object-cover" : "rounded-lg"}`}
+        unoptimized
+      />
+      <span className="absolute inset-0 flex items-center justify-center bg-black/30">
+        {rounded ? (
+          <Icon
+            icon="solar:eye-outline"
+            className="h-6 w-6 text-white drop-shadow"
           />
-          <a
-            href={src}
-            target="_blank"
-            rel="noreferrer"
-            className="w-full px-6 text-center font-mono text-xs break-all text-white/50 hover:text-white/80 hover:underline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {src}
-          </a>
-        </div>
-      )}
-    </>
+        ) : (
+          <span className="rounded-md border border-white/30 bg-white/20 px-2 py-0.5 text-xs font-semibold tracking-widest text-white uppercase backdrop-blur-md">
+            Spoiler
+          </span>
+        )}
+      </span>
+    </button>
   );
 }
 
