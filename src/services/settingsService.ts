@@ -200,20 +200,50 @@ export const fetchSupporterGiftLevels = async (): Promise<SupporterLevel[]> => {
   return Array.isArray(data.levels) ? data.levels : [];
 };
 
-export const updateBanner = async (url: string): Promise<string> => {
-  const response = await fetch(`/api/users/banner/update`, {
+interface CustomBannerResponse {
+  custom_banner: string | null;
+}
+
+export const fetchCustomBanner = async (): Promise<string | null> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/users/me/banner",
+  );
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to load custom banner"),
+    );
+  }
+
+  const data = (await response.json()) as CustomBannerResponse;
+  return typeof data.custom_banner === "string" ? data.custom_banner : null;
+};
+
+export const uploadCustomBanner = async (file: File): Promise<string> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/users/me/banner",
+  );
+  const formData = new FormData();
+  formData.append("banner", file, "banner.png");
+
+  const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      url,
-    }),
+    credentials: "include",
+    headers,
+    body: formData,
   });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    log.error("update banner failed", {
+    log.error("upload custom banner failed", {
       status: response.status,
       body: errorData,
     });
@@ -224,7 +254,7 @@ export const updateBanner = async (url: string): Promise<string> => {
         .error ??
       (errorData as { message?: string; error?: string; detail?: string })
         .detail ??
-      "Failed to update banner";
+      "Failed to upload banner";
 
     // Customize error messages to use "Supporter Tier" instead of "Premium Tier" for 403 responses
     if (response.status === 403 && errorMessage.includes("premium tier")) {
@@ -234,7 +264,12 @@ export const updateBanner = async (url: string): Promise<string> => {
     throw new Error(errorMessage);
   }
 
-  return url;
+  const data = (await response.json()) as CustomBannerResponse;
+  if (!data.custom_banner) {
+    throw new Error("The banner upload did not return an image URL");
+  }
+
+  return data.custom_banner;
 };
 
 interface CustomAvatarResponse {

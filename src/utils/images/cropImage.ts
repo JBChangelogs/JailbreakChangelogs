@@ -1,7 +1,5 @@
 import type { Area } from "react-easy-crop";
 
-const MAX_AVATAR_DIMENSION = 1024;
-
 const loadImage = (source: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const image = new Image();
@@ -11,19 +9,25 @@ const loadImage = (source: string): Promise<HTMLImageElement> =>
     image.src = source;
   });
 
-export async function cropAvatarToPng(
+async function cropImageToPng(
   source: string,
   crop: Area,
-  rotation = 0,
+  rotation: number,
+  maxWidth: number,
+  maxHeight: number,
+  fileName: string,
 ): Promise<File> {
   const image = await loadImage(source);
-  const outputSize = Math.max(
+  const outputScale = Math.min(
     1,
-    Math.min(MAX_AVATAR_DIMENSION, crop.width, crop.height),
+    maxWidth / crop.width,
+    maxHeight / crop.height,
   );
+  const outputWidth = Math.max(1, Math.round(crop.width * outputScale));
+  const outputHeight = Math.max(1, Math.round(crop.height * outputScale));
   const canvas = document.createElement("canvas");
-  canvas.width = outputSize;
-  canvas.height = outputSize;
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
 
   const context = canvas.getContext("2d");
   if (!context) {
@@ -38,8 +42,6 @@ export async function cropAvatarToPng(
   const cos = Math.abs(Math.cos(radians));
   const rotatedWidth = image.naturalWidth * cos + image.naturalHeight * sin;
   const rotatedHeight = image.naturalWidth * sin + image.naturalHeight * cos;
-  const outputScale = outputSize / crop.width;
-
   context.scale(outputScale, outputScale);
   context.translate(-crop.x, -crop.y);
   context.translate(rotatedWidth / 2, rotatedHeight / 2);
@@ -55,5 +57,11 @@ export async function cropAvatarToPng(
     );
   });
 
-  return new File([blob], "avatar.png", { type: "image/png" });
+  return new File([blob], fileName, { type: "image/png" });
 }
+
+export const cropAvatarToPng = (source: string, crop: Area, rotation = 0) =>
+  cropImageToPng(source, crop, rotation, 1024, 1024, "avatar.png");
+
+export const cropBannerToPng = (source: string, crop: Area, rotation = 0) =>
+  cropImageToPng(source, crop, rotation, 1500, 500, "banner.png");

@@ -17,7 +17,10 @@ import dynamic from "next/dynamic";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
-import { AvatarUploadDialog } from "@/components/Settings/AvatarUploadDialog";
+import {
+  AvatarUploadDialog,
+  BannerUploadDialog,
+} from "@/components/Settings/AvatarUploadDialog";
 import { safeSetJSON } from "@/utils/storage/safeStorage";
 import { cn } from "@/lib/utils";
 
@@ -369,6 +372,43 @@ export default function UserProfileClient({
         settings_v2: {
           ...currentUser.settings_v2,
           custom_avatar: displayEnabled,
+        } as UserSettingsV2,
+      };
+      safeSetJSON("user", updatedCurrentUser);
+      window.dispatchEvent(
+        new CustomEvent("authStateChanged", { detail: updatedCurrentUser }),
+      );
+    }
+  };
+
+  const handleProfileBannerUploaded = (
+    newBannerUrl: string,
+    displayEnabled: boolean,
+  ) => {
+    setUser((previousUser) =>
+      previousUser
+        ? {
+            ...previousUser,
+            banner: displayEnabled ? newBannerUrl : previousUser.banner,
+            custom_banner: newBannerUrl,
+            settings_v2: previousUser.settings_v2
+              ? {
+                  ...previousUser.settings_v2,
+                  custom_banner: displayEnabled,
+                }
+              : previousUser.settings_v2,
+          }
+        : previousUser,
+    );
+
+    if (currentUser) {
+      const updatedCurrentUser = {
+        ...currentUser,
+        banner: displayEnabled ? newBannerUrl : currentUser.banner,
+        custom_banner: newBannerUrl,
+        settings_v2: {
+          ...currentUser.settings_v2,
+          custom_banner: displayEnabled,
         } as UserSettingsV2,
       };
       safeSetJSON("user", updatedCurrentUser);
@@ -1130,14 +1170,58 @@ export default function UserProfileClient({
         <Breadcrumb userData={user} />
         <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
           {/* Banner Section */}
-          <Banner
-            userId={user.id}
-            username={user.username}
-            banner={user.banner}
-            customBanner={user.custom_banner}
-            settings={user.settings_v2}
-            premiumType={user.premiumtype}
-          />
+          {currentUserId === user.id ? (
+            <BannerUploadDialog
+              userData={user}
+              activateAfterUpload
+              onUploaded={handleProfileBannerUploaded}
+            >
+              {(openFilePicker, isUploading) => (
+                <div className="group/banner relative">
+                  <Banner
+                    userId={user.id}
+                    username={user.username}
+                    banner={user.banner}
+                    customBanner={user.custom_banner}
+                    settings={user.settings_v2}
+                    premiumType={user.premiumtype}
+                  />
+                  <button
+                    type="button"
+                    onClick={openFilePicker}
+                    disabled={isUploading}
+                    className="bg-secondary-bg/85 text-primary-text border-border-card hover:bg-tertiary-bg absolute top-3 right-3 z-20 hidden cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium opacity-0 shadow-md backdrop-blur-sm transition-all group-hover/banner:opacity-100 focus-visible:opacity-100 md:flex"
+                  >
+                    <Icon
+                      icon={
+                        isUploading
+                          ? "svg-spinners:ring-resize"
+                          : "heroicons:pencil"
+                      }
+                      className="size-4"
+                    />
+                    {isUploading ? "Uploading..." : "Change Banner"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openFilePicker}
+                    disabled={isUploading}
+                    aria-label="Change profile banner"
+                    className="absolute inset-0 z-20 cursor-pointer md:hidden"
+                  />
+                </div>
+              )}
+            </BannerUploadDialog>
+          ) : (
+            <Banner
+              userId={user.id}
+              username={user.username}
+              banner={user.banner}
+              customBanner={user.custom_banner}
+              settings={user.settings_v2}
+              premiumType={user.premiumtype}
+            />
+          )}
 
           {/* Profile Content */}
           <div className="p-3 sm:p-4 md:p-6">
@@ -1189,17 +1273,8 @@ export default function UserProfileClient({
                           onClick={openFilePicker}
                           disabled={isUploading}
                           aria-label="Change profile avatar"
-                          className="bg-button-info text-form-button-text border-secondary-bg absolute right-1 bottom-1 z-30 flex size-9 cursor-pointer items-center justify-center rounded-full border-2 shadow-md md:hidden"
-                        >
-                          <Icon
-                            icon={
-                              isUploading
-                                ? "svg-spinners:ring-resize"
-                                : "heroicons:pencil"
-                            }
-                            className="size-4"
-                          />
-                        </button>
+                          className="absolute inset-0 z-30 cursor-pointer md:hidden"
+                        />
                       </div>
                     )}
                   </AvatarUploadDialog>

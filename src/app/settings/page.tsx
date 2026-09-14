@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
-import { UserData, UserSettingsV2 } from "@/types/auth";
+import { UserData } from "@/types/auth";
 import { formatSettingName } from "@/config/settings";
 import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
 import { BannerSettings } from "@/components/Settings/BannerSettings";
 import { AvatarSettings } from "@/components/Settings/AvatarSettings";
-import ImageHostLinks from "@/components/Settings/ImageHostLinks";
 import SettingsCard from "@/components/Settings/SettingsCard";
 import SupporterHistorySection from "@/components/Settings/SupporterHistorySection";
 import PurchasedGiftsSection from "@/components/Settings/PurchasedGiftsSection";
@@ -122,10 +121,9 @@ export default function SettingsPage() {
       const updatedUser: UserData = {
         ...userData,
         custom_banner: newBannerUrl,
-        settings_v2: {
-          ...userData.settings_v2,
-          custom_banner: true,
-        } as UserSettingsV2,
+        banner: userData.settings_v2?.custom_banner
+          ? newBannerUrl
+          : userData.banner,
       };
       safeSetJSON("user", updatedUser);
       window.dispatchEvent(
@@ -162,13 +160,6 @@ export default function SettingsPage() {
     (a, b) => a.index - b.index,
   );
 
-  const settingsMap = Object.fromEntries(
-    Object.values(settings).flatMap((cat) =>
-      cat.settings.map((s) => [s.name, s]),
-    ),
-  );
-
-  const isSettingEnabled = (name: string) => settingsMap[name]?.value === true;
   const sortedSupporterGifts = [...supporterGifts].sort((a, b) => {
     if (a.level !== b.level) return b.level - a.level;
     return b.created_at - a.created_at;
@@ -330,15 +321,13 @@ export default function SettingsPage() {
                           disabled={isAppearanceCat && isAppearanceUploadBusy}
                           userData={userData}
                         />
-                        {isAppearanceCat &&
-                          entry.name === "custom_banner" &&
-                          isSettingEnabled("custom_banner") && (
-                            <BannerSettings
-                              userData={userData}
-                              onBannerUpdate={handleBannerUpdate}
-                              onUploadStateChange={setIsBannerUploading}
-                            />
-                          )}
+                        {isAppearanceCat && entry.name === "custom_banner" && (
+                          <BannerSettings
+                            userData={userData}
+                            onBannerUpdate={handleBannerUpdate}
+                            onUploadStateChange={setIsBannerUploading}
+                          />
+                        )}
                         {isAppearanceCat && entry.name === "custom_avatar" && (
                           <AvatarSettings
                             userData={userData}
@@ -367,12 +356,6 @@ export default function SettingsPage() {
                     />
                   )}
                 </div>
-                {isAppearanceCat && isSettingEnabled("custom_banner") && (
-                  <>
-                    <div className="border-border-card my-2 border-t" />
-                    <ImageHostLinks />
-                  </>
-                )}
               </SettingsCard>
             );
           })}

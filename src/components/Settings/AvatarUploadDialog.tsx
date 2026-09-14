@@ -18,17 +18,17 @@ import { createLogger } from "@/services/logger";
 import {
   updateUserSettings,
   uploadCustomAvatar,
+  uploadCustomBanner,
 } from "@/services/settingsService";
 import type { UserSettingsV2 } from "@/types/auth";
 import { trackEvent } from "@/utils/analytics/rybbit";
-import { cropAvatarToPng } from "@/utils/images/cropImage";
+import { cropAvatarToPng, cropBannerToPng } from "@/utils/images/cropImage";
 import { validateFile } from "@/utils/storage/fileValidation";
 import SupporterModal from "../Modals/SupporterModal";
 
 const log = createLogger("UI");
-const MAX_AVATAR_FILE_SIZE = 8 * 1024 * 1024;
-const ALLOWED_AVATAR_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
-const ALLOWED_AVATAR_TYPES = [
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
@@ -36,7 +36,7 @@ const ALLOWED_AVATAR_TYPES = [
   "image/gif",
 ];
 
-interface AvatarUploadDialogProps {
+interface ImageUploadDialogProps {
   userData: {
     premiumtype?: number;
     settings_v2?: UserSettingsV2;
@@ -48,15 +48,17 @@ interface AvatarUploadDialogProps {
     openFilePicker: () => void,
     isUploading: boolean,
   ) => React.ReactNode;
+  imageType: "avatar" | "banner";
 }
 
-export const AvatarUploadDialog = ({
+const ImageUploadDialog = ({
   userData,
   activateAfterUpload = false,
   onUploaded,
   onUploadStateChange,
   children,
-}: AvatarUploadDialogProps) => {
+  imageType,
+}: ImageUploadDialogProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const selectedSourceRef = useRef<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -66,8 +68,12 @@ export const AvatarUploadDialog = ({
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const { modalState, closeModal, checkAvatarAccess } = useSupporterModal();
-  const usesSquareAvatar = userData.premiumtype === 3;
+  const { modalState, closeModal, checkAvatarAccess, checkBannerAccess } =
+    useSupporterModal();
+  const isAvatar = imageType === "avatar";
+  const label = isAvatar ? "avatar" : "banner";
+  const maxFileSizeMb = isAvatar ? 8 : 10;
+  const settingName = isAvatar ? "custom_avatar" : "custom_banner";
   const hasCropEdits =
     crop.x !== 0 || crop.y !== 0 || zoom !== 1 || rotation !== 0;
 
@@ -99,9 +105,12 @@ export const AvatarUploadDialog = ({
   }, []);
 
   const openFilePicker = useCallback(() => {
-    if (!checkAvatarAccess(userData.premiumtype ?? 0)) return;
+    const hasAccess = isAvatar
+      ? checkAvatarAccess(userData.premiumtype ?? 0)
+      : checkBannerAccess(userData.premiumtype ?? 0);
+    if (!hasAccess) return;
     fileInputRef.current?.click();
-  }, [checkAvatarAccess, userData.premiumtype]);
+  }, [checkAvatarAccess, checkBannerAccess, isAvatar, userData.premiumtype]);
 
   const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -109,13 +118,13 @@ export const AvatarUploadDialog = ({
 
     const validation = validateFile(
       file,
-      ALLOWED_AVATAR_EXTENSIONS,
-      ALLOWED_AVATAR_TYPES,
-      MAX_AVATAR_FILE_SIZE,
-      8,
+      ALLOWED_IMAGE_EXTENSIONS,
+      ALLOWED_IMAGE_TYPES,
+      maxFileSizeMb * 1024 * 1024,
+      maxFileSizeMb,
     );
     if (!validation.isValid) {
-      toast.error("Invalid avatar", { description: validation.error });
+      toast.error(`Invalid ${label}`, { description: validation.error });
       event.target.value = "";
       return;
     }
@@ -144,32 +153,37 @@ export const AvatarUploadDialog = ({
     setIsUploading(true);
 
     try {
-      const croppedFile = await cropAvatarToPng(
-        selectedSource,
-        croppedAreaPixels,
-        rotation,
-      );
-      const newAvatarUrl = await uploadCustomAvatar(croppedFile);
-      let displayEnabled = userData.settings_v2?.custom_avatar === true;
+      const croppedFile = isAvatar
+        ? await cropAvatarToPng(selectedSource, croppedAreaPixels, rotation)
+        : await cropBannerToPng(selectedSource, croppedAreaPixels, rotation);
+      const newImageUrl = isAvatar
+        ? await uploadCustomAvatar(croppedFile)
+        : await uploadCustomBanner(croppedFile);
+      let displayEnabled = userData.settings_v2?.[settingName] === true;
 
       if (activateAfterUpload && !displayEnabled) {
-        await updateUserSettings("custom_avatar", true);
+        await updateUserSettings(settingName, true);
         displayEnabled = true;
       }
 
-      onUploaded(newAvatarUrl, displayEnabled);
+      onUploaded(newImageUrl, displayEnabled);
       clearSelectedSource();
-      toast.success("Custom avatar uploaded", {
+      toast.success(`Custom ${label} uploaded`, {
         description: displayEnabled
-          ? "Your new avatar is now visible."
-          : "Turn on Custom Avatar when you are ready to display it.",
+          ? `Your new ${label} is now visible.`
+          : `Turn on Custom ${isAvatar ? "Avatar" : "Banner"} when you are ready to display it.`,
       });
-      trackEvent("Custom Avatar Uploaded", { url: newAvatarUrl });
+      trackEvent(
+        isAvatar ? "Custom Avatar Uploaded" : "Custom Banner Uploaded",
+        {
+          url: newImageUrl,
+        },
+      );
     } catch (error) {
-      log.error("Avatar upload error:", error);
-      toast.error("Avatar upload failed", {
+      log.error(`${isAvatar ? "Avatar" : "Banner"} upload error:`, error);
+      toast.error(`${isAvatar ? "Avatar" : "Banner"} upload failed`, {
         description:
-          error instanceof Error ? error.message : "Failed to upload avatar",
+          error instanceof Error ? error.message : `Failed to upload ${label}`,
       });
     } finally {
       setIsUploading(false);
@@ -181,7 +195,7 @@ export const AvatarUploadDialog = ({
       <input
         ref={fileInputRef}
         type="file"
-        accept={ALLOWED_AVATAR_TYPES.join(",")}
+        accept={ALLOWED_IMAGE_TYPES.join(",")}
         onChange={handleFileSelection}
         className="hidden"
         disabled={isUploading}
@@ -194,9 +208,12 @@ export const AvatarUploadDialog = ({
           if (!open && !isUploading) clearSelectedSource();
         }}
       >
-        <DialogContent className="max-w-lg" showClose={!isUploading}>
+        <DialogContent
+          className={isAvatar ? "max-w-lg" : "max-w-2xl"}
+          showClose={!isUploading}
+        >
           <DialogHeader>
-            <DialogTitle>Crop your avatar</DialogTitle>
+            <DialogTitle>Adjust your {label}</DialogTitle>
             <DialogDescription>
               Drag to reposition the image and use the slider to zoom.
             </DialogDescription>
@@ -209,8 +226,10 @@ export const AvatarUploadDialog = ({
                 crop={crop}
                 zoom={zoom}
                 rotation={rotation}
-                aspect={1}
-                cropShape={usesSquareAvatar ? "rect" : "round"}
+                aspect={isAvatar ? 1 : 3}
+                cropShape={
+                  isAvatar && userData.premiumtype !== 3 ? "round" : "rect"
+                }
                 showGrid={false}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
@@ -226,7 +245,7 @@ export const AvatarUploadDialog = ({
               className="text-secondary-text size-5"
             />
             <Slider
-              aria-label="Avatar zoom"
+              aria-label={`${isAvatar ? "Avatar" : "Banner"} zoom`}
               min={1}
               max={3}
               step={0.01}
@@ -246,7 +265,7 @@ export const AvatarUploadDialog = ({
               className="text-secondary-text size-5"
             />
             <Slider
-              aria-label="Avatar rotation"
+              aria-label={`${isAvatar ? "Avatar" : "Banner"} rotation`}
               min={-180}
               max={180}
               step={1}
@@ -290,7 +309,9 @@ export const AvatarUploadDialog = ({
                     : "material-symbols:cloud-upload"
                 }
               />
-              {isUploading ? "Uploading..." : "Upload Avatar"}
+              {isUploading
+                ? "Uploading..."
+                : `Upload ${isAvatar ? "Avatar" : "Banner"}`}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -308,3 +329,13 @@ export const AvatarUploadDialog = ({
     </>
   );
 };
+
+type SharedUploadDialogProps = Omit<ImageUploadDialogProps, "imageType">;
+
+export const AvatarUploadDialog = (props: SharedUploadDialogProps) => (
+  <ImageUploadDialog {...props} imageType="avatar" />
+);
+
+export const BannerUploadDialog = (props: SharedUploadDialogProps) => (
+  <ImageUploadDialog {...props} imageType="banner" />
+);
