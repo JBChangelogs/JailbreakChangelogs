@@ -17,6 +17,9 @@ import dynamic from "next/dynamic";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import { AvatarUploadDialog } from "@/components/Settings/AvatarUploadDialog";
+import { safeSetJSON } from "@/utils/storage/safeStorage";
+import { cn } from "@/lib/utils";
 
 import { UserBadges } from "@/components/Profile/UserBadges";
 import {
@@ -336,6 +339,43 @@ export default function UserProfileClient({
   const refreshBio = async (newBio: string) => {
     setBio(newBio);
     setBioLastUpdated(Date.now());
+  };
+
+  const handleProfileAvatarUploaded = (
+    newAvatarUrl: string,
+    displayEnabled: boolean,
+  ) => {
+    setUser((previousUser) =>
+      previousUser
+        ? {
+            ...previousUser,
+            avatar: displayEnabled ? newAvatarUrl : previousUser.avatar,
+            custom_avatar: newAvatarUrl,
+            settings_v2: previousUser.settings_v2
+              ? {
+                  ...previousUser.settings_v2,
+                  custom_avatar: displayEnabled,
+                }
+              : previousUser.settings_v2,
+          }
+        : previousUser,
+    );
+
+    if (currentUser) {
+      const updatedCurrentUser = {
+        ...currentUser,
+        avatar: displayEnabled ? newAvatarUrl : currentUser.avatar,
+        custom_avatar: newAvatarUrl,
+        settings_v2: {
+          ...currentUser.settings_v2,
+          custom_avatar: displayEnabled,
+        } as UserSettingsV2,
+      };
+      safeSetJSON("user", updatedCurrentUser);
+      window.dispatchEvent(
+        new CustomEvent("authStateChanged", { detail: updatedCurrentUser }),
+      );
+    }
   };
 
   useEffect(() => {
@@ -1104,22 +1144,82 @@ export default function UserProfileClient({
             <div className="flex flex-col items-center gap-3 md:flex-row md:items-start md:gap-6">
               {/* Avatar - smaller on mobile */}
               <div className="relative -mt-14 md:-mt-24">
-                <UserAvatar
-                  userId={user.id}
-                  avatarHash={user.avatar}
-                  username={user.username}
-                  size={38}
-                  custom_avatar={user.custom_avatar}
-                  isOnline={
-                    user.settings_v2?.hide_presence === true &&
-                    currentUserId !== user.id
-                      ? false
-                      : user.presence?.status === "Online"
-                  }
-                  showBadge={true}
-                  settings={user.settings_v2}
-                  premiumType={user.premiumtype}
-                />
+                {currentUserId === user.id ? (
+                  <AvatarUploadDialog
+                    userData={user}
+                    activateAfterUpload
+                    onUploaded={handleProfileAvatarUploaded}
+                  >
+                    {(openFilePicker, isUploading) => (
+                      <div className="group/avatar relative">
+                        <UserAvatar
+                          userId={user.id}
+                          avatarHash={user.avatar}
+                          username={user.username}
+                          size={38}
+                          custom_avatar={user.custom_avatar}
+                          isOnline={user.presence?.status === "Online"}
+                          showBadge={true}
+                          settings={user.settings_v2}
+                          premiumType={user.premiumtype}
+                        />
+                        <button
+                          type="button"
+                          onClick={openFilePicker}
+                          disabled={isUploading}
+                          aria-label="Change profile avatar"
+                          className={cn(
+                            "absolute inset-0 z-30 hidden cursor-pointer items-center justify-center bg-black/55 text-white opacity-0 backdrop-blur-[1px] transition-opacity group-hover/avatar:opacity-100 focus-visible:opacity-100 md:flex",
+                            user.premiumtype === 3
+                              ? "rounded-sm"
+                              : "rounded-full",
+                          )}
+                        >
+                          <Icon
+                            icon={
+                              isUploading
+                                ? "svg-spinners:ring-resize"
+                                : "heroicons:pencil"
+                            }
+                            className="size-8"
+                          />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={openFilePicker}
+                          disabled={isUploading}
+                          aria-label="Change profile avatar"
+                          className="bg-button-info text-form-button-text border-secondary-bg absolute right-1 bottom-1 z-30 flex size-9 cursor-pointer items-center justify-center rounded-full border-2 shadow-md md:hidden"
+                        >
+                          <Icon
+                            icon={
+                              isUploading
+                                ? "svg-spinners:ring-resize"
+                                : "heroicons:pencil"
+                            }
+                            className="size-4"
+                          />
+                        </button>
+                      </div>
+                    )}
+                  </AvatarUploadDialog>
+                ) : (
+                  <UserAvatar
+                    userId={user.id}
+                    avatarHash={user.avatar}
+                    username={user.username}
+                    size={38}
+                    custom_avatar={user.custom_avatar}
+                    isOnline={
+                      user.settings_v2?.hide_presence === true
+                        ? false
+                        : user.presence?.status === "Online"
+                    }
+                    showBadge={true}
+                    settings={user.settings_v2}
+                    premiumType={user.premiumtype}
+                  />
+                )}
               </div>
               <div className="w-full flex-1">
                 <div className="flex flex-col justify-between md:flex-row">

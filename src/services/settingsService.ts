@@ -237,20 +237,50 @@ export const updateBanner = async (url: string): Promise<string> => {
   return url;
 };
 
-export const updateAvatar = async (url: string): Promise<string> => {
-  const response = await fetch(`/api/users/avatar/update`, {
+interface CustomAvatarResponse {
+  custom_avatar: string | null;
+}
+
+export const fetchCustomAvatar = async (): Promise<string | null> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/users/me/avatar",
+  );
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to load custom avatar"),
+    );
+  }
+
+  const data = (await response.json()) as CustomAvatarResponse;
+  return typeof data.custom_avatar === "string" ? data.custom_avatar : null;
+};
+
+export const uploadCustomAvatar = async (file: File): Promise<string> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/users/me/avatar",
+  );
+  const formData = new FormData();
+  formData.append("avatar", file, "avatar.png");
+
+  const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      url,
-    }),
+    credentials: "include",
+    headers,
+    body: formData,
   });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    log.error("update avatar failed", {
+    log.error("upload custom avatar failed", {
       status: response.status,
       body: errorData,
     });
@@ -261,7 +291,7 @@ export const updateAvatar = async (url: string): Promise<string> => {
         .error ??
       (errorData as { message?: string; error?: string; detail?: string })
         .detail ??
-      "Failed to update avatar";
+      "Failed to upload avatar";
 
     // Customize error messages to use "Supporter Tier" instead of "Premium Tier" for 403 responses
     if (response.status === 403 && errorMessage.includes("premium tier")) {
@@ -271,7 +301,12 @@ export const updateAvatar = async (url: string): Promise<string> => {
     throw new Error(errorMessage);
   }
 
-  return url;
+  const data = (await response.json()) as CustomAvatarResponse;
+  if (!data.custom_avatar) {
+    throw new Error("The avatar upload did not return an image URL");
+  }
+
+  return data.custom_avatar;
 };
 
 export const updateUserSettings = async (

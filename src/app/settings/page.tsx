@@ -139,10 +139,9 @@ export default function SettingsPage() {
       const updatedUser: UserData = {
         ...userData,
         custom_avatar: newAvatarUrl,
-        settings_v2: {
-          ...userData.settings_v2,
-          custom_avatar: true,
-        } as UserSettingsV2,
+        avatar: userData.settings_v2?.custom_avatar
+          ? newAvatarUrl
+          : userData.avatar,
       };
       safeSetJSON("user", updatedUser);
       window.dispatchEvent(
@@ -340,15 +339,13 @@ export default function SettingsPage() {
                               onUploadStateChange={setIsBannerUploading}
                             />
                           )}
-                        {isAppearanceCat &&
-                          entry.name === "custom_avatar" &&
-                          isSettingEnabled("custom_avatar") && (
-                            <AvatarSettings
-                              userData={userData}
-                              onAvatarUpdate={handleAvatarUpdate}
-                              onUploadStateChange={setIsAvatarUploading}
-                            />
-                          )}
+                        {isAppearanceCat && entry.name === "custom_avatar" && (
+                          <AvatarSettings
+                            userData={userData}
+                            onAvatarUpdate={handleAvatarUpdate}
+                            onUploadStateChange={setIsAvatarUploading}
+                          />
+                        )}
                       </div>
                     );
                   })}
@@ -370,14 +367,12 @@ export default function SettingsPage() {
                     />
                   )}
                 </div>
-                {isAppearanceCat &&
-                  (isSettingEnabled("custom_banner") ||
-                    isSettingEnabled("custom_avatar")) && (
-                    <>
-                      <div className="border-border-card my-2 border-t" />
-                      <ImageHostLinks />
-                    </>
-                  )}
+                {isAppearanceCat && isSettingEnabled("custom_banner") && (
+                  <>
+                    <div className="border-border-card my-2 border-t" />
+                    <ImageHostLinks />
+                  </>
+                )}
               </SettingsCard>
             );
           })}
