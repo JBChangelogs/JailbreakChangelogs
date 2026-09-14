@@ -410,7 +410,7 @@ export async function fetchUserByIdForOG(id: string) {
       "banner",
       "custom_avatar",
       "custom_banner",
-      "settings",
+      "settings_v2",
       "premiumtype",
     ].join(",");
 
