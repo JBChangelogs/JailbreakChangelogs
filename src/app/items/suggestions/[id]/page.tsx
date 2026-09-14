@@ -54,6 +54,7 @@ import { RejectionInfo } from "@/components/Items/Suggestions/RejectionInfo";
 import { ReportSuggestionModal } from "@/components/Items/Suggestions/ReportSuggestionModal";
 import type { CommonTrade } from "@/components/Items/Suggestions/types";
 import { useSuggestionReporting } from "@/hooks/useSuggestionReporting";
+import { hasMeaningfulCollapsedOverflow } from "@/utils/ui/collapsibleContent";
 
 interface UserSettings {
   custom_avatar?: boolean;
@@ -139,7 +140,6 @@ const badgeBase =
 const voterListClassName =
   "max-h-96 space-y-2 overflow-y-auto scrollbar-thin pr-1";
 
-const MAX_REASON_LENGTH = 400;
 const MIN_COMMON_TRADES = 2;
 
 const toCommonTradeDrafts = (
@@ -290,7 +290,7 @@ export default function ValueSuggestionDetailPage() {
     return () => clearTimeout(t);
   }, [editRateLimitUntil]);
   const [reasonExpanded, setReasonExpanded] = useState(false);
-  const [reasonOverflows, setReasonOverflows] = useState(false);
+  const [reasonOverflows, setReasonOverflows] = useState<boolean | null>(null);
   const reasonRef = useRef<HTMLDivElement | null>(null);
   const [refreshType, setRefreshType] = useState<string | null>(null);
   const [itemHistory, setItemHistory] = useState<ValueHistory[] | null>(null);
@@ -443,6 +443,7 @@ export default function ValueSuggestionDetailPage() {
 
   useEffect(() => {
     setReasonExpanded(false);
+    setReasonOverflows(null);
   }, [suggestion?.id]);
 
   useEffect(() => {
@@ -454,14 +455,14 @@ export default function ValueSuggestionDetailPage() {
     if (!el) return;
 
     const checkOverflow = () => {
-      setReasonOverflows(el.scrollHeight > el.clientHeight);
+      setReasonOverflows(hasMeaningfulCollapsedOverflow(el));
     };
 
     checkOverflow();
     const observer = new ResizeObserver(checkOverflow);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [suggestion?.reason, suggestion?.id, loading, reasonExpanded]);
+  }, [suggestion?.reason, suggestion?.id, loading]);
 
   const silentRefreshVotes = useCallback(async () => {
     if (!id) return;
@@ -1185,9 +1186,6 @@ export default function ValueSuggestionDetailPage() {
                           </div>
                         ) : suggestion.reason.trim() ? (
                           (() => {
-                            const isTruncated =
-                              suggestion.reason.split("\n").length > 5 ||
-                              suggestion.reason.length > MAX_REASON_LENGTH;
                             const mdContent = (() => {
                               const withBold = suggestion.reason.replace(
                                 /(Common Trades?:?)/gi,
@@ -1198,15 +1196,12 @@ export default function ValueSuggestionDetailPage() {
                                 .map((part) => part.replace(/\n/g, "\n\n"))
                                 .join("\n\n");
                             })();
-                            const showReasonToggle =
-                              reasonOverflows ||
-                              (reasonExpanded && isTruncated);
                             return (
                               <div>
                                 <div
                                   ref={reasonRef}
                                   className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
-                                    isTruncated && !reasonExpanded
+                                    reasonOverflows !== false && !reasonExpanded
                                       ? "max-h-36"
                                       : ""
                                   }`}
@@ -1258,7 +1253,7 @@ export default function ValueSuggestionDetailPage() {
                                     {mdContent}
                                   </ReactMarkdown>
                                 </div>
-                                {showReasonToggle && (
+                                {reasonOverflows === true && (
                                   <button
                                     type="button"
                                     onClick={() => setReasonExpanded((v) => !v)}

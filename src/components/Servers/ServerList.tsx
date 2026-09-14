@@ -42,6 +42,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { hasLineClampOverflow } from "@/utils/ui/collapsibleContent";
 
 const BADGE_BASE_URL =
   "https://assets.jailbreakchangelogs.com/assets/website_icons";
@@ -120,7 +121,7 @@ const ServerList: React.FC<{
   const measureRulesTruncation = React.useCallback((serverId: number) => {
     const node = ruleParagraphRefs.current.get(serverId);
     if (!node) return;
-    const isOverflowing = node.scrollHeight > node.clientHeight + 1;
+    const isOverflowing = hasLineClampOverflow(node, 2);
     setTruncatedRules((prev) => {
       const alreadyMarked = prev.has(serverId);
       if (isOverflowing === alreadyMarked) return prev;
@@ -779,9 +780,7 @@ const ServerList: React.FC<{
                     } else {
                       ruleParagraphRefs.current.delete(server.id);
                     }
-                    if (!isRulesExpanded) {
-                      measureRulesTruncation(server.id);
-                    }
+                    measureRulesTruncation(server.id);
                   }}
                   className="text-secondary-text text-sm wrap-break-word"
                   style={

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +39,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { hasMeaningfulCollapsedOverflow } from "@/utils/ui/collapsibleContent";
 
 interface Item {
   id: number;
@@ -191,6 +192,10 @@ export default function ChangelogDetailsClient({
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
     new Set(),
   );
+  const [overflowingReasons, setOverflowingReasons] = useState<Set<number>>(
+    new Set(),
+  );
+  const reasonRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
   const itemsPerPage = 12;
 
   const toggleChangeExpand = (
@@ -432,6 +437,31 @@ export default function ChangelogDetailsClient({
     startIndex,
     startIndex + itemsPerPage,
   );
+
+  useEffect(() => {
+    const elToId = new Map<Element, number>();
+    for (const [id, el] of reasonRefs.current.entries()) {
+      if (el) elToId.set(el, id);
+    }
+
+    const measure = () => {
+      const next = new Set<number>();
+      for (const [id, el] of reasonRefs.current.entries()) {
+        if (el && hasMeaningfulCollapsedOverflow(el)) next.add(id);
+      }
+      setOverflowingReasons((prev) => {
+        if (prev.size === next.size && [...next].every((id) => prev.has(id))) {
+          return prev;
+        }
+        return next;
+      });
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    for (const el of elToId.keys()) observer.observe(el);
+    return () => observer.disconnect();
+  }, [filteredChanges, page]);
 
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
@@ -828,8 +858,6 @@ export default function ChangelogDetailsClient({
                       </div>
                       {(() => {
                         const reason = change.suggestion.data.reason || "";
-                        const isLong =
-                          reason.split("\n").length > 5 || reason.length > 400;
                         const isExpanded = expandedReasons.has(
                           change.suggestion.id,
                         );
@@ -846,8 +874,17 @@ export default function ChangelogDetailsClient({
                         return (
                           <div className="mb-4">
                             <div
+                              ref={(el) => {
+                                reasonRefs.current.set(
+                                  change.suggestion!.id,
+                                  el,
+                                );
+                              }}
                               className={`text-secondary-text overflow-hidden text-sm leading-relaxed font-medium transition-all duration-200 ${
-                                isLong && !isExpanded ? "max-h-36" : ""
+                                overflowingReasons.has(change.suggestion.id) &&
+                                !isExpanded
+                                  ? "max-h-36"
+                                  : ""
                               }`}
                             >
                               <ReactMarkdown
@@ -895,7 +932,7 @@ export default function ChangelogDetailsClient({
                                 {mdContent}
                               </ReactMarkdown>
                             </div>
-                            {isLong && (
+                            {overflowingReasons.has(change.suggestion.id) && (
                               <button
                                 type="button"
                                 onClick={() =>

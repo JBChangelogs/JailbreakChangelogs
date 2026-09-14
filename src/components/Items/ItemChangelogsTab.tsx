@@ -34,6 +34,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
+import { hasMeaningfulCollapsedOverflow } from "@/utils/ui/collapsibleContent";
 
 const log = createLogger("UI");
 
@@ -190,8 +191,6 @@ const fieldLabel = (field: string) =>
 const badgeBase =
   "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
-const MAX_REASON_LENGTH = 300;
-
 interface ItemChangelogsTabProps {
   itemId: number;
 }
@@ -282,7 +281,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
         const id = elToId.get(entry.target);
         if (id === undefined) continue;
         const el = entry.target as HTMLElement;
-        const overflows = el.scrollHeight > el.clientHeight;
+        const overflows = hasMeaningfulCollapsedOverflow(el);
         setOverflowingReasons((prev) => {
           if (overflows === prev.has(id)) return prev;
           const next = new Set(prev);
@@ -295,7 +294,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
 
     for (const [id, el] of reasonRefs.current.entries()) {
       if (!el) continue;
-      const overflows = el.scrollHeight > el.clientHeight;
+      const overflows = hasMeaningfulCollapsedOverflow(el);
       setOverflowingReasons((prev) => {
         if (overflows === prev.has(id)) return prev;
         const next = new Set(prev);
@@ -390,9 +389,6 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
             changelog.votes.downvotes.length > 0;
           const isExpanded = expandedReasons.has(changelog.id);
           const reasonText = changelog.reason ?? "";
-          const isTruncatable =
-            reasonText.length > MAX_REASON_LENGTH ||
-            reasonText.split("\n").length > 5;
 
           return (
             <div
@@ -510,7 +506,9 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                         reasonRefs.current.set(changelog.id, el);
                       }}
                       className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
-                        isTruncatable && !isExpanded ? "max-h-36" : ""
+                        overflowingReasons.has(changelog.id) && !isExpanded
+                          ? "max-h-36"
+                          : ""
                       }`}
                     >
                       <ReactMarkdown
@@ -524,8 +522,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                           .join("\n\n")}
                       </ReactMarkdown>
                     </div>
-                    {(overflowingReasons.has(changelog.id) ||
-                      (isExpanded && isTruncatable)) && (
+                    {overflowingReasons.has(changelog.id) && (
                       <button
                         onClick={() =>
                           setExpandedReasons((prev) => {

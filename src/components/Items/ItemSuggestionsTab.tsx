@@ -36,6 +36,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
+import { hasMeaningfulCollapsedOverflow } from "@/utils/ui/collapsibleContent";
 
 const log = createLogger("UI");
 
@@ -201,8 +202,6 @@ const statusColors: Record<string, string> = {
 const badgeBase =
   "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
-const MAX_REASON_LENGTH = 300;
-
 // RE-ADD: voting — VoteRateLimitBanner (shown below vote buttons when rate limited)
 // function VoteRateLimitBanner({ until }: { until: number }) {
 //   const [secondsLeft, setSecondsLeft] = useState(
@@ -313,15 +312,26 @@ export default function ItemSuggestionsTab({
 
   useEffect(() => {
     if (loading) return;
-    const next = new Set<number>();
-    for (const [id, el] of reasonRefs.current.entries()) {
-      if (el && el.scrollHeight > el.clientHeight) next.add(id);
+
+    const measure = () => {
+      const next = new Set<number>();
+      for (const [id, el] of reasonRefs.current.entries()) {
+        if (el && hasMeaningfulCollapsedOverflow(el)) next.add(id);
+      }
+      setOverflowingReasons((prev) => {
+        if (prev.size === next.size && [...next].every((id) => prev.has(id))) {
+          return prev;
+        }
+        return next;
+      });
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    for (const el of reasonRefs.current.values()) {
+      if (el) observer.observe(el);
     }
-    setOverflowingReasons((prev) => {
-      if (prev.size === next.size && [...next].every((id) => prev.has(id)))
-        return prev;
-      return next;
-    });
+    return () => observer.disconnect();
   }, [suggestions, loading]);
 
   // RE-ADD: voting — restore handleVote here
@@ -415,9 +425,6 @@ export default function ItemSuggestionsTab({
             suggestion.votes.downvotes.length > 0;
           const isExpanded = expandedReasons.has(suggestion.id);
           const reasonText = suggestion.reason ?? "";
-          const isTruncated =
-            reasonText.length > MAX_REASON_LENGTH ||
-            reasonText.split("\n").length > 5;
 
           return (
             <div
@@ -553,7 +560,9 @@ export default function ItemSuggestionsTab({
                         reasonRefs.current.set(suggestion.id, el);
                       }}
                       className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
-                        isTruncated && !isExpanded ? "max-h-36" : ""
+                        overflowingReasons.has(suggestion.id) && !isExpanded
+                          ? "max-h-36"
+                          : ""
                       }`}
                     >
                       <ReactMarkdown
@@ -567,8 +576,7 @@ export default function ItemSuggestionsTab({
                           .join("\n\n")}
                       </ReactMarkdown>
                     </div>
-                    {(overflowingReasons.has(suggestion.id) ||
-                      (isExpanded && isTruncated)) && (
+                    {overflowingReasons.has(suggestion.id) && (
                       <button
                         onClick={() =>
                           setExpandedReasons((prev) => {

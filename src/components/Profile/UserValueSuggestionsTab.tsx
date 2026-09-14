@@ -41,6 +41,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RejectionInfo } from "@/components/Items/Suggestions/RejectionInfo";
 import type { CommonTrade } from "@/components/Items/Suggestions/types";
+import { hasMeaningfulCollapsedOverflow } from "@/utils/ui/collapsibleContent";
 
 const log = createLogger("UI");
 
@@ -126,8 +127,6 @@ const statusColors: Record<string, string> = {
 
 const badgeBase =
   "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
-
-const MAX_REASON_LENGTH = 300;
 
 interface UserValueSuggestionsTabProps {
   userId: string;
@@ -233,11 +232,26 @@ export default function UserValueSuggestionsTab({
 
   useEffect(() => {
     if (loading) return;
-    const next = new Set<number>();
-    for (const [id, el] of reasonRefs.current.entries()) {
-      if (el && el.scrollHeight > el.clientHeight) next.add(id);
+
+    const measure = () => {
+      const next = new Set<number>();
+      for (const [id, el] of reasonRefs.current.entries()) {
+        if (el && hasMeaningfulCollapsedOverflow(el)) next.add(id);
+      }
+      setOverflowingReasons((prev) => {
+        if (prev.size === next.size && [...next].every((id) => prev.has(id))) {
+          return prev;
+        }
+        return next;
+      });
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    for (const el of reasonRefs.current.values()) {
+      if (el) observer.observe(el);
     }
-    setOverflowingReasons(next);
+    return () => observer.disconnect();
   }, [suggestions, loading]);
 
   const openVotersModal = (
@@ -516,9 +530,6 @@ export default function UserValueSuggestionsTab({
               suggestion.votes.downvotes.length > 0;
             const isExpanded = expandedReasons.has(suggestion.id);
             const reasonText = suggestion.reason ?? "";
-            const isTruncated =
-              reasonText.length > MAX_REASON_LENGTH ||
-              reasonText.split("\n").length > 5;
             const item = suggestion.item;
             const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
@@ -734,7 +745,9 @@ export default function UserValueSuggestionsTab({
                           reasonRefs.current.set(suggestion.id, el);
                         }}
                         className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
-                          isTruncated && !isExpanded ? "max-h-36" : ""
+                          overflowingReasons.has(suggestion.id) && !isExpanded
+                            ? "max-h-36"
+                            : ""
                         }`}
                       >
                         <ReactMarkdown
@@ -789,8 +802,7 @@ export default function UserValueSuggestionsTab({
                           })()}
                         </ReactMarkdown>
                       </div>
-                      {(overflowingReasons.has(suggestion.id) ||
-                        (isExpanded && isTruncated)) && (
+                      {overflowingReasons.has(suggestion.id) && (
                         <button
                           onClick={() =>
                             setExpandedReasons((prev) => {
