@@ -153,16 +153,13 @@ const platformGroups = [
 ] as const;
 
 const heroQuickCardClass =
-  "group relative block overflow-hidden rounded-2xl border border-white/20 bg-black/35 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-black/40";
+  "group relative block overflow-hidden rounded-2xl border border-white/20 bg-black/35 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-black/40 [.light_&]:border-white/15 [.light_&]:bg-white/[0.04] [.light_&]:backdrop-blur-sm [.light_&]:hover:border-white/25 [.light_&]:hover:bg-white/[0.08]";
 
 const platformGroupClass =
   "rounded-2xl border border-border-card bg-secondary-bg/90 p-5";
 
 const platformRowClass =
   "group -mx-2 flex items-start gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-tertiary-bg";
-
-const heroStatCardClass =
-  "group rounded-2xl border border-white/20 bg-black/35 p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/35 hover:bg-black/40";
 
 type HeroStatCard = {
   label: string;
@@ -171,7 +168,6 @@ type HeroStatCard = {
   valueStr?: string;
   decimals?: number;
   prefix?: string;
-  suffix?: string;
   badge?: string;
 };
 
@@ -198,7 +194,7 @@ export default async function Home() {
 
   const heroStats: HeroStatCard[] = [
     {
-      label: "Users",
+      label: "Registered Users",
       icon: "mdi:account-group",
       value: homepageStats?.total_users ?? 0,
     },
@@ -207,7 +203,6 @@ export default async function Home() {
       icon: "mdi:shape",
       value: impactStats?.items_tracked ?? 0,
       valueStr: impactStats?.items_tracked_str,
-      suffix: " and counting",
       badge: "All time",
     },
     {
@@ -215,7 +210,6 @@ export default async function Home() {
       icon: "mdi:account-search",
       value: impactStats?.users_scanned ?? 0,
       valueStr: impactStats?.users_scanned_str,
-      suffix: " and counting",
       badge: "All time",
     },
     {
@@ -253,7 +247,7 @@ export default async function Home() {
 
         <div className="relative z-10 container mx-auto px-4">
           <div className="grid items-stretch gap-6 md:grid-cols-2 lg:gap-8">
-            <div className="md:pt-2">
+            <div className="order-1 md:pt-2">
               <h1 className="mb-5 max-w-3xl text-3xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)] md:text-5xl lg:text-6xl">
                 Jailbreak Changelogs: The All-in-One Platform
               </h1>
@@ -286,7 +280,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <div>
+            <div className="order-3 md:order-2">
               <div className="mb-4 grid gap-3 sm:grid-cols-2">
                 {quickLinks.map((link, i) => (
                   <Link
@@ -322,7 +316,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="pt-6 md:col-span-2">
+            <div className="order-2 pt-6 md:order-3 md:col-span-2">
               <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p
@@ -364,10 +358,10 @@ export default async function Home() {
                     key={testimonial.name}
                     href="/testimonials"
                     prefetch={false}
-                    className="block rounded-2xl transition-colors hover:bg-black/45"
+                    className="block rounded-2xl transition-colors hover:bg-black/45 [.light_&]:hover:bg-white/[0.08]"
                   >
                     <blockquote
-                      className="flex h-full flex-col rounded-2xl border border-white/20 bg-black/35 p-4 text-left"
+                      className="flex h-full flex-col rounded-2xl border border-white/20 bg-black/35 p-4 text-left [.light_&]:border-white/15 [.light_&]:bg-white/[0.04] [.light_&]:backdrop-blur-sm"
                       style={
                         {
                           viewTransitionName: `hero-card-${i + 5}`,
@@ -408,48 +402,45 @@ export default async function Home() {
                   View Testimonials
                 </Link>
               </Button>
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {heroStats.map((stat, i) => (
-                  <div
-                    key={stat.label}
-                    className={heroStatCardClass}
-                    style={
-                      {
-                        viewTransitionName: `hero-card-${i + 8}`,
-                      } as React.CSSProperties
-                    }
-                  >
-                    <div className="mb-3 flex items-center gap-2">
-                      <Icon
-                        icon={stat.icon}
-                        className="h-4 w-4 text-white/60"
-                        inline={true}
-                      />
-                      <span className="text-xs font-semibold tracking-wide text-white/70 uppercase">
-                        {stat.label}
-                      </span>
-                    </div>
-                    <p className="text-2xl leading-none font-bold text-white md:text-3xl">
-                      {stat.prefix ?? ""}
-                      {stat.valueStr ?? (
-                        <CountUpNumber
-                          value={stat.value}
-                          decimals={stat.decimals}
+              <div className="rounded-2xl border border-white/20 bg-black/35 p-5 md:p-6 [.light_&]:border-white/15 [.light_&]:bg-white/[0.04] [.light_&]:backdrop-blur-sm">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-6 lg:grid-cols-4 lg:gap-x-8 lg:divide-x lg:divide-white/10">
+                  {heroStats.map((stat, i) => (
+                    <div
+                      key={stat.label}
+                      className="lg:px-6 lg:first:pl-0"
+                      style={
+                        {
+                          viewTransitionName: `hero-card-${i + 8}`,
+                        } as React.CSSProperties
+                      }
+                    >
+                      <div className="mb-2 flex items-center gap-2">
+                        <Icon
+                          icon={stat.icon}
+                          className="h-4 w-4 text-white/50"
+                          inline={true}
                         />
-                      )}
-                      {stat.suffix ? (
-                        <span className="text-sm font-semibold text-white/60">
-                          {stat.suffix}
+                        <span className="text-xs font-semibold tracking-wide text-white/60 uppercase">
+                          {stat.label}
                         </span>
-                      ) : null}
-                    </p>
-                    {stat.badge ? (
-                      <p className="mt-1.5 text-[10px] font-medium tracking-wide text-white/40 uppercase">
-                        {stat.badge}
+                      </div>
+                      <p className="text-2xl leading-none font-bold text-white md:text-3xl">
+                        {stat.prefix ?? ""}
+                        {stat.valueStr ?? (
+                          <CountUpNumber
+                            value={stat.value}
+                            decimals={stat.decimals}
+                          />
+                        )}
                       </p>
-                    ) : null}
-                  </div>
-                ))}
+                      {stat.badge ? (
+                        <p className="mt-1.5 text-[10px] font-medium tracking-wide text-white/40 uppercase">
+                          {stat.badge}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
