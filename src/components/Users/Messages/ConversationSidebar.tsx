@@ -196,7 +196,13 @@ export function ConversationSidebar({
                     username={conversation.user.username}
                     custom_avatar={conversation.user.custom_avatar}
                     size={9}
-                    showBadge={false}
+                    isOnline={conversation.user.presence?.status === "Online"}
+                    showBadge={true}
+                    presenceBadgeClassName={
+                      isActive
+                        ? "border-tertiary-bg"
+                        : "group-hover:border-tertiary-bg"
+                    }
                     settings={conversation.user.settings_v2}
                     premiumType={conversation.user.premiumtype}
                   />

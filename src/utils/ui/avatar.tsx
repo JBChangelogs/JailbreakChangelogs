@@ -4,6 +4,7 @@ import BoringAvatar from "boring-avatars";
 import Image from "next/image";
 import { memo, useState } from "react";
 import { Spinner } from "@/components/ui/Spinner";
+import { cn } from "@/lib/utils";
 
 interface UserAvatarProps {
   userId: string;
@@ -23,7 +24,7 @@ interface UserAvatarProps {
   premiumType?: number;
   className?: string;
   bgClassName?: string;
-  onlineRingClassName?: string;
+  presenceBadgeClassName?: string;
 }
 
 export const DefaultAvatar = ({
@@ -53,46 +54,45 @@ const AvatarWrapper = ({
   isOnline,
   showBadge,
   isHidden = false,
-  shape = "circle",
-  premiumType,
+  size,
   className,
-  onlineRingClassName = "ring-4",
+  presenceBadgeClassName,
 }: {
   children: React.ReactNode;
   isOnline?: boolean;
   showBadge?: boolean;
   isHidden?: boolean;
-  shape?: "circle" | "square";
-  premiumType?: number;
+  size: number;
   className?: string;
-  onlineRingClassName?: string;
+  presenceBadgeClassName?: string;
 }) => {
   if (!showBadge) return <>{children}</>;
 
-  const finalShape = premiumType === 3 ? "square" : shape;
-  const ringClass = isOnline && !isHidden ? onlineRingClassName : "";
-  const ringStyle =
-    isOnline && !isHidden
-      ? ({
-          "--tw-ring-color": "var(--color-status-success-vibrant)",
-        } as React.CSSProperties)
-      : {};
-
-  const roundedClass =
-    finalShape === "circle"
-      ? "rounded-full"
-      : finalShape === "square" && premiumType === 3
-        ? "rounded-sm"
-        : finalShape === "square"
-          ? "rounded-lg"
-          : "rounded-full";
+  const badgeSize = Math.min(32, Math.max(10, Math.round(size * 4 * 0.24)));
+  const badgeOffset = -Math.max(1, Math.round(badgeSize * 0.08));
+  const badgeBorderWidth = badgeSize >= 20 ? 4 : 2;
 
   return (
-    <div
-      className={`${ringClass} ${roundedClass} relative z-20 ${className || ""}`}
-      style={ringStyle}
-    >
+    <div className={cn("relative z-20 w-fit shrink-0", className)}>
       {children}
+      {isOnline && !isHidden ? (
+        <span
+          className={cn(
+            "border-primary-bg pointer-events-none absolute rounded-full",
+            presenceBadgeClassName,
+          )}
+          style={{
+            right: badgeOffset,
+            bottom: badgeOffset,
+            width: badgeSize,
+            height: badgeSize,
+            borderWidth: badgeBorderWidth,
+            backgroundColor: "var(--color-status-success-vibrant)",
+          }}
+          aria-label="Online"
+          title="Online"
+        />
+      ) : null}
     </div>
   );
 };
@@ -112,7 +112,7 @@ const UserAvatarImpl = ({
   premiumType,
   className,
   bgClassName = "bg-primary-bg",
-  onlineRingClassName,
+  presenceBadgeClassName,
 }: UserAvatarProps) => {
   const [imageError, setImageError] = useState(false);
   const [customAvatarError, setCustomAvatarError] = useState(false);
@@ -186,10 +186,9 @@ const UserAvatarImpl = ({
         isOnline={isOnline}
         showBadge={showBadge}
         isHidden={Boolean(settings?.hide_presence)}
-        shape={shape}
-        premiumType={premiumType}
+        size={size}
         className={wrapperClassName}
-        onlineRingClassName={onlineRingClassName}
+        presenceBadgeClassName={presenceBadgeClassName}
       >
         <div
           className={innerDivCommonClass}
@@ -217,10 +216,9 @@ const UserAvatarImpl = ({
       isOnline={isOnline}
       showBadge={showBadge}
       isHidden={Boolean(settings?.hide_presence)}
-      shape={shape}
-      premiumType={premiumType}
+      size={size}
       className={wrapperClassName}
-      onlineRingClassName={onlineRingClassName}
+      presenceBadgeClassName={presenceBadgeClassName}
     >
       <div
         className={innerDivCommonClass}
@@ -268,7 +266,7 @@ export const UserAvatar = memo(
     prev.shape === next.shape &&
     prev.premiumType === next.premiumType &&
     prev.className === next.className &&
-    prev.onlineRingClassName === next.onlineRingClassName &&
+    prev.presenceBadgeClassName === next.presenceBadgeClassName &&
     (prev.settings?.custom_avatar ?? null) ===
       (next.settings?.custom_avatar ?? null) &&
     (prev.settings?.hide_presence ?? null) ===

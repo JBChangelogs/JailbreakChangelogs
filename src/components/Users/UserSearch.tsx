@@ -354,17 +354,6 @@ export default function UserSearch() {
                     prefetch={false}
                     className="border-border-card group bg-secondary-bg relative block rounded-lg border p-4 shadow-md transition-colors"
                   >
-                    {user.settings_v2?.hide_presence !== true &&
-                      user.presence?.status === "Online" && (
-                        <div
-                          className="absolute top-2 right-2 z-10 h-3 w-3 rounded-full border-2"
-                          style={{
-                            backgroundColor:
-                              "var(--color-status-success-vibrant)",
-                            borderColor: "var(--color-secondary-bg)",
-                          }}
-                        />
-                      )}
                     <div className="flex items-center space-x-3">
                       <DiscordUserCard
                         user={user}

@@ -87,7 +87,6 @@ export function ChatHeaderPanel({
             size={8}
             isOnline={isTargetOnline}
             showBadge={true}
-            onlineRingClassName="ring-2"
             settings={selectedUser.settings_v2}
             premiumType={selectedUser.premiumtype}
           />

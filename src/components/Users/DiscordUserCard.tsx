@@ -43,7 +43,9 @@ export default function DiscordUserCard({
         size={12}
         cdnSize={512}
         custom_avatar={user.custom_avatar}
-        showBadge={false}
+        isOnline={user.presence?.status === "Online"}
+        showBadge={true}
+        presenceBadgeClassName="border-secondary-bg"
         settings={user.settings_v2}
         premiumType={user.premiumtype}
       />

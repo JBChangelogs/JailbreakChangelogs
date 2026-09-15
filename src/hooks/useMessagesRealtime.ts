@@ -96,6 +96,37 @@ export function useMessagesRealtime({
       const payload = detail?.data;
 
       if (
+        action === "presence_update" &&
+        payload &&
+        typeof payload.user_id === "string" &&
+        (payload.status === "Online" || payload.status === "Offline")
+      ) {
+        const userId = asId(payload.user_id);
+        const changedAt = Math.floor(Date.now() / 1000);
+
+        setConversations((prev) =>
+          prev.map((conversation) =>
+            conversation.user.id === userId
+              ? {
+                  ...conversation,
+                  user: {
+                    ...conversation.user,
+                    presence: {
+                      status: payload.status as "Online" | "Offline",
+                      last_updated: changedAt,
+                    },
+                    ...(payload.status === "Offline"
+                      ? { last_seen: changedAt }
+                      : {}),
+                  },
+                }
+              : conversation,
+          ),
+        );
+        return;
+      }
+
+      if (
         action === "typing" &&
         payload &&
         typeof payload.user_id === "string"

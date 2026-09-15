@@ -61,6 +61,7 @@ interface RealtimeDmMessageData {
   recipient_id?: string | number;
   content?: string;
   metadata?: unknown | null;
+  status?: "Online" | "Offline";
 }
 
 const PING_INTERVAL_MS = 30000;
@@ -524,6 +525,26 @@ export function useRealtimeNotificationsWebSocket(
 
             if (payload.data && typeof payload.data === "object") {
               const dmData = payload.data as RealtimeDmMessageData;
+              if (
+                payload.action === "presence_update" &&
+                (typeof dmData.user_id === "string" ||
+                  typeof dmData.user_id === "number") &&
+                (dmData.status === "Online" || dmData.status === "Offline")
+              ) {
+                window.dispatchEvent(
+                  new CustomEvent("realtimeMessage", {
+                    detail: {
+                      action: "presence_update",
+                      data: {
+                        user_id: String(dmData.user_id),
+                        status: dmData.status,
+                      },
+                    },
+                  }),
+                );
+                return;
+              }
+
               if (
                 payload.action === "typing" &&
                 (typeof dmData.user_id === "string" ||
