@@ -36,6 +36,7 @@ import HoardersTab from "@/components/Items/HoardersTab";
 import DupesTab from "@/components/Items/DupesTab";
 import ItemSuggestionsTab from "@/components/Items/ItemSuggestionsTab";
 import ItemChangelogsTab from "@/components/Items/ItemChangelogsTab";
+import ReportItemInfoButton from "@/components/Items/ReportItemInfoButton";
 import {
   handleImageError,
   getItemImagePath,
@@ -609,22 +610,25 @@ export default function ItemDetailsClient({
                   </span>
                 )}
               </div>
-              <div className="text-secondary-text mt-2 text-sm">
-                {currentItem.last_updated ? (
-                  <>
-                    Last updated:{" "}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="cursor-help">{relativeTime}</span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {formatCustomDate(currentItem.last_updated)}
-                      </TooltipContent>
-                    </Tooltip>
-                  </>
-                ) : (
-                  <>Last updated: Never</>
-                )}
+              <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <div className="text-secondary-text text-sm">
+                  {currentItem.last_updated ? (
+                    <>
+                      Last updated:{" "}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-help">{relativeTime}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {formatCustomDate(currentItem.last_updated)}
+                        </TooltipContent>
+                      </Tooltip>
+                    </>
+                  ) : (
+                    <>Last updated: Never</>
+                  )}
+                </div>
+                <ReportItemInfoButton item={currentItem} />
               </div>
 
               {/* Official Metrics from Badimo dataset */}
