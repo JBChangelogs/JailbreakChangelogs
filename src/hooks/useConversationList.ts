@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
 import type {
@@ -23,6 +23,27 @@ import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 
 const log = createLogger("UI");
 type Setter<T> = Dispatch<SetStateAction<T>>;
+
+function mergeUserWithLatestPresence(
+  current: MessageUser,
+  incoming: MessageUser,
+): MessageUser {
+  const currentPresenceUpdated = current.presence?.last_updated ?? -1;
+  const incomingPresenceUpdated = incoming.presence?.last_updated ?? -1;
+  const currentPresenceIsNewer =
+    currentPresenceUpdated > incomingPresenceUpdated;
+
+  return {
+    ...current,
+    ...incoming,
+    ...(currentPresenceIsNewer
+      ? {
+          presence: current.presence,
+          last_seen: current.last_seen,
+        }
+      : {}),
+  };
+}
 
 const USER_LOOKUP_FIELDS = [
   "id",
@@ -79,6 +100,10 @@ export function useConversationList({
   const userLookupPendingRef = useRef<Map<string, Promise<MessageUser | null>>>(
     new Map(),
   );
+  const conversationListRequestKey = `${currentUserId ?? "anonymous"}:${refreshKey}`;
+  const [loadedConversationListKey, setLoadedConversationListKey] = useState<
+    string | null
+  >(null);
 
   const loadUserById = async (
     id: string,
@@ -211,6 +236,7 @@ export function useConversationList({
       setConversations([]);
       setTotalConversations(null);
       setSelectedUserId(null);
+      setLoadedConversationListKey(null);
       return;
     }
 
@@ -336,7 +362,19 @@ export function useConversationList({
 
         if (isCancelled) return;
 
-        setConversations(summaries);
+        setConversations((prev) =>
+          summaries.map((summary) => {
+            const current = prev.find(
+              (conversation) => conversation.user.id === summary.user.id,
+            );
+            return current
+              ? {
+                  ...summary,
+                  user: mergeUserWithLatestPresence(current.user, summary.user),
+                }
+              : summary;
+          }),
+        );
         setTotalConversations(totalConversationsValue);
 
         setSelectedUserId((prev) => {
@@ -364,7 +402,10 @@ export function useConversationList({
             : "Failed to load conversations",
         );
       } finally {
-        setIsLoadingConversations(false);
+        if (!isCancelled) {
+          setIsLoadingConversations(false);
+          setLoadedConversationListKey(conversationListRequestKey);
+        }
       }
     };
 
@@ -374,6 +415,7 @@ export function useConversationList({
       isCancelled = true;
     };
   }, [
+    conversationListRequestKey,
     currentUserId,
     isAuthenticated,
     refreshKey,
@@ -456,7 +498,12 @@ export function useConversationList({
   }, [currentUserId, isAuthenticated, selectedUserId, setBlockedByMeByUserId]);
 
   useEffect(() => {
-    if (!isAuthenticated || !currentUserId || !routeConversationId) {
+    if (
+      !isAuthenticated ||
+      !currentUserId ||
+      !routeConversationId ||
+      loadedConversationListKey !== conversationListRequestKey
+    ) {
       return;
     }
 
@@ -474,14 +521,25 @@ export function useConversationList({
       if (!loadedUser || isCancelled) return;
 
       setConversations((prev) => {
-        if (
-          prev.some((conversation) => conversation.user.id === loadedUser.id)
-        ) {
-          return prev;
+        const existingIndex = prev.findIndex(
+          (conversation) => conversation.user.id === loadedUser.id,
+        );
+        if (existingIndex === -1) {
+          return [{ user: loadedUser }, ...prev];
         }
-        return [{ user: loadedUser }, ...prev];
+
+        return prev.map((conversation, index) =>
+          index === existingIndex
+            ? {
+                ...conversation,
+                user: mergeUserWithLatestPresence(
+                  conversation.user,
+                  loadedUser,
+                ),
+              }
+            : conversation,
+        );
       });
-      setSelectedUserId(routeConversationId);
     };
 
     void ensureRouteConversationUser();
@@ -491,8 +549,10 @@ export function useConversationList({
     };
   }, [
     conversations,
+    conversationListRequestKey,
     currentUserId,
     isAuthenticated,
+    loadedConversationListKey,
     routeConversationId,
     setConversations,
     setSelectedUserId,
