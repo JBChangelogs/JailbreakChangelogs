@@ -12,6 +12,7 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { parseBan, showBanToast } from "@/utils/api/ban";
+import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { createLogger } from "@/services/logger";
@@ -209,6 +210,152 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
   );
 }
 
+function ValueChangeCard({
+  field,
+  currentValue,
+  suggestedValue,
+}: {
+  field: string;
+  currentValue: string;
+  suggestedValue: string;
+}) {
+  return (
+    <div className="border-border-card bg-secondary-bg rounded-xl border">
+      <div className="border-border-card border-b px-5 py-3.5">
+        <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+          <Icon
+            icon="material-symbols:swap-vert-rounded"
+            className="text-secondary-text h-4 w-4"
+            inline
+          />
+          {fieldLabel(field)} Suggestion
+        </h2>
+      </div>
+      <div className="grid grid-cols-2 gap-2 p-5">
+        <div className="min-w-0 p-3">
+          <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+            <Icon icon="mdi:minus-circle" className="h-3.5 w-3.5" inline />
+            {`Old ${fieldLabel(field).toUpperCase()}`}
+          </div>
+          <div
+            className="text-secondary-text text-lg font-bold line-through"
+            style={{ wordBreak: "normal", overflowWrap: "anywhere" }}
+          >
+            {formatFullValue(currentValue || "N/A")}
+          </div>
+        </div>
+        <div className="min-w-0 p-3">
+          <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+            <Icon icon="mdi:plus-circle" className="h-3.5 w-3.5" inline />
+            {`New ${fieldLabel(field).toUpperCase()}`}
+          </div>
+          <div
+            className="text-primary-text text-lg font-bold"
+            style={{ wordBreak: "normal", overflowWrap: "anywhere" }}
+          >
+            {formatFullValue(suggestedValue)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VoteButtons({
+  userVote,
+  voteCounts,
+  votingType,
+  disabled,
+  onVote,
+}: {
+  userVote: "upvote" | "downvote" | null;
+  voteCounts: { up: number; down: number };
+  votingType: "upvote" | "downvote" | null;
+  disabled: boolean;
+  onVote: (type: "upvote" | "downvote") => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            onClick={() => onVote("upvote")}
+            disabled={disabled}
+            className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {votingType === "upvote" ? (
+              <Spinner className="text-button-success h-4 w-4" />
+            ) : (
+              <Icon
+                icon={
+                  userVote === "upvote"
+                    ? "material-symbols:thumb-up-rounded"
+                    : "material-symbols:thumb-up-outline-rounded"
+                }
+                className="text-button-success h-4 w-4"
+                inline
+              />
+            )}
+            <span className="text-button-success font-bold">
+              {voteCounts.up}
+            </span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {userVote === "upvote" ? "Remove upvote" : "Upvote"}
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            onClick={() => onVote("downvote")}
+            disabled={disabled}
+            className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {votingType === "downvote" ? (
+              <Spinner className="text-button-danger h-4 w-4" />
+            ) : (
+              <Icon
+                icon={
+                  userVote === "downvote"
+                    ? "material-symbols:thumb-down-rounded"
+                    : "material-symbols:thumb-down-outline-rounded"
+                }
+                className="text-button-danger h-4 w-4"
+                inline
+              />
+            )}
+            <span className="text-button-danger font-bold">
+              {voteCounts.down}
+            </span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {userVote === "downvote" ? "Remove downvote" : "Downvote"}
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  );
+}
+
+function VoteRateLimitBanner({ seconds }: { seconds: number }) {
+  return (
+    <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
+      <Icon
+        icon="material-symbols:hourglass-empty-rounded"
+        className="h-3.5 w-3.5 shrink-0"
+        inline
+      />
+      Too fast — wait{" "}
+      {seconds >= 60
+        ? `${Math.floor(seconds / 60)}m ${seconds % 60}s`
+        : `${seconds}s`}
+    </div>
+  );
+}
+
 export default function ValueSuggestionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const {
@@ -220,6 +367,8 @@ export default function ValueSuggestionDetailPage() {
     setBan,
   } = useAuthContext();
   const ban = bans["value_suggestions"] ?? null;
+  const showInlineVideoAd =
+    !isAuthLoading && !canHideAdsForPremiumType(user?.premiumtype ?? 0);
   const {
     reportModalOpen,
     reportReason,
@@ -909,7 +1058,7 @@ export default function ValueSuggestionDetailPage() {
               <div className="space-y-5">
                 {/* ── Hero ── */}
                 <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap">
+                  <div className="flex flex-col sm:flex-row">
                     {/* Item image */}
                     <div
                       className="bg-secondary-bg relative w-full shrink-0 sm:w-56 lg:w-80"
@@ -939,8 +1088,11 @@ export default function ValueSuggestionDetailPage() {
                     </div>
 
                     {/* Info */}
-                    <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-5">
+                    <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-5 lg:p-6">
                       <div>
+                        <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
+                          Suggestion #{suggestion.id}
+                        </p>
                         {item ? (
                           <Link
                             href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}?tab=suggestions`}
@@ -999,6 +1151,74 @@ export default function ValueSuggestionDetailPage() {
                         )}
                       </div>
 
+                      <div className="border-border-card bg-tertiary-bg/45 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border px-4 py-3">
+                        <div className="grid min-w-0 flex-1 grid-cols-2 gap-4">
+                          <div className="min-w-0">
+                            <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                              <Icon
+                                icon="mdi:minus-circle"
+                                className="h-3.5 w-3.5"
+                                inline
+                              />
+                              {`Old ${fieldLabel(suggestion.field).toUpperCase()}`}
+                            </div>
+                            <div
+                              className="text-secondary-text text-lg font-bold line-through"
+                              style={{
+                                wordBreak: "normal",
+                                overflowWrap: "anywhere",
+                              }}
+                            >
+                              {formatFullValue(
+                                suggestion.current_value || "N/A",
+                              )}
+                            </div>
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                              <Icon
+                                icon="mdi:plus-circle"
+                                className="h-3.5 w-3.5"
+                                inline
+                              />
+                              {`New ${fieldLabel(suggestion.field).toUpperCase()}`}
+                            </div>
+                            <div
+                              className="text-primary-text text-lg font-bold"
+                              style={{
+                                wordBreak: "normal",
+                                overflowWrap: "anywhere",
+                              }}
+                            >
+                              {formatFullValue(suggestion.suggested_value)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border-border-card border-l pl-4 max-lg:w-full max-lg:border-t max-lg:border-l-0 max-lg:pt-3 max-lg:pl-0">
+                          <VoteButtons
+                            userVote={userVote}
+                            voteCounts={voteCounts}
+                            votingType={votingType}
+                            disabled={voteLoading || !!voteRateLimit || !!ban}
+                            onVote={handleVote}
+                          />
+                        </div>
+                      </div>
+                      {voteRateLimit && voteRateLimitSeconds > 0 && (
+                        <p className="flex items-center gap-1.5 text-xs text-yellow-400">
+                          <Icon
+                            icon="material-symbols:hourglass-empty-rounded"
+                            className="h-3.5 w-3.5 shrink-0"
+                            inline
+                          />
+                          Voting temporarily paused — try again in{" "}
+                          {voteRateLimitSeconds >= 60
+                            ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
+                            : `${voteRateLimitSeconds}s`}
+                        </p>
+                      )}
+
                       <div>
                         <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
                           Suggested by
@@ -1039,28 +1259,10 @@ export default function ValueSuggestionDetailPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <Button
-                            variant="success"
-                            size="sm"
-                            asChild
-                            className="w-fit"
-                          >
-                            <Link
-                              href="/items/suggestions?submit=true"
-                              prefetch={false}
-                            >
-                              <Icon
-                                icon="material-symbols:add-rounded"
-                                className="h-4 w-4"
-                                inline
-                              />
-                              Submit a Suggestion
-                            </Link>
-                          </Button>
+                        <div className="mt-3 flex flex-wrap items-center gap-1">
                           {suggestion.user.roblox_id && (
                             <Button
-                              variant="default"
+                              variant="secondary"
                               size="sm"
                               asChild
                               className="w-fit"
@@ -1076,10 +1278,28 @@ export default function ValueSuggestionDetailPage() {
                                   className="h-4 w-4"
                                   inline
                                 />
-                                View Inventory
+                                Suggester&apos;s inventory
                               </Link>
                             </Button>
                           )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            className="text-secondary-text! hover:text-primary-text! w-fit"
+                          >
+                            <Link
+                              href="/items/suggestions?submit=true"
+                              prefetch={false}
+                            >
+                              <Icon
+                                icon="material-symbols:add-rounded"
+                                className="h-4 w-4"
+                                inline
+                              />
+                              New suggestion
+                            </Link>
+                          </Button>
                           {user?.id !== suggestion.user.id && (
                             <Button
                               size="sm"
@@ -1098,12 +1318,6 @@ export default function ValueSuggestionDetailPage() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Video ad — wraps below details until there is room for a side column */}
-                    <NitroInlineVideoPlayer
-                      slotId="np-values-suggestion-detail-video"
-                      variant="wide"
-                    />
                   </div>
                 </div>
 
@@ -1118,195 +1332,235 @@ export default function ValueSuggestionDetailPage() {
                 <div className="space-y-5">
                   {/* Reason — always first on every screen */}
                   <div className="min-w-0 space-y-5">
-                    {/* Reason */}
-                    <div className="border-border-card bg-secondary-bg rounded-xl border">
-                      <div className="border-border-card flex items-center justify-between border-b px-5 py-3.5">
-                        <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                          <Icon
-                            icon="material-symbols:description-outline-rounded"
-                            className="text-secondary-text h-4 w-4"
-                            inline
-                          />
-                          Reason
-                        </h2>
-                        {isAuthenticated &&
-                          user?.id === suggestion.user.id &&
-                          suggestion.status === "pending" && (
-                            <Button
-                              size="sm"
-                              variant={isEditing ? "destructive" : "default"}
-                              onClick={() => {
-                                if (isEditing) {
-                                  setIsEditing(false);
-                                } else {
-                                  setEditReason(suggestion.reason);
-                                  setIsEditingCommonTrades(false);
-                                  setIsEditing(true);
-                                }
-                              }}
-                            >
+                    <div
+                      className={`grid items-start gap-5 ${
+                        showInlineVideoAd
+                          ? "2xl:grid-cols-[minmax(0,1fr)_24rem]"
+                          : ""
+                      }`}
+                    >
+                      {/* Reason */}
+                      <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
+                        <div className="border-border-card bg-tertiary-bg/30 flex items-center justify-between gap-4 border-b px-5 py-4">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <span className="bg-button-info/10 text-link flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                               <Icon
-                                icon={
-                                  isEditing
-                                    ? "material-symbols:close-rounded"
-                                    : "material-symbols:edit-outline-rounded"
-                                }
-                                className="h-3.5 w-3.5"
+                                icon="material-symbols:format-quote-rounded"
+                                className="h-5 w-5"
                                 inline
                               />
-                              {isEditing ? "Cancel" : "Edit"}
-                            </Button>
-                          )}
-                      </div>
-                      <div className="p-5">
-                        {isEditing ? (
-                          <div className="space-y-3">
-                            <div className="flex justify-end">
-                              <span className="text-secondary-text text-xs">
-                                {editReason.length} / 350 min
-                              </span>
-                            </div>
-                            <textarea
-                              value={editReason}
-                              onChange={(e) => setEditReason(e.target.value)}
-                              rows={8}
-                              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
-                            />
-                            <RateLimitBanner
-                              until={editRateLimitUntil}
-                              label="You're updating too fast."
-                            />
-                            <div className="flex justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={handleEditSave}
-                                disabled={
-                                  editSaving ||
-                                  !!editRateLimitUntil ||
-                                  editReason.trim().length < 350
-                                }
-                                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                              >
-                                {editSaving ? (
-                                  <>
-                                    <Spinner className="h-3.5 w-3.5" />
-                                    Saving...
-                                  </>
-                                ) : (
-                                  "Save"
-                                )}
-                              </button>
-                            </div>
+                            </span>
+                            <h2 className="text-primary-text text-sm font-semibold">
+                              Reason for this suggestion
+                            </h2>
                           </div>
-                        ) : suggestion.reason.trim() ? (
-                          (() => {
-                            const mdContent = (() => {
-                              const withBold = suggestion.reason.replace(
-                                /(Common Trades?:?)/gi,
-                                "**$1**",
-                              );
-                              return withBold
-                                .split(/\n\n+/)
-                                .map((part) => part.replace(/\n/g, "\n\n"))
-                                .join("\n\n");
-                            })();
-                            return (
-                              <div>
-                                <div
-                                  ref={reasonRef}
-                                  className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
-                                    reasonOverflows !== false && !reasonExpanded
-                                      ? "max-h-36"
-                                      : ""
-                                  }`}
-                                >
-                                  <ReactMarkdown
-                                    remarkPlugins={[remarkGfm]}
-                                    components={{
-                                      h1: ({ children }) => (
-                                        <h1 className="text-primary-text mt-3 mb-1.5 text-lg font-bold first:mt-0">
-                                          {children}
-                                        </h1>
-                                      ),
-                                      h2: ({ children }) => (
-                                        <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
-                                          {children}
-                                        </h2>
-                                      ),
-                                      h3: ({ children }) => (
-                                        <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
-                                          {children}
-                                        </h3>
-                                      ),
-                                      p: ({ children }) => (
-                                        <p className="mb-2 last:mb-0">
-                                          {children}
-                                        </p>
-                                      ),
-                                      ul: ({ children }) => (
-                                        <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
-                                          {children}
-                                        </ul>
-                                      ),
-                                      ol: ({ children }) => (
-                                        <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
-                                          {children}
-                                        </ol>
-                                      ),
-                                      em: (props) => (
-                                        <em className="italic" {...props} />
-                                      ),
-                                      strong: (props) => (
-                                        <b
-                                          className="text-primary-text font-semibold"
-                                          {...props}
-                                        />
-                                      ),
-                                    }}
-                                  >
-                                    {mdContent}
-                                  </ReactMarkdown>
-                                </div>
-                                {reasonOverflows === true && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setReasonExpanded((v) => !v)}
-                                    className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
-                                  >
-                                    <Icon
-                                      icon={
-                                        reasonExpanded
-                                          ? "heroicons-outline:chevron-up"
-                                          : "heroicons-outline:chevron-down"
-                                      }
-                                      className="h-4 w-4"
-                                      inline
-                                    />
-                                    {reasonExpanded ? "Show Less" : "Read More"}
-                                  </button>
-                                )}
+                          {isAuthenticated &&
+                            user?.id === suggestion.user.id &&
+                            suggestion.status === "pending" && (
+                              <Button
+                                size="sm"
+                                variant={isEditing ? "destructive" : "default"}
+                                onClick={() => {
+                                  if (isEditing) {
+                                    setIsEditing(false);
+                                  } else {
+                                    setEditReason(suggestion.reason);
+                                    setIsEditingCommonTrades(false);
+                                    setIsEditing(true);
+                                  }
+                                }}
+                              >
+                                <Icon
+                                  icon={
+                                    isEditing
+                                      ? "material-symbols:close-rounded"
+                                      : "material-symbols:edit-outline-rounded"
+                                  }
+                                  className="h-3.5 w-3.5"
+                                  inline
+                                />
+                                {isEditing ? "Cancel" : "Edit"}
+                              </Button>
+                            )}
+                        </div>
+                        <div className="px-5 py-5 sm:px-6 sm:py-6">
+                          {isEditing ? (
+                            <div className="space-y-3">
+                              <div className="flex justify-end">
+                                <span className="text-secondary-text text-xs">
+                                  {editReason.length} / 350 min
+                                </span>
                               </div>
-                            );
-                          })()
-                        ) : (
-                          <p className="text-secondary-text text-sm leading-relaxed">
-                            No reason provided.
-                          </p>
-                        )}
+                              <textarea
+                                value={editReason}
+                                onChange={(e) => setEditReason(e.target.value)}
+                                rows={8}
+                                className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
+                              />
+                              <RateLimitBanner
+                                until={editRateLimitUntil}
+                                label="You're updating too fast."
+                              />
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={handleEditSave}
+                                  disabled={
+                                    editSaving ||
+                                    !!editRateLimitUntil ||
+                                    editReason.trim().length < 350
+                                  }
+                                  className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {editSaving ? (
+                                    <>
+                                      <Spinner className="h-3.5 w-3.5" />
+                                      Saving...
+                                    </>
+                                  ) : (
+                                    "Save"
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          ) : suggestion.reason.trim() ? (
+                            (() => {
+                              const mdContent = (() => {
+                                const withBold = suggestion.reason.replace(
+                                  /(Common Trades?:?)/gi,
+                                  "**$1**",
+                                );
+                                return withBold
+                                  .split(/\n\n+/)
+                                  .map((part) => part.replace(/\n/g, "\n\n"))
+                                  .join("\n\n");
+                              })();
+                              return (
+                                <div className="border-button-info/50 max-w-5xl border-l-2 pl-4 sm:pl-5">
+                                  <div
+                                    ref={reasonRef}
+                                    className={`text-primary-text/90 overflow-hidden text-[0.9375rem] leading-7 break-words transition-all duration-200 ${
+                                      reasonOverflows !== false &&
+                                      !reasonExpanded
+                                        ? "max-h-40"
+                                        : ""
+                                    }`}
+                                  >
+                                    <ReactMarkdown
+                                      remarkPlugins={[remarkGfm]}
+                                      components={{
+                                        h1: ({ children }) => (
+                                          <h1 className="text-primary-text mt-3 mb-1.5 text-lg font-bold first:mt-0">
+                                            {children}
+                                          </h1>
+                                        ),
+                                        h2: ({ children }) => (
+                                          <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
+                                            {children}
+                                          </h2>
+                                        ),
+                                        h3: ({ children }) => (
+                                          <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
+                                            {children}
+                                          </h3>
+                                        ),
+                                        p: ({ children }) => (
+                                          <p className="mb-2 last:mb-0">
+                                            {children}
+                                          </p>
+                                        ),
+                                        ul: ({ children }) => (
+                                          <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
+                                            {children}
+                                          </ul>
+                                        ),
+                                        ol: ({ children }) => (
+                                          <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
+                                            {children}
+                                          </ol>
+                                        ),
+                                        em: (props) => (
+                                          <em className="italic" {...props} />
+                                        ),
+                                        strong: (props) => (
+                                          <b
+                                            className="text-primary-text font-semibold"
+                                            {...props}
+                                          />
+                                        ),
+                                      }}
+                                    >
+                                      {mdContent}
+                                    </ReactMarkdown>
+                                  </div>
+                                  {reasonOverflows === true && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setReasonExpanded((v) => !v)
+                                      }
+                                      className="text-link hover:text-link-hover mt-3 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                    >
+                                      <Icon
+                                        icon={
+                                          reasonExpanded
+                                            ? "heroicons-outline:chevron-up"
+                                            : "heroicons-outline:chevron-down"
+                                        }
+                                        className="h-4 w-4"
+                                        inline
+                                      />
+                                      {reasonExpanded
+                                        ? "Show Less"
+                                        : "Read More"}
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })()
+                          ) : (
+                            <div className="border-border-card bg-tertiary-bg/30 flex max-w-5xl items-center gap-3 rounded-lg border border-dashed px-4 py-4">
+                              <Icon
+                                icon="material-symbols:notes-rounded"
+                                className="text-tertiary-text h-5 w-5 shrink-0"
+                                inline
+                              />
+                              <p className="text-secondary-text text-sm">
+                                No reason was provided for this suggestion.
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
+
+                      {showInlineVideoAd && (
+                        <NitroInlineVideoPlayer
+                          slotId="np-values-suggestion-detail-video"
+                          className="2xl:mx-0 2xl:max-w-none"
+                        />
+                      )}
                     </div>
 
                     {isValueSuggestion && item && (
-                      <div className="border-border-card bg-secondary-bg rounded-xl border">
-                        <div className="border-border-card flex items-center justify-between border-b px-5 py-3.5">
-                          <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                            <Icon
-                              icon="material-symbols:swap-horiz-rounded"
-                              className="text-secondary-text h-4 w-4"
-                              inline
-                            />
-                            Common Trades
-                          </h2>
+                      <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
+                        <div className="border-border-card bg-tertiary-bg/20 flex items-center justify-between gap-4 border-b px-5 py-4">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <span className="bg-tertiary-bg text-secondary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                              <Icon
+                                icon="material-symbols:swap-horiz-rounded"
+                                className="h-5 w-5"
+                                inline
+                              />
+                            </span>
+                            <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                              Common Trades
+                              {!!suggestion.common_trades?.length && (
+                                <span className="border-border-card bg-secondary-bg text-secondary-text inline-flex h-5 min-w-5 items-center justify-center rounded-md border px-1.5 text-[0.6875rem] font-semibold">
+                                  {suggestion.common_trades.length}
+                                </span>
+                              )}
+                            </h2>
+                          </div>
                           {isAuthenticated &&
                             user?.id === suggestion.user.id &&
                             suggestion.status === "pending" && (
@@ -1405,6 +1659,7 @@ export default function ValueSuggestionDetailPage() {
                               headingClassName="sr-only"
                               showTradeLabels
                               showItemTypes
+                              appearance="detail"
                             />
                           ) : (
                             <p className="text-secondary-text text-sm">
@@ -1454,63 +1709,11 @@ export default function ValueSuggestionDetailPage() {
                               value="details"
                               className="mt-4 space-y-5"
                             >
-                              {/* Value change */}
-                              <div className="border-border-card bg-secondary-bg rounded-xl border">
-                                <div className="border-border-card border-b px-5 py-3.5">
-                                  <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                                    <Icon
-                                      icon="material-symbols:swap-vert-rounded"
-                                      className="text-secondary-text h-4 w-4"
-                                      inline
-                                    />
-                                    {fieldLabel(suggestion.field)} Suggestion
-                                  </h2>
-                                </div>
-                                <div className="grid grid-cols-2 gap-2 p-5">
-                                  <div className="min-w-0 p-3">
-                                    <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                                      <Icon
-                                        icon="mdi:minus-circle"
-                                        className="h-3.5 w-3.5"
-                                        inline
-                                      />
-                                      {`Old ${fieldLabel(suggestion.field).toUpperCase()}`}
-                                    </div>
-                                    <div
-                                      className="text-secondary-text text-lg font-bold line-through"
-                                      style={{
-                                        wordBreak: "normal",
-                                        overflowWrap: "anywhere",
-                                      }}
-                                    >
-                                      {formatFullValue(
-                                        suggestion.current_value || "N/A",
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="min-w-0 p-3">
-                                    <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                                      <Icon
-                                        icon="mdi:plus-circle"
-                                        className="h-3.5 w-3.5"
-                                        inline
-                                      />
-                                      {`New ${fieldLabel(suggestion.field).toUpperCase()}`}
-                                    </div>
-                                    <div
-                                      className="text-primary-text text-lg font-bold"
-                                      style={{
-                                        wordBreak: "normal",
-                                        overflowWrap: "anywhere",
-                                      }}
-                                    >
-                                      {formatFullValue(
-                                        suggestion.suggested_value,
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
+                              <ValueChangeCard
+                                field={suggestion.field}
+                                currentValue={suggestion.current_value}
+                                suggestedValue={suggestion.suggested_value}
+                              />
                               {/* Votes */}
                               <div className="border-border-card bg-secondary-bg rounded-xl border">
                                 <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
@@ -1522,93 +1725,20 @@ export default function ValueSuggestionDetailPage() {
                                     />
                                     Votes
                                   </h2>
-                                  <div className="flex items-center gap-2">
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleVote("upvote")}
-                                          disabled={
-                                            voteLoading ||
-                                            !!voteRateLimit ||
-                                            !!ban
-                                          }
-                                          className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                                        >
-                                          {votingType === "upvote" ? (
-                                            <Spinner className="text-button-success h-4 w-4" />
-                                          ) : (
-                                            <Icon
-                                              icon={
-                                                userVote === "upvote"
-                                                  ? "material-symbols:thumb-up-rounded"
-                                                  : "material-symbols:thumb-up-outline-rounded"
-                                              }
-                                              className="text-button-success h-4 w-4"
-                                              inline
-                                            />
-                                          )}
-                                          <span className="text-button-success font-bold">
-                                            {voteCounts.up}
-                                          </span>
-                                        </button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        {userVote === "upvote"
-                                          ? "Remove upvote"
-                                          : "Upvote"}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleVote("downvote")}
-                                          disabled={
-                                            voteLoading ||
-                                            !!voteRateLimit ||
-                                            !!ban
-                                          }
-                                          className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                                        >
-                                          {votingType === "downvote" ? (
-                                            <Spinner className="text-button-danger h-4 w-4" />
-                                          ) : (
-                                            <Icon
-                                              icon={
-                                                userVote === "downvote"
-                                                  ? "material-symbols:thumb-down-rounded"
-                                                  : "material-symbols:thumb-down-outline-rounded"
-                                              }
-                                              className="text-button-danger h-4 w-4"
-                                              inline
-                                            />
-                                          )}
-                                          <span className="text-button-danger font-bold">
-                                            {voteCounts.down}
-                                          </span>
-                                        </button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        {userVote === "downvote"
-                                          ? "Remove downvote"
-                                          : "Downvote"}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </div>
+                                  <VoteButtons
+                                    userVote={userVote}
+                                    voteCounts={voteCounts}
+                                    votingType={votingType}
+                                    disabled={
+                                      voteLoading || !!voteRateLimit || !!ban
+                                    }
+                                    onVote={handleVote}
+                                  />
                                 </div>
                                 {voteRateLimit && voteRateLimitSeconds > 0 && (
-                                  <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
-                                    <Icon
-                                      icon="material-symbols:hourglass-empty-rounded"
-                                      className="h-3.5 w-3.5 shrink-0"
-                                      inline
-                                    />
-                                    Too fast — wait{" "}
-                                    {voteRateLimitSeconds >= 60
-                                      ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
-                                      : `${voteRateLimitSeconds}s`}
-                                  </div>
+                                  <VoteRateLimitBanner
+                                    seconds={voteRateLimitSeconds}
+                                  />
                                 )}
                                 {(suggestion.votes.upvotes.length > 0 ||
                                   suggestion.votes.downvotes.length > 0) && (
@@ -1823,62 +1953,11 @@ export default function ValueSuggestionDetailPage() {
 
                     {/* Sidebar — value change + votes + suggester stats */}
                     <div className="space-y-5 lg:col-span-2">
-                      {/* Value change */}
-                      <div className="border-border-card bg-secondary-bg rounded-xl border">
-                        <div className="border-border-card border-b px-5 py-3.5">
-                          <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                            <Icon
-                              icon="material-symbols:swap-vert-rounded"
-                              className="text-secondary-text h-4 w-4"
-                              inline
-                            />
-                            {fieldLabel(suggestion.field)} Suggestion
-                          </h2>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 p-5">
-                          <div className="min-w-0 p-3">
-                            <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                              <Icon
-                                icon="mdi:minus-circle"
-                                className="h-3.5 w-3.5"
-                                inline
-                              />
-                              {`Old ${fieldLabel(suggestion.field).toUpperCase()}`}
-                            </div>
-                            <div
-                              className="text-secondary-text text-lg font-bold line-through"
-                              style={{
-                                wordBreak: "normal",
-                                overflowWrap: "anywhere",
-                              }}
-                            >
-                              {formatFullValue(
-                                suggestion.current_value || "N/A",
-                              )}
-                            </div>
-                          </div>
-                          <div className="min-w-0 p-3">
-                            <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                              <Icon
-                                icon="mdi:plus-circle"
-                                className="h-3.5 w-3.5"
-                                inline
-                              />
-                              {`New ${fieldLabel(suggestion.field).toUpperCase()}`}
-                            </div>
-                            <div
-                              className="text-primary-text text-lg font-bold"
-                              style={{
-                                wordBreak: "normal",
-                                overflowWrap: "anywhere",
-                              }}
-                            >
-                              {formatFullValue(suggestion.suggested_value)}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
+                      <ValueChangeCard
+                        field={suggestion.field}
+                        currentValue={suggestion.current_value}
+                        suggestedValue={suggestion.suggested_value}
+                      />
                       {/* Votes */}
                       <div className="border-border-card bg-secondary-bg rounded-xl border">
                         <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
@@ -1890,89 +1969,16 @@ export default function ValueSuggestionDetailPage() {
                             />
                             Votes
                           </h2>
-                          <div className="flex items-center gap-2">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  type="button"
-                                  onClick={() => handleVote("upvote")}
-                                  disabled={
-                                    voteLoading || !!voteRateLimit || !!ban
-                                  }
-                                  className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  {votingType === "upvote" ? (
-                                    <Spinner className="text-button-success h-4 w-4" />
-                                  ) : (
-                                    <Icon
-                                      icon={
-                                        userVote === "upvote"
-                                          ? "material-symbols:thumb-up-rounded"
-                                          : "material-symbols:thumb-up-outline-rounded"
-                                      }
-                                      className="text-button-success h-4 w-4"
-                                      inline
-                                    />
-                                  )}
-                                  <span className="text-button-success font-bold">
-                                    {voteCounts.up}
-                                  </span>
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {userVote === "upvote"
-                                  ? "Remove upvote"
-                                  : "Upvote"}
-                              </TooltipContent>
-                            </Tooltip>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  type="button"
-                                  onClick={() => handleVote("downvote")}
-                                  disabled={
-                                    voteLoading || !!voteRateLimit || !!ban
-                                  }
-                                  className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  {votingType === "downvote" ? (
-                                    <Spinner className="text-button-danger h-4 w-4" />
-                                  ) : (
-                                    <Icon
-                                      icon={
-                                        userVote === "downvote"
-                                          ? "material-symbols:thumb-down-rounded"
-                                          : "material-symbols:thumb-down-outline-rounded"
-                                      }
-                                      className="text-button-danger h-4 w-4"
-                                      inline
-                                    />
-                                  )}
-                                  <span className="text-button-danger font-bold">
-                                    {voteCounts.down}
-                                  </span>
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {userVote === "downvote"
-                                  ? "Remove downvote"
-                                  : "Downvote"}
-                              </TooltipContent>
-                            </Tooltip>
-                          </div>
+                          <VoteButtons
+                            userVote={userVote}
+                            voteCounts={voteCounts}
+                            votingType={votingType}
+                            disabled={voteLoading || !!voteRateLimit || !!ban}
+                            onVote={handleVote}
+                          />
                         </div>
                         {voteRateLimit && voteRateLimitSeconds > 0 && (
-                          <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
-                            <Icon
-                              icon="material-symbols:hourglass-empty-rounded"
-                              className="h-3.5 w-3.5 shrink-0"
-                              inline
-                            />
-                            Too fast — wait{" "}
-                            {voteRateLimitSeconds >= 60
-                              ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
-                              : `${voteRateLimitSeconds}s`}
-                          </div>
+                          <VoteRateLimitBanner seconds={voteRateLimitSeconds} />
                         )}
                         {(suggestion.votes.upvotes.length > 0 ||
                           suggestion.votes.downvotes.length > 0) && (

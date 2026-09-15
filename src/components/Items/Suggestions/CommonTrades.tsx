@@ -208,6 +208,7 @@ export function CommonTradesDisplay({
   showTradeLabels = false,
   showItemImages = true,
   showItemTypes = false,
+  appearance = "default",
   headingIcon,
   headingClassName = "text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase",
 }: {
@@ -216,6 +217,7 @@ export function CommonTradesDisplay({
   showTradeLabels?: boolean;
   showItemImages?: boolean;
   showItemTypes?: boolean;
+  appearance?: "default" | "detail";
   headingIcon?: string;
   headingClassName?: string;
 }) {
@@ -237,12 +239,21 @@ export function CommonTradesDisplay({
         {trades.map((trade, index) => (
           <div
             key={index}
-            className="border-border-card bg-secondary-bg/40 rounded-lg border p-2"
+            className={`border-border-card border ${
+              appearance === "detail"
+                ? "bg-tertiary-bg/20 rounded-xl p-3 sm:p-4"
+                : "bg-secondary-bg/40 rounded-lg p-2"
+            }`}
           >
             {showTradeLabels && (
-              <p className="text-primary-text mb-2 text-xs font-semibold">
-                Trade {index + 1}
-              </p>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="bg-button-info/10 text-link flex h-5 min-w-5 items-center justify-center rounded-md px-1.5 text-[0.6875rem] font-bold">
+                  {index + 1}
+                </span>
+                <p className="text-primary-text text-xs font-semibold">
+                  Trade example
+                </p>
+              </div>
             )}
             <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
               <div className="min-w-0 space-y-1.5">
@@ -259,11 +270,23 @@ export function CommonTradesDisplay({
                 ))}
               </div>
               <div className="flex items-center justify-center sm:h-full sm:self-stretch">
-                <Icon
-                  icon="material-symbols:arrow-forward-rounded"
-                  className="text-tertiary-text h-5 w-5 rotate-90 sm:rotate-0"
-                  inline
-                />
+                <span
+                  className={`flex items-center justify-center rounded-full ${
+                    appearance === "detail"
+                      ? "border-border-card bg-secondary-bg h-9 w-9 border shadow-sm"
+                      : "h-5 w-5"
+                  }`}
+                >
+                  <Icon
+                    icon="material-symbols:arrow-forward-rounded"
+                    className={`${
+                      appearance === "detail"
+                        ? "text-link h-4 w-4"
+                        : "text-tertiary-text h-5 w-5"
+                    } rotate-90 sm:rotate-0`}
+                    inline
+                  />
+                </span>
               </div>
               <div className="min-w-0 space-y-1.5">
                 <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
