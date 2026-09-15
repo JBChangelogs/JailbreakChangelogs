@@ -1,4 +1,5 @@
 import Breadcrumb from "@/components/Layout/Breadcrumb";
+import SubmitTestimonialButton from "@/components/Testimonials/SubmitTestimonialButton";
 import TestimonialsSection from "@/components/Testimonials/TestimonialsSection";
 import { getTestimonials } from "@/components/Testimonials/testimonialsData";
 
@@ -19,6 +20,9 @@ export default async function TestimonialsPage() {
             We&apos;re continuously adding more testimonials from our growing
             community!
           </p>
+          <div className="mt-6 flex justify-center">
+            <SubmitTestimonialButton />
+          </div>
         </div>
         <TestimonialsSection testimonials={testimonials} />
       </div>
