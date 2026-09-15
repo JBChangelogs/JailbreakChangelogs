@@ -610,25 +610,22 @@ export default function ItemDetailsClient({
                   </span>
                 )}
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <div className="text-secondary-text text-sm">
-                  {currentItem.last_updated ? (
-                    <>
-                      Last updated:{" "}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-help">{relativeTime}</span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {formatCustomDate(currentItem.last_updated)}
-                        </TooltipContent>
-                      </Tooltip>
-                    </>
-                  ) : (
-                    <>Last updated: Never</>
-                  )}
-                </div>
-                <ReportItemInfoButton item={currentItem} />
+              <div className="text-secondary-text mt-2 text-sm">
+                {currentItem.last_updated ? (
+                  <>
+                    Last updated:{" "}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help">{relativeTime}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {formatCustomDate(currentItem.last_updated)}
+                      </TooltipContent>
+                    </Tooltip>
+                  </>
+                ) : (
+                  <>Last updated: Never</>
+                )}
               </div>
 
               {/* Official Metrics from Badimo dataset */}
@@ -739,9 +736,12 @@ export default function ItemDetailsClient({
                         </div>
                       ) : (
                         <div className="space-y-3">
-                          <h3 className="text-primary-text text-lg font-semibold">
-                            Description
-                          </h3>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <h3 className="text-primary-text text-lg font-semibold">
+                              Description
+                            </h3>
+                            <ReportItemInfoButton item={currentItem} />
+                          </div>
                           <div className="text-secondary-text leading-relaxed">
                             <p className="whitespace-pre-wrap">
                               {currentItem.description.length >

@@ -27,7 +27,7 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
 
   const openModal = () => {
     if (!isAuthenticated) {
-      toast.info("You must be logged in to report item information.");
+      toast.info("You must be logged in to report an item description.");
       setLoginModal({ open: true });
       return;
     }
@@ -46,7 +46,7 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
     if (!sanitizedReason || isSubmitting) return;
 
     setIsSubmitting(true);
-    const toastId = toast.loading("Submitting item information report...");
+    const toastId = toast.loading("Submitting item description report...");
 
     try {
       const { url, headers } = buildApiFetchRequest(
@@ -74,7 +74,7 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
 
         const data = await response.json().catch(() => ({}));
         if (data?.error === "report_exists") {
-          toast.info("This item's information has already been reported.", {
+          toast.info("This item's description has already been reported.", {
             id: toastId,
           });
           setReason("");
@@ -87,11 +87,11 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
         );
       }
 
-      toast.success("Item information report submitted", { id: toastId });
+      toast.success("Item description report submitted", { id: toastId });
       setReason("");
       setIsOpen(false);
     } catch (error) {
-      log.error("Error reporting item information", error);
+      log.error("Error reporting item description", error);
       toast.error(
         error instanceof Error ? error.message : "Failed to submit report.",
         { id: toastId },
@@ -110,14 +110,14 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
         onClick={openModal}
       >
         <Icon icon="heroicons-outline:flag" className="h-4 w-4" />
-        Report incorrect info
+        Report inaccurate description
       </Button>
 
       <ConfirmDialog
         isOpen={isOpen}
         onClose={closeModal}
         onConfirm={() => void submitReport()}
-        title="Report Item Information"
+        title="Report Item Description"
         confirmText={isSubmitting ? "Submitting..." : "Submit Report"}
         confirmVariant="default"
         confirmDisabled={!reason.trim() || isSubmitting}
@@ -145,15 +145,15 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
             </span>
           </div>
           <p className="text-secondary-text text-sm">
-            Tell us which item detail is incorrect or outdated and what it
-            should say instead.
+            Use this form only if this item&apos;s description is inaccurate or
+            outdated. Explain what should be corrected.
           </p>
           <div>
             <label
               htmlFor="item-info-report-reason"
               className="text-primary-text mb-1.5 block text-sm font-medium"
             >
-              Reason for reporting
+              Description issue
             </label>
             <textarea
               id="item-info-report-reason"
@@ -161,7 +161,7 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
               rows={4}
               maxLength={MAX_REASON_LENGTH}
               autoFocus
-              placeholder="Describe the incorrect information and the correction..."
+              placeholder="Describe what is inaccurate or outdated and what it should say..."
               value={reason}
               onChange={(event) => setReason(event.target.value)}
             />
