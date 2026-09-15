@@ -5,6 +5,7 @@ import { useQueryState } from "nuqs";
 import Image from "next/image";
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "motion/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
@@ -65,6 +66,7 @@ import {
 import { createLogger } from "@/services/logger";
 import Link from "next/link";
 import { useTheme } from "@/contexts/ThemeContext";
+import { tabSlideVariants, tabSlideTransition } from "@/utils/ui/tabAnimations";
 
 const log = createLogger("UI");
 
@@ -430,6 +432,7 @@ export default function ItemDetailsClient({
     () => (tabParam ? (TAB_NAME_TO_INDEX[tabParam] ?? 0) : 0),
     [tabParam],
   );
+  const [tabDirection, setTabDirection] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
   const [itemMetadata, setItemMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
@@ -493,6 +496,7 @@ export default function ItemDetailsClient({
   }, [item.id, item.type]);
 
   const handleTabChange = (newValue: number) => {
+    setTabDirection(newValue > activeTab ? 1 : -1);
     void setTabParam(TAB_INDEX_TO_NAME[newValue] ?? null);
   };
 
@@ -699,174 +703,194 @@ export default function ItemDetailsClient({
 
             <ItemDetailsTabs value={activeTab} onChange={handleTabChange} />
 
-            {activeTab === 0 && (
-              <>
-                {!currentItem.description ||
-                currentItem.description === "N/A" ||
-                currentItem.description === "" ? (
-                  <div className="space-y-3">
-                    <h3 className="text-primary-text text-lg font-semibold">
-                      Description
-                    </h3>
-                    <div className="text-secondary-text leading-relaxed">
-                      <p className="whitespace-pre-wrap">
-                        No description available
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <h3 className="text-primary-text text-lg font-semibold">
-                      Description
-                    </h3>
-                    <div className="text-secondary-text leading-relaxed">
-                      <p className="whitespace-pre-wrap">
-                        {currentItem.description.length > visibleLength ? (
-                          <>
-                            {convertUrlsToLinks(
-                              `${currentItem.description.slice(0, visibleLength)}...`,
-                            )}
-                            <button
-                              onClick={() =>
-                                setVisibleLength(
-                                  (prev) => prev + INITIAL_DESCRIPTION_LENGTH,
-                                )
-                              }
-                              className="text-button-info hover:text-button-info-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
-                            >
-                              <Icon
-                                icon="heroicons-outline:chevron-down"
-                                className="h-4 w-4"
-                                inline={true}
-                              />
-                              Read More
-                            </button>
-                          </>
-                        ) : (
-                          convertUrlsToLinks(currentItem.description)
-                        )}
-                      </p>
-                      {visibleLength > INITIAL_DESCRIPTION_LENGTH &&
-                        currentItem.description.length >
-                          INITIAL_DESCRIPTION_LENGTH && (
-                          <button
-                            onClick={() =>
-                              setVisibleLength(INITIAL_DESCRIPTION_LENGTH)
-                            }
-                            className="text-button-info hover:text-button-info-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
-                          >
-                            <Icon
-                              icon="heroicons-outline:chevron-up"
-                              className="h-4 w-4"
-                              inline={true}
-                            />
-                            Show Less
-                          </button>
-                        )}
-                    </div>
-                  </div>
-                )}
-
-                <ItemValues
-                  cashValue={currentItem.cash_value}
-                  dupedValue={currentItem.duped_value}
-                  demand={currentItem.demand}
-                  dupedDemand={currentItem.duped_demand}
-                  trend={currentItem.trend}
-                  notes={currentItem.notes}
-                  price={currentItem.price}
-                  health={currentItem.health}
-                  type={currentItem.type}
-                  recentChanges={item.recent_changes}
-                  placementLimit={placementLimit}
-                />
-              </>
-            )}
-
-            {activeTab === 1 && (
-              <div className="mb-8 space-y-6">
-                {/* Chart Sub-tabs */}
-                <div className="border-border-card bg-secondary-bg rounded-lg border p-2 sm:p-4">
-                  <Tabs
-                    value={String(activeChartTab)}
-                    onValueChange={(tabValue) =>
-                      setActiveChartTab(Number(tabValue))
-                    }
-                  >
-                    <TabsList fullWidth>
-                      <TabsTrigger value="0" fullWidth>
-                        Value History
-                      </TabsTrigger>
-                      {item.id !== 587 && (
-                        <TabsTrigger value="1" fullWidth>
-                          Trading Metrics
-                        </TabsTrigger>
+            <div className="relative overflow-x-hidden">
+              <AnimatePresence
+                mode="popLayout"
+                initial={false}
+                custom={tabDirection}
+              >
+                <motion.div
+                  key={activeTab}
+                  custom={tabDirection}
+                  variants={tabSlideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={tabSlideTransition}
+                >
+                  {activeTab === 0 && (
+                    <>
+                      {!currentItem.description ||
+                      currentItem.description === "N/A" ||
+                      currentItem.description === "" ? (
+                        <div className="space-y-3">
+                          <h3 className="text-primary-text text-lg font-semibold">
+                            Description
+                          </h3>
+                          <div className="text-secondary-text leading-relaxed">
+                            <p className="whitespace-pre-wrap">
+                              No description available
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <h3 className="text-primary-text text-lg font-semibold">
+                            Description
+                          </h3>
+                          <div className="text-secondary-text leading-relaxed">
+                            <p className="whitespace-pre-wrap">
+                              {currentItem.description.length >
+                              visibleLength ? (
+                                <>
+                                  {convertUrlsToLinks(
+                                    `${currentItem.description.slice(0, visibleLength)}...`,
+                                  )}
+                                  <button
+                                    onClick={() =>
+                                      setVisibleLength(
+                                        (prev) =>
+                                          prev + INITIAL_DESCRIPTION_LENGTH,
+                                      )
+                                    }
+                                    className="text-button-info hover:text-button-info-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                  >
+                                    <Icon
+                                      icon="heroicons-outline:chevron-down"
+                                      className="h-4 w-4"
+                                      inline={true}
+                                    />
+                                    Read More
+                                  </button>
+                                </>
+                              ) : (
+                                convertUrlsToLinks(currentItem.description)
+                              )}
+                            </p>
+                            {visibleLength > INITIAL_DESCRIPTION_LENGTH &&
+                              currentItem.description.length >
+                                INITIAL_DESCRIPTION_LENGTH && (
+                                <button
+                                  onClick={() =>
+                                    setVisibleLength(INITIAL_DESCRIPTION_LENGTH)
+                                  }
+                                  className="text-button-info hover:text-button-info-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                >
+                                  <Icon
+                                    icon="heroicons-outline:chevron-up"
+                                    className="h-4 w-4"
+                                    inline={true}
+                                  />
+                                  Show Less
+                                </button>
+                              )}
+                          </div>
+                        </div>
                       )}
-                    </TabsList>
-                  </Tabs>
 
-                  {/* Chart Update Notice */}
-                  <div className="mt-4 mb-4">
-                    <div className="bg-button-info/10 border-button-info/30 rounded-lg border p-3">
-                      <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
-                        Chart Update Schedule
-                      </div>
-                      <div className="text-secondary-text mt-1 text-xs">
-                        Charts update daily at {CHART_UPDATE_TIME}
+                      <ItemValues
+                        cashValue={currentItem.cash_value}
+                        dupedValue={currentItem.duped_value}
+                        demand={currentItem.demand}
+                        dupedDemand={currentItem.duped_demand}
+                        trend={currentItem.trend}
+                        notes={currentItem.notes}
+                        price={currentItem.price}
+                        health={currentItem.health}
+                        type={currentItem.type}
+                        recentChanges={item.recent_changes}
+                        placementLimit={placementLimit}
+                      />
+                    </>
+                  )}
+
+                  {activeTab === 1 && (
+                    <div className="mb-8 space-y-6">
+                      {/* Chart Sub-tabs */}
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-2 sm:p-4">
+                        <Tabs
+                          value={String(activeChartTab)}
+                          onValueChange={(tabValue) =>
+                            setActiveChartTab(Number(tabValue))
+                          }
+                        >
+                          <TabsList fullWidth>
+                            <TabsTrigger value="0" fullWidth>
+                              Value History
+                            </TabsTrigger>
+                            {item.id !== 587 && (
+                              <TabsTrigger value="1" fullWidth>
+                                Trading Metrics
+                              </TabsTrigger>
+                            )}
+                          </TabsList>
+                        </Tabs>
+
+                        {/* Chart Update Notice */}
+                        <div className="mt-4 mb-4">
+                          <div className="bg-button-info/10 border-button-info/30 rounded-lg border p-3">
+                            <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
+                              Chart Update Schedule
+                            </div>
+                            <div className="text-secondary-text mt-1 text-xs">
+                              Charts update daily at {CHART_UPDATE_TIME}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Chart Content */}
+                        <div className="mt-4">
+                          <Suspense
+                            fallback={
+                              <div className="bg-secondary-bg h-87.5 animate-pulse rounded" />
+                            }
+                          >
+                            <ItemValueChart
+                              historyPromise={historyPromise}
+                              hideTradingMetrics={
+                                activeChartTab === 0 || currentItem.id === 587
+                              }
+                              showOnlyValueHistory={activeChartTab === 0}
+                              showOnlyTradingMetrics={activeChartTab === 1}
+                            />
+                          </Suspense>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Chart Content */}
-                  <div className="mt-4">
-                    <Suspense
-                      fallback={
-                        <div className="bg-secondary-bg h-87.5 animate-pulse rounded" />
-                      }
-                    >
-                      <ItemValueChart
-                        historyPromise={historyPromise}
-                        hideTradingMetrics={
-                          activeChartTab === 0 || currentItem.id === 587
-                        }
-                        showOnlyValueHistory={activeChartTab === 0}
-                        showOnlyTradingMetrics={activeChartTab === 1}
-                      />
-                    </Suspense>
-                  </div>
-                </div>
-              </div>
-            )}
+                  {activeTab === 2 && (
+                    <div className="space-y-6">
+                      <ItemChangelogsTab itemId={item.id} />
+                    </div>
+                  )}
 
-            {activeTab === 2 && (
-              <div className="space-y-6">
-                <ItemChangelogsTab itemId={item.id} />
-              </div>
-            )}
+                  {activeTab === 3 && (
+                    <div className="space-y-6">
+                      <ItemSuggestionsTab itemId={item.id} />
+                    </div>
+                  )}
 
-            {activeTab === 3 && (
-              <div className="space-y-6">
-                <ItemSuggestionsTab itemId={item.id} />
-              </div>
-            )}
+                  {activeTab === 4 && (
+                    <div className="space-y-6">
+                      <DupesTab itemId={item.id} />
+                    </div>
+                  )}
 
-            {activeTab === 4 && (
-              <div className="space-y-6">
-                <DupesTab itemId={item.id} />
-              </div>
-            )}
+                  {activeTab === 5 && (
+                    <div className="space-y-6">
+                      <HoardersTab itemName={item.name} itemType={item.type} />
+                    </div>
+                  )}
 
-            {activeTab === 5 && (
-              <div className="space-y-6">
-                <HoardersTab itemName={item.name} itemType={item.type} />
-              </div>
-            )}
+                  {activeTab === 6 && (
+                    <div className="space-y-6">{similarItemsSlot}</div>
+                  )}
 
-            {activeTab === 6 && (
-              <div className="space-y-6">{similarItemsSlot}</div>
-            )}
-
-            {activeTab === 7 && item && commentsSlot}
+                  {activeTab === 7 && item && commentsSlot}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>

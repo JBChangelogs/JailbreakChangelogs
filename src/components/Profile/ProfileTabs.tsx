@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQueryState } from "nuqs";
 import React from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 import AboutTab from "./AboutTab";
 import CommentsTab from "./CommentsTab";
@@ -15,6 +16,7 @@ import UserBansTab from "./UserBansTab";
 import { UserSettingsV2 } from "@/types/auth";
 import type { UserFlag } from "@/types/auth";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { tabSlideVariants, tabSlideTransition } from "@/utils/ui/tabAnimations";
 import type { TradeAd } from "@/types/trading";
 
 interface User {
@@ -154,7 +156,10 @@ export default function ProfileTabs({
 
   const sharedItemDetails: Record<string, unknown> = {};
 
+  const [direction, setDirection] = useState(0);
+
   const handleChange = (newValue: number) => {
+    setDirection(newValue > value ? 1 : -1);
     const names: Record<number, string | null> = {
       0: null,
       1: "comments",
@@ -187,69 +192,85 @@ export default function ProfileTabs({
         hasValueSuggestionsTab={hasValueSuggestionsTab}
         isOwnProfile={isOwnProfile}
       />
-      <TabPanel value={value} index={0}>
-        <AboutTab
-          user={user}
-          currentUserId={currentUserId}
-          bio={bio}
-          bioLastUpdated={bioLastUpdated}
-          onBioUpdate={onBioUpdate}
-        />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <CommentsTab
-          currentUserId={currentUserId}
-          userId={user.id}
-          settings={user.settings_v2}
-          sharedItemDetails={sharedItemDetails}
-        />
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        <FavoritesTab
-          userId={user.id}
-          currentUserId={currentUserId}
-          settings={user.settings_v2}
-        />
-      </TabPanel>
-      <TabPanel value={value} index={3}>
-        <PrivateServersTab
-          servers={privateServers}
-          isOwnProfile={currentUserId === user.id}
-          isLoadingAdditionalData={isLoadingAdditionalData}
-        />
-      </TabPanel>
-      {hasRobloxConnection && (
-        <TabPanel value={value} index={4}>
-          <TradeAdsProfileTab
-            user={user}
-            tradeAds={tradeAds}
-            isLoadingAdditionalData={isLoadingAdditionalData}
-            isOwnProfile={currentUserId === user.id}
-            currentUserId={currentUserId}
-          />
-        </TabPanel>
-      )}
-      {hasRobloxConnection && (
-        <TabPanel value={value} index={5} keepMounted>
-          <ProfileInventoryTab
-            robloxId={user.roblox_id ?? ""}
-            active={value === 5}
-          />
-        </TabPanel>
-      )}
-      {hasValueSuggestionsTab && (
-        <TabPanel value={value} index={suggestionsTabIdx}>
-          <UserValueSuggestionsTab
-            userId={user.id}
-            currentUserId={currentUserId}
-          />
-        </TabPanel>
-      )}
-      {isOwnProfile && (
-        <TabPanel value={value} index={bansTabIdx}>
-          <UserBansTab />
-        </TabPanel>
-      )}
+      <div className="relative overflow-x-hidden">
+        <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+          {value !== 5 && (
+            <motion.div
+              key={value}
+              custom={direction}
+              variants={tabSlideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={tabSlideTransition}
+            >
+              <TabPanel value={value} index={0}>
+                <AboutTab
+                  user={user}
+                  currentUserId={currentUserId}
+                  bio={bio}
+                  bioLastUpdated={bioLastUpdated}
+                  onBioUpdate={onBioUpdate}
+                />
+              </TabPanel>
+              <TabPanel value={value} index={1}>
+                <CommentsTab
+                  currentUserId={currentUserId}
+                  userId={user.id}
+                  settings={user.settings_v2}
+                  sharedItemDetails={sharedItemDetails}
+                />
+              </TabPanel>
+              <TabPanel value={value} index={2}>
+                <FavoritesTab
+                  userId={user.id}
+                  currentUserId={currentUserId}
+                  settings={user.settings_v2}
+                />
+              </TabPanel>
+              <TabPanel value={value} index={3}>
+                <PrivateServersTab
+                  servers={privateServers}
+                  isOwnProfile={currentUserId === user.id}
+                  isLoadingAdditionalData={isLoadingAdditionalData}
+                />
+              </TabPanel>
+              {hasRobloxConnection && (
+                <TabPanel value={value} index={4}>
+                  <TradeAdsProfileTab
+                    user={user}
+                    tradeAds={tradeAds}
+                    isLoadingAdditionalData={isLoadingAdditionalData}
+                    isOwnProfile={currentUserId === user.id}
+                    currentUserId={currentUserId}
+                  />
+                </TabPanel>
+              )}
+              {hasValueSuggestionsTab && (
+                <TabPanel value={value} index={suggestionsTabIdx}>
+                  <UserValueSuggestionsTab
+                    userId={user.id}
+                    currentUserId={currentUserId}
+                  />
+                </TabPanel>
+              )}
+              {isOwnProfile && (
+                <TabPanel value={value} index={bansTabIdx}>
+                  <UserBansTab />
+                </TabPanel>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {hasRobloxConnection && (
+          <TabPanel value={value} index={5} keepMounted>
+            <ProfileInventoryTab
+              robloxId={user.roblox_id ?? ""}
+              active={value === 5}
+            />
+          </TabPanel>
+        )}
+      </div>
     </div>
   );
 }

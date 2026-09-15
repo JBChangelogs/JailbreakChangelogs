@@ -53,6 +53,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion, AnimatePresence } from "motion/react";
+import { tabSlideVariants, tabSlideTransition } from "@/utils/ui/tabAnimations";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -517,6 +519,16 @@ export default function TradeDetailsClient({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showOfferDialog, setShowOfferDialog] = useState(false);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
+  const [activeTradeTab, setActiveTradeTab] = useState<"offers" | "comments">(
+    "offers",
+  );
+  const [tradeTabDirection, setTradeTabDirection] = useState(0);
+  const handleTradeTabChange = (newValue: string) => {
+    setTradeTabDirection(
+      newValue === "comments" && activeTradeTab === "offers" ? 1 : -1,
+    );
+    setActiveTradeTab(newValue as "offers" | "comments");
+  };
   const autoOfferHandledRef = useRef(false);
   const [offerState, setOfferState] = useState<{
     status: "idle" | "checking" | "can_offer" | "already_offered" | "error";
@@ -1209,7 +1221,7 @@ export default function TradeDetailsClient({
           </div>
 
           <div className="mt-8">
-            <Tabs defaultValue="offers">
+            <Tabs value={activeTradeTab} onValueChange={handleTradeTabChange}>
               <div className="w-full overflow-x-auto">
                 <TabsList fullWidth className="w-full min-w-0">
                   <TabsTrigger
@@ -1231,456 +1243,495 @@ export default function TradeDetailsClient({
                 </TabsList>
               </div>
 
-              <TabsContent
-                value="offers"
-                id="trade-tabpanel-offers"
-                className="mt-4"
-              >
-                {tradeOffers.status === "loaded" &&
-                  tradeOffers.offers.length > 0 && (
-                    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          placeholder="Search offers (e.g., Torpedo)"
-                          value={offersSearchQuery}
-                          onChange={(e) => setOffersSearchQuery(e.target.value)}
-                          className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-14 w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
-                        />
-                        <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
-                          {offersSearchQuery && (
-                            <button
-                              type="button"
-                              onClick={() => setOffersSearchQuery("")}
-                              className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
-                              aria-label="Clear offer search"
-                            >
-                              <Icon
-                                icon="heroicons:x-mark"
-                                className="h-5 w-5"
+              <div className="relative overflow-x-hidden">
+                <AnimatePresence
+                  mode="popLayout"
+                  initial={false}
+                  custom={tradeTabDirection}
+                >
+                  <motion.div
+                    key={activeTradeTab}
+                    custom={tradeTabDirection}
+                    variants={tabSlideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={tabSlideTransition}
+                  >
+                    <TabsContent
+                      value="offers"
+                      id="trade-tabpanel-offers"
+                      className="mt-4"
+                    >
+                      {tradeOffers.status === "loaded" &&
+                        tradeOffers.offers.length > 0 && (
+                          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+                            <div className="relative flex-1">
+                              <input
+                                type="text"
+                                placeholder="Search offers (e.g., Torpedo)"
+                                value={offersSearchQuery}
+                                onChange={(e) =>
+                                  setOffersSearchQuery(e.target.value)
+                                }
+                                className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-14 w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
                               />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
-                            aria-label="Offer search side"
-                          >
-                            <span>{offersSearchScopeLabel}</span>
-                            <Icon
-                              icon="heroicons:chevron-down"
-                              className="text-secondary-text h-5 w-5"
-                              inline={true}
-                            />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="start"
-                          className="w-(--radix-dropdown-menu-trigger-width)"
-                        >
-                          <DropdownMenuRadioGroup
-                            value={offersSearchScope}
-                            onValueChange={(value) =>
-                              setOffersSearchScope(
-                                value as "all" | "offering" | "requesting",
-                              )
-                            }
-                          >
-                            <DropdownMenuRadioItem value="all">
-                              Both Sides
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="offering">
-                              Offering Only
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="requesting">
-                              Requesting Only
-                            </DropdownMenuRadioItem>
-                          </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  )}
-
-                {tradeOffers.status === "loading" && (
-                  <div className="border-border-card bg-tertiary-bg flex min-h-24 items-center justify-center rounded-lg border p-6 text-center">
-                    <p className="text-secondary-text text-sm">
-                      Loading offers...
-                    </p>
-                  </div>
-                )}
-
-                {tradeOffers.status === "error" && (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-                    <p className="text-primary-text text-sm font-semibold">
-                      Failed to load offers
-                    </p>
-                    <p className="text-secondary-text mt-1 text-sm">
-                      {tradeOffers.error || "Please try again later."}
-                    </p>
-                  </div>
-                )}
-
-                {tradeOffers.status === "loaded" &&
-                  tradeOffers.offers.length === 0 && (
-                    <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
-                      <p className="text-primary-text text-sm font-semibold">
-                        No offers yet
-                      </p>
-                      <p className="text-secondary-text mt-1 text-sm">
-                        Check back later to see incoming offers.
-                      </p>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        className="mt-4"
-                        onClick={() =>
-                          setOffersRefreshToken((prev) => prev + 1)
-                        }
-                      >
-                        <Icon icon="heroicons-outline:arrow-path" />
-                        Refresh
-                      </Button>
-                    </div>
-                  )}
-
-                {tradeOffers.status === "loaded" &&
-                  tradeOffers.offers.length > 0 && (
-                    <div className="space-y-4">
-                      {visibleOffers.length === 0 ? (
-                        <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
-                          <p className="text-primary-text text-sm font-semibold">
-                            No matching offers
-                          </p>
-                          <p className="text-secondary-text mt-1 text-sm">
-                            Try a different search or switch sides.
-                          </p>
-                        </div>
-                      ) : (
-                        visibleOffers.map((offer) => {
-                          const offerUser = offer.user;
-                          const offerDisplayName =
-                            offerUser?.roblox_display_name ||
-                            offerUser?.global_name ||
-                            offerUser?.roblox_username ||
-                            offerUser?.username ||
-                            "Unknown User";
-                          const offerStatusValue =
-                            typeof offer.status === "string"
-                              ? Number(offer.status)
-                              : typeof offer.status === "number"
-                                ? offer.status
-                                : null;
-                          const isPendingOffer = offerStatusValue === 0;
-                          const offerResponseAction =
-                            offerResponseState[offer.id];
-                          const isOfferOwner = !!(
-                            isAuthenticated &&
-                            currentUserId &&
-                            offerUser?.id &&
-                            offerUser.id === currentUserId
-                          );
-                          const isDeletingOffer = !!offerDeleteState[offer.id];
-                          const offerAvatarSrc =
-                            offerUser?.roblox_avatar ?? null;
-                          const offerNote = sanitizeText(offer.note || "");
-                          const offerOffering =
-                            offer.offering == null
-                              ? trade.offering
-                              : normalizeOfferItems(offer.offering);
-                          const offerRequesting =
-                            offer.requesting == null
-                              ? trade.requesting
-                              : normalizeOfferItems(offer.requesting);
-                          const requestingMatchesOriginal =
-                            tradeItemsEquivalent(
-                              offerRequesting,
-                              trade.requesting,
-                            );
-                          const requestingProvided = offer.requesting != null;
-                          const shouldShowRequestingGrid =
-                            requestingProvided && !requestingMatchesOriginal;
-                          const offerStatusLabel = getOfferStatusLabel(
-                            offer.status,
-                          );
-                          const offerStatusBadgeClassName =
-                            getOfferStatusBadgeClassName(offer.status);
-
-                          return (
-                            <div
-                              key={offer.id}
-                              className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-(--color-card-shadow)"
-                            >
-                              <div className="bg-tertiary-bg border-border-card flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
-                                <div className="flex min-w-0 flex-1 items-center gap-3">
-                                  <div
-                                    className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
-                                      offerUser?.premiumtype === 3
-                                        ? "rounded-sm"
-                                        : "rounded-full"
-                                    }`}
+                              <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                                {offersSearchQuery && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setOffersSearchQuery("")}
+                                    className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                                    aria-label="Clear offer search"
                                   >
-                                    {offerAvatarSrc ? (
-                                      <Image
-                                        src={offerAvatarSrc}
-                                        alt={`${offerDisplayName}'s Roblox avatar`}
-                                        fill
-                                        className="object-cover"
-                                        draggable={false}
-                                        onError={handleImageError}
-                                      />
-                                    ) : (
-                                      <div className="flex h-full w-full items-center justify-center">
-                                        <DefaultAvatar
-                                          premiumType={offerUser?.premiumtype}
-                                        />
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  <div className="min-w-0">
-                                    <div className="flex min-w-0 items-center gap-2">
-                                      {offerUser?.id ? (
-                                        <Link
-                                          href={`/users/${offerUser.id}`}
-                                          prefetch={false}
-                                          className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
-                                        >
-                                          {offerDisplayName}
-                                        </Link>
-                                      ) : offerUser?.roblox_id ? (
-                                        <a
-                                          href={`https://www.roblox.com/users/${offerUser.roblox_id}/profile`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
-                                        >
-                                          {offerDisplayName}
-                                        </a>
-                                      ) : (
-                                        <p className="text-primary-text truncate text-sm font-semibold">
-                                          {offerDisplayName}
-                                        </p>
-                                      )}
-                                      <UserBadges
-                                        usernumber={offerUser?.usernumber ?? 0}
-                                        premiumType={offerUser?.premiumtype}
-                                        size="sm"
-                                        noContainer={true}
-                                        disableTooltips={false}
-                                      />
-                                    </div>
-                                    <p className="text-secondary-text truncate text-xs">
-                                      @
-                                      {offerUser?.roblox_username ||
-                                        offerUser?.username ||
-                                        "unknown"}
-                                    </p>
-                                    <div className="text-secondary-text mt-1 text-xs">
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <span className="cursor-help">
-                                            Offered{" "}
-                                            <RelativeTimeText
-                                              timestamp={offer.created_at}
-                                              fallback="unknown"
-                                            />
-                                          </span>
-                                        </TooltipTrigger>
-                                        <TooltipContent
-                                          side="top"
-                                          className="bg-primary-bg text-secondary-text border-none shadow-(--color-card-shadow)"
-                                        >
-                                          <p>
-                                            {offer.created_at
-                                              ? formatCustomDate(
-                                                  offer.created_at,
-                                                )
-                                              : "Unknown"}
-                                          </p>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:shrink-0 sm:justify-end">
-                                  <span
-                                    className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${offerStatusBadgeClassName}`}
-                                  >
-                                    {offerStatusLabel}
-                                  </span>
-
-                                  {offerStatusValue === 1 &&
-                                    ((isOwner && offerUser?.id) ||
-                                      (isOfferOwner && trade.user?.id)) && (
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="default"
-                                        className="h-6! px-2.5!"
-                                        onClick={() => {
-                                          const targetId = isOwner
-                                            ? offerUser?.id
-                                            : trade.user?.id;
-                                          if (targetId)
-                                            router.push(
-                                              `/messages/${encodeURIComponent(targetId)}`,
-                                            );
-                                        }}
-                                      >
-                                        <Icon icon="heroicons-outline:chat-bubble-left-ellipsis" />
-                                        <span className="hidden sm:inline">
-                                          Message
-                                        </span>
-                                      </Button>
-                                    )}
-
-                                  {isOwner && isPendingOffer && (
-                                    <>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="success"
-                                        className="h-6! px-2.5!"
-                                        disabled={!!offerResponseAction}
-                                        onClick={() =>
-                                          void handleOfferResponse(
-                                            offer.id,
-                                            "accept",
-                                            offer.user,
-                                          )
-                                        }
-                                        aria-label="Accept offer"
-                                      >
-                                        <Icon icon="heroicons-outline:check" />
-                                        <span className="hidden sm:inline">
-                                          {offerResponseAction === "accept"
-                                            ? "Accepting..."
-                                            : "Accept"}
-                                        </span>
-                                      </Button>
-
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="destructive"
-                                        className="h-6! px-2.5!"
-                                        disabled={!!offerResponseAction}
-                                        onClick={() =>
-                                          void handleOfferResponse(
-                                            offer.id,
-                                            "decline",
-                                          )
-                                        }
-                                        aria-label="Decline offer"
-                                      >
-                                        <Icon icon="heroicons-outline:x-mark" />
-                                        <span className="hidden sm:inline">
-                                          {offerResponseAction === "decline"
-                                            ? "Declining..."
-                                            : "Decline"}
-                                        </span>
-                                      </Button>
-                                    </>
-                                  )}
-
-                                  {isOfferOwner && isPendingOffer && (
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="destructive"
-                                      className="h-6! px-2.5!"
-                                      disabled={isDeletingOffer}
-                                      onClick={() =>
-                                        setOfferDeleteConfirmId(offer.id)
-                                      }
-                                      aria-label="Delete offer"
-                                    >
-                                      <Icon icon="heroicons-outline:trash" />
-                                      <span className="hidden sm:inline">
-                                        {isDeletingOffer
-                                          ? "Deleting..."
-                                          : "Delete"}
-                                      </span>
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="p-4">
-                                <div>
-                                  <p className="text-secondary-text mb-1 text-[10px] tracking-wide uppercase">
-                                    Offer Note
-                                  </p>
-                                  {offerNote ? (
-                                    <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
-                                      {offerNote}
-                                    </p>
-                                  ) : (
-                                    <p className="text-secondary-text text-sm">
-                                      No note provided.
-                                    </p>
-                                  )}
-                                </div>
-
-                                <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-                                  <TradeSidePreview
-                                    title="Offering"
-                                    items={offerOffering}
-                                  />
-
-                                  {shouldShowRequestingGrid ? (
-                                    <TradeSidePreview
-                                      title="Requesting"
-                                      items={offerRequesting}
+                                    <Icon
+                                      icon="heroicons:x-mark"
+                                      className="h-5 w-5"
                                     />
-                                  ) : (
-                                    <div className="border-border-card bg-tertiary-bg/40 rounded-lg border p-4">
-                                      <p className="text-primary-text text-sm font-semibold">
-                                        Requesting
-                                      </p>
-                                      <p className="text-secondary-text mt-1 text-sm">
-                                        As requested in the original ad.
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                                <RateLimitBanner
-                                  until={offerRateLimits[offer.id] ?? null}
-                                  label="You're deleting too fast."
-                                  className="mt-4"
-                                />
+                                  </button>
+                                )}
                               </div>
                             </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  )}
-              </TabsContent>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
+                                  aria-label="Offer search side"
+                                >
+                                  <span>{offersSearchScopeLabel}</span>
+                                  <Icon
+                                    icon="heroicons:chevron-down"
+                                    className="text-secondary-text h-5 w-5"
+                                    inline={true}
+                                  />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="start"
+                                className="w-(--radix-dropdown-menu-trigger-width)"
+                              >
+                                <DropdownMenuRadioGroup
+                                  value={offersSearchScope}
+                                  onValueChange={(value) =>
+                                    setOffersSearchScope(
+                                      value as
+                                        | "all"
+                                        | "offering"
+                                        | "requesting",
+                                    )
+                                  }
+                                >
+                                  <DropdownMenuRadioItem value="all">
+                                    Both Sides
+                                  </DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem value="offering">
+                                    Offering Only
+                                  </DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem value="requesting">
+                                    Requesting Only
+                                  </DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        )}
 
-              <TabsContent
-                value="comments"
-                id="trade-tabpanel-comments"
-                className="mt-4"
-              >
-                <h3 className="text-primary-text mb-3 text-base font-semibold">
-                  Comments
-                </h3>
-                <ChangelogComments
-                  changelogId={trade.id}
-                  changelogTitle={`Trade #${trade.id}`}
-                  type="tradev2"
-                  trade={trade}
-                  initialComments={initialComments}
-                  initialUserMap={initialUserMap}
-                />
-              </TabsContent>
+                      {tradeOffers.status === "loading" && (
+                        <div className="border-border-card bg-tertiary-bg flex min-h-24 items-center justify-center rounded-lg border p-6 text-center">
+                          <p className="text-secondary-text text-sm">
+                            Loading offers...
+                          </p>
+                        </div>
+                      )}
+
+                      {tradeOffers.status === "error" && (
+                        <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+                          <p className="text-primary-text text-sm font-semibold">
+                            Failed to load offers
+                          </p>
+                          <p className="text-secondary-text mt-1 text-sm">
+                            {tradeOffers.error || "Please try again later."}
+                          </p>
+                        </div>
+                      )}
+
+                      {tradeOffers.status === "loaded" &&
+                        tradeOffers.offers.length === 0 && (
+                          <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
+                            <p className="text-primary-text text-sm font-semibold">
+                              No offers yet
+                            </p>
+                            <p className="text-secondary-text mt-1 text-sm">
+                              Check back later to see incoming offers.
+                            </p>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              className="mt-4"
+                              onClick={() =>
+                                setOffersRefreshToken((prev) => prev + 1)
+                              }
+                            >
+                              <Icon icon="heroicons-outline:arrow-path" />
+                              Refresh
+                            </Button>
+                          </div>
+                        )}
+
+                      {tradeOffers.status === "loaded" &&
+                        tradeOffers.offers.length > 0 && (
+                          <div className="space-y-4">
+                            {visibleOffers.length === 0 ? (
+                              <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
+                                <p className="text-primary-text text-sm font-semibold">
+                                  No matching offers
+                                </p>
+                                <p className="text-secondary-text mt-1 text-sm">
+                                  Try a different search or switch sides.
+                                </p>
+                              </div>
+                            ) : (
+                              visibleOffers.map((offer) => {
+                                const offerUser = offer.user;
+                                const offerDisplayName =
+                                  offerUser?.roblox_display_name ||
+                                  offerUser?.global_name ||
+                                  offerUser?.roblox_username ||
+                                  offerUser?.username ||
+                                  "Unknown User";
+                                const offerStatusValue =
+                                  typeof offer.status === "string"
+                                    ? Number(offer.status)
+                                    : typeof offer.status === "number"
+                                      ? offer.status
+                                      : null;
+                                const isPendingOffer = offerStatusValue === 0;
+                                const offerResponseAction =
+                                  offerResponseState[offer.id];
+                                const isOfferOwner = !!(
+                                  isAuthenticated &&
+                                  currentUserId &&
+                                  offerUser?.id &&
+                                  offerUser.id === currentUserId
+                                );
+                                const isDeletingOffer =
+                                  !!offerDeleteState[offer.id];
+                                const offerAvatarSrc =
+                                  offerUser?.roblox_avatar ?? null;
+                                const offerNote = sanitizeText(
+                                  offer.note || "",
+                                );
+                                const offerOffering =
+                                  offer.offering == null
+                                    ? trade.offering
+                                    : normalizeOfferItems(offer.offering);
+                                const offerRequesting =
+                                  offer.requesting == null
+                                    ? trade.requesting
+                                    : normalizeOfferItems(offer.requesting);
+                                const requestingMatchesOriginal =
+                                  tradeItemsEquivalent(
+                                    offerRequesting,
+                                    trade.requesting,
+                                  );
+                                const requestingProvided =
+                                  offer.requesting != null;
+                                const shouldShowRequestingGrid =
+                                  requestingProvided &&
+                                  !requestingMatchesOriginal;
+                                const offerStatusLabel = getOfferStatusLabel(
+                                  offer.status,
+                                );
+                                const offerStatusBadgeClassName =
+                                  getOfferStatusBadgeClassName(offer.status);
+
+                                return (
+                                  <div
+                                    key={offer.id}
+                                    className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-(--color-card-shadow)"
+                                  >
+                                    <div className="bg-tertiary-bg border-border-card flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
+                                      <div className="flex min-w-0 flex-1 items-center gap-3">
+                                        <div
+                                          className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
+                                            offerUser?.premiumtype === 3
+                                              ? "rounded-sm"
+                                              : "rounded-full"
+                                          }`}
+                                        >
+                                          {offerAvatarSrc ? (
+                                            <Image
+                                              src={offerAvatarSrc}
+                                              alt={`${offerDisplayName}'s Roblox avatar`}
+                                              fill
+                                              className="object-cover"
+                                              draggable={false}
+                                              onError={handleImageError}
+                                            />
+                                          ) : (
+                                            <div className="flex h-full w-full items-center justify-center">
+                                              <DefaultAvatar
+                                                premiumType={
+                                                  offerUser?.premiumtype
+                                                }
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        <div className="min-w-0">
+                                          <div className="flex min-w-0 items-center gap-2">
+                                            {offerUser?.id ? (
+                                              <Link
+                                                href={`/users/${offerUser.id}`}
+                                                prefetch={false}
+                                                className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                                              >
+                                                {offerDisplayName}
+                                              </Link>
+                                            ) : offerUser?.roblox_id ? (
+                                              <a
+                                                href={`https://www.roblox.com/users/${offerUser.roblox_id}/profile`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                                              >
+                                                {offerDisplayName}
+                                              </a>
+                                            ) : (
+                                              <p className="text-primary-text truncate text-sm font-semibold">
+                                                {offerDisplayName}
+                                              </p>
+                                            )}
+                                            <UserBadges
+                                              usernumber={
+                                                offerUser?.usernumber ?? 0
+                                              }
+                                              premiumType={
+                                                offerUser?.premiumtype
+                                              }
+                                              size="sm"
+                                              noContainer={true}
+                                              disableTooltips={false}
+                                            />
+                                          </div>
+                                          <p className="text-secondary-text truncate text-xs">
+                                            @
+                                            {offerUser?.roblox_username ||
+                                              offerUser?.username ||
+                                              "unknown"}
+                                          </p>
+                                          <div className="text-secondary-text mt-1 text-xs">
+                                            <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                <span className="cursor-help">
+                                                  Offered{" "}
+                                                  <RelativeTimeText
+                                                    timestamp={offer.created_at}
+                                                    fallback="unknown"
+                                                  />
+                                                </span>
+                                              </TooltipTrigger>
+                                              <TooltipContent
+                                                side="top"
+                                                className="bg-primary-bg text-secondary-text border-none shadow-(--color-card-shadow)"
+                                              >
+                                                <p>
+                                                  {offer.created_at
+                                                    ? formatCustomDate(
+                                                        offer.created_at,
+                                                      )
+                                                    : "Unknown"}
+                                                </p>
+                                              </TooltipContent>
+                                            </Tooltip>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:shrink-0 sm:justify-end">
+                                        <span
+                                          className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${offerStatusBadgeClassName}`}
+                                        >
+                                          {offerStatusLabel}
+                                        </span>
+
+                                        {offerStatusValue === 1 &&
+                                          ((isOwner && offerUser?.id) ||
+                                            (isOfferOwner &&
+                                              trade.user?.id)) && (
+                                            <Button
+                                              type="button"
+                                              size="sm"
+                                              variant="default"
+                                              className="h-6! px-2.5!"
+                                              onClick={() => {
+                                                const targetId = isOwner
+                                                  ? offerUser?.id
+                                                  : trade.user?.id;
+                                                if (targetId)
+                                                  router.push(
+                                                    `/messages/${encodeURIComponent(targetId)}`,
+                                                  );
+                                              }}
+                                            >
+                                              <Icon icon="heroicons-outline:chat-bubble-left-ellipsis" />
+                                              <span className="hidden sm:inline">
+                                                Message
+                                              </span>
+                                            </Button>
+                                          )}
+
+                                        {isOwner && isPendingOffer && (
+                                          <>
+                                            <Button
+                                              type="button"
+                                              size="sm"
+                                              variant="success"
+                                              className="h-6! px-2.5!"
+                                              disabled={!!offerResponseAction}
+                                              onClick={() =>
+                                                void handleOfferResponse(
+                                                  offer.id,
+                                                  "accept",
+                                                  offer.user,
+                                                )
+                                              }
+                                              aria-label="Accept offer"
+                                            >
+                                              <Icon icon="heroicons-outline:check" />
+                                              <span className="hidden sm:inline">
+                                                {offerResponseAction ===
+                                                "accept"
+                                                  ? "Accepting..."
+                                                  : "Accept"}
+                                              </span>
+                                            </Button>
+
+                                            <Button
+                                              type="button"
+                                              size="sm"
+                                              variant="destructive"
+                                              className="h-6! px-2.5!"
+                                              disabled={!!offerResponseAction}
+                                              onClick={() =>
+                                                void handleOfferResponse(
+                                                  offer.id,
+                                                  "decline",
+                                                )
+                                              }
+                                              aria-label="Decline offer"
+                                            >
+                                              <Icon icon="heroicons-outline:x-mark" />
+                                              <span className="hidden sm:inline">
+                                                {offerResponseAction ===
+                                                "decline"
+                                                  ? "Declining..."
+                                                  : "Decline"}
+                                              </span>
+                                            </Button>
+                                          </>
+                                        )}
+
+                                        {isOfferOwner && isPendingOffer && (
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="destructive"
+                                            className="h-6! px-2.5!"
+                                            disabled={isDeletingOffer}
+                                            onClick={() =>
+                                              setOfferDeleteConfirmId(offer.id)
+                                            }
+                                            aria-label="Delete offer"
+                                          >
+                                            <Icon icon="heroicons-outline:trash" />
+                                            <span className="hidden sm:inline">
+                                              {isDeletingOffer
+                                                ? "Deleting..."
+                                                : "Delete"}
+                                            </span>
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="p-4">
+                                      <div>
+                                        <p className="text-secondary-text mb-1 text-[10px] tracking-wide uppercase">
+                                          Offer Note
+                                        </p>
+                                        {offerNote ? (
+                                          <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
+                                            {offerNote}
+                                          </p>
+                                        ) : (
+                                          <p className="text-secondary-text text-sm">
+                                            No note provided.
+                                          </p>
+                                        )}
+                                      </div>
+
+                                      <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+                                        <TradeSidePreview
+                                          title="Offering"
+                                          items={offerOffering}
+                                        />
+
+                                        {shouldShowRequestingGrid ? (
+                                          <TradeSidePreview
+                                            title="Requesting"
+                                            items={offerRequesting}
+                                          />
+                                        ) : (
+                                          <div className="border-border-card bg-tertiary-bg/40 rounded-lg border p-4">
+                                            <p className="text-primary-text text-sm font-semibold">
+                                              Requesting
+                                            </p>
+                                            <p className="text-secondary-text mt-1 text-sm">
+                                              As requested in the original ad.
+                                            </p>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <RateLimitBanner
+                                        until={
+                                          offerRateLimits[offer.id] ?? null
+                                        }
+                                        label="You're deleting too fast."
+                                        className="mt-4"
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                        )}
+                    </TabsContent>
+
+                    <TabsContent
+                      value="comments"
+                      id="trade-tabpanel-comments"
+                      className="mt-4"
+                    >
+                      <h3 className="text-primary-text mb-3 text-base font-semibold">
+                        Comments
+                      </h3>
+                      <ChangelogComments
+                        changelogId={trade.id}
+                        changelogTitle={`Trade #${trade.id}`}
+                        type="tradev2"
+                        trade={trade}
+                        initialComments={initialComments}
+                        initialUserMap={initialUserMap}
+                      />
+                    </TabsContent>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </Tabs>
           </div>
         </div>
