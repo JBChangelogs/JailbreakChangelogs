@@ -36,6 +36,8 @@ import { useSupporterGifting } from "@/hooks/useSupporterGifting";
 import { usePurchaseGiftModal } from "@/hooks/usePurchaseGiftModal";
 import SettingsLoading from "./loading";
 
+const APP_ONLY_SETTINGS = new Set(["hide_roblox_activity"]);
+
 export default function SettingsPage() {
   const { user, isLoading, refreshUser } = useAuthContext();
   const { twemojiEnabled, setTwemojiEnabled } = useTwemoji();
@@ -252,9 +254,9 @@ export default function SettingsPage() {
           {sortedCategories.map((cat) => {
             const categoryDisplayName =
               cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
-            const sortedSettings = [...cat.settings].sort(
-              (a, b) => a.index - b.index,
-            );
+            const sortedSettings = cat.settings
+              .filter((entry) => !APP_ONLY_SETTINGS.has(entry.name))
+              .sort((a, b) => a.index - b.index);
             const isAppearanceCat = cat.name === "appearance";
             return (
               <SettingsCard
