@@ -28,16 +28,15 @@ import { validateFile } from "@/utils/storage/fileValidation";
 import SupporterModal from "../Modals/SupporterModal";
 
 const log = createLogger("UI");
-const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
   "image/webp",
-  "image/gif",
 ];
 
-export const IMAGE_UPLOAD_FORMATS = "PNG, JPG, WebP, or GIF";
+export const IMAGE_UPLOAD_FORMATS = "PNG, JPG, or WebP";
 export const IMAGE_UPLOAD_MAX_SIZE_MB = {
   avatar: 8,
   banner: 10,
