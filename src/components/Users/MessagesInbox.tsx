@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
@@ -135,6 +142,10 @@ export default function MessagesInbox() {
     selectedUserIdRef,
     routeConversationIdRef,
     messagesContainerRef,
+    handleMessagesScroll,
+    hasNewMessagesBelow,
+    newMessagesStartId,
+    showNewMessages,
     prependScrollRestoreRef,
     pendingOwnSendScrollRef,
   } = useMessageNavigationScroll({
@@ -633,6 +644,7 @@ export default function MessagesInbox() {
 
                 <ChatMessages
                   ref={messagesContainerRef}
+                  onScroll={handleMessagesScroll}
                   className="bg-secondary-bg relative !flex-col px-2 py-3 sm:px-4"
                   style={{ overflowAnchor: "none" }}
                 >
@@ -675,41 +687,70 @@ export default function MessagesInbox() {
                     </div>
                   ) : (
                     messages.map((message, index) => (
-                      <MessageRow
-                        key={message.id}
-                        message={message}
-                        index={index}
-                        messages={messages}
-                        currentUser={currentUser}
-                        currentUserEnriched={currentUserEnriched}
-                        currentUserMessageUser={currentUserMessageUser}
-                        selectedUser={selectedUser}
-                        activeMessageId={activeMessageId}
-                        editingMessageId={editingMessageId}
-                        editContent={editContent}
-                        editEmojiOpen={editEmojiOpen}
-                        emojiStringMap={emojiStringMap}
-                        twemojiEnabled={twemojiEnabled}
-                        isSending={isSending}
-                        deletingMessageId={deletingMessageId}
-                        editCursorPosRef={editCursorPosRef}
-                        editTextareaRef={editTextareaRef}
-                        messagesContainerRef={messagesContainerRef}
-                        setActiveMessageId={setActiveMessageId}
-                        setEditingMessageId={setEditingMessageId}
-                        setEditContent={setEditContent}
-                        setEditEmojiOpen={setEditEmojiOpen}
-                        setReplyingToMessage={setReplyingToMessage}
-                        setReportingMessage={setReportingMessage}
-                        setReportReason={setReportReason}
-                        handleDeleteMessage={handleDeleteMessage}
-                        handleRetryFailedMessage={handleRetryFailedMessage}
-                        handleEditMessage={handleEditMessage}
-                        insertEditEmoji={insertEditEmoji}
-                      />
+                      <Fragment key={message.id}>
+                        {message.id === newMessagesStartId && (
+                          <div
+                            data-new-messages-divider
+                            role="separator"
+                            aria-label="New messages"
+                            className="flex items-center gap-2 py-2"
+                          >
+                            <span className="border-status-error flex-1 border-t" />
+                            <span className="text-status-error min-w-max text-xs font-semibold">
+                              New messages
+                            </span>
+                            <span className="border-status-error flex-1 border-t" />
+                          </div>
+                        )}
+                        <MessageRow
+                          message={message}
+                          index={index}
+                          messages={messages}
+                          currentUser={currentUser}
+                          currentUserEnriched={currentUserEnriched}
+                          currentUserMessageUser={currentUserMessageUser}
+                          selectedUser={selectedUser}
+                          activeMessageId={activeMessageId}
+                          editingMessageId={editingMessageId}
+                          editContent={editContent}
+                          editEmojiOpen={editEmojiOpen}
+                          emojiStringMap={emojiStringMap}
+                          twemojiEnabled={twemojiEnabled}
+                          isSending={isSending}
+                          deletingMessageId={deletingMessageId}
+                          editCursorPosRef={editCursorPosRef}
+                          editTextareaRef={editTextareaRef}
+                          messagesContainerRef={messagesContainerRef}
+                          setActiveMessageId={setActiveMessageId}
+                          setEditingMessageId={setEditingMessageId}
+                          setEditContent={setEditContent}
+                          setEditEmojiOpen={setEditEmojiOpen}
+                          setReplyingToMessage={setReplyingToMessage}
+                          setReportingMessage={setReportingMessage}
+                          setReportReason={setReportReason}
+                          handleDeleteMessage={handleDeleteMessage}
+                          handleRetryFailedMessage={handleRetryFailedMessage}
+                          handleEditMessage={handleEditMessage}
+                          insertEditEmoji={insertEditEmoji}
+                        />
+                      </Fragment>
                     ))
                   )}
                 </ChatMessages>
+
+                {hasNewMessagesBelow && (
+                  <div className="pointer-events-none relative z-20 h-0">
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="pointer-events-auto absolute right-1/2 bottom-3 translate-x-1/2 rounded-full shadow-lg"
+                      onClick={showNewMessages}
+                    >
+                      <Icon icon="heroicons:arrow-down" className="h-4 w-4" />
+                      New messages
+                    </Button>
+                  </div>
+                )}
 
                 <ComposerFooter
                   messageBan={messageBan}

@@ -106,6 +106,21 @@ function getRealtimeWsUrl(): string | null {
   });
 }
 
+function isViewingMessageConversation(
+  locationPath: string,
+  senderId: string,
+): boolean {
+  const pathname = locationPath.split(/[?#]/, 1)[0] ?? "";
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts[0] !== "messages" || !parts[1]) return false;
+
+  try {
+    return decodeURIComponent(parts[1]) === senderId;
+  } catch {
+    return false;
+  }
+}
+
 function getReconnectDelay(attempt: number): number {
   const exponentialDelay = Math.min(
     BASE_RECONNECT_DELAY_MS * Math.pow(2, Math.max(0, attempt - 1)),
@@ -613,18 +628,25 @@ export function useRealtimeNotificationsWebSocket(
                     },
                     tag: `realtime-dm:${String(dmData.id)}`,
                   });
-                  toast("New message", {
-                    id: `realtime-dm:${String(dmData.id)}`,
-                    description: messagePreview,
-                    action: {
-                      label: "Open chat",
-                      onClick: () => {
-                        window.location.assign(
-                          `/messages/${encodeURIComponent(senderId)}`,
-                        );
+                  if (
+                    !isViewingMessageConversation(
+                      locationPathRef.current,
+                      senderId,
+                    )
+                  ) {
+                    toast("New message", {
+                      id: `realtime-dm:${String(dmData.id)}`,
+                      description: messagePreview,
+                      action: {
+                        label: "Open chat",
+                        onClick: () => {
+                          window.location.assign(
+                            `/messages/${encodeURIComponent(senderId)}`,
+                          );
+                        },
                       },
-                    },
-                  });
+                    });
+                  }
 
                   const now = Date.now();
                   const isOnCooldown =
