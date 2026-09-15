@@ -14,6 +14,7 @@ export interface MeResponse {
     roblox_join_date?: number | null;
   } | null;
   settings: UserData["settings_v2"];
+  presence: UserData["presence"];
   flags?: UserData["flags"];
 }
 
@@ -31,6 +32,7 @@ export function normalizeMeResponse(raw: MeResponse): UserData {
     roblox_avatar: raw.roblox?.roblox_avatar ?? "",
     roblox_join_date: raw.roblox?.roblox_join_date ?? 0,
     settings_v2: raw.settings,
+    presence: raw.presence,
     flags: raw.flags,
   } as UserData;
 }
