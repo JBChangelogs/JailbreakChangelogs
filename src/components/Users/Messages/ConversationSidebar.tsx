@@ -5,6 +5,7 @@ import Twemoji from "react-twemoji";
 import { ConversationRowTime } from "@/components/Users/Messages/ConversationRowTime";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { UserData } from "@/types/auth";
@@ -32,6 +33,30 @@ interface ConversationSidebarProps {
   userSearchInputRef: RefObject<HTMLInputElement | null>;
   selectConversation: (userId: string) => void;
   hideConversation: (conversation: ConversationSummary) => void;
+}
+
+function ConversationListSkeleton() {
+  return (
+    <div role="status" aria-label="Loading conversations">
+      <span className="sr-only">Loading conversations</span>
+      {Array.from({ length: 6 }, (_, index) => (
+        <div
+          key={index}
+          aria-hidden="true"
+          className="border-border-card flex items-start gap-3 border-b border-l-2 border-l-transparent px-4 py-3"
+        >
+          <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+          <div className="min-w-0 flex-1">
+            <Skeleton className={cn("h-4", index % 2 ? "w-28" : "w-36")} />
+            <Skeleton
+              className={cn("mt-1.5 h-3", index % 3 === 0 ? "w-4/5" : "w-3/5")}
+            />
+          </div>
+          <Skeleton className="mt-0.5 h-3 w-8 shrink-0" />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function ConversationSidebar({
@@ -144,9 +169,7 @@ export function ConversationSidebar({
             ))
           )
         ) : isLoadingConversations ? (
-          <p className="text-secondary-text px-4 py-4 text-sm">
-            Loading conversations...
-          </p>
+          <ConversationListSkeleton />
         ) : conversations.length === 0 ? (
           <p className="text-secondary-text px-4 py-4 text-sm">
             No conversations yet.
