@@ -202,14 +202,12 @@ export default async function Home() {
       label: "Items Tracked",
       icon: "mdi:shape",
       value: impactStats?.items_tracked ?? 0,
-      valueStr: impactStats?.items_tracked_str,
       badge: "All time",
     },
     {
       label: "Inventories Scanned",
       icon: "mdi:account-search",
       value: impactStats?.users_scanned ?? 0,
-      valueStr: impactStats?.users_scanned_str,
       badge: "All time",
     },
     {
