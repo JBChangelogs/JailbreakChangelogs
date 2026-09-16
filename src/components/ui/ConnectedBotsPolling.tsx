@@ -277,19 +277,23 @@ export default function ConnectedBotsPolling() {
                 <div className="flex items-center gap-2">
                   <span className="text-secondary-text">Queue Length:</span>
                   <span className="text-primary-text font-bold">
-                    {queueInfo.queue_length.toLocaleString()}
+                    <CountUpNumber value={queueInfo.queue_length} />
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-secondary-text">Worker Count:</span>
                   <span className="text-primary-text font-bold">
-                    {queueInfo.worker_count.toLocaleString()}
+                    <CountUpNumber value={queueInfo.worker_count} />
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-secondary-text">Current Delay:</span>
                   <span className="text-primary-text font-bold">
-                    {queueInfo.current_delay.toFixed(2)}s
+                    <CountUpNumber
+                      value={queueInfo.current_delay}
+                      decimals={2}
+                    />
+                    s
                   </span>
                 </div>
                 {queueInfo.processed_counter && queueInfo.running_since && (
