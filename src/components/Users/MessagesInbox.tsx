@@ -59,6 +59,8 @@ import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { sortConversationsByLatestMessage } from "@/utils/messages/sorting";
 
+const HIDDEN_CONVERSATION_UNDO_MS = 8000;
+
 export default function MessagesInbox() {
   const pathname = usePathname();
   const router = useRouter();
@@ -91,6 +93,8 @@ export default function MessagesInbox() {
   );
 
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [recentlyHiddenConversations, setRecentlyHiddenConversations] =
+    useState<ConversationSummary[]>([]);
   const [totalConversations, setTotalConversations] = useState<number | null>(
     null,
   );
@@ -135,6 +139,22 @@ export default function MessagesInbox() {
   const messagesPageRef = useRef(1);
   const messagesTotalPagesRef = useRef<number | null>(null);
   const isLoadingOlderMessagesRef = useRef(false);
+  const hideConversationRequestsRef = useRef<Map<string, Promise<boolean>>>(
+    new Map(),
+  );
+  const hiddenConversationUndoTimeoutsRef = useRef<Map<string, number>>(
+    new Map(),
+  );
+
+  useEffect(() => {
+    const undoTimeouts = hiddenConversationUndoTimeoutsRef.current;
+    return () => {
+      for (const timeoutId of undoTimeouts.values()) {
+        window.clearTimeout(timeoutId);
+      }
+      undoTimeouts.clear();
+    };
+  }, []);
 
   const {
     routeConversationId,
@@ -403,6 +423,65 @@ export default function MessagesInbox() {
     window.history.pushState({}, "", "/messages");
   };
 
+  const showHiddenConversationUndo = (
+    hiddenConversations: ConversationSummary[],
+  ) => {
+    setRecentlyHiddenConversations((prev) => {
+      const nextByUserId = new Map(
+        prev.map((conversation) => [conversation.user.id, conversation]),
+      );
+      for (const conversation of hiddenConversations) {
+        nextByUserId.set(conversation.user.id, conversation);
+      }
+      return [...nextByUserId.values()];
+    });
+
+    for (const conversation of hiddenConversations) {
+      const userId = conversation.user.id;
+      const existingTimeout =
+        hiddenConversationUndoTimeoutsRef.current.get(userId);
+      if (existingTimeout !== undefined) {
+        window.clearTimeout(existingTimeout);
+      }
+      const timeoutId = window.setTimeout(() => {
+        hiddenConversationUndoTimeoutsRef.current.delete(userId);
+        setRecentlyHiddenConversations((prev) =>
+          prev.filter((item) => item.user.id !== userId),
+        );
+      }, HIDDEN_CONVERSATION_UNDO_MS);
+      hiddenConversationUndoTimeoutsRef.current.set(userId, timeoutId);
+    }
+  };
+
+  const dismissHiddenConversationUndo = (userId: string) => {
+    const timeoutId = hiddenConversationUndoTimeoutsRef.current.get(userId);
+    if (timeoutId !== undefined) {
+      window.clearTimeout(timeoutId);
+      hiddenConversationUndoTimeoutsRef.current.delete(userId);
+    }
+    setRecentlyHiddenConversations((prev) =>
+      prev.filter((item) => item.user.id !== userId),
+    );
+  };
+
+  const restoreHiddenConversations = (
+    hiddenConversations: ConversationSummary[],
+  ) => {
+    if (hiddenConversations.length === 0) return;
+    setConversations((prev) => {
+      const existingIds = new Set(prev.map((item) => item.user.id));
+      const missing = hiddenConversations.filter(
+        (item) => !existingIds.has(item.user.id),
+      );
+      return missing.length > 0
+        ? sortConversationsByLatestMessage([...prev, ...missing])
+        : prev;
+    });
+    setTotalConversations((prev) =>
+      prev === null ? null : prev + hiddenConversations.length,
+    );
+  };
+
   const hideConversation = async (conversation: ConversationSummary) => {
     const userId = conversation.user.id;
     setConversations((prev) => prev.filter((item) => item.user.id !== userId));
@@ -414,6 +493,64 @@ export default function MessagesInbox() {
       goToConversationList();
     }
 
+    showHiddenConversationUndo([conversation]);
+
+    const hideRequest = (async () => {
+      try {
+        if (!PUBLIC_API_URL) {
+          throw new Error("Public API URL is not configured");
+        }
+
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/messages/${encodeURIComponent(userId)}/hide`,
+        );
+        const response = await fetch(url, {
+          method: "POST",
+          credentials: "include",
+          headers,
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            await getResponseErrorMessage(
+              response,
+              "Failed to hide conversation",
+            ),
+          );
+        }
+        return true;
+      } catch (error) {
+        restoreHiddenConversations([conversation]);
+        dismissHiddenConversationUndo(userId);
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to hide conversation",
+        );
+        return false;
+      }
+    })();
+
+    hideConversationRequestsRef.current.set(userId, hideRequest);
+    await hideRequest;
+    if (hideConversationRequestsRef.current.get(userId) === hideRequest) {
+      hideConversationRequestsRef.current.delete(userId);
+    }
+  };
+
+  const unhideRecentlyHiddenConversation = async (
+    conversation: ConversationSummary,
+  ) => {
+    const userId = conversation.user.id;
+    dismissHiddenConversationUndo(userId);
+
+    const pendingHide = hideConversationRequestsRef.current.get(userId);
+    const hideSucceeded = pendingHide ? await pendingHide : true;
+    if (!hideSucceeded) return;
+
+    restoreHiddenConversations([conversation]);
+
     try {
       if (!PUBLIC_API_URL) {
         throw new Error("Public API URL is not configured");
@@ -424,30 +561,30 @@ export default function MessagesInbox() {
         `/messages/${encodeURIComponent(userId)}/hide`,
       );
       const response = await fetch(url, {
-        method: "POST",
+        method: "DELETE",
         credentials: "include",
         headers,
       });
-
       if (!response.ok) {
         throw new Error(
           await getResponseErrorMessage(
             response,
-            "Failed to hide conversation",
+            "Failed to unhide conversation",
           ),
         );
       }
     } catch (error) {
       setConversations((prev) =>
-        sortConversationsByLatestMessage(
-          prev.some((item) => item.user.id === userId)
-            ? prev
-            : [...prev, conversation],
-        ),
+        prev.filter((item) => item.user.id !== userId),
       );
-      setTotalConversations((prev) => (prev === null ? null : prev + 1));
+      setTotalConversations((prev) =>
+        prev === null ? null : Math.max(0, prev - 1),
+      );
+      showHiddenConversationUndo([conversation]);
       toast.error(
-        error instanceof Error ? error.message : "Failed to hide conversation",
+        error instanceof Error
+          ? error.message
+          : "Failed to unhide conversation",
       );
     }
   };
@@ -565,10 +702,14 @@ export default function MessagesInbox() {
             isLoadingConversations={isLoadingConversations}
             isAuthenticated={isAuthenticated}
             twemojiEnabled={twemojiEnabled}
+            recentlyHiddenConversations={recentlyHiddenConversations}
             userSearchInputRef={userSearchInputRef}
             selectConversation={selectConversation}
             hideConversation={(conversation) =>
               void hideConversation(conversation)
+            }
+            unhideRecentlyHiddenConversation={(conversation) =>
+              void unhideRecentlyHiddenConversation(conversation)
             }
           />
 

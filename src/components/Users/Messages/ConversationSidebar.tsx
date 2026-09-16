@@ -30,9 +30,11 @@ interface ConversationSidebarProps {
   isLoadingConversations: boolean;
   isAuthenticated: boolean;
   twemojiEnabled: boolean;
+  recentlyHiddenConversations: ConversationSummary[];
   userSearchInputRef: RefObject<HTMLInputElement | null>;
   selectConversation: (userId: string) => void;
   hideConversation: (conversation: ConversationSummary) => void;
+  unhideRecentlyHiddenConversation: (conversation: ConversationSummary) => void;
 }
 
 function ConversationListSkeleton() {
@@ -72,9 +74,11 @@ export function ConversationSidebar({
   isLoadingConversations,
   isAuthenticated,
   twemojiEnabled,
+  recentlyHiddenConversations,
   userSearchInputRef,
   selectConversation,
   hideConversation,
+  unhideRecentlyHiddenConversation,
 }: ConversationSidebarProps) {
   return (
     <aside
@@ -124,6 +128,27 @@ export function ConversationSidebar({
           ) : null}
         </div>
       </div>
+      {!userSearchQuery.trim() && recentlyHiddenConversations.length > 0 && (
+        <div className="border-border-card max-h-40 overflow-y-auto border-b">
+          {recentlyHiddenConversations.map((conversation) => (
+            <div
+              key={conversation.user.id}
+              className="border-border-card bg-tertiary-bg animate-in fade-in slide-in-from-top-1 flex items-center gap-3 border-b px-4 py-2 duration-200 last:border-b-0"
+            >
+              <p className="text-secondary-text min-w-0 flex-1 truncate text-sm">
+                Hid {getDisplayName(conversation.user)}
+              </p>
+              <button
+                type="button"
+                onClick={() => unhideRecentlyHiddenConversation(conversation)}
+                className="text-link hover:text-link-hover shrink-0 cursor-pointer text-sm font-semibold transition-colors"
+              >
+                Undo
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain">
         {userSearchQuery.trim() ? (
           isUserSearchLoading ? (
