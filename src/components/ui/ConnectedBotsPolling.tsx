@@ -10,6 +10,7 @@ import { type ConnectedBot } from "@/utils/api/api";
 import { type RobloxUser } from "@/types";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/helpers/timestamp";
+import CountUpNumber from "@/components/Home/CountUpNumber";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
@@ -294,7 +295,9 @@ export default function ConnectedBotsPolling() {
                 {queueInfo.processed_counter && queueInfo.running_since && (
                   <div className="text-secondary-text text-sm">
                     <span className="text-primary-text font-bold">
-                      {queueInfo.processed_counter.total.toLocaleString()}
+                      <CountUpNumber
+                        value={queueInfo.processed_counter.total}
+                      />
                     </span>{" "}
                     users scanned since startup (
                     {formatCustomDate(queueInfo.running_since * 1000)})
