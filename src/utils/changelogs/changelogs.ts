@@ -1,8 +1,7 @@
 import { parse } from "date-fns";
 
-// Parse markdown content into structured sections
 export function parseMarkdown(text: string) {
-  // Ensure headings always start a new paragraph even when the source omits the blank line
+  // Force headings onto their own paragraph even without a blank line before them
   const normalized = text.replace(/([^\n])\n(#{1,6} )/g, "$1\n\n$2");
   const sections = normalized.split("\n\n");
   return sections
@@ -19,10 +18,8 @@ export function parseMarkdown(text: string) {
       return {
         title,
         items: items.map((line) => {
-          // Remove all leading hyphens and spaces
           const cleanLine = line.replace(/^[- ]+/, "").trim();
 
-          // Check for media embeds
           const mediaMatch = cleanLine.match(/^\((image|video|audio)\)(.+)$/);
           if (mediaMatch) {
             return {
@@ -33,7 +30,6 @@ export function parseMarkdown(text: string) {
             };
           }
 
-          // Process inline markdown and mentions
           const processedText = cleanLine
             .replace(
               /\*\*(.+?)\*\*/g,
@@ -44,10 +40,15 @@ export function parseMarkdown(text: string) {
               return `<a href="https://www.roblox.com/users/profile?username=${username}" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover active:text-link-active transition-colors duration-200">@${username}</a>`;
             });
 
+          // Bare bold lines (no "-") are group labels, not bullets — no arrow.
+          const isLabel =
+            !/^-/.test(line.trim()) && /^\*\*[^*]+\*\*$/.test(cleanLine);
+
           return {
             type: "text" as const,
             text: processedText,
             isNested: line.trim().startsWith("- - "),
+            isLabel,
           };
         }),
       };
@@ -58,9 +59,9 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Helper function to highlight text. Accepts either a literal query (substring
-// search) or a list of terms (e.g. the actual words a fuzzy search matched on,
-// since the typed query itself may not appear verbatim in the text).
+// `query` can be a literal search string, or a list of terms (e.g. the words
+// a fuzzy search actually matched on, since the typed query itself may not
+// appear verbatim in the text).
 export function highlightText(text: string, query: string | string[]) {
   const terms = (Array.isArray(query) ? query : [query]).filter(Boolean);
   if (terms.length === 0) return text;
@@ -72,7 +73,6 @@ export function highlightText(text: string, query: string | string[]) {
   );
 }
 
-// Helper function to extract media types and mentions from content
 export function extractContentInfo(sections: string) {
   const mediaTypes = new Set<string>();
   const mentions = new Set<string>();
@@ -82,7 +82,6 @@ export function extractContentInfo(sections: string) {
     image: 0,
   };
 
-  // Check for media embeds
   const mediaRegex = /\((image|video|audio)\)/g;
   let match;
   while ((match = mediaRegex.exec(sections)) !== null) {
@@ -91,7 +90,6 @@ export function extractContentInfo(sections: string) {
     mediaTypeCounts[mediaType] = (mediaTypeCounts[mediaType] || 0) + 1;
   }
 
-  // Check for mentions
   const mentionRegex = /@(\w+)/g;
   let mentionCount = 0;
   while ((match = mentionRegex.exec(sections)) !== null) {
@@ -107,27 +105,19 @@ export function extractContentInfo(sections: string) {
   };
 }
 
-// Add helper function to clean markdown and media tags
 export function cleanMarkdown(text: string): string {
-  return (
-    text
-      // Remove markdown headers
-      .replace(/^#+\s*/gm, "")
-      // Remove list markers
-      .replace(/^[- ]+/gm, "")
-      // Remove media tags and their asset URLs
-      .replace(/\((image|video|audio)\)\/assets\/.*?(?=\s|$)/g, "")
-      // Remove any remaining media tags without URLs
-      .replace(/\((image|video|audio)\)/g, "")
-      // Remove extra whitespace
-      .replace(/\s+/g, " ")
-      .trim()
-  );
+  return text
+    .replace(/^#+\s*/gm, "") // headers
+    .replace(/^[- ]+/gm, "") // list markers
+    .replace(/\((image|video|audio)\)\/assets\/.*?(?=\s|$)/g, "") // media tags with URLs
+    .replace(/\((image|video|audio)\)/g, "") // leftover media tags
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-// Picks the line to preview. `query` can be the literal search string, or a
-// list of terms to look for (e.g. the words a fuzzy search actually matched on,
-// since the typed query itself may not appear verbatim in the content).
+// `query` can be the literal search string, or a list of terms to look for
+// (e.g. the words a fuzzy search actually matched on, since the typed query
+// itself may not appear verbatim in the content).
 export function getContentPreview(sections: string, query: string | string[]) {
   const terms = (Array.isArray(query) ? query : [query])
     .filter(Boolean)

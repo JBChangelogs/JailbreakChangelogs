@@ -66,22 +66,16 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
   const nextChangelog =
     currentIndex > 0 ? changelogList[currentIndex - 1] : null;
 
-  // Parse markdown sections
   const parsedSections = parseMarkdown(sections);
-
-  // Extract content info for badges
   const contentInfo = extractContentInfo(sections);
 
   const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
     const aspectRatio = img.naturalWidth / img.naturalHeight;
 
-    // Determine the appropriate aspect ratio class based on image dimensions
     if (Math.abs(aspectRatio - 1) < 0.1) {
-      // Square image (ratio close to 1:1)
       setImageAspectRatio("aspect-square");
     } else {
-      // Everything else uses 16:9
       setImageAspectRatio("aspect-video");
     }
   };
@@ -157,13 +151,15 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                   {section.items.map((item, itemIndex) => (
                     <li
                       key={itemIndex}
-                      className={`flex items-start gap-2 ${item.isNested ? "ml-8" : ""}`}
+                      className={`flex items-start gap-2 ${item.isNested ? "ml-8" : ""} ${item.type === "text" && item.isLabel ? "mt-3 first:mt-0" : ""}`}
                     >
                       {item.type === "media" ? (
                         <ChangelogMediaEmbed
                           type={item.mediaType}
                           url={item.url}
                         />
+                      ) : item.isLabel ? (
+                        <span dangerouslySetInnerHTML={{ __html: item.text }} />
                       ) : (
                         <>
                           {item.isNested ? (
