@@ -7,7 +7,10 @@ import {
   getNotificationActionLabel,
   parseNotificationUrl,
 } from "@/utils/notifications/notificationUrl";
-import { showDesktopNotification } from "@/utils/notifications/desktopNotifications";
+import {
+  shouldShowDesktopNotification,
+  showDesktopNotification,
+} from "@/utils/notifications/desktopNotifications";
 import { NotifDescription } from "@/components/notifications/NotifDescription";
 import { TwemojiText } from "@/components/ui/TwemojiText";
 import {
@@ -22,6 +25,7 @@ import {
   updatePreferencesCache,
 } from "@/utils/preferences/realtimePreferencesCache";
 import { setRealtimeConnectionState } from "@/services/realtimeConnection";
+import { fetchHasAppConnection } from "@/services/settingsService";
 
 const log = createLogger("WS");
 
@@ -142,6 +146,23 @@ function parseRealtimeMessagePayload(raw: string): RealtimeNotificationMessage {
 
 function openValidatedExternalNotificationUrl(validatedExternalHref: string) {
   window.open(validatedExternalHref, "_blank", "noopener,noreferrer");
+}
+
+function showDesktopNotificationUnlessAppConnected(
+  notification: Parameters<typeof showDesktopNotification>[0],
+): void {
+  if (!shouldShowDesktopNotification()) return;
+
+  void fetchHasAppConnection()
+    .then((hasAppConnection) => {
+      if (!hasAppConnection) {
+        showDesktopNotification(notification);
+      }
+    })
+    .catch(() => {
+      // Do not lose browser notifications if the connection check fails.
+      showDesktopNotification(notification);
+    });
 }
 
 export function useRealtimeNotificationsWebSocket(
@@ -620,7 +641,7 @@ export function useRealtimeNotificationsWebSocket(
                   const messagePreview =
                     toNotificationBody(dmData.content) ??
                     "Check your messages.";
-                  showDesktopNotification({
+                  showDesktopNotificationUnlessAppConnected({
                     title: "New message",
                     body: messagePreview,
                     target: {
@@ -854,12 +875,14 @@ export function useRealtimeNotificationsWebSocket(
               return undefined;
             })();
 
-            showDesktopNotification({
+            const desktopNotification = {
               title: notificationTitle,
               body: notificationDescription,
               target: desktopTarget,
               tag: toastId,
-            });
+            };
+
+            showDesktopNotificationUnlessAppConnected(desktopNotification);
 
             const now = Date.now();
             const isOnCooldown =
