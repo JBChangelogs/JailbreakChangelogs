@@ -51,7 +51,7 @@ export class ProfileDataService {
           },
         ).catch(() => null),
         fetchWithRetry(
-          `${PUBLIC_API_URL}/users/description/get?user=${userId}&nocache=true`,
+          `${PUBLIC_API_URL}/users/description/get?user=${userId}`,
           undefined,
           {
             maxRetries: 2,

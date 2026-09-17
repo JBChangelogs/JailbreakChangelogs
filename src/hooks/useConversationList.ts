@@ -251,7 +251,7 @@ export function useConversationList({
 
         const { url: convUrl, headers: convHeaders } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          "/messages?nocache=true",
+          "/messages",
         );
         const response = await fetch(convUrl, {
           method: "GET",
