@@ -92,6 +92,11 @@ interface SearchResult {
   highlightTerms?: string[];
 }
 
+// 0 = exact/substring match, 1 = fuzzy typo match; exact hits are ranked first.
+interface RankedSearchResult extends SearchResult {
+  matchTier: number;
+}
+
 interface ChangelogDetailsClientProps {
   changelogList: Changelog[];
   currentChangelog: Changelog;
@@ -151,10 +156,7 @@ export default function ChangelogDetailsClient({
       return;
     }
 
-    let results: SearchResult[] = [];
-    // 0 = exact/substring match, 1 = fuzzy typo match, used to rank exact hits
-    // first below. `has:` results aren't tiered and default to 0.
-    const fuzzyTierById = new Map<number, number>();
+    let results: RankedSearchResult[] = [];
 
     // Queries for mentions, images, etc.
     if (debouncedSearchQuery.startsWith("has:")) {
@@ -183,7 +185,8 @@ export default function ChangelogDetailsClient({
                   item.sections,
                   additionalQuery || "@",
                 ),
-              } as SearchResult;
+                matchTier: 0,
+              } as RankedSearchResult;
             }
             return null;
           }
@@ -204,7 +207,8 @@ export default function ChangelogDetailsClient({
                 item.sections,
                 additionalQuery || mediaType,
               ),
-            } as SearchResult;
+              matchTier: 0,
+            } as RankedSearchResult;
           }
           return null;
         })
@@ -249,8 +253,6 @@ export default function ChangelogDetailsClient({
           const highlightTerms = [...matchedTerms];
           if (highlightTerms.length === 0) return null;
 
-          fuzzyTierById.set(item.id, isExactMatch ? 0 : 1);
-
           return {
             id: item.id,
             title: item.title,
@@ -260,18 +262,15 @@ export default function ChangelogDetailsClient({
               ? getContentPreview(item.sections, highlightTerms)
               : undefined,
             highlightTerms,
-          } as SearchResult;
+            matchTier: isExactMatch ? 0 : 1,
+          } as RankedSearchResult;
         })
-        .filter((result): result is SearchResult => result !== null);
+        .filter((result): result is RankedSearchResult => result !== null);
     }
 
     // Exact matches rank above fuzzy ones; ties break by newest changelog first.
     setSearchResults(
-      [...results].sort((a, b) => {
-        const tierDiff =
-          (fuzzyTierById.get(a.id) ?? 0) - (fuzzyTierById.get(b.id) ?? 0);
-        return tierDiff !== 0 ? tierDiff : b.id - a.id;
-      }),
+      [...results].sort((a, b) => a.matchTier - b.matchTier || b.id - a.id),
     );
   }, [debouncedSearchQuery, changelogList, fuse]);
 
