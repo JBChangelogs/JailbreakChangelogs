@@ -50,8 +50,12 @@ export function isFuzzyTokenMatch(
   fieldToken: string,
   threshold: number = FUZZY_MATCH_THRESHOLD,
 ) {
+  // A short search token (e.g. "ev") is a substring of almost any word (e.g.
+  // "level"), so below the fuzzy floor it may only match a token verbatim.
+  if (searchToken.length < FUZZY_MIN_TOKEN_LENGTH) {
+    return fieldToken === searchToken;
+  }
   if (fieldToken.includes(searchToken)) return true;
-  if (searchToken.length < FUZZY_MIN_TOKEN_LENGTH) return false;
 
   // Cap edit distance to prevent shared prefixes from producing false matches.
   const maxEdits = searchToken.length >= 8 ? 2 : 1;
