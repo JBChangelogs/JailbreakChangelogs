@@ -7,6 +7,7 @@ import {
   extractContentInfo,
   getContentPreview,
 } from "@/utils/changelogs/changelogs";
+import { isFuzzyTokenMatch } from "@/utils/helpers/itemSearch";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
@@ -108,7 +109,6 @@ export default function ChangelogDetailsClient({
 }: ChangelogDetailsClientProps) {
   const router = useRouter();
 
-  // Use state to manage the current changelog
   const [currentChangelogState, setCurrentChangelogState] =
     useState(currentChangelog);
   const changelog = currentChangelogState;
@@ -141,12 +141,10 @@ export default function ChangelogDetailsClient({
     [changelogList],
   );
 
-  // Update selectedId when changelogId changes
   useEffect(() => {
     setSelectedId(changelogId);
   }, [changelogId]);
 
-  // Handle search functionality
   useEffect(() => {
     if (debouncedSearchQuery.trim() === "") {
       setSearchResults([]);
@@ -154,6 +152,9 @@ export default function ChangelogDetailsClient({
     }
 
     let results: SearchResult[] = [];
+    // 0 = exact/substring match, 1 = fuzzy typo match, used to rank exact hits
+    // first below. `has:` results aren't tiered and default to 0.
+    const fuzzyTierById = new Map<number, number>();
 
     // Queries for mentions, images, etc.
     if (debouncedSearchQuery.startsWith("has:")) {
@@ -165,7 +166,6 @@ export default function ChangelogDetailsClient({
         .map((item) => {
           const contentInfo = extractContentInfo(item.sections);
 
-          // Special handling for mentions
           if (mediaType === "mentions") {
             const hasMentions = contentInfo.mentions.length > 0;
             const matchesAdditionalQuery =
@@ -212,36 +212,67 @@ export default function ChangelogDetailsClient({
 
       results = filteredResults;
     } else {
-      results = fuse.search(debouncedSearchQuery).map(({ item, matches }) => {
-        const contentInfo = extractContentInfo(item.sections);
-        const contentMatch = matches?.find((match) => match.key === "sections");
+      const searchTokens =
+        debouncedSearchQuery.toLowerCase().match(/[a-z0-9]+/g) ?? [];
 
-        // Fuzzy matches don't always contain the typed query verbatim (typos,
-        // transpositions), so highlight the actual text Fuse matched on rather
-        // than the raw query.
-        const matchedTerms = new Set<string>();
-        for (const match of matches ?? []) {
-          if (!match.value) continue;
-          for (const [start, end] of match.indices ?? []) {
-            matchedTerms.add(match.value.slice(start, end + 1));
+      results = fuse
+        .search(debouncedSearchQuery)
+        .map(({ item, matches }) => {
+          const contentInfo = extractContentInfo(item.sections);
+          const contentMatch = matches?.find(
+            (match) => match.key === "sections",
+          );
+
+          // Fuse's own fuzzy scoring is too loose on its own (e.g. "goal"
+          // matching "gala"), so re-check every matched fragment against the
+          // stricter rule used for item search and drop the ones that fail.
+          const matchedTerms = new Set<string>();
+          let isExactMatch = false;
+          for (const match of matches ?? []) {
+            if (!match.value) continue;
+            for (const [start, end] of match.indices ?? []) {
+              const fragment = match.value.slice(start, end + 1);
+              if (
+                searchTokens.some((token) =>
+                  fragment.toLowerCase().includes(token),
+                )
+              ) {
+                matchedTerms.add(fragment);
+                isExactMatch = true;
+              } else if (
+                searchTokens.some((token) => isFuzzyTokenMatch(token, fragment))
+              ) {
+                matchedTerms.add(fragment);
+              }
+            }
           }
-        }
-        const highlightTerms = [...matchedTerms];
+          const highlightTerms = [...matchedTerms];
+          if (highlightTerms.length === 0) return null;
 
-        return {
-          id: item.id,
-          title: item.title,
-          mediaTypes: contentInfo.mediaTypes,
-          mentions: contentInfo.mentions,
-          contentPreview: contentMatch
-            ? getContentPreview(item.sections, highlightTerms)
-            : undefined,
-          highlightTerms,
-        } as SearchResult;
-      });
+          fuzzyTierById.set(item.id, isExactMatch ? 0 : 1);
+
+          return {
+            id: item.id,
+            title: item.title,
+            mediaTypes: contentInfo.mediaTypes,
+            mentions: contentInfo.mentions,
+            contentPreview: contentMatch
+              ? getContentPreview(item.sections, highlightTerms)
+              : undefined,
+            highlightTerms,
+          } as SearchResult;
+        })
+        .filter((result): result is SearchResult => result !== null);
     }
 
-    setSearchResults(results);
+    // Exact matches rank above fuzzy ones; ties break by newest changelog first.
+    setSearchResults(
+      [...results].sort((a, b) => {
+        const tierDiff =
+          (fuzzyTierById.get(a.id) ?? 0) - (fuzzyTierById.get(b.id) ?? 0);
+        return tierDiff !== 0 ? tierDiff : b.id - a.id;
+      }),
+    );
   }, [debouncedSearchQuery, changelogList, fuse]);
 
   const handleSearch = (query: string) => {

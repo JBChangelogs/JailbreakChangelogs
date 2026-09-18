@@ -45,10 +45,10 @@ function getDamerauLevenshteinDistance(left: string, right: string) {
   return previous[right.length];
 }
 
-function isFuzzyTokenMatch(
+export function isFuzzyTokenMatch(
   searchToken: string,
   fieldToken: string,
-  threshold: number,
+  threshold: number = FUZZY_MATCH_THRESHOLD,
 ) {
   if (fieldToken.includes(searchToken)) return true;
   if (searchToken.length < FUZZY_MIN_TOKEN_LENGTH) return false;
