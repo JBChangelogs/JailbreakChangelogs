@@ -42,18 +42,42 @@ type IssuesResponse = {
 function getStatusStyle(status: string) {
   switch (status.toLowerCase()) {
     case "resolved":
-      return "bg-green-500/10 text-green-600 dark:text-green-400";
+      return "border-green-500/25 bg-green-500/10 text-green-600 dark:text-green-400";
     case "acknowledged":
-      return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
+      return "border-blue-500/25 bg-blue-500/10 text-blue-600 dark:text-blue-400";
     case "wont fix":
-      return "bg-red-500/10 text-red-600 dark:text-red-400";
+      return "border-red-500/25 bg-red-500/10 text-red-600 dark:text-red-400";
     default:
-      return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
+      return "border-yellow-500/25 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
   }
 }
 
 function getStatusLabel(status: string) {
   return status === "Wont Fix" ? "Won't Fix" : status;
+}
+
+function IssueDescription({ description }: { description: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const canExpand = description.length > 220;
+
+  return (
+    <div className="mt-2">
+      <p
+        className={`text-secondary-text text-sm leading-relaxed break-words whitespace-pre-wrap ${expanded ? "" : "line-clamp-4"}`}
+      >
+        {description}
+      </p>
+      {canExpand && (
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          className="text-link hover:text-link-hover mt-2 cursor-pointer text-xs font-medium transition-colors"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
 }
 
 export default function MyIssues() {
@@ -157,14 +181,14 @@ export default function MyIssues() {
 
         <SubmissionTabs active="issues" />
 
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row">
-          <div className="relative w-full lg:w-1/2">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+          <div className="relative min-w-0 flex-1">
             <input
               type="text"
               placeholder="Search by issue ID, title, or description..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-10 transition-all duration-300 focus:outline-none"
+              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-11 w-full rounded-lg border px-10 text-sm transition-colors focus:outline-none"
             />
             <Icon
               icon="heroicons:magnifying-glass"
@@ -182,12 +206,12 @@ export default function MyIssues() {
             )}
           </div>
 
-          <div className="w-full lg:flex-1">
+          <div className="w-full sm:w-52">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:outline-none"
+                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-11 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-colors focus:outline-none"
                 >
                   <span>
                     {statusFilter === "all"
@@ -208,7 +232,7 @@ export default function MyIssues() {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
+                className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1.5 shadow-lg"
               >
                 <DropdownMenuRadioGroup
                   value={statusFilter}
@@ -240,19 +264,32 @@ export default function MyIssues() {
             {[1, 2, 3, 4].map((item) => (
               <div
                 key={item}
-                className="border-border-card bg-secondary-bg rounded-lg border p-4 shadow-sm"
+                className="border-border-card bg-secondary-bg rounded-xl border p-5 shadow-sm"
               >
-                <div className="mb-4 flex justify-between gap-3">
-                  <Skeleton style={{ width: 120, height: 22 }} />
-                  <Skeleton style={{ width: 110, height: 18 }} />
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton
+                      style={{ width: 36, height: 36 }}
+                      className="rounded-lg"
+                    />
+                    <div className="space-y-1.5">
+                      <Skeleton style={{ width: 92, height: 14 }} />
+                      <Skeleton style={{ width: 62, height: 10 }} />
+                    </div>
+                    <Skeleton style={{ width: 80, height: 26 }} />
+                  </div>
+                  <Skeleton style={{ width: 90, height: 14 }} />
                 </div>
-                <Skeleton className="mb-3" style={{ height: 20 }} />
-                <Skeleton style={{ height: 64 }} />
+                <Skeleton
+                  className="mb-3"
+                  style={{ width: "65%", height: 18 }}
+                />
+                <Skeleton style={{ height: 54 }} />
               </div>
             ))}
           </div>
         ) : error ? (
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+          <div className="border-border-card bg-secondary-bg rounded-2xl border p-10 text-center shadow-sm">
             <Icon
               icon="heroicons:exclamation-circle"
               className="text-button-danger mx-auto mb-3 h-10 w-10"
@@ -270,7 +307,7 @@ export default function MyIssues() {
             </button>
           </div>
         ) : issues.length === 0 ? (
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+          <div className="border-border-card bg-secondary-bg rounded-2xl border p-10 text-center shadow-sm">
             <Icon
               icon="heroicons:check-circle"
               className="text-secondary-text mx-auto mb-3 h-10 w-10"
@@ -283,7 +320,7 @@ export default function MyIssues() {
             </p>
           </div>
         ) : filteredIssues.length === 0 ? (
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+          <div className="border-border-card bg-secondary-bg rounded-2xl border p-10 text-center shadow-sm">
             <Icon
               icon="heroicons:magnifying-glass"
               className="text-secondary-text mx-auto mb-3 h-10 w-10"
@@ -308,33 +345,41 @@ export default function MyIssues() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
               {filteredIssues.map((issue) => (
                 <article
                   key={issue.id}
-                  className="border-border-card bg-secondary-bg rounded-lg border p-4 shadow-sm"
+                  className="border-border-card bg-secondary-bg hover:border-border-focus group relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+                      <span className="bg-button-info/10 text-button-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                        <Icon icon="heroicons:flag" className="h-4.5 w-4.5" />
+                      </span>
+                      <div>
+                        <p className="text-primary-text text-sm font-semibold">
+                          Reported issue
+                        </p>
+                        <p className="text-secondary-text text-[11px]">
+                          Issue #{issue.id}
+                        </p>
+                      </div>
                       <span
-                        className={`rounded-md px-2 py-0.5 text-xs font-medium ${getStatusStyle(issue.status)}`}
+                        className={`inline-flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs ${getStatusStyle(issue.status)}`}
                       >
                         {getStatusLabel(issue.status)}
                       </span>
-                      <span className="text-secondary-text font-mono text-xs">
-                        #{issue.id}
-                      </span>
                     </div>
-                    <time className="text-secondary-text text-xs">
+                    <time className="text-secondary-text pt-1 text-right text-xs">
                       {formatCustomDate(issue.created_at * 1000)}
                     </time>
                   </div>
-                  <h2 className="text-primary-text mt-3 font-semibold break-words">
+                  <h2 className="text-primary-text relative z-10 mt-4 text-base font-semibold break-words">
                     {issue.title}
                   </h2>
-                  <p className="text-secondary-text mt-2 text-sm break-words whitespace-pre-wrap">
-                    {issue.description}
-                  </p>
+                  <div className="relative z-10">
+                    <IssueDescription description={issue.description} />
+                  </div>
                 </article>
               ))}
             </div>

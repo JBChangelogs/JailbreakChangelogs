@@ -5,7 +5,7 @@ import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
-import { PUBLIC_API_URL } from "@/utils/api/api";
+import { fetchItemByIdClient, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -20,6 +20,11 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import type { UserData } from "@/types/auth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { humanizeIdentifier } from "@/utils/humanizeIdentifier";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import SubmissionTabs from "@/components/Users/SubmissionTabs";
@@ -111,7 +116,7 @@ function SpoilerImage({
 }
 
 export interface ReportMetadataComment {
-  id: number;
+  id?: number;
   date: string;
   author: string;
   content: string;
@@ -212,6 +217,45 @@ export function getTypeLabel(type: string) {
   return humanizeIdentifier(type);
 }
 
+function CopyIdentifierButton({
+  value,
+  label,
+}: {
+  value: string;
+  label: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const copyReference = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard access may be unavailable in an insecure context.
+    }
+  };
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={copyReference}
+          className="text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors"
+          aria-label={copied ? `${label} copied` : `Copy ${label}`}
+        >
+          <Icon
+            icon={copied ? "heroicons:check" : "heroicons:clipboard-document"}
+            className={copied ? "text-button-success h-4 w-4" : "h-4 w-4"}
+          />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{copied ? "Copied" : `Copy ${label}`}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 function ItemTypeBadge({ type }: { type: string }) {
   const categoryColor = getCategoryColor(type);
   const categoryIcon = getCategoryIcon(type);
@@ -272,6 +316,23 @@ function normalizeUserId(value: unknown): string | null {
   return null;
 }
 
+function getCommentTargetUrl(comment: ReportMetadataComment): string | null {
+  switch (comment.item_type.toLowerCase()) {
+    case "changelog":
+      return `/changelogs/${comment.item_id}`;
+    case "season":
+      return `/seasons/${comment.item_id}`;
+    case "tradev2":
+      return `/trading/ad/${comment.item_id}`;
+    case "inventory":
+      return `/inventories/${comment.item_id}`;
+    case "vsuggestion":
+      return `/items/suggestions/${comment.item_id}`;
+    default:
+      return null;
+  }
+}
+
 export function getReportedUserId(report: Report): string | null {
   switch (report.type) {
     case "comment":
@@ -300,13 +361,17 @@ export function getReportedUserId(report: Report): string | null {
 export function ReportContext({ report }: { report: Report }) {
   const router = useRouter();
   const { type, metadata } = report;
+  const contextClassName =
+    "border-border-card bg-tertiary-bg/55 mt-3 rounded-xl border p-3.5";
 
   switch (type) {
     case "comment":
       if (metadata.comment) {
+        const commentTargetUrl = getCommentTargetUrl(metadata.comment);
         return (
-          <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
-            <p className="text-secondary-text mb-1 text-xs">
+          <div className={contextClassName}>
+            <p className="text-secondary-text mb-2 flex items-center gap-1.5 text-xs">
+              <Icon icon="heroicons:chat-bubble-left" className="h-3.5 w-3.5" />
               Comment by{" "}
               <button
                 onClick={(e) => {
@@ -318,9 +383,46 @@ export function ReportContext({ report }: { report: Report }) {
               >
                 {metadata.comment.author}
               </button>{" "}
-              on {metadata.comment.item_type} #{metadata.comment.item_id}
+              {commentTargetUrl ? (
+                <Link
+                  href={commentTargetUrl}
+                  prefetch={false}
+                  onClick={(event) => event.stopPropagation()}
+                  className="text-link hover:text-link-hover inline-flex items-center gap-1 transition-colors"
+                >
+                  on {getTypeLabel(metadata.comment.item_type)} #
+                  {metadata.comment.item_id}
+                  <Icon
+                    icon="heroicons:arrow-top-right-on-square"
+                    className="h-3 w-3"
+                  />
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const item = await fetchItemByIdClient(
+                      String(metadata.comment!.item_id),
+                    );
+                    if (!item) return;
+                    router.push(
+                      `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`,
+                    );
+                  }}
+                  className="text-link hover:text-link-hover inline-flex cursor-pointer items-center gap-1 transition-colors"
+                >
+                  on {getTypeLabel(metadata.comment.item_type)} #
+                  {metadata.comment.item_id}
+                  <Icon
+                    icon="heroicons:arrow-top-right-on-square"
+                    className="h-3 w-3"
+                  />
+                </button>
+              )}
             </p>
-            <p className="text-primary-text line-clamp-3 text-sm break-words">
+            <p className="text-primary-text border-border-focus/40 line-clamp-3 border-l-2 pl-3 text-sm leading-relaxed break-words">
               {metadata.comment.content}
             </p>
           </div>
@@ -335,7 +437,7 @@ export function ReportContext({ report }: { report: Report }) {
       const hasGlobalName =
         reportedUser.global_name && reportedUser.global_name !== "None";
       return (
-        <div className="border-border-card bg-tertiary-bg mt-2 flex items-center gap-3 rounded-lg border p-3">
+        <div className={`${contextClassName} flex items-center gap-3`}>
           <div className="bg-button-danger/10 text-button-danger flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
             <Icon icon="heroicons:user" className="h-4 w-4" />
           </div>
@@ -357,9 +459,14 @@ export function ReportContext({ report }: { report: Report }) {
     case "avatar":
       if (metadata.avatar) {
         return (
-          <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
-            <p className="text-secondary-text mb-2 text-xs">Reported avatar</p>
+          <div className={`${contextClassName} flex items-center gap-3`}>
             <SpoilerImage src={metadata.avatar} alt="Reported avatar" rounded />
+            <div>
+              <p className="text-secondary-text text-xs">Reported avatar</p>
+              <p className="text-primary-text mt-0.5 text-sm font-medium">
+                Click to reveal
+              </p>
+            </div>
           </div>
         );
       }
@@ -368,8 +475,11 @@ export function ReportContext({ report }: { report: Report }) {
     case "banner":
       if (metadata.custom_banner ?? metadata.banner) {
         return (
-          <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
-            <p className="text-secondary-text mb-2 text-xs">Reported banner</p>
+          <div className={contextClassName}>
+            <p className="text-secondary-text mb-2 flex items-center gap-1.5 text-xs">
+              <Icon icon="heroicons:photo" className="h-3.5 w-3.5" />
+              Reported banner
+            </p>
             <SpoilerImage
               src={(metadata.custom_banner ?? metadata.banner) as string}
               alt="Reported banner"
@@ -399,9 +509,16 @@ export function ReportContext({ report }: { report: Report }) {
           ? `@${usernameStr}`
           : "";
       return (
-        <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
-          <p className="text-secondary-text text-xs">Reported username</p>
-          <p className="text-primary-text text-sm font-medium">{displayName}</p>
+        <div className={`${contextClassName} flex items-center gap-3`}>
+          <div className="bg-button-info/10 text-button-info flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+            <Icon icon="heroicons:identification" className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-secondary-text text-xs">Reported username</p>
+            <p className="text-primary-text truncate text-sm font-medium">
+              {displayName}
+            </p>
+          </div>
         </div>
       );
     }
@@ -409,11 +526,12 @@ export function ReportContext({ report }: { report: Report }) {
     case "description":
       if (metadata.description?.description) {
         return (
-          <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
-            <p className="text-secondary-text mb-1 text-xs">
+          <div className={contextClassName}>
+            <p className="text-secondary-text mb-2 flex items-center gap-1.5 text-xs">
+              <Icon icon="heroicons:document-text" className="h-3.5 w-3.5" />
               Reported description
             </p>
-            <p className="text-primary-text/80 mt-0.5 line-clamp-4 text-sm break-words whitespace-pre-wrap">
+            <p className="text-primary-text/80 border-border-focus/40 line-clamp-4 border-l-2 pl-3 text-sm leading-relaxed break-words whitespace-pre-wrap">
               {convertUrlsToLinks(
                 sanitizeText(metadata.description.description),
               )}
@@ -426,9 +544,12 @@ export function ReportContext({ report }: { report: Report }) {
     case "message":
       if (metadata.message?.content) {
         return (
-          <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
-            <p className="text-secondary-text mb-1 text-xs">Reported message</p>
-            <p className="text-primary-text line-clamp-3 text-sm break-words">
+          <div className={contextClassName}>
+            <p className="text-secondary-text mb-2 flex items-center gap-1.5 text-xs">
+              <Icon icon="heroicons:envelope" className="h-3.5 w-3.5" />
+              Reported message
+            </p>
+            <p className="text-primary-text border-border-focus/40 line-clamp-3 border-l-2 pl-3 text-sm leading-relaxed break-words">
               {metadata.message.content}
             </p>
           </div>
@@ -443,7 +564,7 @@ export function ReportContext({ report }: { report: Report }) {
             href={`/items/suggestions/${metadata.suggestion.id}`}
             prefetch={false}
             onClick={(event) => event.stopPropagation()}
-            className="border-border-card bg-tertiary-bg hover:border-border-focus mt-2 block rounded-lg border p-3 transition-colors"
+            className="border-border-card bg-tertiary-bg/55 hover:border-border-focus hover:bg-tertiary-bg mt-3 block rounded-xl border p-3.5 transition-colors"
           >
             <div className="mb-1 flex flex-wrap items-center gap-2">
               <p className="text-secondary-text text-xs">
@@ -494,7 +615,7 @@ export function ReportContext({ report }: { report: Report }) {
           href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
           prefetch={false}
           onClick={(event) => event.stopPropagation()}
-          className="border-border-card bg-tertiary-bg hover:border-border-focus mt-2 flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors"
+          className="border-border-card bg-tertiary-bg/55 hover:border-border-focus hover:bg-tertiary-bg mt-3 flex items-center justify-between gap-3 rounded-xl border p-3.5 transition-colors"
         >
           <div className="min-w-0">
             <p className="text-secondary-text text-xs">
@@ -703,175 +824,162 @@ export default function MyReports() {
 
         <SubmissionTabs active="reports" />
 
-        {/* Search and status controls */}
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row">
-          {/* Search input */}
-          <div className="w-full lg:w-1/3">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search by report ID, user ID, or username..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none"
-              />
-              <Icon
-                icon="heroicons:magnifying-glass"
-                className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-                  aria-label="Clear search"
-                >
-                  <Icon icon="heroicons:x-mark" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="w-full lg:flex-1">
-            <div className="w-full">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+        <>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+            <div className="min-w-0 flex-1">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search by report ID, user ID, or username..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-11 w-full rounded-lg border px-10 text-sm transition-colors focus:outline-none"
+                />
+                <Icon
+                  icon="heroicons:magnifying-glass"
+                  className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+                />
+                {searchTerm && (
                   <button
-                    type="button"
-                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:outline-none"
+                    onClick={() => setSearchTerm("")}
+                    className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                    aria-label="Clear search"
                   >
-                    <span className="truncate">
-                      {statusFilter === "all"
-                        ? "All Statuses"
-                        : getStatusStyle(statusFilter).label ||
-                          statusFilter
-                            .split(" ")
-                            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                            .join(" ")}
-                    </span>
-                    <Icon
-                      icon="heroicons:chevron-down"
-                      className="text-secondary-text h-5 w-5 shrink-0"
-                    />
+                    <Icon icon="heroicons:x-mark" />
                   </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
-                >
-                  <DropdownMenuRadioGroup
-                    value={statusFilter}
-                    onValueChange={setStatusFilter}
+                )}
+              </div>
+            </div>
+
+            <div className="w-full sm:w-52">
+              <div className="w-full">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-11 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-colors focus:outline-none"
+                    >
+                      <span className="truncate">
+                        {statusFilter === "all"
+                          ? "All Statuses"
+                          : getStatusStyle(statusFilter).label ||
+                            statusFilter
+                              .split(" ")
+                              .map(
+                                (w) => w.charAt(0).toUpperCase() + w.slice(1),
+                              )
+                              .join(" ")}
+                      </span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5 shrink-0"
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1.5 shadow-lg"
                   >
-                    {[
-                      { value: "all", label: "All Statuses" },
-                      { value: "action taken", label: "Action Taken" },
-                      { value: "denied", label: "Denied" },
-                      { value: "pending review", label: "Pending Review" },
-                    ].map((opt) => (
-                      <DropdownMenuRadioItem
-                        key={opt.value}
-                        value={opt.value}
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                      >
-                        {opt.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuRadioGroup
+                      value={statusFilter}
+                      onValueChange={setStatusFilter}
+                    >
+                      {[
+                        { value: "all", label: "All Statuses" },
+                        { value: "action taken", label: "Action Taken" },
+                        { value: "denied", label: "Denied" },
+                        { value: "pending review", label: "Pending Review" },
+                      ].map((opt) => (
+                        <DropdownMenuRadioItem
+                          key={opt.value}
+                          value={opt.value}
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          {opt.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mb-6">
-          <p className="text-secondary-text mb-3 text-sm font-medium">
-            Filter by Report Type
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {["all", ...reportTypes].map((type) => {
-              const active = typeFilter === type;
-              return (
-                <Button
-                  key={type}
-                  type="button"
-                  onClick={() => {
-                    setTypeFilter(active && type !== "all" ? "all" : type);
-                    void setPageParam("1");
-                  }}
-                  aria-pressed={active}
-                  variant={active ? "default" : "secondary"}
-                  size="sm"
-                  className="gap-2"
-                >
-                  {active && (
-                    <Icon icon="heroicons:check" className="h-4 w-4" />
-                  )}
-                  <span>{type === "all" ? "All" : getTypeLabel(type)}</span>
-                </Button>
-              );
-            })}
+          <div className="mb-6">
+            <p className="text-secondary-text mb-2 text-xs font-semibold tracking-wide uppercase">
+              Report type
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {["all", ...reportTypes].map((type) => {
+                const active = typeFilter === type;
+                return (
+                  <Button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      setTypeFilter(active && type !== "all" ? "all" : type);
+                      void setPageParam("1");
+                    }}
+                    aria-pressed={active}
+                    variant={active ? "default" : "secondary"}
+                    size="sm"
+                    className="gap-2"
+                  >
+                    {active && (
+                      <Icon icon="heroicons:check" className="h-4 w-4" />
+                    )}
+                    <span>{type === "all" ? "All" : getTypeLabel(type)}</span>
+                  </Button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        </>
 
         {loading ? (
           <>
-            {/* Search controls skeleton */}
-            <div className="mb-6 flex flex-col gap-4 lg:flex-row">
-              <div className="w-full lg:w-1/3">
-                <Skeleton style={{ height: 56 }} />
-              </div>
-              <div className="w-full lg:flex-1">
-                <Skeleton style={{ height: 56 }} />
-              </div>
-            </div>
-            {/* Card grid skeleton */}
-            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="border-border-card bg-secondary-bg flex flex-col rounded-lg border p-4 shadow-sm"
+                  className="border-border-card bg-secondary-bg flex flex-col rounded-xl border p-5 shadow-sm"
                 >
                   {/* Badge row + date */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex gap-2">
-                      <Skeleton style={{ width: 64, height: 22 }} />
-                      <Skeleton style={{ width: 100, height: 22 }} />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <Skeleton
+                        style={{ width: 36, height: 36 }}
+                        className="rounded-lg"
+                      />
+                      <div className="space-y-1.5">
+                        <Skeleton style={{ width: 90, height: 14 }} />
+                        <Skeleton style={{ width: 72, height: 10 }} />
+                      </div>
+                      <Skeleton style={{ width: 94, height: 26 }} />
                     </div>
                     <Skeleton style={{ width: 80, height: 16 }} />
                   </div>
-                  {/* Reported user row */}
-                  <div className="mt-2 flex items-center gap-2">
-                    <Skeleton style={{ width: 78, height: 14 }} />
-                    <Skeleton
-                      style={{ width: 28, height: 28 }}
-                      className="rounded-full"
-                    />
-                    <Skeleton style={{ width: 90, height: 14 }} />
-                  </div>
-                  {/* Content preview box */}
-                  <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
-                    <Skeleton style={{ width: 100, height: 12 }} />
+                  <div className="bg-tertiary-bg/55 mt-3 rounded-xl p-3.5">
+                    <Skeleton style={{ width: 112, height: 11 }} />
                     <Skeleton
                       style={{ width: "100%", height: 14 }}
-                      className="mt-1"
+                      className="mt-2"
                     />
                   </div>
-                  {/* Reason */}
-                  <Skeleton
-                    style={{ width: "75%", height: 14 }}
-                    className="mt-2"
-                  />
-                  {/* IDs */}
-                  <div className="mt-1 space-y-1">
-                    <Skeleton style={{ width: 130, height: 12 }} />
-                    <Skeleton style={{ width: 170, height: 12 }} />
+                  <div className="mt-3 space-y-2">
+                    <Skeleton style={{ width: 88, height: 10 }} />
+                    <Skeleton style={{ width: "72%", height: 14 }} />
+                  </div>
+                  <div className="border-border-card mt-4 flex items-center gap-2 border-t pt-3">
+                    <Skeleton style={{ width: 16, height: 16 }} />
+                    <Skeleton style={{ width: "55%", height: 12 }} />
                   </div>
                 </div>
               ))}
             </div>
           </>
         ) : error ? (
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center shadow-sm">
+          <div className="border-border-card bg-secondary-bg rounded-2xl border p-10 text-center shadow-sm">
             <Icon
               icon="heroicons:exclamation-circle"
               className="text-button-danger mx-auto mb-3 h-10 w-10"
@@ -888,7 +996,7 @@ export default function MyReports() {
             </button>
           </div>
         ) : reports.length === 0 ? (
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center shadow-sm">
+          <div className="border-border-card bg-secondary-bg rounded-2xl border p-10 text-center shadow-sm">
             <Icon
               icon="heroicons:flag"
               className="text-secondary-text mx-auto mb-3 h-10 w-10 opacity-40"
@@ -899,7 +1007,7 @@ export default function MyReports() {
             </p>
           </div>
         ) : filteredReports.length === 0 ? (
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+          <div className="border-border-card bg-secondary-bg rounded-2xl border p-10 text-center shadow-sm">
             <Icon
               icon="heroicons:magnifying-glass"
               className="text-secondary-text mx-auto mb-3 h-10 w-10 opacity-40"
@@ -939,7 +1047,7 @@ export default function MyReports() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
               {filteredReports.map((report) => {
                 const statusStyle = getStatusStyle(report.status);
                 const reportedId = getReportedUserId(report);
@@ -957,74 +1065,114 @@ export default function MyReports() {
                 return (
                   <div
                     key={String(report.id)}
-                    className="border-border-card bg-secondary-bg flex flex-col rounded-lg border p-4 shadow-sm"
+                    className="border-border-card bg-secondary-bg hover:border-border-focus group relative flex flex-col overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="bg-tertiary-bg border-border-card text-primary-text rounded-md border px-2 py-0.5 text-xs font-medium">
-                          {getTypeLabel(report.type)}
+                    <div className="relative z-10 flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+                        <span className="bg-button-info/10 text-button-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                          <Icon icon="heroicons:flag" className="h-4.5 w-4.5" />
                         </span>
+                        <div className="min-w-0">
+                          <p className="text-primary-text truncate text-sm font-semibold">
+                            {getTypeLabel(report.type)}
+                          </p>
+                          <p className="text-secondary-text text-[11px]">
+                            Content report
+                          </p>
+                        </div>
                         <span
-                          className={`rounded-md px-2 py-0.5 text-xs font-medium ${statusStyle.className}`}
+                          className={`inline-flex h-5 items-center rounded-lg px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs ${statusStyle.className}`}
                         >
                           {statusStyle.label}
                         </span>
-                        <span className="text-secondary-text font-mono text-xs">
-                          #{report.id}
-                        </span>
                       </div>
-                      <span className="text-secondary-text text-xs">
+                      <time className="text-secondary-text pt-1 text-right text-xs">
                         {formatCustomDate(report.created_at * 1000)}
-                      </span>
+                      </time>
                     </div>
 
-                    {reportedUser && reportedDisplayName && (
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className="text-secondary-text text-xs">
-                          Reported user:
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            router.push(`/users/${reportedUser.id}`);
-                          }}
-                          className="flex cursor-pointer items-center gap-1.5 transition-opacity hover:opacity-80"
-                        >
-                          <UserAvatar
-                            userId={reportedUser.id}
-                            avatarHash={reportedUser.avatar}
-                            username={reportedUser.username}
-                            custom_avatar={reportedUser.custom_avatar}
-                            settings={{
-                              custom_avatar:
-                                reportedUser.settings_v2?.custom_avatar,
-                            }}
-                            premiumType={reportedUser.premiumtype}
-                            size={7}
-                            showBadge={false}
-                          />
-                          <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
-                            {reportedDisplayName}
+                    <div className="relative z-10 flex flex-col">
+                      {reportedUser && reportedDisplayName && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-secondary-text text-xs">
+                            Reported user:
                           </span>
-                        </button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              router.push(`/users/${reportedUser.id}`);
+                            }}
+                            className="flex cursor-pointer items-center gap-1.5 transition-opacity hover:opacity-80"
+                          >
+                            <UserAvatar
+                              userId={reportedUser.id}
+                              avatarHash={reportedUser.avatar}
+                              username={reportedUser.username}
+                              custom_avatar={reportedUser.custom_avatar}
+                              settings={{
+                                custom_avatar:
+                                  reportedUser.settings_v2?.custom_avatar,
+                              }}
+                              premiumType={reportedUser.premiumtype}
+                              size={7}
+                              showBadge={false}
+                            />
+                            <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
+                              {reportedDisplayName}
+                            </span>
+                          </button>
+                        </div>
+                      )}
+
+                      <ReportContext report={report} />
+
+                      <div className="border-border-card bg-tertiary-bg/55 mt-3 rounded-xl border p-3.5">
+                        <p className="text-secondary-text text-[10px] font-semibold tracking-wider uppercase">
+                          Report reason
+                        </p>
+                        <p className="text-primary-text mt-1 text-sm leading-relaxed break-words">
+                          {report.content}
+                        </p>
                       </div>
-                    )}
 
-                    <ReportContext report={report} />
-
-                    <p className="text-primary-text mt-2 text-sm break-words">
-                      <span className="text-secondary-text">Reason: </span>
-                      {report.content}
-                    </p>
-
-                    <div className="mt-1 space-y-0.5 text-xs">
-                      <p className="text-secondary-text">
-                        Reference ID:{" "}
-                        <span className="text-primary-text font-mono break-all">
-                          {report.report_id}
-                        </span>
-                      </p>
+                      <div className="border-border-card mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-3">
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <span className="text-secondary-text text-[10px] font-semibold tracking-wide uppercase">
+                            Report
+                          </span>
+                          <code className="text-primary-text text-xs font-semibold">
+                            #{report.id}
+                          </code>
+                          <CopyIdentifierButton
+                            value={String(report.id)}
+                            label="report number"
+                          />
+                        </div>
+                        <span
+                          aria-hidden="true"
+                          className="bg-border-card hidden h-4 w-px sm:block"
+                        />
+                        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                          <Icon
+                            icon="heroicons:finger-print"
+                            className="text-secondary-text h-4 w-4 shrink-0"
+                          />
+                          <span className="text-secondary-text text-[10px] font-semibold tracking-wide uppercase">
+                            ID
+                          </span>
+                          <code
+                            className="text-secondary-text min-w-0 flex-1 truncate text-xs"
+                            title={report.report_id}
+                          >
+                            {report.report_id}
+                          </code>
+                          <CopyIdentifierButton
+                            value={report.report_id}
+                            label="report ID"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );

@@ -21,9 +21,17 @@ export default function SubmissionTabs({ active }: { active: SubmissionTab }) {
       }}
       className="mb-6"
     >
-      <TabsList aria-label="Submission type">
-        <TabsTrigger value="reports">Content Reports</TabsTrigger>
-        <TabsTrigger value="issues">Reported Issues</TabsTrigger>
+      <TabsList
+        aria-label="Submission type"
+        fullWidth
+        className="grid grid-cols-2 sm:inline-flex sm:w-auto sm:min-w-max"
+      >
+        <TabsTrigger value="reports" fullWidth className="sm:flex-none">
+          Content Reports
+        </TabsTrigger>
+        <TabsTrigger value="issues" fullWidth className="sm:flex-none">
+          Reported Issues
+        </TabsTrigger>
       </TabsList>
     </Tabs>
   );
