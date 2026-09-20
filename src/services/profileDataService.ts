@@ -10,8 +10,6 @@ export interface ProfileDataResult {
   followingCount: number;
   bio: string | null;
   bioLastUpdated: number | null;
-  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-  privateServers: any[];
   tradeAds: TradeAd[];
 }
 
@@ -26,49 +24,36 @@ export class ProfileDataService {
   static async fetchProfileData(userId: string): Promise<ProfileDataResult> {
     try {
       // Fetch additional data in parallel
-      const [
-        followersResponse,
-        followingResponse,
-        bioResponse,
-        serversResponse,
-      ] = await Promise.all([
-        fetchWithRetry(
-          `${PUBLIC_API_URL}/users/followers/get?user=${userId}`,
-          undefined,
-          {
-            maxRetries: 2,
-            initialDelayMs: 700,
-            timeoutMs: 10000,
-          },
-        ).catch(() => null),
-        fetchWithRetry(
-          `${PUBLIC_API_URL}/users/following/get?user=${userId}`,
-          undefined,
-          {
-            maxRetries: 2,
-            initialDelayMs: 700,
-            timeoutMs: 10000,
-          },
-        ).catch(() => null),
-        fetchWithRetry(
-          `${PUBLIC_API_URL}/users/description/get?user=${userId}`,
-          undefined,
-          {
-            maxRetries: 2,
-            initialDelayMs: 700,
-            timeoutMs: 10000,
-          },
-        ).catch(() => null),
-        fetchWithRetry(
-          `${PUBLIC_API_URL}/servers/get?owner=${userId}`,
-          undefined,
-          {
-            maxRetries: 2,
-            initialDelayMs: 700,
-            timeoutMs: 10000,
-          },
-        ).catch(() => null),
-      ]);
+      const [followersResponse, followingResponse, bioResponse] =
+        await Promise.all([
+          fetchWithRetry(
+            `${PUBLIC_API_URL}/users/followers/get?user=${userId}`,
+            undefined,
+            {
+              maxRetries: 2,
+              initialDelayMs: 700,
+              timeoutMs: 10000,
+            },
+          ).catch(() => null),
+          fetchWithRetry(
+            `${PUBLIC_API_URL}/users/following/get?user=${userId}`,
+            undefined,
+            {
+              maxRetries: 2,
+              initialDelayMs: 700,
+              timeoutMs: 10000,
+            },
+          ).catch(() => null),
+          fetchWithRetry(
+            `${PUBLIC_API_URL}/users/description/get?user=${userId}`,
+            undefined,
+            {
+              maxRetries: 2,
+              initialDelayMs: 700,
+              timeoutMs: 10000,
+            },
+          ).catch(() => null),
+        ]);
 
       // Process responses
       const followersData = followersResponse?.ok
@@ -78,16 +63,11 @@ export class ProfileDataService {
         ? await followingResponse.json()
         : [];
       const bioData = bioResponse?.ok ? await bioResponse.json() : null;
-      const serversData = serversResponse?.ok
-        ? await serversResponse.json()
-        : [];
-
       return {
         followerCount: Array.isArray(followersData) ? followersData.length : 0,
         followingCount: Array.isArray(followingData) ? followingData.length : 0,
         bio: bioData?.description || null,
         bioLastUpdated: bioData?.last_updated || null,
-        privateServers: Array.isArray(serversData) ? serversData : [],
         tradeAds: [],
       };
     } catch (error) {
@@ -105,7 +85,6 @@ export class ProfileDataService {
       followingCount: 0,
       bio: null,
       bioLastUpdated: null,
-      privateServers: [],
       tradeAds: [],
     };
   }

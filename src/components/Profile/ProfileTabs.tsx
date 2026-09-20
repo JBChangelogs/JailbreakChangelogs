@@ -50,22 +50,12 @@ interface User {
   flags?: UserFlag[];
 }
 
-interface Server {
-  id: number;
-  link: string;
-  owner: string;
-  rules: string;
-  expires: string;
-  created_at: string;
-}
-
 interface ProfileTabsProps {
   user: User | null;
   currentUserId: string | null;
   bio: string | null;
   bioLastUpdated: number | null;
   onBioUpdate?: (newBio: string) => void;
-  privateServers?: Server[];
   isLoadingAdditionalData?: boolean;
   tradeAds?: TradeAd[];
 }
@@ -99,7 +89,6 @@ export default function ProfileTabs({
   bio,
   bioLastUpdated,
   onBioUpdate,
-  privateServers = [],
   isLoadingAdditionalData = false,
   tradeAds = [],
 }: ProfileTabsProps) {
@@ -230,9 +219,8 @@ export default function ProfileTabs({
               </TabPanel>
               <TabPanel value={value} index={3}>
                 <PrivateServersTab
-                  servers={privateServers}
+                  userId={user.id}
                   isOwnProfile={currentUserId === user.id}
-                  isLoadingAdditionalData={isLoadingAdditionalData}
                 />
               </TabPanel>
               {hasRobloxConnection && (

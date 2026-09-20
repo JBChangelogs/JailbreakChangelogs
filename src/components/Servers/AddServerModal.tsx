@@ -6,8 +6,10 @@ import React from "react";
 const log = createLogger("UI");
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { useAuthContext, getJbclToken } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import type { PrivateServer } from "@/types/server";
 import {
   Dialog,
   DialogContent,
@@ -35,13 +37,7 @@ interface AddServerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onServerAdded: () => void;
-  editingServer?: {
-    id: number;
-    link: string;
-    owner: string;
-    rules: string;
-    expires: string;
-  } | null;
+  editingServer?: PrivateServer | null;
 }
 
 const AddServerModal: React.FC<AddServerModalProps> = ({
@@ -234,8 +230,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       }
     }
 
-    const owner = getJbclToken();
-    if (!PUBLIC_API_URL || !owner) {
+    if (!PUBLIC_API_URL || !isAuthenticated) {
       toast.error("You must be logged in to save a server");
       return;
     }
@@ -245,18 +240,19 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       editingServer ? "Saving server changes..." : "Adding server...",
     );
     try {
-      const endpoint = editingServer
-        ? `${PUBLIC_API_URL}/servers/update?id=${editingServer.id}`
-        : `${PUBLIC_API_URL}/servers/add`;
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        editingServer ? `/servers/${editingServer.id}` : "/servers",
+      );
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch(url, {
+        method: editingServer ? "PATCH" : "POST",
+        credentials: "include",
+        headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify({
           link: normalizedLink,
           rules: normalizedRules,
           expires: normalizedExpires,
-          owner,
         }),
       });
 

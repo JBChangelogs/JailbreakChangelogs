@@ -8,15 +8,6 @@ import { createLogger } from "@/services/logger";
 const log = createLogger("API");
 import type { TradeAd } from "@/types/trading";
 
-interface Server {
-  id: number;
-  link: string;
-  owner: string;
-  rules: string;
-  expires: string;
-  created_at: string;
-}
-
 interface User {
   id: string;
   username: string;
@@ -57,7 +48,6 @@ interface UserProfileData {
   followingCount: number;
   bio: string | null;
   bioLastUpdated: number | null;
-  privateServers: Server[];
   tradeAds: TradeAd[];
 }
 
@@ -78,7 +68,6 @@ function UserProfileLoadingFallback({
         followingCount: 0,
         bio: null,
         bioLastUpdated: null,
-        privateServers: [],
         tradeAds: [],
       }}
       isLoadingAdditionalData={true}

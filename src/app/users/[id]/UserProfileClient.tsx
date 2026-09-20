@@ -178,15 +178,6 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
   );
 };
 
-interface Server {
-  id: number;
-  link: string;
-  owner: string;
-  rules: string;
-  expires: string;
-  created_at: string;
-}
-
 interface User {
   id: string;
   username: string;
@@ -227,7 +218,6 @@ interface UserProfileData {
   followingCount: number;
   bio: string | null;
   bioLastUpdated: number | null;
-  privateServers: Server[];
   tradeAds: TradeAd[];
 }
 
@@ -302,9 +292,6 @@ export default function UserProfileClient({
   );
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
-  const [privateServers] = useState<Server[]>(
-    initialData?.privateServers || [],
-  );
   const [tradeAds] = useState<TradeAd[]>(initialData?.tradeAds || []);
   const [isReportDescriptionOpen, setIsReportDescriptionOpen] = useState(false);
   const [reportDescriptionReason, setReportDescriptionReason] = useState("");
@@ -1785,7 +1772,6 @@ export default function UserProfileClient({
               bio={bio}
               bioLastUpdated={bioLastUpdated}
               onBioUpdate={refreshBio}
-              privateServers={privateServers}
               isLoadingAdditionalData={isLoadingAdditionalData}
               tradeAds={tradeAds}
             />

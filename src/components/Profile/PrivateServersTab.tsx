@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
@@ -6,20 +8,16 @@ import { formatProfileDate } from "@/utils/helpers/timestamp";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import Link from "next/link";
 import { toast } from "sonner";
+import type { PrivateServer } from "@/types/server";
+import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { createLogger } from "@/services/logger";
 
-interface Server {
-  id: number;
-  link: string;
-  owner: string;
-  rules: string;
-  expires: string;
-  created_at: string;
-}
+const log = createLogger("API");
 
 interface PrivateServersTabProps {
-  servers: Server[];
+  userId: string;
   isOwnProfile: boolean;
-  isLoadingAdditionalData?: boolean;
 }
 
 function ServerCardSkeleton() {
@@ -57,10 +55,61 @@ function PrivateServersTabSkeleton() {
 }
 
 const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
-  servers,
+  userId,
   isOwnProfile,
-  isLoadingAdditionalData = false,
 }) => {
+  const [servers, setServers] = React.useState<PrivateServer[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchServers = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/servers/owner/${encodeURIComponent(userId)}`,
+        );
+        const response = await fetch(url, {
+          cache: "no-store",
+          credentials: "include",
+          headers,
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(
+            await getResponseErrorMessage(
+              response,
+              "Failed to load private servers",
+            ),
+          );
+        }
+
+        const data = (await response.json()) as unknown;
+        if (!controller.signal.aborted) {
+          setServers(Array.isArray(data) ? (data as PrivateServer[]) : []);
+        }
+      } catch (fetchError) {
+        if (controller.signal.aborted) return;
+        log.error("Failed to fetch profile private servers", fetchError);
+        setError(
+          fetchError instanceof Error
+            ? fetchError.message
+            : "Failed to load private servers",
+        );
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    };
+
+    void fetchServers();
+    return () => controller.abort();
+  }, [userId]);
+
   const handleCopyLink = async (link: string) => {
     try {
       await navigator.clipboard.writeText(link);
@@ -70,11 +119,19 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
     }
   };
 
-  if (isLoadingAdditionalData) {
+  if (isLoading) {
     return (
       <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
         <div className="bg-quaternary-bg mb-4 h-6 w-36 animate-pulse rounded" />
         <PrivateServersTabSkeleton />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="border-button-danger bg-button-danger/10 text-button-danger rounded-t-none rounded-b-lg border p-4">
+        {error}
       </div>
     );
   }

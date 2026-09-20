@@ -1,12 +1,15 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
 import React from "react";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
+import { createLogger } from "@/services/logger";
 
-const log = createLogger("UI");
+const log = createLogger("API");
+
 import { Icon } from "@/components/ui/IconWrapper";
+import { Spinner } from "@/components/ui/Spinner";
 import { formatProfileDate } from "@/utils/helpers/timestamp";
-import { useAuthContext, getJbclToken } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +32,7 @@ import {
 } from "@/components/ui/tooltip";
 import { UserAvatar } from "@/utils/ui/avatar";
 import DOMPurify from "dompurify";
-import type { UserData } from "@/types/auth";
+import type { PrivateServer, PrivateServerListResponse } from "@/types/server";
 import { Button } from "@/components/ui/button";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
@@ -38,8 +41,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { hasLineClampOverflow } from "@/utils/ui/collapsibleContent";
@@ -51,21 +52,6 @@ const supporterIcons = {
   2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
   3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
 };
-
-interface Server {
-  id: number;
-  link: string;
-  owner: string;
-  rules: string;
-  expires: string;
-  created_at: string;
-}
-
-type SortOption =
-  | "date_added_asc"
-  | "date_added_desc"
-  | "date_expires_asc"
-  | "date_expires_desc";
 
 const processMentions = (text: string): string => {
   return text.replace(/@(\w+)/g, (_, username) => {
@@ -87,26 +73,49 @@ const sanitizeHTML = (html: string): string => {
   });
 };
 
-const ServerList: React.FC<{
-  sortOption?: SortOption;
-  onSortChange?: (sortOption: SortOption) => void;
-}> = ({ sortOption = "date_added_desc", onSortChange }) => {
+const fetchServersPage = async (
+  page: number,
+  query: string,
+  signal?: AbortSignal,
+): Promise<PrivateServerListResponse> => {
+  // TODO: Restore server sorting controls when the API accepts a sort parameter.
+  const path = query
+    ? `/servers/search?query=${encodeURIComponent(query)}&page=${page}`
+    : `/servers?page=${page}`;
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, path);
+  const response = await fetch(url, { cache: "no-store", headers, signal });
+  if (!response.ok) {
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to fetch servers"),
+    );
+  }
+  return (await response.json()) as PrivateServerListResponse;
+};
+
+const ServerList: React.FC = () => {
   const { isAuthenticated, user } = useAuthContext();
-  const [servers, setServers] = React.useState<Server[]>([]);
+  const [{ query: queryFromUrl, page }, setParams] = useQueryStates({
+    query: parseAsString.withDefault(""),
+    page: parseAsInteger.withDefault(1),
+  });
+  const [servers, setServers] = React.useState<PrivateServer[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [isFetching, setIsFetching] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const loggedInUserId = user?.id ?? null;
-  const [userData, setUserData] = React.useState<Record<string, UserData>>({});
-  const [loadingUsers, setLoadingUsers] = React.useState<
-    Record<string, boolean>
+  const [searchQuery, setSearchQuery] = React.useState(queryFromUrl);
+  const [totalServers, setTotalServers] = React.useState(0);
+  const [totalPages, setTotalPages] = React.useState(0);
+  const [serverNumberMap, setServerNumberMap] = React.useState<
+    Record<number, number>
   >({});
-  const failedUserIdsRef = React.useRef<Set<string>>(new Set());
+  const [refreshVersion, setRefreshVersion] = React.useState(0);
+  const loggedInUserId = user?.id ?? null;
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
-  const [editingServer, setEditingServer] = React.useState<Server | null>(null);
+  const [editingServer, setEditingServer] =
+    React.useState<PrivateServer | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
-  const [serverToDelete, setServerToDelete] = React.useState<Server | null>(
-    null,
-  );
+  const [serverToDelete, setServerToDelete] =
+    React.useState<PrivateServer | null>(null);
   const [deletingServer, setDeletingServer] = React.useState(false);
   const [expandedRules, setExpandedRules] = React.useState<Set<number>>(
     new Set(),
@@ -144,254 +153,108 @@ const ServerList: React.FC<{
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [measureRulesTruncation]);
-  const [page, setPage] = React.useState(1);
-  const itemsPerPage = 15;
-
-  const sortOptions = [
-    { value: "date_added_desc", label: "Newest added" },
-    { value: "date_added_asc", label: "Oldest added" },
-    { value: "date_expires_desc", label: "Latest expiry" },
-    { value: "date_expires_asc", label: "Earliest expiry" },
-  ];
-  const sortLabel =
-    sortOptions.find((option) => option.value === sortOption)?.label ??
-    "Select sort option";
-
-  const sortedServers = React.useMemo(() => {
-    const sorted = [...servers];
-    const normalizeTimestamp = (timestamp: string): number => {
-      const num = parseInt(timestamp);
-      return num < 10000000000 ? num * 1000 : num;
-    };
-
-    // Separate user's servers from others
-    const userServers = sorted.filter(
-      (server) => server.owner === loggedInUserId,
-    );
-    const otherServers = sorted.filter(
-      (server) => server.owner !== loggedInUserId,
-    );
-
-    // Sort each group based on the selected option
-    const sortGroup = (group: Server[]) => {
-      switch (sortOption) {
-        case "date_added_asc":
-          return group.sort((a, b) => a.id - b.id);
-        case "date_added_desc":
-          return group.sort((a, b) => b.id - a.id);
-        case "date_expires_asc":
-          return group.sort((a, b) => {
-            if (a.expires === "Never" && b.expires === "Never") return 0;
-            if (a.expires === "Never") return 1;
-            if (b.expires === "Never") return -1;
-            const aTime = normalizeTimestamp(a.expires);
-            const bTime = normalizeTimestamp(b.expires);
-            return aTime - bTime;
-          });
-        case "date_expires_desc":
-          return group.sort((a, b) => {
-            if (a.expires === "Never" && b.expires === "Never") return 0;
-            if (a.expires === "Never") return -1;
-            if (b.expires === "Never") return 1;
-            const aTime = normalizeTimestamp(a.expires);
-            const bTime = normalizeTimestamp(b.expires);
-            return bTime - aTime;
-          });
-        default:
-          return group;
-      }
-    };
-
-    // Return user's servers first, then others
-    return [...sortGroup(userServers), ...sortGroup(otherServers)];
-  }, [servers, sortOption, loggedInUserId]);
-
-  const serverNumberMap = React.useMemo(() => {
-    const idToNumber: Record<number, number> = {};
-    const sortedByIds = [...servers].sort((a, b) => a.id - b.id);
-    sortedByIds.forEach((server, index) => {
-      idToNumber[server.id] = index + 1;
-    });
-    return idToNumber;
-  }, [servers]);
-
-  // Pagination calculation
-  const totalPages = Math.ceil(sortedServers.length / itemsPerPage);
-  const currentServers = React.useMemo(() => {
-    const startIndex = (page - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return sortedServers.slice(startIndex, endIndex);
-  }, [sortedServers, page, itemsPerPage]);
-
-  const currentOwnerIds = React.useMemo(
-    () => [...new Set(currentServers.map((server) => server.owner))],
-    [currentServers],
-  );
-
-  // Fetch user data for visible servers
-  React.useEffect(() => {
-    const fetchVisibleUsers = async () => {
-      // Filter out user IDs that we already have data for or are currently loading
-      const idsToFetch = currentOwnerIds.filter(
-        (id) =>
-          !userData[id] &&
-          !loadingUsers[id] &&
-          !failedUserIdsRef.current.has(id),
-      );
-
-      if (idsToFetch.length === 0) return;
-
-      // Mark these IDs as loading
-      setLoadingUsers((prev) => {
-        const next = { ...prev };
-        idsToFetch.forEach((id) => (next[id] = true));
-        return next;
-      });
-
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/users/get/batch?ids=${idsToFetch.map(encodeURIComponent).join(",")}`,
-        );
-        const userResponse = await fetch(url, {
-          cache: "no-store",
-          headers,
-        });
-
-        if (userResponse.ok) {
-          const userDataArray = (await userResponse.json()) as UserData[];
-          const newUserDataMap = userDataArray.reduce(
-            (acc, userData) => {
-              acc[userData.id] = userData;
-              return acc;
-            },
-            {} as Record<string, UserData>,
-          );
-
-          setUserData((prev) => ({ ...prev, ...newUserDataMap }));
-
-          // Avoid retry loops for IDs the API did not resolve in this response.
-          const resolvedIds = new Set(Object.keys(newUserDataMap));
-          idsToFetch.forEach((id) => {
-            if (!resolvedIds.has(id)) {
-              failedUserIdsRef.current.add(id);
-            }
-          });
-        }
-      } catch (err) {
-        log.error("Error fetching user data", err);
-      } finally {
-        // Mark as no longer loading
-        setLoadingUsers((prev) => {
-          const next = { ...prev };
-          idsToFetch.forEach((id) => (next[id] = false));
-          return next;
-        });
-      }
-    };
-
-    fetchVisibleUsers();
-  }, [currentOwnerIds, userData, loadingUsers]); // Dependencies ensure we fetch when page changes or servers update
-
   // Handle page change
   const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
+    _event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
-    setPage(value);
+    if (value === page) return;
+    setLoading(true);
+    setIsFetching(true);
+    void setParams({ page: value > 1 ? value : null });
   };
 
   React.useEffect(() => {
-    let ignore = false;
+    setSearchQuery(queryFromUrl);
+  }, [queryFromUrl]);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
 
     const fetchServers = async () => {
       setLoading(true);
+      setIsFetching(true);
       setError(null);
 
       try {
         if (!PUBLIC_API_URL) {
           throw new Error("Missing PUBLIC_API_URL");
         }
-        const serversResponse = await fetch(`${PUBLIC_API_URL}/servers/list`, {
-          cache: "no-store",
-        });
-        if (!serversResponse.ok) {
-          throw new Error("Failed to fetch servers");
-        }
-        const data = (await serversResponse.json()) as Server[];
-        if (ignore) return;
+        const data = await fetchServersPage(
+          page,
+          queryFromUrl.trim(),
+          controller.signal,
+        );
+        if (controller.signal.aborted) return;
 
-        // Filter out expired servers (but keep servers with "Never" expiry)
-        const now = Date.now();
-        const filteredServers = data.filter((server) => {
-          if (server.expires === "Never") return true;
-          const expiryTimestamp = parseInt(server.expires);
-          const normalizedExpiry =
-            expiryTimestamp < 10000000000
-              ? expiryTimestamp * 1000
-              : expiryTimestamp;
-          return normalizedExpiry > now;
+        if (data.total_pages > 0 && page > data.total_pages) {
+          void setParams({ page: data.total_pages });
+          return;
+        }
+
+        const numbers: Record<number, number> = {};
+        data.items.forEach((server, index) => {
+          numbers[server.id] = data.total - (page - 1) * data.size - index;
         });
-        setServers(filteredServers);
-        // User data fetching is now handled by the other useEffect dependent on currentServers
+        setServerNumberMap(numbers);
+        setServers(data.items);
+        setTotalServers(data.total);
+        setTotalPages(data.total_pages);
       } catch (serverErr) {
-        if (ignore) return;
+        if (controller.signal.aborted) return;
+        log.error("Failed to fetch servers", serverErr);
         setError(
           serverErr instanceof Error
             ? serverErr.message
             : "An error occurred while fetching servers",
         );
       } finally {
-        if (!ignore) {
+        if (!controller.signal.aborted) {
           setLoading(false);
+          setIsFetching(false);
         }
       }
     };
 
-    fetchServers();
+    void fetchServers();
 
     return () => {
-      ignore = true;
+      controller.abort();
     };
-  }, []);
+  }, [page, queryFromUrl, refreshVersion, setParams]);
 
-  const handleServerAdded = async () => {
-    try {
-      if (!PUBLIC_API_URL) {
-        throw new Error("Missing PUBLIC_API_URL");
-      }
-      const serversResponse = await fetch(`${PUBLIC_API_URL}/servers/list`, {
-        cache: "no-store",
-      });
-      if (!serversResponse.ok) {
-        throw new Error("Failed to fetch servers");
-      }
-      const data = (await serversResponse.json()) as Server[];
-
-      // Filter out expired servers (but keep servers with "Never" expiry)
-      const now = Date.now();
-      const filteredServers = data.filter((server) => {
-        if (server.expires === "Never") return true;
-        const expiryTimestamp = parseInt(server.expires);
-        const normalizedExpiry =
-          expiryTimestamp < 10000000000
-            ? expiryTimestamp * 1000
-            : expiryTimestamp;
-        return normalizedExpiry > now;
-      });
-      setServers(filteredServers);
-      // User data will update automatically thanks to the effect
-    } catch {
-      toast.error("Failed to refresh server list");
-    }
+  const handleServerAdded = () => {
+    setLoading(true);
+    setIsFetching(true);
+    void setParams({ query: null, page: null });
+    setRefreshVersion((version) => version + 1);
   };
 
-  const handleDeleteServer = (server: Server) => {
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (!query) return;
+    if (query === queryFromUrl.trim() && page === 1) return;
+    setLoading(true);
+    setIsFetching(true);
+    void setParams({ query, page: null });
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    if (!queryFromUrl) return;
+    setServers([]);
+    setLoading(true);
+    setIsFetching(true);
+    void setParams({ query: null, page: null });
+  };
+
+  const handleDeleteServer = (server: PrivateServer) => {
     setServerToDelete(server);
     setDeleteModalOpen(true);
   };
 
-  const handleDeleteServerFromMenu = (server: Server) => {
+  const handleDeleteServerFromMenu = (server: PrivateServer) => {
     // Let Radix close the menu before opening modal to avoid layout/focus race.
     setTimeout(() => {
       handleDeleteServer(server);
@@ -401,8 +264,7 @@ const ServerList: React.FC<{
   const confirmDeleteServer = async () => {
     if (!serverToDelete) return;
     if (deletingServer) return;
-    const owner = getJbclToken();
-    if (!isAuthenticated || !PUBLIC_API_URL || !owner) {
+    if (!isAuthenticated || !PUBLIC_API_URL) {
       toast.info("You must be logged in to delete a server.");
       setDeleteModalOpen(false);
       setServerToDelete(null);
@@ -411,15 +273,14 @@ const ServerList: React.FC<{
     setDeletingServer(true);
     const deletingToastId = toast.loading("Deleting server...");
     try {
-      const response = await fetch(`${PUBLIC_API_URL}/servers/delete`, {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/servers/${serverToDelete.id}`,
+      );
+      const response = await fetch(url, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          link: serverToDelete.link,
-          owner,
-        }),
+        credentials: "include",
+        headers,
       });
       if (response.ok) {
         toast.success("Server deleted successfully!", { id: deletingToastId });
@@ -431,7 +292,8 @@ const ServerList: React.FC<{
         );
         toast.error(message, { id: deletingToastId });
       }
-    } catch {
+    } catch (deleteError) {
+      log.error("Failed to delete server", deleteError);
       toast.error("An error occurred while deleting the server.", {
         id: deletingToastId,
       });
@@ -442,12 +304,12 @@ const ServerList: React.FC<{
     }
   };
 
-  const handleEditServer = (server: Server) => {
+  const handleEditServer = (server: PrivateServer) => {
     setEditingServer(server);
     setIsAddModalOpen(true);
   };
 
-  const handleEditServerFromMenu = (server: Server) => {
+  const handleEditServerFromMenu = (server: PrivateServer) => {
     // Let Radix close the menu before opening modal to avoid layout/focus race.
     setTimeout(() => {
       handleEditServer(server);
@@ -468,15 +330,77 @@ const ServerList: React.FC<{
     }
   };
 
+  const searchControls = (
+    <form onSubmit={handleSearchSubmit} className="mb-6">
+      <div className="relative flex items-center">
+        <input
+          type="search"
+          name="query"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search server rules..."
+          className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+          aria-label="Search server rules"
+          disabled={isFetching}
+        />
+        <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+          {searchQuery && (
+            <>
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                aria-label="Clear search"
+              >
+                <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+              </button>
+              <div className="border-primary-text h-6 border-l opacity-30" />
+            </>
+          )}
+          <button
+            type="submit"
+            disabled={isFetching || !searchQuery.trim()}
+            className="text-link hover:bg-link/10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Search"
+          >
+            {isFetching ? (
+              <Spinner className="h-5 w-5" />
+            ) : (
+              <Icon icon="heroicons:magnifying-glass" className="h-5 w-5" />
+            )}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+
+  const listHeader = (
+    <div className="mb-4 flex items-center justify-between gap-3 px-4 lg:px-0">
+      <p className="text-secondary-text flex items-center gap-2 text-sm">
+        {queryFromUrl ? "Matching servers" : "Total servers"}:
+        {loading ? (
+          <Spinner className="h-4 w-4" />
+        ) : (
+          totalServers.toLocaleString()
+        )}
+      </p>
+      <Button
+        onClick={handleAddServer}
+        size="sm"
+        className="shrink-0 whitespace-nowrap"
+      >
+        <Icon icon="heroicons:plus" className="h-4 w-4" />
+        <span className="hidden sm:inline">Add server</span>
+        <span className="sm:hidden">Add</span>
+      </Button>
+    </div>
+  );
+
   if (loading) {
     return (
       <div>
-        <div className="mb-4 flex items-center justify-between px-4 lg:px-0">
-          <div className="flex items-center">
-            <Skeleton style={{ width: 120, height: 24 }} />
-          </div>
-          <Skeleton style={{ width: 120, height: 40 }} />
-        </div>
+        {searchControls}
+        {listHeader}
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -529,88 +453,43 @@ const ServerList: React.FC<{
 
   if (error) {
     return (
-      <div className="bg-button-danger/10 border-button-danger text-button-danger rounded-lg border p-4">
-        {error}
+      <div>
+        {searchControls}
+        {listHeader}
+        <div className="bg-button-danger/10 border-button-danger text-button-danger rounded-lg border p-4">
+          {error}
+        </div>
       </div>
     );
   }
 
-  if (sortedServers.length === 0) {
+  if (servers.length === 0) {
     return (
-      <div className="border-border-card bg-secondary-bg hover:border-border-focus rounded-lg border p-8 text-center">
-        <Icon
-          icon="heroicons-outline:shield-check"
-          className="text-button-info mx-auto mb-4 h-12 w-12"
-        />
-        <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          No servers available
-        </h3>
-        <p className="text-secondary-text">
-          You can add a server or check back later
-        </p>
+      <div>
+        {searchControls}
+        {listHeader}
+        <div className="border-border-card bg-secondary-bg hover:border-border-focus rounded-lg border p-8 text-center">
+          <Icon
+            icon="heroicons-outline:shield-check"
+            className="text-button-info mx-auto mb-4 h-12 w-12"
+          />
+          <h3 className="text-primary-text mb-2 text-xl font-semibold">
+            {queryFromUrl ? "No matching servers" : "No servers available"}
+          </h3>
+          <p className="text-secondary-text">
+            {queryFromUrl
+              ? `No server rules match “${queryFromUrl}”.`
+              : "You can add a server or check back later"}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="mb-4 px-4 lg:px-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-start">
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <div className="min-w-0 flex-1 sm:min-w-47.5 sm:flex-none md:min-w-52.5">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-10 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
-                    aria-label="Select sort option"
-                  >
-                    <span className="truncate">{sortLabel}</span>
-                    <Icon
-                      icon="heroicons:chevron-down"
-                      className="text-secondary-text h-4 w-4"
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="border-border-card bg-secondary-bg text-primary-text max-h-60 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                >
-                  <DropdownMenuRadioGroup
-                    value={sortOption}
-                    onValueChange={(value) => {
-                      if (onSortChange) {
-                        onSortChange(value as SortOption);
-                      }
-                    }}
-                  >
-                    {sortOptions.map((option) => (
-                      <DropdownMenuRadioItem
-                        key={option.value}
-                        value={option.value}
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                      >
-                        {option.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <Button
-              onClick={handleAddServer}
-              size="sm"
-              className="shrink-0 whitespace-nowrap"
-            >
-              <span className="hidden sm:inline">Add server</span>
-              <span className="sm:hidden">Add</span>
-            </Button>
-          </div>
-        </div>
-        <p className="text-secondary-text mt-3 text-sm">
-          Total Servers: {sortedServers.length}
-        </p>
-      </div>
+      {searchControls}
+      {listHeader}
 
       {totalPages > 1 && (
         <div className="mb-6 flex justify-center">
@@ -618,17 +497,18 @@ const ServerList: React.FC<{
             count={totalPages}
             page={page}
             onChange={handlePageChange}
+            disabled={isFetching}
           />
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 gap-y-6 pb-4 md:grid-cols-2 xl:grid-cols-3">
-        {currentServers.map((server) => {
+        {servers.map((server) => {
           // Check if user is a Supporter (premium types 1-3)
-          const premiumType = userData[server.owner]?.premiumtype ?? 0;
+          const premiumType = server.user.premiumtype ?? 0;
           const isSupporter = premiumType >= 1 && premiumType <= 3;
           const supporterTier = isSupporter ? premiumType : null;
-          const isServerOwner = loggedInUserId === server.owner;
+          const isServerOwner = loggedInUserId === server.user.id;
           const expiresText =
             server.expires === "Never"
               ? "Never"
@@ -704,24 +584,24 @@ const ServerList: React.FC<{
                   Server owner
                 </p>
                 <div className="flex items-center justify-between gap-3">
-                  {userData[server.owner] ? (
+                  {server.user.id ? (
                     <div className="flex min-w-0 flex-1 items-center gap-2">
                       <UserAvatar
-                        userId={userData[server.owner].id}
-                        avatarHash={userData[server.owner].avatar}
-                        username={userData[server.owner].username}
+                        userId={server.user.id}
+                        avatarHash={server.user.avatar}
+                        username={server.user.username}
                         size={9}
-                        custom_avatar={userData[server.owner].custom_avatar}
+                        custom_avatar={server.user.custom_avatar ?? undefined}
                         showBadge={false}
-                        settings={userData[server.owner].settings_v2}
-                        premiumType={userData[server.owner].premiumtype}
+                        settings={server.user.settings}
+                        premiumType={server.user.premiumtype}
                       />
                       <Link
-                        href={`/users/${server.owner}`}
+                        href={`/users/${server.user.id}`}
                         prefetch={false}
                         className="text-primary-text hover:text-link active:text-link-active min-w-0 truncate font-medium transition-colors"
                       >
-                        {userData[server.owner].username}
+                        {server.user.username}
                       </Link>
                       {isSupporter && supporterTier && (
                         <Tooltip>
@@ -857,6 +737,7 @@ const ServerList: React.FC<{
             count={totalPages}
             page={page}
             onChange={handlePageChange}
+            disabled={isFetching}
           />
         </div>
       )}
