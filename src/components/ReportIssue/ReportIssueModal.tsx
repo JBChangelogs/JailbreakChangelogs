@@ -7,6 +7,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 
 const log = createLogger("UI");
 import { sanitizeText } from "@/utils/ui/sanitizeText";
+import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const MAX_TITLE_LENGTH = 100;
+const MAX_TITLE_LENGTH = 50;
 const MAX_DESCRIPTION_LENGTH = 500;
 
 interface ReportIssueModalProps {
@@ -60,9 +62,11 @@ export default function ReportIssueModal({
         return;
       }
 
-      const response = await fetch("/api/issues/add", {
+      const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/issues");
+      const response = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify({
           title: sanitizedTitle,
           description: sanitizedDescription,
@@ -70,9 +74,9 @@ export default function ReportIssueModal({
       });
 
       if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        log.error("submit issue failed", { status: response.status, body });
-        throw new Error("Failed to submit issue");
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to submit issue"),
+        );
       }
 
       toast.success("Issue reported successfully");
@@ -81,7 +85,11 @@ export default function ReportIssueModal({
       onClose();
     } catch (error) {
       log.error("Error submitting issue", error);
-      toast.error("Failed to submit issue. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit issue. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }

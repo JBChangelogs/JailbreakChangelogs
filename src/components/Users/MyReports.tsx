@@ -22,6 +22,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/button";
 import { humanizeIdentifier } from "@/utils/humanizeIdentifier";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import SubmissionTabs from "@/components/Users/SubmissionTabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -686,14 +687,21 @@ export default function MyReports() {
         <Breadcrumb />
 
         <div className="mb-4 flex items-center gap-2">
-          <Icon icon="heroicons:flag" className="text-primary-text h-5 w-5" />
+          <Icon
+            icon="heroicons:inbox-stack"
+            className="text-primary-text h-5 w-5"
+          />
           <h1 className="text-primary-text text-lg font-semibold">
-            My Reports
+            My Submissions
           </h1>
           {!loading && (
-            <span className="text-secondary-text text-sm">({total})</span>
+            <span className="text-secondary-text text-sm">
+              ({total} reports)
+            </span>
           )}
         </div>
+
+        <SubmissionTabs active="reports" />
 
         {/* Search and status controls */}
         <div className="mb-6 flex flex-col gap-4 lg:flex-row">

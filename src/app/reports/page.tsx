@@ -1,5 +1,5 @@
-import MyReports from "@/components/Users/MyReports";
+import MySubmissions from "@/components/Users/MySubmissions";
 
 export default function ReportsPage() {
-  return <MyReports />;
+  return <MySubmissions />;
 }

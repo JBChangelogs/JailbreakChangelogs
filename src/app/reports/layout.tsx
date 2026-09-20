@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "My Reports",
-  description: "View reports you have submitted.",
+  title: "My Submissions",
+  description: "View reports and issues you have submitted.",
   robots: {
     index: false,
     follow: false,

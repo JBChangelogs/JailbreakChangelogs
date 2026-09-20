@@ -1,0 +1,30 @@
+"use client";
+
+import { useRouter } from "nextjs-toploader/app";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+type SubmissionTab = "reports" | "issues";
+
+export default function SubmissionTabs({ active }: { active: SubmissionTab }) {
+  const router = useRouter();
+
+  return (
+    <Tabs
+      value={active}
+      onValueChange={(value) => {
+        const nextTab = value as SubmissionTab;
+        router.push(
+          nextTab === "issues"
+            ? "/reports?tab=issues&page=1"
+            : "/reports?page=1",
+        );
+      }}
+      className="mb-6"
+    >
+      <TabsList aria-label="Submission type">
+        <TabsTrigger value="reports">Content Reports</TabsTrigger>
+        <TabsTrigger value="issues">Reported Issues</TabsTrigger>
+      </TabsList>
+    </Tabs>
+  );
+}
