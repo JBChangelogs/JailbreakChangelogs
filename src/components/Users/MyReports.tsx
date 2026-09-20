@@ -813,7 +813,7 @@ export default function MyReports() {
             className="text-primary-text h-5 w-5"
           />
           <h1 className="text-primary-text text-lg font-semibold">
-            My Submissions
+            My Reports
           </h1>
           {!loading && (
             <span className="text-secondary-text text-sm">
@@ -938,11 +938,11 @@ export default function MyReports() {
 
         {loading ? (
           <>
-            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="border-border-card bg-secondary-bg flex flex-col rounded-xl border p-5 shadow-sm"
+                  className="border-border-card bg-secondary-bg flex h-full flex-col rounded-xl border p-5 shadow-sm"
                 >
                   {/* Badge row + date */}
                   <div className="flex items-start justify-between gap-3">
@@ -953,7 +953,6 @@ export default function MyReports() {
                       />
                       <div className="space-y-1.5">
                         <Skeleton style={{ width: 90, height: 14 }} />
-                        <Skeleton style={{ width: 72, height: 10 }} />
                       </div>
                       <Skeleton style={{ width: 94, height: 26 }} />
                     </div>
@@ -1047,7 +1046,7 @@ export default function MyReports() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {filteredReports.map((report) => {
                 const statusStyle = getStatusStyle(report.status);
                 const reportedId = getReportedUserId(report);
@@ -1065,7 +1064,7 @@ export default function MyReports() {
                 return (
                   <div
                     key={String(report.id)}
-                    className="border-border-card bg-secondary-bg hover:border-border-focus group relative flex flex-col overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                    className="border-border-card bg-secondary-bg hover:border-border-focus group relative flex h-full flex-col overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                   >
                     <div className="relative z-10 flex flex-wrap items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-wrap items-center gap-2.5">
@@ -1075,9 +1074,6 @@ export default function MyReports() {
                         <div className="min-w-0">
                           <p className="text-primary-text truncate text-sm font-semibold">
                             {getTypeLabel(report.type)}
-                          </p>
-                          <p className="text-secondary-text text-[11px]">
-                            Content report
                           </p>
                         </div>
                         <span
@@ -1091,7 +1087,7 @@ export default function MyReports() {
                       </time>
                     </div>
 
-                    <div className="relative z-10 flex flex-col">
+                    <div className="relative z-10 flex flex-1 flex-col">
                       {reportedUser && reportedDisplayName && (
                         <div className="mt-2 flex items-center gap-2">
                           <span className="text-secondary-text text-xs">
@@ -1136,7 +1132,8 @@ export default function MyReports() {
                         </p>
                       </div>
 
-                      <div className="border-border-card mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-3">
+                      <div className="min-h-4 flex-1" />
+                      <div className="border-border-card flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-3">
                         <div className="flex shrink-0 items-center gap-1.5">
                           <span className="text-secondary-text text-[10px] font-semibold tracking-wide uppercase">
                             Report

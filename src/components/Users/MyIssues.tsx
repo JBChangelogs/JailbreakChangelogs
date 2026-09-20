@@ -170,7 +170,7 @@ export default function MyIssues() {
             className="text-primary-text h-5 w-5"
           />
           <h1 className="text-primary-text text-lg font-semibold">
-            My Submissions
+            My Reports
           </h1>
           {!loading && (
             <span className="text-secondary-text text-sm">
@@ -260,11 +260,11 @@ export default function MyIssues() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {[1, 2, 3, 4].map((item) => (
               <div
                 key={item}
-                className="border-border-card bg-secondary-bg rounded-xl border p-5 shadow-sm"
+                className="border-border-card bg-secondary-bg h-full rounded-xl border p-5 shadow-sm"
               >
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2.5">
@@ -274,7 +274,6 @@ export default function MyIssues() {
                     />
                     <div className="space-y-1.5">
                       <Skeleton style={{ width: 92, height: 14 }} />
-                      <Skeleton style={{ width: 62, height: 10 }} />
                     </div>
                     <Skeleton style={{ width: 80, height: 26 }} />
                   </div>
@@ -345,11 +344,11 @@ export default function MyIssues() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {filteredIssues.map((issue) => (
                 <article
                   key={issue.id}
-                  className="border-border-card bg-secondary-bg hover:border-border-focus group relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                  className="border-border-card bg-secondary-bg hover:border-border-focus group relative h-full overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-2.5">
@@ -358,9 +357,6 @@ export default function MyIssues() {
                       </span>
                       <div>
                         <p className="text-primary-text text-sm font-semibold">
-                          Reported issue
-                        </p>
-                        <p className="text-secondary-text text-[11px]">
                           Issue #{issue.id}
                         </p>
                       </div>
