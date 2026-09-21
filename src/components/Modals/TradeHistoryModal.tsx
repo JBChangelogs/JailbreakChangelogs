@@ -21,10 +21,35 @@ import { RobloxUser } from "@/types";
 import { formatShortDateTime } from "@/utils/helpers/timestamp";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { INVENTORY_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 interface TradeHistoryEntry {
   UserId: number;
   TradeTime: number;
+}
+
+interface ItemTransferHop {
+  from_user_id: string | null;
+  to_user_id: string | null;
+  trade_time: number;
+  confidence: "confirmed" | "gap";
+}
+
+interface ItemTransferBranch {
+  branch_id: string;
+  is_duplicate: boolean;
+  hops: ItemTransferHop[];
+}
+
+interface ItemTransferHistory {
+  item_id: string;
+  branches: ItemTransferBranch[];
 }
 
 interface Item {
@@ -79,6 +104,188 @@ const TradeAvatarImage = ({ userId }: { userId: string }) => {
   );
 };
 
+function TransferUser({
+  userId,
+  getUsername,
+  getHasVerifiedBadge,
+}: {
+  userId: string | null;
+  getUsername: (userId: string) => string;
+  getHasVerifiedBadge: (userId: string) => boolean;
+}) {
+  if (!userId || !/^\d+$/.test(userId)) {
+    return (
+      <div className="flex min-w-0 items-center gap-2">
+        <div className="bg-quaternary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
+          <DefaultAvatar name="Unknown owner" />
+        </div>
+        <span className="text-secondary-text font-medium">Unknown owner</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      <TradeAvatarImage userId={userId} />
+      <a
+        href={`https://www.roblox.com/users/${userId}/profile`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-link hover:text-link-hover flex min-w-0 items-center gap-1 font-medium transition-colors"
+      >
+        <span className="truncate">{getUsername(userId)}</span>
+        {getHasVerifiedBadge(userId) && (
+          <VerifiedBadgeIcon className="h-3.5 w-3.5 shrink-0" />
+        )}
+      </a>
+    </div>
+  );
+}
+
+function TransferHistoryView({
+  history,
+  getUsername,
+  getHasVerifiedBadge,
+}: {
+  history: ItemTransferHistory;
+  getUsername: (userId: string) => string;
+  getHasVerifiedBadge: (userId: string) => boolean;
+}) {
+  const branches = [...history.branches].sort((left, right) => {
+    if (left.is_duplicate === right.is_duplicate) return 0;
+    return left.is_duplicate ? 1 : -1;
+  });
+  let duplicateNumber = 0;
+
+  return (
+    <div className="space-y-4">
+      {branches.map((branch) => {
+        const branchNumber = branch.is_duplicate ? ++duplicateNumber : 0;
+        const hops = [...branch.hops].sort(
+          (left, right) => left.trade_time - right.trade_time,
+        );
+
+        return (
+          <section key={branch.branch_id} className="space-y-2">
+            {branches.length > 1 && (
+              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-primary-text text-sm font-semibold">
+                    {branch.is_duplicate
+                      ? `Duped copy ${branchNumber}`
+                      : "Original copy"}
+                  </h3>
+                  {branch.is_duplicate && (
+                    <span className="border-status-warning/30 bg-status-warning/15 text-status-warning inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-semibold">
+                      Duped copy
+                    </span>
+                  )}
+                </div>
+                <span className="text-secondary-text text-xs">
+                  {hops.length} recorded{" "}
+                  {hops.length === 1 ? "trade" : "trades"}
+                </span>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {hops.map((hop, index) => {
+                const isFirstPrimaryTrade = !branch.is_duplicate && index === 0;
+
+                return (
+                  <div
+                    key={`${branch.branch_id}-${hop.trade_time}-${hop.from_user_id}-${hop.to_user_id}-${index}`}
+                    className={`flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center ${
+                      isFirstPrimaryTrade
+                        ? "border-[#FFD700] bg-[#FFD700]/10"
+                        : "border-border-card bg-tertiary-bg"
+                    }`}
+                  >
+                    <div className="flex min-w-0 flex-1 flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
+                      <TransferUser
+                        userId={hop.from_user_id}
+                        getUsername={getUsername}
+                        getHasVerifiedBadge={getHasVerifiedBadge}
+                      />
+
+                      <div className="text-secondary-text flex items-center gap-1.5 sm:px-1">
+                        <svg
+                          className="h-4 w-4 shrink-0 sm:hidden"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 13l-5 5m0 0l-5-5m5 5V6"
+                          />
+                        </svg>
+                        <svg
+                          className="hidden h-4 w-4 shrink-0 sm:block"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"
+                          />
+                        </svg>
+                        <span className="text-xs whitespace-nowrap">
+                          Trade #{index + 1}
+                        </span>
+                      </div>
+
+                      <TransferUser
+                        userId={hop.to_user_id}
+                        getUsername={getUsername}
+                        getHasVerifiedBadge={getHasVerifiedBadge}
+                      />
+                    </div>
+
+                    <div className="text-secondary-text flex w-full items-center justify-center gap-2 text-xs sm:w-auto sm:shrink-0 sm:justify-end sm:text-sm">
+                      <time
+                        dateTime={new Date(hop.trade_time * 1000).toISOString()}
+                      >
+                        {formatShortDateTime(hop.trade_time)}
+                      </time>
+                      {hop.confidence !== "confirmed" && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                className="text-tertiary-text decoration-tertiary-text/70 cursor-help border-b border-dotted text-xs font-medium"
+                                tabIndex={0}
+                              >
+                                Recovered record
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-64">
+                              This transfer was recovered after a tracking gap.
+                              It is not an error.
+                            </TooltipContent>
+                          </Tooltip>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function TradeHistoryModal({
   isOpen,
   onClose,
@@ -88,19 +295,116 @@ export default function TradeHistoryModal({
   usersData,
 }: TradeHistoryModalProps) {
   const pathname = usePathname();
+  const [instanceHistory, setInstanceHistory] =
+    useState<ItemTransferHistory | null>(null);
+  const [instanceHistoryState, setInstanceHistoryState] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [instanceHistoryError, setInstanceHistoryError] = useState<
+    string | null
+  >(null);
+  const [instanceHistoryRetry, setInstanceHistoryRetry] = useState(0);
+
+  useEffect(() => {
+    if (!isOpen || !item?.id || !INVENTORY_API_URL) return;
+
+    const controller = new AbortController();
+    let ignore = false;
+    let didTimeout = false;
+    const timeoutId = window.setTimeout(() => {
+      didTimeout = true;
+      controller.abort();
+    }, 15_000);
+
+    setInstanceHistory(null);
+    setInstanceHistoryError(null);
+    setInstanceHistoryState("loading");
+
+    const fetchInstanceHistory = async () => {
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          INVENTORY_API_URL,
+          `/trades/instance/${encodeURIComponent(item.id!)}?nocache=false`,
+        );
+        const response = await fetch(url, {
+          headers,
+          signal: controller.signal,
+          cache: "no-store",
+        });
+
+        if (ignore) return;
+        if (response.status === 404) {
+          setInstanceHistory({ item_id: item.id!, branches: [] });
+          setInstanceHistoryState("success");
+          return;
+        }
+        if (!response.ok) {
+          const body = await response.json().catch(() => null);
+          const message =
+            typeof body === "string"
+              ? body
+              : body && typeof body === "object" && "message" in body
+                ? String(body.message)
+                : `Failed to load item transfer history (${response.status})`;
+          throw new Error(message);
+        }
+
+        const history = (await response.json()) as ItemTransferHistory;
+        if (!history || !Array.isArray(history.branches)) {
+          throw new Error("Invalid item transfer history response");
+        }
+        if (ignore) return;
+        setInstanceHistory(history);
+        setInstanceHistoryState("success");
+      } catch (error) {
+        if (ignore || (controller.signal.aborted && !didTimeout)) return;
+        log.error("fetch item transfer history failed", {
+          itemId: item.id,
+          error,
+        });
+        setInstanceHistoryError(
+          didTimeout
+            ? "The transfer history request timed out."
+            : error instanceof Error
+              ? error.message
+              : "Failed to load item transfer history",
+        );
+        setInstanceHistoryState("error");
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    };
+
+    void fetchInstanceHistory();
+
+    return () => {
+      ignore = true;
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [instanceHistoryRetry, isOpen, item?.id]);
 
   const tradeHistoryUserIds = useMemo(() => {
-    if (!item?.history || !Array.isArray(item.history)) {
-      return [];
+    const userIds = new Set<string>();
+    if (instanceHistory && instanceHistory.branches.length > 0) {
+      instanceHistory.branches.forEach((branch) => {
+        branch.hops.forEach((hop) => {
+          if (hop.from_user_id && /^\d+$/.test(hop.from_user_id)) {
+            userIds.add(hop.from_user_id);
+          }
+          if (hop.to_user_id && /^\d+$/.test(hop.to_user_id)) {
+            userIds.add(hop.to_user_id);
+          }
+        });
+      });
+    } else if (item?.history && Array.isArray(item.history)) {
+      item.history.forEach((entry) => {
+        userIds.add(entry.UserId.toString());
+      });
     }
 
-    const userIds = new Set<string>();
-    item.history.forEach((entry) => {
-      userIds.add(entry.UserId.toString());
-    });
-
     return Array.from(userIds);
-  }, [item]);
+  }, [instanceHistory, item]);
 
   // Process specific user data from props if available
   const memoizedUserData = useMemo(() => {
@@ -132,18 +436,18 @@ export default function TradeHistoryModal({
     >
   >({});
 
-  // Use either the passed data or the fetched data
-  const finalUsers = usersData ? memoizedUserData : fetchedUsers;
+  const finalUsers = useMemo(
+    () => ({ ...fetchedUsers, ...memoizedUserData }),
+    [fetchedUsers, memoizedUserData],
+  );
 
   useEffect(() => {
     if (!isOpen) return;
 
-    // If we have usersData via props, we don't need to fetch
-    if (usersData) {
-      return;
-    }
-
-    if (tradeHistoryUserIds.length === 0) {
+    const missingUserIds = tradeHistoryUserIds.filter(
+      (userId) => !memoizedUserData[userId],
+    );
+    if (missingUserIds.length === 0) {
       return;
     }
 
@@ -161,7 +465,7 @@ export default function TradeHistoryModal({
                 process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userIds: tradeHistoryUserIds }),
+            body: JSON.stringify({ userIds: missingUserIds }),
           },
         );
 
@@ -210,7 +514,7 @@ export default function TradeHistoryModal({
     return () => {
       ignore = true;
     };
-  }, [isOpen, tradeHistoryUserIds, usersData]);
+  }, [isOpen, memoizedUserData, tradeHistoryUserIds]);
 
   const getUsername = (userId: string) => {
     const cachedUser = finalUsers[userId];
@@ -311,6 +615,52 @@ export default function TradeHistoryModal({
 
         <div className="max-h-[calc(80vh-200px)] overflow-y-auto px-6 pt-4 pb-6">
           {(() => {
+            if (instanceHistoryState === "loading") {
+              return (
+                <div className="text-secondary-text flex min-h-48 items-center justify-center gap-2 text-sm">
+                  <Spinner className="h-5 w-5" /> Loading transfer history...
+                </div>
+              );
+            }
+
+            if (instanceHistory && instanceHistory.branches.length > 0) {
+              return (
+                <TransferHistoryView
+                  history={instanceHistory}
+                  getUsername={getUsername}
+                  getHasVerifiedBadge={getHasVerifiedBadge}
+                />
+              );
+            }
+
+            const hasLegacyHistory = Boolean(
+              item.history &&
+              Array.isArray(item.history) &&
+              item.history.length > 0,
+            );
+            if (instanceHistoryState === "error" && !hasLegacyHistory) {
+              return (
+                <div className="py-8 text-center">
+                  <p className="text-primary-text font-semibold">
+                    Couldn&apos;t load transfer history
+                  </p>
+                  <p className="text-secondary-text mt-1 text-sm">
+                    {instanceHistoryError}
+                  </p>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() =>
+                      setInstanceHistoryRetry((current) => current + 1)
+                    }
+                  >
+                    Try again
+                  </Button>
+                </div>
+              );
+            }
+
             if (
               !item.history ||
               !Array.isArray(item.history) ||
