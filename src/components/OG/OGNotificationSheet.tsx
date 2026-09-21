@@ -22,8 +22,9 @@ import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -523,47 +524,54 @@ export default function OGNotificationSheet({
               <div className="flex min-h-0 flex-1 flex-col gap-3">
                 {/* Search + category filter - single row */}
                 <div className="flex shrink-0 gap-2">
-                  <div className="relative min-w-0 flex-1">
+                  <div className="relative flex min-w-0 flex-1 items-center">
                     <input
                       type="text"
                       placeholder="Search items..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus w-full rounded-xl border py-2.5 pr-9 pl-9 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
                     />
-                    <Icon
-                      icon="heroicons:magnifying-glass"
-                      className="text-secondary-text absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                      inline={true}
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 cursor-pointer transition-colors"
-                      >
-                        <Icon icon="heroicons:x-mark" inline={true} />
-                      </button>
-                    )}
+
+                    <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                      {searchQuery && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setSearchQuery("")}
+                            className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                            aria-label="Clear search"
+                          >
+                            <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                          </button>
+                          <div className="border-primary-text h-6 border-l opacity-30" />
+                        </>
+                      )}
+                      <Icon
+                        icon="heroicons:magnifying-glass"
+                        className="text-secondary-text h-5 w-5"
+                        inline={true}
+                      />
+                    </div>
                   </div>
 
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className={cn(
-                          "border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-auto shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm transition-all duration-300 focus:ring-1 focus:outline-none",
-                          selectedType !== "all" && "border-link text-link",
-                        )}
+                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[50px] w-40 shrink-0 items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                         aria-label="Filter by item category"
                       >
+                        <span className="truncate">
+                          {selectedType === "all"
+                            ? "All categories"
+                            : selectedType}
+                        </span>
                         <Icon
-                          icon="heroicons:funnel"
-                          className="h-4 w-4 shrink-0"
+                          icon="heroicons:chevron-down"
+                          className="text-secondary-text h-5 w-5 shrink-0"
                           inline={true}
                         />
-                        <span className="max-w-20 truncate">
-                          {selectedType === "all" ? "Filter" : selectedType}
-                        </span>
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
@@ -571,29 +579,26 @@ export default function OGNotificationSheet({
                       container={sheetContentRef.current}
                       className="border-border-card bg-tertiary-bg text-primary-text max-h-70 w-(--radix-popper-anchor-width) min-w-40 scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                     >
-                      <DropdownMenuCheckboxItem
-                        checked={selectedType === "all"}
-                        onCheckedChange={(checked) => {
-                          if (checked) setSelectedType("all");
-                        }}
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                      <DropdownMenuRadioGroup
+                        value={selectedType}
+                        onValueChange={setSelectedType}
                       >
-                        All
-                      </DropdownMenuCheckboxItem>
-                      {itemTypes.map((type) => (
-                        <DropdownMenuCheckboxItem
-                          key={type}
-                          checked={selectedType === type}
-                          onCheckedChange={(checked) => {
-                            if (checked) setSelectedType(type);
-                            else if (selectedType === type)
-                              setSelectedType("all");
-                          }}
+                        <DropdownMenuRadioItem
+                          value="all"
                           className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
                         >
-                          {type}
-                        </DropdownMenuCheckboxItem>
-                      ))}
+                          All
+                        </DropdownMenuRadioItem>
+                        {itemTypes.map((type) => (
+                          <DropdownMenuRadioItem
+                            key={type}
+                            value={type}
+                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                          >
+                            {type}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
