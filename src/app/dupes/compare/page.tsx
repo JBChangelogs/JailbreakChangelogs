@@ -1,5 +1,5 @@
-import { fetchDuplicateVariants, fetchItems } from "@/utils/api/api";
-import DupeComparisonClient from "@/components/Dupes/DupeComparisonClient";
+import { fetchItems } from "@/utils/api/api";
+import DupeComparisonLoader from "@/components/Dupes/DupeComparisonLoader";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { notFound } from "next/navigation";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
@@ -8,7 +8,7 @@ import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<{ id: string }>;
+  searchParams: Promise<{ id?: string }>;
 }
 
 export default async function DupeComparisonPage({ searchParams }: PageProps) {
@@ -18,14 +18,7 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
     notFound();
   }
 
-  const [variantsData, itemsData] = await Promise.all([
-    fetchDuplicateVariants(id),
-    fetchItems(),
-  ]);
-
-  if (!variantsData) {
-    notFound();
-  }
+  const itemsData = await fetchItems();
 
   return (
     <>
@@ -50,11 +43,7 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
           </p>
         </div>
 
-        <DupeComparisonClient
-          ogItem={variantsData.og}
-          duplicateItem={variantsData.duplicate}
-          itemsData={itemsData}
-        />
+        <DupeComparisonLoader id={id} itemsData={itemsData} />
         <DupeFinderFAQ />
       </div>
     </>
