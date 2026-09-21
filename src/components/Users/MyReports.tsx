@@ -219,6 +219,10 @@ export function getTypeLabel(type: string) {
   return humanizeIdentifier(type);
 }
 
+function getSortLabel(sort: string) {
+  return humanizeIdentifier(sort);
+}
+
 function CopyIdentifierButton({
   value,
   label,
@@ -655,8 +659,13 @@ export default function MyReports() {
   });
 
   const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const [sort, setSort] = useQueryState("sort", {
+    history: "push",
+    shallow: true,
+  });
 
   const [reports, setReports] = useState<Report[]>([]);
+  const [sortTypes, setSortTypes] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -668,16 +677,10 @@ export default function MyReports() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [reportTypes, setReportTypes] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState("all");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
-      if (
-        statusFilter !== "all" &&
-        report.status.toLowerCase() !== statusFilter
-      )
-        return false;
       if (debouncedSearch) {
         const q = debouncedSearch.toLowerCase();
         const reportedId = getReportedUserId(report);
@@ -694,10 +697,14 @@ export default function MyReports() {
       }
       return true;
     });
-  }, [reports, statusFilter, debouncedSearch, reportedUsers]);
+  }, [reports, debouncedSearch, reportedUsers]);
 
   const fetchReports = useCallback(
-    async (currentPage: number, reportType: string) => {
+    async (
+      currentPage: number,
+      reportType: string,
+      currentSort: string | null,
+    ) => {
       setLoading(true);
       setError(null);
       try {
@@ -705,9 +712,12 @@ export default function MyReports() {
           reportType === "all"
             ? ""
             : `&report_type=${encodeURIComponent(reportType)}`;
+        const sortQuery = currentSort
+          ? `&sort=${encodeURIComponent(currentSort)}`
+          : "";
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          `/reports/me?page=${currentPage}${typeQuery}`,
+          `/reports/me?page=${currentPage}${typeQuery}${sortQuery}`,
         );
         const response = await fetch(url, {
           credentials: "include",
@@ -774,8 +784,8 @@ export default function MyReports() {
   );
 
   useEffect(() => {
-    void fetchReports(page, typeFilter);
-  }, [page, typeFilter, fetchReports]);
+    void fetchReports(page, typeFilter, sort);
+  }, [page, typeFilter, sort, fetchReports]);
 
   useEffect(() => {
     const { url, headers } = buildApiFetchRequest(
@@ -798,6 +808,37 @@ export default function MyReports() {
       .catch((error) => {
         log.error("Failed to fetch report types:", error);
       });
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      "/reports/sorts",
+    );
+    fetch(url, {
+      credentials: "include",
+      cache: "no-store",
+      headers,
+      signal: controller.signal,
+    })
+      .then((response) =>
+        response.ok ? (response.json() as Promise<unknown>) : null,
+      )
+      .then((data) => {
+        if (
+          Array.isArray(data) &&
+          data.every((value) => typeof value === "string")
+        ) {
+          setSortTypes(data);
+        }
+      })
+      .catch((sortError) => {
+        if (!controller.signal.aborted) {
+          log.error("Failed to fetch report sort types:", sortError);
+        }
+      });
+    return () => controller.abort();
   }, []);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -860,18 +901,15 @@ export default function MyReports() {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
+                      disabled={sortTypes.length === 0}
                       className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-11 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-colors focus:outline-none"
                     >
                       <span className="truncate">
-                        {statusFilter === "all"
-                          ? "All Statuses"
-                          : getStatusStyle(statusFilter).label ||
-                            statusFilter
-                              .split(" ")
-                              .map(
-                                (w) => w.charAt(0).toUpperCase() + w.slice(1),
-                              )
-                              .join(" ")}
+                        {sort
+                          ? getSortLabel(sort)
+                          : sortTypes[0]
+                            ? getSortLabel(sortTypes[0])
+                            : "Sort"}
                       </span>
                       <Icon
                         icon="heroicons:chevron-down"
@@ -884,21 +922,19 @@ export default function MyReports() {
                     className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1.5 shadow-lg"
                   >
                     <DropdownMenuRadioGroup
-                      value={statusFilter}
-                      onValueChange={setStatusFilter}
+                      value={sort ?? sortTypes[0] ?? ""}
+                      onValueChange={(value) => {
+                        void setSort(value);
+                        void setPageParam("1");
+                      }}
                     >
-                      {[
-                        { value: "all", label: "All Statuses" },
-                        { value: "action taken", label: "Action Taken" },
-                        { value: "denied", label: "Denied" },
-                        { value: "pending review", label: "Pending Review" },
-                      ].map((opt) => (
+                      {sortTypes.map((value) => (
                         <DropdownMenuRadioItem
-                          key={opt.value}
-                          value={opt.value}
+                          key={value}
+                          value={value}
                           className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                         >
-                          {opt.label}
+                          {getSortLabel(value)}
                         </DropdownMenuRadioItem>
                       ))}
                     </DropdownMenuRadioGroup>
@@ -980,7 +1016,7 @@ export default function MyReports() {
             </p>
             <p className="text-secondary-text mt-1 text-sm">{error}</p>
             <button
-              onClick={() => void fetchReports(page, typeFilter)}
+              onClick={() => void fetchReports(page, typeFilter, sort)}
               className="text-link hover:text-link-hover mt-3 cursor-pointer text-sm transition-colors"
             >
               Try again
@@ -1009,8 +1045,6 @@ export default function MyReports() {
                 if (debouncedSearch) msg += ` matching "${debouncedSearch}"`;
                 if (typeFilter !== "all")
                   msg += ` in ${getTypeLabel(typeFilter)}`;
-                if (statusFilter !== "all")
-                  msg += ` with ${getStatusStyle(statusFilter).label} status`;
                 return msg;
               })()}
             </p>
@@ -1018,18 +1052,16 @@ export default function MyReports() {
               Try adjusting your search or filter.
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
-              {debouncedSearch &&
-                (typeFilter !== "all" || statusFilter !== "all") && (
-                  <Button variant="secondary" onClick={() => setSearchTerm("")}>
-                    Clear Search
-                  </Button>
-                )}
+              {debouncedSearch && typeFilter !== "all" && (
+                <Button variant="secondary" onClick={() => setSearchTerm("")}>
+                  Clear Search
+                </Button>
+              )}
               <Button
                 variant="default"
                 onClick={() => {
                   setSearchTerm("");
                   setTypeFilter("all");
-                  setStatusFilter("all");
                 }}
               >
                 Clear All Filters
