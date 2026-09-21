@@ -63,6 +63,33 @@ const sumKnownValues = (
   return (values as number[]).reduce((total, value) => total + value, 0);
 };
 
+function ValueDifferenceBadge({
+  value,
+  className = "",
+}: {
+  value: number;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`${className} items-center rounded-lg border px-2.5 py-1 text-xs leading-none font-semibold whitespace-nowrap ${
+        value > 0
+          ? "border-status-success/40 bg-status-success/80 text-form-button-text"
+          : value < 0
+            ? "border-status-error/40 bg-status-error/80 text-form-button-text"
+            : "border-border-card bg-quaternary-bg text-secondary-text"
+      }`}
+      title="Difference using current item values"
+    >
+      {value > 0
+        ? `Getting ${formatTradeValue(value)} more`
+        : value < 0
+          ? `Giving ${formatTradeValue(value)} more`
+          : "Even trade"}
+    </span>
+  );
+}
+
 const getErrorMessage = async (response: Response, fallback: string) => {
   const body = await response.json().catch(() => null);
   if (typeof body === "string" && body.trim()) return body;
@@ -569,14 +596,23 @@ export default function UserTradeHistory({
                   </div>
                 </div>
 
-                <div className="text-secondary-text flex items-center gap-1.5 sm:px-1">
-                  <Icon
-                    icon="heroicons:arrows-right-left"
-                    className="h-4 w-4"
-                  />
-                  <span className="text-xs whitespace-nowrap">
-                    {trade.items_given} given · {trade.items_received} received
-                  </span>
+                <div className="text-secondary-text flex flex-col items-center gap-1.5 sm:flex-row sm:px-1">
+                  <div className="flex items-center gap-1.5">
+                    <Icon
+                      icon="heroicons:arrows-right-left"
+                      className="h-4 w-4"
+                    />
+                    <span className="text-xs whitespace-nowrap">
+                      {trade.items_given} given · {trade.items_received}{" "}
+                      received
+                    </span>
+                  </div>
+                  {!isExpanded && valueDifference !== null && (
+                    <ValueDifferenceBadge
+                      value={valueDifference}
+                      className="inline-flex sm:hidden"
+                    />
+                  )}
                 </div>
 
                 <div className="flex min-w-0 items-center gap-2">
@@ -597,19 +633,10 @@ export default function UserTradeHistory({
 
               <div className="text-secondary-text flex w-full items-center justify-center gap-2 text-xs sm:w-auto sm:shrink-0 sm:justify-end sm:text-right sm:text-sm">
                 {!isExpanded && valueDifference !== null && (
-                  <span
-                    className={`rounded-md px-2 py-1 text-xs font-semibold ${
-                      valueDifference > 0
-                        ? "bg-status-success/10 text-status-success"
-                        : valueDifference < 0
-                          ? "bg-button-danger/10 text-button-danger"
-                          : "bg-quaternary-bg text-secondary-text"
-                    }`}
-                    title="Difference using current item values"
-                  >
-                    {valueDifference > 0 ? "+" : valueDifference < 0 ? "−" : ""}
-                    {formatTradeValue(valueDifference)}
-                  </span>
+                  <ValueDifferenceBadge
+                    value={valueDifference}
+                    className="hidden sm:inline-flex"
+                  />
                 )}
                 {trade.confidence === "partial" && (
                   <span
@@ -676,7 +703,7 @@ export default function UserTradeHistory({
                               className="text-secondary-text/60 h-4 w-4"
                             />
                             <span
-                              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] leading-none font-semibold whitespace-nowrap sm:text-xs ${
+                              className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[10px] leading-none font-semibold whitespace-nowrap sm:text-xs ${
                                 valueDifference! > 0
                                   ? "border-status-success/40 bg-status-success/80 text-form-button-text"
                                   : valueDifference! < 0
