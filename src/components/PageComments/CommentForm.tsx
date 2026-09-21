@@ -33,6 +33,8 @@ export function CommentForm() {
     emojiStringMap,
   } = useCommentsContext();
   const { twemojiEnabled } = useTwemoji();
+  const inputBgClass =
+    type === "tradev2" ? "bg-secondary-bg" : "bg-tertiary-bg";
 
   const [newComment, setNewComment] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
@@ -79,7 +81,7 @@ export function CommentForm() {
         <button
           type="button"
           disabled={isBlocked}
-          className="border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info w-full cursor-text rounded-lg border px-4 py-3 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          className={`border-border-card text-secondary-text hover:border-button-info w-full cursor-text rounded-lg border px-4 py-3 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${inputBgClass}`}
           onClick={() => {
             if (!isLoggedIn) {
               setLoginModal({ open: true });
@@ -91,7 +93,9 @@ export function CommentForm() {
           {isLoggedIn ? "Write a comment..." : "Log in to leave a comment..."}
         </button>
       ) : (
-        <div className="border-border-card bg-tertiary-bg focus-within:border-button-info rounded-lg border transition-colors">
+        <div
+          className={`border-border-card focus-within:border-button-info rounded-lg border transition-colors ${inputBgClass}`}
+        >
           <CommentTextarea
             ref={textareaRef}
             id="new-comment-textarea"

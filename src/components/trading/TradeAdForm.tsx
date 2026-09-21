@@ -154,6 +154,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const [tradeNote, setTradeNote] = useState("");
   const [userData, setUserData] = useState<UserData | null>(null);
   const didAutoFillSuggestedNoteRef = React.useRef(false);
+  const restoreDecisionRef = useRef<"pending" | "restore" | "new">("pending");
   const tradeAdSyncDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -355,12 +356,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         const remoteNote = remote.note ?? "";
         const remoteExpiration = remote.expiration ?? null;
 
-        // Apply silently — no modal. State setters don't call syncItemsToPreference so no loop.
-        setOfferingItems(hydOff);
-        setRequestingItems(hydReq);
-        setTradeNote(remoteNote);
-        setExpirationHours(remoteExpiration);
-        // Persist so a page reload can offer restore
+        if (restoreDecisionRef.current === "new") return;
+
         if (tradeDraftStorageKey)
           safeSetJSON(tradeDraftStorageKey, {
             offering: hydOff,
@@ -368,6 +365,19 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             note: remoteNote,
             expiration: remoteExpiration,
           });
+
+        if (restoreDecisionRef.current === "restore") {
+          setOfferingItems(hydOff);
+          setRequestingItems(hydReq);
+          setTradeNote(remoteNote);
+          setExpirationHours(remoteExpiration);
+        } else if (
+          hydOff.length > 0 ||
+          hydReq.length > 0 ||
+          remoteNote.length > 0
+        ) {
+          setShowRestoreModal(true);
+        }
       } catch {
         // ignore malformed
       }
@@ -380,6 +390,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       setRequestingItems([]);
       setTradeNote("");
       setExpirationHours(null);
+      restoreDecisionRef.current = "new";
       if (tradeDraftStorageKey)
         safeLocalStorage.removeItem(tradeDraftStorageKey);
     };
@@ -404,13 +415,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
     const cached = getCachedPreference("trade_ad_items");
     if (typeof cached === "string" && cached) {
-      setTimeout(() => {
-        handlePreference(
-          new CustomEvent("realtimePreference", {
-            detail: { key: "trade_ad_items", value: cached },
-          }),
-        );
-      }, 0);
+      handlePreference(
+        new CustomEvent("realtimePreference", {
+          detail: { key: "trade_ad_items", value: cached },
+        }),
+      );
     }
 
     window.addEventListener("realtimePreference", handlePreference);
@@ -471,6 +480,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   }, [user]);
 
   useEffect(() => {
+    restoreDecisionRef.current = "pending";
     setOfferingItems([]);
     setRequestingItems([]);
     setTradeNote("");
@@ -489,8 +499,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         const { offering = [], requesting = [], note = "" } = storedItems;
         if (offering.length > 0 || requesting.length > 0 || note.length > 0) {
           setShowRestoreModal(true);
+          return;
         }
       }
+      restoreDecisionRef.current = "new";
     } catch (error) {
       log.error("Failed to parse stored items from localStorage:", error);
       safeLocalStorage.removeItem(tradeDraftStorageKey);
@@ -517,6 +529,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
   const handleRestoreItems = () => {
     try {
+      restoreDecisionRef.current = "restore";
       if (!tradeDraftStorageKey) return;
       const storedItems = safeGetJSON<TradeFormDraft>(tradeDraftStorageKey, {
         offering: [],
@@ -543,6 +556,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   };
 
   const handleStartNewTradeAd = () => {
+    restoreDecisionRef.current = "new";
     if (tradeDraftStorageKey) safeLocalStorage.removeItem(tradeDraftStorageKey);
     setOfferingItems([]);
     setRequestingItems([]);
@@ -1007,13 +1021,14 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         <div className="space-y-6">
           <ConfirmDialog
             isOpen={showRestoreModal}
-            onClose={() => setShowRestoreModal(false)}
+            onClose={handleStartNewTradeAd}
             title="Restore Trade Ad?"
             message="Do you want to restore your previously added items or start a new trade ad?"
             confirmText="Restore"
             cancelText="Start New"
             onConfirm={handleRestoreItems}
             confirmVariant="default"
+            closeOnConfirm={false}
           />
 
           {/* Clear Confirmation Modal */}

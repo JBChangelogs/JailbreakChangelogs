@@ -129,6 +129,14 @@ export default function TradeAds({
   const [isTradeAdsLoading, setIsTradeAdsLoading] = useState(
     initialTradeAds.length === 0,
   );
+  const [userTradeAds, setUserTradeAds] = useState<TradeAd[]>([]);
+  const [isUserTradeAdsLoading, setIsUserTradeAdsLoading] = useState(false);
+  const [userTradeAdsError, setUserTradeAdsError] = useState<string | null>(
+    null,
+  );
+  const [userTradeAdsPage, setUserTradeAdsPage] = useState(1);
+  const [userTradeAdsTotalPages, setUserTradeAdsTotalPages] = useState(1);
+  const [userTradeAdsTotalCount, setUserTradeAdsTotalCount] = useState(0);
   const [items] = useState<TradeItem[]>(initialItems);
   const [error, setError] = useState<string | null>(null);
   const [isListRateLimited, setIsListRateLimited] = useState(false);
@@ -143,11 +151,16 @@ export default function TradeAds({
     history: "push",
     shallow: true,
   });
+  const [createParam, setCreateParam] = useQueryState("create", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
   const activeTab = useMemo<"view" | "create" | "myads">(() => {
-    if (tabParam === "create") return "create";
+    if (createParam === "true" || tabParam === "create") return "create";
     if (tabParam === "myads") return "myads";
     return "view";
-  }, [tabParam]);
+  }, [createParam, tabParam]);
   const [itemsInputMode, setItemsInputMode] = useState<"values" | "inventory">(
     "values",
   );
@@ -185,6 +198,7 @@ export default function TradeAds({
   >("contains");
   const currentUserId = user?.id || null;
   const lastFetchedTradeAdsPageRef = useRef<number | null>(null);
+  const lastFetchedUserTradeAdsUserIdRef = useRef<string | null>(null);
   const lastRealtimeRefreshAtRef = useRef<number>(0);
   const isSyncingPageWithUrlRef = useRef(false);
 
@@ -201,6 +215,7 @@ export default function TradeAds({
     (targetPage: number) => {
       const params = new URLSearchParams(searchParams.toString());
       params.delete("tab");
+      params.delete("create");
       if (targetPage > 1) {
         params.set("page", String(targetPage));
       } else {
@@ -653,6 +668,12 @@ export default function TradeAds({
   );
 
   const handleCreateSuccess = (createdTradeRaw?: unknown) => {
+    lastFetchedUserTradeAdsUserIdRef.current = null;
+    setUserTradeAds([]);
+    setUserTradeAdsPage(1);
+    setUserTradeAdsTotalPages(1);
+    setUserTradeAdsTotalCount(0);
+
     void (async () => {
       try {
         isSyncingPageWithUrlRef.current = true;
@@ -673,6 +694,7 @@ export default function TradeAds({
     })();
 
     router.replace(getTradingUrl(1));
+    void setCreateParam(null);
     void setTabParam(null);
   };
 
@@ -702,17 +724,19 @@ export default function TradeAds({
   };
 
   const fetchRecentTradeAdsPage = useCallback(
-    async (targetPage: number): Promise<PaginatedTradeAdsResponse> => {
+    async (
+      targetPage: number,
+      userId?: string,
+    ): Promise<PaginatedTradeAdsResponse> => {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
       if (!baseUrl) {
         throw new Error("NEXT_PUBLIC_API_URL is not configured");
       }
 
+      const query = new URLSearchParams({ page: String(targetPage) });
+      if (userId) query.set("user", userId);
       const { url: recentTradesUrl, headers: recentTradesHeaders } =
-        buildApiFetchRequest(
-          baseUrl,
-          `/trades/v2/recent?page=${encodeURIComponent(String(targetPage))}`,
-        );
+        buildApiFetchRequest(baseUrl, `/trades/v2/recent?${query.toString()}`);
       const response = await fetch(recentTradesUrl, {
         cache: "no-store",
         credentials: "include",
@@ -887,9 +911,44 @@ export default function TradeAds({
     [fetchRecentTradeAdsPage, getTradingUrl, page, router, tradeAds.length],
   );
 
-  const userTradeAds = tradeAds.filter(
-    (trade) => trade.author === currentUserId,
+  const refreshUserTradeAds = useCallback(
+    async (targetPage: number, userId: string): Promise<void> => {
+      try {
+        setIsUserTradeAdsLoading(true);
+        setUserTradeAdsError(null);
+        const response = await fetchRecentTradeAdsPage(targetPage, userId);
+        setUserTradeAds(response.items);
+        setUserTradeAdsTotalCount(response.total);
+        setUserTradeAdsTotalPages(response.total_pages || 1);
+        setUserTradeAdsPage(response.page || targetPage);
+        lastFetchedUserTradeAdsUserIdRef.current = userId;
+      } catch (err) {
+        log.error("Error refreshing user trade ads:", err);
+        lastFetchedUserTradeAdsUserIdRef.current = null;
+        setUserTradeAdsError("Failed to load your trade ads");
+      } finally {
+        setIsUserTradeAdsLoading(false);
+      }
+    },
+    [fetchRecentTradeAdsPage],
   );
+
+  useEffect(() => {
+    lastFetchedUserTradeAdsUserIdRef.current = null;
+    setUserTradeAds([]);
+    setUserTradeAdsError(null);
+    setUserTradeAdsPage(1);
+    setUserTradeAdsTotalPages(1);
+    setUserTradeAdsTotalCount(0);
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (activeTab !== "myads" || !currentUserId) return;
+    if (lastFetchedUserTradeAdsUserIdRef.current === currentUserId) return;
+
+    lastFetchedUserTradeAdsUserIdRef.current = currentUserId;
+    void refreshUserTradeAds(1, currentUserId);
+  }, [activeTab, currentUserId, refreshUserTradeAds]);
 
   useEffect(() => {
     if (page === pageFromUrl) {
@@ -942,18 +1001,10 @@ export default function TradeAds({
     void refreshTradeAds(page);
   }, [isRecentTradesUnauthorized, isAuthenticated, page, refreshTradeAds]);
 
-  useEffect(() => {
-    if (tabParam !== "myads") return;
-    if (!currentUserId || userTradeAds.length === 0) {
-      void setTabParam(null);
-    }
-  }, [tabParam, currentUserId, userTradeAds.length, setTabParam]);
-
   const handleTabChange = (tab: "view" | "create" | "myads") => {
-    isSyncingPageWithUrlRef.current = true;
     setIsPageTransitionLoading(false);
-    setPage(1);
-    void setTabParam(tab === "view" ? null : tab);
+    void setCreateParam(tab === "create" ? "true" : null);
+    void setTabParam(tab === "myads" ? "myads" : null);
   };
 
   const handleDeleteTrade = async (tradeId: number) => {
@@ -961,6 +1012,8 @@ export default function TradeAds({
     try {
       // Remove the trade from the list immediately to prevent UI flicker
       setTradeAds((prevAds) => prevAds.filter((ad) => ad.id !== tradeId));
+      setUserTradeAds((prevAds) => prevAds.filter((ad) => ad.id !== tradeId));
+      setUserTradeAdsTotalCount((count) => Math.max(0, count - 1));
       await deleteTradeAd(tradeId);
       toast.success("Trade ad deleted successfully", { id: toastId });
     } catch (error) {
@@ -975,6 +1028,9 @@ export default function TradeAds({
       }
       // Refresh the trade ads list to ensure consistency
       refreshTradeAds();
+      if (currentUserId) {
+        void refreshUserTradeAds(userTradeAdsPage, currentUserId);
+      }
     }
   };
 
@@ -987,6 +1043,17 @@ export default function TradeAds({
     setIsPageTransitionLoading(true);
     setPage(value);
     router.push(getTradingUrl(value));
+  };
+
+  const handleUserTradeAdsPageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
+    if (value === userTradeAdsPage || isUserTradeAdsLoading || !currentUserId) {
+      return;
+    }
+    setUserTradeAdsPage(value);
+    void refreshUserTradeAds(value, currentUserId);
   };
 
   if (isListRateLimited) {
@@ -1013,7 +1080,7 @@ export default function TradeAds({
         <TradeAdTabs
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          hasTradeAds={userTradeAds.length > 0}
+          showMyAds={Boolean(currentUserId)}
         />
         <TradeAdSkeleton />
       </div>
@@ -1062,7 +1129,7 @@ export default function TradeAds({
         <TradeAdTabs
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          hasTradeAds={false}
+          showMyAds={false}
         />
 
         <div
@@ -1076,10 +1143,10 @@ export default function TradeAds({
         </div>
 
         <div
-          role="tabpanel"
+          role="region"
           hidden={activeTab !== "create"}
           id="trading-tabpanel-create"
-          aria-labelledby="trading-tab-create"
+          aria-labelledby="trading-create-button"
           className="mt-6"
         >
           {activeTab === "create" && (
@@ -1098,7 +1165,7 @@ export default function TradeAds({
         <TradeAdTabs
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          hasTradeAds={userTradeAds.length > 0}
+          showMyAds={Boolean(currentUserId)}
         />
         {/* Tab Content */}
         <div
@@ -1129,10 +1196,10 @@ export default function TradeAds({
         </div>
 
         <div
-          role="tabpanel"
+          role="region"
           hidden={activeTab !== "create"}
           id="trading-tabpanel-create"
-          aria-labelledby="trading-tab-create"
+          aria-labelledby="trading-create-button"
           className="mt-6"
         >
           {activeTab === "create" && (
@@ -1372,13 +1439,22 @@ export default function TradeAds({
         )}
       </div>
     ) : null;
+  const renderUserTradeAdsPaginationControls = () =>
+    userTradeAdsTotalPages > 1 ? (
+      <Pagination
+        count={userTradeAdsTotalPages}
+        page={userTradeAdsPage}
+        onChange={handleUserTradeAdsPageChange}
+        disabled={isUserTradeAdsLoading}
+      />
+    ) : null;
 
   return (
     <div className="mt-8 mb-8">
       <TradeAdTabs
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        hasTradeAds={userTradeAds.length > 0}
+        showMyAds={Boolean(currentUserId)}
       />
 
       {/* Search Input - Show for view and myads tabs */}
@@ -1598,7 +1674,7 @@ export default function TradeAds({
         hidden={activeTab !== "view"}
         id="trading-tabpanel-view"
         aria-labelledby="trading-tab-view"
-        className="mt-6"
+        className="mt-3"
       >
         {activeTab === "view" && (
           <>
@@ -1666,6 +1742,8 @@ export default function TradeAds({
                         trade={enrichedTrade}
                         currentUserId={currentUserId}
                         onDelete={() => handleDeleteTrade(trade.id)}
+                        useQuaternaryAvatarBackground
+                        timestampTooltipSide="bottom"
                       />
                       <RateLimitBanner
                         until={deleteRateLimits.get(trade.id) ?? null}
@@ -1687,10 +1765,10 @@ export default function TradeAds({
       </div>
 
       <div
-        role="tabpanel"
+        role="region"
         hidden={activeTab !== "create"}
         id="trading-tabpanel-create"
-        aria-labelledby="trading-tab-create"
+        aria-labelledby="trading-create-button"
         className="mt-6"
       >
         {activeTab === "create" && (
@@ -1720,18 +1798,39 @@ export default function TradeAds({
         hidden={activeTab !== "myads"}
         id="trading-tabpanel-myads"
         aria-labelledby="trading-tab-myads"
-        className="mt-6"
+        className="mt-3"
       >
         {activeTab === "myads" && (
           <>
             <div className="mb-4 flex items-center justify-between">
               <p className="text-secondary-text">
                 Showing {filteredUserTradeAds.length}{" "}
+                {!hasActiveFilters && userTradeAdsTotalCount > 0
+                  ? `of ${userTradeAdsTotalCount} `
+                  : ""}
                 {filteredUserTradeAds.length === 1 ? "trade ad" : "trade ads"}
                 {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
               </p>
             </div>
-            {filteredUserTradeAds.length === 0 ? (
+            {isUserTradeAdsLoading ? (
+              <TradeAdSkeleton />
+            ) : userTradeAdsError ? (
+              <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+                <h3 className="text-secondary-text mb-4 text-lg font-medium">
+                  Unable to Load Your Trade Ads
+                </h3>
+                <p className="text-secondary-text mb-6">{userTradeAdsError}</p>
+                <Button
+                  onClick={() => {
+                    if (currentUserId) {
+                      void refreshUserTradeAds(userTradeAdsPage, currentUserId);
+                    }
+                  }}
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : filteredUserTradeAds.length === 0 ? (
               userTradeAds.length === 0 ? (
                 <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
                   <h3 className="text-secondary-text mb-4 text-lg font-medium">
@@ -1755,37 +1854,51 @@ export default function TradeAds({
                 </div>
               )
             ) : (
-              <div className="space-y-4">
-                {filteredUserTradeAds.map((trade) => {
-                  const enrichedTrade: TradeAd = {
-                    ...trade,
-                    offering: trade.offering.map((it) => ({
-                      ...it,
-                      demand: getDemandForItem(it) || it.demand,
-                      trend: getTrendForItem(it) || it.trend,
-                    })),
-                    requesting: trade.requesting.map((it) => ({
-                      ...it,
-                      demand: getDemandForItem(it) || it.demand,
-                      trend: getTrendForItem(it) || it.trend,
-                    })),
-                  };
-                  return (
-                    <div key={trade.id}>
-                      <TradeAdCard
-                        trade={enrichedTrade}
-                        currentUserId={currentUserId}
-                        onDelete={() => handleDeleteTrade(trade.id)}
-                      />
-                      <RateLimitBanner
-                        until={deleteRateLimits.get(trade.id) ?? null}
-                        label="You're deleting too fast."
-                        className="mt-2"
-                      />
-                    </div>
-                  );
-                })}
-              </div>
+              <>
+                {userTradeAdsTotalPages > 1 && (
+                  <div className="mb-4 flex justify-center">
+                    {renderUserTradeAdsPaginationControls()}
+                  </div>
+                )}
+                <div className="space-y-4">
+                  {filteredUserTradeAds.map((trade) => {
+                    const enrichedTrade: TradeAd = {
+                      ...trade,
+                      offering: trade.offering.map((it) => ({
+                        ...it,
+                        demand: getDemandForItem(it) || it.demand,
+                        trend: getTrendForItem(it) || it.trend,
+                      })),
+                      requesting: trade.requesting.map((it) => ({
+                        ...it,
+                        demand: getDemandForItem(it) || it.demand,
+                        trend: getTrendForItem(it) || it.trend,
+                      })),
+                    };
+                    return (
+                      <div key={trade.id}>
+                        <TradeAdCard
+                          trade={enrichedTrade}
+                          currentUserId={currentUserId}
+                          onDelete={() => handleDeleteTrade(trade.id)}
+                          useQuaternaryAvatarBackground
+                          timestampTooltipSide="bottom"
+                        />
+                        <RateLimitBanner
+                          until={deleteRateLimits.get(trade.id) ?? null}
+                          label="You're deleting too fast."
+                          className="mt-2"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                {userTradeAdsTotalPages > 1 && (
+                  <div className="mt-8 mb-8 flex justify-center">
+                    {renderUserTradeAdsPaginationControls()}
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

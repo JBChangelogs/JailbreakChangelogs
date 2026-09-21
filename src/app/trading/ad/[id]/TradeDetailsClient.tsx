@@ -197,16 +197,23 @@ const TradeSidePreview = ({
         </h3>
       </div>
       {/* Mobile list view */}
-      <div className="border-border-card bg-tertiary-bg/40 flex-1 rounded-xl border lg:hidden">
-        <div className="border-border-card grid grid-cols-[1fr_auto] gap-3 border-b px-3 py-2 text-xs font-semibold">
-          <span className="text-secondary-text">Item</span>
-          <span className="text-secondary-text">Qty</span>
+      <div className="border-border-card bg-tertiary-bg flex-1 rounded-xl border lg:hidden">
+        <div className="border-border-card border-b px-3 py-2 text-xs font-semibold">
+          <span className="text-secondary-text">Items</span>
         </div>
         {previewItems.length > 0 ? (
           <div className="max-h-80 overflow-y-auto">
             {previewItems.map((item) => {
               const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
               const itemHref = getTradeItemDetailHref(item);
+              const rawItemValue = item.isDuped
+                ? item.duped_value
+                : item.cash_value;
+              const hasKnownItemValue =
+                rawItemValue != null && rawItemValue !== "N/A";
+              const itemValue = hasKnownItemValue
+                ? formatTradeValue(parseTradeValue(rawItemValue))
+                : "N/A";
 
               const rawNameNode = itemHref ? (
                 <Link
@@ -244,7 +251,7 @@ const TradeSidePreview = ({
                   className="border-border-card border-b last:border-b-0"
                 >
                   <div className="hover:bg-quaternary-bg cursor-default transition-colors">
-                    <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
+                    <div className="px-3 py-2">
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="bg-tertiary-bg relative hidden aspect-video w-28 shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block">
                           <Image
@@ -255,10 +262,23 @@ const TradeSidePreview = ({
                             onError={handleImageError}
                             draggable={false}
                           />
+                          {item.count > 1 && (
+                            <span
+                              aria-hidden="true"
+                              className="bg-primary-bg/85 text-primary-text absolute top-2 right-2 rounded-md px-2 py-1 text-xs leading-none font-bold shadow-sm backdrop-blur-sm"
+                            >
+                              ×{item.count}
+                            </span>
+                          )}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             {nameNode}
+                            {item.count > 1 && (
+                              <span className="text-secondary-text shrink-0 text-xs font-semibold tabular-nums">
+                                ×{item.count}
+                              </span>
+                            )}
                             <span
                               className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                               style={{
@@ -290,21 +310,18 @@ const TradeSidePreview = ({
                             )}
                           </div>
                           {!isCustomTradeItem(item) && (
-                            <div className="text-secondary-text mt-1 text-xs">
-                              <span className="font-medium">
-                                {item.isDuped ? "Duped value:" : "Cash value:"}
+                            <div className="mt-2 flex items-center justify-between gap-2">
+                              <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                                {item.isDuped ? "Duped value" : "Cash value"}
                               </span>{" "}
-                              <span className="tabular-nums">
-                                {(() => {
-                                  const rawValue = item.isDuped
-                                    ? item.duped_value
-                                    : item.cash_value;
-                                  if (rawValue == null || rawValue === "N/A")
-                                    return "N/A";
-                                  return formatTradeValue(
-                                    parseTradeValue(rawValue) * item.count,
-                                  );
-                                })()}
+                              <span
+                                className={`inline-flex h-5 items-center rounded-lg px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs ${
+                                  hasKnownItemValue
+                                    ? "bg-button-info text-form-button-text"
+                                    : "bg-quaternary-bg text-secondary-text"
+                                }`}
+                              >
+                                {itemValue}
                               </span>
                             </div>
                           )}
@@ -312,9 +329,6 @@ const TradeSidePreview = ({
                             {item.name} ({item.type})
                           </div>
                         </div>
-                      </div>
-                      <div className="text-primary-text text-sm font-semibold tabular-nums">
-                        ×{item.count}
                       </div>
                     </div>
                   </div>
@@ -329,17 +343,25 @@ const TradeSidePreview = ({
         )}
       </div>
 
-      {/* Desktop 4-column card grid */}
+      {/* Desktop card grid */}
       <div className="hidden lg:flex lg:flex-1 lg:flex-col">
         {previewItems.length > 0 ? (
-          <div className="border-border-card bg-tertiary-bg/40 flex-1 rounded-xl border p-2">
-            <div className="grid grid-cols-4 gap-2">
+          <div className="border-border-card bg-tertiary-bg flex-1 rounded-xl border p-2">
+            <div className="grid grid-cols-3 items-start gap-2">
               {previewItems.map((item) => {
                 const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}-grid`;
                 const itemHref = getTradeItemDetailHref(item);
+                const rawItemValue = item.isDuped
+                  ? item.duped_value
+                  : item.cash_value;
+                const hasKnownItemValue =
+                  rawItemValue != null && rawItemValue !== "N/A";
+                const itemValue = hasKnownItemValue
+                  ? formatTradeValue(parseTradeValue(rawItemValue))
+                  : "N/A";
 
                 const cardInner = (
-                  <div className="bg-tertiary-bg hover:bg-quaternary-bg overflow-hidden rounded-lg border border-white/5 transition-colors">
+                  <div className="bg-secondary-bg hover:bg-quaternary-bg overflow-hidden rounded-lg border border-white/5 transition-colors">
                     <div className="relative aspect-video w-full overflow-hidden">
                       <Image
                         src={getTradeItemImagePath(item, true)}
@@ -349,61 +371,68 @@ const TradeSidePreview = ({
                         onError={handleImageError}
                         draggable={false}
                       />
-                      <div className="absolute right-1 bottom-1 flex items-center gap-1">
-                        {item.isDuped && (
-                          <span className="bg-status-error/90 rounded px-1 py-0.5 text-[10px] leading-none font-semibold text-white">
-                            D
-                          </span>
-                        )}
-                        {item.isOG && (
-                          <span className="rounded border border-white/10 bg-black/60 px-1 py-0.5 text-[10px] leading-none font-semibold text-white">
-                            OG
-                          </span>
-                        )}
-                        <span className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] leading-none font-semibold text-white backdrop-blur-sm">
+                      {item.count > 1 && (
+                        <span
+                          aria-hidden="true"
+                          className="bg-primary-bg/85 text-primary-text absolute top-2 right-2 rounded-md px-2 py-1 text-xs leading-none font-bold shadow-sm backdrop-blur-sm"
+                        >
                           ×{item.count}
                         </span>
-                      </div>
+                      )}
                     </div>
-                    <div className="px-1.5 py-1">
-                      <p className="text-primary-text line-clamp-1 text-[11px] leading-tight font-semibold">
-                        {item.name}
-                      </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                    <div className="p-2.5">
+                      <div className="flex min-w-0 items-start gap-1.5">
+                        <p className="text-primary-text line-clamp-2 min-w-0 flex-1 text-sm leading-5 font-semibold wrap-break-word">
+                          {item.name}
+                        </p>
+                        {item.count > 1 && (
+                          <span className="text-secondary-text shrink-0 text-xs font-semibold tabular-nums">
+                            ×{item.count}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                         <span
-                          className="bg-tertiary-bg/40 text-primary-text inline-flex h-5 items-center gap-1 rounded border px-1.5 text-[10px] leading-none font-medium backdrop-blur-xl"
+                          className="bg-tertiary-bg/40 text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                           style={{ borderColor: getCategoryColor(item.type) }}
                         >
                           {(() => {
                             const categoryIcon = getCategoryIcon(item.type);
                             return categoryIcon ? (
                               <categoryIcon.Icon
-                                className="h-2.5 w-2.5 shrink-0"
+                                className="h-3 w-3 shrink-0"
                                 style={{ color: getCategoryColor(item.type) }}
                               />
                             ) : null;
                           })()}
                           {item.type}
                         </span>
+                        {item.isDuped && (
+                          <span className="bg-status-error/90 inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-semibold text-white">
+                            Duped
+                          </span>
+                        )}
+                        {item.isOG && (
+                          <span className="inline-flex h-6 items-center rounded-lg border border-white/10 bg-black/40 px-2.5 text-xs leading-none font-semibold text-white">
+                            OG
+                          </span>
+                        )}
                       </div>
                       {!isCustomTradeItem(item) && (
-                        <p className="text-secondary-text mt-0.5 truncate text-[10px]">
-                          <span className="font-medium">
-                            {item.isDuped ? "Duped value:" : "Cash value:"}
-                          </span>{" "}
-                          <span className="tabular-nums">
-                            {(() => {
-                              const rawValue = item.isDuped
-                                ? item.duped_value
-                                : item.cash_value;
-                              if (rawValue == null || rawValue === "N/A")
-                                return "N/A";
-                              return formatTradeValue(
-                                parseTradeValue(rawValue) * item.count,
-                              );
-                            })()}
+                        <div className="mt-2.5 flex items-center justify-between gap-2">
+                          <span className="text-secondary-text truncate text-xs font-medium">
+                            {item.isDuped ? "Duped value" : "Cash value"}
                           </span>
-                        </p>
+                          <span
+                            className={`inline-flex h-6 shrink-0 items-center rounded-lg px-2.5 text-xs leading-none font-bold tabular-nums ${
+                              hasKnownItemValue
+                                ? "bg-button-info text-form-button-text"
+                                : "bg-quaternary-bg text-secondary-text"
+                            }`}
+                          >
+                            {itemValue}
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -988,7 +1017,7 @@ export default function TradeDetailsClient({
             <div className="flex w-full items-start justify-between gap-3">
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div
-                  className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
+                  className={`border-border-card bg-quaternary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
                     trade.user?.premiumtype === 3
                       ? "rounded-sm"
                       : "rounded-full"

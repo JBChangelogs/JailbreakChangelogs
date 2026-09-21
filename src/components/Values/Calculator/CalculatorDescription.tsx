@@ -18,7 +18,7 @@ const CalculatorDescription: React.FC = () => {
           <Link href="/values">View Item Values</Link>
         </Button>
         <Button asChild>
-          <Link href="/trading">Create A Trade Ad</Link>
+          <Link href="/trading?create=true">Create A Trade Ad</Link>
         </Button>
       </div>
     </div>

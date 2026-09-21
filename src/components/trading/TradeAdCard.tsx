@@ -32,6 +32,8 @@ interface TradeAdCardProps {
   currentUserId: string | null;
   onDelete?: () => void;
   actionsVariant?: "full" | "details-only";
+  useQuaternaryAvatarBackground?: boolean;
+  timestampTooltipSide?: "top" | "bottom";
 }
 
 const groupTradeItems = (items: TradeItem[]) => {
@@ -123,9 +125,8 @@ const TradeSidePreview = ({
         </h3>
       </div>
       <div className="border-border-card bg-tertiary-bg/40 rounded-xl border">
-        <div className="border-border-card grid grid-cols-[1fr_auto] gap-3 border-b px-3 py-2 text-xs font-semibold">
-          <span className="text-secondary-text">Item</span>
-          <span className="text-secondary-text">Qty</span>
+        <div className="border-border-card border-b px-3 py-2 text-xs font-semibold">
+          <span className="text-secondary-text">Items</span>
         </div>
         {previewItems.length > 0 ? (
           <div className="max-h-80 overflow-y-auto">
@@ -133,6 +134,14 @@ const TradeSidePreview = ({
               const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
               const itemHref = getTradeItemDetailHref(item);
               const itemDisplayName = item.name;
+              const rawItemValue = item.isDuped
+                ? item.duped_value
+                : item.cash_value;
+              const hasKnownItemValue =
+                rawItemValue != null && rawItemValue !== "N/A";
+              const itemValue = hasKnownItemValue
+                ? formatTradeValue(parseTradeValue(rawItemValue))
+                : "N/A";
 
               const rawNameNode = itemHref ? (
                 <Link
@@ -165,7 +174,7 @@ const TradeSidePreview = ({
               );
 
               const rowContent = (
-                <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
+                <div className="px-3 py-2">
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="bg-tertiary-bg relative hidden aspect-video w-28 shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block">
                       <Image
@@ -176,10 +185,23 @@ const TradeSidePreview = ({
                         onError={handleImageError}
                         draggable={false}
                       />
+                      {item.count > 1 && (
+                        <span
+                          aria-hidden="true"
+                          className="bg-primary-bg/85 text-primary-text absolute top-2 right-2 rounded-md px-2 py-1 text-xs leading-none font-bold shadow-sm backdrop-blur-sm"
+                        >
+                          ×{item.count}
+                        </span>
+                      )}
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         {nameNode}
+                        {item.count > 1 && (
+                          <span className="text-secondary-text shrink-0 text-xs font-semibold tabular-nums">
+                            ×{item.count}
+                          </span>
+                        )}
                         <span
                           className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                           style={{
@@ -209,30 +231,22 @@ const TradeSidePreview = ({
                         )}
                       </div>
                       {!isCustomTradeItem(item) && (
-                        <div className="text-secondary-text mt-1 text-xs">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-medium">
-                              {item.isDuped ? "Duped value:" : "Cash value:"}
-                            </span>
-                            <span className="tabular-nums">
-                              {(() => {
-                                const rawValue = item.isDuped
-                                  ? item.duped_value
-                                  : item.cash_value;
-                                if (rawValue == null || rawValue === "N/A")
-                                  return "N/A";
-                                const totalValue =
-                                  parseTradeValue(rawValue) * item.count;
-                                return formatTradeValue(totalValue);
-                              })()}
-                            </span>
-                          </div>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                            {item.isDuped ? "Duped value" : "Cash value"}
+                          </span>
+                          <span
+                            className={`inline-flex h-5 items-center rounded-lg px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs ${
+                              hasKnownItemValue
+                                ? "bg-button-info text-form-button-text"
+                                : "bg-quaternary-bg text-secondary-text"
+                            }`}
+                          >
+                            {itemValue}
+                          </span>
                         </div>
                       )}
                     </div>
-                  </div>
-                  <div className="text-primary-text text-sm font-semibold tabular-nums">
-                    ×{item.count}
                   </div>
                 </div>
               );
@@ -281,6 +295,8 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
   currentUserId,
   onDelete,
   actionsVariant = "full",
+  useQuaternaryAvatarBackground = false,
+  timestampTooltipSide = "top",
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -339,7 +355,11 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         <div className="bg-tertiary-bg border-border-card -mx-3 -mt-3 mb-4 flex flex-col gap-3 border-b px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <div
-              className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
+              className={`border-border-card relative h-10 w-10 shrink-0 overflow-hidden border ${
+                useQuaternaryAvatarBackground
+                  ? "bg-quaternary-bg"
+                  : "bg-primary-bg"
+              } ${
                 trade.user?.premiumtype === 3 ? "rounded-sm" : "rounded-full"
               }`}
             >
@@ -394,7 +414,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                       Created <RelativeTimeText timestamp={trade.created_at} />
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent side="top">
+                  <TooltipContent side={timestampTooltipSide}>
                     <p>{formatCustomDate(trade.created_at)}</p>
                   </TooltipContent>
                 </Tooltip>
@@ -407,7 +427,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                           Expires <RelativeTimeText timestamp={trade.expires} />
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent side="top">
+                      <TooltipContent side={timestampTooltipSide}>
                         <p>{formatCustomDate(trade.expires)}</p>
                       </TooltipContent>
                     </Tooltip>
