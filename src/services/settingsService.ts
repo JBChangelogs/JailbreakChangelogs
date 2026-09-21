@@ -226,7 +226,7 @@ export const uploadCustomBanner = async (file: File): Promise<string> => {
     "/users/me/banner",
   );
   const formData = new FormData();
-  formData.append("banner", file, "banner.png");
+  formData.append("banner", file, file.name);
 
   const response = await fetch(url, {
     method: "POST",
@@ -298,7 +298,7 @@ export const uploadCustomAvatar = async (file: File): Promise<string> => {
     "/users/me/avatar",
   );
   const formData = new FormData();
-  formData.append("avatar", file, "avatar.png");
+  formData.append("avatar", file, file.name);
 
   const response = await fetch(url, {
     method: "POST",

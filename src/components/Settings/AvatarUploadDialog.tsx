@@ -23,20 +23,22 @@ import {
 } from "@/services/settingsService";
 import type { UserSettingsV2 } from "@/types/auth";
 import { trackEvent } from "@/utils/analytics/rybbit";
-import { cropAvatarToPng, cropBannerToPng } from "@/utils/images/cropImage";
+import { cropAvatarImage, cropBannerImage } from "@/utils/images/cropImage";
 import { validateFile } from "@/utils/storage/fileValidation";
 import SupporterModal from "../Modals/SupporterModal";
 
 const log = createLogger("UI");
-const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+type UploadPhase = "processing" | "uploading" | null;
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
   "image/webp",
+  "image/gif",
 ];
 
-export const IMAGE_UPLOAD_FORMATS = "PNG, JPG, or WebP";
+export const IMAGE_UPLOAD_FORMATS = "PNG, JPG, WebP, or animated GIF";
 export const IMAGE_UPLOAD_MAX_SIZE_MB = {
   avatar: 8,
   banner: 10,
@@ -69,14 +71,17 @@ const ImageUploadDialog = ({
   imageType,
 }: ImageUploadDialogProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const selectedFileRef = useRef<File | null>(null);
   const selectedSourceRef = useRef<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadPhase, setUploadPhase] = useState<UploadPhase>(null);
   const [isUploadPromptOpen, setIsUploadPromptOpen] = useState(false);
   const [isCropOpen, setIsCropOpen] = useState(false);
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
+  const [croppedAreaPercentages, setCroppedAreaPercentages] =
+    useState<Area | null>(null);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const { modalState, closeModal, checkAvatarAccess, checkBannerAccess } =
     useSupporterModal();
@@ -84,6 +89,7 @@ const ImageUploadDialog = ({
   const label = isAvatar ? "avatar" : "banner";
   const maxFileSizeMb = IMAGE_UPLOAD_MAX_SIZE_MB[imageType];
   const settingName = isAvatar ? "custom_avatar" : "custom_banner";
+  const isUploading = uploadPhase !== null;
   const hasCropEdits =
     crop.x !== 0 || crop.y !== 0 || zoom !== 1 || rotation !== 0;
 
@@ -106,10 +112,12 @@ const ImageUploadDialog = ({
       selectedSourceRef.current = null;
     }
     setSelectedSource(null);
+    selectedFileRef.current = null;
     setIsCropOpen(false);
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setRotation(0);
+    setCroppedAreaPercentages(null);
     setCroppedAreaPixels(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
@@ -154,15 +162,21 @@ const ImageUploadDialog = ({
     }
 
     const source = URL.createObjectURL(file);
+    if (selectedSourceRef.current) {
+      URL.revokeObjectURL(selectedSourceRef.current);
+    }
+    selectedFileRef.current = file;
     selectedSourceRef.current = source;
     setSelectedSource(source);
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setRotation(0);
+    setCroppedAreaPercentages(null);
     setIsCropOpen(true);
   };
 
-  const handleCropComplete = useCallback((_area: Area, pixels: Area) => {
+  const handleCropComplete = useCallback((area: Area, pixels: Area) => {
+    setCroppedAreaPercentages(area);
     setCroppedAreaPixels(pixels);
   }, []);
 
@@ -173,13 +187,43 @@ const ImageUploadDialog = ({
   };
 
   const handleUpload = async () => {
-    if (!selectedSource || !croppedAreaPixels || isUploading) return;
-    setIsUploading(true);
+    const selectedFile = selectedFileRef.current;
+    if (!selectedFile || !selectedSource || !croppedAreaPixels || isUploading)
+      return;
+    const fullImageSelected =
+      croppedAreaPercentages !== null &&
+      croppedAreaPercentages.x <= 0.01 &&
+      croppedAreaPercentages.y <= 0.01 &&
+      croppedAreaPercentages.width >= 99.99 &&
+      croppedAreaPercentages.height >= 99.99;
+    const canUploadGifDirectly =
+      selectedFile.type === "image/gif" && !hasCropEdits && fullImageSelected;
+    setUploadPhase(canUploadGifDirectly ? "uploading" : "processing");
 
+    let uploadStarted = false;
     try {
-      const croppedFile = isAvatar
-        ? await cropAvatarToPng(selectedSource, croppedAreaPixels, rotation)
-        : await cropBannerToPng(selectedSource, croppedAreaPixels, rotation);
+      const croppedFile = canUploadGifDirectly
+        ? selectedFile
+        : isAvatar
+          ? await cropAvatarImage(
+              selectedFile,
+              selectedSource,
+              croppedAreaPixels,
+              rotation,
+            )
+          : await cropBannerImage(
+              selectedFile,
+              selectedSource,
+              croppedAreaPixels,
+              rotation,
+            );
+      if (croppedFile.size > maxFileSizeMb * 1024 * 1024) {
+        throw new Error(
+          `The cropped ${label} is larger than ${maxFileSizeMb}MB. Try a shorter or smaller GIF.`,
+        );
+      }
+      setUploadPhase("uploading");
+      uploadStarted = true;
       const newImageUrl = isAvatar
         ? await uploadCustomAvatar(croppedFile)
         : await uploadCustomBanner(croppedFile);
@@ -204,13 +248,21 @@ const ImageUploadDialog = ({
         },
       );
     } catch (error) {
-      log.error(`${isAvatar ? "Avatar" : "Banner"} upload error:`, error);
-      toast.error(`${isAvatar ? "Avatar" : "Banner"} upload failed`, {
-        description:
-          error instanceof Error ? error.message : `Failed to upload ${label}`,
-      });
+      log.error(
+        `${isAvatar ? "Avatar" : "Banner"} ${uploadStarted ? "upload" : "processing"} error:`,
+        error,
+      );
+      toast.error(
+        `${isAvatar ? "Avatar" : "Banner"} ${uploadStarted ? "upload" : "processing"} failed`,
+        {
+          description:
+            error instanceof Error
+              ? error.message
+              : `Failed to upload ${label}`,
+        },
+      );
     } finally {
-      setIsUploading(false);
+      setUploadPhase(null);
     }
   };
 
@@ -265,7 +317,10 @@ const ImageUploadDialog = ({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="bg-primary-bg relative mt-4 h-[min(52vh,420px)] w-full overflow-hidden rounded-xl">
+          <div
+            className="bg-primary-bg relative mt-4 h-[min(52vh,420px)] w-full overflow-hidden rounded-xl"
+            aria-busy={isUploading}
+          >
             {selectedSource && (
               <Cropper
                 image={selectedSource}
@@ -277,11 +332,14 @@ const ImageUploadDialog = ({
                   isAvatar && userData.premiumtype !== 3 ? "round" : "rect"
                 }
                 showGrid={false}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onRotationChange={setRotation}
+                onCropChange={isUploading ? () => undefined : setCrop}
+                onZoomChange={isUploading ? undefined : setZoom}
+                onRotationChange={isUploading ? undefined : setRotation}
                 onCropComplete={handleCropComplete}
               />
+            )}
+            {isUploading && (
+              <div className="absolute inset-0 z-10 cursor-wait" />
             )}
           </div>
 
@@ -355,9 +413,13 @@ const ImageUploadDialog = ({
                     : "material-symbols:cloud-upload"
                 }
               />
-              {isUploading
-                ? "Uploading..."
-                : `Upload ${isAvatar ? "Avatar" : "Banner"}`}
+              {uploadPhase === "processing"
+                ? selectedFileRef.current?.type === "image/gif"
+                  ? "Processing GIF..."
+                  : "Processing image..."
+                : uploadPhase === "uploading"
+                  ? "Uploading..."
+                  : `Upload ${isAvatar ? "Avatar" : "Banner"}`}
             </Button>
           </DialogFooter>
         </DialogContent>
