@@ -67,7 +67,9 @@ function SpoilerImage({
         showUrl
         stopPropagation
         previewRadius={rounded ? "rounded-full" : "rounded-lg"}
-        className={rounded ? "inline-block" : undefined}
+        className={
+          rounded ? "bg-tertiary-bg inline-block" : "bg-tertiary-bg w-full"
+        }
       >
         <Image
           src={src}
@@ -86,7 +88,7 @@ function SpoilerImage({
     <button
       type="button"
       aria-label={`Reveal ${alt}`}
-      className={`relative cursor-pointer overflow-hidden ${rounded ? "inline-block rounded-full" : "rounded-lg"}`}
+      className={`bg-tertiary-bg relative cursor-pointer overflow-hidden ${rounded ? "inline-block rounded-full" : "w-full rounded-lg"}`}
       onClick={(event) => {
         event.stopPropagation();
         setRevealed(true);
@@ -361,8 +363,7 @@ export function getReportedUserId(report: Report): string | null {
 export function ReportContext({ report }: { report: Report }) {
   const router = useRouter();
   const { type, metadata } = report;
-  const contextClassName =
-    "border-border-card bg-tertiary-bg/55 mt-3 rounded-xl border p-3.5";
+  const contextClassName = "mt-3 max-w-4xl";
 
   switch (type) {
     case "comment":
@@ -370,7 +371,7 @@ export function ReportContext({ report }: { report: Report }) {
         const commentTargetUrl = getCommentTargetUrl(metadata.comment);
         return (
           <div className={contextClassName}>
-            <p className="text-secondary-text mb-2 flex items-center gap-1.5 text-xs">
+            <p className="text-secondary-text mb-2 flex flex-wrap items-center gap-1.5 text-xs">
               <Icon icon="heroicons:chat-bubble-left" className="h-3.5 w-3.5" />
               Comment by{" "}
               <button
@@ -437,7 +438,7 @@ export function ReportContext({ report }: { report: Report }) {
       const hasGlobalName =
         reportedUser.global_name && reportedUser.global_name !== "None";
       return (
-        <div className={`${contextClassName} flex items-center gap-3`}>
+        <div className={`${contextClassName} flex items-center gap-3 py-1`}>
           <div className="bg-button-danger/10 text-button-danger flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
             <Icon icon="heroicons:user" className="h-4 w-4" />
           </div>
@@ -459,7 +460,7 @@ export function ReportContext({ report }: { report: Report }) {
     case "avatar":
       if (metadata.avatar) {
         return (
-          <div className={`${contextClassName} flex items-center gap-3`}>
+          <div className={`${contextClassName} flex items-center gap-3 py-1`}>
             <SpoilerImage src={metadata.avatar} alt="Reported avatar" rounded />
             <div>
               <p className="text-secondary-text text-xs">Reported avatar</p>
@@ -509,7 +510,7 @@ export function ReportContext({ report }: { report: Report }) {
           ? `@${usernameStr}`
           : "";
       return (
-        <div className={`${contextClassName} flex items-center gap-3`}>
+        <div className={`${contextClassName} flex items-center gap-3 py-1`}>
           <div className="bg-button-info/10 text-button-info flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
             <Icon icon="heroicons:identification" className="h-4 w-4" />
           </div>
@@ -564,10 +565,10 @@ export function ReportContext({ report }: { report: Report }) {
             href={`/items/suggestions/${metadata.suggestion.id}`}
             prefetch={false}
             onClick={(event) => event.stopPropagation()}
-            className="border-border-card bg-tertiary-bg/55 hover:border-border-focus hover:bg-tertiary-bg mt-3 block rounded-xl border p-3.5 transition-colors"
+            className="group/preview mt-3 block max-w-4xl"
           >
             <div className="mb-1 flex flex-wrap items-center gap-2">
-              <p className="text-secondary-text text-xs">
+              <p className="text-link group-hover/preview:text-link-hover text-xs transition-colors">
                 Value suggestion for {metadata.suggestion.item_name}
               </p>
               <ItemTypeBadge type={metadata.suggestion.item_type} />
@@ -615,7 +616,7 @@ export function ReportContext({ report }: { report: Report }) {
           href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
           prefetch={false}
           onClick={(event) => event.stopPropagation()}
-          className="border-border-card bg-tertiary-bg/55 hover:border-border-focus hover:bg-tertiary-bg mt-3 flex items-center justify-between gap-3 rounded-xl border p-3.5 transition-colors"
+          className="group/preview mt-3 inline-block max-w-full"
         >
           <div className="min-w-0">
             <p className="text-secondary-text text-xs">
@@ -623,17 +624,19 @@ export function ReportContext({ report }: { report: Report }) {
                 ? "Item duplicate dispute"
                 : "Reported item information"}
             </p>
-            <p className="text-primary-text truncate text-sm font-semibold">
-              {item.name}
-            </p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-link group-hover/preview:text-link-hover truncate text-sm font-semibold transition-colors">
+                {item.name}
+              </p>
+              <Icon
+                icon="heroicons:arrow-top-right-on-square"
+                className="text-link group-hover/preview:text-link-hover h-3.5 w-3.5 shrink-0 transition-colors"
+              />
+            </div>
             <div className="mt-1">
               <ItemTypeBadge type={item.type} />
             </div>
           </div>
-          <Icon
-            icon="heroicons:arrow-top-right-on-square"
-            className="text-secondary-text h-4 w-4 shrink-0"
-          />
         </Link>
       );
     }
@@ -937,46 +940,35 @@ export default function MyReports() {
         </>
 
         {loading ? (
-          <>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="border-border-card bg-secondary-bg flex h-full flex-col rounded-xl border p-5 shadow-sm"
-                >
-                  {/* Badge row + date */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <Skeleton
-                        style={{ width: 36, height: 36 }}
-                        className="rounded-lg"
-                      />
-                      <div className="space-y-1.5">
-                        <Skeleton style={{ width: 90, height: 14 }} />
-                      </div>
-                      <Skeleton style={{ width: 94, height: 26 }} />
-                    </div>
-                    <Skeleton style={{ width: 80, height: 16 }} />
-                  </div>
-                  <div className="bg-tertiary-bg/55 mt-3 rounded-xl p-3.5">
-                    <Skeleton style={{ width: 112, height: 11 }} />
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="border-border-card bg-secondary-bg h-full rounded-xl border p-4 sm:p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
                     <Skeleton
-                      style={{ width: "100%", height: 14 }}
-                      className="mt-2"
+                      style={{ width: 36, height: 36 }}
+                      className="rounded-lg"
                     />
+                    <Skeleton style={{ width: 90, height: 14 }} />
+                    <Skeleton style={{ width: 94, height: 24 }} />
                   </div>
-                  <div className="mt-3 space-y-2">
-                    <Skeleton style={{ width: 88, height: 10 }} />
-                    <Skeleton style={{ width: "72%", height: 14 }} />
-                  </div>
-                  <div className="border-border-card mt-4 flex items-center gap-2 border-t pt-3">
-                    <Skeleton style={{ width: 16, height: 16 }} />
-                    <Skeleton style={{ width: "55%", height: 12 }} />
-                  </div>
+                  <Skeleton style={{ width: 110, height: 14 }} />
                 </div>
-              ))}
-            </div>
-          </>
+                <div className="mt-4 space-y-2 pl-11">
+                  <Skeleton style={{ width: 150, height: 11 }} />
+                  <Skeleton style={{ width: "78%", height: 14 }} />
+                  <Skeleton style={{ width: "55%", height: 14 }} />
+                </div>
+                <div className="mt-4 flex items-center gap-3 pl-11">
+                  <Skeleton style={{ width: 72, height: 12 }} />
+                  <Skeleton style={{ width: "38%", height: 12 }} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : error ? (
           <div className="border-border-card bg-secondary-bg rounded-2xl border p-10 text-center shadow-sm">
             <Icon
@@ -1062,9 +1054,9 @@ export default function MyReports() {
                     : `@${reportedUser.username}`
                   : null;
                 return (
-                  <div
+                  <article
                     key={String(report.id)}
-                    className="border-border-card bg-secondary-bg hover:border-border-focus group relative flex h-full flex-col overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                    className="border-border-card bg-secondary-bg hover:border-border-focus relative flex h-full flex-col rounded-xl border p-4 transition-colors sm:p-5"
                   >
                     <div className="relative z-10 flex flex-wrap items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-wrap items-center gap-2.5">
@@ -1087,91 +1079,82 @@ export default function MyReports() {
                       </time>
                     </div>
 
-                    <div className="relative z-10 flex flex-1 flex-col">
-                      {reportedUser && reportedDisplayName && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <span className="text-secondary-text text-xs">
-                            Reported user:
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              router.push(`/users/${reportedUser.id}`);
-                            }}
-                            className="flex cursor-pointer items-center gap-1.5 transition-opacity hover:opacity-80"
-                          >
-                            <UserAvatar
-                              userId={reportedUser.id}
-                              avatarHash={reportedUser.avatar}
-                              username={reportedUser.username}
-                              custom_avatar={reportedUser.custom_avatar}
-                              settings={{
-                                custom_avatar:
-                                  reportedUser.settings_v2?.custom_avatar,
-                              }}
-                              premiumType={reportedUser.premiumtype}
-                              size={7}
-                              showBadge={false}
-                            />
-                            <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
-                              {reportedDisplayName}
+                    <div className="relative z-10 flex flex-1 flex-col pl-0 sm:pl-11">
+                      {report.type !== "comment" &&
+                        reportedUser &&
+                        reportedDisplayName && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-secondary-text text-xs">
+                              Reported user:
                             </span>
-                          </button>
-                        </div>
-                      )}
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                router.push(`/users/${reportedUser.id}`);
+                              }}
+                              className="flex cursor-pointer items-center gap-1.5 transition-opacity hover:opacity-80"
+                            >
+                              <UserAvatar
+                                userId={reportedUser.id}
+                                avatarHash={reportedUser.avatar}
+                                username={reportedUser.username}
+                                custom_avatar={reportedUser.custom_avatar}
+                                settings={{
+                                  custom_avatar:
+                                    reportedUser.settings_v2?.custom_avatar,
+                                }}
+                                premiumType={reportedUser.premiumtype}
+                                size={7}
+                                showBadge={false}
+                              />
+                              <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
+                                {reportedDisplayName}
+                              </span>
+                            </button>
+                          </div>
+                        )}
 
                       <ReportContext report={report} />
 
-                      <div className="border-border-card bg-tertiary-bg/55 mt-3 rounded-xl border p-3.5">
-                        <p className="text-secondary-text text-[10px] font-semibold tracking-wider uppercase">
-                          Report reason
-                        </p>
-                        <p className="text-primary-text mt-1 text-sm leading-relaxed break-words">
-                          {report.content}
-                        </p>
-                      </div>
-
-                      <div className="min-h-4 flex-1" />
-                      <div className="border-border-card flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-3">
-                        <div className="flex shrink-0 items-center gap-1.5">
-                          <span className="text-secondary-text text-[10px] font-semibold tracking-wide uppercase">
-                            Report
-                          </span>
-                          <code className="text-primary-text text-xs font-semibold">
-                            #{report.id}
-                          </code>
-                          <CopyIdentifierButton
-                            value={String(report.id)}
-                            label="report number"
-                          />
-                        </div>
-                        <span
-                          aria-hidden="true"
-                          className="bg-border-card hidden h-4 w-px sm:block"
-                        />
-                        <div className="flex min-w-0 flex-1 items-center gap-1.5">
-                          <Icon
-                            icon="heroicons:finger-print"
-                            className="text-secondary-text h-4 w-4 shrink-0"
-                          />
-                          <span className="text-secondary-text text-[10px] font-semibold tracking-wide uppercase">
-                            ID
-                          </span>
-                          <code
-                            className="text-secondary-text min-w-0 flex-1 truncate text-xs"
-                            title={report.report_id}
-                          >
-                            {report.report_id}
-                          </code>
-                          <CopyIdentifierButton
-                            value={report.report_id}
-                            label="report ID"
-                          />
-                        </div>
-                      </div>
+                      <p className="text-primary-text mt-3 max-w-4xl text-sm leading-relaxed break-words">
+                        <span className="text-secondary-text mr-2">
+                          Reason:
+                        </span>
+                        {report.content}
+                      </p>
                     </div>
-                  </div>
+                    <footer className="bg-tertiary-bg -mx-4 mt-4 -mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:-mx-5 sm:-mb-5 sm:pr-5 sm:pl-16">
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <span className="text-secondary-text text-[10px] font-semibold tracking-wide uppercase">
+                          Report
+                        </span>
+                        <code className="text-primary-text text-xs font-medium">
+                          #{report.id}
+                        </code>
+                        <CopyIdentifierButton
+                          value={String(report.id)}
+                          label="report number"
+                        />
+                      </div>
+                      <span
+                        aria-hidden="true"
+                        className="bg-border-card hidden h-4 w-px sm:block"
+                      />
+                      <div className="flex max-w-full min-w-0 items-center gap-1.5">
+                        <span className="text-secondary-text text-[10px] font-semibold tracking-wide uppercase">
+                          ID
+                        </span>
+                        <code className="text-primary-text max-w-64 min-w-0 truncate text-xs font-medium">
+                          {report.report_id}
+                        </code>
+                        <CopyIdentifierButton
+                          value={report.report_id}
+                          label="report ID"
+                        />
+                      </div>
+                    </footer>
+                  </article>
                 );
               })}
             </div>

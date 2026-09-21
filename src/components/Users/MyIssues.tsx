@@ -260,11 +260,11 @@ export default function MyIssues() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {[1, 2, 3, 4].map((item) => (
               <div
                 key={item}
-                className="border-border-card bg-secondary-bg h-full rounded-xl border p-5 shadow-sm"
+                className="border-border-card bg-secondary-bg h-full rounded-xl border p-4 sm:p-5"
               >
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2.5">
@@ -348,7 +348,7 @@ export default function MyIssues() {
               {filteredIssues.map((issue) => (
                 <article
                   key={issue.id}
-                  className="border-border-card bg-secondary-bg hover:border-border-focus group relative h-full overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                  className="border-border-card bg-secondary-bg hover:border-border-focus relative h-full rounded-xl border p-4 transition-colors sm:p-5"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-2.5">
@@ -370,10 +370,10 @@ export default function MyIssues() {
                       {formatCustomDate(issue.created_at * 1000)}
                     </time>
                   </div>
-                  <h2 className="text-primary-text relative z-10 mt-4 text-base font-semibold break-words">
-                    {issue.title}
-                  </h2>
-                  <div className="relative z-10">
+                  <div className="relative z-10 mt-3 sm:pl-11">
+                    <h2 className="text-primary-text text-base font-semibold break-words">
+                      {issue.title}
+                    </h2>
                     <IssueDescription description={issue.description} />
                   </div>
                 </article>
