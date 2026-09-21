@@ -1,7 +1,13 @@
 export const UPLOAD_CONFIG = {
   MAX_FILE_SIZE: 20 * 1024 * 1024, // 20MB in bytes
   MAX_FILE_SIZE_MB: 20, // 20MB for display purposes
-  ALLOWED_FILE_TYPES: ["image/png", "image/jpeg", "image/jpg", "image/webp"],
+  ALLOWED_FILE_TYPES: [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+    "image/gif",
+  ],
 } as const;
 
 export const getAllowedFileExtensions = (): string => {
@@ -14,6 +20,8 @@ export const getAllowedFileExtensions = (): string => {
         return "PNG";
       case "image/webp":
         return "WebP";
+      case "image/gif":
+        return "GIF";
       default:
         return (type as string).split("/")[1]?.toUpperCase() || type;
     }

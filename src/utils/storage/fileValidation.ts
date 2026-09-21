@@ -47,6 +47,7 @@ export function validateFileType(
     ".jpeg": ["image/jpeg", "image/jpg"],
     ".png": ["image/png"],
     ".gif": ["image/gif"],
+    ".webp": ["image/webp"],
   };
 
   const expectedMimeTypes = extensionMimeMap[fileExtension];
