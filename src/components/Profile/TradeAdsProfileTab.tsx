@@ -349,7 +349,7 @@ export default function TradeAdsProfileTab({
               : "This user hasn't posted any trade ads yet."}
           </p>
           <Button asChild variant="default" size="sm">
-            <Link href={isOwnProfile ? "/trading#create" : "/trading"}>
+            <Link href={isOwnProfile ? "/trading?create=true" : "/trading"}>
               {isOwnProfile ? "Create Trade Ad" : "Browse Trade Ads"}
             </Link>
           </Button>

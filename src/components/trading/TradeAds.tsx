@@ -151,11 +151,16 @@ export default function TradeAds({
     history: "push",
     shallow: true,
   });
+  const [createParam, setCreateParam] = useQueryState("create", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
   const activeTab = useMemo<"view" | "create" | "myads">(() => {
-    if (tabParam === "create") return "create";
+    if (createParam === "true" || tabParam === "create") return "create";
     if (tabParam === "myads") return "myads";
     return "view";
-  }, [tabParam]);
+  }, [createParam, tabParam]);
   const [itemsInputMode, setItemsInputMode] = useState<"values" | "inventory">(
     "values",
   );
@@ -210,6 +215,7 @@ export default function TradeAds({
     (targetPage: number) => {
       const params = new URLSearchParams(searchParams.toString());
       params.delete("tab");
+      params.delete("create");
       if (targetPage > 1) {
         params.set("page", String(targetPage));
       } else {
@@ -688,6 +694,7 @@ export default function TradeAds({
     })();
 
     router.replace(getTradingUrl(1));
+    void setCreateParam(null);
     void setTabParam(null);
   };
 
@@ -996,7 +1003,8 @@ export default function TradeAds({
 
   const handleTabChange = (tab: "view" | "create" | "myads") => {
     setIsPageTransitionLoading(false);
-    void setTabParam(tab === "view" ? null : tab);
+    void setCreateParam(tab === "create" ? "true" : null);
+    void setTabParam(tab === "myads" ? "myads" : null);
   };
 
   const handleDeleteTrade = async (tradeId: number) => {
@@ -1072,7 +1080,7 @@ export default function TradeAds({
         <TradeAdTabs
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          hasTradeAds={Boolean(currentUserId)}
+          showMyAds={Boolean(currentUserId)}
         />
         <TradeAdSkeleton />
       </div>
@@ -1121,7 +1129,7 @@ export default function TradeAds({
         <TradeAdTabs
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          hasTradeAds={false}
+          showMyAds={false}
         />
 
         <div
@@ -1135,10 +1143,10 @@ export default function TradeAds({
         </div>
 
         <div
-          role="tabpanel"
+          role="region"
           hidden={activeTab !== "create"}
           id="trading-tabpanel-create"
-          aria-labelledby="trading-tab-create"
+          aria-labelledby="trading-create-button"
           className="mt-6"
         >
           {activeTab === "create" && (
@@ -1157,7 +1165,7 @@ export default function TradeAds({
         <TradeAdTabs
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          hasTradeAds={Boolean(currentUserId)}
+          showMyAds={Boolean(currentUserId)}
         />
         {/* Tab Content */}
         <div
@@ -1188,10 +1196,10 @@ export default function TradeAds({
         </div>
 
         <div
-          role="tabpanel"
+          role="region"
           hidden={activeTab !== "create"}
           id="trading-tabpanel-create"
-          aria-labelledby="trading-tab-create"
+          aria-labelledby="trading-create-button"
           className="mt-6"
         >
           {activeTab === "create" && (
@@ -1446,7 +1454,7 @@ export default function TradeAds({
       <TradeAdTabs
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        hasTradeAds={Boolean(currentUserId)}
+        showMyAds={Boolean(currentUserId)}
       />
 
       {/* Search Input - Show for view and myads tabs */}
@@ -1666,7 +1674,7 @@ export default function TradeAds({
         hidden={activeTab !== "view"}
         id="trading-tabpanel-view"
         aria-labelledby="trading-tab-view"
-        className="mt-6"
+        className="mt-3"
       >
         {activeTab === "view" && (
           <>
@@ -1734,6 +1742,8 @@ export default function TradeAds({
                         trade={enrichedTrade}
                         currentUserId={currentUserId}
                         onDelete={() => handleDeleteTrade(trade.id)}
+                        useQuaternaryAvatarBackground
+                        timestampTooltipSide="bottom"
                       />
                       <RateLimitBanner
                         until={deleteRateLimits.get(trade.id) ?? null}
@@ -1755,10 +1765,10 @@ export default function TradeAds({
       </div>
 
       <div
-        role="tabpanel"
+        role="region"
         hidden={activeTab !== "create"}
         id="trading-tabpanel-create"
-        aria-labelledby="trading-tab-create"
+        aria-labelledby="trading-create-button"
         className="mt-6"
       >
         {activeTab === "create" && (
@@ -1788,7 +1798,7 @@ export default function TradeAds({
         hidden={activeTab !== "myads"}
         id="trading-tabpanel-myads"
         aria-labelledby="trading-tab-myads"
-        className="mt-6"
+        className="mt-3"
       >
         {activeTab === "myads" && (
           <>
@@ -1871,6 +1881,8 @@ export default function TradeAds({
                           trade={enrichedTrade}
                           currentUserId={currentUserId}
                           onDelete={() => handleDeleteTrade(trade.id)}
+                          useQuaternaryAvatarBackground
+                          timestampTooltipSide="bottom"
                         />
                         <RateLimitBanner
                           until={deleteRateLimits.get(trade.id) ?? null}

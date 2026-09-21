@@ -36,6 +36,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   title,
   message,
   confirmText = "Confirm",
+  cancelText = "Cancel",
   confirmVariant = "destructive",
   confirmDisabled = false,
   closeOnConfirm = true,
@@ -64,7 +65,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
             <DialogClose asChild>
               <Button variant="ghost" size="sm">
-                Cancel
+                {cancelText}
               </Button>
             </DialogClose>
             <Button
