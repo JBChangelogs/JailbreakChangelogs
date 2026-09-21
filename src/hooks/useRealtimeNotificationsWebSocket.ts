@@ -32,7 +32,10 @@ import {
   acknowledgePreferenceOperation,
   getPreferenceOutbox,
   getQueuedPreference,
+  getUserPreferenceOutboxScope,
+  migrateGuestPreferenceOutbox,
   overlayPreferenceOutbox,
+  PreferenceOutboxScope,
   queuePreferenceOperation,
 } from "@/utils/preferences/realtimePreferenceOutbox";
 import { setRealtimeConnectionState } from "@/services/realtimeConnection";
@@ -181,6 +184,7 @@ export function useRealtimeNotificationsWebSocket(
   locationPath?: string | null,
   onWebsiteBan?: (reason?: string) => void,
   onSupporterUpdated?: (level: number) => void,
+  preferenceUserId?: string | null,
 ): void {
   const isRealtimeNotificationsEnabled =
     enabled && ENABLE_REALTIME_NOTIFICATIONS_WS;
@@ -203,10 +207,24 @@ export function useRealtimeNotificationsWebSocket(
       : "/",
   );
   const lastSentLocationRef = useRef<string>("");
+  const preferenceScope: PreferenceOutboxScope | null = preferenceUserId
+    ? getUserPreferenceOutboxScope(preferenceUserId)
+    : isRealtimeNotificationsEnabled
+      ? null
+      : "guest";
+
+  useEffect(() => {
+    if (preferenceScope?.startsWith("user:")) {
+      migrateGuestPreferenceOutbox(preferenceScope);
+    }
+  }, [preferenceScope]);
 
   const flushPreferenceOutbox = useCallback(() => {
-    if (wsRef.current?.readyState !== WebSocket.OPEN) return;
-    for (const [key, operation] of Object.entries(getPreferenceOutbox())) {
+    if (!preferenceScope || wsRef.current?.readyState !== WebSocket.OPEN)
+      return;
+    for (const [key, operation] of Object.entries(
+      getPreferenceOutbox(preferenceScope),
+    )) {
       wsRef.current.send(
         JSON.stringify(
           operation.action === "delete"
@@ -215,7 +233,7 @@ export function useRealtimeNotificationsWebSocket(
         ),
       );
     }
-  }, []);
+  }, [preferenceScope]);
 
   const ensureAudio = useCallback((): HTMLAudioElement => {
     if (!audioRef.current) {
@@ -256,11 +274,14 @@ export function useRealtimeNotificationsWebSocket(
         delete: del,
       } = (e as CustomEvent<{ key: string; value?: unknown; delete?: boolean }>)
         .detail;
+      const writeScope = preferenceScope ?? "guest";
       queuePreferenceOperation(
+        writeScope,
         key,
         del ? { action: "delete" } : { action: "set", value },
       );
       if (
+        preferenceScope &&
         wsRef.current?.readyState === WebSocket.OPEN &&
         hasSyncedPreferences()
       ) {
@@ -279,7 +300,7 @@ export function useRealtimeNotificationsWebSocket(
         "sendRealtimePreference",
         handleSendPreference,
       );
-  }, []);
+  }, [preferenceScope]);
 
   useEffect(() => {
     const handleSendTyping = (event: Event) => {
@@ -517,11 +538,12 @@ export function useRealtimeNotificationsWebSocket(
                 value?: unknown;
               };
               if (data.action === "set" && data.key) {
-                acknowledgePreferenceOperation(data.key, {
+                if (!preferenceScope) return;
+                acknowledgePreferenceOperation(preferenceScope, data.key, {
                   action: "set",
                   value: data.value,
                 });
-                const pending = getQueuedPreference(data.key);
+                const pending = getQueuedPreference(preferenceScope, data.key);
                 if (pending?.action === "delete") {
                   deleteCachedPreference(data.key);
                   window.dispatchEvent(
@@ -540,8 +562,11 @@ export function useRealtimeNotificationsWebSocket(
                   );
                 }
               } else if (data.action === "delete" && data.key) {
-                acknowledgePreferenceOperation(data.key, { action: "delete" });
-                const pending = getQueuedPreference(data.key);
+                if (!preferenceScope) return;
+                acknowledgePreferenceOperation(preferenceScope, data.key, {
+                  action: "delete",
+                });
+                const pending = getQueuedPreference(preferenceScope, data.key);
                 if (pending?.action === "set") {
                   setCachedPreference(data.key, pending.value);
                   window.dispatchEvent(
@@ -559,7 +584,9 @@ export function useRealtimeNotificationsWebSocket(
                 }
               } else if (data.action === "clear") {
                 const previousKeys = getCachedPreferenceKeys();
-                const preferences = overlayPreferenceOutbox({});
+                const preferences = preferenceScope
+                  ? overlayPreferenceOutbox(preferenceScope, {})
+                  : {};
                 replacePreferencesCache(preferences);
                 for (const key of previousKeys) {
                   if (key in preferences) continue;
@@ -585,9 +612,10 @@ export function useRealtimeNotificationsWebSocket(
               payload.data &&
               typeof payload.data === "object"
             ) {
-              const preferences = overlayPreferenceOutbox(
-                payload.data as Record<string, unknown>,
-              );
+              const serverPreferences = payload.data as Record<string, unknown>;
+              const preferences = preferenceScope
+                ? overlayPreferenceOutbox(preferenceScope, serverPreferences)
+                : serverPreferences;
               replacePreferencesCache(preferences);
               window.dispatchEvent(
                 new CustomEvent("realtimePreferences", {
@@ -1138,5 +1166,6 @@ export function useRealtimeNotificationsWebSocket(
     flushPreferenceOutbox,
     onWebsiteBan,
     onSupporterUpdated,
+    preferenceScope,
   ]);
 }

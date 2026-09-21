@@ -374,6 +374,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     locationString,
     handleRealtimeSiteBan,
     handleRealtimeSupporterUpdate,
+    authState.user?.id,
   );
 
   useEffect(() => {
