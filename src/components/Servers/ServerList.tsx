@@ -41,6 +41,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { hasLineClampOverflow } from "@/utils/ui/collapsibleContent";
@@ -73,15 +75,23 @@ const sanitizeHTML = (html: string): string => {
   });
 };
 
+const getSortLabel = (sort: string): string =>
+  sort
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+
 const fetchServersPage = async (
   page: number,
   query: string,
+  sort: string | null,
   signal?: AbortSignal,
 ): Promise<PrivateServerListResponse> => {
-  // TODO: Restore server sorting controls when the API accepts a sort parameter.
+  const params = new URLSearchParams({ page: String(page) });
+  if (query) params.set("query", query);
+  if (sort) params.set("sort", sort);
   const path = query
-    ? `/servers/search?query=${encodeURIComponent(query)}&page=${page}`
-    : `/servers?page=${page}`;
+    ? `/servers/search?${params.toString()}`
+    : `/servers?${params.toString()}`;
   const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, path);
   const response = await fetch(url, { cache: "no-store", headers, signal });
   if (!response.ok) {
@@ -94,10 +104,12 @@ const fetchServersPage = async (
 
 const ServerList: React.FC = () => {
   const { isAuthenticated, user } = useAuthContext();
-  const [{ query: queryFromUrl, page }, setParams] = useQueryStates({
+  const [{ query: queryFromUrl, page, sort }, setParams] = useQueryStates({
     query: parseAsString.withDefault(""),
     page: parseAsInteger.withDefault(1),
+    sort: parseAsString,
   });
+  const [sortTypes, setSortTypes] = React.useState<string[]>([]);
   const [servers, setServers] = React.useState<PrivateServer[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isFetching, setIsFetching] = React.useState(false);
@@ -170,6 +182,37 @@ const ServerList: React.FC = () => {
 
   React.useEffect(() => {
     const controller = new AbortController();
+    const fetchSortTypes = async () => {
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          "/servers/sorts",
+        );
+        const response = await fetch(url, {
+          cache: "no-store",
+          headers,
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const data = (await response.json()) as unknown;
+        if (
+          Array.isArray(data) &&
+          data.every((value) => typeof value === "string")
+        ) {
+          setSortTypes(data);
+        }
+      } catch (sortError) {
+        if (!controller.signal.aborted) {
+          log.error("Failed to fetch server sort types", sortError);
+        }
+      }
+    };
+    void fetchSortTypes();
+    return () => controller.abort();
+  }, []);
+
+  React.useEffect(() => {
+    const controller = new AbortController();
 
     const fetchServers = async () => {
       setLoading(true);
@@ -183,6 +226,7 @@ const ServerList: React.FC = () => {
         const data = await fetchServersPage(
           page,
           queryFromUrl.trim(),
+          sort,
           controller.signal,
         );
         if (controller.signal.aborted) return;
@@ -221,7 +265,7 @@ const ServerList: React.FC = () => {
     return () => {
       controller.abort();
     };
-  }, [page, queryFromUrl, refreshVersion, setParams]);
+  }, [page, queryFromUrl, refreshVersion, setParams, sort]);
 
   const handleServerAdded = () => {
     setLoading(true);
@@ -384,15 +428,63 @@ const ServerList: React.FC = () => {
           totalServers.toLocaleString()
         )}
       </p>
-      <Button
-        onClick={handleAddServer}
-        size="sm"
-        className="shrink-0 whitespace-nowrap"
-      >
-        <Icon icon="heroicons:plus" className="h-4 w-4" />
-        <span className="hidden sm:inline">Add server</span>
-        <span className="sm:hidden">Add</span>
-      </Button>
+      <div className="flex shrink-0 items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              disabled={sortTypes.length === 0}
+              className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-9 min-w-36 items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Sort servers"
+            >
+              <span className="truncate">
+                {sort
+                  ? getSortLabel(sort)
+                  : sortTypes[0]
+                    ? getSortLabel(sortTypes[0])
+                    : "Sort"}
+              </span>
+              <Icon
+                icon="heroicons:chevron-down"
+                className="text-secondary-text h-4 w-4 shrink-0"
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="border-border-card bg-secondary-bg text-primary-text min-w-40 rounded-xl border p-1.5 shadow-lg"
+          >
+            <DropdownMenuRadioGroup
+              value={sort ?? sortTypes[0] ?? ""}
+              onValueChange={(value) =>
+                void setParams({
+                  sort: value,
+                  page: null,
+                })
+              }
+            >
+              {sortTypes.map((value) => (
+                <DropdownMenuRadioItem
+                  key={value}
+                  value={value}
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  {getSortLabel(value)}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Button
+          onClick={handleAddServer}
+          size="sm"
+          className="shrink-0 whitespace-nowrap"
+        >
+          <Icon icon="heroicons:plus" className="h-4 w-4" />
+          <span className="hidden sm:inline">Add server</span>
+          <span className="sm:hidden">Add</span>
+        </Button>
+      </div>
     </div>
   );
 

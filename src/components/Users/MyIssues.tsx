@@ -42,18 +42,24 @@ type IssuesResponse = {
 function getStatusStyle(status: string) {
   switch (status.toLowerCase()) {
     case "resolved":
-      return "border-green-500/25 bg-green-500/10 text-green-600 dark:text-green-400";
+      return "border-green-500/25 bg-green-500/10 text-primary-text";
     case "acknowledged":
-      return "border-blue-500/25 bg-blue-500/10 text-blue-600 dark:text-blue-400";
+      return "border-blue-500/25 bg-blue-500/10 text-primary-text";
     case "wont fix":
-      return "border-red-500/25 bg-red-500/10 text-red-600 dark:text-red-400";
+      return "bg-button-danger/15 text-primary-text border-button-danger/30";
     default:
-      return "border-yellow-500/25 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
+      return "border-yellow-500/25 bg-yellow-500/10 text-primary-text";
   }
 }
 
 function getStatusLabel(status: string) {
   return status === "Wont Fix" ? "Won't Fix" : status;
+}
+
+function getSortLabel(sort: string) {
+  return sort
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 function IssueDescription({ description }: { description: string }) {
@@ -87,24 +93,22 @@ export default function MyIssues() {
     shallow: true,
   });
   const page = Math.max(1, Number.parseInt(pageParam ?? "1", 10) || 1);
+  const [sort, setSort] = useQueryState("sort", {
+    history: "push",
+    shallow: true,
+  });
   const [issues, setIssues] = useState<Issue[]>([]);
+  const [sortTypes, setSortTypes] = useState<string[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   const filteredIssues = useMemo(() => {
     const query = debouncedSearch.trim().toLowerCase();
     return issues.filter((issue) => {
-      if (
-        statusFilter !== "all" &&
-        issue.status.toLowerCase() !== statusFilter
-      ) {
-        return false;
-      }
       if (!query) return true;
       return (
         String(issue.id).includes(query) ||
@@ -112,47 +116,81 @@ export default function MyIssues() {
         issue.description.toLowerCase().includes(query)
       );
     });
-  }, [debouncedSearch, issues, statusFilter]);
+  }, [debouncedSearch, issues]);
 
-  const fetchIssues = useCallback(async (currentPage: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL,
-        `/issues/me?page=${currentPage}`,
-      );
-      const response = await fetch(url, {
-        credentials: "include",
-        cache: "no-store",
-        headers,
-      });
-      if (!response.ok) {
-        throw new Error(
-          await getResponseErrorMessage(response, "Failed to load issues"),
+  const fetchIssues = useCallback(
+    async (currentPage: number, currentSort: string | null) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/issues/me?page=${currentPage}${currentSort ? `&sort=${encodeURIComponent(currentSort)}` : ""}`,
         );
-      }
+        const response = await fetch(url, {
+          credentials: "include",
+          cache: "no-store",
+          headers,
+        });
+        if (!response.ok) {
+          throw new Error(
+            await getResponseErrorMessage(response, "Failed to load issues"),
+          );
+        }
 
-      const data = (await response.json()) as IssuesResponse;
-      setIssues(Array.isArray(data.items) ? data.items : []);
-      setTotal(data.total ?? 0);
-      setTotalPages(Math.max(1, data.total_pages ?? 1));
-    } catch (fetchError) {
-      log.error("Error fetching reported issues", fetchError);
-      setIssues([]);
-      setError(
-        fetchError instanceof Error
-          ? fetchError.message
-          : "Failed to load issues",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+        const data = (await response.json()) as IssuesResponse;
+        setIssues(Array.isArray(data.items) ? data.items : []);
+        setTotal(data.total ?? 0);
+        setTotalPages(Math.max(1, data.total_pages ?? 1));
+      } catch (fetchError) {
+        log.error("Error fetching reported issues", fetchError);
+        setIssues([]);
+        setError(
+          fetchError instanceof Error
+            ? fetchError.message
+            : "Failed to load issues",
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    void fetchIssues(page);
-  }, [fetchIssues, page]);
+    void fetchIssues(page, sort);
+  }, [fetchIssues, page, sort]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchSortTypes = async () => {
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          "/issues/sorts",
+        );
+        const response = await fetch(url, {
+          cache: "no-store",
+          headers,
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const data = (await response.json()) as unknown;
+        if (
+          Array.isArray(data) &&
+          data.every((value) => typeof value === "string")
+        ) {
+          setSortTypes(data);
+        }
+      } catch (sortError) {
+        if (!controller.signal.aborted) {
+          log.error("Error fetching issue sort types", sortError);
+        }
+      }
+    };
+    void fetchSortTypes();
+    return () => controller.abort();
+  }, []);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     void setPageParam(String(value));
@@ -214,15 +252,11 @@ export default function MyIssues() {
                   className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-11 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-colors focus:outline-none"
                 >
                   <span>
-                    {statusFilter === "all"
-                      ? "All Statuses"
-                      : getStatusLabel(
-                          statusFilter === "wont fix"
-                            ? "Wont Fix"
-                            : statusFilter.replace(/\b\w/g, (character) =>
-                                character.toUpperCase(),
-                              ),
-                        )}
+                    {sort
+                      ? getSortLabel(sort)
+                      : sortTypes[0]
+                        ? getSortLabel(sortTypes[0])
+                        : "Sort"}
                   </span>
                   <Icon
                     icon="heroicons:chevron-down"
@@ -235,22 +269,19 @@ export default function MyIssues() {
                 className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1.5 shadow-lg"
               >
                 <DropdownMenuRadioGroup
-                  value={statusFilter}
-                  onValueChange={setStatusFilter}
+                  value={sort ?? sortTypes[0] ?? ""}
+                  onValueChange={(value) => {
+                    void setSort(value);
+                    void setPageParam("1");
+                  }}
                 >
-                  {[
-                    { value: "all", label: "All Statuses" },
-                    { value: "pending", label: "Pending" },
-                    { value: "acknowledged", label: "Acknowledged" },
-                    { value: "resolved", label: "Resolved" },
-                    { value: "wont fix", label: "Won't Fix" },
-                  ].map((option) => (
+                  {sortTypes.map((value) => (
                     <DropdownMenuRadioItem
-                      key={option.value}
-                      value={option.value}
+                      key={value}
+                      value={value}
                       className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                     >
-                      {option.label}
+                      {getSortLabel(value)}
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
@@ -299,7 +330,7 @@ export default function MyIssues() {
             <p className="text-secondary-text mt-1 text-sm">{error}</p>
             <button
               type="button"
-              onClick={() => void fetchIssues(page)}
+              onClick={() => void fetchIssues(page, sort)}
               className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-4 rounded-lg px-4 py-2 text-sm font-medium"
             >
               Try Again
@@ -336,7 +367,6 @@ export default function MyIssues() {
               className="mt-4"
               onClick={() => {
                 setSearchTerm("");
-                setStatusFilter("all");
               }}
             >
               Clear Filters
