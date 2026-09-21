@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
+import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 
 type SetSort = (value: string, history?: "replace") => void;
 
@@ -12,6 +13,7 @@ export function useSuggestionSort(
 ) {
   const initialSortRef = useRef(initialSort);
   const [availableSorts, setAvailableSorts] = useState<string[]>([]);
+  const availableSortsRef = useRef<string[]>([]);
 
   useEffect(() => {
     let ignore = false;
@@ -25,10 +27,17 @@ export function useSuggestionSort(
       .then((data) => {
         if (ignore) return;
         if (Array.isArray(data) && data.length > 0) {
-          setAvailableSorts(data as string[]);
+          const sorts = data as string[];
+          availableSortsRef.current = sorts;
+          setAvailableSorts(sorts);
           if (initialSortRef.current === null) {
+            const cachedSort = getCachedPreference("vsuggestions_sort");
             const storedSort = localStorage.getItem("vsuggestions_sort");
-            setSort(storedSort ?? (data as string[])[0], "replace");
+            setSort(
+              (typeof cachedSort === "string" ? cachedSort : storedSort) ??
+                (data as string[])[0],
+              "replace",
+            );
           }
         }
       })
@@ -56,13 +65,32 @@ export function useSuggestionSort(
       if (typeof incoming === "string") {
         localStorage.setItem("vsuggestions_sort", incoming);
         setSort(incoming);
+      } else {
+        localStorage.removeItem("vsuggestions_sort");
+        const fallback = availableSortsRef.current[0];
+        if (fallback) setSort(fallback);
       }
+    };
+    const handlePreferenceDeleted = (event: Event) => {
+      const { key } = (event as CustomEvent<{ key: string }>).detail;
+      if (key !== "vsuggestions_sort") return;
+      localStorage.removeItem("vsuggestions_sort");
+      const fallback = availableSortsRef.current[0];
+      if (fallback) setSort(fallback);
     };
     window.addEventListener("realtimePreference", handlePreference);
     window.addEventListener("realtimePreferences", handlePreferences);
+    window.addEventListener(
+      "realtimePreferenceDeleted",
+      handlePreferenceDeleted,
+    );
     return () => {
       window.removeEventListener("realtimePreference", handlePreference);
       window.removeEventListener("realtimePreferences", handlePreferences);
+      window.removeEventListener(
+        "realtimePreferenceDeleted",
+        handlePreferenceDeleted,
+      );
     };
   }, [setSort]);
 

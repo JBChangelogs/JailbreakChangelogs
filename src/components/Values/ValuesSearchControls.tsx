@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { ValuesFilterMode } from "@/hooks/useValuesFilterMode";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -35,6 +37,8 @@ interface ValuesSearchControlsProps {
   selectedFilterSorts: FilterSort[];
   onToggleFilterSort: (sort: FilterSort) => void;
   onClearFilterSorts: (subset?: FilterSort[]) => void;
+  filterMode: ValuesFilterMode;
+  onFilterModeChange: (mode: ValuesFilterMode) => void;
   valueSort: ValueSort;
   setValueSort: (sort: ValueSort) => void;
   rangeValue: number[];
@@ -52,6 +56,8 @@ export default function ValuesSearchControls({
   selectedFilterSorts,
   onToggleFilterSort,
   onClearFilterSorts,
+  filterMode,
+  onFilterModeChange,
   valueSort,
   setValueSort,
   rangeValue,
@@ -184,6 +190,11 @@ export default function ValuesSearchControls({
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-4">
             {/* Search input */}
             <div className="w-full lg:w-1/3">
+              <div className="mb-2 flex h-6 items-center">
+                <span className="text-secondary-text text-xs font-medium">
+                  Search items
+                </span>
+              </div>
               <div className="relative">
                 <input
                   ref={searchInputRef}
@@ -219,6 +230,28 @@ export default function ValuesSearchControls({
             <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:flex-row lg:gap-4">
               {/* Filter dropdown */}
               <div className="col-span-1 w-full lg:w-1/2">
+                <div className="mb-2 flex h-6 items-center justify-between gap-2">
+                  <span className="text-secondary-text text-xs font-medium">
+                    Category
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <label
+                      htmlFor="values-multi-filter-mode"
+                      className="text-secondary-text cursor-pointer text-xs font-medium"
+                    >
+                      <span className="hidden sm:inline">Multi-select</span>
+                      <span className="sm:hidden">Multi</span>
+                    </label>
+                    <Switch
+                      id="values-multi-filter-mode"
+                      checked={filterMode === "multi"}
+                      onCheckedChange={(checked) =>
+                        onFilterModeChange(checked ? "multi" : "single")
+                      }
+                      aria-label="Allow multiple value filters"
+                    />
+                  </div>
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
@@ -239,49 +272,99 @@ export default function ValuesSearchControls({
                     align="start"
                     className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
-                    {selectedFilterSorts.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => onClearFilterSorts()}
-                        className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
-                      >
-                        Clear Filters
-                      </button>
-                    )}
-                    {filterGroups.map((group, groupIndex) => (
-                      <Fragment key={group.label}>
-                        <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                          {group.label}
-                        </DropdownMenuLabel>
-                        {group.options.map((option) => (
-                          <DropdownMenuCheckboxItem
-                            key={option.value}
-                            checked={selectedFilterSorts.includes(option.value)}
-                            onSelect={(e) => e.preventDefault()}
-                            onCheckedChange={() => {
-                              onToggleFilterSort(option.value);
-                              trackFilterSortEvent(
-                                "values",
-                                "filter",
-                                option.value,
-                              );
-                            }}
-                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                    {filterMode === "multi" ? (
+                      <>
+                        {selectedFilterSorts.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => onClearFilterSorts()}
+                            className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
                           >
-                            {option.label}
-                          </DropdownMenuCheckboxItem>
-                        ))}
-                        {groupIndex !== filterGroups.length - 1 && (
-                          <DropdownMenuSeparator className="bg-border-primary/60" />
+                            Clear Filters
+                          </button>
                         )}
-                      </Fragment>
-                    ))}
+                        {filterGroups.map((group, groupIndex) => (
+                          <Fragment key={group.label}>
+                            <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                              {group.label}
+                            </DropdownMenuLabel>
+                            {group.options.map((option) => (
+                              <DropdownMenuCheckboxItem
+                                key={option.value}
+                                checked={selectedFilterSorts.includes(
+                                  option.value,
+                                )}
+                                onSelect={(e) => e.preventDefault()}
+                                onCheckedChange={() => {
+                                  onToggleFilterSort(option.value);
+                                  trackFilterSortEvent(
+                                    "values",
+                                    "filter",
+                                    option.value,
+                                  );
+                                }}
+                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                              >
+                                {option.label}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                            {groupIndex !== filterGroups.length - 1 && (
+                              <DropdownMenuSeparator className="bg-border-primary/60" />
+                            )}
+                          </Fragment>
+                        ))}
+                      </>
+                    ) : (
+                      <DropdownMenuRadioGroup
+                        value={selectedFilterSorts[0] ?? "name-all-items"}
+                        onValueChange={(newValue) => {
+                          if (newValue === "name-all-items") {
+                            onClearFilterSorts();
+                            return;
+                          }
+                          const nextValue = newValue as FilterSort;
+                          onToggleFilterSort(nextValue);
+                          trackFilterSortEvent("values", "filter", nextValue);
+                        }}
+                      >
+                        <DropdownMenuRadioItem
+                          value="name-all-items"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          All Items
+                        </DropdownMenuRadioItem>
+                        {filterGroups.map((group, groupIndex) => (
+                          <Fragment key={group.label}>
+                            <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                              {group.label}
+                            </DropdownMenuLabel>
+                            {group.options.map((option) => (
+                              <DropdownMenuRadioItem
+                                key={option.value}
+                                value={option.value}
+                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                              >
+                                {option.label}
+                              </DropdownMenuRadioItem>
+                            ))}
+                            {groupIndex !== filterGroups.length - 1 && (
+                              <DropdownMenuSeparator className="bg-border-primary/60" />
+                            )}
+                          </Fragment>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
 
               {/* Sort dropdown */}
               <div className="col-span-1 w-full lg:w-1/2">
+                <div className="mb-2 flex h-6 items-center">
+                  <span className="text-secondary-text text-xs font-medium">
+                    Sort by
+                  </span>
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button

@@ -41,13 +41,30 @@ export function TwemojiProvider({ children }: { children: React.ReactNode }) {
       if (typeof incoming === "boolean") {
         setTwemojiState(incoming);
         safeLocalStorage.setItem("twemoji_enabled", String(incoming));
+      } else {
+        setTwemojiState(true);
+        safeLocalStorage.removeItem("twemoji_enabled");
       }
+    };
+    const handlePreferenceDeleted = (e: Event) => {
+      const { key } = (e as CustomEvent<{ key: string }>).detail;
+      if (key !== "twemoji_enabled") return;
+      setTwemojiState(true);
+      safeLocalStorage.removeItem("twemoji_enabled");
     };
     window.addEventListener("realtimePreference", handlePreferenceUpdate);
     window.addEventListener("realtimePreferences", handlePreferences);
+    window.addEventListener(
+      "realtimePreferenceDeleted",
+      handlePreferenceDeleted,
+    );
     return () => {
       window.removeEventListener("realtimePreference", handlePreferenceUpdate);
       window.removeEventListener("realtimePreferences", handlePreferences);
+      window.removeEventListener(
+        "realtimePreferenceDeleted",
+        handlePreferenceDeleted,
+      );
     };
   }, []);
 

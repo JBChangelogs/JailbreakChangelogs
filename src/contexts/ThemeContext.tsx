@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import { debounce } from "@/utils/helpers/debounce";
+import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 
 type Theme = "light" | "dark" | "amoled";
 
@@ -64,6 +65,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
+    const cached = getCachedPreference("theme");
+    if (cached === "light" || cached === "dark" || cached === "amoled") {
+      setThemeState(cached);
+      return;
+    }
     const savedTheme = getInitialTheme();
     setThemeState(savedTheme);
   }, []);
@@ -102,13 +108,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         incoming === "amoled"
       ) {
         setThemeState(incoming);
+      } else {
+        safeLocalStorage.removeItem("theme");
+        setThemeState("dark");
       }
+    };
+    const handlePreferenceDeleted = (e: Event) => {
+      const { key } = (e as CustomEvent<{ key: string }>).detail;
+      if (key !== "theme" || isBlocked()) return;
+      safeLocalStorage.removeItem("theme");
+      setThemeState("dark");
     };
     window.addEventListener("realtimePreference", handlePreferenceUpdate);
     window.addEventListener("realtimePreferences", handlePreferences);
+    window.addEventListener(
+      "realtimePreferenceDeleted",
+      handlePreferenceDeleted,
+    );
     return () => {
       window.removeEventListener("realtimePreference", handlePreferenceUpdate);
       window.removeEventListener("realtimePreferences", handlePreferences);
+      window.removeEventListener(
+        "realtimePreferenceDeleted",
+        handlePreferenceDeleted,
+      );
     };
   }, []);
 

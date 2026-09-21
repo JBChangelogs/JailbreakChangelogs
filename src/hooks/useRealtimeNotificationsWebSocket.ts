@@ -20,10 +20,21 @@ import {
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import {
+  clearPreferencesCache,
   deleteCachedPreference,
+  getCachedPreferenceKeys,
+  hasSyncedPreferences,
+  markPreferencesUnsynced,
+  replacePreferencesCache,
   setCachedPreference,
-  updatePreferencesCache,
 } from "@/utils/preferences/realtimePreferencesCache";
+import {
+  acknowledgePreferenceOperation,
+  getPreferenceOutbox,
+  getQueuedPreference,
+  overlayPreferenceOutbox,
+  queuePreferenceOperation,
+} from "@/utils/preferences/realtimePreferenceOutbox";
 import { setRealtimeConnectionState } from "@/services/realtimeConnection";
 import { fetchHasAppConnection } from "@/services/settingsService";
 
@@ -193,6 +204,19 @@ export function useRealtimeNotificationsWebSocket(
   );
   const lastSentLocationRef = useRef<string>("");
 
+  const flushPreferenceOutbox = useCallback(() => {
+    if (wsRef.current?.readyState !== WebSocket.OPEN) return;
+    for (const [key, operation] of Object.entries(getPreferenceOutbox())) {
+      wsRef.current.send(
+        JSON.stringify(
+          operation.action === "delete"
+            ? { action: "delete_preference", key }
+            : { action: "set_preference", key, value: operation.value },
+        ),
+      );
+    }
+  }, []);
+
   const ensureAudio = useCallback((): HTMLAudioElement => {
     if (!audioRef.current) {
       audioRef.current = new Audio("/audios/notification_ding.mp3");
@@ -223,7 +247,7 @@ export function useRealtimeNotificationsWebSocket(
     }
   }, [locationPath]);
 
-  // Forward user-initiated preference changes to the server when WS is open
+  // Queue preference changes locally and forward them after a full snapshot.
   useEffect(() => {
     const handleSendPreference = (e: Event) => {
       const {
@@ -232,7 +256,14 @@ export function useRealtimeNotificationsWebSocket(
         delete: del,
       } = (e as CustomEvent<{ key: string; value?: unknown; delete?: boolean }>)
         .detail;
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
+      queuePreferenceOperation(
+        key,
+        del ? { action: "delete" } : { action: "set", value },
+      );
+      if (
+        wsRef.current?.readyState === WebSocket.OPEN &&
+        hasSyncedPreferences()
+      ) {
         wsRef.current.send(
           JSON.stringify(
             del
@@ -318,6 +349,7 @@ export function useRealtimeNotificationsWebSocket(
 
   useEffect(() => {
     if (!isRealtimeNotificationsEnabled) {
+      clearPreferencesCache();
       publishRealtimeConnectionState(false);
       toast.dismiss("realtime-notifications-reconnecting");
       if (reconnectTimeoutRef.current) {
@@ -431,6 +463,7 @@ export function useRealtimeNotificationsWebSocket(
         openedForAttemptRef.current = false;
 
         ws.addEventListener("open", () => {
+          markPreferencesUnsynced();
           publishRealtimeConnectionState(true);
           openedForAttemptRef.current = true;
           connectedAtRef.current = Date.now();
@@ -464,6 +497,7 @@ export function useRealtimeNotificationsWebSocket(
           const currentPath = locationPathRef.current || "/";
           lastSentLocationRef.current = currentPath;
           ws.send(JSON.stringify({ location: currentPath }));
+          ws.send(JSON.stringify({ action: "get_preferences" }));
         });
 
         ws.addEventListener("message", (event) => {
@@ -483,19 +517,64 @@ export function useRealtimeNotificationsWebSocket(
                 value?: unknown;
               };
               if (data.action === "set" && data.key) {
-                setCachedPreference(data.key, data.value);
-                window.dispatchEvent(
-                  new CustomEvent("realtimePreference", {
-                    detail: { key: data.key, value: data.value },
-                  }),
-                );
+                acknowledgePreferenceOperation(data.key, {
+                  action: "set",
+                  value: data.value,
+                });
+                const pending = getQueuedPreference(data.key);
+                if (pending?.action === "delete") {
+                  deleteCachedPreference(data.key);
+                  window.dispatchEvent(
+                    new CustomEvent("realtimePreferenceDeleted", {
+                      detail: { key: data.key },
+                    }),
+                  );
+                } else {
+                  const value =
+                    pending?.action === "set" ? pending.value : data.value;
+                  setCachedPreference(data.key, value);
+                  window.dispatchEvent(
+                    new CustomEvent("realtimePreference", {
+                      detail: { key: data.key, value },
+                    }),
+                  );
+                }
               } else if (data.action === "delete" && data.key) {
-                deleteCachedPreference(data.key);
+                acknowledgePreferenceOperation(data.key, { action: "delete" });
+                const pending = getQueuedPreference(data.key);
+                if (pending?.action === "set") {
+                  setCachedPreference(data.key, pending.value);
+                  window.dispatchEvent(
+                    new CustomEvent("realtimePreference", {
+                      detail: { key: data.key, value: pending.value },
+                    }),
+                  );
+                } else {
+                  deleteCachedPreference(data.key);
+                  window.dispatchEvent(
+                    new CustomEvent("realtimePreferenceDeleted", {
+                      detail: { key: data.key },
+                    }),
+                  );
+                }
+              } else if (data.action === "clear") {
+                const previousKeys = getCachedPreferenceKeys();
+                const preferences = overlayPreferenceOutbox({});
+                replacePreferencesCache(preferences);
+                for (const key of previousKeys) {
+                  if (key in preferences) continue;
+                  window.dispatchEvent(
+                    new CustomEvent("realtimePreferenceDeleted", {
+                      detail: { key },
+                    }),
+                  );
+                }
                 window.dispatchEvent(
-                  new CustomEvent("realtimePreferenceDeleted", {
-                    detail: { key: data.key },
+                  new CustomEvent("realtimePreferences", {
+                    detail: preferences,
                   }),
                 );
+                flushPreferenceOutbox();
               }
               return;
             }
@@ -506,12 +585,16 @@ export function useRealtimeNotificationsWebSocket(
               payload.data &&
               typeof payload.data === "object"
             ) {
-              updatePreferencesCache(payload.data as Record<string, unknown>);
+              const preferences = overlayPreferenceOutbox(
+                payload.data as Record<string, unknown>,
+              );
+              replacePreferencesCache(preferences);
               window.dispatchEvent(
                 new CustomEvent("realtimePreferences", {
-                  detail: payload.data,
+                  detail: preferences,
                 }),
               );
+              flushPreferenceOutbox();
               return;
             }
 
@@ -1052,6 +1135,7 @@ export function useRealtimeNotificationsWebSocket(
   }, [
     isRealtimeNotificationsEnabled,
     ensureAudio,
+    flushPreferenceOutbox,
     onWebsiteBan,
     onSupporterUpdated,
   ]);

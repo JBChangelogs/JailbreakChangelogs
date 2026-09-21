@@ -8,6 +8,8 @@ const log = createLogger("UI");
 const EMPTY_FAVORITES: number[] = [];
 const EMPTY_ITEMS: Item[] = [];
 const FILTER_SORT_STORAGE_KEY = "valuesFilterSort";
+const FILTER_SORT_PREFERENCE_KEY = "values_filter_sorts";
+const VALUE_SORT_PREFERENCE_KEY = "values_value_sort";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, FavoriteItem } from "@/types";
@@ -21,11 +23,14 @@ import {
 import { useAuthContext, useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeSessionStorage } from "@/utils/storage/safeStorage";
+import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 import TradingGuides from "./TradingGuides";
 import ValuesSearchControls from "./ValuesSearchControls";
 import ValuesItemsGrid from "./ValuesItemsGrid";
 import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import { useValueSortState } from "@/hooks/useValueSortState";
+import { useValuesFilterMode } from "@/hooks/useValuesFilterMode";
+import { useValuesRangePreference } from "@/hooks/useValuesRangePreference";
 import { filterOptions } from "./valuesFilterOptions";
 import { valueSortOptions } from "./valuesSortOptions";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
@@ -87,25 +92,21 @@ export default function ValuesClient() {
       enabled: true,
       cleanupPath: "/values",
     },
+    valuePreferenceKey: VALUE_SORT_PREFERENCE_KEY,
   });
 
   const searchParams = useSearchParams();
   const isAuthenticated = useIsAuthenticated();
+  const {
+    filterMode,
+    setFilterMode,
+    isResolved: isFilterModeResolved,
+  } = useValuesFilterMode();
 
   const [selectedFilterSorts, setSelectedFilterSortsState] = useState<
     FilterSort[]
-  >(() => {
-    const fromUrl = parseFilterSorts(
-      searchParams.get("filterSort"),
-      validFilterSorts,
-    );
-    if (fromUrl.length > 0) return fromUrl;
-
-    return parseFilterSorts(
-      safeSessionStorage.getItem(FILTER_SORT_STORAGE_KEY),
-      validFilterSorts,
-    );
-  });
+  >([]);
+  const didRestoreFilterSortsRef = useRef(false);
 
   const persistFilterSorts = useCallback((next: FilterSort[]) => {
     if (next.length > 0) {
@@ -115,6 +116,88 @@ export default function ValuesClient() {
     }
   }, []);
 
+  const publishFilterSorts = useCallback((next: FilterSort[]) => {
+    window.dispatchEvent(
+      new CustomEvent("sendRealtimePreference", {
+        detail: { key: FILTER_SORT_PREFERENCE_KEY, value: next },
+      }),
+    );
+  }, []);
+
+  useEffect(() => {
+    if (didRestoreFilterSortsRef.current) return;
+    didRestoreFilterSortsRef.current = true;
+
+    const fromUrl = parseFilterSorts(
+      searchParams.get("filterSort"),
+      validFilterSorts,
+    );
+    const cached = getCachedPreference(FILTER_SORT_PREFERENCE_KEY);
+    const hasCachedFilters = Array.isArray(cached);
+    const fromCache = hasCachedFilters
+      ? cached.filter((value): value is FilterSort =>
+          validFilterSorts.includes(value as FilterSort),
+        )
+      : [];
+    const restored =
+      fromUrl.length > 0
+        ? fromUrl
+        : hasCachedFilters
+          ? fromCache
+          : parseFilterSorts(
+              safeSessionStorage.getItem(FILTER_SORT_STORAGE_KEY),
+              validFilterSorts,
+            );
+    setSelectedFilterSortsState(restored);
+    if (fromUrl.length > 0) {
+      persistFilterSorts(fromUrl);
+      publishFilterSorts(fromUrl);
+    }
+  }, [persistFilterSorts, publishFilterSorts, searchParams, validFilterSorts]);
+
+  useEffect(() => {
+    const applyFilters = (value: unknown) => {
+      if (!Array.isArray(value)) return;
+      const next = value.filter((filter): filter is FilterSort =>
+        validFilterSorts.includes(filter as FilterSort),
+      );
+      setSelectedFilterSortsState(next);
+      persistFilterSorts(next);
+    };
+    const resetFilters = () => {
+      setSelectedFilterSortsState([]);
+      persistFilterSorts([]);
+    };
+    const handlePreference = (event: Event) => {
+      const { key, value } = (
+        event as CustomEvent<{ key: string; value?: unknown }>
+      ).detail;
+      if (key === FILTER_SORT_PREFERENCE_KEY) applyFilters(value);
+    };
+    const handlePreferences = (event: Event) => {
+      const preferences = (event as CustomEvent<Record<string, unknown>>)
+        .detail;
+      if (FILTER_SORT_PREFERENCE_KEY in preferences) {
+        applyFilters(preferences[FILTER_SORT_PREFERENCE_KEY]);
+      } else {
+        resetFilters();
+      }
+    };
+    const handleDeleted = (event: Event) => {
+      const { key } = (event as CustomEvent<{ key: string }>).detail;
+      if (key === FILTER_SORT_PREFERENCE_KEY) resetFilters();
+    };
+
+    window.addEventListener("realtimePreference", handlePreference);
+    window.addEventListener("realtimePreferences", handlePreferences);
+    window.addEventListener("realtimePreferenceDeleted", handleDeleted);
+    return () => {
+      window.removeEventListener("realtimePreference", handlePreference);
+      window.removeEventListener("realtimePreferences", handlePreferences);
+      window.removeEventListener("realtimePreferenceDeleted", handleDeleted);
+    };
+  }, [persistFilterSorts, validFilterSorts]);
+
   const handleToggleFilterSort = useCallback(
     (value: FilterSort) => {
       if (value === "favorites" && !isAuthenticated) {
@@ -123,24 +206,46 @@ export default function ValuesClient() {
       }
       setSelectedFilterSortsState((prev) => {
         const next = prev.includes(value)
-          ? prev.filter((v) => v !== value)
-          : [...prev, value];
+          ? filterMode === "single"
+            ? []
+            : prev.filter((v) => v !== value)
+          : filterMode === "single"
+            ? [value]
+            : [...prev, value];
         persistFilterSorts(next);
+        publishFilterSorts(next);
         return next;
       });
     },
-    [isAuthenticated, persistFilterSorts],
+    [filterMode, isAuthenticated, persistFilterSorts, publishFilterSorts],
   );
+
+  useEffect(() => {
+    if (!isFilterModeResolved || filterMode !== "single") return;
+    setSelectedFilterSortsState((prev) => {
+      if (prev.length <= 1) return prev;
+      const next = [prev[prev.length - 1]];
+      persistFilterSorts(next);
+      publishFilterSorts(next);
+      return next;
+    });
+  }, [
+    filterMode,
+    isFilterModeResolved,
+    persistFilterSorts,
+    publishFilterSorts,
+  ]);
 
   const handleClearFilterSorts = useCallback(
     (subset?: FilterSort[]) => {
       setSelectedFilterSortsState((prev) => {
         const next = subset ? prev.filter((v) => !subset.includes(v)) : [];
         persistFilterSorts(next);
+        publishFilterSorts(next);
         return next;
       });
     },
-    [persistFilterSorts],
+    [persistFilterSorts, publishFilterSorts],
   );
 
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
@@ -156,15 +261,14 @@ export default function ValuesClient() {
       return currentMax;
     }, 50_000_000);
   }, [items]);
-
-  const [rangeValue, setRangeValue] = useState<number[]>(() => [
-    0,
-    DYNAMIC_MAX_VALUE,
-  ]);
-  const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
-  const [appliedMaxValue, setAppliedMaxValue] =
-    useState<number>(DYNAMIC_MAX_VALUE);
-  const previousMaxValueRef = useRef(DYNAMIC_MAX_VALUE);
+  const {
+    rangeValue,
+    setRangeValue,
+    appliedMinValue,
+    setAppliedMinValue,
+    appliedMaxValue,
+    setAppliedMaxValue,
+  } = useValuesRangePreference(DYNAMIC_MAX_VALUE, data !== undefined);
 
   useEffect(() => {
     if (!data) return;
@@ -178,18 +282,6 @@ export default function ValuesClient() {
       cancelled = true;
     };
   }, [data]);
-
-  useEffect(() => {
-    const previousMaxValue = previousMaxValueRef.current;
-    setRangeValue(([min, max]) => [
-      min,
-      max === previousMaxValue ? DYNAMIC_MAX_VALUE : max,
-    ]);
-    setAppliedMaxValue((max) =>
-      max === previousMaxValue ? DYNAMIC_MAX_VALUE : max,
-    );
-    previousMaxValueRef.current = DYNAMIC_MAX_VALUE;
-  }, [DYNAMIC_MAX_VALUE]);
 
   const handleCategorySelect = (filter: FilterSort) => {
     handleToggleFilterSort(filter);
@@ -363,6 +455,8 @@ export default function ValuesClient() {
         selectedFilterSorts={selectedFilterSorts}
         onToggleFilterSort={handleToggleFilterSort}
         onClearFilterSorts={handleClearFilterSorts}
+        filterMode={filterMode}
+        onFilterModeChange={setFilterMode}
         valueSort={valueSort}
         setValueSort={setValueSort}
         rangeValue={rangeValue}

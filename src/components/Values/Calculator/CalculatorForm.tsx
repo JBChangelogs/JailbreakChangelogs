@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import { TradeItem } from "@/types/trading";
 import TradeItemPickerV2 from "../../trading/TradeItemPickerV2";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -103,6 +103,38 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const robloxId = (user?.roblox_id ?? "").trim();
   const hasValidRobloxId = /^\d+$/.test(robloxId);
   const canLoadInventory = Boolean(isAuthenticated && hasValidRobloxId);
+  const calculatorStorageKey = `calculatorItems:${user?.id ?? "guest"}`;
+  const previousCalculatorStorageKeyRef = useRef(calculatorStorageKey);
+  const skipNextCalculatorPersistRef = useRef(false);
+
+  useEffect(() => {
+    if (safeLocalStorage.getItem(calculatorStorageKey) !== null) return;
+    const migrationSource = user?.id
+      ? (safeLocalStorage.getItem("calculatorItems:guest") ??
+        safeLocalStorage.getItem("calculatorItems"))
+      : safeLocalStorage.getItem("calculatorItems");
+    if (migrationSource === null) return;
+    safeLocalStorage.setItem(calculatorStorageKey, migrationSource);
+    safeLocalStorage.removeItem("calculatorItems");
+    if (user?.id) safeLocalStorage.removeItem("calculatorItems:guest");
+  }, [calculatorStorageKey, user?.id]);
+
+  useEffect(() => {
+    const previousKey = previousCalculatorStorageKeyRef.current;
+    if (previousKey === calculatorStorageKey) return;
+    previousCalculatorStorageKeyRef.current = calculatorStorageKey;
+    skipNextCalculatorPersistRef.current = true;
+
+    const isGuestLogin =
+      previousKey === "calculatorItems:guest" && Boolean(user?.id);
+    if (isGuestLogin) return;
+
+    appliedFromWSRef.current = true;
+    hadItemsRef.current = false;
+    setOfferingItems([]);
+    setRequestingItems([]);
+    setShowRestoreModal(false);
+  }, [calculatorStorageKey, user?.id]);
 
   useEffect(() => {
     offeringItemsRef.current = offeringItems;
@@ -361,8 +393,30 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         .filter((it) => it !== null) as TradeItem[];
     };
 
+    const remoteRaw = getCachedPreference("calculator_items");
+    if (typeof remoteRaw === "string" && remoteRaw) {
+      try {
+        const remote = JSON.parse(remoteRaw) as {
+          offering?: { id: number; isDuped: boolean }[];
+          requesting?: { id: number; isDuped: boolean }[];
+        };
+        const hydOff = hydrateCompact(remote.offering ?? []);
+        const hydReq = hydrateCompact(remote.requesting ?? []);
+        if (hydOff.length > 0 || hydReq.length > 0) {
+          safeSetJSON(calculatorStorageKey, {
+            offering: hydOff,
+            requesting: hydReq,
+          });
+          setTimeout(() => setShowRestoreModal(true), 0);
+          return;
+        }
+      } catch {
+        // Ignore malformed remote preferences and fall back to local data.
+      }
+    }
+
     try {
-      const saved = safeGetJSON("calculatorItems", {
+      const saved = safeGetJSON(calculatorStorageKey, {
         offering: [],
         requesting: [],
       });
@@ -381,64 +435,52 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         "Failed to parse stored calculator items from localStorage:",
         error,
       );
-      safeLocalStorage.removeItem("calculatorItems");
-    }
-
-    // No local items — check for items saved on another device
-    const remoteRaw = getCachedPreference("calculator_items");
-    if (typeof remoteRaw !== "string" || !remoteRaw) return;
-    try {
-      const remote = JSON.parse(remoteRaw) as {
-        offering?: { id: number; isDuped: boolean }[];
-        requesting?: { id: number; isDuped: boolean }[];
-      };
-      const hydOff = hydrateCompact(remote.offering ?? []);
-      const hydReq = hydrateCompact(remote.requesting ?? []);
-      if (hydOff.length === 0 && hydReq.length === 0) return;
-      safeSetJSON("calculatorItems", { offering: hydOff, requesting: hydReq });
-      setTimeout(() => setShowRestoreModal(true), 0);
-    } catch {
-      // ignore malformed preference
+      safeLocalStorage.removeItem(calculatorStorageKey);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [calculatorStorageKey, initialItems]);
 
   /**
    * Persist current selections to localStorage so users can resume later.
    * Schema: { offering: TradeItem[], requesting: TradeItem[] }
    */
-  const saveItemsToLocalStorage = (
-    offering: TradeItem[],
-    requesting: TradeItem[],
-  ) => {
-    safeSetJSON("calculatorItems", { offering, requesting });
-  };
+  const saveItemsToLocalStorage = useCallback(
+    (offering: TradeItem[], requesting: TradeItem[]) => {
+      safeSetJSON(calculatorStorageKey, { offering, requesting });
+    },
+    [calculatorStorageKey],
+  );
 
-  const syncItemsToPreference = (
-    offering: TradeItem[],
-    requesting: TradeItem[],
-  ) => {
-    if (calcSyncDebounceRef.current) clearTimeout(calcSyncDebounceRef.current);
-    calcSyncDebounceRef.current = setTimeout(() => {
-      const compact = {
-        offering: offering.map((it) => ({
-          id: it.id,
-          isDuped: it.isDuped || false,
-        })),
-        requesting: requesting.map((it) => ({
-          id: it.id,
-          isDuped: it.isDuped || false,
-        })),
-      };
-      window.dispatchEvent(
-        new CustomEvent("sendRealtimePreference", {
-          detail: { key: "calculator_items", value: JSON.stringify(compact) },
-        }),
-      );
-    }, 1000);
-  };
+  const syncItemsToPreference = useCallback(
+    (offering: TradeItem[], requesting: TradeItem[]) => {
+      if (calcSyncDebounceRef.current)
+        clearTimeout(calcSyncDebounceRef.current);
+      calcSyncDebounceRef.current = setTimeout(() => {
+        const compact = {
+          offering: offering.map((it) => ({
+            id: it.id,
+            isDuped: it.isDuped || false,
+          })),
+          requesting: requesting.map((it) => ({
+            id: it.id,
+            isDuped: it.isDuped || false,
+          })),
+        };
+        window.dispatchEvent(
+          new CustomEvent("sendRealtimePreference", {
+            detail: { key: "calculator_items", value: JSON.stringify(compact) },
+          }),
+        );
+      }, 1000);
+    },
+    [],
+  );
 
   useEffect(() => {
+    if (skipNextCalculatorPersistRef.current) {
+      skipNextCalculatorPersistRef.current = false;
+      return;
+    }
     const fromWS = appliedFromWSRef.current;
     appliedFromWSRef.current = false;
 
@@ -450,7 +492,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       // Items existed and just became empty (real clear/remove-last transition) —
       // remove localStorage and broadcast delete so other devices clear too.
       hadItemsRef.current = false;
-      safeLocalStorage.removeItem("calculatorItems");
+      safeLocalStorage.removeItem(calculatorStorageKey);
       if (!fromWS) {
         if (calcSyncDebounceRef.current)
           clearTimeout(calcSyncDebounceRef.current);
@@ -464,7 +506,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       }
     }
     // else: still empty and never had items (e.g. initial mount) — no-op.
-  }, [offeringItems, requestingItems]);
+  }, [
+    calculatorStorageKey,
+    offeringItems,
+    requestingItems,
+    saveItemsToLocalStorage,
+    syncItemsToPreference,
+  ]);
 
   // Live sync: silently apply calculator_items preference from other devices
   useEffect(() => {
@@ -518,6 +566,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             detail: { key: "calculator_items", value },
           }),
         );
+      } else {
+        handlePreferenceDeleted(
+          new CustomEvent("realtimePreferenceDeleted", {
+            detail: { key: "calculator_items" },
+          }),
+        );
       }
     };
 
@@ -528,7 +582,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       appliedFromWSRef.current = true;
       setOfferingItems([]);
       setRequestingItems([]);
-      safeLocalStorage.removeItem("calculatorItems");
+      safeLocalStorage.removeItem(calculatorStorageKey);
     };
 
     window.addEventListener("realtimePreference", handlePreference);
@@ -545,10 +599,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         handlePreferenceDeleted,
       );
     };
-  }, [initialItems]);
+  }, [calculatorStorageKey, initialItems]);
 
   const handleRestoreItems = () => {
-    const saved = safeGetJSON("calculatorItems", {
+    const saved = safeGetJSON(calculatorStorageKey, {
       offering: [],
       requesting: [],
     });
@@ -578,7 +632,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const handleStartNew = () => {
     setOfferingItems([]);
     setRequestingItems([]);
-    safeLocalStorage.removeItem("calculatorItems");
+    safeLocalStorage.removeItem(calculatorStorageKey);
     setShowRestoreModal(false);
     setShowClearConfirmModal(false);
     if (calcSyncDebounceRef.current) clearTimeout(calcSyncDebounceRef.current);

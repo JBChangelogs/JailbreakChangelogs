@@ -81,15 +81,14 @@ export function useCommentState(props: ChangelogCommentsProps) {
     new Set(),
   );
   const sortPrefKey = `comments_sort_${type}`;
-  const [sortOrder, setSortOrder] = useState<string | null>(
-    () =>
-      (typeof window !== "undefined"
-        ? (localStorage.getItem(`comments_sort_${type}`) ?? undefined)
-        : undefined) ??
-      (getCachedPreference(`comments_sort_${type}`) as string | undefined) ??
-      null,
-  );
+  const [sortOrder, setSortOrder] = useState<string | null>(null);
   const [availableSorts, setAvailableSorts] = useState<string[]>([]);
+
+  useEffect(() => {
+    const cached = getCachedPreference(sortPrefKey);
+    const stored = localStorage.getItem(sortPrefKey);
+    setSortOrder(typeof cached === "string" ? cached : stored);
+  }, [sortPrefKey]);
 
   // --- UI State (Modals & Loading) ---
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -512,15 +511,32 @@ export function useCommentState(props: ChangelogCommentsProps) {
       if (typeof incoming === "string") {
         localStorage.setItem(sortPrefKey, incoming);
         setSortOrder(incoming);
+      } else {
+        localStorage.removeItem(sortPrefKey);
+        setSortOrder(availableSorts[0] ?? null);
       }
+    };
+    const handlePreferenceDeleted = (e: Event) => {
+      const { key } = (e as CustomEvent<{ key: string }>).detail;
+      if (key !== sortPrefKey) return;
+      localStorage.removeItem(sortPrefKey);
+      setSortOrder(availableSorts[0] ?? null);
     };
     window.addEventListener("realtimePreference", handlePreference);
     window.addEventListener("realtimePreferences", handlePreferences);
+    window.addEventListener(
+      "realtimePreferenceDeleted",
+      handlePreferenceDeleted,
+    );
     return () => {
       window.removeEventListener("realtimePreference", handlePreference);
       window.removeEventListener("realtimePreferences", handlePreferences);
+      window.removeEventListener(
+        "realtimePreferenceDeleted",
+        handlePreferenceDeleted,
+      );
     };
-  }, [sortPrefKey]);
+  }, [availableSorts, sortPrefKey]);
 
   useEffect(() => {
     fetch(`${PUBLIC_API_URL}/emojis/string`, {

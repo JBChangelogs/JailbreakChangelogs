@@ -52,6 +52,7 @@ import { getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
+import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 
 const log = createLogger("UI");
 
@@ -172,6 +173,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     showItemSourceTabs &&
     isInventoryMode &&
     (isAuthLoading || !isAuthenticated || !hasValidRobloxId);
+  const tradeDraftStorageKey = user?.id ? `tradeAdFormItems:${user.id}` : null;
+
+  useEffect(() => {
+    if (!tradeDraftStorageKey) return;
+    if (safeLocalStorage.getItem(tradeDraftStorageKey) !== null) return;
+    const legacy = safeLocalStorage.getItem("tradeAdFormItems");
+    if (legacy === null) return;
+    safeLocalStorage.setItem(tradeDraftStorageKey, legacy);
+    safeLocalStorage.removeItem("tradeAdFormItems");
+  }, [tradeDraftStorageKey]);
 
   // Drag and drop state
   const [activeItem, setActiveItem] = useState<TradeItem | null>(null);
@@ -281,8 +292,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       requesting: TradeItem[],
       note: string = tradeNote,
     ) => {
-      if (isAuthenticated) {
-        safeSetJSON("tradeAdFormItems", {
+      if (isAuthenticated && tradeDraftStorageKey) {
+        safeSetJSON(tradeDraftStorageKey, {
           offering,
           requesting,
           note,
@@ -290,7 +301,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         });
       }
     },
-    [isAuthenticated, tradeNote, expirationHours],
+    [isAuthenticated, tradeDraftStorageKey, tradeNote, expirationHours],
   );
 
   useEffect(() => {
@@ -350,12 +361,13 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         setTradeNote(remoteNote);
         setExpirationHours(remoteExpiration);
         // Persist so a page reload can offer restore
-        safeSetJSON("tradeAdFormItems", {
-          offering: hydOff,
-          requesting: hydReq,
-          note: remoteNote,
-          expiration: remoteExpiration,
-        });
+        if (tradeDraftStorageKey)
+          safeSetJSON(tradeDraftStorageKey, {
+            offering: hydOff,
+            requesting: hydReq,
+            note: remoteNote,
+            expiration: remoteExpiration,
+          });
       } catch {
         // ignore malformed
       }
@@ -368,22 +380,54 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       setRequestingItems([]);
       setTradeNote("");
       setExpirationHours(null);
-      safeLocalStorage.removeItem("tradeAdFormItems");
+      if (tradeDraftStorageKey)
+        safeLocalStorage.removeItem(tradeDraftStorageKey);
     };
 
+    const handlePreferences = (e: Event) => {
+      const preferences = (e as CustomEvent<Record<string, unknown>>).detail;
+      const value = preferences?.trade_ad_items;
+      if (typeof value === "string" && value) {
+        handlePreference(
+          new CustomEvent("realtimePreference", {
+            detail: { key: "trade_ad_items", value },
+          }),
+        );
+      } else {
+        handlePreferenceDeleted(
+          new CustomEvent("realtimePreferenceDeleted", {
+            detail: { key: "trade_ad_items" },
+          }),
+        );
+      }
+    };
+
+    const cached = getCachedPreference("trade_ad_items");
+    if (typeof cached === "string" && cached) {
+      setTimeout(() => {
+        handlePreference(
+          new CustomEvent("realtimePreference", {
+            detail: { key: "trade_ad_items", value: cached },
+          }),
+        );
+      }, 0);
+    }
+
     window.addEventListener("realtimePreference", handlePreference);
+    window.addEventListener("realtimePreferences", handlePreferences);
     window.addEventListener(
       "realtimePreferenceDeleted",
       handlePreferenceDeleted,
     );
     return () => {
       window.removeEventListener("realtimePreference", handlePreference);
+      window.removeEventListener("realtimePreferences", handlePreferences);
       window.removeEventListener(
         "realtimePreferenceDeleted",
         handlePreferenceDeleted,
       );
     };
-  }, [items, customTradeTypeSet]);
+  }, [items, customTradeTypeSet, tradeDraftStorageKey]);
 
   const syncItemsToPreference = (
     offering: TradeItem[],
@@ -433,10 +477,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     setExpirationHours(null);
     didAutoFillSuggestedNoteRef.current = false;
 
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !tradeDraftStorageKey) return;
 
     try {
-      const storedItems = safeGetJSON<TradeFormDraft>("tradeAdFormItems", {
+      const storedItems = safeGetJSON<TradeFormDraft>(tradeDraftStorageKey, {
         offering: [],
         requesting: [],
         note: "",
@@ -449,9 +493,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       }
     } catch (error) {
       log.error("Failed to parse stored items from localStorage:", error);
-      safeLocalStorage.removeItem("tradeAdFormItems");
+      safeLocalStorage.removeItem(tradeDraftStorageKey);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, tradeDraftStorageKey, user?.id]);
 
   useEffect(() => {
     if (!autoFillSuggestedTradeNote) return;
@@ -473,7 +517,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
   const handleRestoreItems = () => {
     try {
-      const storedItems = safeGetJSON<TradeFormDraft>("tradeAdFormItems", {
+      if (!tradeDraftStorageKey) return;
+      const storedItems = safeGetJSON<TradeFormDraft>(tradeDraftStorageKey, {
         offering: [],
         requesting: [],
         note: "",
@@ -498,7 +543,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   };
 
   const handleStartNewTradeAd = () => {
-    safeLocalStorage.removeItem("tradeAdFormItems");
+    if (tradeDraftStorageKey) safeLocalStorage.removeItem(tradeDraftStorageKey);
     setOfferingItems([]);
     setRequestingItems([]);
     setTradeNote("");
@@ -844,7 +889,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         toast.success("Trade ad created successfully!", {
           id: creatingToastId ?? undefined,
         });
-        safeLocalStorage.removeItem("tradeAdFormItems");
+        if (tradeDraftStorageKey)
+          safeLocalStorage.removeItem(tradeDraftStorageKey);
         setOfferingItems([]);
         setRequestingItems([]);
         setTradeNote("");
@@ -993,8 +1039,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   <UiButton
                     onClick={() => {
                       setOfferingItems([]);
-                      if (requestingItems.length === 0) {
-                        safeLocalStorage.removeItem("tradeAdFormItems");
+                      if (
+                        requestingItems.length === 0 &&
+                        tradeDraftStorageKey
+                      ) {
+                        safeLocalStorage.removeItem(tradeDraftStorageKey);
                       } else {
                         saveItemsToLocalStorage([], requestingItems, tradeNote);
                       }
@@ -1009,8 +1058,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   <UiButton
                     onClick={() => {
                       setRequestingItems([]);
-                      if (offeringItems.length === 0) {
-                        safeLocalStorage.removeItem("tradeAdFormItems");
+                      if (offeringItems.length === 0 && tradeDraftStorageKey) {
+                        safeLocalStorage.removeItem(tradeDraftStorageKey);
                       } else {
                         saveItemsToLocalStorage(offeringItems, [], tradeNote);
                       }
