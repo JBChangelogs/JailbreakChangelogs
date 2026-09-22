@@ -45,9 +45,8 @@ function shouldLog(): boolean {
   if (_clientDebug === null) {
     try {
       const fromStorage = localStorage.getItem("jbcl_debug") === "1";
-      const fromUrl = new URLSearchParams(window.location.search).has(
-        "jbcl_debug",
-      );
+      const fromUrl =
+        new URLSearchParams(window.location.search).get("jbcl_debug") === "1";
       _clientDebug = fromStorage || fromUrl;
     } catch {
       _clientDebug = false;

@@ -168,6 +168,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setHasToken(!!token);
 
       if (!token) {
+        log.debug("[RT-DEBUG] setAuthState: no token (guest)");
         // Site bans may be IP-based and are maintained independently by the
         // public API response interceptor, including for logged-out visitors.
         setAuthState({
@@ -199,6 +200,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // but skip this when we know the server data is about to differ (post-OAuth)
       const cachedUser = safeGetJSON<UserData>("user", null);
       if (cachedUser && !isReturnFromRobloxOAuth) {
+        log.debug("[RT-DEBUG] setAuthState: cached user (stage 1)", {
+          userId: cachedUser.id,
+          isOwner: (cachedUser as { is_owner?: boolean }).is_owner,
+        });
         setAuthState({
           isAuthenticated: true,
           user: cachedUser,
@@ -244,6 +249,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (user.avatar) {
             safeLocalStorage.setItem("avatar", user.avatar);
           }
+          log.debug("[RT-DEBUG] setAuthState: fetched user (stage 2)", {
+            userId: user.id,
+            isOwner: (user as { is_owner?: boolean }).is_owner,
+            cachedUserId: cachedUser?.id,
+            idChangedFromCache: cachedUser ? cachedUser.id !== user.id : null,
+          });
           setAuthState({
             isAuthenticated: true,
             user,
@@ -263,6 +274,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
 
           // Token is invalid — clear state
+          log.debug("[RT-DEBUG] setAuthState: token invalid, clearing user");
           safeSetJSON("user", null);
           setSiteBan(null);
           setHasToken(false);
@@ -368,9 +380,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
   }, []);
 
-  useRealtimeNotificationsWebSocket(
+  const realtimeEnabled =
     ((authState.isAuthenticated && !authState.isLoading) || hasToken) &&
-      !siteBan,
+    !siteBan;
+  log.debug("[RT-DEBUG] AuthProvider render -> RT hook inputs", {
+    enabled: realtimeEnabled,
+    userId: authState.user?.id,
+    isOwner: (authState.user as { is_owner?: boolean } | null)?.is_owner,
+    hasToken,
+    isAuthenticated: authState.isAuthenticated,
+    isLoading: authState.isLoading,
+    siteBan: !!siteBan,
+  });
+
+  useRealtimeNotificationsWebSocket(
+    realtimeEnabled,
     locationString,
     handleRealtimeSiteBan,
     handleRealtimeSupporterUpdate,
