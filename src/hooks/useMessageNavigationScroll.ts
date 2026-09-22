@@ -60,9 +60,11 @@ export function useMessageNavigationScroll({
   const pendingOwnSendScrollRef = useRef(false);
   const initialScrollConversationIdRef = useRef<string | null>(null);
   const isAtBottomRef = useRef(true);
+  const pendingRealtimeReadUserIdsRef = useRef<Set<string>>(new Set());
   const latestRenderedMessageRef = useRef<{
     conversationId: string;
     messageId: string;
+    seenBadgeMessageId: string | null;
   } | null>(null);
 
   const scrollMessagesToLatest = useCallback((behavior: ScrollBehavior) => {
@@ -94,8 +96,16 @@ export function useMessageNavigationScroll({
     isAtBottomRef.current = distanceFromBottom <= 48;
     if (isAtBottomRef.current) {
       setHasNewMessagesBelow(false);
+      const userId = selectedUserId;
+      if (userId && pendingRealtimeReadUserIdsRef.current.delete(userId)) {
+        window.dispatchEvent(
+          new CustomEvent("sendRealtimeMarkRead", {
+            detail: { sender_id: userId },
+          }),
+        );
+      }
     }
-  }, []);
+  }, [selectedUserId]);
 
   const showNewMessages = useCallback(() => {
     setHasNewMessagesBelow(false);
@@ -211,20 +221,34 @@ export function useMessageNavigationScroll({
     if (!latestMessage) return;
 
     const previous = latestRenderedMessageRef.current;
+    const latestUserMessage = messages.findLast(
+      (message) => message.type !== "system",
+    );
+    const seenBadgeMessageId =
+      latestUserMessage &&
+      asId(latestUserMessage.senderId) === currentUserId &&
+      typeof latestUserMessage.readAt === "number" &&
+      latestUserMessage.status !== "pending" &&
+      latestUserMessage.status !== "failed"
+        ? latestUserMessage.id
+        : null;
     latestRenderedMessageRef.current = {
       conversationId: selectedUserId,
       messageId: latestMessage.id,
+      seenBadgeMessageId,
     };
 
     const hasNewLatestMessage =
       previous?.conversationId === selectedUserId &&
       previous.messageId !== latestMessage.id;
+    const hasSeenBadgeAppeared =
+      previous?.conversationId === selectedUserId &&
+      !previous.seenBadgeMessageId &&
+      !!seenBadgeMessageId;
 
-    // Preserve the familiar chat behavior: incoming messages keep the view
-    // pinned only when the user was already at the bottom. If they scrolled up
-    // to read history, leave their viewport undisturbed.
+    // Keep new messages and read receipts pinned only when already at the bottom.
     if (
-      hasNewLatestMessage &&
+      (hasNewLatestMessage || hasSeenBadgeAppeared) &&
       isAtBottomRef.current &&
       !prependScrollRestoreRef.current
     ) {
@@ -281,5 +305,7 @@ export function useMessageNavigationScroll({
     showNewMessages,
     prependScrollRestoreRef,
     pendingOwnSendScrollRef,
+    isAtBottomRef,
+    pendingRealtimeReadUserIdsRef,
   };
 }

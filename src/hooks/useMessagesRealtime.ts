@@ -24,6 +24,8 @@ interface UseMessagesRealtimeOptions {
   selectedUserIdRef: RefObject<string | null>;
   wsSendFallbackTimeoutsRef: RefObject<Set<number>>;
   readMessageIdsRef: RefObject<Set<string>>;
+  isAtBottomRef: RefObject<boolean>;
+  pendingRealtimeReadUserIdsRef: RefObject<Set<string>>;
   localThreadMessagesByUserIdRef: RefObject<Map<string, Message[]>>;
   updateLocalThreadMessage: (
     userId: string,
@@ -46,6 +48,8 @@ export function useMessagesRealtime({
   selectedUserIdRef,
   wsSendFallbackTimeoutsRef,
   readMessageIdsRef,
+  isAtBottomRef,
+  pendingRealtimeReadUserIdsRef,
   localThreadMessagesByUserIdRef,
   updateLocalThreadMessage,
   upsertLocalThreadMessage,
@@ -447,11 +451,15 @@ export function useMessagesRealtime({
       }
 
       if (action === "message_received" && senderId !== currentUserId) {
-        window.dispatchEvent(
-          new CustomEvent("sendRealtimeMarkRead", {
-            detail: { sender_id: senderId },
-          }),
-        );
+        if (isAtBottomRef.current) {
+          window.dispatchEvent(
+            new CustomEvent("sendRealtimeMarkRead", {
+              detail: { sender_id: senderId },
+            }),
+          );
+        } else {
+          pendingRealtimeReadUserIdsRef.current.add(senderId);
+        }
       }
 
       setMessages((prev) => {
@@ -554,6 +562,8 @@ export function useMessagesRealtime({
     currentUserId,
     isAuthenticated,
     readMessageIdsRef,
+    isAtBottomRef,
+    pendingRealtimeReadUserIdsRef,
     updateLocalThreadMessage,
     upsertLocalThreadMessage,
     removeLocalThreadMessage,

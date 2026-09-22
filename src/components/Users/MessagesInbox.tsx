@@ -168,6 +168,8 @@ export default function MessagesInbox() {
     showNewMessages,
     prependScrollRestoreRef,
     pendingOwnSendScrollRef,
+    isAtBottomRef,
+    pendingRealtimeReadUserIdsRef,
   } = useMessageNavigationScroll({
     pathname,
     selectedUserId,
@@ -244,6 +246,8 @@ export default function MessagesInbox() {
     selectedUserIdRef,
     wsSendFallbackTimeoutsRef,
     readMessageIdsRef,
+    isAtBottomRef,
+    pendingRealtimeReadUserIdsRef,
     localThreadMessagesByUserIdRef,
     updateLocalThreadMessage,
     upsertLocalThreadMessage,
