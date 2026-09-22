@@ -207,7 +207,7 @@ export function useRealtimeNotificationsWebSocket(
   const terminalCloseRef = useRef(false);
   const reconnectOnFocusOnlyRef = useRef(false);
   const manuallyDisconnectedRef = useRef(false);
-  const connectRef = useRef<(() => void) | null>(null);
+  const connectRef = useRef<((reason: string) => void) | null>(null);
   const connectedAtRef = useRef<number | null>(null);
   const locationPathRef = useRef<string>(
     typeof window !== "undefined"
@@ -217,6 +217,9 @@ export function useRealtimeNotificationsWebSocket(
   const lastSentLocationRef = useRef<string>("");
   const rtDebugConnectCounterRef = useRef(0);
   const rtDebugEffectRunCounterRef = useRef(0);
+  const rtDebugHistoryRef = useRef<
+    Array<{ n: number; reason: string; at: string; preferenceScope: unknown }>
+  >([]);
   const preferenceScope: PreferenceOutboxScope | null = preferenceUserId
     ? getUserPreferenceOutboxScope(preferenceUserId)
     : isRealtimeNotificationsEnabled
@@ -387,7 +390,8 @@ export function useRealtimeNotificationsWebSocket(
       ) {
         return;
       }
-      connectRef.current?.();
+      log.info("[RT-DEBUG] realtimeManualConnect event received");
+      connectRef.current?.("manual-connect-event");
     };
 
     window.addEventListener("realtimeManualDisconnect", handleManualDisconnect);
@@ -497,11 +501,11 @@ export function useRealtimeNotificationsWebSocket(
 
       reconnectTimeoutRef.current = setTimeout(() => {
         reconnectTimeoutRef.current = null;
-        connect();
+        connect(`scheduled-reconnect:${source}`);
       }, delay);
     };
 
-    const connect = () => {
+    const connect = (reason: string) => {
       if (unmounted || !enabledRef.current) {
         return;
       }
@@ -526,10 +530,18 @@ export function useRealtimeNotificationsWebSocket(
         }
 
         rtDebugConnectCounterRef.current += 1;
+        rtDebugHistoryRef.current.push({
+          n: rtDebugConnectCounterRef.current,
+          reason,
+          at: new Date().toISOString(),
+          preferenceScope,
+        });
         log.debug("[RT-DEBUG] opening WebSocket", {
           connectNumber: rtDebugConnectCounterRef.current,
           effectRunNumber: rtDebugEffectRunCounterRef.current,
+          reason,
           preferenceScope,
+          history: [...rtDebugHistoryRef.current],
         });
 
         const ws = new WebSocket(wsUrl);
@@ -1190,7 +1202,7 @@ export function useRealtimeNotificationsWebSocket(
         effectRunNumber: rtDebugEffectRunCounterRef.current,
         source,
       });
-      connect();
+      connect(`reconnect-now:${source}`);
     };
 
     const handleVisibilityChange = () => {
@@ -1211,7 +1223,7 @@ export function useRealtimeNotificationsWebSocket(
     window.addEventListener("focus", handleWindowFocus);
     window.addEventListener("online", handleOnline);
 
-    connect();
+    connect(`effect-mount:${rtDebugEffectRunCounterRef.current}`);
 
     return () => {
       unmounted = true;
