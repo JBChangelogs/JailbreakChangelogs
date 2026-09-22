@@ -48,7 +48,7 @@ export async function fetchUserNotificationPreferences(
 ): Promise<NotificationPreferencesResponse> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    `/notifications/preferences?user_id=${encodeURIComponent(userId)}`,
+    `/notifications/preferences/${encodeURIComponent(userId)}`,
   );
   const resp = await fetch(url, {
     method: "GET",
@@ -79,7 +79,7 @@ export async function updateUserNotificationPreferences(
     "/notifications/preferences",
   );
   const resp = await fetch(url, {
-    method: "POST",
+    method: "PATCH",
     credentials: "include",
     headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ preferences }),
