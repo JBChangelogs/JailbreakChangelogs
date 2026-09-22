@@ -1088,7 +1088,7 @@ export default function MyReports() {
                 return (
                   <article
                     key={String(report.id)}
-                    className="border-border-card bg-secondary-bg hover:border-border-focus relative flex h-full flex-col rounded-xl border p-4 transition-colors sm:p-5"
+                    className="border-border-card bg-secondary-bg hover:border-border-focus relative flex h-full flex-col overflow-hidden rounded-xl border p-4 transition-colors sm:p-5"
                   >
                     <div className="relative z-10 flex flex-wrap items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-wrap items-center gap-2.5">
