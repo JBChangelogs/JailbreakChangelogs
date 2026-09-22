@@ -215,8 +215,6 @@ export function useRealtimeNotificationsWebSocket(
       : "/",
   );
   const lastSentLocationRef = useRef<string>("");
-  const rtDebugConnectCounterRef = useRef(0);
-  const rtDebugEffectRunCounterRef = useRef(0);
   const preferenceScope: PreferenceOutboxScope | null = preferenceUserId
     ? getUserPreferenceOutboxScope(preferenceUserId)
     : isRealtimeNotificationsEnabled
@@ -402,13 +400,6 @@ export function useRealtimeNotificationsWebSocket(
   }, []);
 
   useEffect(() => {
-    rtDebugEffectRunCounterRef.current += 1;
-    log.debug("[RT-DEBUG] main effect (re)run", {
-      runNumber: rtDebugEffectRunCounterRef.current,
-      isRealtimeNotificationsEnabled,
-      preferenceScope,
-    });
-
     if (!isRealtimeNotificationsEnabled) {
       clearPreferencesCache();
       publishRealtimeConnectionState(false);
@@ -518,13 +509,6 @@ export function useRealtimeNotificationsWebSocket(
           log.warn("Missing NEXT_PUBLIC_WS_URL");
           return;
         }
-
-        rtDebugConnectCounterRef.current += 1;
-        log.debug("[RT-DEBUG] opening WebSocket", {
-          connectNumber: rtDebugConnectCounterRef.current,
-          effectRunNumber: rtDebugEffectRunCounterRef.current,
-          preferenceScope,
-        });
 
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
@@ -1203,10 +1187,6 @@ export function useRealtimeNotificationsWebSocket(
 
     return () => {
       unmounted = true;
-      log.debug("[RT-DEBUG] main effect cleanup", {
-        effectRunNumber: rtDebugEffectRunCounterRef.current,
-        hadOpenSocket: wsRef.current?.readyState === WebSocket.OPEN,
-      });
       publishRealtimeConnectionState(false);
       toast.dismiss("realtime-notifications-reconnecting");
       document.removeEventListener("visibilitychange", handleVisibilityChange);
