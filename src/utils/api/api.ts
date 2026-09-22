@@ -1328,6 +1328,38 @@ export async function fetchItemHistory(id: string) {
   }
 }
 
+export async function fetchItemScanCount(
+  itemId: number,
+): Promise<number | null> {
+  if (!INVENTORY_API_URL) return null;
+
+  try {
+    const response = await fetch(
+      `${INVENTORY_API_URL}/items/${itemId}/scans/count?days=30`,
+      {
+        headers: { "X-Source": INVENTORY_API_SOURCE_HEADER },
+      },
+    );
+    if (!response.ok) {
+      log.error("fetchItemScanCount failed", {
+        status: response.status,
+        itemId,
+      });
+      return null;
+    }
+
+    const data = (await response.json()) as { scan_count?: unknown };
+    return typeof data.scan_count === "number" &&
+      Number.isFinite(data.scan_count) &&
+      data.scan_count >= 0
+      ? data.scan_count
+      : null;
+  } catch (error) {
+    log.error("Error fetching item scan count", error);
+    return null;
+  }
+}
+
 export async function fetchItemsByType(type: string) {
   try {
     const response = await fetch(

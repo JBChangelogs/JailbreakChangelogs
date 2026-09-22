@@ -19,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ItemValueChart = dynamic(
@@ -52,7 +53,7 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
-import { fetchItemByIdClient } from "@/utils/api/api";
+import { fetchItemByIdClient, fetchItemScanCount } from "@/utils/api/api";
 import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
@@ -438,10 +439,26 @@ export default function ItemDetailsClient({
   const [itemMetadata, setItemMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
   const [placementLimit, setPlacementLimit] = useState<number | null>(null);
+  const [scanCount, setScanCount] = useState<{
+    itemId: number;
+    count: number | null;
+  } | null>(null);
 
   useEffect(() => {
     setItem(initialItem);
   }, [initialItem]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchItemScanCount(item.id).then((count) => {
+      if (!cancelled) {
+        setScanCount({ itemId: item.id, count });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [item.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -502,6 +519,8 @@ export default function ItemDetailsClient({
   };
 
   const currentItem = item;
+  const currentScanCount =
+    scanCount?.itemId === currentItem.id ? scanCount.count : undefined;
   const metadataLevel = itemMetadata?.level;
   const metadataPlacement = itemMetadata?.placement;
   const hasMetadataLevel = hasUnlockLevel(metadataLevel);
@@ -696,6 +715,30 @@ export default function ItemDetailsClient({
                   </div>
                 )}
 
+              <div className="border-border-card mt-4 flex min-h-14 items-center justify-between gap-4 border-b pb-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-primary-text text-sm font-medium">
+                    Inventory appearances · 30 days
+                  </div>
+                  <div className="text-secondary-text text-xs">
+                    Times this item appeared in scanned inventories. Repeat
+                    scans are included.
+                  </div>
+                </div>
+                <div
+                  className="text-primary-text w-20 shrink-0 text-right text-lg font-semibold tabular-nums"
+                  aria-live="polite"
+                >
+                  {currentScanCount === undefined ? (
+                    <Skeleton className="ml-auto h-6 w-16" aria-hidden="true" />
+                  ) : currentScanCount === null ? (
+                    <span aria-label="Scan count unavailable">—</span>
+                  ) : (
+                    currentScanCount.toLocaleString()
+                  )}
+                </div>
+              </div>
+
               {/* Mobile Ad - shown only on smaller screens */}
               <div className="mt-4 flex justify-center xl:hidden">
                 <NitroItemMobileAd className="min-h-45 w-full max-w-xs sm:max-w-sm md:max-w-md" />
@@ -757,7 +800,7 @@ export default function ItemDetailsClient({
                                           prev + INITIAL_DESCRIPTION_LENGTH,
                                       )
                                     }
-                                    className="text-button-info hover:text-button-info-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                    className="text-link hover:text-link-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                                   >
                                     <Icon
                                       icon="heroicons-outline:chevron-down"
@@ -778,7 +821,7 @@ export default function ItemDetailsClient({
                                   onClick={() =>
                                     setVisibleLength(INITIAL_DESCRIPTION_LENGTH)
                                   }
-                                  className="text-button-info hover:text-button-info-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                  className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                                 >
                                   <Icon
                                     icon="heroicons-outline:chevron-up"
