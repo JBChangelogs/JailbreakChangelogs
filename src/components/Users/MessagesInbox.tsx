@@ -207,6 +207,7 @@ export default function MessagesInbox() {
     };
   }, []);
   const wsSendFallbackTimeoutsRef = useRef<Set<number>>(new Set());
+  const readMessageIdsRef = useRef<Set<string>>(new Set());
   const typingSentAtByUserIdRef = useRef<Map<string, number>>(new Map());
 
   const insertEditEmoji = useCallback(
@@ -242,6 +243,7 @@ export default function MessagesInbox() {
     isAuthenticated,
     selectedUserIdRef,
     wsSendFallbackTimeoutsRef,
+    readMessageIdsRef,
     localThreadMessagesByUserIdRef,
     updateLocalThreadMessage,
     upsertLocalThreadMessage,
@@ -599,6 +601,7 @@ export default function MessagesInbox() {
     selectedUserIdRef,
     pendingOwnSendScrollRef,
     wsSendFallbackTimeoutsRef,
+    readMessageIdsRef,
     prepareMessageContentForApi,
     prepareMessageDisplayContent,
     setIsSending,
