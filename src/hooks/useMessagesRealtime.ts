@@ -387,6 +387,14 @@ export function useMessagesRealtime({
         return;
       }
 
+      if (action === "message_received" && senderId !== currentUserId) {
+        window.dispatchEvent(
+          new CustomEvent("sendRealtimeMarkRead", {
+            detail: { sender_id: senderId },
+          }),
+        );
+      }
+
       setMessages((prev) => {
         const existing = prev.find((item) => item.id === realtimeMessage.id);
         if (existing) {

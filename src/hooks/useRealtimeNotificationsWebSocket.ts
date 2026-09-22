@@ -326,6 +326,29 @@ export function useRealtimeNotificationsWebSocket(
   }, []);
 
   useEffect(() => {
+    const handleMarkRead = (event: Event) => {
+      const detail = (event as CustomEvent<{ sender_id?: string }>).detail;
+      if (
+        typeof detail?.sender_id !== "string" ||
+        wsRef.current?.readyState !== WebSocket.OPEN
+      ) {
+        return;
+      }
+      wsRef.current.send(
+        JSON.stringify({
+          type: "mark_read",
+          sender_id: detail.sender_id,
+        }),
+      );
+    };
+
+    window.addEventListener("sendRealtimeMarkRead", handleMarkRead);
+    return () => {
+      window.removeEventListener("sendRealtimeMarkRead", handleMarkRead);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleManualDisconnect = () => {
       manuallyDisconnectedRef.current = true;
       toast.dismiss("realtime-notifications-reconnecting");
