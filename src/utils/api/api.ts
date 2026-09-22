@@ -1711,6 +1711,11 @@ export interface ItemCountStats {
   user_count_str: string;
 }
 
+export interface TradeCountStats {
+  trade_count: number;
+  trade_count_str: string;
+}
+
 export interface UserScan {
   user_id: string;
   upsert_count: number;
@@ -1767,6 +1772,35 @@ export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
     return data as ItemCountStats;
   } catch {
     log.error("Error fetching item count stats");
+    return null;
+  }
+}
+
+export async function fetchTradeCountStats(): Promise<TradeCountStats | null> {
+  try {
+    const response = await fetch(`${INVENTORY_API_URL}/trades/count`, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchTradeCountStats failed", {
+        status: response.status,
+        body,
+      });
+      throw new Error("Failed to fetch trade count stats");
+    }
+
+    return (await response.json()) as TradeCountStats;
+  } catch (error) {
+    log.error("Error fetching trade count stats", error);
     return null;
   }
 }
