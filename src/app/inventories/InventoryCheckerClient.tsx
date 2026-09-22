@@ -54,7 +54,6 @@ const log = createLogger("INVENTORY");
 import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
 import NetworthHistoryChart from "@/components/Inventory/NetworthHistoryChart";
 import InventoryBreakdown from "@/components/Inventory/InventoryBreakdown";
-import UserTradeHistory from "@/components/Inventory/UserTradeHistory";
 
 const MemoInventoryItems = React.memo(InventoryItems);
 const MemoDuplicatesTab = React.memo(DuplicatesTab);
@@ -318,7 +317,6 @@ export default function InventoryCheckerClient({
   const tabIndex = useMemo(() => {
     let nextIndex = 1;
 
-    const trades = robloxId ? nextIndex++ : null;
     const breakdown = hasBreakdownData ? nextIndex++ : null;
     const copies = hasDuplicates ? nextIndex++ : null;
     const dupes = hasDupedItems ? nextIndex++ : null;
@@ -327,18 +325,12 @@ export default function InventoryCheckerClient({
 
     const max = Math.max(
       0,
-      ...(Array.from([
-        trades,
-        breakdown,
-        copies,
-        dupes,
-        graphs,
-        comments,
-      ]).filter((idx): idx is number => typeof idx === "number") as number[]),
+      ...(Array.from([breakdown, copies, dupes, graphs, comments]).filter(
+        (idx): idx is number => typeof idx === "number",
+      ) as number[]),
     );
 
     return {
-      trades,
       breakdown,
       copies,
       dupes,
@@ -351,7 +343,6 @@ export default function InventoryCheckerClient({
   // Derive active tab index from the ?tab= search param + available tabs
   const activeTab = useMemo(() => {
     const tabNameMap: Record<string, number | null> = {
-      trades: tabIndex.trades,
       breakdown: tabIndex.breakdown,
       copies: tabIndex.copies,
       dupes: tabIndex.dupes,
@@ -592,7 +583,6 @@ export default function InventoryCheckerClient({
     );
 
     const tabIndexToName: Record<number, string> = {};
-    if (tabIndex.trades !== null) tabIndexToName[tabIndex.trades] = "trades";
     if (tabIndex.breakdown !== null)
       tabIndexToName[tabIndex.breakdown] = "breakdown";
     if (tabIndex.copies !== null) tabIndexToName[tabIndex.copies] = "copies";
@@ -1220,7 +1210,6 @@ export default function InventoryCheckerClient({
                   hasDuplicates={hasDuplicates}
                   hasDupedItems={hasDupedItems}
                   hasBreakdown={hasBreakdownData}
-                  hasTrades={Boolean(robloxId)}
                   robloxId={robloxId}
                 />
 
@@ -1239,24 +1228,6 @@ export default function InventoryCheckerClient({
                       onShowOnlySeasonalChange={setShowOnlySeasonal}
                     />
                   </div>
-
-                  {tabIndex.trades !== null &&
-                    mountedTabs.has(tabIndex.trades) &&
-                    robloxId && (
-                      <div
-                        className={
-                          effectiveActiveTab === tabIndex.trades ? "" : "hidden"
-                        }
-                      >
-                        <UserTradeHistory
-                          key={robloxId}
-                          userId={robloxId}
-                          userDisplayName={getUserDisplay(robloxId)}
-                          isActive={effectiveActiveTab === tabIndex.trades}
-                          itemsData={itemsData}
-                        />
-                      </div>
-                    )}
 
                   {tabIndex.copies !== null &&
                     mountedTabs.has(tabIndex.copies) && (
@@ -1427,7 +1398,6 @@ function InventoryOverflowTabs({
   hasDuplicates,
   hasDupedItems,
   hasBreakdown,
-  hasTrades,
   robloxId,
 }: {
   value: number;
@@ -1436,12 +1406,10 @@ function InventoryOverflowTabs({
   hasDuplicates: boolean;
   hasDupedItems: boolean;
   hasBreakdown: boolean;
-  hasTrades: boolean;
   robloxId?: string;
 }) {
   const labels = [
     "Inventory Items",
-    ...(hasTrades ? ["Trade History"] : []),
     ...(hasBreakdown ? ["Inventory Breakdown"] : []),
     ...(hasDuplicates ? ["Multiple Copies"] : []),
     ...(hasDupedItems ? ["Duplicate Items"] : []),

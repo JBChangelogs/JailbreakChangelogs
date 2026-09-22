@@ -54,7 +54,7 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
           two value columns, which was truncating the totals on narrow screens. */}
       <div className="mb-3 flex justify-center sm:hidden">
         <span
-          className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-center text-[11px] leading-none font-semibold whitespace-nowrap ${netColorClass}`}
+          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-center text-[11px] leading-none font-semibold whitespace-nowrap ${netColorClass}`}
         >
           {netLabel}
         </span>
@@ -80,7 +80,7 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
             inline={true}
           />
           <span
-            className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-center text-xs leading-none font-semibold whitespace-nowrap ${netColorClass}`}
+            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-center text-xs leading-none font-semibold whitespace-nowrap ${netColorClass}`}
           >
             {netLabel}
           </span>
