@@ -1224,7 +1224,7 @@ export default function UserProfileClient({
           <div className="p-3 sm:p-4 md:p-6">
             <div className="flex flex-col items-center gap-3 md:flex-row md:items-start md:gap-6">
               {/* Avatar - smaller on mobile */}
-              <div className="relative -mt-14 md:-mt-24">
+              <div className="relative z-30 -mt-14 md:-mt-24">
                 {currentUserId === user.id ? (
                   <AvatarUploadDialog
                     userData={user}
@@ -1241,6 +1241,8 @@ export default function UserProfileClient({
                           custom_avatar={user.custom_avatar}
                           isOnline={user.presence?.status === "Online"}
                           showBadge={true}
+                          className="z-auto"
+                          presenceBadgeClassName="z-40"
                           settings={user.settings_v2}
                           premiumType={user.premiumtype}
                         />

@@ -55,6 +55,7 @@ const AvatarWrapper = ({
   showBadge,
   isHidden = false,
   size,
+  isSquare,
   className,
   presenceBadgeClassName,
 }: {
@@ -63,13 +64,16 @@ const AvatarWrapper = ({
   showBadge?: boolean;
   isHidden?: boolean;
   size: number;
+  isSquare: boolean;
   className?: string;
   presenceBadgeClassName?: string;
 }) => {
   if (!showBadge) return <>{children}</>;
 
   const badgeSize = Math.min(32, Math.max(10, Math.round(size * 4 * 0.24)));
-  const badgeOffset = -Math.max(1, Math.round(badgeSize * 0.08));
+  const badgeOffset = isSquare
+    ? -Math.max(3, Math.round(badgeSize * 0.25))
+    : -Math.max(1, Math.round(badgeSize * 0.08));
   const badgeBorderWidth = badgeSize >= 20 ? 4 : 2;
 
   return (
@@ -78,7 +82,7 @@ const AvatarWrapper = ({
       {isOnline && !isHidden ? (
         <span
           className={cn(
-            "border-primary-bg pointer-events-none absolute rounded-full",
+            "border-secondary-bg pointer-events-none absolute rounded-full",
             presenceBadgeClassName,
           )}
           style={{
@@ -187,6 +191,7 @@ const UserAvatarImpl = ({
         showBadge={showBadge}
         isHidden={Boolean(settings?.hide_presence)}
         size={size}
+        isSquare={finalShape === "square"}
         className={wrapperClassName}
         presenceBadgeClassName={presenceBadgeClassName}
       >
@@ -217,6 +222,7 @@ const UserAvatarImpl = ({
       showBadge={showBadge}
       isHidden={Boolean(settings?.hide_presence)}
       size={size}
+      isSquare={finalShape === "square"}
       className={wrapperClassName}
       presenceBadgeClassName={presenceBadgeClassName}
     >
