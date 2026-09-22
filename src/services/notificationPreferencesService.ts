@@ -12,14 +12,14 @@ export type NotificationPreferencesResponse = {
   preferences: NotificationPreferenceEntry[];
 };
 
-function getClientToken(): string | null {
-  const cookieMatch =
-    typeof document !== "undefined"
-      ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-      : null;
-  return cookieMatch
-    ? decodeURIComponent(cookieMatch[1])
-    : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
+function getErrorMessage(data: unknown, fallback: string): string {
+  if (typeof data === "string") return data || fallback;
+  if (!data || typeof data !== "object") return fallback;
+  const { message, detail, error } = data as Record<string, unknown>;
+  if (typeof message === "string" && message) return message;
+  if (typeof detail === "string" && detail) return detail;
+  if (typeof error === "string" && error) return error;
+  return fallback;
 }
 
 export async function fetchAvailableNotificationPreferences(): Promise<
@@ -35,8 +35,7 @@ export async function fetchAvailableNotificationPreferences(): Promise<
   if (!resp.ok) {
     const data = await resp.json().catch(() => ({}));
     throw new Error(
-      (data as { error?: string }).error ||
-        "Failed to fetch available preferences",
+      getErrorMessage(data, "Failed to fetch available preferences"),
     );
   }
 
@@ -60,9 +59,7 @@ export async function fetchUserNotificationPreferences(
 
   if (!resp.ok) {
     const data = await resp.json().catch(() => ({}));
-    throw new Error(
-      (data as { error?: string }).error || "Failed to fetch user preferences",
-    );
+    throw new Error(getErrorMessage(data, "Failed to fetch user preferences"));
   }
 
   const data = (await resp
@@ -76,8 +73,7 @@ export async function fetchUserNotificationPreferences(
 
 export async function updateUserNotificationPreferences(
   preferences: NotificationPreferenceEntry[],
-): Promise<unknown> {
-  const token = getClientToken();
+): Promise<{ success: boolean; message: string }> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     "/notifications/preferences",
@@ -86,16 +82,15 @@ export async function updateUserNotificationPreferences(
     method: "POST",
     credentials: "include",
     headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ token, preferences }),
+    body: JSON.stringify({ preferences }),
   });
 
   if (!resp.ok) {
     const data = await resp.json().catch(() => ({}));
     throw new Error(
-      (data as { error?: string }).error ||
-        "Failed to update notification preferences",
+      getErrorMessage(data, "Failed to update notification preferences"),
     );
   }
 
-  return resp.json().catch(() => ({}));
+  return resp.json() as Promise<{ success: boolean; message: string }>;
 }

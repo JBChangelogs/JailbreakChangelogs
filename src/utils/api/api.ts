@@ -2507,17 +2507,9 @@ export async function fetchNotificationHistory(
   size: number = 5,
 ): Promise<NotificationHistory> {
   try {
-    const cookieMatch =
-      typeof document !== "undefined"
-        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-        : null;
-    const token = cookieMatch
-      ? decodeURIComponent(cookieMatch[1])
-      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
-    const tokenParam = token ? `&token=${encodeURIComponent(token)}` : "";
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/notifications/history?page=${page}&size=${size}${tokenParam}`,
+      `/notifications/history?page=${page}&size=${size}`,
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2557,17 +2549,9 @@ export async function fetchUnreadNotifications(
   size: number = 5,
 ): Promise<NotificationHistory> {
   try {
-    const cookieMatch =
-      typeof document !== "undefined"
-        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-        : null;
-    const token = cookieMatch
-      ? decodeURIComponent(cookieMatch[1])
-      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
-    const tokenParam = token ? `&token=${encodeURIComponent(token)}` : "";
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/notifications?page=${page}&size=${size}${tokenParam}`,
+      `/notifications?page=${page}&size=${size}`,
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2603,17 +2587,9 @@ export async function fetchUnreadNotifications(
 
 export async function fetchUnreadNotificationCount(): Promise<number | null> {
   try {
-    const cookieMatch =
-      typeof document !== "undefined"
-        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-        : null;
-    const token = cookieMatch
-      ? decodeURIComponent(cookieMatch[1])
-      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
-    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/notifications/unread${tokenParam}`,
+      "/notifications/unread",
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2667,18 +2643,10 @@ export async function clearNotificationHistory(): Promise<boolean> {
       PUBLIC_API_URL!,
       "/notifications/history/clear",
     );
-    const cookieMatch =
-      typeof document !== "undefined"
-        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-        : null;
-    const token = cookieMatch
-      ? decodeURIComponent(cookieMatch[1])
-      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
     const response = await fetch(url, {
       method: "DELETE",
       credentials: "include",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
+      headers,
     });
 
     return response.ok;
@@ -2723,11 +2691,9 @@ export async function fetchEmailNotificationStatus(): Promise<{
   enabled: boolean;
 }> {
   try {
-    const token = getClientToken();
-    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/notifications/emails${tokenParam}`,
+      "/notifications/emails",
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2745,9 +2711,13 @@ export async function fetchEmailNotificationStatus(): Promise<{
 export async function enableEmailNotifications(): Promise<{
   ok: boolean;
   status: number;
-  data: { message?: string; detail?: string; error?: string };
+  data: {
+    success?: boolean;
+    message?: string;
+    detail?: string;
+    error?: string;
+  };
 }> {
-  const token = getClientToken();
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     "/notifications/emails",
@@ -2755,27 +2725,23 @@ export async function enableEmailNotifications(): Promise<{
   const response = await fetch(url, {
     method: "POST",
     credentials: "include",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
+    headers,
     cache: "no-store",
   });
-  const data = await response.json().catch(
-    () =>
-      ({ success: true }) as {
-        message?: string;
-        detail?: string;
-        error?: string;
-      },
-  );
+  const data = await response.json().catch(() => ({}));
   return { ok: response.ok, status: response.status, data };
 }
 
 export async function disableEmailNotifications(): Promise<{
   ok: boolean;
   status: number;
-  data: { message?: string; detail?: string };
+  data: {
+    success?: boolean;
+    message?: string;
+    detail?: string;
+    error?: string;
+  };
 }> {
-  const token = getClientToken();
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     "/notifications/emails",
@@ -2783,13 +2749,10 @@ export async function disableEmailNotifications(): Promise<{
   const response = await fetch(url, {
     method: "DELETE",
     credentials: "include",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
+    headers,
     cache: "no-store",
   });
-  const data = await response
-    .json()
-    .catch(() => ({ success: true }) as { message?: string; detail?: string });
+  const data = await response.json().catch(() => ({}));
   return { ok: response.ok, status: response.status, data };
 }
 
