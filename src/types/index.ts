@@ -127,6 +127,7 @@ export interface Item {
   metadata?: {
     TimesTraded?: number;
     UniqueCirculation?: number;
+    TimesScanned?: number;
     DemandMultiple?: number;
     LastUpdated?: number;
   };
@@ -216,6 +217,7 @@ export interface ItemDetails {
   metadata?: {
     TimesTraded?: number;
     UniqueCirculation?: number;
+    TimesScanned?: number;
     DemandMultiple?: number;
     LastUpdated?: number;
   };

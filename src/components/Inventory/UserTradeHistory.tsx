@@ -164,10 +164,7 @@ function TradeItem({
         )}
       </div>
       <div className="min-w-0 p-2.5">
-        <p
-          className="text-primary-text line-clamp-2 text-sm leading-5 font-semibold wrap-break-word"
-          title={item.title}
-        >
+        <p className="text-primary-text line-clamp-2 text-sm leading-5 font-semibold wrap-break-word">
           {item.title}
         </p>
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
