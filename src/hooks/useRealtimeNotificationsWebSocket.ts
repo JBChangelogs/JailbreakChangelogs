@@ -456,18 +456,24 @@ export function useRealtimeNotificationsWebSocket(
     const scheduleReconnect = (source: string) => {
       if (!canReconnect() || reconnectTimeoutRef.current) return;
       if (document.visibilityState !== "visible") {
-        log.info("Reconnect paused while document is hidden", { source });
+        log.info("[RT-DEBUG] Reconnect paused while document is hidden", {
+          source,
+        });
         return;
       }
       if (typeof navigator !== "undefined" && !navigator.onLine) {
-        log.info("Reconnect paused while browser is offline", { source });
+        log.info("[RT-DEBUG] Reconnect paused while browser is offline", {
+          source,
+        });
         return;
       }
 
       reconnectAttemptsRef.current += 1;
       const attempt = reconnectAttemptsRef.current;
       const delay = getReconnectDelay(attempt);
-      log.warn("Realtime reconnect scheduled", {
+      log.warn("[RT-DEBUG] Realtime reconnect scheduled", {
+        connectNumber: rtDebugConnectCounterRef.current,
+        effectRunNumber: rtDebugEffectRunCounterRef.current,
         source,
         attempt,
         delay,
@@ -1115,7 +1121,9 @@ export function useRealtimeNotificationsWebSocket(
           connectedAtRef.current = null;
           if (wsRef.current === ws) wsRef.current = null;
 
-          log.warn("Realtime connection closed", {
+          log.warn("[RT-DEBUG] Realtime connection closed", {
+            connectNumber: rtDebugConnectCounterRef.current,
+            effectRunNumber: rtDebugEffectRunCounterRef.current,
             code: event.code,
             reason: event.reason || undefined,
             clean: event.wasClean,
@@ -1177,7 +1185,11 @@ export function useRealtimeNotificationsWebSocket(
         return;
       }
       clearReconnectTimeout();
-      log.info("Realtime reconnect requested", { source });
+      log.info("[RT-DEBUG] Realtime reconnect requested", {
+        connectNumber: rtDebugConnectCounterRef.current,
+        effectRunNumber: rtDebugEffectRunCounterRef.current,
+        source,
+      });
       connect();
     };
 
