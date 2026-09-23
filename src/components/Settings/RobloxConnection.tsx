@@ -122,7 +122,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
             }
             target="_blank"
             rel="noopener noreferrer"
-            className="border-border-card bg-tertiary-bg/50 hover:bg-tertiary-bg mt-3 flex items-center gap-3 rounded-lg border p-3 transition-colors"
+            className="border-border-card bg-tertiary-bg hover:border-link mt-3 flex items-center gap-3 rounded-lg border p-3 transition-colors"
           >
             {userData.roblox_avatar && (
               <Image

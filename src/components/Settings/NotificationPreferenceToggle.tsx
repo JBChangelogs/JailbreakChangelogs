@@ -41,7 +41,7 @@ export function NotificationPreferenceToggle({
   };
 
   return (
-    <div className="mb-4 w-full">
+    <div className="w-full">
       <div className="mb-1 flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <label className="text-primary-text text-base font-medium">

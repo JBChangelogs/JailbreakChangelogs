@@ -47,7 +47,6 @@ export function useSectionHighlight() {
       ? {
           backgroundColor:
             "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-          transition: "background-color 0.5s ease",
         }
       : undefined;
 
