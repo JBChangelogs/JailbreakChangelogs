@@ -54,38 +54,56 @@ const parseKnownValue = (value: string | null | undefined): number | null => {
 const formatTradeValue = (value: number) =>
   formatCurrencyValue(Math.abs(value));
 
-const sumKnownValues = (
+const summarizeValues = (
   items: TradeItemDetail[],
   getItemValue: (item: TradeItemDetail) => number | null,
-): number | null => {
-  const values = items.map(getItemValue);
-  if (values.some((value) => value === null)) return null;
-  return (values as number[]).reduce((total, value) => total + value, 0);
+): { total: number; missingCount: number } => {
+  return items.reduce(
+    (summary, item) => {
+      const value = getItemValue(item);
+      if (value === null) summary.missingCount += 1;
+      else summary.total += value;
+      return summary;
+    },
+    { total: 0, missingCount: 0 },
+  );
 };
 
 function ValueDifferenceBadge({
   value,
+  isPartial = false,
   className = "",
 }: {
-  value: number;
+  value: number | null;
+  isPartial?: boolean;
   className?: string;
 }) {
   return (
     <span
       className={`${className} items-center rounded-lg border px-2.5 py-1 text-xs leading-none font-semibold whitespace-nowrap ${
-        value > 0
-          ? "border-status-success/40 bg-status-success/80 text-form-button-text"
-          : value < 0
-            ? "border-status-error/40 bg-status-error/80 text-form-button-text"
-            : "border-border-card bg-quaternary-bg text-secondary-text"
+        value === null
+          ? "border-border-card bg-quaternary-bg text-secondary-text"
+          : value > 0
+            ? "border-status-success/40 bg-status-success/80 text-form-button-text"
+            : value < 0
+              ? "border-status-error/40 bg-status-error/80 text-form-button-text"
+              : "border-border-card bg-quaternary-bg text-secondary-text"
       }`}
-      title="Difference using current item values"
+      title={
+        value === null
+          ? "One or more items have no current catalog value"
+          : isPartial
+            ? "Difference using known item values; N/A items are excluded"
+            : "Difference using current item values"
+      }
     >
-      {value > 0
-        ? `Getting ${formatTradeValue(value)} more`
-        : value < 0
-          ? `Giving ${formatTradeValue(value)} more`
-          : "Even trade"}
+      {value === null
+        ? "Value comparison unavailable"
+        : value > 0
+          ? `Getting ${formatTradeValue(value)} more`
+          : value < 0
+            ? `Giving ${formatTradeValue(value)} more`
+            : "Even trade"}
     </span>
   );
 }
@@ -191,16 +209,14 @@ function TradeItem({
             </span>
           )}
         </div>
-        {currentValue !== null && (
-          <div className="mt-2 flex items-center justify-between gap-2">
-            <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
-              Value
-            </span>
-            <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded-lg px-2 text-[10px] leading-none font-bold sm:h-6 sm:px-2.5 sm:text-xs">
-              {formatTradeValue(currentValue)}
-            </span>
-          </div>
-        )}
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+            Value
+          </span>
+          <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded-lg px-2 text-[10px] leading-none font-bold sm:h-6 sm:px-2.5 sm:text-xs">
+            {currentValue === null ? "N/A" : formatTradeValue(currentValue)}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -547,23 +563,26 @@ export default function UserTradeHistory({
           detail?.user_a === userId
             ? detail.items_b_to_a
             : detail?.items_a_to_b || [];
-        const ownerGaveValue = detail
-          ? sumKnownValues(ownerGave, getTradeItemValue)
+        const ownerGaveValues = detail
+          ? summarizeValues(ownerGave, getTradeItemValue)
           : null;
-        const ownerReceivedValue = detail
-          ? sumKnownValues(ownerReceived, getTradeItemValue)
+        const ownerReceivedValues = detail
+          ? summarizeValues(ownerReceived, getTradeItemValue)
           : null;
+        const missingValueCount =
+          (ownerGaveValues?.missingCount ?? 0) +
+          (ownerReceivedValues?.missingCount ?? 0);
+        const knownValueCount =
+          ownerGave.length + ownerReceived.length - missingValueCount;
         const valueDifference =
-          ownerGaveValue !== null && ownerReceivedValue !== null
-            ? ownerReceivedValue - ownerGaveValue
+          ownerGaveValues && ownerReceivedValues && knownValueCount > 0
+            ? ownerReceivedValues.total - ownerGaveValues.total
             : null;
         const combinedValue =
-          ownerGaveValue !== null && ownerReceivedValue !== null
-            ? ownerGaveValue + ownerReceivedValue
-            : 0;
+          (ownerGaveValues?.total ?? 0) + (ownerReceivedValues?.total ?? 0);
         const gaveShare =
-          combinedValue > 0 && ownerGaveValue !== null
-            ? (ownerGaveValue / combinedValue) * 100
+          combinedValue > 0 && ownerGaveValues
+            ? (ownerGaveValues.total / combinedValue) * 100
             : 50;
         const counterpartyName = getCounterpartyName(
           trade.counterparty_user_id,
@@ -604,9 +623,10 @@ export default function UserTradeHistory({
                       received
                     </span>
                   </div>
-                  {!isExpanded && valueDifference !== null && (
+                  {!isExpanded && detail && (
                     <ValueDifferenceBadge
                       value={valueDifference}
+                      isPartial={missingValueCount > 0}
                       className="inline-flex sm:hidden"
                     />
                   )}
@@ -629,9 +649,10 @@ export default function UserTradeHistory({
               </div>
 
               <div className="text-secondary-text flex w-full items-center justify-center gap-2 text-xs sm:w-auto sm:shrink-0 sm:justify-end sm:text-right sm:text-sm">
-                {!isExpanded && valueDifference !== null && (
+                {!isExpanded && detail && (
                   <ValueDifferenceBadge
                     value={valueDifference}
+                    isPartial={missingValueCount > 0}
                     className="hidden sm:inline-flex"
                   />
                 )}
@@ -679,10 +700,12 @@ export default function UserTradeHistory({
                   </div>
                 ) : detail ? (
                   <>
-                    {ownerGaveValue !== null && ownerReceivedValue !== null && (
+                    {ownerGaveValues && ownerReceivedValues && (
                       <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
                         <p className="text-secondary-text mb-2 text-[10px] font-semibold tracking-wide uppercase sm:text-xs">
-                          Current values
+                          {missingValueCount > 0
+                            ? "Known values"
+                            : "Current values"}
                         </p>
                         <div className="flex items-center justify-between gap-3">
                           <div className="min-w-0 flex-1">
@@ -690,7 +713,8 @@ export default function UserTradeHistory({
                               Gave ({ownerGave.length})
                             </p>
                             <p className="text-primary-text truncate text-lg font-bold sm:text-xl">
-                              {formatTradeValue(ownerGaveValue)}
+                              {formatTradeValue(ownerGaveValues.total)}
+                              {ownerGaveValues.missingCount > 0 && "+"}
                             </p>
                           </div>
 
@@ -699,21 +723,11 @@ export default function UserTradeHistory({
                               icon="heroicons:scale"
                               className="text-secondary-text/60 h-4 w-4"
                             />
-                            <span
-                              className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[10px] leading-none font-semibold whitespace-nowrap sm:text-xs ${
-                                valueDifference! > 0
-                                  ? "border-status-success/40 bg-status-success/80 text-form-button-text"
-                                  : valueDifference! < 0
-                                    ? "border-status-error/40 bg-status-error/80 text-form-button-text"
-                                    : "border-border-card bg-quaternary-bg text-secondary-text"
-                              }`}
-                            >
-                              {valueDifference! > 0
-                                ? `Getting ${formatTradeValue(valueDifference!)} more`
-                                : valueDifference! < 0
-                                  ? `Giving ${formatTradeValue(valueDifference!)} more`
-                                  : "Even trade"}
-                            </span>
+                            <ValueDifferenceBadge
+                              value={valueDifference}
+                              isPartial={missingValueCount > 0}
+                              className="inline-flex"
+                            />
                           </div>
 
                           <div className="min-w-0 flex-1 text-right">
@@ -721,20 +735,34 @@ export default function UserTradeHistory({
                               Received ({ownerReceived.length})
                             </p>
                             <p className="text-primary-text truncate text-lg font-bold sm:text-xl">
-                              {formatTradeValue(ownerReceivedValue)}
+                              {formatTradeValue(ownerReceivedValues.total)}
+                              {ownerReceivedValues.missingCount > 0 && "+"}
                             </p>
                           </div>
                         </div>
-                        <div className="bg-quaternary-bg mt-3 flex h-1.5 w-full overflow-hidden rounded-full">
-                          <div
-                            className="bg-status-error h-full"
-                            style={{ width: `${gaveShare}%` }}
-                          />
-                          <div
-                            className="bg-status-success h-full"
-                            style={{ width: `${100 - gaveShare}%` }}
-                          />
-                        </div>
+                        {missingValueCount > 0 && (
+                          <p className="text-secondary-text mt-3 text-xs">
+                            {missingValueCount}{" "}
+                            {missingValueCount === 1
+                              ? "item has"
+                              : "items have"}{" "}
+                            no current value. N/A items are excluded from the
+                            totals, difference, and bar. Totals with + are
+                            partial.
+                          </p>
+                        )}
+                        {knownValueCount > 0 && (
+                          <div className="bg-quaternary-bg mt-3 flex h-1.5 w-full overflow-hidden rounded-full">
+                            <div
+                              className="bg-status-error h-full"
+                              style={{ width: `${gaveShare}%` }}
+                            />
+                            <div
+                              className="bg-status-success h-full"
+                              style={{ width: `${100 - gaveShare}%` }}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                     <div className="grid gap-5 xl:grid-cols-2">
