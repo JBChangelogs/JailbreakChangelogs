@@ -358,6 +358,7 @@ export default function UserSearch() {
                       <DiscordUserCard
                         user={user}
                         disableBadgeTooltips={true}
+                        badgeLimit={1}
                       />
                     </div>
                   </Link>

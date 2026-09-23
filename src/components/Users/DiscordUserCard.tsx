@@ -28,11 +28,13 @@ interface DiscordUserCardProps {
     flags?: UserFlag[];
   };
   disableBadgeTooltips?: boolean;
+  badgeLimit?: number;
 }
 
 export default function DiscordUserCard({
   user,
   disableBadgeTooltips = false,
+  badgeLimit,
 }: DiscordUserCardProps) {
   return (
     <div className="flex items-center space-x-3">
@@ -64,6 +66,7 @@ export default function DiscordUserCard({
             size="sm"
             className="flex flex-wrap gap-1"
             disableTooltips={disableBadgeTooltips}
+            limit={badgeLimit}
           />
         </div>
         <p className="text-secondary-text max-w-45 truncate text-sm sm:max-w-62.5">
