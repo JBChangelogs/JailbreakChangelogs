@@ -844,16 +844,13 @@ export default function UserTradeHistory({
                         getCatalogItem={getCatalogItem}
                       />
                       <TradeSide
-                        label={`${counterpartyName} gave`}
+                        label={`${userDisplayName} received`}
                         items={ownerReceived}
                         getItemValue={getTradeItemValue}
                         getCatalogItem={getCatalogItem}
                       />
                     </div>
-                    <div className="border-border-card text-secondary-text mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-xs sm:text-sm">
-                      <span>
-                        Traded on: {formatMessageDate(detail.last_time)}
-                      </span>
+                    <div className="border-border-card mt-4 flex justify-end border-t pt-3 text-xs sm:text-sm">
                       <Link
                         href={`/inventories/${encodeURIComponent(trade.counterparty_user_id)}`}
                         target="_blank"
