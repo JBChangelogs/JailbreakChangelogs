@@ -37,6 +37,7 @@ import HoardersTab from "@/components/Items/HoardersTab";
 import DupesTab from "@/components/Items/DupesTab";
 import ItemSuggestionsTab from "@/components/Items/ItemSuggestionsTab";
 import ItemChangelogsTab from "@/components/Items/ItemChangelogsTab";
+import ItemTradesTab from "@/components/Items/ItemTradesTab";
 import ReportItemInfoButton from "@/components/Items/ReportItemInfoButton";
 import {
   handleImageError,
@@ -75,6 +76,7 @@ const log = createLogger("UI");
 const TAB_LABELS = [
   "Details",
   "Charts",
+  "Trades",
   "Changes",
   "Suggestions",
   "Dupes",
@@ -92,23 +94,25 @@ const BLUEBIRD_RAISED_IMAGE =
 
 const TAB_NAME_TO_INDEX: Record<string, number> = {
   charts: 1,
-  changes: 2,
-  suggestions: 3,
-  dupes: 4,
-  hoarders: 5,
-  similar: 6,
-  comments: 7,
+  trades: 2,
+  changes: 3,
+  suggestions: 4,
+  dupes: 5,
+  hoarders: 6,
+  similar: 7,
+  comments: 8,
 };
 
 const TAB_INDEX_TO_NAME: Record<number, string | null> = {
   0: null,
   1: "charts",
-  2: "changes",
-  3: "suggestions",
-  4: "dupes",
-  5: "hoarders",
-  6: "similar",
-  7: "comments",
+  2: "trades",
+  3: "changes",
+  4: "suggestions",
+  5: "dupes",
+  6: "hoarders",
+  7: "similar",
+  8: "comments",
 };
 
 const CHART_UPDATE_TIME = (() => {
@@ -908,33 +912,39 @@ export default function ItemDetailsClient({
 
                   {activeTab === 2 && (
                     <div className="space-y-6">
-                      <ItemChangelogsTab itemId={item.id} />
+                      <ItemTradesTab itemId={item.id} />
                     </div>
                   )}
 
                   {activeTab === 3 && (
                     <div className="space-y-6">
-                      <ItemSuggestionsTab itemId={item.id} />
+                      <ItemChangelogsTab itemId={item.id} />
                     </div>
                   )}
 
                   {activeTab === 4 && (
                     <div className="space-y-6">
-                      <DupesTab itemId={item.id} />
+                      <ItemSuggestionsTab itemId={item.id} />
                     </div>
                   )}
 
                   {activeTab === 5 && (
                     <div className="space-y-6">
-                      <HoardersTab itemName={item.name} itemType={item.type} />
+                      <DupesTab itemId={item.id} />
                     </div>
                   )}
 
                   {activeTab === 6 && (
+                    <div className="space-y-6">
+                      <HoardersTab itemName={item.name} itemType={item.type} />
+                    </div>
+                  )}
+
+                  {activeTab === 7 && (
                     <div className="space-y-6">{similarItemsSlot}</div>
                   )}
 
-                  {activeTab === 7 && item && commentsSlot}
+                  {activeTab === 8 && item && commentsSlot}
                 </motion.div>
               </AnimatePresence>
             </div>
