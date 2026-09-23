@@ -11,10 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
+import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { createLogger } from "@/services/logger";
 import { Item } from "@/types";
+import { TradeItem as CatalogTradeItem } from "@/types/trading";
 import { INVENTORY_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
@@ -28,6 +31,7 @@ import {
   formatShortDateTime,
 } from "@/utils/helpers/timestamp";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
+import { getTradeItemDetailHref } from "@/utils/trading/tradeItems";
 
 const log = createLogger("INVENTORY");
 const PAGE_SIZE = 25;
@@ -38,6 +42,7 @@ type RequestState = "idle" | "loading" | "error";
 interface CatalogValue {
   cashValue: string;
   dupedValue: string;
+  item: CatalogTradeItem;
 }
 
 const normalizeCatalogKey = (name: string, category: string) =>
@@ -87,7 +92,7 @@ function ValueDifferenceBadge({
             ? "border-status-success/40 bg-status-success/80 text-form-button-text"
             : value < 0
               ? "border-status-error/40 bg-status-error/80 text-form-button-text"
-              : "border-border-card bg-quaternary-bg text-secondary-text"
+              : "border-border-card bg-quaternary-bg text-primary-text"
       }`}
       title={
         value === null
@@ -157,21 +162,26 @@ function TradeItem({
   item,
   currentValue,
   quantity,
+  catalogItem,
 }: {
   item: TradeItemDetail;
   currentValue: number | null;
   quantity: number;
+  catalogItem: CatalogTradeItem | null;
 }) {
   const categoryIcon = getCategoryIcon(item.category_title);
+  const itemHref = catalogItem ? getTradeItemDetailHref(catalogItem) : null;
+  const cardClassName =
+    "border-border-card bg-tertiary-bg hover:border-button-info/40 flex w-full min-w-0 self-start overflow-hidden rounded-lg border transition-colors min-[400px]:block min-[400px]:w-40 sm:w-48 xl:w-40";
 
-  return (
-    <div className="border-border-card bg-tertiary-bg hover:border-button-info/40 w-40 min-w-0 self-start overflow-hidden rounded-lg border transition-colors sm:w-48 xl:w-40">
-      <div className="relative aspect-video w-full overflow-hidden">
+  const content = (
+    <>
+      <div className="relative aspect-square w-24 shrink-0 overflow-hidden min-[360px]:w-28 min-[400px]:aspect-video min-[400px]:w-full">
         <Image
           src={getItemImagePath(item.category_title, item.title, true)}
           alt={item.title}
           fill
-          sizes="(min-width: 1280px) 160px, (min-width: 640px) 192px, 160px"
+          sizes="(max-width: 359px) 96px, (max-width: 399px) 112px, (min-width: 1280px) 160px, (min-width: 640px) 192px, 160px"
           className="object-cover"
           onError={handleImageError}
         />
@@ -181,8 +191,8 @@ function TradeItem({
           </span>
         )}
       </div>
-      <div className="min-w-0 p-2.5">
-        <p className="text-primary-text line-clamp-2 text-sm leading-5 font-semibold wrap-break-word">
+      <div className="flex min-w-0 flex-1 flex-col justify-center p-2.5 min-[400px]:block">
+        <p className="text-primary-text group-hover:text-link group-focus-visible:text-link line-clamp-2 text-sm leading-5 font-semibold wrap-break-word transition-colors">
           {item.title}
         </p>
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
@@ -218,7 +228,28 @@ function TradeItem({
           </span>
         </div>
       </div>
-    </div>
+    </>
+  );
+
+  if (!catalogItem || !itemHref) {
+    return <div className={cardClassName}>{content}</div>;
+  }
+
+  return (
+    <Tooltip delayDuration={150}>
+      <TooltipTrigger asChild>
+        <Link
+          href={itemHref}
+          prefetch={false}
+          className={`${cardClassName} group cursor-pointer`}
+        >
+          {content}
+        </Link>
+      </TooltipTrigger>
+      <TradeItemHoverTooltip
+        item={{ ...catalogItem, isDuped: item.is_duplicate_branch }}
+      />
+    </Tooltip>
   );
 }
 
@@ -226,10 +257,12 @@ function TradeSide({
   label,
   items,
   getItemValue,
+  getCatalogItem,
 }: {
   label: string;
   items: TradeItemDetail[];
   getItemValue: (item: TradeItemDetail) => number | null;
+  getCatalogItem: (item: TradeItemDetail) => CatalogTradeItem | null;
 }) {
   const groupedItems = Array.from(
     items
@@ -261,6 +294,7 @@ function TradeSide({
             item={group.item}
             currentValue={getItemValue(group.item)}
             quantity={group.quantity}
+            catalogItem={getCatalogItem(group.item)}
           />
         ))}
       </div>
@@ -310,12 +344,42 @@ export default function UserTradeHistory({
       values.set(normalizeCatalogKey(item.name, item.type), {
         cashValue: item.cash_value,
         dupedValue: item.duped_value,
+        item: {
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          cash_value: item.cash_value,
+          duped_value: item.duped_value,
+          is_limited: item.is_limited,
+          is_seasonal: item.is_seasonal,
+          tradable: item.tradable,
+          trend: item.trend,
+          demand: item.demand,
+          duped_demand: item.duped_demand,
+        },
       });
 
       item.children?.forEach((child) => {
         const childValue = {
           cashValue: child.data.cash_value,
           dupedValue: child.data.duped_value,
+          item: {
+            id: child.id,
+            name: child.data.name,
+            base_name: item.name,
+            type: child.data.type,
+            cash_value: child.data.cash_value,
+            duped_value: child.data.duped_value,
+            is_limited: child.data.is_limited,
+            is_seasonal: child.data.is_seasonal,
+            tradable: Number(child.data.tradable),
+            trend: child.data.trend,
+            demand: child.data.demand,
+            duped_demand: child.data.duped_demand,
+            is_sub: true,
+            sub_name: child.sub_name,
+            data: child.data,
+          },
         };
         const candidateNames = new Set([
           child.data.name,
@@ -345,6 +409,13 @@ export default function UserTradeHistory({
       }
       return parseKnownValue(catalogItem.cashValue);
     },
+    [catalogValues],
+  );
+
+  const getCatalogItem = useCallback(
+    (item: TradeItemDetail): CatalogTradeItem | null =>
+      catalogValues.get(normalizeCatalogKey(item.title, item.category_title))
+        ?.item ?? null,
     [catalogValues],
   );
 
@@ -770,11 +841,13 @@ export default function UserTradeHistory({
                         label={`${userDisplayName} gave`}
                         items={ownerGave}
                         getItemValue={getTradeItemValue}
+                        getCatalogItem={getCatalogItem}
                       />
                       <TradeSide
                         label={`${counterpartyName} gave`}
                         items={ownerReceived}
                         getItemValue={getTradeItemValue}
+                        getCatalogItem={getCatalogItem}
                       />
                     </div>
                     <div className="border-border-card text-secondary-text mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-xs sm:text-sm">
