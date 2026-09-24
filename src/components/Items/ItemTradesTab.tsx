@@ -1,11 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/Spinner";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { createLogger } from "@/services/logger";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import {
   INVENTORY_API_SOURCE_HEADER,
   INVENTORY_API_URL,
@@ -29,6 +32,39 @@ interface CatalogItemTrade {
 
 interface ItemTradesTabProps {
   itemId: number;
+}
+
+function TradeAvatarImage({ userId }: { userId: string }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [avatarError, setAvatarError] = useState(false);
+
+  return (
+    <div className="bg-tertiary-bg relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+      {avatarError ? (
+        <DefaultAvatar name={userId} />
+      ) : (
+        <>
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Spinner className="h-5 w-5" />
+            </div>
+          )}
+          <Image
+            src={`${INVENTORY_API_URL}/proxy/users/${encodeURIComponent(userId)}/avatar-headshot`}
+            alt={`User ${userId} avatar`}
+            width={40}
+            height={40}
+            className="rounded-full"
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setAvatarError(true);
+            }}
+          />
+        </>
+      )}
+    </div>
+  );
 }
 
 export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
@@ -88,25 +124,20 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
       href={`https://www.roblox.com/users/${encodeURIComponent(userId)}/profile`}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-link hover:text-link-hover font-medium hover:underline"
+      className="text-link hover:text-link-hover inline-flex items-center gap-2 font-medium hover:underline"
     >
-      {robloxUsers[userId]?.displayName ||
-        robloxUsers[userId]?.name ||
-        `User ${userId}`}
+      <TradeAvatarImage userId={userId} />
+      <span>
+        {robloxUsers[userId]?.displayName ||
+          robloxUsers[userId]?.name ||
+          `User ${userId}`}
+      </span>
     </a>
   );
 
   return (
     <section className="space-y-4">
-      <div>
-        <h3 className="text-primary-text text-lg font-semibold">
-          Recent Trades
-        </h3>
-        <p className="text-secondary-text text-sm">
-          Recorded transfers across all copies of this item, newest first.
-          Multiple copies in one trade may appear separately.
-        </p>
-      </div>
+      <h3 className="text-primary-text text-2xl font-bold">Recent Trades</h3>
 
       {isFetching ? (
         <div className="space-y-2" aria-label="Loading recent trades">
@@ -131,7 +162,12 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div
+          role="region"
+          aria-label="Recent item transfers"
+          tabIndex={0}
+          className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-[60vh] scrollbar-thin scrollbar-track-transparent space-y-2 overflow-y-auto pr-2 sm:max-h-150"
+        >
           {trades.map((trade) => (
             <article
               key={`${trade.trade_id}:${trade.item_id}:${trade.branch_id}`}
@@ -150,18 +186,17 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
                   {formatShortDateTime(trade.trade_time)}
                 </time>
               </div>
-              <div className="text-secondary-text mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                <span>Copy {trade.item_id}</span>
-                {trade.is_duplicate_branch && <span>Duplicate branch</span>}
-                {trade.confidence !== "confirmed" && <span>Partial data</span>}
-              </div>
+              {(trade.is_duplicate_branch ||
+                trade.confidence !== "confirmed") && (
+                <div className="text-secondary-text mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                  {trade.is_duplicate_branch && <span>Duplicate branch</span>}
+                  {trade.confidence !== "confirmed" && (
+                    <span>Partial data</span>
+                  )}
+                </div>
+              )}
             </article>
           ))}
-          {trades.length === 50 && (
-            <p className="text-secondary-text text-center text-xs">
-              Showing the 50 most recent recorded item transfers.
-            </p>
-          )}
         </div>
       )}
     </section>
