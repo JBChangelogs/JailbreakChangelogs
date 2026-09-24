@@ -1348,11 +1348,11 @@ export async function fetchItemScanCount(
       return null;
     }
 
-    const data = (await response.json()) as { scan_count?: unknown };
-    return typeof data.scan_count === "number" &&
-      Number.isFinite(data.scan_count) &&
-      data.scan_count >= 0
-      ? data.scan_count
+    const data = (await response.json()) as { copy_count?: unknown };
+    return typeof data.copy_count === "number" &&
+      Number.isFinite(data.copy_count) &&
+      data.copy_count >= 0
+      ? data.copy_count
       : null;
   } catch (error) {
     log.error("Error fetching item scan count", error);

@@ -722,11 +722,10 @@ export default function ItemDetailsClient({
               <div className="border-border-card mt-4 flex min-h-14 items-center justify-between gap-4 border-b pb-3">
                 <div className="min-w-0 flex-1">
                   <div className="text-primary-text text-sm font-medium">
-                    Inventory appearances · 30 days
+                    Scanned copies · 30 days
                   </div>
                   <div className="text-secondary-text text-xs">
-                    Times this item appeared in scanned inventories. Repeat
-                    scans are included.
+                    Unique copies that have been scanned in inventories
                   </div>
                 </div>
                 <div
