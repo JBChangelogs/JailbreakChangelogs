@@ -830,17 +830,13 @@ export async function fetchItemsByTypeClient(
   type: string,
 ): Promise<ItemDetails[] | null> {
   try {
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL,
-      `/items/get?type=${encodeURIComponent(type)}`,
-    );
-    const response = await fetch(url, { headers, credentials: "include" });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return (await response.json()) as ItemDetails[];
+    return await fetchAllItemPages<ItemDetails>((page) => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/items?type=${encodeURIComponent(type)}&page=${page}`,
+      );
+      return fetch(url, { headers, credentials: "include" });
+    });
   } catch (err) {
     log.error("Error fetching items by type client-side", err);
     return null;
@@ -1252,39 +1248,6 @@ export async function fetchDuplicateVariants(
 export interface ItemHoarder {
   user_id: string;
   count: number;
-}
-
-export async function fetchItemHoarders(
-  name: string,
-  type: string,
-): Promise<ItemHoarder[]> {
-  try {
-    if (!INVENTORY_API_URL) {
-      throw new Error("Missing INVENTORY_API_URL");
-    }
-    const url = `${INVENTORY_API_URL}/items/hoarders?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`;
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
-      },
-      next: { revalidate: 3600 }, // Revalidate every 1 hour
-    });
-    if (!response.ok) {
-      if (response.status === 404) {
-        return [];
-      }
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItemHoarders failed", { status: response.status, body });
-      throw new Error(`Failed to fetch item hoarders: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch (err) {
-    log.error("Error fetching item hoarders", err);
-    return [];
-  }
 }
 
 export interface SeasonContract {

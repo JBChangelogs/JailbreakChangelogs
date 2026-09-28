@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useCallback, use, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { ItemDetails } from "@/types";
+import { fetchItemsByTypeClient } from "@/utils/api/api";
 import { demandOrder } from "@/utils/trading/values";
 import Image from "next/image";
 import {
@@ -26,20 +28,19 @@ import {
 
 interface SimilarItemsProps {
   currentItem: ItemDetails;
-  similarItemsPromise?: Promise<ItemDetails[] | null>;
 }
 
 type SortCriteria = "similarity" | "creator" | "trading_metrics" | "trend";
 
-const SimilarItems = ({
-  currentItem,
-  similarItemsPromise,
-}: SimilarItemsProps) => {
-  // Use server-side data at the top level
-  const serverItems = similarItemsPromise ? use(similarItemsPromise) : null;
+const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
+  // Fetched only once the Similar tab mounts; suspends to the parent fallback.
+  const { data: fetchedItems } = useSuspenseQuery({
+    queryKey: ["items-by-type", currentItem.type],
+    queryFn: () => fetchItemsByTypeClient(currentItem.type),
+  });
   const typeItems: ItemDetails[] = useMemo(
-    () => serverItems || [],
-    [serverItems],
+    () => fetchedItems || [],
+    [fetchedItems],
   );
 
   const [sortBy, setSortBy] = useState<SortCriteria>("similarity");

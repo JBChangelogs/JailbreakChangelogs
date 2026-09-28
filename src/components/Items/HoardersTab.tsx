@@ -4,7 +4,11 @@ import { useRef, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { ItemHoarder } from "@/utils/api/api";
+import {
+  ItemHoarder,
+  INVENTORY_API_URL,
+  INVENTORY_API_SOURCE_HEADER,
+} from "@/utils/api/api";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -71,7 +75,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch hoarders client-side
   const {
     data: hoarders = [],
     isLoading: isLoadingHoarders,
@@ -79,15 +82,28 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   } = useQuery({
     queryKey: ["item-hoarders", itemName, itemType],
     queryFn: async () => {
+      if (!INVENTORY_API_URL) {
+        throw new Error("Missing NEXT_PUBLIC_INVENTORY_API_URL");
+      }
+
       const response = await fetch(
-        `/api/items/hoarders?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+        `${INVENTORY_API_URL}/items/hoarders?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+        {
+          headers: {
+            "X-Source": INVENTORY_API_SOURCE_HEADER || "",
+          },
+        },
       );
       if (!response.ok) {
+        if (response.status === 404) {
+          return [];
+        }
         const body = await response.json().catch(() => ({}));
         log.error("fetch hoarders failed", { status: response.status, body });
         throw new Error("Failed to fetch hoarders");
       }
-      return response.json() as Promise<ItemHoarder[]>;
+      const data: unknown = await response.json();
+      return Array.isArray(data) ? (data as ItemHoarder[]) : [];
     },
   });
 

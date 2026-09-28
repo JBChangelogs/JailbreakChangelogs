@@ -3,11 +3,7 @@
 import { Suspense, useMemo } from "react";
 import { notFound } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import {
-  fetchItemClient,
-  fetchItemsByTypeClient,
-  fetchItemHistoryClient,
-} from "@/utils/api/api";
+import { fetchItemClient, fetchItemHistoryClient } from "@/utils/api/api";
 import ItemDetailsClient from "@/components/Items/ItemDetailsClient";
 import ItemCommentsServer from "@/components/Items/SuspenseWrapper/ItemCommentsServer";
 import SimilarItems from "@/components/Items/SimilarItems";
@@ -28,10 +24,6 @@ export default function ItemPageClient({ type, name }: Props) {
   });
 
   // Promises consumed via use() must stay stable across renders.
-  const similarItemsPromise = useMemo(
-    () => (item ? fetchItemsByTypeClient(item.type) : null),
-    [item],
-  );
   const historyPromise = useMemo(
     () => (item ? fetchItemHistoryClient(String(item.id)) : null),
     [item],
@@ -41,7 +33,7 @@ export default function ItemPageClient({ type, name }: Props) {
     return <Loading />;
   }
 
-  if (!item || !similarItemsPromise || !historyPromise) {
+  if (!item || !historyPromise) {
     notFound();
   }
 
@@ -65,10 +57,7 @@ export default function ItemPageClient({ type, name }: Props) {
         <div className="bg-secondary-bg h-87.5 animate-pulse rounded-lg" />
       }
     >
-      <SimilarItems
-        currentItem={item}
-        similarItemsPromise={similarItemsPromise}
-      />
+      <SimilarItems currentItem={item} />
     </Suspense>
   );
 
