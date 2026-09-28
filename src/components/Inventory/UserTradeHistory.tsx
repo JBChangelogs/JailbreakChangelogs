@@ -14,6 +14,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
+import { PendingTradeItemsPlaceholder } from "@/components/Inventory/PendingTradeItemsPlaceholder";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { createLogger } from "@/services/logger";
@@ -217,18 +218,18 @@ function TradeItem({
           )}
           {item.given_by_original_owner && (
             <span
-              className="text-secondary-text text-[10px] sm:text-xs"
+              className="text-primary-text inline-flex rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1.5 py-0.5 text-[10px] leading-none font-semibold sm:text-xs"
               title="The item's original owner gave it in this trade."
             >
-              Given by original owner
+              OG
             </span>
           )}
           {item.received_by_original_owner && (
             <span
-              className="text-secondary-text text-[10px] sm:text-xs"
+              className="text-primary-text inline-flex rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1.5 py-0.5 text-[10px] leading-none font-semibold sm:text-xs"
               title="The item returned to its original owner in this trade."
             >
-              Returned to original owner
+              Returned to OG
             </span>
           )}
         </div>
@@ -269,18 +270,21 @@ function TradeItem({
 function TradeSide({
   label,
   items,
+  isPending,
   getItemValue,
   getCatalogItem,
 }: {
   label: string;
   items: TradeItemDetail[];
+  isPending: boolean;
   getItemValue: (item: TradeItemDetail) => number | null;
   getCatalogItem: (item: TradeItemDetail) => CatalogTradeItem | null;
 }) {
   return (
     <div className="min-w-0">
       <h4 className="text-primary-text mb-2 text-sm font-semibold">
-        {label} {items.length} {items.length === 1 ? "item" : "items"}
+        {label} {isPending && items.length === 0 ? "?" : items.length}{" "}
+        {items.length === 1 ? "item" : "items"}
       </h4>
       <div className="flex flex-wrap gap-2">
         {items.map((item, index) => (
@@ -291,10 +295,8 @@ function TradeSide({
             catalogItem={getCatalogItem(item)}
           />
         ))}
-        {items.length === 0 && (
-          <p className="text-secondary-text text-xs">
-            No items observed on this side yet.
-          </p>
+        {items.length === 0 && isPending && (
+          <PendingTradeItemsPlaceholder className="w-full min-[400px]:w-40 sm:w-48 xl:w-40" />
         )}
       </div>
     </div>
@@ -653,6 +655,10 @@ export default function UserTradeHistory({
           detail?.user_a === userId
             ? detail.items_b_to_a
             : detail?.items_a_to_b || [];
+        const givenCount = detail ? ownerGave.length : trade.items_given.length;
+        const receivedCount = detail
+          ? ownerReceived.length
+          : trade.items_received.length;
         const ownerGaveValues = detail
           ? summarizeValues(ownerGave, getTradeItemValue)
           : null;
@@ -712,8 +718,14 @@ export default function UserTradeHistory({
                       className="h-4 w-4"
                     />
                     <span className="text-xs whitespace-nowrap">
-                      {trade.items_given.length} given ·{" "}
-                      {trade.items_received.length} received
+                      {status === "pending" && givenCount === 0
+                        ? "?"
+                        : givenCount}{" "}
+                      given ·{" "}
+                      {status === "pending" && receivedCount === 0
+                        ? "?"
+                        : receivedCount}{" "}
+                      received
                     </span>
                   </div>
                   {!isExpanded && detail && status === "completed" && (
@@ -744,8 +756,8 @@ export default function UserTradeHistory({
               <div className="text-secondary-text flex w-full items-center justify-center gap-2 text-xs sm:w-auto sm:shrink-0 sm:justify-end sm:text-right sm:text-sm">
                 {status === "pending" && (
                   <span
-                    className="bg-status-warning/15 text-status-warning rounded px-2 py-1 text-[10px] font-semibold whitespace-nowrap sm:text-xs"
-                    title="Only one side of this trade has been scanned so far."
+                    className="bg-status-warning/15 text-primary-text rounded px-2 py-1 text-[10px] font-semibold whitespace-nowrap sm:text-xs"
+                    title="Only one side's items have been scanned so far. The other side's items are still pending."
                   >
                     Pending
                   </span>
@@ -803,8 +815,8 @@ export default function UserTradeHistory({
                   <>
                     {detail.status === "pending" && (
                       <p className="text-secondary-text mb-4 text-sm">
-                        Only one side of this trade has been observed. The other
-                        side will appear after its items are scanned.
+                        Only one side&apos;s items have been scanned so far. The
+                        other side&apos;s items are still pending.
                       </p>
                     )}
                     {detail.status === "completed" &&
@@ -878,12 +890,14 @@ export default function UserTradeHistory({
                       <TradeSide
                         label={`${userDisplayName} gave`}
                         items={ownerGave}
+                        isPending={detail.status === "pending"}
                         getItemValue={getTradeItemValue}
                         getCatalogItem={getCatalogItem}
                       />
                       <TradeSide
                         label={`${userDisplayName} received`}
                         items={ownerReceived}
+                        isPending={detail.status === "pending"}
                         getItemValue={getTradeItemValue}
                         getCatalogItem={getCatalogItem}
                       />

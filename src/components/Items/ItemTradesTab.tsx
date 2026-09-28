@@ -9,6 +9,7 @@ import {
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { PendingTradeItemsPlaceholder } from "@/components/Inventory/PendingTradeItemsPlaceholder";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
@@ -62,19 +63,25 @@ function TradeAvatarImage({ userId }: { userId: string }) {
 function TradeItems({
   label,
   items,
+  isPending,
 }: {
   label: string;
   items: TradeItemDetail[];
+  isPending: boolean;
 }) {
   return (
     <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
       <p className="text-primary-text mb-2 text-xs font-semibold">
-        {label} ({items.length})
+        {label} (
+        {isPending && items.length === 0
+          ? "? items"
+          : `${items.length} ${items.length === 1 ? "item" : "items"}`}
+        )
       </p>
       {items.length === 0 ? (
-        <p className="text-secondary-text text-xs">
-          No items observed on this side yet.
-        </p>
+        isPending ? (
+          <PendingTradeItemsPlaceholder />
+        ) : null
       ) : (
         <ul className="space-y-2">
           {items.map((item, index) => (
@@ -96,13 +103,19 @@ function TradeItems({
                   </span>
                 )}
                 {item.given_by_original_owner && (
-                  <span title="The original owner gave this item in this trade.">
-                    Given by original owner
+                  <span
+                    className="text-primary-text rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1.5 py-0.5 font-semibold"
+                    title="The original owner gave this item in this trade."
+                  >
+                    OG
                   </span>
                 )}
                 {item.received_by_original_owner && (
-                  <span title="The item returned to its original owner in this trade.">
-                    Returned to original owner
+                  <span
+                    className="text-primary-text rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1.5 py-0.5 font-semibold"
+                    title="The item returned to its original owner in this trade."
+                  >
+                    Returned to OG
                   </span>
                 )}
               </div>
@@ -237,8 +250,8 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
                 <div className="flex items-center gap-2">
                   {trade.status === "pending" && (
                     <span
-                      className="bg-status-warning/15 text-status-warning rounded px-2 py-1 text-xs font-semibold"
-                      title="Only one side of this trade has been scanned so far."
+                      className="bg-status-warning/15 text-primary-text rounded px-2 py-1 text-xs font-semibold"
+                      title="Only one side's items have been scanned so far. The other side's items are still pending."
                     >
                       Pending
                     </span>
@@ -253,17 +266,20 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
               </div>
               {trade.status === "pending" && (
                 <p className="text-secondary-text mt-2 text-xs">
-                  The other side of this trade has not been scanned yet.
+                  Only one side&apos;s items have been scanned so far. The other
+                  side&apos;s items are still pending.
                 </p>
               )}
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <TradeItems
                   label={`${robloxUsers[trade.user_a]?.displayName || robloxUsers[trade.user_a]?.name || `User ${trade.user_a}`} gave`}
                   items={trade.items_a_to_b}
+                  isPending={trade.status === "pending"}
                 />
                 <TradeItems
                   label={`${robloxUsers[trade.user_b]?.displayName || robloxUsers[trade.user_b]?.name || `User ${trade.user_b}`} gave`}
                   items={trade.items_b_to_a}
+                  isPending={trade.status === "pending"}
                 />
               </div>
             </article>
