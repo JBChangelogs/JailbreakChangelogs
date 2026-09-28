@@ -56,6 +56,7 @@ import {
   DupeItemSearchResult,
 } from "@/types";
 import { UserData, UserFlag } from "@/types/auth";
+import type { ValueHistory } from "@/components/Items/ItemValueChart";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { fetchAllItemPages } from "@/utils/api/fetchAllItemPages";
@@ -802,6 +803,72 @@ export async function fetchItemByIdClient(
   }
 }
 
+// Returns null when the item doesn't exist; throws on other failures so the
+// route error boundary can handle them.
+export async function fetchItemClient(
+  type: string,
+  name: string,
+): Promise<ItemDetails | null> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    `/items/${encodeURIComponent(type)}/${encodeURIComponent(name)}`,
+  );
+  const response = await fetch(url, { headers, credentials: "include" });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch item (${response.status})`);
+  }
+
+  return (await response.json()) as ItemDetails;
+}
+
+export async function fetchItemsByTypeClient(
+  type: string,
+): Promise<ItemDetails[] | null> {
+  try {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      `/items/get?type=${encodeURIComponent(type)}`,
+    );
+    const response = await fetch(url, { headers, credentials: "include" });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as ItemDetails[];
+  } catch (err) {
+    log.error("Error fetching items by type client-side", err);
+    return null;
+  }
+}
+
+export async function fetchItemHistoryClient(
+  id: string,
+): Promise<ValueHistory[] | null> {
+  try {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      `/items/${encodeURIComponent(id)}/history`,
+    );
+    const response = await fetch(url, { headers, credentials: "include" });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? (data as ValueHistory[]) : null;
+  } catch (err) {
+    log.error("Error fetching item history client-side", err);
+    return null;
+  }
+}
+
 export async function fetchChangelogList(): Promise<Changelog[]> {
   const response = await fetch(`${BASE_API_URL}/changelogs`, {
     credentials: "include",
@@ -1361,33 +1428,6 @@ export async function fetchUserFavorites(userId: string) {
   }
 }
 
-export async function fetchItemHistory(id: string) {
-  try {
-    const response = await fetch(`${BASE_API_URL}/item/history?id=${id}`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-ValueHistory/1.0",
-      },
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    });
-
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItemHistory failed", { status: response.status, body });
-      throw new Error("Failed to fetch item history");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    log.error("Error fetching item history", err);
-    return null;
-  }
-}
-
 export async function fetchItemScanCount(
   itemId: number,
 ): Promise<number | null> {
@@ -1416,35 +1456,6 @@ export async function fetchItemScanCount(
       : null;
   } catch (error) {
     log.error("Error fetching item scan count", error);
-    return null;
-  }
-}
-
-export async function fetchItemsByType(type: string) {
-  try {
-    const response = await fetch(
-      `${BASE_API_URL}/items/get?type=${encodeURIComponent(type)}`,
-      {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-ItemCatalog/1.0",
-        },
-      },
-    );
-
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItemsByType failed", { status: response.status, body });
-      throw new Error("Failed to fetch items by type");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    log.error("Error fetching items by type", err);
     return null;
   }
 }
