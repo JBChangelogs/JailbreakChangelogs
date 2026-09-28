@@ -56,15 +56,22 @@ export interface UserConnectionData {
 }
 
 export type TradeConfidence = "confirmed" | "partial";
+export type TradeStatus = "completed" | "pending";
+
+export interface TradeList<T> {
+  completed: T[];
+  pending: T[];
+}
 
 export interface UserTradeSummary {
   trade_id: string;
   counterparty_user_id: string;
-  items_given: number;
-  items_received: number;
+  items_given: TradeItemDetail[];
+  items_received: TradeItemDetail[];
   first_time: number;
   last_time: number;
   confidence: TradeConfidence;
+  status: TradeStatus;
 }
 
 export interface TradeItemDetail {
@@ -75,6 +82,9 @@ export interface TradeItemDetail {
   trade_time: number;
   confidence: "confirmed" | "gap";
   is_duplicate_branch: boolean;
+  original_owner: string | null;
+  given_by_original_owner: boolean;
+  received_by_original_owner: boolean;
 }
 
 export interface TradeDetail {
@@ -86,4 +96,5 @@ export interface TradeDetail {
   first_time: number;
   last_time: number;
   confidence: TradeConfidence;
+  status: TradeStatus;
 }

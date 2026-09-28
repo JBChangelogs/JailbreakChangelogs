@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   TradeDetail,
   TradeItemDetail,
+  TradeList,
   UserTradeSummary,
 } from "@/app/inventories/types";
 import { Button } from "@/components/ui/button";
@@ -161,12 +162,10 @@ function TradeAvatar({ userId, name }: { userId: string; name: string }) {
 function TradeItem({
   item,
   currentValue,
-  quantity,
   catalogItem,
 }: {
   item: TradeItemDetail;
   currentValue: number | null;
-  quantity: number;
   catalogItem: CatalogTradeItem | null;
 }) {
   const categoryIcon = getCategoryIcon(item.category_title);
@@ -185,11 +184,6 @@ function TradeItem({
           className="object-cover"
           onError={handleImageError}
         />
-        {quantity > 1 && (
-          <span className="bg-primary-bg/85 text-primary-text absolute top-2 right-2 rounded-md px-2 py-1 text-xs leading-none font-bold shadow-sm backdrop-blur-sm">
-            ×{quantity}
-          </span>
-        )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center p-2.5 min-[400px]:block">
         <p className="text-primary-text group-hover:text-link group-focus-visible:text-link line-clamp-2 text-sm leading-5 font-semibold wrap-break-word transition-colors">
@@ -214,8 +208,27 @@ function TradeItem({
             </span>
           )}
           {item.confidence !== "confirmed" && (
-            <span className="text-secondary-text text-[10px] sm:text-xs">
-              Partial data
+            <span
+              className="text-secondary-text text-[10px] sm:text-xs"
+              title="The previous owner was recovered after a data gap."
+            >
+              Recovered hop
+            </span>
+          )}
+          {item.given_by_original_owner && (
+            <span
+              className="text-secondary-text text-[10px] sm:text-xs"
+              title="The item's original owner gave it in this trade."
+            >
+              Given by original owner
+            </span>
+          )}
+          {item.received_by_original_owner && (
+            <span
+              className="text-secondary-text text-[10px] sm:text-xs"
+              title="The item returned to its original owner in this trade."
+            >
+              Returned to original owner
             </span>
           )}
         </div>
@@ -264,39 +277,25 @@ function TradeSide({
   getItemValue: (item: TradeItemDetail) => number | null;
   getCatalogItem: (item: TradeItemDetail) => CatalogTradeItem | null;
 }) {
-  const groupedItems = Array.from(
-    items
-      .reduce((groups, item) => {
-        const key = `${normalizeCatalogKey(item.title, item.category_title)}::${item.is_duplicate_branch ? "duped" : "clean"}`;
-        const existing = groups.get(key);
-        if (existing) {
-          existing.quantity += 1;
-          if (item.confidence !== "confirmed") {
-            existing.item = { ...existing.item, confidence: "gap" };
-          }
-        } else {
-          groups.set(key, { key, item, quantity: 1 });
-        }
-        return groups;
-      }, new Map<string, { key: string; item: TradeItemDetail; quantity: number }>())
-      .values(),
-  );
-
   return (
     <div className="min-w-0">
       <h4 className="text-primary-text mb-2 text-sm font-semibold">
         {label} {items.length} {items.length === 1 ? "item" : "items"}
       </h4>
       <div className="flex flex-wrap gap-2">
-        {groupedItems.map((group) => (
+        {items.map((item, index) => (
           <TradeItem
-            key={group.key}
-            item={group.item}
-            currentValue={getItemValue(group.item)}
-            quantity={group.quantity}
-            catalogItem={getCatalogItem(group.item)}
+            key={`${item.item_id}:${item.branch_id}:${index}`}
+            item={item}
+            currentValue={getItemValue(item)}
+            catalogItem={getCatalogItem(item)}
           />
         ))}
+        {items.length === 0 && (
+          <p className="text-secondary-text text-xs">
+            No items observed on this side yet.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -319,6 +318,7 @@ export default function UserTradeHistory({
   const [listState, setListState] = useState<RequestState>("idle");
   const [listError, setListError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [nextBefore, setNextBefore] = useState<number | null>(null);
   const [expandedTradeId, setExpandedTradeId] = useState<string | null>(null);
   const [details, setDetails] = useState<Record<string, TradeDetail>>({});
   const [detailStates, setDetailStates] = useState<
@@ -467,18 +467,32 @@ export default function UserTradeHistory({
           );
         }
 
-        const page = (await response.json()) as UserTradeSummary[];
-        if (!Array.isArray(page))
+        const page = (await response.json()) as TradeList<UserTradeSummary>;
+        if (!Array.isArray(page.completed) || !Array.isArray(page.pending))
           throw new Error("Invalid trade history response");
+
+        const pageTrades = [...page.completed, ...page.pending];
 
         setTrades((current) => {
           const byId = new Map(current.map((trade) => [trade.trade_id, trade]));
-          page.forEach((trade) => byId.set(trade.trade_id, trade));
+          pageTrades.forEach((trade) => byId.set(trade.trade_id, trade));
           return Array.from(byId.values()).sort(
             (a, b) => b.last_time - a.last_time,
           );
         });
-        setHasMore(page.length === PAGE_SIZE);
+        const fullLists = [page.completed, page.pending].filter(
+          (list) => list.length === PAGE_SIZE,
+        );
+        setHasMore(fullLists.length > 0);
+        setNextBefore(
+          fullLists.length > 0
+            ? Math.max(
+                ...fullLists.map((list) =>
+                  Math.min(...list.map((trade) => trade.first_time)),
+                ),
+              )
+            : null,
+        );
         setListState("idle");
       } catch (error) {
         if (controller.signal.aborted && !didTimeout) return;
@@ -613,7 +627,7 @@ export default function UserTradeHistory({
         />
         <p className="text-primary-text font-semibold">No recorded trades</p>
         <p className="text-secondary-text mt-1 text-sm">
-          Trades will appear here after both sides have been observed.
+          Trades will appear here when an item transfer is observed.
         </p>
       </div>
     );
@@ -629,6 +643,7 @@ export default function UserTradeHistory({
       {trades.map((trade) => {
         const isExpanded = expandedTradeId === trade.trade_id;
         const detail = details[trade.trade_id];
+        const status = detail?.status ?? trade.status;
         const detailState = detailStates[trade.trade_id];
         const ownerGave =
           detail?.user_a === userId
@@ -650,7 +665,10 @@ export default function UserTradeHistory({
         const knownValueCount =
           ownerGave.length + ownerReceived.length - missingValueCount;
         const valueDifference =
-          ownerGaveValues && ownerReceivedValues && knownValueCount > 0
+          ownerGaveValues &&
+          ownerReceivedValues &&
+          knownValueCount > 0 &&
+          status === "completed"
             ? ownerReceivedValues.total - ownerGaveValues.total
             : null;
         const combinedValue =
@@ -694,11 +712,11 @@ export default function UserTradeHistory({
                       className="h-4 w-4"
                     />
                     <span className="text-xs whitespace-nowrap">
-                      {trade.items_given} given · {trade.items_received}{" "}
-                      received
+                      {trade.items_given.length} given ·{" "}
+                      {trade.items_received.length} received
                     </span>
                   </div>
-                  {!isExpanded && detail && (
+                  {!isExpanded && detail && status === "completed" && (
                     <ValueDifferenceBadge
                       value={valueDifference}
                       isPartial={missingValueCount > 0}
@@ -724,7 +742,15 @@ export default function UserTradeHistory({
               </div>
 
               <div className="text-secondary-text flex w-full items-center justify-center gap-2 text-xs sm:w-auto sm:shrink-0 sm:justify-end sm:text-right sm:text-sm">
-                {!isExpanded && detail && (
+                {status === "pending" && (
+                  <span
+                    className="bg-status-warning/15 text-status-warning rounded px-2 py-1 text-[10px] font-semibold whitespace-nowrap sm:text-xs"
+                    title="Only one side of this trade has been scanned so far."
+                  >
+                    Pending
+                  </span>
+                )}
+                {!isExpanded && detail && status === "completed" && (
                   <ValueDifferenceBadge
                     value={valueDifference}
                     isPartial={missingValueCount > 0}
@@ -775,71 +801,79 @@ export default function UserTradeHistory({
                   </div>
                 ) : detail ? (
                   <>
-                    {ownerGaveValues && ownerReceivedValues && (
-                      <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
-                        <p className="text-secondary-text mb-2 text-[10px] font-semibold tracking-wide uppercase sm:text-xs">
-                          {missingValueCount > 0
-                            ? "Known values"
-                            : "Current values"}
-                        </p>
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0 flex-1">
-                            <p className="text-button-danger text-[10px] font-medium tracking-wide uppercase sm:text-xs">
-                              Gave ({ownerGave.length})
-                            </p>
-                            <p className="text-primary-text truncate text-lg font-bold sm:text-xl">
-                              {formatTradeValue(ownerGaveValues.total)}
-                              {ownerGaveValues.missingCount > 0 && "+"}
-                            </p>
-                          </div>
-
-                          <div className="flex shrink-0 flex-col items-center gap-1">
-                            <Icon
-                              icon="heroicons:scale"
-                              className="text-secondary-text/60 h-4 w-4"
-                            />
-                            <ValueDifferenceBadge
-                              value={valueDifference}
-                              isPartial={missingValueCount > 0}
-                              className="inline-flex"
-                            />
-                          </div>
-
-                          <div className="min-w-0 flex-1 text-right">
-                            <p className="text-status-success text-[10px] font-medium tracking-wide uppercase sm:text-xs">
-                              Received ({ownerReceived.length})
-                            </p>
-                            <p className="text-primary-text truncate text-lg font-bold sm:text-xl">
-                              {formatTradeValue(ownerReceivedValues.total)}
-                              {ownerReceivedValues.missingCount > 0 && "+"}
-                            </p>
-                          </div>
-                        </div>
-                        {missingValueCount > 0 && (
-                          <p className="text-secondary-text mt-3 text-xs">
-                            {missingValueCount}{" "}
-                            {missingValueCount === 1
-                              ? "item has"
-                              : "items have"}{" "}
-                            no current value. N/A items are excluded from the
-                            totals, difference, and bar. Totals with + are
-                            partial.
-                          </p>
-                        )}
-                        {knownValueCount > 0 && (
-                          <div className="bg-quaternary-bg mt-3 flex h-1.5 w-full overflow-hidden rounded-full">
-                            <div
-                              className="bg-status-error h-full"
-                              style={{ width: `${gaveShare}%` }}
-                            />
-                            <div
-                              className="bg-status-success h-full"
-                              style={{ width: `${100 - gaveShare}%` }}
-                            />
-                          </div>
-                        )}
-                      </div>
+                    {detail.status === "pending" && (
+                      <p className="text-secondary-text mb-4 text-sm">
+                        Only one side of this trade has been observed. The other
+                        side will appear after its items are scanned.
+                      </p>
                     )}
+                    {detail.status === "completed" &&
+                      ownerGaveValues &&
+                      ownerReceivedValues && (
+                        <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
+                          <p className="text-secondary-text mb-2 text-[10px] font-semibold tracking-wide uppercase sm:text-xs">
+                            {missingValueCount > 0
+                              ? "Known values"
+                              : "Current values"}
+                          </p>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-button-danger text-[10px] font-medium tracking-wide uppercase sm:text-xs">
+                                Gave ({ownerGave.length})
+                              </p>
+                              <p className="text-primary-text truncate text-lg font-bold sm:text-xl">
+                                {formatTradeValue(ownerGaveValues.total)}
+                                {ownerGaveValues.missingCount > 0 && "+"}
+                              </p>
+                            </div>
+
+                            <div className="flex shrink-0 flex-col items-center gap-1">
+                              <Icon
+                                icon="heroicons:scale"
+                                className="text-secondary-text/60 h-4 w-4"
+                              />
+                              <ValueDifferenceBadge
+                                value={valueDifference}
+                                isPartial={missingValueCount > 0}
+                                className="inline-flex"
+                              />
+                            </div>
+
+                            <div className="min-w-0 flex-1 text-right">
+                              <p className="text-status-success text-[10px] font-medium tracking-wide uppercase sm:text-xs">
+                                Received ({ownerReceived.length})
+                              </p>
+                              <p className="text-primary-text truncate text-lg font-bold sm:text-xl">
+                                {formatTradeValue(ownerReceivedValues.total)}
+                                {ownerReceivedValues.missingCount > 0 && "+"}
+                              </p>
+                            </div>
+                          </div>
+                          {missingValueCount > 0 && (
+                            <p className="text-secondary-text mt-3 text-xs">
+                              {missingValueCount}{" "}
+                              {missingValueCount === 1
+                                ? "item has"
+                                : "items have"}{" "}
+                              no current value. N/A items are excluded from the
+                              totals, difference, and bar. Totals with + are
+                              partial.
+                            </p>
+                          )}
+                          {knownValueCount > 0 && (
+                            <div className="bg-quaternary-bg mt-3 flex h-1.5 w-full overflow-hidden rounded-full">
+                              <div
+                                className="bg-status-error h-full"
+                                style={{ width: `${gaveShare}%` }}
+                              />
+                              <div
+                                className="bg-status-success h-full"
+                                style={{ width: `${100 - gaveShare}%` }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
                     <div className="grid gap-5 xl:grid-cols-2">
                       <TradeSide
                         label={`${userDisplayName} gave`}
@@ -884,8 +918,7 @@ export default function UserTradeHistory({
             size="sm"
             disabled={listState === "loading"}
             onClick={() => {
-              const oldest = trades.at(-1);
-              if (oldest) void loadTrades(oldest.first_time);
+              if (nextBefore !== null) void loadTrades(nextBefore);
             }}
           >
             {listState === "loading" && <Spinner className="h-4 w-4" />}

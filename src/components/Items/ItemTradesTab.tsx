@@ -1,6 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  TradeDetail,
+  TradeItemDetail,
+  TradeList,
+} from "@/app/inventories/types";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -16,19 +21,6 @@ import {
 import { formatShortDateTime } from "@/utils/helpers/timestamp";
 
 const log = createLogger("UI");
-
-interface CatalogItemTrade {
-  trade_id: string;
-  item_id: string;
-  branch_id: string;
-  is_duplicate_branch: boolean;
-  from_user_id: string;
-  to_user_id: string;
-  title: string;
-  category_title: string;
-  trade_time: number;
-  confidence: string;
-}
 
 interface ItemTradesTabProps {
   itemId: number;
@@ -67,20 +59,70 @@ function TradeAvatarImage({ userId }: { userId: string }) {
   );
 }
 
+function TradeItems({
+  label,
+  items,
+}: {
+  label: string;
+  items: TradeItemDetail[];
+}) {
+  return (
+    <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+      <p className="text-primary-text mb-2 text-xs font-semibold">
+        {label} ({items.length})
+      </p>
+      {items.length === 0 ? (
+        <p className="text-secondary-text text-xs">
+          No items observed on this side yet.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {items.map((item, index) => (
+            <li
+              key={`${item.item_id}:${item.branch_id}:${index}`}
+              className="text-primary-text text-sm"
+            >
+              <span className="font-medium">{item.title}</span>
+              <span className="text-secondary-text ml-1 text-xs">
+                {item.category_title}
+              </span>
+              <div className="text-secondary-text mt-0.5 flex flex-wrap gap-x-2 text-xs">
+                {item.is_duplicate_branch && (
+                  <span className="text-status-warning">Duped copy</span>
+                )}
+                {item.confidence === "gap" && (
+                  <span title="The previous owner was recovered after a data gap.">
+                    Recovered hop
+                  </span>
+                )}
+                {item.given_by_original_owner && (
+                  <span title="The original owner gave this item in this trade.">
+                    Given by original owner
+                  </span>
+                )}
+                {item.received_by_original_owner && (
+                  <span title="The item returned to its original owner in this trade.">
+                    Returned to original owner
+                  </span>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
-  const {
-    data: trades = [],
-    isFetching,
-    isError,
-    refetch,
-  } = useQuery({
+  const { data, isFetching, isError, refetch } = useQuery({
     queryKey: ["item-trades", itemId],
     gcTime: 30 * 60 * 1000,
     refetchOnMount: "always",
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchInterval: false,
-    queryFn: async (): Promise<CatalogItemTrade[]> => {
+    queryFn: async (): Promise<TradeList<TradeDetail>> => {
       if (!INVENTORY_API_URL) throw new Error("Inventory API is unavailable");
 
       const response = await fetch(
@@ -90,7 +132,7 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
           cache: "no-store",
         },
       );
-      if (response.status === 404) return [];
+      if (response.status === 404) return { completed: [], pending: [] };
       if (!response.ok) {
         log.error("Failed to fetch catalog item trades", {
           itemId,
@@ -100,18 +142,31 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
       }
 
       const data: unknown = await response.json();
-      if (!Array.isArray(data)) throw new Error("Invalid trade response");
-      return data as CatalogItemTrade[];
+      if (
+        !data ||
+        typeof data !== "object" ||
+        !Array.isArray((data as TradeList<TradeDetail>).completed) ||
+        !Array.isArray((data as TradeList<TradeDetail>).pending)
+      ) {
+        throw new Error("Invalid trade response");
+      }
+      return data as TradeList<TradeDetail>;
     },
     retry: false,
   });
 
+  const trades = useMemo(
+    () =>
+      [...(data?.completed ?? []), ...(data?.pending ?? [])].sort(
+        (a, b) => b.last_time - a.last_time,
+      ),
+    [data],
+  );
+
   const userIds = useMemo(
     () =>
       Array.from(
-        new Set(
-          trades.flatMap((trade) => [trade.from_user_id, trade.to_user_id]),
-        ),
+        new Set(trades.flatMap((trade) => [trade.user_a, trade.user_b])),
       ),
     [trades],
   );
@@ -158,7 +213,7 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
         <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
           <p className="text-primary-text font-semibold">No recorded trades</p>
           <p className="text-secondary-text mt-1 text-sm">
-            Trades will appear here after both sides have been observed.
+            Trades will appear here when an item transfer is observed.
           </p>
         </div>
       ) : (
@@ -170,31 +225,47 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
         >
           {trades.map((trade) => (
             <article
-              key={`${trade.trade_id}:${trade.item_id}:${trade.branch_id}`}
+              key={trade.trade_id}
               className="border-border-card bg-secondary-bg rounded-lg border p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="text-primary-text flex flex-wrap items-center gap-2 text-sm">
-                  {userLink(trade.from_user_id)}
-                  <span aria-hidden="true">→</span>
-                  {userLink(trade.to_user_id)}
+                  {userLink(trade.user_a)}
+                  <span aria-hidden="true">↔</span>
+                  {userLink(trade.user_b)}
                 </div>
-                <time
-                  dateTime={new Date(trade.trade_time * 1000).toISOString()}
-                  className="text-secondary-text text-xs"
-                >
-                  {formatShortDateTime(trade.trade_time)}
-                </time>
-              </div>
-              {(trade.is_duplicate_branch ||
-                trade.confidence !== "confirmed") && (
-                <div className="text-secondary-text mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                  {trade.is_duplicate_branch && <span>Duplicate branch</span>}
-                  {trade.confidence !== "confirmed" && (
-                    <span>Partial data</span>
+                <div className="flex items-center gap-2">
+                  {trade.status === "pending" && (
+                    <span
+                      className="bg-status-warning/15 text-status-warning rounded px-2 py-1 text-xs font-semibold"
+                      title="Only one side of this trade has been scanned so far."
+                    >
+                      Pending
+                    </span>
                   )}
+                  <time
+                    dateTime={new Date(trade.last_time * 1000).toISOString()}
+                    className="text-secondary-text text-xs"
+                  >
+                    {formatShortDateTime(trade.last_time)}
+                  </time>
                 </div>
+              </div>
+              {trade.status === "pending" && (
+                <p className="text-secondary-text mt-2 text-xs">
+                  The other side of this trade has not been scanned yet.
+                </p>
               )}
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <TradeItems
+                  label={`${robloxUsers[trade.user_a]?.displayName || robloxUsers[trade.user_a]?.name || `User ${trade.user_a}`} gave`}
+                  items={trade.items_a_to_b}
+                />
+                <TradeItems
+                  label={`${robloxUsers[trade.user_b]?.displayName || robloxUsers[trade.user_b]?.name || `User ${trade.user_b}`} gave`}
+                  items={trade.items_b_to_a}
+                />
+              </div>
             </article>
           ))}
         </div>
