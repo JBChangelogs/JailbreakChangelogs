@@ -826,21 +826,41 @@ export async function fetchItemClient(
   return (await response.json()) as ItemDetails;
 }
 
-export async function fetchItemsByTypeClient(
-  type: string,
-): Promise<ItemDetails[] | null> {
-  try {
-    return await fetchAllItemPages<ItemDetails>((page) => {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL,
-        `/items?type=${encodeURIComponent(type)}&page=${page}`,
-      );
-      return fetch(url, { headers, credentials: "include" });
-    });
-  } catch (err) {
-    log.error("Error fetching items by type client-side", err);
-    return null;
+export async function fetchSimilarItemSorts(): Promise<string[]> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    "/items/similar/sorts",
+  );
+  const response = await fetch(url, { headers, credentials: "include" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch similar item sorts (${response.status})`);
   }
+
+  const data: unknown = await response.json();
+  return Array.isArray(data)
+    ? data.filter((sort): sort is string => typeof sort === "string")
+    : [];
+}
+
+export async function fetchSimilarItems(
+  id: number,
+  sort: string | null,
+  limit: number,
+): Promise<ItemDetails[]> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (sort) params.set("sort", sort);
+
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    `/items/${id}/similar?${params}`,
+  );
+  const response = await fetch(url, { headers, credentials: "include" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch similar items (${response.status})`);
+  }
+
+  const data = (await response.json()) as { items?: ItemDetails[] };
+  return Array.isArray(data.items) ? data.items : [];
 }
 
 export async function fetchItemHistoryClient(

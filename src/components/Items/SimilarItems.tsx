@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { ItemDetails } from "@/types";
-import { fetchItemsByTypeClient } from "@/utils/api/api";
-import { demandOrder } from "@/utils/trading/values";
+import { fetchSimilarItems, fetchSimilarItemSorts } from "@/utils/api/api";
 import Image from "next/image";
 import {
   handleImageError,
@@ -25,259 +24,78 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { unlockLevel } from "@/utils/items/season";
+import {
+  formatUnlockLevelBadge,
+  formatUnlockRequirementsTooltip,
+  hasUnlockLevel,
+} from "@/utils/items/itemUnlockPresentation";
+
+const SIMILAR_ITEMS_LIMIT = 6;
 
 interface SimilarItemsProps {
   currentItem: ItemDetails;
 }
 
-type SortCriteria = "similarity" | "creator" | "trading_metrics" | "trend";
+function getSortLabel(sort: string) {
+  return sort
+    .replaceAll(/[-_]/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function SeasonLevelBadges({ item }: { item: ItemDetails }) {
+  const level = unlockLevel(item.level);
+  const hasLevel = hasUnlockLevel(level);
+  if (item.season == null && !hasLevel) return null;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
+          {item.season != null && (
+            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+              S{item.season}
+            </span>
+          )}
+          {hasLevel && (
+            <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+              {formatUnlockLevelBadge(level)}
+            </span>
+          )}
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>
+        {formatUnlockRequirementsTooltip(item.season ?? undefined, level)}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
-  // Fetched only once the Similar tab mounts; suspends to the parent fallback.
-  const { data: fetchedItems } = useSuspenseQuery({
-    queryKey: ["items-by-type", currentItem.type],
-    queryFn: () => fetchItemsByTypeClient(currentItem.type),
+  const [selectedSort, setSelectedSort] = useState<string | null>(null);
+
+  const { data: sorts = [], isPending: sortsPending } = useQuery({
+    queryKey: ["similar-item-sorts"],
+    queryFn: fetchSimilarItemSorts,
+    staleTime: Infinity,
   });
-  const typeItems: ItemDetails[] = useMemo(
-    () => fetchedItems || [],
-    [fetchedItems],
-  );
+  const sortBy = selectedSort ?? sorts[0] ?? null;
 
-  const [sortBy, setSortBy] = useState<SortCriteria>("similarity");
-
-  const parseValue = (value: string): number => {
-    if (value === "N/A") return 0;
-    const num = parseFloat(value.replace(/[^0-9.]/g, ""));
-    if (value.toLowerCase().includes("k")) return num * 1000;
-    if (value.toLowerCase().includes("m")) return num * 1000000;
-    return num;
-  };
-
-  const calculateSimilarityScore = useCallback(
-    (item1: ItemDetails, item2: ItemDetails): number => {
-      let score = 0;
-
-      // Tradability matching (40%) - Critical for proper comparison
-      const isTradable1 = item1.tradable === 1 || item1.tradable === true;
-      const isTradable2 = item2.tradable === 1 || item2.tradable === true;
-
-      if (isTradable1 === isTradable2) {
-        score += 0.4; // Both tradable or both non-tradable
-      } else {
-        // Heavy penalty for tradability mismatch - different categories entirely
-        score -= 0.3;
-      }
-
-      // Value range similarity (30%) - Adjusted weight
-      const value1 = parseValue(item1.cash_value);
-      const value2 = parseValue(item2.cash_value);
-
-      // Handle N/A values properly
-      if (item1.cash_value === "N/A" && item2.cash_value === "N/A") {
-        score += 0.3; // Both have N/A values - perfect match
-      } else if (value1 > 0 && value2 > 0) {
-        const ratio = Math.min(value1, value2) / Math.max(value1, value2);
-        if (ratio >= 0.9) score += 0.3; // Within 10%
-        else if (ratio >= 0.7) score += 0.2; // Within 30%
-        else if (ratio >= 0.5) score += 0.1; // Within 50%
-      } else if (
-        (item1.cash_value === "N/A") !==
-        (item2.cash_value === "N/A")
-      ) {
-        // One has N/A, other has value - penalty for mismatch
-        score -= 0.1;
-      }
-
-      // Limited status similarity (20%)
-      if (
-        (item1.is_limited === 1 && item2.is_limited === 1) ||
-        (item1.is_limited === 0 && item2.is_limited === 0)
-      ) {
-        score += 0.2;
-      }
-
-      // Demand level similarity (10%) - Reduced weight since many items have N/A
-      const demand1Index = demandOrder.indexOf(
-        item1.demand as (typeof demandOrder)[number],
-      );
-      const demand2Index = demandOrder.indexOf(
-        item2.demand as (typeof demandOrder)[number],
-      );
-
-      if (item1.demand === "N/A" && item2.demand === "N/A") {
-        score += 0.1; // Both have N/A demand
-      } else if (demand1Index !== -1 && demand2Index !== -1) {
-        const demandDiff = Math.abs(demand1Index - demand2Index);
-        if (demandDiff === 0) score += 0.1; // Exact match
-        else if (demandDiff === 1) score += 0.05; // One level difference
-      } else if ((item1.demand === "N/A") !== (item2.demand === "N/A")) {
-        // One has N/A, other has demand - slight penalty
-        score -= 0.05;
-      }
-
-      return Math.max(0, score); // Ensure score doesn't go negative
-    },
-    [],
-  );
-
-  const calculateTradingMetricsScore = useCallback(
-    (item1: ItemDetails, item2: ItemDetails): number => {
-      let score = 0;
-
-      // Check if both items have trading metrics
-      if (!item1.metadata || !item2.metadata) {
-        return 0;
-      }
-
-      const metrics1 = item1.metadata;
-      const metrics2 = item2.metadata;
-
-      // Times Traded similarity (40%)
-      if (metrics1.TimesTraded && metrics2.TimesTraded) {
-        const ratio =
-          Math.min(metrics1.TimesTraded, metrics2.TimesTraded) /
-          Math.max(metrics1.TimesTraded, metrics2.TimesTraded);
-        if (ratio >= 0.9) score += 0.4; // Within 10%
-        else if (ratio >= 0.7) score += 0.3; // Within 30%
-        else if (ratio >= 0.5) score += 0.2; // Within 50%
-        else if (ratio >= 0.3) score += 0.1; // Within 70%
-      }
-
-      // Unique Circulation similarity (30%)
-      if (metrics1.UniqueCirculation && metrics2.UniqueCirculation) {
-        const ratio =
-          Math.min(metrics1.UniqueCirculation, metrics2.UniqueCirculation) /
-          Math.max(metrics1.UniqueCirculation, metrics2.UniqueCirculation);
-        if (ratio >= 0.9) score += 0.3; // Within 10%
-        else if (ratio >= 0.7) score += 0.2; // Within 30%
-        else if (ratio >= 0.5) score += 0.1; // Within 50%
-      }
-
-      // Demand Multiple similarity (30%)
-      if (metrics1.DemandMultiple && metrics2.DemandMultiple) {
-        const ratio =
-          Math.min(metrics1.DemandMultiple, metrics2.DemandMultiple) /
-          Math.max(metrics1.DemandMultiple, metrics2.DemandMultiple);
-        if (ratio >= 0.9) score += 0.3; // Within 10%
-        else if (ratio >= 0.7) score += 0.2; // Within 30%
-        else if (ratio >= 0.5) score += 0.1; // Within 50%
-      }
-
-      return score;
-    },
-    [],
-  );
-
-  const calculateTrendSimilarityScore = useCallback(
-    (item1: ItemDetails, item2: ItemDetails): number => {
-      let score = 0;
-
-      // Check if both items have trends
-      if (!item1.trend || !item2.trend) {
-        return 0;
-      }
-
-      // Exact trend match (60%)
-      if (item1.trend === item2.trend) {
-        score += 0.6;
-      }
-
-      // Similar trend categories (40%)
-      const positiveTrends = ["Rising", "Hyped", "Recovering"];
-      const negativeTrends = ["Dropping"];
-      const neutralTrends = ["Stable", "Unstable"];
-      const specialTrends = ["Hoarded", "Manipulated"];
-
-      const isPositive1 = positiveTrends.includes(item1.trend);
-      const isPositive2 = positiveTrends.includes(item2.trend);
-      const isNegative1 = negativeTrends.includes(item1.trend);
-      const isNegative2 = negativeTrends.includes(item2.trend);
-      const isNeutral1 = neutralTrends.includes(item1.trend);
-      const isNeutral2 = neutralTrends.includes(item2.trend);
-      const isSpecial1 = specialTrends.includes(item1.trend);
-      const isSpecial2 = specialTrends.includes(item2.trend);
-
-      if (
-        (isPositive1 && isPositive2) ||
-        (isNegative1 && isNegative2) ||
-        (isNeutral1 && isNeutral2) ||
-        (isSpecial1 && isSpecial2)
-      ) {
-        score += 0.4;
-      }
-
-      return score;
-    },
-    [],
-  );
-
-  const similarItems = useMemo(() => {
-    // Calculate similarity scores and sort based on selected criteria
-    const itemsWithScores = typeItems
-      .filter((item) => item.id !== currentItem.id) // Exclude current item
-      .map((item) => ({
-        item,
-        similarityScore: calculateSimilarityScore(currentItem, item),
-        tradingMetricsScore: calculateTradingMetricsScore(currentItem, item),
-        trendScore: calculateTrendSimilarityScore(currentItem, item),
-      }));
-
-    let sortedItems: ItemDetails[] = [];
-    switch (sortBy) {
-      case "creator":
-        // Check if current item has an unknown creator
-        if (currentItem.creator === "N/A") {
-          sortedItems = [];
-        } else {
-          sortedItems = itemsWithScores
-            .filter(({ item }) => {
-              // Extract creator name without ID for comparison, handling both formats
-              const currentCreatorName = currentItem.creator
-                .split(/[ (]/)[0]
-                .toLowerCase();
-              const itemCreatorName = item.creator
-                .split(/[ (]/)[0]
-                .toLowerCase();
-              return currentCreatorName === itemCreatorName;
-            })
-            .sort((a, b) => {
-              // Sort by similarity score within the same creator
-              return b.similarityScore - a.similarityScore;
-            })
-            .map(({ item }) => item);
-        }
-        break;
-      case "trading_metrics":
-        sortedItems = itemsWithScores
-          .filter(({ tradingMetricsScore }) => tradingMetricsScore > 0) // Only include items with trading metrics
-          .sort((a, b) => b.tradingMetricsScore - a.tradingMetricsScore)
-          .map(({ item }) => item);
-        break;
-      case "trend":
-        sortedItems = itemsWithScores
-          .filter(({ trendScore }) => trendScore > 0) // Only include items with trends
-          .sort((a, b) => b.trendScore - a.trendScore)
-          .map(({ item }) => item);
-        break;
-      default: // 'similarity'
-        sortedItems = itemsWithScores
-          .sort((a, b) => b.similarityScore - a.similarityScore)
-          .map(({ item }) => item);
-    }
-
-    return sortedItems.slice(0, 6); // Get top 6
-  }, [
-    currentItem,
-    sortBy,
-    calculateSimilarityScore,
-    calculateTradingMetricsScore,
-    calculateTrendSimilarityScore,
-    typeItems,
-  ]);
+  const { data: similarItems, isPending: itemsPending } = useQuery({
+    queryKey: ["similar-items", currentItem.id, sortBy],
+    queryFn: () =>
+      fetchSimilarItems(currentItem.id, sortBy, SIMILAR_ITEMS_LIMIT),
+    // Without sorts, fall back to the endpoint's default sort.
+    enabled: !sortsPending,
+  });
 
   return (
     <div className="border-border-card bg-secondary-bg hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
-      {/* Header Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="bg-button-info/20 flex h-8 w-8 items-center justify-center rounded-lg">
@@ -291,70 +109,48 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
           </h3>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-              aria-label="Sort similar items"
+        {sorts.length > 0 && sortBy && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                aria-label="Sort similar items"
+              >
+                <span className="truncate">Sort by {getSortLabel(sortBy)}</span>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className="text-secondary-text h-5 w-5"
+                  inline={true}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="border-border-card bg-tertiary-bg text-primary-text max-h-60 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
-              <span className="truncate">
-                {sortBy === "creator"
-                  ? "Sort by Creator"
-                  : sortBy === "similarity"
-                    ? "Sort by Similarity"
-                    : sortBy === "trading_metrics"
-                      ? "Sort by Trading Metrics"
-                      : "Sort by Trend"}
-              </span>
-              <Icon
-                icon="heroicons:chevron-down"
-                className="text-secondary-text h-5 w-5"
-                inline={true}
-              />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="border-border-card bg-tertiary-bg text-primary-text max-h-60 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-          >
-            <DropdownMenuRadioGroup
-              value={sortBy}
-              onValueChange={(value) => setSortBy(value as SortCriteria)}
-            >
-              <DropdownMenuRadioItem
-                value="creator"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+              <DropdownMenuRadioGroup
+                value={sortBy}
+                onValueChange={setSelectedSort}
               >
-                Sort by Creator
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem
-                value="similarity"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Sort by Similarity
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem
-                value="trading_metrics"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Sort by Trading Metrics
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem
-                value="trend"
-                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-              >
-                Sort by Trend
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                {sorts.map((sort) => (
+                  <DropdownMenuRadioItem
+                    key={sort}
+                    value={sort}
+                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  >
+                    Sort by {getSortLabel(sort)}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
-      {/* Content Section */}
-      {!typeItems.length ? (
+      {sortsPending || itemsPending ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
+          {[...Array(SIMILAR_ITEMS_LIMIT)].map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="border-border-card bg-tertiary-bg mb-3 aspect-video rounded-lg border"></div>
               <div className="bg-secondary-bg mb-2 h-4 w-3/4 rounded"></div>
@@ -362,7 +158,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
             </div>
           ))}
         </div>
-      ) : similarItems.length === 0 ? (
+      ) : !similarItems || similarItems.length === 0 ? (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
           <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
             <Icon
@@ -371,24 +167,12 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
             />
           </div>
           <h4 className="text-primary-text mb-2 text-lg font-semibold">
-            {sortBy === "creator" && currentItem.creator !== "N/A"
-              ? "No Items from Same Creator"
-              : sortBy === "trading_metrics"
-                ? "No Items with Similar Trading Metrics"
-                : sortBy === "trend"
-                  ? "No Items with Similar Trends"
-                  : "No Similar Items Found"}
+            No Similar Items Found
           </h4>
           <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-            {sortBy === "creator" && currentItem.creator !== "N/A"
-              ? `No other items by ${currentItem.creator.split(/[ (]/)[0]} were found in the ${currentItem.type} category. Try switching to "Sort by Similarity" to see items with similar values and demand.`
-              : sortBy === "creator" && currentItem.creator === "N/A"
-                ? "This item doesn't have a creator listed. Try switching to 'Sort by Similarity' to see items with similar values and demand."
-                : sortBy === "trading_metrics"
-                  ? "No items with similar trading metrics were found. This item might have unique trading patterns, or other items in this category don't have trading metrics data. Try switching to 'Sort by Similarity' to see items with similar values and demand."
-                  : sortBy === "trend"
-                    ? "No items with similar trends were found. Other items in this category don't have Official Trend data. Try switching to 'Sort by Similarity' to see items with similar values and demand."
-                    : "We couldn't find any items similar to this one. This might be a unique item or there may not be enough data to calculate similarities."}
+            We couldn&apos;t find any items similar to this one
+            {sortBy ? ` when sorting by ${getSortLabel(sortBy)}` : ""}. Try a
+            different sort option.
           </p>
         </div>
       ) : (
@@ -401,7 +185,6 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
               prefetch={false}
             >
               <div className="border-border-card bg-tertiary-bg relative overflow-hidden rounded-lg border transition-all duration-300">
-                {/* Media Section */}
                 <div className="relative aspect-video w-full overflow-hidden">
                   {isVideoItem(item.name) ? (
                     <video
@@ -421,18 +204,16 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                       onError={handleImageError}
                     />
                   )}
+                  <SeasonLevelBadges item={item} />
                 </div>
 
-                {/* Content Section */}
                 <div className="flex flex-1 flex-col space-y-2 p-3">
-                  {/* Item Name */}
                   <div className="flex items-center justify-between">
                     <h3 className="text-primary-text group-hover:text-link line-clamp-2 text-sm leading-tight font-semibold transition-colors">
                       {item.name}
                     </h3>
                   </div>
 
-                  {/* Type Badge */}
                   <div className="flex flex-wrap gap-1">
                     <span
                       className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
@@ -458,9 +239,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                     )}
                   </div>
 
-                  {/* Values Section */}
                   <div className="space-y-1">
-                    {/* Cash Value */}
                     <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                       <span className="text-secondary-text text-[10px] font-medium">
                         Cash
@@ -470,7 +249,6 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                       </span>
                     </div>
 
-                    {/* Duped Value */}
                     <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                       <span className="text-secondary-text text-[10px] font-medium">
                         Duped
@@ -480,7 +258,6 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                       </span>
                     </div>
 
-                    {/* Demand */}
                     <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                       <span className="text-secondary-text text-[10px] font-medium">
                         Demand
@@ -492,7 +269,6 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                       </span>
                     </div>
 
-                    {/* Trend */}
                     {item.trend && (
                       <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                         <span className="text-secondary-text text-[10px] font-medium">
