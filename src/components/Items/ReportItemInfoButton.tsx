@@ -51,7 +51,7 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/items/report?id=${encodeURIComponent(item.id)}`,
+        `/items/${encodeURIComponent(item.id)}/report`,
       );
       const response = await fetch(url, {
         method: "POST",

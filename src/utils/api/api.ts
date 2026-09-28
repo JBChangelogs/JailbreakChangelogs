@@ -721,7 +721,7 @@ export async function fetchItem(
     const itemType = decodeURIComponent(type);
 
     const response = await fetch(
-      `${BASE_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+      `${BASE_API_URL}/items/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
@@ -748,7 +748,7 @@ export async function fetchItem(
 export async function fetchItemById(id: string): Promise<ItemDetails | null> {
   try {
     const response = await fetchWithRetry(
-      `${BASE_API_URL}/items/get?id=${id}`,
+      `${BASE_API_URL}/items/${encodeURIComponent(id)}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
@@ -783,7 +783,7 @@ export async function fetchItemByIdClient(
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
-      `/items/get?id=${encodeURIComponent(id)}`,
+      `/items/${encodeURIComponent(id)}`,
     );
     const response = await fetch(url, {
       headers,

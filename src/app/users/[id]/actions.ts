@@ -18,7 +18,7 @@ async function fetchSeason(id: string) {
 async function fetchItemById(id: string) {
   try {
     const response = await fetchWithRetry(
-      `${PUBLIC_API_URL}/items/get?id=${id}`,
+      `${PUBLIC_API_URL}/items/${encodeURIComponent(id)}`,
       undefined,
       { maxRetries: 3, initialDelayMs: 800, timeoutMs: 10000 },
     );
