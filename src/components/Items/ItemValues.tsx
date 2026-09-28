@@ -8,16 +8,17 @@ import {
 } from "@/utils/trading/values";
 import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import { RecentChange } from "@/types";
+import { hasItemValue } from "@/utils/items/itemValue";
 
 interface ItemValuesProps {
   cashValue: string | null;
   dupedValue: string | null;
-  demand: string;
+  demand: string | null;
   dupedDemand?: string | null;
   trend?: string | null;
-  notes: string;
+  notes: string | null;
   price: string;
-  health: number;
+  health: number | null;
   type: string;
   recentChanges?: RecentChange[] | null;
   placementLimit?: number | null;
@@ -36,7 +37,7 @@ function ItemValues({
   recentChanges,
   placementLimit,
 }: ItemValuesProps) {
-  const hasNoPrice = price === "N/A";
+  const hasNoPrice = !hasItemValue(price);
   const priceParts = hasNoPrice ? [] : formatPrice(price).split(" / ");
   const cashChange = getValueChange(recentChanges, "cash_value");
   const dupedChange = getValueChange(recentChanges, "duped_value");
@@ -226,7 +227,7 @@ function ItemValues({
       </div>
 
       {/* Item Notes - Full width */}
-      {notes && notes.trim() !== "" && (
+      {hasItemValue(notes) && (
         <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
             <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">

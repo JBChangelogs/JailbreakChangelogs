@@ -28,6 +28,7 @@ import {
 } from "@/utils/helpers/timestamp";
 import { formatFullValue, formatPrice } from "@/utils/trading/values";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { hasItemValue } from "@/utils/items/itemValue";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
@@ -45,9 +46,9 @@ interface Item {
   id: number;
   name: string;
   type: string;
-  creator: string;
-  cash_value: string;
-  duped_value: string;
+  creator: string | null;
+  cash_value: string | null;
+  duped_value: string | null;
   tradable: number;
 }
 
@@ -229,10 +230,9 @@ export default function ChangelogDetailsClient({
   const formatCreatorValue = (
     value: unknown,
   ): { display: string; robloxId?: string } => {
-    if (value === undefined || value === null) return { display: "N/A" };
-    if (value === "N/A") return { display: "???" };
+    const strValue = value == null ? null : String(value);
+    if (!hasItemValue(strValue)) return { display: "???" };
 
-    const strValue = String(value);
     const match = strValue.match(/(.*?)\s*\((\d+)\)/);
     if (!match) return { display: strValue };
 

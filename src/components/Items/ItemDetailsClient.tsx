@@ -56,6 +56,7 @@ import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
 import { fetchItemByIdClient, fetchItemScanCount } from "@/utils/api/api";
 import { hasSeason, unlockLevel } from "@/utils/items/season";
+import { hasItemValue } from "@/utils/items/itemValue";
 import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import {
   formatUnlockLevelBadge,
@@ -742,9 +743,7 @@ export default function ItemDetailsClient({
                 >
                   {activeTab === 0 && (
                     <>
-                      {!currentItem.description ||
-                      currentItem.description === "N/A" ||
-                      currentItem.description === "" ? (
+                      {!hasItemValue(currentItem.description) ? (
                         <div className="space-y-3">
                           <h3 className="text-primary-text text-lg font-semibold">
                             Description

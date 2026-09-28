@@ -19,6 +19,7 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatFullValue, getValueChange } from "@/utils/trading/values";
 import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import { hasSeason, unlockLevel } from "@/utils/items/season";
+import { hasItemValue } from "@/utils/items/itemValue";
 import {
   formatUnlockLevelBadge,
   formatUnlockRequirementsTooltip,
@@ -247,8 +248,9 @@ function ItemCard({
     return relativeTime;
   };
   const itemUrl = `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`;
-  const demandLabel =
-    currentItemData.demand === "N/A" ? "Unknown" : currentItemData.demand;
+  const demandLabel = hasItemValue(currentItemData.demand)
+    ? currentItemData.demand
+    : "Unknown";
   const dupedDemandLabel =
     !currentItemData.duped_demand || currentItemData.duped_demand === "N/A"
       ? "N/A"

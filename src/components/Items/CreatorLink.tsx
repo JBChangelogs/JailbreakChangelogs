@@ -1,12 +1,12 @@
 import React from "react";
+import { hasItemValue } from "@/utils/items/itemValue";
 
 interface CreatorLinkProps {
   creator: string | null;
 }
 
 export default function CreatorLink({ creator }: CreatorLinkProps) {
-  if (!creator) return <span>Unknown</span>;
-  if (creator === "N/A") return <span>???</span>;
+  if (!hasItemValue(creator)) return <span>???</span>;
 
   const match = creator.match(/(.*?)\s*\((\d+)\)/);
   if (!match) {

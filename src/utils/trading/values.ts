@@ -1,5 +1,6 @@
 import { Item, FilterSort, ValueSort } from "@/types";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { hasItemValue } from "@/utils/items/itemValue";
 
 export const demandOrder = [
   "Close To None",
@@ -45,8 +46,8 @@ export const trendValueMap: Record<string, string> = {
   "trend-recovering": "Recovering",
 };
 
-export const parseCashValue = (value: string | null): number => {
-  if (value === null || value === "N/A" || value === "null") return -1;
+export const parseCashValue = (value: string | null | undefined): number => {
+  if (!hasItemValue(value)) return -1;
   const numericPart = value.replace(/[^0-9.]/g, "");
   if (numericPart === "") return -1;
   const num = parseFloat(numericPart);
@@ -58,14 +59,20 @@ export const parseCashValue = (value: string | null): number => {
 };
 
 export const sortByCashValue = (
-  a: string,
-  b: string,
+  a: string | null | undefined,
+  b: string | null | undefined,
   order: "asc" | "desc" = "desc",
 ): number => {
-  const aValue =
-    a === "N/A" ? (order === "desc" ? -1 : Infinity) : parseCashValue(a);
-  const bValue =
-    b === "N/A" ? (order === "desc" ? -1 : Infinity) : parseCashValue(b);
+  const aValue = !hasItemValue(a)
+    ? order === "desc"
+      ? -1
+      : Infinity
+    : parseCashValue(a);
+  const bValue = !hasItemValue(b)
+    ? order === "desc"
+      ? -1
+      : Infinity
+    : parseCashValue(b);
   return order === "desc" ? bValue - aValue : aValue - bValue;
 };
 
@@ -115,8 +122,8 @@ export const sortByTrend = (
 };
 
 type ValueSortGetters<T> = {
-  getCashValue?: (item: T) => string;
-  getDupedValue?: (item: T) => string;
+  getCashValue?: (item: T) => string | null | undefined;
+  getDupedValue?: (item: T) => string | null | undefined;
   getDemand?: (item: T) => string | null | undefined;
   getTrend?: (item: T) => string | null | undefined;
   getLastUpdated?: (item: T) => number | null | undefined;
@@ -183,8 +190,10 @@ export const sortByValueSort = <T>(
 ): T[] => {
   const sorted = [...items];
   const {
-    getCashValue = (item: T) => (item as { cash_value: string }).cash_value,
-    getDupedValue = (item: T) => (item as { duped_value: string }).duped_value,
+    getCashValue = (item: T) =>
+      (item as { cash_value?: string | null }).cash_value,
+    getDupedValue = (item: T) =>
+      (item as { duped_value?: string | null }).duped_value,
     getDemand = (item: T) => (item as { demand?: string | null }).demand,
     getLastUpdated = (item: T) =>
       (item as { last_updated?: number | null }).last_updated ?? 0,
@@ -350,17 +359,17 @@ export const sortByValueSort = <T>(
 };
 
 // Helper function to get the current cash value for an item
-export const getEffectiveCashValue = (item: Item): string => {
+export const getEffectiveCashValue = (item: Item): string | null => {
   return item.cash_value;
 };
 
 // Helper function to get the current duped value for an item
-export const getEffectiveDupedValue = (item: Item): string => {
+export const getEffectiveDupedValue = (item: Item): string | null => {
   return item.duped_value;
 };
 
 // Helper function to get the current demand for an item
-export const getEffectiveDemand = (item: Item): string => {
+export const getEffectiveDemand = (item: Item): string | null => {
   return item.demand;
 };
 
@@ -560,8 +569,8 @@ export const sortAndFilterItems = async (
  * @param value - The value string to format (e.g., "380m", "1.5k", "2b")
  * @returns Formatted string with full number and commas
  */
-export const formatFullValue = (value: string | null): string => {
-  if (value === null || value === "N/A" || value === "null") return "N/A";
+export const formatFullValue = (value: string | null | undefined): string => {
+  if (!hasItemValue(value)) return "N/A";
 
   // Remove any suffix (k, m, b, etc.) and convert to number
   const numericPart = value.toLowerCase().replace(/[kmb]$/, "");
@@ -595,8 +604,8 @@ export const formatFullValue = (value: string | null): string => {
  * @param price - The price string to format (e.g., "100k - 10m", "380m", "1.5k")
  * @returns Formatted string with full number and commas
  */
-export const formatPrice = (price: string | null): string => {
-  if (price === null || price === "N/A") return "N/A";
+export const formatPrice = (price: string | null | undefined): string => {
+  if (!hasItemValue(price)) return "N/A";
 
   // Handle dual-currency prices (e.g., "Free / 499 Robux", "100k / 50 Robux")
   if (price.includes(" / ")) {

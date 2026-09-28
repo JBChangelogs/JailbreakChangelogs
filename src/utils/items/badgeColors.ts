@@ -1,3 +1,5 @@
+import { hasItemValue } from "@/utils/items/itemValue";
+
 export const getItemTypeColor = (type: string): string => {
   // Normalize the type string to match the expected format
   const normalizedType = type
@@ -35,7 +37,10 @@ export const getItemTypeColor = (type: string): string => {
   }
 };
 
-export const getDemandHexColor = (demand: string): string => {
+export const getDemandHexColor = (
+  demand: string | null | undefined,
+): string => {
+  if (!hasItemValue(demand)) return "#4b5563";
   const normalizedDemand = demand
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -63,7 +68,8 @@ export const getDemandHexColor = (demand: string): string => {
   }
 };
 
-export const getTrendHexColor = (trend: string): string => {
+export const getTrendHexColor = (trend: string | null | undefined): string => {
+  if (!hasItemValue(trend)) return "#6b7280";
   const normalizedTrend =
     trend.charAt(0).toUpperCase() + trend.slice(1).toLowerCase();
 
@@ -89,7 +95,8 @@ export const getTrendHexColor = (trend: string): string => {
   }
 };
 
-export const getDemandColor = (demand: string): string => {
+export const getDemandColor = (demand: string | null | undefined): string => {
+  if (!hasItemValue(demand)) return "bg-gray-600 text-white";
   // Normalize the demand string to handle case variations
   const normalizedDemand = demand
     .split(" ")
@@ -118,7 +125,8 @@ export const getDemandColor = (demand: string): string => {
   }
 };
 
-export const getTrendColor = (trend: string): string => {
+export const getTrendColor = (trend: string | null | undefined): string => {
+  if (!hasItemValue(trend)) return "bg-gray-600 text-white";
   // Normalize the trend string to handle case variations
   const normalizedTrend =
     trend.charAt(0).toUpperCase() + trend.slice(1).toLowerCase();

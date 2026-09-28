@@ -30,6 +30,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { unlockLevel } from "@/utils/items/season";
+import { hasItemValue } from "@/utils/items/itemValue";
 import {
   formatUnlockLevelBadge,
   formatUnlockRequirementsTooltip,
@@ -265,22 +266,20 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                       <span
                         className={`${getDemandColor(item.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap`}
                       >
-                        {item.demand === "N/A" ? "Unknown" : item.demand}
+                        {hasItemValue(item.demand) ? item.demand : "Unknown"}
                       </span>
                     </div>
 
-                    {item.trend && (
-                      <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
-                        <span className="text-secondary-text text-[10px] font-medium">
-                          Trend
-                        </span>
-                        <span
-                          className={`${getTrendColor(item.trend)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap`}
-                        >
-                          {item.trend === "N/A" ? "Unknown" : item.trend}
-                        </span>
-                      </div>
-                    )}
+                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
+                      <span className="text-secondary-text text-[10px] font-medium">
+                        Trend
+                      </span>
+                      <span
+                        className={`${getTrendColor(item.trend)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap`}
+                      >
+                        {hasItemValue(item.trend) ? item.trend : "Unknown"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

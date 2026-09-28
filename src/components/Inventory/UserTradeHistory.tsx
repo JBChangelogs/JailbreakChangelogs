@@ -40,8 +40,8 @@ const REQUEST_TIMEOUT_MS = 15_000;
 type RequestState = "idle" | "loading" | "error";
 
 interface CatalogValue {
-  cashValue: string;
-  dupedValue: string;
+  cashValue: string | null;
+  dupedValue: string | null;
   item: CatalogTradeItem;
 }
 

@@ -706,7 +706,7 @@ export default function TradeAds({
     if (it.data?.demand) return it.data.demand;
     const match = items.find((base) => tradeItemIdsEqual(base.id, it.id));
     if (!match) return undefined;
-    return match.demand;
+    return match.demand ?? undefined;
   };
 
   const getTrendForItem = (it: TradeItem): string | undefined => {
