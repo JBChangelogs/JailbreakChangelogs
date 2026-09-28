@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useQueryState, parseAsInteger } from "nuqs";
 import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
 import ItemCardSkeleton from "@/components/Items/ItemCardSkeleton";
@@ -41,6 +42,8 @@ interface ValuesItemsGridProps {
   onClearCategoryFilter: () => void;
   selectedFilterSorts: FilterSort[];
   totalItemsCount: number;
+  totalPages: number;
+  pageSize: number;
   valueSort: string;
   debouncedSearchTerm: string;
 }
@@ -58,11 +61,12 @@ export default function ValuesItemsGrid({
   onClearCategoryFilter,
   selectedFilterSorts,
   totalItemsCount,
+  totalPages,
+  pageSize,
   valueSort,
   debouncedSearchTerm,
 }: ValuesItemsGridProps) {
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 32;
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [metadataMap, setMetadataMap] = useState<Map<
     number,
     ItemUnlockMetadataEntry
@@ -83,31 +87,20 @@ export default function ValuesItemsGrid({
 
   const filterSortKey = selectedFilterSorts.join(",");
 
-  // State derivation to reset page when filters change
-  const [prevFilters, setPrevFilters] = useState({
+  const filterKey = JSON.stringify({
     filterSortKey,
     valueSort,
     debouncedSearchTerm,
     appliedMinValue,
     appliedMaxValue,
   });
+  const previousFilterKey = useRef(filterKey);
 
-  if (
-    prevFilters.filterSortKey !== filterSortKey ||
-    prevFilters.valueSort !== valueSort ||
-    prevFilters.debouncedSearchTerm !== debouncedSearchTerm ||
-    prevFilters.appliedMinValue !== appliedMinValue ||
-    prevFilters.appliedMaxValue !== appliedMaxValue
-  ) {
-    setPrevFilters({
-      filterSortKey,
-      valueSort,
-      debouncedSearchTerm,
-      appliedMinValue,
-      appliedMaxValue,
-    });
-    setPage(1);
-  }
+  useEffect(() => {
+    if (previousFilterKey.current === filterKey) return;
+    previousFilterKey.current = filterKey;
+    void setPage(1);
+  }, [filterKey, setPage]);
 
   const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
 
@@ -122,11 +115,13 @@ export default function ValuesItemsGrid({
     });
   }, [items, appliedMinValue, appliedMaxValue, MAX_VALUE_RANGE]);
 
-  const totalPages = Math.ceil(rangeFilteredItems.length / itemsPerPage);
-  const displayedItems = rangeFilteredItems.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage,
-  );
+  const currentPage = Math.min(Math.max(1, page), Math.max(1, totalPages));
+  const displayedItems = rangeFilteredItems;
+
+  useEffect(() => {
+    if (page < 1) void setPage(1);
+    else if (totalPages > 0 && page > totalPages) void setPage(totalPages);
+  }, [page, setPage, totalPages]);
 
   const hasCategoryActive = selectedFilterSorts.length > 0;
   const categoryNames = getFilterSortsDisplayNames(selectedFilterSorts);
@@ -135,7 +130,7 @@ export default function ValuesItemsGrid({
     event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
-    setPage(value);
+    void setPage(value);
   };
 
   const getNoItemsMessage = () => {
@@ -235,16 +230,16 @@ export default function ValuesItemsGrid({
             if (debouncedSearchTerm) {
               return `Found ${rangeFilteredItems.length} ${
                 rangeFilteredItems.length === 1 ? "item" : "items"
-              } matching "${debouncedSearchTerm}"${rangeText}${
+              } on this page matching "${debouncedSearchTerm}"${rangeText}${
                 hasCategoryActive ? ` in ${categoryNames}` : ""
               }`;
             }
 
             if (hasCategoryActive) {
-              return `${rangeFilteredItems.length} of ${totalItemsCount} Items${rangeText} in ${categoryNames}`;
+              return `${rangeFilteredItems.length} items on this page${rangeText} in ${categoryNames} (${totalItemsCount} total)`;
             }
 
-            return `Total Items${rangeText}: ${rangeFilteredItems.length}`;
+            return `Total Items: ${totalItemsCount}${rangeText}`;
           })()}
         </p>
 
@@ -254,7 +249,7 @@ export default function ValuesItemsGrid({
           <div className="flex justify-center">
             <Pagination
               count={totalPages}
-              page={page}
+              page={currentPage}
               onChange={handlePageChange}
             />
           </div>
@@ -263,7 +258,7 @@ export default function ValuesItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {displayedItems.length === 0 && isLoading ? (
-          [...Array(itemsPerPage)].map((_, index) => (
+          [...Array(pageSize)].map((_, index) => (
             <ItemCardSkeleton key={index} />
           ))
         ) : displayedItems.length === 0 ? (
@@ -318,7 +313,7 @@ export default function ValuesItemsGrid({
         <div className="mt-8 flex justify-center">
           <Pagination
             count={totalPages}
-            page={page}
+            page={currentPage}
             onChange={handlePageChange}
           />
         </div>

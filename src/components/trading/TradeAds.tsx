@@ -38,6 +38,7 @@ import {
   fetchUserFavorites,
 } from "@/utils/api/api";
 import type { FavoriteItem } from "@/types";
+import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -369,8 +370,10 @@ export default function TradeAds({
         rawItems.forEach((entry) => pushEntry(entry, false));
         rawDuplicates.forEach((entry) => pushEntry(entry, true));
 
+        const resolvedItems = await fetchTradeItemsByIds(inventoryIds, items);
+        if (controller.signal.aborted) return;
         const itemById = new Map<number, TradeItem>();
-        items.forEach((it) => itemById.set(it.id, it));
+        resolvedItems.forEach((it) => itemById.set(it.id, it));
 
         const inventoryTradeItems = inventoryIds
           .map((id) => itemById.get(id))
@@ -1207,6 +1210,7 @@ export default function TradeAds({
               <TradeAdForm
                 onSuccess={handleCreateSuccess}
                 items={createPickerItems}
+                useCatalogApi={!shouldUseInventoryItems}
                 suggestedTradeNote={inventoryTradeNote}
                 autoFillSuggestedTradeNote={shouldUseInventoryItems}
                 itemsInputMode={itemsInputMode}
@@ -1776,6 +1780,7 @@ export default function TradeAds({
             <TradeAdForm
               onSuccess={handleCreateSuccess}
               items={createPickerItems}
+              useCatalogApi={!shouldUseInventoryItems}
               suggestedTradeNote={inventoryTradeNote}
               autoFillSuggestedTradeNote={shouldUseInventoryItems}
               itemsInputMode={itemsInputMode}

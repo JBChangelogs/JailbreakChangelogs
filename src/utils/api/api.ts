@@ -58,6 +58,7 @@ import {
 import { UserData, UserFlag } from "@/types/auth";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { fetchAllItemPages } from "@/utils/api/fetchAllItemPages";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");
@@ -591,19 +592,14 @@ export async function fetchUserByRobloxId(robloxId: string) {
 
 export async function fetchItems() {
   try {
-    const response = await fetch(`${BASE_API_URL}/items/list`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-ItemCatalog/1.0",
-      },
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    });
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItems failed", { status: response.status, body });
-      throw new Error("Failed to fetch items");
-    }
-    const data = await response.json();
-    return data as Item[];
+    return await fetchAllItemPages<Item>((page) =>
+      fetch(`${BASE_API_URL}/items?page=${page}`, {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-ItemCatalog/1.0",
+        },
+        next: { revalidate: 300 }, // Cache for 5 minutes
+      }),
+    );
   } catch (error) {
     log.error("Error fetching items", error);
     throw error; // Re-throw to allow error boundaries to handle it
@@ -611,14 +607,78 @@ export async function fetchItems() {
 }
 
 export async function fetchItemsClient(): Promise<Item[]> {
-  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items/list");
-  const response = await fetch(url, { headers, credentials: "include" });
+  return fetchAllItemPages<Item>((page) => {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      `/items?page=${page}`,
+    );
+    return fetch(url, { headers, credentials: "include" });
+  });
+}
+
+export interface ItemsPage<T> {
+  total: number;
+  items: T[];
+  page: number;
+  total_pages: number;
+  size: number;
+}
+
+export async function fetchItemsClientPage(
+  page: number,
+  signal?: AbortSignal,
+): Promise<ItemsPage<Item>> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    `/items?page=${page}`,
+  );
+  const response = await fetch(url, {
+    headers,
+    credentials: "include",
+    signal,
+  });
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    log.error("fetchItemsClient failed", { status: response.status, body });
-    throw new Error("Failed to fetch items");
+    throw new Error(`Failed to fetch items page ${page} (${response.status})`);
   }
-  return (await response.json()) as Item[];
+  return (await response.json()) as ItemsPage<Item>;
+}
+
+export async function searchItemsClientPage(
+  query: string,
+  page: number,
+  signal?: AbortSignal,
+): Promise<ItemsPage<Item>> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    "/items/search",
+  );
+  const searchUrl = new URL(url);
+  searchUrl.searchParams.set("query", query);
+  searchUrl.searchParams.set("page", String(page));
+
+  const response = await fetch(searchUrl, {
+    headers,
+    credentials: "include",
+    signal,
+  });
+  if (response.status === 404) {
+    const error = await response.json().catch(() => null);
+    if (error?.error === "items_not_found") {
+      return { total: 0, items: [], page, size: 32, total_pages: 0 };
+    }
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to search items (${response.status})`);
+  }
+
+  const result = (await response.json()) as Omit<
+    ItemsPage<Item>,
+    "total_pages"
+  >;
+  return {
+    ...result,
+    total_pages: Math.ceil(result.total / result.size),
+  };
 }
 
 export async function fetchLastUpdated(items: Item[]) {

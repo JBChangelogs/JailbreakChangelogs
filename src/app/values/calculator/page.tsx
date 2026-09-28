@@ -1,7 +1,4 @@
-import { Suspense } from "react";
 import { CalculatorClient } from "./CalculatorClient";
-import { fetchItems } from "@/utils/api/api";
-import Loading from "./loading";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CalculatorDescription from "@/components/Values/Calculator/CalculatorDescription";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
@@ -23,19 +20,8 @@ export default function CalculatorPage() {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumb />
         <CalculatorDescription />
-        <Suspense fallback={<Loading />}>
-          <CalculatorFormWrapper />
-        </Suspense>
+        <CalculatorClient initialItems={[]} />
       </main>
     </>
   );
-}
-
-async function CalculatorFormWrapper() {
-  const items = await fetchItems();
-  const tradeItems = items.map((item) => {
-    return { ...item, is_sub: false, side: undefined };
-  });
-
-  return <CalculatorClient initialItems={tradeItems} />;
 }

@@ -53,12 +53,14 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
+import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 
 const log = createLogger("UI");
 
 interface TradeAdFormProps {
   onSuccess?: (createdTrade?: unknown) => void;
   items?: TradeItem[];
+  useCatalogApi?: boolean;
   suggestedTradeNote?: string | null;
   autoFillSuggestedTradeNote?: boolean;
   itemsInputMode?: "values" | "inventory";
@@ -116,6 +118,7 @@ type V2CreateTradeItem =
 export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   onSuccess,
   items = [],
+  useCatalogApi = false,
   suggestedTradeNote = null,
   autoFillSuggestedTradeNote = false,
   itemsInputMode,
@@ -306,7 +309,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   );
 
   useEffect(() => {
-    const handlePreference = (e: Event) => {
+    let cancelled = false;
+    const handlePreference = async (e: Event) => {
       const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
         .detail;
       if (key !== "trade_ad_items" || typeof value !== "string" || !value)
@@ -329,7 +333,14 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           note?: string;
           expiration?: number | null;
         };
-        const byId = new Map(items.map((it) => [it.id, it]));
+        const resolved = await fetchTradeItemsByIds(
+          [...(remote.offering ?? []), ...(remote.requesting ?? [])]
+            .map((it) => it.id)
+            .filter((id): id is number => id !== undefined),
+          items,
+        );
+        if (cancelled) return;
+        const byId = new Map(resolved.map((it) => [it.id, it]));
         const rehydrate = (
           compactItems: {
             id?: number;
@@ -429,6 +440,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       handlePreferenceDeleted,
     );
     return () => {
+      cancelled = true;
       window.removeEventListener("realtimePreference", handlePreference);
       window.removeEventListener("realtimePreferences", handlePreferences);
       window.removeEventListener(
@@ -1497,7 +1509,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               isInventoryMode &&
               !inventoryModeGate &&
               inventoryStatus === "loaded" &&
-              items.length === 0 && (
+              items.length === 0 &&
+              !useCatalogApi && (
                 <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
                   <p className="text-secondary-text text-sm">
                     No tradable inventory items found.
@@ -1523,7 +1536,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 </div>
               )}
 
-            {items.length > 0 &&
+            {(items.length > 0 || useCatalogApi) &&
               (!showItemSourceTabs ||
                 itemsInputMode === "values" ||
                 (isInventoryMode &&
@@ -1531,6 +1544,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   inventoryStatus === "loaded")) && (
                 <TradeItemPickerV2
                   items={items}
+                  useCatalogApi={useCatalogApi}
                   onSelect={handleAddItem}
                   onAddCustomType={handleAddCustomType}
                   customTypes={CUSTOM_TRADE_TYPES.map((customType) => ({

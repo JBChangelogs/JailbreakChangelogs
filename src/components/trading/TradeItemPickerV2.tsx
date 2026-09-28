@@ -51,6 +51,7 @@ import {
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { CustomTypeDialog } from "@/components/trading/CustomTypeDialog";
 import { useRouter } from "nextjs-toploader/app";
+import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 
 type TradeSide = "offering" | "requesting";
 type ItemCondition = "clean" | "duped" | "og";
@@ -81,6 +82,7 @@ interface TradeItemPickerV2Props {
    * Offer dialog keep today's single-select filter behavior unchanged.
    */
   multiSelectFilters?: boolean;
+  useCatalogApi?: boolean;
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
@@ -156,6 +158,7 @@ export default function TradeItemPickerV2({
   favoriteIds,
   onToggleFavorite,
   multiSelectFilters = false,
+  useCatalogApi = false,
 }: TradeItemPickerV2Props) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -192,6 +195,11 @@ export default function TradeItemPickerV2({
     useState<CustomTypeOption | null>(null);
   const router = useRouter();
   const [page, setPage] = useState(1);
+  const catalog = useItemCatalogPage(searchQuery, page, useCatalogApi);
+  const visibleItems: TradeItem[] = useMemo(
+    () => (useCatalogApi ? (catalog.data?.items ?? []) : items),
+    [useCatalogApi, catalog.data?.items, items],
+  );
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   // Multi-select mode only (opt-in via multiSelectFilters) — mirrors /values'
   // selectedFilterSorts: an empty array means "All Items".
@@ -276,9 +284,13 @@ export default function TradeItemPickerV2({
   }, [selectedItems]);
 
   const filteredItems = useMemo(() => {
-    const tradeableItems = items.filter((item) => item.tradable === 1);
+    const tradeableItems = visibleItems.filter((item) => item.tradable === 1);
     const base = tradeableItems.filter((item) => {
-      if (!matchesTextSearch([item.name, item.type], searchQuery)) return false;
+      if (
+        !useCatalogApi &&
+        !matchesTextSearch([item.name, item.type], searchQuery)
+      )
+        return false;
 
       return multiSelectFilters
         ? matchesAnyCategoryFilterSort(item, filterSorts)
@@ -309,8 +321,9 @@ export default function TradeItemPickerV2({
       ...sorted.filter((item) => !favSet.has(item.id)),
     ];
   }, [
-    items,
+    visibleItems,
     searchQuery,
+    useCatalogApi,
     filterSort,
     filterSorts,
     multiSelectFilters,
@@ -319,22 +332,26 @@ export default function TradeItemPickerV2({
     favoriteIds,
   ]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      filteredItems.length /
-        (variant === "compact"
-          ? ITEMS_PER_PAGE_COMPACT
-          : ITEMS_PER_PAGE_DEFAULT),
-    ),
-  );
+  const totalPages = useCatalogApi
+    ? Math.max(1, catalog.data?.total_pages ?? 1)
+    : Math.max(
+        1,
+        Math.ceil(
+          filteredItems.length /
+            (variant === "compact"
+              ? ITEMS_PER_PAGE_COMPACT
+              : ITEMS_PER_PAGE_DEFAULT),
+        ),
+      );
   const currentPage = Math.min(page, totalPages);
   const itemsPerPage =
     variant === "compact" ? ITEMS_PER_PAGE_COMPACT : ITEMS_PER_PAGE_DEFAULT;
-  const pagedItems = filteredItems.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const pagedItems = useCatalogApi
+    ? filteredItems
+    : filteredItems.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+      );
 
   const gridClassName =
     variant === "compact"
@@ -514,7 +531,10 @@ export default function TradeItemPickerV2({
                 <button
                   type="button"
                   className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setPage(1);
+                  }}
                   aria-label="Clear search"
                 >
                   <Icon icon="heroicons:x-mark" />
@@ -667,7 +687,8 @@ export default function TradeItemPickerV2({
 
         <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-secondary-text text-sm">
-            Total Tradable Items: {filteredItems.length}
+            Total Tradable Items:{" "}
+            {useCatalogApi ? (catalog.data?.total ?? 0) : filteredItems.length}
           </p>
           {showOfferRequestButtons ? (
             <p className="text-secondary-text text-sm">
@@ -699,7 +720,15 @@ export default function TradeItemPickerV2({
           </div>
         )}
 
-        {filteredItems.length === 0 ? (
+        {useCatalogApi && catalog.loading ? (
+          <div className="border-border-card bg-secondary-bg text-secondary-text mb-8 rounded-lg border p-6 text-center text-sm">
+            Loading items...
+          </div>
+        ) : useCatalogApi && catalog.error ? (
+          <div className="border-border-card bg-secondary-bg text-secondary-text mb-8 rounded-lg border p-6 text-center text-sm">
+            Could not load items.
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
             <h3 className="text-secondary-text mb-2 text-base font-medium">
               No items found

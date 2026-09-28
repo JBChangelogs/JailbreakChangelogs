@@ -33,6 +33,7 @@ import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
 
 interface ValuesSearchControlsProps {
   onDebouncedSearchChange: (term: string) => void;
+  initialSearchTerm: string;
   clearTrigger: number;
   selectedFilterSorts: FilterSort[];
   onToggleFilterSort: (sort: FilterSort) => void;
@@ -52,6 +53,7 @@ interface ValuesSearchControlsProps {
 
 export default function ValuesSearchControls({
   onDebouncedSearchChange,
+  initialSearchTerm,
   clearTrigger,
   selectedFilterSorts,
   onToggleFilterSort,
@@ -71,8 +73,12 @@ export default function ValuesSearchControls({
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  useEffect(() => {
+    setSearchTerm(initialSearchTerm);
+  }, [initialSearchTerm]);
 
   useEffect(() => {
     onDebouncedSearchChange(debouncedSearchTerm);

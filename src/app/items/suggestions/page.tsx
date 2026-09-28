@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { createLogger } from "@/services/logger";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 
-const log = createLogger("API");
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -16,7 +14,6 @@ import Link from "next/link";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { parseBan, showBanToast } from "@/utils/api/ban";
 import { trackEvent } from "@/utils/analytics/rybbit";
-import type { Item } from "@/types/index";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import { SuggestionForm } from "@/components/Items/Suggestions/SuggestionForm";
@@ -111,10 +108,6 @@ export default function ValueSuggestionsPage() {
     setLoginModal,
     setBan,
   });
-
-  // Items state (for form dropdown)
-  const [items, setItems] = useState<Item[]>([]);
-  const [loadingItems, setLoadingItems] = useState(true);
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -242,39 +235,6 @@ export default function ValueSuggestionsPage() {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
-
-  useEffect(() => {
-    let ignore = false;
-
-    const fetchItems = async () => {
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          "/items/list",
-        );
-        const res = await fetch(url, { headers });
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          log.error("fetch items failed", { status: res.status, body });
-          throw new Error("Failed to fetch items");
-        }
-        const data: Item[] = await res.json();
-        if (ignore) return;
-        setItems(data);
-      } catch {
-        // silently fail — form can still show without items
-      } finally {
-        if (!ignore) {
-          setLoadingItems(false);
-        }
-      }
-    };
-    fetchItems();
-
-    return () => {
-      ignore = true;
     };
   }, []);
 
@@ -567,8 +527,6 @@ export default function ValueSuggestionsPage() {
           <div ref={formRef}>
             {showForm && isAuthenticated && !ban && (
               <SuggestionForm
-                items={items}
-                loadingItems={loadingItems}
                 limits={limits}
                 loadingLimits={loadingLimits}
                 isVtEligible={

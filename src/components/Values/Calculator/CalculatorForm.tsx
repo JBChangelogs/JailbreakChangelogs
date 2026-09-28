@@ -24,6 +24,7 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
 import type { FavoriteItem } from "@/types";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
+import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 
 // Import extracted components and utilities
 import { parseValueString, formatTotalValue } from "./calculatorUtils";
@@ -324,8 +325,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         rawItems.forEach((entry) => pushId(entry, false));
         rawDuplicates.forEach((entry) => pushId(entry, true));
 
+        const resolvedItems = await fetchTradeItemsByIds(
+          inventoryIds,
+          initialItems,
+        );
+        if (controller.signal.aborted) return;
         const itemById = new Map<number, TradeItem>();
-        initialItems.forEach((it) => itemById.set(it.id, it));
+        resolvedItems.forEach((it) => itemById.set(it.id, it));
 
         const inventoryTradeItems = inventoryIds
           .map((id) => itemById.get(id))
@@ -375,10 +381,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
    * existing handleRestoreItems path needs no changes.
    */
   useEffect(() => {
-    const hydrateCompact = (
+    let cancelled = false;
+    const hydrateCompact = async (
       items: { id: number; isDuped: boolean }[],
-    ): TradeItem[] => {
-      const byId = new Map(initialItems.map((it) => [it.id, it]));
+    ): Promise<TradeItem[]> => {
+      const resolved = await fetchTradeItemsByIds(
+        items.map((item) => item.id),
+        initialItems,
+      );
+      const byId = new Map(resolved.map((it) => [it.id, it]));
       return items
         .map(({ id, isDuped }) => {
           const base = byId.get(id);
@@ -393,50 +404,59 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         .filter((it) => it !== null) as TradeItem[];
     };
 
-    const remoteRaw = getCachedPreference("calculator_items");
-    if (typeof remoteRaw === "string" && remoteRaw) {
-      try {
-        const remote = JSON.parse(remoteRaw) as {
-          offering?: { id: number; isDuped: boolean }[];
-          requesting?: { id: number; isDuped: boolean }[];
-        };
-        const hydOff = hydrateCompact(remote.offering ?? []);
-        const hydReq = hydrateCompact(remote.requesting ?? []);
-        if (hydOff.length > 0 || hydReq.length > 0) {
-          safeSetJSON(calculatorStorageKey, {
-            offering: hydOff,
-            requesting: hydReq,
-          });
-          setTimeout(() => setShowRestoreModal(true), 0);
-          return;
+    const restore = async () => {
+      const remoteRaw = getCachedPreference("calculator_items");
+      if (typeof remoteRaw === "string" && remoteRaw) {
+        try {
+          const remote = JSON.parse(remoteRaw) as {
+            offering?: { id: number; isDuped: boolean }[];
+            requesting?: { id: number; isDuped: boolean }[];
+          };
+          const [hydOff, hydReq] = await Promise.all([
+            hydrateCompact(remote.offering ?? []),
+            hydrateCompact(remote.requesting ?? []),
+          ]);
+          if (cancelled) return;
+          if (hydOff.length > 0 || hydReq.length > 0) {
+            safeSetJSON(calculatorStorageKey, {
+              offering: hydOff,
+              requesting: hydReq,
+            });
+            setShowRestoreModal(true);
+            return;
+          }
+        } catch {
+          // Ignore malformed remote preferences and fall back to local data.
         }
-      } catch {
-        // Ignore malformed remote preferences and fall back to local data.
       }
-    }
 
-    try {
-      const saved = safeGetJSON(calculatorStorageKey, {
-        offering: [],
-        requesting: [],
-      });
-      if (saved) {
-        const { offering = [], requesting = [] } = saved;
-        if (
-          (offering && offering.length > 0) ||
-          (requesting && requesting.length > 0)
-        ) {
-          setTimeout(() => setShowRestoreModal(true), 0);
-          return;
+      try {
+        const saved = safeGetJSON(calculatorStorageKey, {
+          offering: [],
+          requesting: [],
+        });
+        if (saved) {
+          const { offering = [], requesting = [] } = saved;
+          if (
+            (offering && offering.length > 0) ||
+            (requesting && requesting.length > 0)
+          ) {
+            if (!cancelled) setShowRestoreModal(true);
+            return;
+          }
         }
+      } catch (error) {
+        log.error(
+          "Failed to parse stored calculator items from localStorage:",
+          error,
+        );
+        safeLocalStorage.removeItem(calculatorStorageKey);
       }
-    } catch (error) {
-      log.error(
-        "Failed to parse stored calculator items from localStorage:",
-        error,
-      );
-      safeLocalStorage.removeItem(calculatorStorageKey);
-    }
+    };
+    void restore();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calculatorStorageKey, initialItems]);
 
@@ -516,7 +536,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
   // Live sync: silently apply calculator_items preference from other devices
   useEffect(() => {
-    const handlePreference = (e: Event) => {
+    let cancelled = false;
+    const handlePreference = async (e: Event) => {
       const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
         .detail;
       if (key !== "calculator_items" || typeof value !== "string" || !value)
@@ -527,7 +548,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           offering?: { id: number; isDuped: boolean }[];
           requesting?: { id: number; isDuped: boolean }[];
         };
-        const byId = new Map(initialItems.map((it) => [it.id, it]));
+        const resolved = await fetchTradeItemsByIds(
+          [...(remote.offering ?? []), ...(remote.requesting ?? [])].map(
+            (it) => it.id,
+          ),
+          initialItems,
+        );
+        if (cancelled) return;
+        const byId = new Map(resolved.map((it) => [it.id, it]));
         const rehydrate = (
           items: { id: number; isDuped: boolean }[],
         ): TradeItem[] =>
@@ -592,6 +620,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       handlePreferenceDeleted,
     );
     return () => {
+      cancelled = true;
       window.removeEventListener("realtimePreference", handlePreference);
       window.removeEventListener("realtimePreferences", handlePreferences);
       window.removeEventListener(
@@ -680,12 +709,16 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     return true;
   };
 
-  const handleScanTradeSuccess = (result: {
+  const handleScanTradeSuccess = async (result: {
     offering: Array<{ id: number; name: string; type: string }>;
     requesting: Array<{ id: number; name: string; type: string }>;
   }) => {
+    const resolved = await fetchTradeItemsByIds(
+      [...result.offering, ...result.requesting].map((it) => it.id),
+      initialItems,
+    );
     const itemById = new Map<number, TradeItem>();
-    initialItems.forEach((it) => {
+    resolved.forEach((it) => {
       itemById.set(it.id, it);
     });
 
@@ -879,6 +912,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             side="offering"
             items={offeringItems}
             catalogItems={catalogItems}
+            useCatalogApi={itemsInputMode === "picker"}
             onRemoveItem={(instanceId) =>
               handleRemoveItem(instanceId, "offering")
             }
@@ -894,6 +928,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             side="requesting"
             items={requestingItems}
             catalogItems={catalogItems}
+            useCatalogApi={itemsInputMode === "picker"}
             onRemoveItem={(instanceId) =>
               handleRemoveItem(instanceId, "requesting")
             }
@@ -926,6 +961,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           {itemsInputMode === "picker" ? (
             <TradeItemPickerV2
               items={catalogItems}
+              useCatalogApi
               onSelect={handleAddItem}
               selectedItems={[...offeringItems, ...requestingItems]}
               customTypes={[]}

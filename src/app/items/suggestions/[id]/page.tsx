@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { PUBLIC_API_URL } from "@/utils/api/api";
+import { PUBLIC_API_URL, fetchItemsClientPage } from "@/utils/api/api";
 import { parseBan, showBanToast } from "@/utils/api/ban";
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { BanBanner } from "@/components/ui/BanBanner";
@@ -461,16 +461,12 @@ export default function ValueSuggestionDetailPage() {
       setTradeItemsLoading(true);
       setTradeItemsError(null);
       try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          "/items/list",
-        );
-        const res = await fetch(url, { headers });
-        if (!res.ok) throw new Error("Failed to load items.");
-        const data: Item[] = await res.json();
+        const data = await fetchItemsClientPage(1);
         if (ignore) return;
-        setTradeItems(data);
-        setEditCommonTrades((current) => toCommonTradeDrafts(current, data));
+        setTradeItems(data.items);
+        setEditCommonTrades((current) =>
+          toCommonTradeDrafts(current, data.items),
+        );
       } catch {
         if (!ignore) setTradeItemsError("Failed to load tradable items.");
       } finally {
@@ -1611,7 +1607,6 @@ export default function ValueSuggestionDetailPage() {
                                 </div>
                               ) : (
                                 <CommonTradesEditor
-                                  items={tradeItems}
                                   trades={editCommonTrades}
                                   suggestedItem={item}
                                   onChange={(trades) => {

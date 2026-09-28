@@ -3,6 +3,7 @@
 import { createLogger } from "@/services/logger";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 
 const log = createLogger("UI");
 const EMPTY_FAVORITES: number[] = [];
@@ -17,7 +18,8 @@ import { sortAndFilterItems, parseCashValue } from "@/utils/trading/values";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import {
   fetchUserFavorites,
-  fetchItemsClient,
+  fetchItemsClientPage,
+  searchItemsClientPage,
   fetchLastUpdated,
 } from "@/utils/api/api";
 import { useAuthContext, useIsAuthenticated } from "@/contexts/AuthContext";
@@ -52,12 +54,33 @@ const parseFilterSorts = (
 
 export default function ValuesClient() {
   const { user } = useAuthContext();
+  const [{ page, query: debouncedSearchTerm }, setSearchParams] =
+    useQueryStates({
+      page: parseAsInteger.withDefault(1),
+      query: parseAsString.withDefault(""),
+    });
+  const searchQuery = debouncedSearchTerm.trim();
+  const searchQueryRef = useRef(searchQuery);
+  useEffect(() => {
+    searchQueryRef.current = searchQuery;
+  }, [searchQuery]);
+  const handleSearchChange = useCallback(
+    (term: string) => {
+      const nextQuery = term.trim();
+      if (nextQuery === searchQueryRef.current) return;
+      void setSearchParams({ query: nextQuery || null, page: null });
+    },
+    [setSearchParams],
+  );
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["values-items"],
-    queryFn: fetchItemsClient,
+    queryKey: ["values-items", page, searchQuery],
+    queryFn: ({ signal }) =>
+      searchQuery
+        ? searchItemsClientPage(searchQuery, Math.max(1, page), signal)
+        : fetchItemsClientPage(Math.max(1, page), signal),
   });
-  const items = data ?? EMPTY_ITEMS;
+  const items = data?.items ?? EMPTY_ITEMS;
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
   useEffect(() => {
@@ -70,7 +93,6 @@ export default function ValuesClient() {
       window.removeEventListener("realtimeValues", handleRealtimeValues);
   }, [refetch]);
 
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [clearSearchTrigger, setClearSearchTrigger] = useState(0);
 
   const validFilterSorts = useMemo(
@@ -249,6 +271,7 @@ export default function ValuesClient() {
   );
 
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
+  const [sortedItemsPage, setSortedItemsPage] = useState<number | null>(null);
   const [isInitialSortPending, setIsInitialSortPending] = useState(true);
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
@@ -274,7 +297,7 @@ export default function ValuesClient() {
     if (!data) return;
 
     let cancelled = false;
-    fetchLastUpdated(data).then((timestamp) => {
+    fetchLastUpdated(data.items).then((timestamp) => {
       if (!cancelled) setLastUpdated(timestamp);
     });
 
@@ -325,6 +348,7 @@ export default function ValuesClient() {
 
   useEffect(() => {
     if (isLoading) return;
+    let cancelled = false;
 
     const updateSortedItems = async () => {
       const favoritesData = effectiveFavorites.map((id) => ({
@@ -334,15 +358,22 @@ export default function ValuesClient() {
         items,
         selectedFilterSorts,
         valueSort,
-        debouncedSearchTerm,
+        "",
         favoritesData,
       );
-      setSortedItems(sorted);
-      setIsInitialSortPending(false);
+      if (!cancelled) {
+        setSortedItems(sorted);
+        setSortedItemsPage(page);
+        setIsInitialSortPending(false);
+      }
     };
-    updateSortedItems();
+    void updateSortedItems();
+    return () => {
+      cancelled = true;
+    };
   }, [
     items,
+    page,
     debouncedSearchTerm,
     selectedFilterSorts,
     valueSort,
@@ -450,7 +481,8 @@ export default function ValuesClient() {
       </div>
 
       <ValuesSearchControls
-        onDebouncedSearchChange={setDebouncedSearchTerm}
+        onDebouncedSearchChange={handleSearchChange}
+        initialSearchTerm={debouncedSearchTerm}
         clearTrigger={clearSearchTrigger}
         selectedFilterSorts={selectedFilterSorts}
         onToggleFilterSort={handleToggleFilterSort}
@@ -489,8 +521,12 @@ export default function ValuesClient() {
       <div className="grid grid-cols-1 gap-8">
         <div className="space-y-6">
           <ValuesItemsGrid
-            items={sortedItems}
-            isLoading={isLoading || isInitialSortPending}
+            items={
+              isLoading || sortedItemsPage !== page ? EMPTY_ITEMS : sortedItems
+            }
+            isLoading={
+              isLoading || isInitialSortPending || sortedItemsPage !== page
+            }
             favorites={favorites}
             onFavoriteChange={(itemId, isFavorited) => {
               setFavorites((prev) =>
@@ -517,7 +553,9 @@ export default function ValuesClient() {
             }}
             onClearCategoryFilter={handleClearFilterSorts}
             selectedFilterSorts={selectedFilterSorts}
-            totalItemsCount={items.length}
+            totalItemsCount={data?.total ?? 0}
+            totalPages={data?.total_pages ?? 0}
+            pageSize={data?.size ?? 50}
             valueSort={valueSort}
             debouncedSearchTerm={debouncedSearchTerm}
           />
