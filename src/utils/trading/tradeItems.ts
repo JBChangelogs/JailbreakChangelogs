@@ -13,7 +13,10 @@ type CategoryFilterableItem = {
   type: string;
   is_limited?: number | null;
   is_seasonal?: number | null;
-  data?: { is_limited?: number | null; is_seasonal?: number | null };
+  data?: {
+    is_limited?: number | null;
+    is_seasonal?: number | null;
+  };
 };
 
 const TRADE_ICON_BASE_URL =
@@ -96,8 +99,6 @@ export const matchesCategoryFilterSort = (
   switch (filterSort) {
     case "name-limited-items":
       return item.is_limited === 1 || item.data?.is_limited === 1;
-    case "name-seasonal-items":
-      return item.is_seasonal === 1 || item.data?.is_seasonal === 1;
     case "name-vehicles":
       return item.type.toLowerCase() === "vehicle";
     case "name-spoilers":

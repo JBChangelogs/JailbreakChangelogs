@@ -6,6 +6,8 @@ export interface TradeItem {
   duped_value: string;
   is_limited: number | null;
   is_seasonal: number | null;
+  season?: number | null;
+  level?: number | string | null;
   tradable: number;
   trend?: string | null;
   base_name?: string;
@@ -23,6 +25,8 @@ export interface TradeItem {
     type: string;
     creator: string;
     is_seasonal: number | null;
+    season?: number | null;
+    level?: number | string | null;
     cash_value: string;
     duped_value: string;
     price: string;

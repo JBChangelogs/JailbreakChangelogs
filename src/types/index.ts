@@ -16,7 +16,6 @@ export type FilterSort =
   | "name-all-items"
   | "name-limited-items"
   | "name-untradeable-items"
-  | "name-seasonal-items"
   | "name-vehicles"
   | "name-spoilers"
   | "name-rims"
@@ -55,10 +54,6 @@ export type ValueSort =
   | "cash-asc"
   | "duped-desc"
   | "duped-asc"
-  | "season-number-asc"
-  | "season-number-desc"
-  | "season-level-asc"
-  | "season-level-desc"
   | "demand-desc"
   | "demand-asc"
   | "last-updated-desc"
@@ -110,6 +105,8 @@ export interface Item {
   type: string;
   creator: string;
   is_seasonal: number;
+  season: number | null;
+  level: number | string | null;
   cash_value: string;
   duped_value: string;
   price: string;
@@ -141,6 +138,8 @@ export interface Item {
       type: string;
       creator: string;
       is_seasonal: number | null;
+      season?: number | null;
+      level?: number | string | null;
       cash_value: string;
       duped_value: string;
       price: string;
@@ -200,6 +199,8 @@ export interface ItemDetails {
   type: string;
   creator: string;
   is_seasonal: number | null;
+  season: number | null;
+  level: number | string | null;
   cash_value: string;
   duped_value: string;
   price: string;

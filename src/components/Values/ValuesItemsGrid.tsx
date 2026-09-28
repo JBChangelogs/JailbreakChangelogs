@@ -7,10 +7,6 @@ import ItemCard from "@/components/Items/ItemCard";
 import ItemCardSkeleton from "@/components/Items/ItemCardSkeleton";
 import { Item, FilterSort } from "@/types";
 import { getEffectiveCashValue } from "@/utils/trading/values";
-import {
-  fetchItemUnlockMetadataById,
-  ItemUnlockMetadataEntry,
-} from "@/utils/items/itemUnlockMetadata";
 import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
@@ -67,19 +63,12 @@ export default function ValuesItemsGrid({
   debouncedSearchTerm,
 }: ValuesItemsGridProps) {
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [metadataMap, setMetadataMap] = useState<Map<
-    number,
-    ItemUnlockMetadataEntry
-  > | null>(null);
   const [placementLimitsMap, setPlacementLimitsMap] = useState<Map<
     number,
     number
   > | null>(null);
 
   useEffect(() => {
-    fetchItemUnlockMetadataById()
-      .then(setMetadataMap)
-      .catch(() => {});
     fetchFurniturePlacementLimits()
       .then(setPlacementLimitsMap)
       .catch(() => {});
@@ -291,7 +280,6 @@ export default function ValuesItemsGrid({
               <ItemCard
                 item={item}
                 isFavorited={favoritesSet.has(item.id)}
-                itemMetadata={metadataMap?.get(item.id) ?? null}
                 placementLimit={placementLimitsMap?.get(item.id) ?? null}
                 onFavoriteChange={(fav) => {
                   onFavoriteChange(item.id, fav);

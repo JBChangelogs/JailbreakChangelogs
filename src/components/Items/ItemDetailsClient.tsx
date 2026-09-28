@@ -55,14 +55,10 @@ import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
 import { fetchItemByIdClient, fetchItemScanCount } from "@/utils/api/api";
-import {
-  fetchItemUnlockMetadataById,
-  ItemUnlockMetadataEntry,
-} from "@/utils/items/itemUnlockMetadata";
+import { hasSeason, unlockLevel } from "@/utils/items/season";
 import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import {
   formatUnlockLevelBadge,
-  formatPlacementBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
 } from "@/utils/items/itemUnlockPresentation";
@@ -260,7 +256,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
           <CategoryIconBadge
             type={item.type}
             isLimited={item.is_limited === 1}
-            isSeasonal={item.is_seasonal === 1}
+            isSeasonal={hasSeason(item)}
             className="h-5 w-5"
           />
         </div>
@@ -440,8 +436,6 @@ export default function ItemDetailsClient({
   );
   const [tabDirection, setTabDirection] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
-  const [itemMetadata, setItemMetadata] =
-    useState<ItemUnlockMetadataEntry | null>(null);
   const [placementLimit, setPlacementLimit] = useState<number | null>(null);
   const [scanCount, setScanCount] = useState<{
     itemId: number;
@@ -491,16 +485,6 @@ export default function ItemDetailsClient({
   useEffect(() => {
     let isMounted = true;
 
-    fetchItemUnlockMetadataById()
-      .then((metadataById) => {
-        if (!isMounted) return;
-        setItemMetadata(metadataById.get(item.id) ?? null);
-      })
-      .catch((error) => {
-        log.error("Error loading item metadata:", error);
-        if (isMounted) setItemMetadata(null);
-      });
-
     if (item.type === "Furniture") {
       fetchFurniturePlacementLimits()
         .then((limitsMap) => {
@@ -525,17 +509,15 @@ export default function ItemDetailsClient({
   const currentItem = item;
   const currentScanCount =
     scanCount?.itemId === currentItem.id ? scanCount.count : undefined;
-  const metadataLevel = itemMetadata?.level;
-  const metadataPlacement = itemMetadata?.placement;
+  const metadataLevel = unlockLevel(currentItem.level);
   const hasMetadataLevel = hasUnlockLevel(metadataLevel);
   const requirementsTooltipText = useMemo(
     () =>
       formatUnlockRequirementsTooltip(
-        itemMetadata?.season,
+        currentItem.season ?? undefined,
         metadataLevel,
-        metadataPlacement,
       ),
-    [itemMetadata, metadataLevel, metadataPlacement],
+    [currentItem.season, metadataLevel],
   );
   const categoryColor = useMemo(
     () => getCategoryColor(currentItem.type),
@@ -591,7 +573,7 @@ export default function ItemDetailsClient({
                     Limited
                   </span>
                 )}
-                {currentItem.is_seasonal === 1 && (
+                {hasSeason(currentItem) && (
                   <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                     <Icon
                       icon="noto-v1:snowflake"
@@ -601,25 +583,18 @@ export default function ItemDetailsClient({
                     Seasonal
                   </span>
                 )}
-                {(typeof itemMetadata?.season === "number" ||
-                  hasMetadataLevel ||
-                  metadataPlacement) && (
+                {(hasSeason(currentItem) || hasMetadataLevel) && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex cursor-help items-center gap-1">
-                        {typeof itemMetadata?.season === "number" && (
+                        {currentItem.season != null && (
                           <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                            S{itemMetadata.season}
+                            S{currentItem.season}
                           </span>
                         )}
                         {hasMetadataLevel && (
                           <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                             {formatUnlockLevelBadge(metadataLevel)}
-                          </span>
-                        )}
-                        {!hasMetadataLevel && metadataPlacement && (
-                          <span className="bg-status-warning inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold text-black">
-                            {formatPlacementBadge(metadataPlacement)}
                           </span>
                         )}
                       </div>

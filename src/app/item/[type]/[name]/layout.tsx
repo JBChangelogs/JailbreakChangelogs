@@ -53,11 +53,9 @@ async function generateFAQJsonLd(
     {
       question: `Is ${item.name} seasonal?`,
       answer:
-        item.is_seasonal === 1
-          ? `${item.name} is a seasonal item.`
-          : item.is_seasonal === 0
-            ? `${item.name} is not a seasonal item.`
-            : `It is unknown if ${item.name} is a seasonal item.`,
+        item.season != null
+          ? `${item.name} is a seasonal item from Season ${item.season}.`
+          : `${item.name} is not a seasonal item.`,
     },
     {
       question: `Can ${item.name} be traded?`,

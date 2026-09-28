@@ -41,8 +41,7 @@ interface QuickAddPopoverProps {
 
 const MAX_RESULTS = 8;
 
-// Same subset TradeItemPickerV2 supports — season-based filters aren't
-// relevant here since the calculator has no season context.
+// Same subset TradeItemPickerV2 supports.
 const SUPPORTED_FILTER_SORTS = new Set<FilterSort>([
   "name-all-items",
   "name-body-colors",
@@ -53,7 +52,6 @@ const SUPPORTED_FILTER_SORTS = new Set<FilterSort>([
   "name-hyperchromes",
   "name-limited-items",
   "name-rims",
-  "name-seasonal-items",
   "name-spoilers",
   "name-tire-stickers",
   "name-tire-styles",

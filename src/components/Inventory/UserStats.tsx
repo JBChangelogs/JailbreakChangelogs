@@ -20,7 +20,6 @@ interface UserStatsProps {
   showOnlyNonOriginal: boolean;
   showOnlyOriginal: boolean;
   showOnlyLimited: boolean;
-  showOnlySeasonal: boolean;
   scanWebSocket: UseScanWebSocketReturn;
   scanErrorBanner?: { title: string; subtitle?: string } | null;
   queuePosition?: { position: number; delay: number } | null;
@@ -40,7 +39,6 @@ export default function UserStats({
   showOnlyNonOriginal,
   showOnlyOriginal,
   showOnlyLimited,
-  showOnlySeasonal,
   scanWebSocket,
   scanErrorBanner,
   queuePosition,
@@ -113,10 +111,7 @@ export default function UserStats({
 
   const activeFilteredStats = useMemo(() => {
     const anyFilterActive =
-      showOnlyOriginal ||
-      showOnlyNonOriginal ||
-      showOnlyLimited ||
-      showOnlySeasonal;
+      showOnlyOriginal || showOnlyNonOriginal || showOnlyLimited;
     if (!anyFilterActive || !itemsData || itemsData.length === 0) return null;
 
     const itemsMap = new Map(
@@ -133,15 +128,7 @@ export default function UserStats({
       if (showOnlyNonOriginal && invItem.isOriginalOwner) return;
       const item = itemsMap.get(invItem.item_id.toString());
       if (!item) return;
-      if (showOnlyLimited || showOnlySeasonal) {
-        const isLimited = item.is_limited === 1;
-        const isSeasonal = item.is_seasonal === 1;
-        if (
-          !(showOnlyLimited && isLimited) &&
-          !(showOnlySeasonal && isSeasonal)
-        )
-          return;
-      }
+      if (showOnlyLimited && item.is_limited !== 1) return;
       itemCount++;
       inventoryValue += parseValue(item.cash_value);
     });
@@ -151,15 +138,7 @@ export default function UserStats({
       if (showOnlyNonOriginal && invItem.isOriginalOwner) return;
       const item = itemsMap.get(invItem.item_id.toString());
       if (!item) return;
-      if (showOnlyLimited || showOnlySeasonal) {
-        const isLimited = item.is_limited === 1;
-        const isSeasonal = item.is_seasonal === 1;
-        if (
-          !(showOnlyLimited && isLimited) &&
-          !(showOnlySeasonal && isSeasonal)
-        )
-          return;
-      }
+      if (showOnlyLimited && item.is_limited !== 1) return;
       itemCount++;
       dupedItemCount++;
       dupedValue += parseValue(item.duped_value);
@@ -180,7 +159,6 @@ export default function UserStats({
     showOnlyOriginal,
     showOnlyNonOriginal,
     showOnlyLimited,
-    showOnlySeasonal,
   ]);
 
   const filterLabel = useMemo(() => {
@@ -188,14 +166,8 @@ export default function UserStats({
     if (showOnlyOriginal) parts.push("OG");
     if (showOnlyNonOriginal) parts.push("Non-OG");
     if (showOnlyLimited) parts.push("Limited");
-    if (showOnlySeasonal) parts.push("Seasonal");
     return parts.join(" + ");
-  }, [
-    showOnlyOriginal,
-    showOnlyNonOriginal,
-    showOnlyLimited,
-    showOnlySeasonal,
-  ]);
+  }, [showOnlyOriginal, showOnlyNonOriginal, showOnlyLimited]);
 
   // Since we are deriving values directly from props, they are always available (or 0)
   // We can treat loading as false since there's no async operation here

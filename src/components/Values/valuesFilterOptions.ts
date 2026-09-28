@@ -77,12 +77,6 @@ export const chipFilterOptions: {
     iconColor: "#ffd700",
   },
   {
-    value: "name-seasonal-items",
-    label: "Seasonal",
-    icon: "noto-v1:snowflake",
-    iconColor: "#40c0e7",
-  },
-  {
     value: "name-limited-items",
     label: "Limited",
     icon: "mdi:clock",

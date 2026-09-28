@@ -18,13 +18,9 @@ import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatFullValue, getValueChange } from "@/utils/trading/values";
 import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
-import {
-  fetchItemUnlockMetadataById,
-  ItemUnlockMetadataEntry,
-} from "@/utils/items/itemUnlockMetadata";
+import { hasSeason, unlockLevel } from "@/utils/items/season";
 import {
   formatUnlockLevelBadge,
-  formatPlacementBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
 } from "@/utils/items/itemUnlockPresentation";
@@ -51,7 +47,6 @@ interface ItemCardProps {
   item: Item;
   isFavorited: boolean;
   onFavoriteChange: (isFavorited: boolean) => void;
-  itemMetadata?: ItemUnlockMetadataEntry | null;
   placementLimit?: number | null;
 }
 
@@ -59,7 +54,6 @@ function ItemCard({
   item,
   isFavorited,
   onFavoriteChange,
-  itemMetadata: itemMetadataProp,
   placementLimit,
 }: ItemCardProps) {
   const isBlueBird = item.id === 919;
@@ -76,10 +70,6 @@ function ItemCard({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pathname = usePathname();
   const isValuesPage = pathname === "/values";
-  const [localItemMetadata, setLocalItemMetadata] =
-    useState<ItemUnlockMetadataEntry | null>(null);
-  const itemMetadata =
-    itemMetadataProp !== undefined ? itemMetadataProp : localItemMetadata;
   const { isAuthenticated, setLoginModal } = useAuthContext();
 
   useEffect(() => {
@@ -144,26 +134,6 @@ function ItemCard({
       window.clearInterval(interval);
     };
   }, [isBlueBird]);
-
-  useEffect(() => {
-    if (!isValuesPage || itemMetadataProp !== undefined) return;
-
-    let isMounted = true;
-
-    fetchItemUnlockMetadataById()
-      .then((metadataById) => {
-        if (!isMounted) return;
-        setLocalItemMetadata(metadataById.get(item.id) ?? null);
-      })
-      .catch((error) => {
-        log.error("Error loading item metadata:", error);
-        if (isMounted) setLocalItemMetadata(null);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isValuesPage, item.id, itemMetadataProp]);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -293,14 +263,11 @@ function ItemCard({
   const dupedChange = isValuesPage
     ? getValueChange(item.recent_changes, "duped_value")
     : null;
-  const visibleItemMetadata = isValuesPage ? itemMetadata : null;
-  const metadataLevel = visibleItemMetadata?.level;
-  const metadataPlacement = visibleItemMetadata?.placement;
+  const metadataLevel = unlockLevel(item.level);
   const hasMetadataLevel = hasUnlockLevel(metadataLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
-    visibleItemMetadata?.season,
+    item.season ?? undefined,
     metadataLevel,
-    metadataPlacement,
   );
 
   const formatChange = (difference: number) => {
@@ -337,37 +304,29 @@ function ItemCard({
             <CategoryIconBadge
               type={item.type}
               isLimited={currentItemData.is_limited === 1}
-              isSeasonal={currentItemData.is_seasonal === 1}
+              isSeasonal={hasSeason(currentItemData)}
               className="h-4 w-4 sm:h-5 sm:w-5"
             />
           </div>
-          {isValuesPage &&
-            (typeof visibleItemMetadata?.season === "number" ||
-              hasMetadataLevel ||
-              metadataPlacement) && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
-                    {typeof visibleItemMetadata?.season === "number" && (
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                        S{visibleItemMetadata.season}
-                      </span>
-                    )}
-                    {hasMetadataLevel && (
-                      <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                        {formatUnlockLevelBadge(metadataLevel)}
-                      </span>
-                    )}
-                    {!hasMetadataLevel && metadataPlacement && (
-                      <span className="bg-status-warning inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold text-black">
-                        {formatPlacementBadge(metadataPlacement)}
-                      </span>
-                    )}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>{requirementsTooltipText}</TooltipContent>
-              </Tooltip>
-            )}
+          {isValuesPage && (hasSeason(item) || hasMetadataLevel) && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
+                  {item.season != null && (
+                    <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                      S{item.season}
+                    </span>
+                  )}
+                  {hasMetadataLevel && (
+                    <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                      {formatUnlockLevelBadge(metadataLevel)}
+                    </span>
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>{requirementsTooltipText}</TooltipContent>
+            </Tooltip>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -782,7 +741,6 @@ export default React.memo(ItemCard, (prev, next) => {
   return (
     prev.item === next.item &&
     prev.isFavorited === next.isFavorited &&
-    prev.itemMetadata === next.itemMetadata &&
     prev.placementLimit === next.placementLimit
   );
 });

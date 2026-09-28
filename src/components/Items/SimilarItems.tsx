@@ -87,14 +87,10 @@ const SimilarItems = ({
         score -= 0.1;
       }
 
-      // Limited/Seasonal status similarity (20%)
+      // Limited status similarity (20%)
       if (
         (item1.is_limited === 1 && item2.is_limited === 1) ||
-        (item1.is_seasonal === 1 && item2.is_seasonal === 1) ||
-        (item1.is_limited === 0 &&
-          item2.is_limited === 0 &&
-          item1.is_seasonal === 0 &&
-          item2.is_seasonal === 0)
+        (item1.is_limited === 0 && item2.is_limited === 0)
       ) {
         score += 0.2;
       }

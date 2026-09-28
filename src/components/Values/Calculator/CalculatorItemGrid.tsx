@@ -130,8 +130,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
               : formatCurrencyValue(parseValueString(item.cash_value));
             const isLimited =
               item.is_limited === 1 || item.data?.is_limited === 1;
-            const isSeasonal =
-              item.is_seasonal === 1 || item.data?.is_seasonal === 1;
+            const isSeasonal = item.season != null || item.data?.season != null;
             const lastInstanceId =
               group.instanceIds[group.instanceIds.length - 1];
 

@@ -224,7 +224,6 @@ export default function TradeItemPickerV2({
         "name-hyperchromes",
         "name-limited-items",
         "name-rims",
-        "name-seasonal-items",
         "name-spoilers",
         "name-tire-stickers",
         "name-tire-styles",
@@ -1013,7 +1012,7 @@ export default function TradeItemPickerV2({
                           item.is_limited === 1 || item.data?.is_limited === 1
                         }
                         isSeasonal={
-                          item.is_seasonal === 1 || item.data?.is_seasonal === 1
+                          item.season != null || item.data?.season != null
                         }
                         withContainer={false}
                         className="h-4 w-4 sm:h-5 sm:w-5"

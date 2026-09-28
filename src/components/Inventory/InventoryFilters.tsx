@@ -19,10 +19,6 @@ type SortOrder =
   | "alpha-desc"
   | "created-asc"
   | "created-desc"
-  | "season-asc"
-  | "season-desc"
-  | "level-asc"
-  | "level-desc"
   | "cash-desc"
   | "cash-asc"
   | "duped-desc"
@@ -46,7 +42,6 @@ interface InventoryFiltersProps {
   hideDuplicates: boolean;
   showMissingItems: boolean;
   showOnlyLimited: boolean;
-  showOnlySeasonal: boolean;
   showOnlyTradable: boolean;
   showOnlyUntradable: boolean;
   availableCategories: string[];
@@ -55,7 +50,6 @@ interface InventoryFiltersProps {
   onHideDuplicatesToggle: (checked: boolean) => void;
   onShowMissingItemsToggle: (checked: boolean) => void;
   onLimitedFilterToggle: (checked: boolean) => void;
-  onSeasonalFilterToggle: (checked: boolean) => void;
   onTradableFilterToggle: (checked: boolean) => void;
   onUntradableFilterToggle: (checked: boolean) => void;
   sortOrder: SortOrder;
@@ -72,7 +66,6 @@ export default function InventoryFilters({
   hideDuplicates,
   showMissingItems,
   showOnlyLimited,
-  showOnlySeasonal,
   showOnlyTradable,
   showOnlyUntradable,
   availableCategories,
@@ -81,7 +74,6 @@ export default function InventoryFilters({
   onHideDuplicatesToggle,
   onShowMissingItemsToggle,
   onLimitedFilterToggle,
-  onSeasonalFilterToggle,
   onTradableFilterToggle,
   onUntradableFilterToggle,
   sortOrder,
@@ -95,10 +87,6 @@ export default function InventoryFilters({
     "alpha-desc": "Name (Z to A)",
     "created-asc": "Oldest First",
     "created-desc": "Newest First",
-    "season-asc": "Season Number (Oldest to Newest)",
-    "season-desc": "Season Number (Newest to Oldest)",
-    "level-asc": "Season Level (Low to High)",
-    "level-desc": "Season Level (High to Low)",
     "cash-desc": "Cash Value (High to Low)",
     "cash-asc": "Cash Value (Low to High)",
     "duped-desc": "Duped Value (High to Low)",
@@ -260,34 +248,6 @@ export default function InventoryFilters({
                 </DropdownMenuRadioItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                  Season
-                </DropdownMenuLabel>
-                <DropdownMenuRadioItem
-                  value="season-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Season Number (Oldest to Newest)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="season-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Season Number (Newest to Oldest)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="level-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Season Level (Low to High)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="level-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Season Level (High to Low)
-                </DropdownMenuRadioItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
                   Values
                 </DropdownMenuLabel>
                 <DropdownMenuRadioItem
@@ -379,20 +339,6 @@ export default function InventoryFilters({
             inline={true}
           />
           Limiteds Only
-        </Button>
-        <Button
-          onClick={() => onSeasonalFilterToggle(!showOnlySeasonal)}
-          size="sm"
-          variant={showOnlySeasonal ? "default" : "secondary"}
-          className="w-fit"
-        >
-          <Icon
-            icon="noto-v1:snowflake"
-            className="h-4 w-4"
-            style={{ color: "#40c0e7" }}
-            inline={true}
-          />
-          Seasonal Only
         </Button>
       </div>
 
