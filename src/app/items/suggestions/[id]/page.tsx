@@ -839,7 +839,7 @@ export default function ValueSuggestionDetailPage() {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/item/history?id=${item.id}`,
+          `/items/${item.id}/history`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) return;
