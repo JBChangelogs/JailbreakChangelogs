@@ -455,6 +455,28 @@ const MobileDrawer = memo(function MobileDrawer({
         </MobileNavSection>
 
         <MobileNavSection
+          title="Trackers"
+          sectionIcon="material-symbols:sensors-rounded"
+          open={openNavSection === "Trackers"}
+          onToggle={() => toggleNavSection("Trackers")}
+        >
+          <MobileNavItem
+            href="/robberies"
+            icon="material-symbols:local-police-rounded"
+            label="Robbery Tracker"
+            badge="Live"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/bounties"
+            icon="mdi:currency-usd"
+            label="Bounty Tracker"
+            badge="Live"
+            onClick={onClose}
+          />
+        </MobileNavSection>
+
+        <MobileNavSection
           title="Community"
           sectionIcon="material-symbols:groups-rounded"
           open={openNavSection === "Community"}
@@ -465,18 +487,6 @@ const MobileDrawer = memo(function MobileDrawer({
             icon="material-symbols:person-search-rounded"
             label="User Search"
             prefetch={false}
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/robberies"
-            icon="material-symbols:local-police-rounded"
-            label="Robbery Tracker"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/bounties"
-            icon="mdi:currency-usd"
-            label="Bounty Tracker"
             onClick={onClose}
           />
           <MobileNavItem

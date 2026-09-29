@@ -20,6 +20,7 @@ import ServerBountyGroup from "@/components/RobberyTracker/ServerBountyGroup";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
+import TrackerSwitcher from "@/components/RobberyTracker/TrackerSwitcher";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -538,6 +539,8 @@ function BountyTrackerContent() {
 
         <ExperimentalFeatureBanner className="mb-6" />
 
+        <TrackerSwitcher className="mb-6" />
+
         {/* Header */}
         <div className="mb-6">
           <h1 className="mb-2 text-3xl font-bold">Bounty Tracker</h1>
@@ -724,7 +727,7 @@ export default function BountyTrackerPage() {
     <RobberyTrackerAuthWrapper
       redirectOnFail={false}
       requireAuth
-      loginDescription="You must be logged in to access live bounty data. This helps prevent abuse and keeps queue times reasonable."
+      loginDescription="You must be logged in to access live bounty data. This helps prevent abuse and keeps queue times reasonable. One login unlocks both the Bounty and Robbery trackers."
       redirectToastMessage="You need to be logged in to use the Bounty Tracker."
     >
       <BountyTrackerContent />

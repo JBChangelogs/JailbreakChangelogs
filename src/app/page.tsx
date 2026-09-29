@@ -152,6 +152,23 @@ const platformGroups = [
   },
 ] as const;
 
+const liveTrackers = [
+  {
+    href: "/robberies",
+    icon: "material-symbols:local-police-rounded",
+    title: "Robbery Tracker",
+    description:
+      "See which stores, mansions, and airdrops are open across servers right now, then jump straight in.",
+  },
+  {
+    href: "/bounties",
+    icon: "mdi:currency-usd",
+    title: "Bounty Tracker",
+    description:
+      "Find the highest bounty players across servers and join the server they're in.",
+  },
+] as const;
+
 const heroQuickCardClass =
   "group relative block overflow-hidden rounded-2xl border border-white/20 bg-black/35 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-black/40 [.light_&]:border-white/15 [.light_&]:bg-white/[0.04] [.light_&]:backdrop-blur-sm [.light_&]:hover:border-white/25 [.light_&]:hover:bg-white/[0.08]";
 
@@ -440,6 +457,56 @@ export default async function Home() {
                   ))}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="pt-8">
+        <div className="container mx-auto px-4">
+          <div className="border-border-card bg-secondary-bg rounded-2xl border p-6 md:p-8">
+            <div className="mb-5 flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="bg-status-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+                <span className="bg-status-success relative inline-flex h-2.5 w-2.5 rounded-full" />
+              </span>
+              <p className="text-link text-xs font-semibold tracking-[0.2em] uppercase">
+                Live Trackers
+              </p>
+            </div>
+            <h2 className="text-card-headline mb-5 text-2xl font-bold md:text-3xl">
+              Know what&apos;s happening in Jailbreak right now
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {liveTrackers.map((tracker) => (
+                <Link
+                  key={tracker.href}
+                  href={tracker.href}
+                  prefetch={false}
+                  className="group border-border-card bg-tertiary-bg hover:border-border-focus flex items-start gap-4 rounded-xl border p-4 transition-colors"
+                >
+                  <div className="bg-button-info/15 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg">
+                    <Icon
+                      icon={tracker.icon}
+                      className="text-link h-6 w-6"
+                      inline={true}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-card-headline group-hover:text-link font-semibold transition-colors">
+                      {tracker.title}
+                    </p>
+                    <p className="text-card-paragraph mt-1 text-sm leading-relaxed">
+                      {tracker.description}
+                    </p>
+                  </div>
+                  <Icon
+                    icon="mdi:arrow-right"
+                    className="text-tertiary-text group-hover:text-link mt-1 h-5 w-5 shrink-0 transition-colors"
+                    inline={true}
+                  />
+                </Link>
+              ))}
             </div>
           </div>
         </div>

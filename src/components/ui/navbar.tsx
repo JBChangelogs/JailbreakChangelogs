@@ -68,7 +68,7 @@ export const NavDropdownItem = ({
   icon: string;
   title: string;
   description: string;
-  badge?: "coming-soon" | "new";
+  badge?: "coming-soon" | "new" | "live";
   setActive?: (item: string | null) => void;
   className?: string;
   prefetch?: boolean;
@@ -91,7 +91,11 @@ export const NavDropdownItem = ({
           {title}
           {badge && (
             <span className="bg-button-info/20 text-link rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
-              {badge === "coming-soon" ? "Soon" : "New"}
+              {badge === "coming-soon"
+                ? "Soon"
+                : badge === "live"
+                  ? "Live"
+                  : "New"}
             </span>
           )}
         </div>
@@ -557,6 +561,51 @@ export const NavbarModern = ({
                 </NavigationMenu.Content>
               </NavigationMenu.Item>
 
+              {/* Trackers */}
+              <NavigationMenu.Item value="trackers">
+                <NavigationMenu.Trigger
+                  ref={(el) => {
+                    triggerRefs.current["trackers"] = el;
+                  }}
+                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                >
+                  Trackers
+                  <Icon
+                    icon="mdi:chevron-down"
+                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    inline={true}
+                  />
+                </NavigationMenu.Trigger>
+                <NavigationMenu.Content
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    animationDuration: "0ms",
+                    animationTimingFunction: "ease",
+                  }}
+                  onClick={() => setNavMenuValue("")}
+                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
+                >
+                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                    <NavDropdownItem
+                      href="/robberies"
+                      icon="material-symbols:local-police-rounded"
+                      title="Robbery Tracker"
+                      description="See which stores, mansions & airdrops are open right now"
+                      badge="live"
+                    />
+                    <NavDropdownItem
+                      href="/bounties"
+                      icon="mdi:currency-usd"
+                      title="Bounty Tracker"
+                      description="Find the highest bounty players and join their server"
+                      badge="live"
+                    />
+                  </div>
+                </NavigationMenu.Content>
+              </NavigationMenu.Item>
+
               {/* Community */}
               <NavigationMenu.Item value="community">
                 <NavigationMenu.Trigger
@@ -590,18 +639,6 @@ export const NavbarModern = ({
                       title="User Search"
                       description="Browse 30k+ Jailbreak Changelogs user profiles"
                       prefetch={false}
-                    />
-                    <NavDropdownItem
-                      href="/robberies"
-                      icon="material-symbols:local-police-rounded"
-                      title="Robbery Tracker"
-                      description="Track recent in-game robberies"
-                    />
-                    <NavDropdownItem
-                      href="/bounties"
-                      icon="mdi:currency-usd"
-                      title="Bounty Tracker"
-                      description="View and track active bounties"
                     />
                     <NavDropdownItem
                       href="/servers"

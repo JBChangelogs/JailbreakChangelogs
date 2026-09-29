@@ -20,6 +20,7 @@ import RobberyCard from "@/components/RobberyTracker/RobberyCard";
 import RobberyComboCard from "@/components/RobberyTracker/RobberyComboCard";
 import RobberyServerGroupCard from "@/components/RobberyTracker/RobberyServerGroupCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
+import TrackerSwitcher from "@/components/RobberyTracker/TrackerSwitcher";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { Button } from "@/components/ui/button";
@@ -983,6 +984,8 @@ function RobberyTrackerContent() {
           <Breadcrumb />
 
           <ExperimentalFeatureBanner className="mb-6" />
+
+          <TrackerSwitcher className="mb-6" />
 
           {/* Header */}
           <div className="mb-6">

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import TrackerSwitcher from "./TrackerSwitcher";
 
 interface RobberyTrackerAuthWrapperProps {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ export default function RobberyTrackerAuthWrapper({
   redirectOnFail = true,
   requireAuth,
   loginTitle = "Login required",
-  loginDescription = "You must be logged in to access live robbery data. This helps prevent abuse and keeps queue times reasonable.",
+  loginDescription = "You must be logged in to access live robbery data. This helps prevent abuse and keeps queue times reasonable. One login unlocks both the Robbery and Bounty trackers.",
   redirectToastMessage = "You need to be logged in to use the Robbery Tracker.",
 }: RobberyTrackerAuthWrapperProps) {
   // Environment variable to toggle auth requirement
@@ -88,7 +89,8 @@ export default function RobberyTrackerAuthWrapper({
     }
 
     return (
-      <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
+      <div className="container mx-auto flex min-h-screen flex-col items-center justify-center gap-4 px-4 py-8">
+        <TrackerSwitcher />
         <div className="border-border-card bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
           <h2 className="text-primary-text text-2xl font-semibold">
             {loginTitle}
