@@ -576,9 +576,45 @@ export default function SettingsPage() {
             onCopyLink={() => copySectionLink("danger", "Danger Zone")}
             variant="danger"
           >
-            <DeleteInventoryData robloxId={userData.roblox_id} />
+            <div
+              id="inventory-data-deletion"
+              className="-mx-3 scroll-mt-24 rounded-lg px-3 py-2 transition-colors duration-500"
+              style={getSectionHighlightStyle("inventory-data-deletion")}
+              ref={(el) =>
+                scrollHighlightedSectionIntoView("inventory-data-deletion", el)
+              }
+            >
+              <DeleteInventoryData
+                robloxId={userData.roblox_id}
+                onCopyLink={
+                  userData.flags?.some((f) => f.flag === "is_owner")
+                    ? () =>
+                        copySectionLink(
+                          "inventory-data-deletion",
+                          "Inventory Data Deletion",
+                        )
+                    : undefined
+                }
+              />
+            </div>
             <div className="border-border-card my-6 border-t" />
-            <DeleteAccount />
+            <div
+              id="account-deletion"
+              className="-mx-3 scroll-mt-24 rounded-lg px-3 py-2 transition-colors duration-500"
+              style={getSectionHighlightStyle("account-deletion")}
+              ref={(el) =>
+                scrollHighlightedSectionIntoView("account-deletion", el)
+              }
+            >
+              <DeleteAccount
+                onCopyLink={
+                  userData.flags?.some((f) => f.flag === "is_owner")
+                    ? () =>
+                        copySectionLink("account-deletion", "Account Deletion")
+                    : undefined
+                }
+              />
+            </div>
           </SettingsCard>
 
           {/* Supporter Modal */}

@@ -20,9 +20,7 @@ export const ExportInventoryData = ({ robloxId }: { robloxId?: string }) => {
 
       const response = await fetch(
         `${INVENTORY_API_URL}/user/export?token=${encodeURIComponent(token)}`,
-        {
-          method: "POST",
-        },
+        { method: "POST" },
       );
 
       if (!response.ok) {

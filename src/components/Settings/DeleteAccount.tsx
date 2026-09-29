@@ -7,10 +7,11 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { SettingsSubsectionHeading } from "./SettingsSubsectionHeading";
 
 const log = createLogger("UI");
 
-export const DeleteAccount = () => {
+export const DeleteAccount = ({ onCopyLink }: { onCopyLink?: () => void }) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -46,9 +47,10 @@ export const DeleteAccount = () => {
   return (
     <div className="rounded-lg">
       <div className="mb-2">
-        <h6 className="text-primary-text mb-1 text-lg font-bold">
-          Account Deletion
-        </h6>
+        <SettingsSubsectionHeading
+          title="Account Deletion"
+          onCopyLink={onCopyLink}
+        />
         <p className="text-secondary-text text-sm">
           Delete your Jailbreak Changelogs account. Inventory data can be
           deleted separately above.

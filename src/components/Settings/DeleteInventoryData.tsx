@@ -5,19 +5,24 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { createLogger } from "@/services/logger";
 import { getJbclToken } from "@/contexts/AuthContext";
 import { INVENTORY_API_URL } from "@/utils/api/api";
+import { SettingsSubsectionHeading } from "./SettingsSubsectionHeading";
 
 const log = createLogger("UI");
 
-export const DeleteInventoryData = ({ robloxId }: { robloxId?: string }) => {
+export const DeleteInventoryData = ({
+  robloxId,
+  onCopyLink,
+}: {
+  robloxId?: string;
+  onCopyLink?: () => void;
+}) => {
   const [open, setOpen] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduled, setScheduled] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async () => {
     if (!robloxId || isScheduling || scheduled) return;
     setIsScheduling(true);
-    setError(null);
 
     try {
       const token = getJbclToken();
@@ -30,6 +35,9 @@ export const DeleteInventoryData = ({ robloxId }: { robloxId?: string }) => {
       );
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
+        if (response.status === 400 || response.status === 401) {
+          setOpen(false);
+        }
         throw new Error(
           response.status === 400 || response.status === 401
             ? "Your session is invalid or expired. Please sign in again."
@@ -49,7 +57,7 @@ export const DeleteInventoryData = ({ robloxId }: { robloxId?: string }) => {
       });
     } catch (error) {
       log.error("Error scheduling inventory data deletion", error);
-      setError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to schedule data deletion",
@@ -62,9 +70,10 @@ export const DeleteInventoryData = ({ robloxId }: { robloxId?: string }) => {
   return (
     <div className="rounded-lg">
       <div className="mb-2">
-        <h6 className="text-primary-text mb-1 text-lg font-bold">
-          Inventory Data Deletion
-        </h6>
+        <SettingsSubsectionHeading
+          title="Inventory Data Deletion"
+          onCopyLink={onCopyLink}
+        />
         <p className="text-secondary-text text-sm">
           {robloxId
             ? "Delete your current inventory data. Trade history remains, and bots may scan you again later."
@@ -86,7 +95,6 @@ export const DeleteInventoryData = ({ robloxId }: { robloxId?: string }) => {
         onClose={() => {
           if (isScheduling) return;
           setOpen(false);
-          setError(null);
         }}
         onConfirm={handleDelete}
         title="Delete Inventory Data"
@@ -101,11 +109,6 @@ export const DeleteInventoryData = ({ robloxId }: { robloxId?: string }) => {
           history remains, and future bot scans may collect new inventory data.
           Are you sure?
         </p>
-        {error && (
-          <div className="mt-3 rounded-md border border-red-500/20 bg-red-500/10 p-3">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
       </ConfirmDialog>
     </div>
   );

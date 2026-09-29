@@ -13,6 +13,8 @@ import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/Spinner";
 import { toast } from "sonner";
+import Link from "next/link";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { createLogger } from "@/services/logger";
@@ -158,6 +160,9 @@ export default function UserStatsSection({
   totalItemsCount,
   duplicatesCount,
 }: UserStatsSectionProps) {
+  const { user, isAuthenticated } = useAuthContext();
+  const isOwnInventory =
+    isAuthenticated && Boolean(user?.roblox_id) && user?.roblox_id === userId;
   const [isScanHistoryModalOpen, setIsScanHistoryModalOpen] = useState(false);
   const [isMetadataExpanded, setIsMetadataExpanded] = useState(true);
   const [scanHistory, setScanHistory] = useState<
@@ -840,8 +845,7 @@ export default function UserStatsSection({
                     </div>
                   </div>
 
-                  {/* View Scan History Button */}
-                  <div>
+                  <div className="flex flex-wrap items-center gap-2">
                     <Button
                       onClick={handleOpenScanHistory}
                       disabled={isLoadingScanHistory}
@@ -852,6 +856,22 @@ export default function UserStatsSection({
                         ? "Loading..."
                         : "View Scan History"}
                     </Button>
+                    {isOwnInventory && (
+                      <Button
+                        asChild
+                        variant="secondary"
+                        size="sm"
+                        className="font-medium"
+                      >
+                        <Link href="/settings?highlight=inventory-data-deletion">
+                          <Icon
+                            icon="heroicons:trash"
+                            className="text-button-danger h-4 w-4"
+                          />
+                          Delete inventory data
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
