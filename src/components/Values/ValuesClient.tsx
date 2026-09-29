@@ -13,8 +13,8 @@ const FILTER_SORT_PREFERENCE_KEY = "values_filter_sorts";
 const VALUE_SORT_PREFERENCE_KEY = "values_value_sort";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Item, FilterSort, FavoriteItem } from "@/types";
-import { sortAndFilterItems, parseCashValue } from "@/utils/trading/values";
+import { Item, FilterSort, FavoriteItem, ValueSort } from "@/types";
+import { filterByTypes } from "@/utils/trading/values";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import {
   fetchUserFavorites,
@@ -33,12 +33,12 @@ import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import { useValueSortState } from "@/hooks/useValueSortState";
 import { useValuesFilterMode } from "@/hooks/useValuesFilterMode";
 import { useValuesRangePreference } from "@/hooks/useValuesRangePreference";
-import { filterOptions } from "./valuesFilterOptions";
-import { valueSortOptions } from "./valuesSortOptions";
+import { filterOptions, getCatalogItemType } from "./valuesFilterOptions";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatRelativeDate } from "@/utils/helpers/timestamp";
+import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 
 const parseFilterSorts = (
   raw: string | null,
@@ -51,6 +51,13 @@ const parseFilterSorts = (
           validValues.includes(value as FilterSort),
         )
     : [];
+
+const MAX_VALUE_RANGE = 50_000_000;
+function getBackendType(filters: FilterSort[]): string | undefined {
+  const categories = filters.filter((filter) => getCatalogItemType(filter));
+  if (categories.length !== 1) return undefined;
+  return getCatalogItemType(categories[0]);
+}
 
 export default function ValuesClient() {
   const { user } = useAuthContext();
@@ -73,25 +80,12 @@ export default function ValuesClient() {
     [setSearchParams],
   );
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["values-items", page, searchQuery],
-    queryFn: ({ signal }) =>
-      searchQuery
-        ? searchItemsClientPage(searchQuery, Math.max(1, page), signal)
-        : fetchItemsClientPage(Math.max(1, page), signal),
-  });
-  const items = data?.items ?? EMPTY_ITEMS;
+  const valueSortGroups = useItemSortGroups();
+  const valueSortOptions = useMemo(
+    () => valueSortGroups.flatMap((group) => group.options),
+    [valueSortGroups],
+  );
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
-
-  useEffect(() => {
-    const handleRealtimeValues = () => {
-      void refetch();
-    };
-
-    window.addEventListener("realtimeValues", handleRealtimeValues);
-    return () =>
-      window.removeEventListener("realtimeValues", handleRealtimeValues);
-  }, [refetch]);
 
   const [clearSearchTrigger, setClearSearchTrigger] = useState(0);
 
@@ -100,8 +94,8 @@ export default function ValuesClient() {
     [],
   );
   const validValueSorts = useMemo(
-    () => valueSortOptions.map((option) => option.value),
-    [],
+    () => valueSortOptions.map((option) => option.value as ValueSort),
+    [valueSortOptions],
   );
 
   const { valueSort, setValueSort } = useValueSortState({
@@ -270,20 +264,8 @@ export default function ValuesClient() {
     [persistFilterSorts, publishFilterSorts],
   );
 
-  const [sortedItems, setSortedItems] = useState<Item[]>([]);
-  const [sortedItemsPage, setSortedItemsPage] = useState<number | null>(null);
-  const [isInitialSortPending, setIsInitialSortPending] = useState(true);
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
-  const DYNAMIC_MAX_VALUE = useMemo(() => {
-    return items.reduce((currentMax, item) => {
-      if (item.tradable === 1) {
-        const val = parseCashValue(item.cash_value);
-        return val > currentMax ? val : currentMax;
-      }
-      return currentMax;
-    }, 50_000_000);
-  }, [items]);
   const {
     rangeValue,
     setRangeValue,
@@ -291,7 +273,50 @@ export default function ValuesClient() {
     setAppliedMinValue,
     appliedMaxValue,
     setAppliedMaxValue,
-  } = useValuesRangePreference(DYNAMIC_MAX_VALUE, data !== undefined);
+  } = useValuesRangePreference(MAX_VALUE_RANGE, true);
+
+  const backendType = getBackendType(selectedFilterSorts);
+  const backendCategory = selectedFilterSorts.find((filter) =>
+    getCatalogItemType(filter),
+  );
+  const serverMinValue = appliedMinValue > 0 ? appliedMinValue : undefined;
+  const serverMaxValue =
+    appliedMaxValue < MAX_VALUE_RANGE ? appliedMaxValue : undefined;
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: [
+      "values-items",
+      page,
+      searchQuery,
+      valueSort,
+      backendType,
+      serverMinValue,
+      serverMaxValue,
+    ],
+    queryFn: ({ signal }) =>
+      searchQuery
+        ? searchItemsClientPage(searchQuery, Math.max(1, page), signal, {
+            sort: valueSort,
+            type: backendType,
+            minValue: serverMinValue,
+            maxValue: serverMaxValue,
+          })
+        : fetchItemsClientPage(Math.max(1, page), signal, {
+            sort: valueSort,
+            type: backendType,
+            minValue: serverMinValue,
+            maxValue: serverMaxValue,
+          }),
+  });
+  const items = data?.items ?? EMPTY_ITEMS;
+
+  useEffect(() => {
+    const handleRealtimeValues = () => {
+      void refetch();
+    };
+    window.addEventListener("realtimeValues", handleRealtimeValues);
+    return () =>
+      window.removeEventListener("realtimeValues", handleRealtimeValues);
+  }, [refetch]);
 
   useEffect(() => {
     if (!data) return;
@@ -346,39 +371,22 @@ export default function ValuesClient() {
     ? favorites
     : EMPTY_FAVORITES;
 
-  useEffect(() => {
-    if (isLoading) return;
-    let cancelled = false;
-
-    const updateSortedItems = async () => {
-      const favoritesData = effectiveFavorites.map((id) => ({
-        item_id: String(id),
-      }));
-      const sorted = await sortAndFilterItems(
-        items,
-        selectedFilterSorts,
-        valueSort,
-        "",
-        favoritesData,
-      );
-      if (!cancelled) {
-        setSortedItems(sorted);
-        setSortedItemsPage(page);
-        setIsInitialSortPending(false);
-      }
-    };
-    void updateSortedItems();
-    return () => {
-      cancelled = true;
-    };
+  const sortedItems = useMemo(() => {
+    if (!data) return EMPTY_ITEMS;
+    const favoritesData = effectiveFavorites.map((id) => ({
+      item_id: String(id),
+    }));
+    const clientFilters = selectedFilterSorts.filter(
+      (filter) => !backendType || filter !== backendCategory,
+    );
+    return filterByTypes(items, clientFilters, favoritesData);
   }, [
+    data,
     items,
-    page,
-    debouncedSearchTerm,
     selectedFilterSorts,
-    valueSort,
+    backendType,
+    backendCategory,
     effectiveFavorites,
-    isLoading,
   ]);
 
   return (
@@ -491,13 +499,14 @@ export default function ValuesClient() {
         onFilterModeChange={setFilterMode}
         valueSort={valueSort}
         setValueSort={setValueSort}
+        valueSortGroups={valueSortGroups}
         rangeValue={rangeValue}
         setRangeValue={setRangeValue}
         setAppliedMinValue={setAppliedMinValue}
         appliedMaxValue={appliedMaxValue}
         setAppliedMaxValue={setAppliedMaxValue}
         searchSectionRef={searchSectionRef}
-        maxValueRange={DYNAMIC_MAX_VALUE}
+        maxValueRange={MAX_VALUE_RANGE}
       />
 
       <Link
@@ -521,12 +530,8 @@ export default function ValuesClient() {
       <div className="grid grid-cols-1 gap-8">
         <div className="space-y-6">
           <ValuesItemsGrid
-            items={
-              isLoading || sortedItemsPage !== page ? EMPTY_ITEMS : sortedItems
-            }
-            isLoading={
-              isLoading || isInitialSortPending || sortedItemsPage !== page
-            }
+            items={isLoading ? EMPTY_ITEMS : sortedItems}
+            isLoading={isLoading}
             favorites={favorites}
             onFavoriteChange={(itemId, isFavorited) => {
               setFavorites((prev) =>
@@ -537,19 +542,19 @@ export default function ValuesClient() {
             }}
             appliedMinValue={appliedMinValue}
             appliedMaxValue={appliedMaxValue}
-            MAX_VALUE_RANGE={DYNAMIC_MAX_VALUE}
+            MAX_VALUE_RANGE={MAX_VALUE_RANGE}
             onResetValueRange={() => {
-              setRangeValue([0, DYNAMIC_MAX_VALUE]);
+              setRangeValue([0, MAX_VALUE_RANGE]);
               setAppliedMinValue(0);
-              setAppliedMaxValue(DYNAMIC_MAX_VALUE);
+              setAppliedMaxValue(MAX_VALUE_RANGE);
             }}
             onClearAllFilters={() => {
               handleClearFilterSorts();
               setValueSort("cash-desc");
               setClearSearchTrigger((prev) => prev + 1);
-              setRangeValue([0, DYNAMIC_MAX_VALUE]);
+              setRangeValue([0, MAX_VALUE_RANGE]);
               setAppliedMinValue(0);
-              setAppliedMaxValue(DYNAMIC_MAX_VALUE);
+              setAppliedMaxValue(MAX_VALUE_RANGE);
             }}
             onClearCategoryFilter={handleClearFilterSorts}
             selectedFilterSorts={selectedFilterSorts}

@@ -28,7 +28,6 @@ import {
   getFilterSortsButtonLabel,
   getFilterSortsDisplayNames,
 } from "./valuesFilterOptions";
-import { valueSortGroups, getValueSortLabel } from "./valuesSortOptions";
 import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
 
 interface ValuesSearchControlsProps {
@@ -42,6 +41,10 @@ interface ValuesSearchControlsProps {
   onFilterModeChange: (mode: ValuesFilterMode) => void;
   valueSort: ValueSort;
   setValueSort: (sort: ValueSort) => void;
+  valueSortGroups: {
+    label: string;
+    options: { value: string; label: string }[];
+  }[];
   rangeValue: number[];
   setRangeValue: (value: number[]) => void;
   setAppliedMinValue: (value: number) => void;
@@ -62,6 +65,7 @@ export default function ValuesSearchControls({
   onFilterModeChange,
   valueSort,
   setValueSort,
+  valueSortGroups,
   rangeValue,
   setRangeValue,
   setAppliedMinValue,
@@ -153,7 +157,10 @@ export default function ValuesSearchControls({
 
   const filterLabel = getFilterSortsButtonLabel(selectedFilterSorts);
 
-  const sortLabel = getValueSortLabel(valueSort);
+  const sortLabel =
+    valueSortGroups
+      .flatMap((group) => group.options)
+      .find((option) => option.value === valueSort)?.label ?? "Sort by";
 
   const advancedFilterValues = useMemo(
     () =>
@@ -391,6 +398,11 @@ export default function ValuesSearchControls({
                     align="start"
                     className="border-border-card bg-secondary-bg text-primary-text max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
+                    {valueSortGroups.length === 0 && (
+                      <DropdownMenuLabel className="text-secondary-text px-3 py-2 text-sm">
+                        Sort options unavailable
+                      </DropdownMenuLabel>
+                    )}
                     <DropdownMenuRadioGroup
                       value={valueSort}
                       onValueChange={(newValue) => {

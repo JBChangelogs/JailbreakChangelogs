@@ -28,12 +28,9 @@ import {
   filterGroups,
   filterOptions,
   getFilterSortsButtonLabel,
+  getCatalogItemType,
 } from "@/components/Values/valuesFilterOptions";
-import {
-  valueSortGroups,
-  getValueSortLabel,
-  valueSortOptions,
-} from "@/components/Values/valuesSortOptions";
+import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
@@ -195,11 +192,6 @@ export default function TradeItemPickerV2({
     useState<CustomTypeOption | null>(null);
   const router = useRouter();
   const [page, setPage] = useState(1);
-  const catalog = useItemCatalogPage(searchQuery, page, useCatalogApi);
-  const visibleItems: TradeItem[] = useMemo(
-    () => (useCatalogApi ? (catalog.data?.items ?? []) : items),
-    [useCatalogApi, catalog.data?.items, items],
-  );
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   // Multi-select mode only (opt-in via multiSelectFilters) — mirrors /values'
   // selectedFilterSorts: an empty array means "All Items".
@@ -211,6 +203,27 @@ export default function TradeItemPickerV2({
     setPage(1);
   };
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
+  const valueSortGroups = useItemSortGroups();
+  const valueSortOptions = useMemo(
+    () => valueSortGroups.flatMap((group) => group.options),
+    [valueSortGroups],
+  );
+  const selectedCategory = multiSelectFilters
+    ? filterSorts.length === 1
+      ? filterSorts[0]
+      : undefined
+    : filterSort;
+  const categoryType = selectedCategory
+    ? getCatalogItemType(selectedCategory)
+    : undefined;
+  const catalog = useItemCatalogPage(searchQuery, page, useCatalogApi, {
+    sort: valueSort,
+    type: categoryType,
+  });
+  const visibleItems: TradeItem[] = useMemo(
+    () => (useCatalogApi ? (catalog.data?.items ?? []) : items),
+    [useCatalogApi, catalog.data?.items, items],
+  );
 
   const supportedFilterSorts = useMemo(
     () =>
@@ -250,11 +263,16 @@ export default function TradeItemPickerV2({
     ? getFilterSortsButtonLabel(filterSorts)
     : (filterOptions.find((option) => option.value === filterSort)?.label ??
       "Select category");
-  const sortLabel = getValueSortLabel(valueSort);
+  const sortLabel =
+    valueSortOptions.find((option) => option.value === valueSort)?.label ??
+    "Sort by";
 
   const validValueSorts = useMemo(
-    () => new Set<ValueSort>(valueSortOptions.map((option) => option.value)),
-    [],
+    () =>
+      new Set<ValueSort>(
+        valueSortOptions.map((option) => option.value as ValueSort),
+      ),
+    [valueSortOptions],
   );
   const getConditionFlags = (condition: ItemCondition) => {
     switch (condition) {
@@ -305,13 +323,15 @@ export default function TradeItemPickerV2({
       ? valueSort
       : "cash-desc";
 
-    const sorted = sortByValueSort(filteredByValue, selectedSort, {
-      getCashValue: (item) => item.cash_value ?? "N/A",
-      getDupedValue: (item) => item.duped_value ?? "N/A",
-      getDemand: (item) => item.demand ?? item.data?.demand,
-      getTrend: (item) => item.trend ?? item.data?.trend,
-      fallbackSortForDemandTrend: "none",
-    });
+    const sorted = useCatalogApi
+      ? filteredByValue
+      : sortByValueSort(filteredByValue, selectedSort, {
+          getCashValue: (item) => item.cash_value ?? "N/A",
+          getDupedValue: (item) => item.duped_value ?? "N/A",
+          getDemand: (item) => item.demand ?? item.data?.demand,
+          getTrend: (item) => item.trend ?? item.data?.trend,
+          fallbackSortForDemandTrend: "none",
+        });
 
     if (!favoriteIds?.length) return sorted;
     const favSet = new Set(favoriteIds);
@@ -651,6 +671,11 @@ export default function TradeItemPickerV2({
                   align="start"
                   className="border-border-card bg-tertiary-bg text-primary-text max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
+                  {valueSortGroups.length === 0 && (
+                    <DropdownMenuLabel className="text-secondary-text px-3 py-2 text-sm">
+                      Sort options unavailable
+                    </DropdownMenuLabel>
+                  )}
                   <DropdownMenuRadioGroup
                     value={valueSort}
                     onValueChange={(val) => {

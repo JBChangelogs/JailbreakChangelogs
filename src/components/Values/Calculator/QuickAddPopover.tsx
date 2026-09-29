@@ -21,6 +21,7 @@ import {
 import {
   filterGroups,
   filterOptions,
+  getCatalogItemType,
 } from "@/components/Values/valuesFilterOptions";
 import { Icon } from "../../ui/IconWrapper";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
@@ -85,7 +86,11 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [page, setPage] = useState(1);
-  const catalog = useItemCatalogPage(searchQuery, page, open && useCatalogApi);
+  const catalogType = getCatalogItemType(filterSort);
+  const catalog = useItemCatalogPage(searchQuery, page, open && useCatalogApi, {
+    sort: "cash-desc",
+    type: catalogType,
+  });
   const visibleItems: TradeItem[] = useMemo(
     () => (useCatalogApi ? (catalog.data?.items ?? []) : items),
     [useCatalogApi, catalog.data?.items, items],
@@ -103,11 +108,13 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
           matchesTextSearch([item.name, item.type], searchQuery)) &&
         matchesCategoryFilterSort(item, filterSort),
     );
-    const sorted = sortByValueSort(matched, "cash-desc", {
-      getCashValue: (item) => item.cash_value ?? "N/A",
-      getDupedValue: (item) => item.duped_value ?? "N/A",
-      getDemand: (item) => item.demand ?? item.data?.demand,
-    });
+    const sorted = useCatalogApi
+      ? matched
+      : sortByValueSort(matched, "cash-desc", {
+          getCashValue: (item) => item.cash_value ?? "N/A",
+          getDupedValue: (item) => item.duped_value ?? "N/A",
+          getDemand: (item) => item.demand ?? item.data?.demand,
+        });
     return useCatalogApi ? sorted : sorted.slice(0, MAX_RESULTS);
   }, [visibleItems, searchQuery, filterSort, useCatalogApi]);
 

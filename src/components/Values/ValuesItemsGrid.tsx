@@ -6,24 +6,15 @@ import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
 import ItemCardSkeleton from "@/components/Items/ItemCardSkeleton";
 import { Item, FilterSort } from "@/types";
-import { getEffectiveCashValue } from "@/utils/trading/values";
 import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";
 import { Button } from "../ui/button";
-import { getFilterSortsDisplayNames } from "./valuesFilterOptions";
-
-const parseNumericValue = (value: string | null): number => {
-  if (!value || value === "N/A") return -1;
-  const lower = value.toLowerCase();
-  const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
-  if (Number.isNaN(num)) return -1;
-  if (lower.includes("k")) return num * 1_000;
-  if (lower.includes("m")) return num * 1_000_000;
-  if (lower.includes("b")) return num * 1_000_000_000;
-  return num;
-};
+import {
+  getCatalogItemType,
+  getFilterSortsDisplayNames,
+} from "./valuesFilterOptions";
 
 interface ValuesItemsGridProps {
   items: Item[];
@@ -93,19 +84,8 @@ export default function ValuesItemsGrid({
 
   const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
 
-  const rangeFilteredItems = useMemo(() => {
-    if (appliedMinValue === 0 && appliedMaxValue >= MAX_VALUE_RANGE)
-      return items;
-    return items.filter((item) => {
-      const cash = parseNumericValue(getEffectiveCashValue(item));
-      const isOpenEndedMax = appliedMaxValue >= MAX_VALUE_RANGE;
-      if (isOpenEndedMax) return cash >= appliedMinValue;
-      return cash >= appliedMinValue && cash <= appliedMaxValue;
-    });
-  }, [items, appliedMinValue, appliedMaxValue, MAX_VALUE_RANGE]);
-
   const currentPage = Math.min(Math.max(1, page), Math.max(1, totalPages));
-  const displayedItems = rangeFilteredItems;
+  const displayedItems = items;
 
   useEffect(() => {
     if (page < 1) void setPage(1);
@@ -113,6 +93,9 @@ export default function ValuesItemsGrid({
   }, [page, setPage, totalPages]);
 
   const hasCategoryActive = selectedFilterSorts.length > 0;
+  const hasLocalFilters =
+    selectedFilterSorts.filter((filter) => getCatalogItemType(filter)).length >
+      1 || selectedFilterSorts.some((filter) => !getCatalogItemType(filter));
   const categoryNames = getFilterSortsDisplayNames(selectedFilterSorts);
 
   const handlePageChange = (
@@ -182,22 +165,10 @@ export default function ValuesItemsGrid({
   };
 
   const getEmptyStateTitle = () => {
-    if (rangeFilteredItems.length === 0 && items.length > 0) {
-      return "No results";
-    }
-
     return getNoItemsMessage();
   };
 
   const getEmptyStateDescription = () => {
-    if (rangeFilteredItems.length === 0 && items.length > 0) {
-      return `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${
-        appliedMaxValue >= MAX_VALUE_RANGE
-          ? `${MAX_VALUE_RANGE.toLocaleString()}+`
-          : appliedMaxValue.toLocaleString()
-      })`;
-    }
-
     return "Try adjusting your search or filter.";
   };
 
@@ -216,16 +187,20 @@ export default function ValuesItemsGrid({
                 }`
               : "";
 
+            if (hasLocalFilters) {
+              return `Showing ${displayedItems.length} items on this page after local filters (${totalItemsCount} before those filters)`;
+            }
+
             if (debouncedSearchTerm) {
-              return `Found ${rangeFilteredItems.length} ${
-                rangeFilteredItems.length === 1 ? "item" : "items"
-              } on this page matching "${debouncedSearchTerm}"${rangeText}${
+              return `Found ${totalItemsCount} ${
+                totalItemsCount === 1 ? "item" : "items"
+              } matching "${debouncedSearchTerm}"${rangeText}${
                 hasCategoryActive ? ` in ${categoryNames}` : ""
               }`;
             }
 
             if (hasCategoryActive) {
-              return `${rangeFilteredItems.length} items on this page${rangeText} in ${categoryNames} (${totalItemsCount} total)`;
+              return `${totalItemsCount} items${rangeText} in ${categoryNames}`;
             }
 
             return `Total Items: ${totalItemsCount}${rangeText}`;
@@ -259,7 +234,7 @@ export default function ValuesItemsGrid({
               {getEmptyStateDescription()}
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
-              {rangeFilteredItems.length === 0 && items.length > 0 && (
+              {(appliedMinValue > 0 || appliedMaxValue < MAX_VALUE_RANGE) && (
                 <Button onClick={onResetValueRange} variant="default">
                   Reset Value Range
                 </Button>

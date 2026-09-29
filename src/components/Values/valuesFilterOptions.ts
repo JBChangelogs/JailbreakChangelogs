@@ -96,6 +96,16 @@ export const filterOptions = [
   ...chipFilterOptions,
 ];
 
+const itemTypeFilters = new Set(
+  filterGroups.flatMap((group) => group.options.map((option) => option.value)),
+);
+
+export function getCatalogItemType(filter: FilterSort): string | undefined {
+  if (!itemTypeFilters.has(filter)) return undefined;
+  const type = filter.replace(/^name-/, "");
+  return type === "furnitures" ? "furniture" : type;
+}
+
 const filterLabelMap: Record<FilterSort, string> = filterOptions.reduce(
   (map, option) => {
     map[option.value] = option.label;

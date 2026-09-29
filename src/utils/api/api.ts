@@ -656,15 +656,45 @@ export interface ItemsPage<T> {
   size: number;
 }
 
+export interface ItemsPageOptions {
+  sort?: string;
+  type?: string;
+  minValue?: number;
+  maxValue?: number;
+}
+
+export async function fetchItemSortGroups(
+  signal?: AbortSignal,
+): Promise<{ group: string; sorts: { value: string; label: string }[] }[]> {
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items/sorts");
+  const response = await fetch(url, {
+    headers,
+    credentials: "include",
+    signal,
+  });
+  if (!response.ok)
+    throw new Error(`Failed to fetch item sorts (${response.status})`);
+  return (await response.json()) as {
+    group: string;
+    sorts: { value: string; label: string }[];
+  }[];
+}
+
 export async function fetchItemsClientPage(
   page: number,
   signal?: AbortSignal,
+  options: ItemsPageOptions = {},
 ): Promise<ItemsPage<Item>> {
-  const { url, headers } = buildApiFetchRequest(
-    PUBLIC_API_URL,
-    `/items?page=${page}`,
-  );
-  const response = await fetch(url, {
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items");
+  const itemsUrl = new URL(url);
+  itemsUrl.searchParams.set("page", String(page));
+  if (options.sort) itemsUrl.searchParams.set("sort", options.sort);
+  if (options.type) itemsUrl.searchParams.set("type", options.type);
+  if (options.minValue !== undefined)
+    itemsUrl.searchParams.set("min_value", String(options.minValue));
+  if (options.maxValue !== undefined)
+    itemsUrl.searchParams.set("max_value", String(options.maxValue));
+  const response = await fetch(itemsUrl, {
     headers,
     credentials: "include",
     signal,
@@ -679,6 +709,7 @@ export async function searchItemsClientPage(
   query: string,
   page: number,
   signal?: AbortSignal,
+  options: ItemsPageOptions = {},
 ): Promise<ItemsPage<Item>> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
@@ -687,6 +718,12 @@ export async function searchItemsClientPage(
   const searchUrl = new URL(url);
   searchUrl.searchParams.set("query", query);
   searchUrl.searchParams.set("page", String(page));
+  if (options.sort) searchUrl.searchParams.set("sort", options.sort);
+  if (options.type) searchUrl.searchParams.set("type", options.type);
+  if (options.minValue !== undefined)
+    searchUrl.searchParams.set("min_value", String(options.minValue));
+  if (options.maxValue !== undefined)
+    searchUrl.searchParams.set("max_value", String(options.maxValue));
 
   const response = await fetch(searchUrl, {
     headers,

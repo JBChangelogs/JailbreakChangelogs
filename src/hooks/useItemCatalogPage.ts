@@ -5,14 +5,21 @@ import {
   fetchItemsClientPage,
   searchItemsClientPage,
   type ItemsPage,
+  type ItemsPageOptions,
 } from "@/utils/api/api";
 import type { Item } from "@/types";
 
-export function useItemCatalogPage(query: string, page = 1, enabled = true) {
+export function useItemCatalogPage(
+  query: string,
+  page = 1,
+  enabled = true,
+  options: ItemsPageOptions = {},
+) {
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [data, setData] = useState<ItemsPage<Item> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const { sort, type, minValue, maxValue } = options;
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQuery(query), 300);
@@ -26,8 +33,18 @@ export function useItemCatalogPage(query: string, page = 1, enabled = true) {
     setError(false);
     setData(null);
     const request = debouncedQuery.trim()
-      ? searchItemsClientPage(debouncedQuery, page, controller.signal)
-      : fetchItemsClientPage(page, controller.signal);
+      ? searchItemsClientPage(debouncedQuery, page, controller.signal, {
+          sort,
+          type,
+          minValue,
+          maxValue,
+        })
+      : fetchItemsClientPage(page, controller.signal, {
+          sort,
+          type,
+          minValue,
+          maxValue,
+        });
     void request
       .then((result) => {
         if (!controller.signal.aborted) setData(result);
@@ -39,7 +56,7 @@ export function useItemCatalogPage(query: string, page = 1, enabled = true) {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [debouncedQuery, enabled, page]);
+  }, [debouncedQuery, enabled, page, sort, type, minValue, maxValue]);
 
   return {
     data: query === debouncedQuery ? data : null,

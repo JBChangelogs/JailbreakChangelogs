@@ -319,6 +319,31 @@ export const sortByValueSort = <T>(
           (getUniqueCirculation(a) ?? 0) - (getUniqueCirculation(b) ?? 0),
       );
       break;
+    case "season-number-asc":
+    case "season-number-desc":
+    case "season-level-asc":
+    case "season-level-desc": {
+      const field = valueSort.startsWith("season-number") ? "season" : "level";
+      const direction = valueSort.endsWith("desc") ? -1 : 1;
+      const numeric = (item: T) => {
+        const source = item as {
+          season?: number | null;
+          level?: number | string | null;
+          data?: { season?: number | null; level?: number | string | null };
+        };
+        const value = source[field] ?? source.data?.[field];
+        const number = Number(value);
+        return value == null || !Number.isFinite(number) ? null : number;
+      };
+      sorted.sort((a, b) => {
+        const first = numeric(a);
+        const second = numeric(b);
+        if (first === null) return second === null ? 0 : 1;
+        if (second === null) return -1;
+        return (first - second) * direction;
+      });
+      break;
+    }
     case "demand-multiple-desc":
       sorted.sort(
         (a, b) => (getDemandMultiple(b) ?? 0) - (getDemandMultiple(a) ?? 0),
