@@ -142,7 +142,7 @@ export default function JoinedUsers({
                 prefetch={false}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-link hover:text-link-hover"
+                className="text-link hover:text-link-hover no-underline hover:no-underline"
               >
                 {identityFor(users[0]).name}
               </Link>
@@ -216,9 +216,9 @@ export default function JoinedUsers({
                     prefetch={false}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-w-0 truncate"
+                    className="group min-w-0 truncate no-underline hover:no-underline"
                   >
-                    <span className="text-link hover:text-link-hover block truncate text-sm">
+                    <span className="text-link group-hover:text-link-hover block truncate text-sm">
                       {identityFor(user).name}
                     </span>
                     <span className="text-secondary-text block truncate text-xs">
