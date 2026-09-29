@@ -47,6 +47,7 @@ export interface NotificationHistory {
   unread_count?: number;
 }
 
+import { parseSortGroups, type SortGroup } from "@/utils/api/sortGroups";
 import {
   Item,
   ItemDetails,
@@ -902,7 +903,7 @@ export async function fetchItemClient(
   return (await response.json()) as ItemDetails;
 }
 
-export async function fetchSimilarItemSorts(): Promise<string[]> {
+export async function fetchSimilarItemSorts(): Promise<SortGroup[]> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
     "/items/similar/sorts",
@@ -912,10 +913,7 @@ export async function fetchSimilarItemSorts(): Promise<string[]> {
     throw new Error(`Failed to fetch similar item sorts (${response.status})`);
   }
 
-  const data: unknown = await response.json();
-  return Array.isArray(data)
-    ? data.filter((sort): sort is string => typeof sort === "string")
-    : [];
+  return parseSortGroups(await response.json());
 }
 
 export async function fetchSimilarItems(

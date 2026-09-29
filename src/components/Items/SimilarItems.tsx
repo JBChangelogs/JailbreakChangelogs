@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { ItemDetails } from "@/types";
@@ -20,10 +20,13 @@ import { getTrendColor, getDemandColor } from "@/utils/items/badgeColors";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getSortLabel } from "@/utils/api/sortGroups";
 import {
   Tooltip,
   TooltipContent,
@@ -41,12 +44,6 @@ const SIMILAR_ITEMS_LIMIT = 6;
 
 interface SimilarItemsProps {
   currentItem: ItemDetails;
-}
-
-function getSortLabel(sort: string) {
-  return sort
-    .replaceAll(/[-_]/g, " ")
-    .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 function SeasonLevelBadges({ item }: { item: ItemDetails }) {
@@ -80,12 +77,12 @@ function SeasonLevelBadges({ item }: { item: ItemDetails }) {
 const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
   const [selectedSort, setSelectedSort] = useState<string | null>(null);
 
-  const { data: sorts = [], isPending: sortsPending } = useQuery({
+  const { data: sortGroups = [], isPending: sortsPending } = useQuery({
     queryKey: ["similar-item-sorts"],
     queryFn: fetchSimilarItemSorts,
     staleTime: Infinity,
   });
-  const sortBy = selectedSort ?? sorts[0] ?? null;
+  const sortBy = selectedSort ?? sortGroups[0]?.options[0]?.value ?? null;
 
   const { data: similarItems, isPending: itemsPending } = useQuery({
     queryKey: ["similar-items", currentItem.id, sortBy],
@@ -110,7 +107,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
           </h3>
         </div>
 
-        {sorts.length > 0 && sortBy && (
+        {sortGroups.length > 0 && sortBy && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -118,7 +115,9 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                 className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Sort similar items"
               >
-                <span className="truncate">Sort by {getSortLabel(sortBy)}</span>
+                <span className="truncate">
+                  Sort by {getSortLabel(sortGroups, sortBy)}
+                </span>
                 <Icon
                   icon="heroicons:chevron-down"
                   className="text-secondary-text h-5 w-5"
@@ -134,14 +133,22 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                 value={sortBy}
                 onValueChange={setSelectedSort}
               >
-                {sorts.map((sort) => (
-                  <DropdownMenuRadioItem
-                    key={sort}
-                    value={sort}
-                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                  >
-                    Sort by {getSortLabel(sort)}
-                  </DropdownMenuRadioItem>
+                {sortGroups.map((group, index) => (
+                  <Fragment key={group.label}>
+                    {index > 0 && <DropdownMenuSeparator />}
+                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                      {group.label}
+                    </DropdownMenuLabel>
+                    {group.options.map((option) => (
+                      <DropdownMenuRadioItem
+                        key={option.value}
+                        value={option.value}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </Fragment>
                 ))}
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
@@ -172,8 +179,10 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
           </h4>
           <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
             We couldn&apos;t find any items similar to this one
-            {sortBy ? ` when sorting by ${getSortLabel(sortBy)}` : ""}. Try a
-            different sort option.
+            {sortBy
+              ? ` when sorting by ${getSortLabel(sortGroups, sortBy)}`
+              : ""}
+            . Try a different sort option.
           </p>
         </div>
       ) : (
