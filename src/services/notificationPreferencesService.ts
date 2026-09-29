@@ -43,12 +43,10 @@ export async function fetchAvailableNotificationPreferences(): Promise<
   return Array.isArray(data) ? (data as NotificationPreferenceTitle[]) : [];
 }
 
-export async function fetchUserNotificationPreferences(
-  userId: string,
-): Promise<NotificationPreferencesResponse> {
+export async function fetchUserNotificationPreferences(): Promise<NotificationPreferencesResponse> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    `/v2/users/${encodeURIComponent(userId)}/notification-preferences`,
+    "/v2/users/me/notification-preferences",
   );
   const resp = await fetch(url, {
     method: "GET",
