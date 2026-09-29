@@ -171,7 +171,7 @@ export default function UserValueSuggestionsTab({
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v1/value-suggestions/recent?user=${userId}&page=${p}`,
+          `/v2/value-suggestions?user=${userId}&page=${p}`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (res.status === 404) {
@@ -213,7 +213,7 @@ export default function UserValueSuggestionsTab({
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v1/value-suggestions/user/${userId}/stats`,
+          `/v2/users/${userId}/value-suggestion-stats`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) return;

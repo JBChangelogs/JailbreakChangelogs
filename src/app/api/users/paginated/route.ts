@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     const fields =
       "id,username,global_name,avatar,usernumber,premiumtype,created_at,settings,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
 
-    const url = new URL(`${BASE_API_URL}/v1/users/paginated`);
+    const url = new URL(`${BASE_API_URL}/v2/users`);
     url.searchParams.set("page", page);
     url.searchParams.set("size", size.toString());
     if (seed) {

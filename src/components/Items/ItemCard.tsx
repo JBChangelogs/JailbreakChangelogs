@@ -151,12 +151,11 @@ function ItemCard({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/v1/favorites",
+        `/v2/users/me/favorites/${encodeURIComponent(String(item.id))}`,
       );
       const response = await fetch(url, {
-        method: isFavorited ? "DELETE" : "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ item_id: String(item.id) }),
+        method: isFavorited ? "DELETE" : "PUT",
+        headers,
         credentials: "include",
       });
 

@@ -44,10 +44,10 @@ export function useMessageBlocking({
 
       const { url: blockUrl, headers: blockHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v1/messages/${encodeURIComponent(targetUserId)}/block`,
+        `/v2/users/me/blocked-users/${encodeURIComponent(targetUserId)}`,
       );
       const response = await fetch(blockUrl, {
-        method: shouldBlock ? "POST" : "DELETE",
+        method: shouldBlock ? "PUT" : "DELETE",
         credentials: "include",
         cache: "no-store",
         headers: blockHeaders,

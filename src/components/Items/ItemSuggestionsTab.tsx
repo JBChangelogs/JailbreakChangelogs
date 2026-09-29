@@ -273,7 +273,7 @@ export default function ItemSuggestionsTab({
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v1/value-suggestions/item/${itemId}?page=${p}`,
+          `/v2/items/${itemId}/value-suggestions?page=${p}`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (res.status === 404) {

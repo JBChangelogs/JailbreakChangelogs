@@ -91,7 +91,7 @@ export default function ChangelogSummary({
 
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v1/changelogs/${changelogId}/summary`,
+        `/v2/changelogs/${changelogId}/summary`,
       );
 
       const response = await fetch(url, { credentials: "include", headers });

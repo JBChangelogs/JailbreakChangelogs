@@ -13,7 +13,7 @@ const log = createLogger("API");
 export const fetchUserSettings = async (): Promise<ApiSettingsResponse> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/settings/me",
+    "/v2/users/me/settings",
   );
   const resp = await fetch(url, {
     method: "GET",
@@ -30,7 +30,7 @@ export const fetchUserSettings = async (): Promise<ApiSettingsResponse> => {
 export const fetchHasAppConnection = async (): Promise<boolean> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/users/me/connections",
+    "/v2/users/me/connections",
   );
   const resp = await fetch(url, {
     method: "GET",
@@ -52,7 +52,7 @@ export const fetchHasAppConnection = async (): Promise<boolean> => {
 export const fetchSupporterGifts = async (): Promise<SupporterGift[]> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/supporter/gifts",
+    "/v2/users/me/gifts",
   );
   const resp = await fetch(url, {
     method: "GET",
@@ -71,7 +71,7 @@ export const fetchSupporterHistory = async (): Promise<
 > => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/supporter/history",
+    "/v2/users/me/supporter/history",
   );
   const resp = await fetch(url, {
     method: "GET",
@@ -129,13 +129,14 @@ export const fetchSupporterHistory = async (): Promise<
 export const revertSupporterLevel = async (level: number): Promise<void> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    `/v1/supporter/${level}`,
+    "/v2/users/me/supporter",
   );
   const resp = await fetch(url, {
     method: "PATCH",
     credentials: "include",
     cache: "no-store",
-    headers,
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({ level }),
   });
 
   if (!resp.ok) {
@@ -151,7 +152,7 @@ export const giftSupporterGift = async (
 ): Promise<{ id: string }> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    `/v1/supporter/gifts/${shareId}`,
+    `/v2/gifts/${shareId}/redemptions`,
   );
   const resp = await fetch(url, {
     method: "POST",
@@ -174,7 +175,7 @@ export const giftSupporterGift = async (
 };
 
 export const fetchSupporterGiftLevels = async (): Promise<SupporterLevel[]> => {
-  const url = `${PUBLIC_API_URL}/v1/supporter/levels`;
+  const url = `${PUBLIC_API_URL}/v2/supporter/levels`;
   const resp = await fetch(url, {
     method: "GET",
     credentials: "include",
@@ -201,7 +202,7 @@ interface CustomBannerResponse {
 export const fetchCustomBanner = async (): Promise<string | null> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/users/me/banner",
+    "/v2/users/me/banner",
   );
   const response = await fetch(url, {
     method: "GET",
@@ -223,13 +224,13 @@ export const fetchCustomBanner = async (): Promise<string | null> => {
 export const uploadCustomBanner = async (file: File): Promise<string> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/users/me/banner",
+    "/v2/users/me/banner",
   );
   const formData = new FormData();
   formData.append("banner", file, file.name);
 
   const response = await fetch(url, {
-    method: "POST",
+    method: "PUT",
     credentials: "include",
     headers,
     body: formData,
@@ -273,7 +274,7 @@ interface CustomAvatarResponse {
 export const fetchCustomAvatar = async (): Promise<string | null> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/users/me/avatar",
+    "/v2/users/me/avatar",
   );
   const response = await fetch(url, {
     method: "GET",
@@ -295,13 +296,13 @@ export const fetchCustomAvatar = async (): Promise<string | null> => {
 export const uploadCustomAvatar = async (file: File): Promise<string> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/users/me/avatar",
+    "/v2/users/me/avatar",
   );
   const formData = new FormData();
   formData.append("avatar", file, file.name);
 
   const response = await fetch(url, {
-    method: "POST",
+    method: "PUT",
     credentials: "include",
     headers,
     body: formData,
@@ -344,7 +345,7 @@ export const updateUserSettings = async (
 ): Promise<void> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/settings/me",
+    "/v2/users/me/settings",
   );
   const response = await fetch(url, {
     method: "PATCH",

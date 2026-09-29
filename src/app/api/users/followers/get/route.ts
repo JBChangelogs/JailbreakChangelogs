@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
   try {
     const upstream = await fetch(
-      `${BASE_API_URL}/v1/users/followers/get?user=${userId}`,
+      `${BASE_API_URL}/v2/users/${userId}/followers`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-Followers/1.0",

@@ -362,7 +362,7 @@ export const searchDupeItemsByOwner = async (
 export async function fetchUserById(id: string) {
   try {
     const response = await fetch(
-      `${BASE_API_URL}/v1/users/get?id=${id}&nocache=false`,
+      `${BASE_API_URL}/v2/users/${id}?nocache=false`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
@@ -438,7 +438,7 @@ export async function fetchUserByIdForOG(id: string) {
     ].join(",");
 
     const response = await fetch(
-      `${BASE_API_URL}/v1/users/get?id=${id}&fields=${fields}`,
+      `${BASE_API_URL}/v2/users/${id}?fields=${fields}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
@@ -493,7 +493,7 @@ export async function fetchUserByIdForMetadata(id: string) {
     const fields = ["accent_color", "global_name", "username"].join(",");
 
     const response = await fetch(
-      `${BASE_API_URL}/v1/users/get?id=${id}&fields=${fields}`,
+      `${BASE_API_URL}/v2/users/${id}?fields=${fields}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-Metadata/1.0",
@@ -555,7 +555,7 @@ export async function fetchUserByIdForMetadata(id: string) {
 export async function fetchUserByRobloxId(robloxId: string) {
   try {
     const response = await fetch(
-      `${BASE_API_URL}/v1/users/get/roblox?id=${robloxId}`,
+      `${BASE_API_URL}/v2/users/by-roblox-id/${robloxId}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
@@ -621,7 +621,7 @@ export async function fetchItemsBatch(
 
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    "/v1/items/batch",
+    "/v2/items/batch",
   );
   const response = await fetch(url, {
     method: "POST",
@@ -658,7 +658,7 @@ export async function fetchPartialItems<T extends { id: number }>(
 ): Promise<T[]> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    "/v1/items/partial",
+    "/v2/items/partial",
   );
   const partialUrl = new URL(url);
   partialUrl.searchParams.set(
@@ -711,7 +711,7 @@ export async function fetchItemSortGroups(
 ): Promise<{ group: string; sorts: { value: string; label: string }[] }[]> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    "/v1/items/sorts",
+    "/v2/items/sorts",
   );
   const response = await fetch(url, {
     headers,
@@ -731,7 +731,7 @@ export async function fetchItemsClientPage(
   signal?: AbortSignal,
   options: ItemsPageOptions = {},
 ): Promise<ItemsPage<Item>> {
-  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/v1/items");
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/v2/items");
   const itemsUrl = new URL(url);
   itemsUrl.searchParams.set("page", String(page));
   applyItemsPageOptions(itemsUrl, options);
@@ -754,7 +754,7 @@ export async function searchItemsClientPage(
 ): Promise<ItemsPage<Item>> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    "/v1/items/search",
+    "/v2/items/search",
   );
   const searchUrl = new URL(url);
   searchUrl.searchParams.set("query", query);
@@ -826,7 +826,7 @@ export async function fetchItem(
     const itemType = canonicalItemType(decodeURIComponent(type));
 
     const response = await fetch(
-      `${BASE_API_URL}/v1/items/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`,
+      `${BASE_API_URL}/v2/items/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
@@ -853,7 +853,7 @@ export async function fetchItem(
 export async function fetchItemById(id: string): Promise<ItemDetails | null> {
   try {
     const response = await fetchWithRetry(
-      `${BASE_API_URL}/v1/items/${encodeURIComponent(id)}`,
+      `${BASE_API_URL}/v2/items/${encodeURIComponent(id)}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
@@ -888,7 +888,7 @@ export async function fetchItemByIdClient(
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
-      `/v1/items/${encodeURIComponent(id)}`,
+      `/v2/items/${encodeURIComponent(id)}`,
     );
     const response = await fetch(url, {
       headers,
@@ -915,7 +915,7 @@ export async function fetchItemClient(
 ): Promise<ItemDetails | null> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    `/v1/items/${encodeURIComponent(canonicalItemType(type))}/${encodeURIComponent(name)}`,
+    `/v2/items/${encodeURIComponent(canonicalItemType(type))}/${encodeURIComponent(name)}`,
   );
   const response = await fetch(url, { headers, credentials: "include" });
 
@@ -933,7 +933,7 @@ export async function fetchItemClient(
 export async function fetchSimilarItemSorts(): Promise<SortGroup[]> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    "/v1/items/similar/sorts",
+    "/v2/items/similar-sorts",
   );
   const response = await fetch(url, { headers, credentials: "include" });
   if (!response.ok) {
@@ -953,7 +953,7 @@ export async function fetchSimilarItems(
 
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    `/v1/items/${id}/similar?${params}`,
+    `/v2/items/${id}/similar?${params}`,
   );
   const response = await fetch(url, { headers, credentials: "include" });
   if (!response.ok) {
@@ -970,7 +970,7 @@ export async function fetchItemHistoryClient(
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
-      `/v1/items/${encodeURIComponent(id)}/history`,
+      `/v2/items/${encodeURIComponent(id)}/history`,
     );
     const response = await fetch(url, { headers, credentials: "include" });
 
@@ -987,7 +987,7 @@ export async function fetchItemHistoryClient(
 }
 
 export async function fetchChangelogList(): Promise<Changelog[]> {
-  const response = await fetch(`${BASE_API_URL}/v1/changelogs`, {
+  const response = await fetch(`${BASE_API_URL}/v2/changelogs`, {
     credentials: "include",
     headers: {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
@@ -1002,7 +1002,7 @@ export async function fetchChangelogList(): Promise<Changelog[]> {
 }
 
 export async function fetchChangelog(id: string): Promise<Changelog> {
-  const response = await fetch(`${BASE_API_URL}/v1/changelogs/${id}`, {
+  const response = await fetch(`${BASE_API_URL}/v2/changelogs/${id}`, {
     headers: {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
     },
@@ -1016,7 +1016,7 @@ export async function fetchChangelog(id: string): Promise<Changelog> {
 }
 
 export async function fetchLatestChangelog(): Promise<Changelog> {
-  const response = await fetch(`${BASE_API_URL}/v1/changelogs/latest`, {
+  const response = await fetch(`${BASE_API_URL}/v2/changelogs/latest`, {
     headers: {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
     },
@@ -1037,7 +1037,7 @@ export async function fetchUsersBatch(userIds: string[]) {
     }
 
     const response = await fetch(
-      `${BASE_API_URL}/v1/users/get/batch?ids=${userIds.join(",")}&nocache=false`,
+      `${BASE_API_URL}/v2/users/batch?ids=${userIds.join(",")}&nocache=false`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-UserBatch/1.0",
@@ -1359,7 +1359,7 @@ export async function fetchSeasonContracts(): Promise<SeasonContractsResponse | 
 
 export async function fetchSeasonsList() {
   try {
-    const response = await fetch(`${BASE_API_URL}/v1/seasons`, {
+    const response = await fetch(`${BASE_API_URL}/v2/seasons`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
       },
@@ -1384,7 +1384,7 @@ export async function fetchSeasonsList() {
 
 export async function fetchSeason(id: string) {
   try {
-    const response = await fetch(`${BASE_API_URL}/v1/seasons/${id}`, {
+    const response = await fetch(`${BASE_API_URL}/v2/seasons/${id}`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
       },
@@ -1407,7 +1407,7 @@ export async function fetchItemFavorites(id: string) {
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
-      `/v1/favorites/count/${id}`,
+      `/v2/items/${id}/favorites/count`,
     );
     const response = await fetch(url, { headers, credentials: "include" });
 
@@ -1433,7 +1433,7 @@ export async function fetchUserFavorites(userId: string) {
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
-      `/v1/favorites/user/${userId}`,
+      `/v2/users/${userId}/favorites`,
     );
     const response = await fetch(url, { headers, credentials: "include" });
 
@@ -2471,7 +2471,7 @@ export interface UserWithFlags extends UserData {
 
 export async function fetchUsersWithFlags(): Promise<UserWithFlags[]> {
   try {
-    const response = await fetch(`${BASE_API_URL}/v1/users/list/flags`, {
+    const response = await fetch(`${BASE_API_URL}/v2/users/with-flags`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-UserFlags/1.0",
       },
@@ -2608,7 +2608,7 @@ export interface Supporter {
 
 export async function fetchSupporters(): Promise<Supporter[]> {
   try {
-    const response = await fetch(`${BASE_API_URL}/v1/users/list/supporters`, {
+    const response = await fetch(`${BASE_API_URL}/v2/users/supporters`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Supporters/1.0",
       },
@@ -2639,7 +2639,7 @@ export async function fetchNotificationHistory(
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/v1/notifications/history?page=${page}&size=${size}`,
+      `/v2/notifications/history?page=${page}&size=${size}`,
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2681,7 +2681,7 @@ export async function fetchUnreadNotifications(
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/v1/notifications?page=${page}&size=${size}`,
+      `/v2/notifications?page=${page}&size=${size}`,
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2719,7 +2719,7 @@ export async function fetchUnreadNotificationCount(): Promise<number | null> {
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      "/v1/notifications/unread",
+      "/v2/notifications/unread-count",
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2746,7 +2746,7 @@ export async function fetchUnreadMessageCount(): Promise<number | null> {
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      "/v1/messages/unread",
+      "/v2/conversations/unread-count",
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2771,7 +2771,7 @@ export async function clearNotificationHistory(): Promise<boolean> {
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      "/v1/notifications/history/clear",
+      "/v2/notifications/history",
     );
     const response = await fetch(url, {
       method: "DELETE",
@@ -2799,16 +2799,15 @@ function getClientToken(): string | null {
 export async function fetchEmailLinkedStatus(): Promise<{ linked: boolean }> {
   try {
     const token = getClientToken();
-    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/v1/users/email/linked${tokenParam}`,
+      "/v2/users/me/email",
     );
     const response = await fetch(url, {
       method: "GET",
       credentials: "include",
       cache: "no-store",
-      headers,
+      headers: token ? { ...headers, Authorization: token } : headers,
     });
     if (!response.ok) return { linked: false };
     return response.json();
@@ -2823,7 +2822,7 @@ export async function fetchEmailNotificationStatus(): Promise<{
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      "/v1/notifications/emails",
+      "/v2/notifications/email",
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2850,10 +2849,10 @@ export async function enableEmailNotifications(): Promise<{
 }> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/notifications/emails",
+    "/v2/notifications/email",
   );
   const response = await fetch(url, {
-    method: "POST",
+    method: "PUT",
     credentials: "include",
     headers,
     cache: "no-store",
@@ -2874,7 +2873,7 @@ export async function disableEmailNotifications(): Promise<{
 }> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/notifications/emails",
+    "/v2/notifications/email",
   );
   const response = await fetch(url, {
     method: "DELETE",
@@ -2894,12 +2893,12 @@ export async function unlinkEmail(): Promise<{
   const token = getClientToken();
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    `/v1/users/email/unlink?token=${token}`,
+    "/v2/users/me/email",
   );
   const response = await fetch(url, {
     method: "DELETE",
     credentials: "include",
-    headers,
+    headers: token ? { ...headers, Authorization: token } : headers,
     cache: "no-store",
   });
   const data = await response
@@ -2945,7 +2944,7 @@ export interface NetworthCapStats {
 
 export async function fetchHomepageStats(): Promise<HomepageStats | null> {
   try {
-    const response = await fetch(`${BASE_API_URL}/v1/stats/homepage`, {
+    const response = await fetch(`${BASE_API_URL}/v2/stats/homepage`, {
       next: { revalidate: 10800 }, // Revalidate every 3 hours
       headers: {
         "User-Agent": "JailbreakChangelogs-HomepageStats/1.0",

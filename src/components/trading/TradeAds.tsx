@@ -447,12 +447,11 @@ export default function TradeAds({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/v1/favorites",
+        `/v2/users/me/favorites/${encodeURIComponent(String(itemId))}`,
       );
       const response = await fetch(url, {
-        method: isFavorited ? "DELETE" : "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ item_id: String(itemId) }),
+        method: isFavorited ? "DELETE" : "PUT",
+        headers,
         credentials: "include",
       });
       if (!response.ok) {
@@ -739,10 +738,7 @@ export default function TradeAds({
       const query = new URLSearchParams({ page: String(targetPage) });
       if (userId) query.set("user", userId);
       const { url: recentTradesUrl, headers: recentTradesHeaders } =
-        buildApiFetchRequest(
-          baseUrl,
-          `/v1/trades/v2/recent?${query.toString()}`,
-        );
+        buildApiFetchRequest(baseUrl, `/v2/trades?${query.toString()}`);
       const response = await fetch(recentTradesUrl, {
         cache: "no-store",
         credentials: "include",

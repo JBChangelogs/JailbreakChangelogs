@@ -21,7 +21,7 @@ export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
 
     const { url: deleteUrl, headers: deleteHeaders } = buildApiFetchRequest(
       baseUrl,
-      `/v1/trades/v2/${encodeURIComponent(String(tradeId))}/delete`,
+      `/v2/trades/${encodeURIComponent(String(tradeId))}`,
     );
     const response = await fetch(deleteUrl, {
       method: "DELETE",
@@ -81,7 +81,7 @@ export const createTradeOffer = async (
 
   const { url, headers } = buildApiFetchRequest(
     baseUrl,
-    `/v1/trades/v2/${encodeURIComponent(String(tradeId))}/offers`,
+    `/v2/trades/${encodeURIComponent(String(tradeId))}/offers`,
   );
   const hasBody = payload !== undefined;
 
@@ -172,7 +172,7 @@ export const fetchTradeOffers = async (
 
   const { url: offersUrl, headers: offersHeaders } = buildApiFetchRequest(
     baseUrl,
-    `/v1/trades/v2/${encodeURIComponent(String(tradeId))}/offers`,
+    `/v2/trades/${encodeURIComponent(String(tradeId))}/offers`,
   );
   const response = await fetch(offersUrl, {
     method: "GET",
@@ -205,7 +205,7 @@ export type TradeOfferV2ResponseStatus =
   | "cancel";
 
 const tradeOfferV2Path = (tradeId: number, offerId: number) =>
-  `/v1/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}`;
+  `/v2/trades/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}`;
 
 export const respondToTradeOfferV2 = async (
   tradeId: number,
@@ -223,7 +223,7 @@ export const respondToTradeOfferV2 = async (
   );
 
   const response = await fetch(endpoint, {
-    method: "POST",
+    method: "PATCH",
     cache: "no-store",
     credentials: "include",
     headers: { ...endpointHeaders, "Content-Type": "application/json" },

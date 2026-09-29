@@ -29,7 +29,7 @@ export default function TimelinePage() {
         const apiBaseUrl = PUBLIC_API_URL;
 
         const { url: changelogsUrl, headers: changelogsHeaders } =
-          buildApiFetchRequest(apiBaseUrl, "/v1/changelogs");
+          buildApiFetchRequest(apiBaseUrl, "/v2/changelogs");
         const response = await fetch(changelogsUrl, {
           credentials: "include",
           headers: {

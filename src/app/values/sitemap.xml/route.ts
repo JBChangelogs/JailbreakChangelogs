@@ -5,7 +5,7 @@ export async function GET() {
     return new Response("API URL not configured", { status: 500 });
   }
 
-  const response = await fetch(`${BASE_API_URL}/v1/items/sitemap`);
+  const response = await fetch(`${BASE_API_URL}/v2/items/sitemap`);
   if (!response.ok) {
     return new Response("Failed to fetch items sitemap", {
       status: response.status,

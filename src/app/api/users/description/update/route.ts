@@ -16,10 +16,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const resp = await fetch(`${BASE_API_URL}/v1/users/description/update`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ user: token, description }),
+    const resp = await fetch(`${BASE_API_URL}/v2/users/me/description`, {
+      method: "PUT",
+      headers: { "content-type": "application/json", Authorization: token },
+      body: JSON.stringify({ description }),
       cache: "no-store",
     });
 

@@ -240,7 +240,7 @@ export default function ValueSuggestionsPage() {
 
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      "/v1/value-suggestions/stats/leaderboard",
+      "/v2/value-suggestions/leaderboard",
     );
     fetch(url, { credentials: "include", headers })
       .then((r) => (r.ok ? r.json() : []))
@@ -275,7 +275,7 @@ export default function ValueSuggestionsPage() {
   }) => {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      "/v1/value-suggestions",
+      "/v2/value-suggestions",
     );
     const body: Record<string, unknown> = {
       item: payload.item,
@@ -354,7 +354,7 @@ export default function ValueSuggestionsPage() {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
-        "/v1/value-suggestions/limits",
+        "/v2/value-suggestions/limits",
       );
       const res = await fetch(url, { credentials: "include", headers });
       if (res.ok) {

@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const resp = await fetch(`${PUBLIC_API_URL}/v1/users/me`, {
+    const resp = await fetch(`${PUBLIC_API_URL}/v2/users/me`, {
       cache: "no-store",
       credentials: "include",
       headers: { Authorization: token },

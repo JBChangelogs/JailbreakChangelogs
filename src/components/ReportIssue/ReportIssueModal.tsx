@@ -64,7 +64,7 @@ export default function ReportIssueModal({
 
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/v1/issues",
+        "/v2/issues",
       );
       const response = await fetch(url, {
         method: "POST",

@@ -719,7 +719,7 @@ export default function MyReports() {
           : "";
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          `/v1/reports/me?page=${currentPage}${typeQuery}${sortQuery}`,
+          `/v2/users/me/reports?page=${currentPage}${typeQuery}${sortQuery}`,
         );
         const response = await fetch(url, {
           credentials: "include",
@@ -759,7 +759,7 @@ export default function MyReports() {
           try {
             const { url, headers } = buildApiFetchRequest(
               PUBLIC_API_URL,
-              `/v1/users/get/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
+              `/v2/users/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
             );
             const usersRes = await fetch(url, { cache: "no-store", headers });
             if (usersRes.ok) {
@@ -792,7 +792,7 @@ export default function MyReports() {
   useEffect(() => {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
-      "/v1/reports/types",
+      "/v2/reports/types",
     );
 
     fetch(url, { credentials: "include", cache: "no-store", headers })
@@ -816,7 +816,7 @@ export default function MyReports() {
     const controller = new AbortController();
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
-      "/v1/reports/sorts",
+      "/v2/reports/sorts",
     );
     fetch(url, {
       credentials: "include",

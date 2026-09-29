@@ -63,7 +63,7 @@ export default function UserBansTab() {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/v1/bans/me",
+        "/v2/users/me/bans",
       );
       const res = await fetch(url, { credentials: "include", headers });
       if (!res.ok) {

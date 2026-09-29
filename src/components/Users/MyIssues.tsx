@@ -127,7 +127,7 @@ export default function MyIssues() {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          `/v1/issues/me?page=${currentPage}${currentSort ? `&sort=${encodeURIComponent(currentSort)}` : ""}`,
+          `/v2/users/me/issues?page=${currentPage}${currentSort ? `&sort=${encodeURIComponent(currentSort)}` : ""}`,
         );
         const response = await fetch(url, {
           credentials: "include",
@@ -169,7 +169,7 @@ export default function MyIssues() {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          "/v1/issues/sorts",
+          "/v2/issues/sorts",
         );
         const response = await fetch(url, {
           cache: "no-store",

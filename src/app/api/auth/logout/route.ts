@@ -8,14 +8,11 @@ export async function POST() {
 
   if (token) {
     try {
-      await fetch(
-        `${BASE_API_URL}/v1/users/token/invalidate?session_token=${encodeURIComponent(token)}`,
-        {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          cache: "no-store",
-        },
-      );
+      await fetch(`${BASE_API_URL}/v2/users/me/session`, {
+        method: "DELETE",
+        headers: { Authorization: token },
+        cache: "no-store",
+      });
     } catch {
       // Ignore network errors on logout
     }

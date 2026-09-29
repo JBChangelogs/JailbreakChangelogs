@@ -16,12 +16,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const upstream = await fetch(`${BASE_API_URL}/v1/users/followers/add`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ follower: token, following }),
-    cache: "no-store",
-  });
+  const upstream = await fetch(
+    `${BASE_API_URL}/v2/users/me/following/${encodeURIComponent(following)}`,
+    {
+      method: "PUT",
+      headers: { Authorization: token },
+      cache: "no-store",
+    },
+  );
 
   return proxyPassthroughResponse(upstream, {
     log,

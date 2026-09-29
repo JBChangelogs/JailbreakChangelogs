@@ -131,7 +131,7 @@ export function useSendMessage({
 
       const { url: sendUrl, headers: sendHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v1/messages/${encodeURIComponent(targetUserId)}`,
+        `/v2/conversations/${encodeURIComponent(targetUserId)}/messages`,
       );
       const response = await fetch(sendUrl, {
         method: "POST",

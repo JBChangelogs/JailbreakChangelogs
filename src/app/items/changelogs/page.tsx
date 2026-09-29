@@ -99,7 +99,7 @@ export default function ValuesChangelogPage() {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v1/value-changelogs?page=${p}`,
+          `/v2/value-changelogs?page=${p}`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (isStale?.()) return;

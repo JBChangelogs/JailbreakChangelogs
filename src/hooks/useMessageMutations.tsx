@@ -112,7 +112,7 @@ export function useMessageMutations({
 
       const { url: editUrl, headers: editHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v1/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
+        `/v2/conversations/${encodeURIComponent(selectedUserId)}/messages/${encodeURIComponent(messageId)}`,
       );
       const response = await fetch(editUrl, {
         method: "PATCH",
@@ -282,7 +282,7 @@ export function useMessageMutations({
 
       const { url: deleteUrl, headers: deleteHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v1/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
+        `/v2/conversations/${encodeURIComponent(selectedUserId)}/messages/${encodeURIComponent(messageId)}`,
       );
       const response = await fetch(deleteUrl, {
         method: "DELETE",
@@ -357,7 +357,7 @@ export function useMessageMutations({
     try {
       const { url: reportUrl, headers: reportHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v1/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(reportingMessage.id)}/report`,
+        `/v2/conversations/${encodeURIComponent(selectedUserId)}/messages/${encodeURIComponent(reportingMessage.id)}/reports`,
       );
       const response = await fetch(reportUrl, {
         method: "POST",

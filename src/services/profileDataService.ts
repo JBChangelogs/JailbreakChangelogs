@@ -27,7 +27,7 @@ export class ProfileDataService {
       const [followersResponse, followingResponse, bioResponse] =
         await Promise.all([
           fetchWithRetry(
-            `${PUBLIC_API_URL}/v1/users/followers/get?user=${userId}`,
+            `${PUBLIC_API_URL}/v2/users/${userId}/followers`,
             undefined,
             {
               maxRetries: 2,
@@ -36,7 +36,7 @@ export class ProfileDataService {
             },
           ).catch(() => null),
           fetchWithRetry(
-            `${PUBLIC_API_URL}/v1/users/following/get?user=${userId}`,
+            `${PUBLIC_API_URL}/v2/users/${userId}/following`,
             undefined,
             {
               maxRetries: 2,
@@ -45,7 +45,7 @@ export class ProfileDataService {
             },
           ).catch(() => null),
           fetchWithRetry(
-            `${PUBLIC_API_URL}/v1/users/description/get?user=${userId}`,
+            `${PUBLIC_API_URL}/v2/users/${userId}/description`,
             undefined,
             {
               maxRetries: 2,

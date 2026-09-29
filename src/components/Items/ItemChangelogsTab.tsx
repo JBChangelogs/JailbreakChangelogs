@@ -231,7 +231,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v1/value-changelogs/item/${itemId}?page=${p}`,
+          `/v2/items/${itemId}/value-changelogs?page=${p}`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (res.status === 404) {

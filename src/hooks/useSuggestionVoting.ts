@@ -120,10 +120,10 @@ export function useSuggestionVoting({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
-        `/v1/value-suggestions/${suggestion.id}/vote`,
+        `/v2/value-suggestions/${suggestion.id}/votes/me`,
       );
       const res = await fetch(url, {
-        method: removing ? "DELETE" : "POST",
+        method: removing ? "DELETE" : "PUT",
         credentials: "include",
         ...(removing
           ? { headers }
@@ -248,7 +248,7 @@ export function useSuggestionVoting({
         if (id != null) {
           const { url, headers } = buildApiFetchRequest(
             PUBLIC_API_URL!,
-            `/v1/value-suggestions/${id}/votes`,
+            `/v2/value-suggestions/${id}/votes`,
           );
           const response = await fetch(url, {
             credentials: "include",
@@ -276,7 +276,7 @@ export function useSuggestionVoting({
         if (sort !== null) query.set("sort", sort);
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v1/value-suggestions/recent?${query}`,
+          `/v2/value-suggestions?${query}`,
         );
         const response = await fetch(url, {
           credentials: "include",
