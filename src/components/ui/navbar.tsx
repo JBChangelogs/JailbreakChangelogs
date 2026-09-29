@@ -592,7 +592,7 @@ export const NavbarModern = ({
                       href="/robberies"
                       icon="material-symbols:local-police-rounded"
                       title="Robbery Tracker"
-                      description="See which stores, mansions & airdrops are open right now"
+                      description="See which robberies and mansions are open right now"
                       badge="live"
                     />
                     <NavDropdownItem

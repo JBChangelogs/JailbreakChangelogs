@@ -3,14 +3,14 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Robbery LIVE Tracker",
   description:
-    "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on open stores and upcoming events.",
+    "Track live status of robberies and mansions in Roblox Jailbreak. Get real-time updates on what's open across servers.",
   alternates: {
     canonical: "/robberies",
   },
   openGraph: {
     title: "Robbery LIVE Tracker | Jailbreak Changelogs",
     description:
-      "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on robberies, mansions, and airdrops.",
+      "Track live status of robberies and mansions in Roblox Jailbreak. See what's open across servers right now.",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Robbery LIVE Tracker | Jailbreak Changelogs",
     description:
-      "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on robberies, mansions, and airdrops.",
+      "Track live status of robberies and mansions in Roblox Jailbreak. See what's open across servers right now.",
     images: [
       "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
     ],

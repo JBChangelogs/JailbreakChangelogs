@@ -158,7 +158,7 @@ const liveTrackers = [
     icon: "material-symbols:local-police-rounded",
     title: "Robbery Tracker",
     description:
-      "See which stores, mansions, and airdrops are open across servers right now, then jump straight in.",
+      "See which robberies and mansions are open across servers right now.",
   },
   {
     href: "/bounties",
