@@ -21,6 +21,10 @@ import { useServerRegions } from "@/hooks/useServerRegions";
 import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import TrackerSwitcher from "@/components/RobberyTracker/TrackerSwitcher";
+import RecentJoins, {
+  type RecentJoinEvent,
+} from "@/components/RobberyTracker/RecentJoins";
+import type { TrackerJoinReport } from "@/hooks/trackerJoinHistory";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -224,6 +228,7 @@ const BountyRangeFilter = memo(function BountyRangeFilter({
 
 function BountyTrackerContent() {
   const { user } = useAuthContext();
+  const [recentJoin, setRecentJoin] = useState<RecentJoinEvent | null>(null);
   const {
     bounties,
     joinHistory,
@@ -239,6 +244,19 @@ function BountyTrackerContent() {
     reconnectFromBan,
     checkBanStatus,
   } = useRobberyTrackerBountiesWebSocket(true, user?.id);
+
+  const handleJoin = (report: TrackerJoinReport) => {
+    reportJoin(report);
+    setRecentJoin({
+      id: crypto.randomUUID(),
+      item: {
+        timestamp: new Date().toISOString(),
+        tracker_type: report.tracker_type,
+        marker_name: report.marker_name,
+        display_name: report.display_name,
+      },
+    });
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
   const [totalBountyRange, setTotalBountyRange] = useState<[number, number]>([
@@ -585,6 +603,14 @@ function BountyTrackerContent() {
           />
         </div>
 
+        {user && (
+          <RecentJoins
+            key={user.id}
+            trackerType="bounty"
+            recentJoin={recentJoin}
+          />
+        )}
+
         {/* Status Bar */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Statistics */}
@@ -671,7 +697,7 @@ function BountyTrackerContent() {
                     serverId={group.serverId}
                     bounties={group.bounties}
                     joinedUsers={joinHistory[group.serverId] ?? []}
-                    onJoin={reportJoin}
+                    onJoin={handleJoin}
                     regionData={serverRegionsByJobId[group.serverId]}
                     useExternalRegionData
                   />

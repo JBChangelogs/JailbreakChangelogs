@@ -21,6 +21,10 @@ import RobberyComboCard from "@/components/RobberyTracker/RobberyComboCard";
 import RobberyServerGroupCard from "@/components/RobberyTracker/RobberyServerGroupCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import TrackerSwitcher from "@/components/RobberyTracker/TrackerSwitcher";
+import RecentJoins, {
+  type RecentJoinEvent,
+} from "@/components/RobberyTracker/RecentJoins";
+import type { TrackerJoinReport } from "@/hooks/trackerJoinHistory";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { Button } from "@/components/ui/button";
@@ -219,6 +223,7 @@ function isNonEmptyString(value: unknown): value is string {
 
 function RobberyTrackerContent() {
   const { user } = useAuthContext();
+  const [recentJoin, setRecentJoin] = useState<RecentJoinEvent | null>(null);
   const {
     robberies,
     joinHistory,
@@ -233,6 +238,19 @@ function RobberyTrackerContent() {
     banRemainingSeconds,
     checkBanStatus: handleBanStatusCheck,
   } = useRobberyTrackerWebSocket(true, user?.id);
+
+  const handleJoin = (report: TrackerJoinReport) => {
+    reportJoin(report);
+    setRecentJoin({
+      id: crypto.randomUUID(),
+      item: {
+        timestamp: new Date().toISOString(),
+        tracker_type: report.tracker_type,
+        marker_name: report.marker_name,
+        display_name: report.display_name,
+      },
+    });
+  };
 
   const hasData = robberies.length > 0;
 
@@ -1260,6 +1278,14 @@ function RobberyTrackerContent() {
             <TotalRobberiesLoggedPolling className="hidden sm:ml-auto sm:inline-flex" />
           </div>
 
+          {user && (
+            <RecentJoins
+              key={user.id}
+              trackerType="robbery"
+              recentJoin={recentJoin}
+            />
+          )}
+
           {/* Loading State - only show when no data */}
           {!isConnected && !hasData && !requiresManualReconnect && (
             <div className="flex min-h-screen flex-col items-center justify-start py-20 pt-24">
@@ -1497,7 +1523,7 @@ function RobberyTrackerContent() {
                         robberies={combo.robberies}
                         comboLabel={combo.comboLabel}
                         joinedUsers={joinHistory[combo.serverId] ?? []}
-                        onJoin={reportJoin}
+                        onJoin={handleJoin}
                         regionData={mergedServerRegionsByJobId[combo.serverId]}
                         useExternalRegionData
                       />
@@ -1526,7 +1552,7 @@ function RobberyTrackerContent() {
                         serverId={group.jobId}
                         robberies={group.robberies}
                         joinedUsers={joinHistory[group.jobId] ?? []}
-                        onJoin={reportJoin}
+                        onJoin={handleJoin}
                         regionData={mergedServerRegionsByJobId[group.jobId]}
                         useExternalRegionData
                       />
@@ -1555,7 +1581,7 @@ function RobberyTrackerContent() {
                         key={`${robbery.marker_name}-${jobId}-${robbery.timestamp}`}
                         robbery={robbery}
                         joinedUsers={joinHistory[jobId] ?? []}
-                        onJoin={reportJoin}
+                        onJoin={handleJoin}
                         regionData={mergedServerRegionsByJobId[jobId]}
                         useExternalRegionData
                       />

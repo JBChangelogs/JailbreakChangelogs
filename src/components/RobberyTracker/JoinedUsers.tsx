@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -49,6 +50,24 @@ export default function JoinedUsers({
   users: TrackerJoinUser[];
   variant?: "robbery" | "bounty";
 }) {
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearCloseTimer = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+  };
+  const scheduleClose = () => {
+    clearCloseTimer();
+    closeTimer.current = setTimeout(() => setPopoverOpen(false), 150);
+  };
+
+  useEffect(
+    () => () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    },
+    [],
+  );
+
   const isBounty = variant === "bounty";
   const userIds = users.map((user) => String(user.user_id)).sort();
   const { data: userDetails } = useQuery({
@@ -123,7 +142,7 @@ export default function JoinedUsers({
                 prefetch={false}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-link hover:text-link-hover underline-offset-2 hover:underline"
+                className="text-link hover:text-link-hover"
               >
                 {identityFor(users[0]).name}
               </Link>
@@ -133,17 +152,35 @@ export default function JoinedUsers({
           joined
         </span>
       ) : (
-        <Popover>
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
             <button
               type="button"
-              className="hover:text-link cursor-pointer underline-offset-2 hover:underline"
+              className="hover:text-link cursor-pointer"
               aria-label={`View ${users.length} people who joined this server`}
+              onPointerEnter={(event) => {
+                if (event.pointerType !== "mouse") return;
+                clearCloseTimer();
+                setPopoverOpen(true);
+              }}
+              onPointerLeave={(event) => {
+                if (event.pointerType === "mouse") scheduleClose();
+              }}
             >
               {users.length} people joined
             </button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-64 p-3">
+          <PopoverContent
+            align="start"
+            className="w-64 p-3"
+            onPointerEnter={(event) => {
+              if (event.pointerType === "mouse") clearCloseTimer();
+            }}
+            onPointerLeave={(event) => {
+              if (event.pointerType === "mouse") scheduleClose();
+            }}
+            onCloseAutoFocus={(event) => event.preventDefault()}
+          >
             <p className="text-secondary-text mb-2 text-xs font-semibold">
               Joined from this website
             </p>
@@ -179,7 +216,7 @@ export default function JoinedUsers({
                     prefetch={false}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-w-0 truncate underline-offset-2 hover:underline"
+                    className="min-w-0 truncate"
                   >
                     <span className="text-link hover:text-link-hover block truncate text-sm">
                       {identityFor(user).name}

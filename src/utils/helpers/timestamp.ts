@@ -4,6 +4,12 @@
 
 type DateFormat = "full" | "long" | "medium" | "short" | "time" | "relative";
 
+/** API timestamps may be offset-aware or older UTC strings without an offset. */
+export function parseUtcTimestamp(timestamp: string): Date {
+  const hasOffset = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(timestamp);
+  return new Date(hasOffset ? timestamp : `${timestamp}Z`);
+}
+
 interface FormatOptions {
   format?: DateFormat;
   includeTime?: boolean;
