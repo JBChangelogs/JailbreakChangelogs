@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 interface AboutTabProps {
   user: {
@@ -91,9 +93,14 @@ export default function AboutTab({
 
     setIsSavingBio(true);
     try {
-      const response = await fetch(`/api/users/description/update`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/users/me/description",
+      );
+      const response = await fetch(url, {
+        method: "PUT",
+        credentials: "include",
+        headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify({ description: cleanedBio }),
       });
 
@@ -102,8 +109,6 @@ export default function AboutTab({
         log.error("update bio failed", { status: response.status, body });
         throw new Error("Failed to update bio");
       }
-
-      await response.json();
 
       // Update parent component with new bio directly
       if (onBioUpdate) {

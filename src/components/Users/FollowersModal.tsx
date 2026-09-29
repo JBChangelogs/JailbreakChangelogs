@@ -15,6 +15,8 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { UserSettingsV2 } from "@/types/auth";
 import { createLogger } from "@/services/logger";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 const log = createLogger("UI");
 
@@ -257,10 +259,14 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         return;
       }
 
-      const response = await fetch("/api/users/followers/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ following: followerId }),
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/me/following/${encodeURIComponent(followerId)}`,
+      );
+      const response = await fetch(url, {
+        method: "PUT",
+        credentials: "include",
+        headers,
       });
 
       if (!response.ok) {

@@ -2798,7 +2798,6 @@ function getClientToken(): string | null {
 
 export async function fetchEmailLinkedStatus(): Promise<{ linked: boolean }> {
   try {
-    const token = getClientToken();
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       "/v2/users/me/email",
@@ -2807,7 +2806,7 @@ export async function fetchEmailLinkedStatus(): Promise<{ linked: boolean }> {
       method: "GET",
       credentials: "include",
       cache: "no-store",
-      headers: token ? { ...headers, Authorization: token } : headers,
+      headers,
     });
     if (!response.ok) return { linked: false };
     return response.json();
@@ -2890,7 +2889,6 @@ export async function unlinkEmail(): Promise<{
   status: number;
   data: { message?: string; detail?: string };
 }> {
-  const token = getClientToken();
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     "/v2/users/me/email",
@@ -2898,7 +2896,7 @@ export async function unlinkEmail(): Promise<{
   const response = await fetch(url, {
     method: "DELETE",
     credentials: "include",
-    headers: token ? { ...headers, Authorization: token } : headers,
+    headers,
     cache: "no-store",
   });
   const data = await response

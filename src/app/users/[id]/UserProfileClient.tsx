@@ -840,21 +840,15 @@ export default function UserProfileClient({
         return;
       }
 
-      let response;
-
-      if (isFollowing) {
-        response = await fetch(`/api/users/followers/remove`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ following: userId }),
-        });
-      } else {
-        response = await fetch(`/api/users/followers/add`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ following: userId }),
-        });
-      }
+      const { url: followUrl, headers: followHeaders } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/me/following/${encodeURIComponent(userId)}`,
+      );
+      const response = await fetch(followUrl, {
+        method: isFollowing ? "DELETE" : "PUT",
+        credentials: "include",
+        headers: followHeaders,
+      });
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
