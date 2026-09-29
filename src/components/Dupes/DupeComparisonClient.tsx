@@ -271,7 +271,11 @@ export default function DupeComparisonClient({
               <CategoryIconBadge
                 type={duplicateItem.categoryTitle}
                 isLimited={sharedItemData.is_limited === 1}
-                isSeasonal={sharedItemData.season != null}
+                isSeasonal={
+                  sharedItemData.is_seasonal === 1 ||
+                  sharedItemData.season != null ||
+                  duplicateItem.season != null
+                }
                 preferItemType={true}
                 className="h-5 w-5"
               />

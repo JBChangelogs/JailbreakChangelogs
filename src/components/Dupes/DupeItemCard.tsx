@@ -67,8 +67,10 @@ export default function DupeItemCard({
   const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
   const dupedValue = getDupedValueForItem(itemData, item);
-  const displayedSeason = itemData.season ?? undefined;
-  const displayedLevel = unlockLevel(itemData.level);
+  const displayedSeason = itemData.season ?? item.season ?? undefined;
+  const displayedLevel = unlockLevel(itemData.level ?? item.level);
+  const isSeasonal =
+    itemData?.is_seasonal === 1 || hasSeason(itemData) || item.season != null;
   const hasDisplayedLevel = hasUnlockLevel(displayedLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
     displayedSeason,
@@ -150,20 +152,20 @@ export default function DupeItemCard({
 
       {/* Item Image */}
       <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg">
-        {(itemData?.is_limited === 1 || hasSeason(itemData)) && (
+        {(itemData?.is_limited === 1 || isSeasonal) && (
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="absolute top-2 right-2 z-10">
                 <CategoryIconBadge
                   type={item.categoryTitle}
                   isLimited={itemData?.is_limited === 1}
-                  isSeasonal={hasSeason(itemData)}
+                  isSeasonal={isSeasonal}
                   className="h-4 w-4"
                 />
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              {hasSeason(itemData) ? "Seasonal item" : "Limited item"}
+              {isSeasonal ? "Seasonal item" : "Limited item"}
             </TooltipContent>
           </Tooltip>
         )}
