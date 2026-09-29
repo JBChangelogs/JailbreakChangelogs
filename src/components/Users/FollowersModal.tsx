@@ -115,15 +115,11 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
           return;
         }
 
-        const response = await fetch(
-          `/api/users/followers/get?user=${userId}`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Followers/1.0",
-            },
-            cache: "no-store",
-          },
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(userId)}/followers`,
         );
+        const response = await fetch(url, { headers, cache: "no-store" });
         if (ignore) return;
 
         if (response.status === 404) {
@@ -206,17 +202,12 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       if (!isOpen || !currentUserId) return;
 
       try {
-        // Use API route instead of direct API call
         // Call this every time the modal opens to get fresh following status
-        const response = await fetch(
-          `/api/users/following/get?user=${currentUserId}`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Followers/1.0",
-            },
-            cache: "no-store",
-          },
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(currentUserId)}/following`,
         );
+        const response = await fetch(url, { headers, cache: "no-store" });
 
         if (!response.ok) return;
 

@@ -252,6 +252,18 @@ function throwUserAccessErrorFrom403(data: unknown): never {
   throw new Error(`BANNED_USER: ${errorMessage}`);
 }
 
+const USER_LIST_FIELDS =
+  "id,username,global_name,avatar,usernumber,premiumtype,created_at,settings,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
+const USER_SEARCH_FIELDS =
+  "id,username,global_name,avatar,banner,custom_banner,accent_color,usernumber,premiumtype,created_at,settings,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
+const MAX_USER_PAGE_SIZE = 30;
+
+const clampUserPageSize = (value: number) =>
+  Math.min(
+    Math.max(Number.isNaN(value) ? MAX_USER_PAGE_SIZE : value, 1),
+    MAX_USER_PAGE_SIZE,
+  );
+
 export const fetchPaginatedUsers = async (
   page: number = 1,
   size: number = 30,
@@ -260,13 +272,16 @@ export const fetchPaginatedUsers = async (
 ) => {
   const params = new URLSearchParams();
   params.set("page", page.toString());
-  params.set("size", size.toString());
+  params.set("size", clampUserPageSize(size).toString());
   if (seed) params.set("seed", seed);
+  params.set("fields", USER_LIST_FIELDS);
 
-  const response = await fetch(`/api/users/paginated?${params.toString()}`, {
-    headers: {
-      "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
-    },
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    `/v2/users?${params.toString()}`,
+  );
+  const response = await fetch(url, {
+    headers,
     cache: "no-store",
     signal,
   });
@@ -284,16 +299,21 @@ export const searchUsers = async (
   limit: number = 30,
   signal?: AbortSignal,
 ) => {
-  const response = await fetch(
-    `/api/users/search?username=${encodeURIComponent(username)}&limit=${limit}`,
-    {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
-      },
-      cache: "no-store",
-      signal,
-    },
+  const params = new URLSearchParams({
+    query: username,
+    limit: clampUserPageSize(limit).toString(),
+    fields: USER_SEARCH_FIELDS,
+  });
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    `/v2/users/search?${params.toString()}`,
   );
+  const response = await fetch(url, {
+    headers,
+    cache: "no-store",
+    signal,
+  });
+  if (response.status === 404) return { users: [] };
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     log.error("searchUsers failed", { status: response.status, body });
