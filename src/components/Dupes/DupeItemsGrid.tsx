@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
-import { useBatchItems } from "@/hooks/useBatchItems";
+import { useCatalogValues, type CatalogValues } from "@/hooks/usePartialItems";
 import DupeItemCard from "./DupeItemCard";
 import { DupeFinderItem, Item } from "@/types";
 
@@ -12,7 +12,10 @@ interface DupeItemsGridProps {
   filteredItems: DupeFinderItem[];
   getUserAvatar: (userId: string) => string;
   getUsername: (userId: string) => string;
-  getDupedValueForItem: (itemData: Item, dupeItem: DupeFinderItem) => number;
+  getDupedValueForItem: (
+    itemData: CatalogValues,
+    dupeItem: DupeFinderItem,
+  ) => number;
   onCardClick: (item: DupeFinderItem) => void;
   isLoading?: boolean;
   itemCounts: Map<string, number>;
@@ -42,12 +45,8 @@ export default function DupeItemsGrid({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-  const itemQuery = useBatchItems(
-    displayedItems
-      .filter((item) => !itemsData.some((data) => data.id === item.item_id))
-      .map((item) => item.item_id),
-  );
-  const pageItems = itemQuery.data ?? itemsData;
+  const itemQuery = useCatalogValues();
+  const pageItems: CatalogValues[] = itemQuery.data ?? itemsData;
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,

@@ -1,5 +1,6 @@
 "use client";
 
+import type { CatalogValues } from "@/hooks/usePartialItems";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
@@ -20,7 +21,6 @@ import {
 } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { formatFullValue } from "@/utils/trading/values";
-import { Item } from "@/types";
 import { hasSeason, unlockLevel } from "@/utils/items/season";
 import {
   formatUnlockLevelBadge,
@@ -64,7 +64,7 @@ interface OGItem {
 
 interface OGItemCardProps {
   item: OGItem;
-  itemData?: Item;
+  itemData?: CatalogValues;
   getUsername: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge?: (userId: string) => boolean;
@@ -87,10 +87,9 @@ export default function OGItemCard({
   const [avatarError, setAvatarError] = useState(false);
   const isOriginalOwner = item.isOriginalOwner;
   const isDuplicate = duplicateCount > 1;
-  const displayedSeason = itemData?.season ?? item.season ?? undefined;
-  const displayedLevel = unlockLevel(itemData?.level ?? item.level);
-  const isSeasonal =
-    itemData?.is_seasonal === 1 || hasSeason(itemData) || item.season != null;
+  const displayedSeason = itemData?.season ?? undefined;
+  const displayedLevel = unlockLevel(itemData?.level);
+  const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
   const hasDisplayedLevel = hasUnlockLevel(displayedLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
     displayedSeason,

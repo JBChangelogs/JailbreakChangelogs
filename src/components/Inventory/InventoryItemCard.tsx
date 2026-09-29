@@ -1,12 +1,12 @@
 "use client";
 
+import type { CatalogValues } from "@/hooks/usePartialItems";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 
 import Link from "next/link";
 import { useState } from "react";
 import { InventoryItem } from "@/app/inventories/types";
-import { Item } from "@/types";
 import {
   getItemImagePath,
   isVideoItem,
@@ -44,7 +44,7 @@ const formatNumber = (num: number) => {
 
 interface InventoryItemCardProps {
   item: InventoryItem;
-  itemData?: Item;
+  itemData?: CatalogValues;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge?: (userId: string) => boolean;
@@ -75,10 +75,9 @@ export default function InventoryItemCard({
   );
   const isDuplicate = duplicateCount > 1;
   const isMissingItem = item.id.startsWith("missing-");
-  const displayedSeason = itemData?.season ?? item.season ?? undefined;
-  const displayedLevel = unlockLevel(itemData?.level ?? item.level);
-  const isSeasonal =
-    itemData?.is_seasonal === 1 || hasSeason(itemData) || item.season != null;
+  const displayedSeason = itemData?.season ?? undefined;
+  const displayedLevel = unlockLevel(itemData?.level);
+  const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
   const hasDisplayedLevel = hasUnlockLevel(displayedLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
     displayedSeason,

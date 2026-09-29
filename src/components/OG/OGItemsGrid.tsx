@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Pagination } from "@/components/ui/Pagination";
-import { useBatchItems } from "@/hooks/useBatchItems";
+import { useCatalogValues, type CatalogValues } from "@/hooks/usePartialItems";
 import OGItemCard from "./OGItemCard";
 import { Item } from "@/types";
 
@@ -69,13 +69,9 @@ export default function OGItemsGrid({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-  const itemQuery = useBatchItems(
-    displayedItems
-      .filter((item) => !items.some((data) => data.id === item.item_id))
-      .map((item) => item.item_id),
-  );
+  const itemQuery = useCatalogValues();
   const pageItemsMap = useMemo(() => {
-    const map = new Map(itemsMap);
+    const map = new Map<number, CatalogValues>(itemsMap);
     itemQuery.data?.forEach((item) => map.set(item.id, item));
     return map;
   }, [itemsMap, itemQuery.data]);

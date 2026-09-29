@@ -26,6 +26,8 @@ export type CatalogValues = {
   is_limited: number | null;
   is_seasonal: number | null;
   tradable: number;
+  season: number | null;
+  level: number | string | null;
 };
 const CATALOG_VALUE_FIELDS = [
   "cash_value",
@@ -35,6 +37,8 @@ const CATALOG_VALUE_FIELDS = [
   "is_limited",
   "is_seasonal",
   "tradable",
+  "season",
+  "level",
 ] as const;
 
 export function useCatalogValues(enabled = true) {

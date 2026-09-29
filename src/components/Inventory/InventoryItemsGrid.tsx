@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
-import { useBatchItems } from "@/hooks/useBatchItems";
+import { useCatalogValues } from "@/hooks/usePartialItems";
 import InventoryItemCard from "./InventoryItemCard";
 import { Item } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
@@ -45,12 +45,11 @@ export default function InventoryItemsGrid({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-  const itemQuery = useBatchItems(
-    displayedItems
-      .filter(({ itemData }) => !itemData)
-      .map(({ item }) => item.item_id),
+  const itemQuery = useCatalogValues();
+  const catalogValuesById = useMemo(
+    () => new Map(itemQuery.data?.map((item) => [item.id, item])),
+    [itemQuery.data],
   );
-  const pageItems = new Map(itemQuery.data?.map((item) => [item.id, item]));
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -138,7 +137,8 @@ export default function InventoryItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
         {displayedItems.map(({ item, itemData, isDupedItem }, index) => {
-          const currentItemData = pageItems.get(item.item_id) ?? itemData;
+          const currentItemData =
+            catalogValuesById.get(item.item_id) ?? itemData;
           const itemKey = `${item.categoryTitle}-${item.title}`;
           const duplicateCount = itemCounts.get(itemKey) || 1;
           const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;

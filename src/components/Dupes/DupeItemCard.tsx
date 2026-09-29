@@ -1,11 +1,12 @@
 "use client";
 
+import type { CatalogValues } from "@/hooks/usePartialItems";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { useState } from "react";
 import { Spinner } from "@/components/ui/Spinner";
-import { DupeFinderItem, Item } from "@/types";
+import { DupeFinderItem } from "@/types";
 import { formatCurrencyValue } from "@/utils/trading/currency";
 import {
   getItemImagePath,
@@ -38,10 +39,13 @@ import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 
 interface DupeItemCardProps {
   item: DupeFinderItem;
-  itemData: Item;
+  itemData: CatalogValues;
   getUserAvatar: (userId: string) => string;
   getUsername: (userId: string) => string;
-  getDupedValueForItem: (itemData: Item, dupeItem: DupeFinderItem) => number;
+  getDupedValueForItem: (
+    itemData: CatalogValues,
+    dupeItem: DupeFinderItem,
+  ) => number;
   onCardClick: (item: DupeFinderItem) => void;
   duplicateNumber?: number;
   isDuplicate?: boolean;
@@ -67,10 +71,9 @@ export default function DupeItemCard({
   const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
   const dupedValue = getDupedValueForItem(itemData, item);
-  const displayedSeason = itemData.season ?? item.season ?? undefined;
-  const displayedLevel = unlockLevel(itemData.level ?? item.level);
-  const isSeasonal =
-    itemData?.is_seasonal === 1 || hasSeason(itemData) || item.season != null;
+  const displayedSeason = itemData.season ?? undefined;
+  const displayedLevel = unlockLevel(itemData.level);
+  const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
   const hasDisplayedLevel = hasUnlockLevel(displayedLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
     displayedSeason,
@@ -242,11 +245,9 @@ export default function DupeItemCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-primary-text cursor-help text-xl font-bold">
-                {itemData?.metadata?.UniqueCirculation
-                  ? formatNumber(itemData.metadata.UniqueCirculation)
-                  : item.uniqueCirculation
-                    ? formatNumber(item.uniqueCirculation)
-                    : "N/A"}
+                {item.uniqueCirculation
+                  ? formatNumber(item.uniqueCirculation)
+                  : "N/A"}
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -259,16 +260,12 @@ export default function DupeItemCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-primary-text cursor-help text-xl font-bold">
-                {itemData?.metadata?.TimesTraded
-                  ? formatNumber(itemData.metadata.TimesTraded)
-                  : "N/A"}
+                {item.timesTraded ? formatNumber(item.timesTraded) : "N/A"}
               </div>
             </TooltipTrigger>
             <TooltipContent>
               Monthly traded:{" "}
-              {itemData?.metadata?.TimesTraded
-                ? itemData.metadata.TimesTraded.toLocaleString()
-                : "N/A"}
+              {item.timesTraded ? item.timesTraded.toLocaleString() : "N/A"}
             </TooltipContent>
           </Tooltip>
         </div>

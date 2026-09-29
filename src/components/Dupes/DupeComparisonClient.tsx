@@ -273,8 +273,7 @@ export default function DupeComparisonClient({
                 isLimited={sharedItemData.is_limited === 1}
                 isSeasonal={
                   sharedItemData.is_seasonal === 1 ||
-                  sharedItemData.season != null ||
-                  duplicateItem.season != null
+                  sharedItemData.season != null
                 }
                 preferItemType={true}
                 className="h-5 w-5"
