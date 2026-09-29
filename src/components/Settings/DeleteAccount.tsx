@@ -46,11 +46,12 @@ export const DeleteAccount = () => {
   return (
     <div className="rounded-lg">
       <div className="mb-2">
-        <h6 className="text-button-danger mb-1 text-lg font-bold">
+        <h6 className="text-primary-text mb-1 text-lg font-bold">
           Account Deletion
         </h6>
-        <p className="text-primary-text text-sm">
-          Delete your account and all associated data
+        <p className="text-secondary-text text-sm">
+          Delete your Jailbreak Changelogs account. Inventory data can be
+          deleted separately above.
         </p>
       </div>
 

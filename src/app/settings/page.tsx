@@ -16,6 +16,7 @@ import GiftToUserDialog from "@/components/Settings/GiftToUserDialog";
 import PurchaseGiftDialog from "@/components/Settings/PurchaseGiftDialog";
 import { Icon } from "@/components/ui/IconWrapper";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
+import { DeleteInventoryData } from "@/components/Settings/DeleteInventoryData";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { ExportInventoryData } from "@/components/Settings/ExportInventoryData";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -489,7 +490,7 @@ export default function SettingsPage() {
             scrollRef={(el) => scrollHighlightedSectionIntoView("export", el)}
             onCopyLink={() => copySectionLink("export", "Export Data")}
           >
-            <ExportInventoryData />
+            <ExportInventoryData robloxId={userData.roblox_id} />
           </SettingsCard>
 
           {hasSupporterHistory ? (
@@ -575,6 +576,8 @@ export default function SettingsPage() {
             onCopyLink={() => copySectionLink("danger", "Danger Zone")}
             variant="danger"
           >
+            <DeleteInventoryData robloxId={userData.roblox_id} />
+            <div className="border-border-card my-6 border-t" />
             <DeleteAccount />
           </SettingsCard>
 
