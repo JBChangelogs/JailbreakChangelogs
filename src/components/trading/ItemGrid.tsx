@@ -8,6 +8,7 @@ import {
   isCustomTradeItem,
   tradeItemIdsEqual,
 } from "@/utils/trading/tradeItems";
+import { TradeItemMarketDetails, TradeItemNote } from "./TradeItemContext";
 
 interface ItemGridProps {
   items: TradeItem[];
@@ -64,6 +65,8 @@ const groupItems = (items: TradeItem[]) => {
           ...itemData,
           count: 1,
           id: item.id,
+          isDuped: item.isDuped,
+          isOG: item.isOG,
         };
       } else {
         acc[key].count++;
@@ -169,7 +172,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
   }
 
   return (
-    <div className="rounded-lg p-4">
+    <div className="rounded-lg">
       {showTitle ? (
         <h4 className="text-primary-text mb-2 text-sm">{title}</h4>
       ) : null}
@@ -181,7 +184,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
           className={
             variant === "compact"
               ? "grid grid-cols-2 gap-3 sm:grid-cols-3"
-              : "grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4"
+              : "grid grid-cols-2 gap-3 md:grid-cols-3"
           }
         >
           {groupItems(items).map((item) => {
@@ -196,7 +199,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             const rawValue = item.isDuped ? item.duped_value : item.cash_value;
             const hasValue = rawValue != null && rawValue !== "N/A";
             const displayValue = hasValue
-              ? formatTradeValue(parseTradeValue(rawValue) * item.count)
+              ? formatTradeValue(parseTradeValue(rawValue))
               : "N/A";
 
             const stepperButtonClass =
@@ -268,39 +271,50 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                   </div>
                 </div>
 
-                {/* Name row */}
-                <p className="text-primary-text mt-1.5 line-clamp-2 text-xs font-medium">
-                  {displayName}
-                </p>
-
-                {/* Value row */}
-                {!isCustom && (
-                  <p className="text-primary-text mt-0.5 truncate text-sm font-bold">
-                    {displayValue}
-                    {item.count > 1 && (
-                      <span className="text-secondary-text ml-1 text-xs font-semibold">
-                        ×{item.count}
-                      </span>
+                <div className="mt-2 space-y-2">
+                  <div className="flex items-center justify-between gap-1">
+                    <p
+                      className="text-primary-text min-w-0 truncate text-xs font-semibold"
+                      title={displayName}
+                    >
+                      {displayName}
+                    </p>
+                    {!isCustom && (
+                      <TradeItemNote item={item} name={displayName} />
                     )}
-                  </p>
-                )}
+                  </div>
 
-                {/* Badge row */}
-                <div className="mt-1 flex flex-wrap items-center gap-1">
-                  {item.isOG ? (
-                    <span className="bg-tertiary-bg text-primary-text inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold">
+                  {!isCustom && (
+                    <div className="flex flex-wrap items-center justify-between gap-1">
+                      <p className="text-primary-text text-sm font-bold">
+                        {displayValue}
+                        {item.count > 1 && (
+                          <span className="text-secondary-text ml-1 text-[10px] font-semibold">
+                            ×{item.count}
+                          </span>
+                        )}
+                      </p>
+                      <span
+                        className={`inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold ${
+                          item.isDuped
+                            ? "bg-status-error text-form-button-text"
+                            : "bg-status-success text-form-button-text"
+                        }`}
+                      >
+                        {item.isDuped ? "Duped" : "Clean"}
+                      </span>
+                    </div>
+                  )}
+                  {item.isOG && (
+                    <span className="bg-secondary-bg text-primary-text inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold">
                       OG
                     </span>
-                  ) : (
-                    <span
-                      className={`inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold ${
-                        item.isDuped
-                          ? "bg-status-error text-form-button-text"
-                          : "bg-status-success text-form-button-text"
-                      }`}
-                    >
-                      {item.isDuped ? "Duped" : "Clean"}
-                    </span>
+                  )}
+                  {!isCustom && (
+                    <TradeItemMarketDetails
+                      item={item}
+                      isDuped={item.isDuped}
+                    />
                   )}
                 </div>
               </div>
@@ -309,7 +323,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             return (
               <div
                 key={`${item.id}:${item.name}:${item.isDuped ? "duped" : "clean"}:${item.isOG ? "og" : "regular"}`}
-                className={`group relative ${
+                className={`group border-border-card bg-tertiary-bg/50 relative rounded-xl border p-2.5 ${
                   disableInteraction ? "cursor-not-allowed opacity-60" : ""
                 }`}
               >

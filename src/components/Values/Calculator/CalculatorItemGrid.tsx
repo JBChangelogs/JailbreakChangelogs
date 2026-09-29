@@ -11,18 +11,10 @@ import { Icon } from "../../ui/IconWrapper";
 import { formatCurrencyValue, parseValueString } from "./calculatorUtils";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { QuickAddPopover } from "./QuickAddPopover";
-import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
-import { hasItemValue } from "@/utils/items/itemValue";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  TradeItemMarketDetails,
+  TradeItemNote,
+} from "@/components/trading/TradeItemContext";
 
 interface CalculatorItemGridProps {
   items: TradeItem[];
@@ -45,20 +37,6 @@ interface ItemGroup {
   representative: TradeItem;
   instanceIds: string[];
 }
-
-const NoteButton = ({
-  name,
-  ...buttonProps
-}: { name: string } & React.ComponentProps<"button">) => (
-  <button
-    {...buttonProps}
-    type="button"
-    className="border-border-card bg-secondary-bg text-secondary-text hover:text-primary-text inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border [@media(hover:hover)]:h-6 [@media(hover:hover)]:w-6"
-    aria-label={`Read note for ${name}`}
-  >
-    <Icon icon="mdi:information-outline" className="h-3.5 w-3.5" />
-  </button>
-);
 
 export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
   items,
@@ -159,12 +137,6 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             const isSeasonal = item.season != null || item.data?.season != null;
             const lastInstanceId =
               group.instanceIds[group.instanceIds.length - 1];
-            const demand =
-              selectedType === "duped"
-                ? (item.duped_demand ?? item.data?.duped_demand)
-                : (item.demand ?? item.data?.demand);
-            const trend = item.trend ?? item.data?.trend;
-            const notes = item.notes ?? item.data?.notes;
 
             const handleDecrement = () => {
               if (lastInstanceId) onRemove?.(lastInstanceId);
@@ -260,30 +232,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                     >
                       {displayName}
                     </p>
-                    {hasItemValue(notes) && (
-                      <>
-                        <span className="hidden [@media(hover:hover)]:inline-flex">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <NoteButton name={displayName} />
-                            </TooltipTrigger>
-                            <TooltipContent className="max-h-64 max-w-72 overflow-y-auto whitespace-pre-wrap">
-                              {notes}
-                            </TooltipContent>
-                          </Tooltip>
-                        </span>
-                        <span className="inline-flex [@media(hover:hover)]:hidden">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <NoteButton name={displayName} />
-                            </PopoverTrigger>
-                            <PopoverContent className="max-h-64 w-64 overflow-y-auto p-3 text-sm whitespace-pre-wrap">
-                              {notes}
-                            </PopoverContent>
-                          </Popover>
-                        </span>
-                      </>
-                    )}
+                    <TradeItemNote item={item} name={displayName} />
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-1">
                     <p className="text-primary-text text-sm font-bold">
@@ -317,30 +266,10 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       {selectedType === "duped" ? "Duped" : "Clean"}
                     </button>
                   </div>
-                  <div className="border-border-card space-y-1 border-t pt-2 text-[11px]">
-                    <div className="flex min-w-0 items-center gap-1">
-                      <span className="text-secondary-text w-11 shrink-0">
-                        Demand
-                      </span>
-                      <span
-                        className={`${getDemandColor(demand)} min-w-0 truncate rounded px-1.5 py-0.5 font-semibold whitespace-nowrap`}
-                        title={hasItemValue(demand) ? demand : "Unknown"}
-                      >
-                        {hasItemValue(demand) ? demand : "Unknown"}
-                      </span>
-                    </div>
-                    <div className="flex min-w-0 items-center gap-1">
-                      <span className="text-secondary-text w-11 shrink-0">
-                        Trend
-                      </span>
-                      <span
-                        className={`${getTrendColor(trend)} min-w-0 truncate rounded px-1.5 py-0.5 font-semibold whitespace-nowrap`}
-                        title={hasItemValue(trend) ? trend : "Unknown"}
-                      >
-                        {hasItemValue(trend) ? trend : "Unknown"}
-                      </span>
-                    </div>
-                  </div>
+                  <TradeItemMarketDetails
+                    item={item}
+                    isDuped={selectedType === "duped"}
+                  />
                 </div>
               </div>
             );
