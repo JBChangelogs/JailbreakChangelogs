@@ -440,10 +440,11 @@ export default function UserTradeHistory({
   );
 
   useEffect(() => {
-    if (!catalogQuery.data) return;
+    const catalogItems = catalogQuery.data;
+    if (!catalogItems) return;
     setLoadedCatalogItems((current) => {
       const next = { ...current };
-      catalogQuery.data.forEach((item) => {
+      catalogItems.forEach((item) => {
         next[item.id] = item;
       });
       return next;
