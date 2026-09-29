@@ -388,7 +388,9 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                             className="ml-2"
                           >
                             {loadingFollow[user.id]
-                              ? "..."
+                              ? followingStatus[user.id]
+                                ? "Unfollowing..."
+                                : "Following..."
                               : followingStatus[user.id]
                                 ? "Unfollow"
                                 : "Follow"}
