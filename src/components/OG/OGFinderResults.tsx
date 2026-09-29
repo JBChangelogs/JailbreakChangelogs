@@ -11,7 +11,7 @@ import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { useBatchItems } from "@/hooks/useBatchItems";
+import { useCatalogValues } from "@/hooks/usePartialItems";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { Spinner } from "@/components/ui/Spinner";
 import OGFinderFAQ from "./OGFinderFAQ";
@@ -133,14 +133,10 @@ export default function OGFinderResults({
     ...batchedUsers,
   };
 
-  const limitedItemsQuery = useBatchItems(
-    initialData?.results.map((item) => item.item_id) ?? [],
-    showOnlyLimited,
+  const limitedItemsQuery = useCatalogValues(showOnlyLimited);
+  const catalogValuesById = new Map(
+    (limitedItemsQuery.data ?? []).map((item) => [item.id, item]),
   );
-  const catalogItems = limitedItemsQuery.data ?? items;
-
-  // Create items map for the limited-item filter.
-  const itemsMap = new Map(catalogItems.map((item) => [item.id, item]));
 
   // Parse values like "23.4m" -> 23400000
   const parseNumericValue = (value: string | null): number => {
@@ -233,8 +229,7 @@ export default function OGFinderResults({
         selectedCategories.includes(item.categoryTitle);
 
       if (showOnlyLimited) {
-        const itemData = itemsMap.get(item.item_id);
-        if (!itemData || itemData.is_limited !== 1) return false;
+        if (catalogValuesById.get(item.item_id)?.is_limited !== 1) return false;
       }
 
       return matchesSearch && matchesCategory;
@@ -644,7 +639,7 @@ export default function OGFinderResults({
                 onCardClick={handleCardClick}
                 itemCounts={itemCounts}
                 duplicateOrders={duplicateOrders}
-                items={catalogItems}
+                items={items}
               />
             )}
           </div>

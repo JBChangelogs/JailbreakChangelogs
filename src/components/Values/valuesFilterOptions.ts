@@ -96,14 +96,10 @@ export const filterOptions = [
   ...chipFilterOptions,
 ];
 
-const itemTypeFilters = new Set(
-  filterGroups.flatMap((group) => group.options.map((option) => option.value)),
-);
-
-export function getCatalogItemType(filter: FilterSort): string | undefined {
-  if (!itemTypeFilters.has(filter)) return undefined;
-  const type = filter.replace(/^name-/, "");
-  return type === "furnitures" ? "furniture" : type;
+export function getServerFilters(filters: FilterSort[]): FilterSort[] {
+  return filters.filter(
+    (filter) => filter !== "favorites" && filter !== "name-all-items",
+  );
 }
 
 const filterLabelMap: Record<FilterSort, string> = filterOptions.reduce(

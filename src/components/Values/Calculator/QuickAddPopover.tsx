@@ -21,7 +21,7 @@ import {
 import {
   filterGroups,
   filterOptions,
-  getCatalogItemType,
+  getServerFilters,
 } from "@/components/Values/valuesFilterOptions";
 import { Icon } from "../../ui/IconWrapper";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
@@ -86,10 +86,9 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [page, setPage] = useState(1);
-  const catalogType = getCatalogItemType(filterSort);
   const catalog = useItemCatalogPage(searchQuery, page, open && useCatalogApi, {
     sort: "cash-desc",
-    type: catalogType,
+    filters: getServerFilters([filterSort]),
   });
   const visibleItems: TradeItem[] = useMemo(
     () => (useCatalogApi ? (catalog.data?.items ?? []) : items),

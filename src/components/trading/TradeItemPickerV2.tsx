@@ -28,7 +28,7 @@ import {
   filterGroups,
   filterOptions,
   getFilterSortsButtonLabel,
-  getCatalogItemType,
+  getServerFilters,
 } from "@/components/Values/valuesFilterOptions";
 import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 import {
@@ -208,17 +208,9 @@ export default function TradeItemPickerV2({
     () => valueSortGroups.flatMap((group) => group.options),
     [valueSortGroups],
   );
-  const selectedCategory = multiSelectFilters
-    ? filterSorts.length === 1
-      ? filterSorts[0]
-      : undefined
-    : filterSort;
-  const categoryType = selectedCategory
-    ? getCatalogItemType(selectedCategory)
-    : undefined;
   const catalog = useItemCatalogPage(searchQuery, page, useCatalogApi, {
     sort: valueSort,
-    type: categoryType,
+    filters: getServerFilters(multiSelectFilters ? filterSorts : [filterSort]),
   });
   const visibleItems: TradeItem[] = useMemo(
     () => (useCatalogApi ? (catalog.data?.items ?? []) : items),

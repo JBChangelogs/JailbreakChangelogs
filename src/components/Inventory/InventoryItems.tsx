@@ -2,15 +2,16 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { RobloxUser, Item } from "@/types";
+import { RobloxUser, Item, ValueSort } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
-import InventoryFilters from "./InventoryFilters";
+import InventoryFilters, { type InventorySortGroup } from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../ui/IconWrapper";
 import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
-import { usePartialItems } from "@/hooks/usePartialItems";
-import { useBatchItems } from "@/hooks/useBatchItems";
+import { sortByValueSort } from "@/utils/trading/values";
+import { usePartialItems, useCatalogValues } from "@/hooks/usePartialItems";
+import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 
 interface InventoryItemsProps {
   initialData: InventoryData;
@@ -23,16 +24,30 @@ interface InventoryItemsProps {
   onShowOnlyLimitedChange?: (val: boolean) => void;
 }
 
-const parseNumericValue = (value: string | null): number => {
-  if (!value || value === "N/A") return -1;
-  const lower = value.toLowerCase();
-  const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
-  if (Number.isNaN(num)) return -1;
-  if (lower.includes("k")) return num * 1_000;
-  if (lower.includes("m")) return num * 1_000_000;
-  if (lower.includes("b")) return num * 1_000_000_000;
-  return num;
+const DATE_SORT_GROUP: InventorySortGroup = {
+  label: "Date",
+  options: [
+    { value: "created-desc", label: "Newest First" },
+    { value: "created-asc", label: "Oldest First" },
+  ],
 };
+const SNAPSHOT_SORTS = new Set([
+  "created-desc",
+  "created-asc",
+  "alpha-asc",
+  "alpha-desc",
+  "random",
+  "unique-circulation-desc",
+  "unique-circulation-asc",
+  "season-number-asc",
+  "season-number-desc",
+  "season-level-asc",
+  "season-level-desc",
+]);
+const UNSUPPORTED_SORT_GROUPS = new Set(["Last Updated"]);
+
+const snapshotValue = (item: InventoryItem, field: string) =>
+  item.info.find((entry) => entry.title === field)?.value ?? null;
 
 export default function InventoryItems({
   initialData,
@@ -54,16 +69,17 @@ export default function InventoryItems({
   const [showOnlyUntradable, setShowOnlyUntradable] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
 
-  const [sortOrder, setSortOrder] = useState<
-    | "alpha-asc"
-    | "alpha-desc"
-    | "created-asc"
-    | "created-desc"
-    | "cash-desc"
-    | "cash-asc"
-    | "duped-desc"
-    | "duped-asc"
-  >("created-desc");
+  const [sortOrder, setSortOrder] = useState("created-desc");
+  const itemSortGroups = useItemSortGroups();
+  const sortGroups = useMemo(
+    () => [
+      DATE_SORT_GROUP,
+      ...itemSortGroups.filter(
+        (group) => !UNSUPPORTED_SORT_GROUPS.has(group.label),
+      ),
+    ],
+    [itemSortGroups],
+  );
 
   // Merge inventory data with metadata from item/list endpoint
   // This ensures fields like timesTraded and uniqueCirculation
@@ -198,29 +214,20 @@ export default function InventoryItems({
   const currentItemsData = useMemo(() => propItemsData || [], [propItemsData]);
   const partialItemsQuery = usePartialItems(showMissingItems);
   const metadataFilterActive =
-    showOnlyLimited || showOnlyTradable || showOnlyUntradable;
-  const filterIds = useMemo(
+    (showOnlyLimited || showOnlyTradable || showOnlyUntradable) &&
+    !showMissingItems;
+  const catalogValuesQuery = useCatalogValues(
+    metadataFilterActive || !SNAPSHOT_SORTS.has(sortOrder),
+  );
+  const catalogValuesById = useMemo(
     () =>
-      Array.from(
-        new Set(
-          [...initialData.data, ...(initialData.duplicates ?? [])].map(
-            (item) => item.item_id,
-          ),
-        ),
-      ),
-    [initialData.data, initialData.duplicates],
+      new Map((catalogValuesQuery.data ?? []).map((item) => [item.id, item])),
+    [catalogValuesQuery.data],
   );
-  const filterItemsQuery = useBatchItems(
-    filterIds,
-    metadataFilterActive && !showMissingItems,
-  );
-  const catalogItems = filterItemsQuery.data ?? currentItemsData;
   const catalogById = useMemo(
-    () => new Map(catalogItems.map((item) => [item.id, item])),
-    [catalogItems],
+    () => new Map(currentItemsData.map((item) => [item.id, item])),
+    [currentItemsData],
   );
-  const snapshotValue = (item: InventoryItem, field: string) =>
-    item.info.find((entry) => entry.title === field)?.value ?? null;
 
   const getUserDisplay = (userId: string) => {
     const user = robloxUsers[userId];
@@ -274,6 +281,35 @@ export default function InventoryItems({
         return maxHistoryTime * 1000;
       }
       return 0;
+    };
+
+    const sortEntries = <E extends { item: InventoryItem }>(entries: E[]) => {
+      if (sortOrder === "created-asc" || sortOrder === "created-desc") {
+        const direction = sortOrder === "created-asc" ? 1 : -1;
+        return [...entries].sort(
+          (a, b) => (getLatestTime(a.item) - getLatestTime(b.item)) * direction,
+        );
+      }
+      const keyed = entries.map((entry) => {
+        const values = catalogValuesById.get(entry.item.item_id);
+        return {
+          entry,
+          name: entry.item.title,
+          season: entry.item.season,
+          level: entry.item.level,
+          cash_value:
+            values?.cash_value ?? snapshotValue(entry.item, "Cash Value"),
+          duped_value:
+            values?.duped_value ?? snapshotValue(entry.item, "Duped Value"),
+          demand: values?.demand ?? null,
+          trend: values?.trend ?? null,
+          uniqueCirculation: entry.item.uniqueCirculation,
+        };
+      });
+      return sortByValueSort(keyed, sortOrder as ValueSort, {
+        getUniqueCirculation: (key) => key.uniqueCirculation,
+        fallbackSortForDemandTrend: "none",
+      }).map((key) => key.entry);
     };
 
     if (showMissingItems) {
@@ -350,30 +386,14 @@ export default function InventoryItems({
         };
       });
 
-      // Sort missing items
-      return [...mappedMissingItems].sort((a, b) => {
-        switch (sortOrder) {
-          case "alpha-asc":
-            return a.name.localeCompare(b.name);
-          case "alpha-desc":
-            return b.name.localeCompare(a.name);
-          case "cash-desc":
-            return a.name.localeCompare(b.name);
-          case "cash-asc":
-            return a.name.localeCompare(b.name);
-          case "duped-desc":
-            return a.name.localeCompare(b.name);
-          case "duped-asc":
-            return a.name.localeCompare(b.name);
-          default:
-            return a.name.localeCompare(b.name);
-        }
-      });
+      return sortOrder === "created-asc" || sortOrder === "created-desc"
+        ? [...mappedMissingItems].sort((a, b) => a.name.localeCompare(b.name))
+        : sortEntries(mappedMissingItems);
     }
 
     // Original logic for showing owned items
     const filtered = mergedInventoryData.filter((item) => {
-      const itemData = catalogById.get(item.item_id);
+      const itemData = catalogValuesById.get(item.item_id);
 
       // Search filter
       if (
@@ -443,60 +463,13 @@ export default function InventoryItems({
       };
     });
 
-    // Sort the items
-    return [...mappedItems].sort((a, b) => {
-      switch (sortOrder) {
-        case "alpha-asc":
-          return a.item.title.localeCompare(b.item.title);
-        case "alpha-desc":
-          return b.item.title.localeCompare(a.item.title);
-        case "created-asc": {
-          return getLatestTime(a.item) - getLatestTime(b.item);
-        }
-        case "created-desc": {
-          return getLatestTime(b.item) - getLatestTime(a.item);
-        }
-        case "cash-desc":
-          const aCashDesc = parseNumericValue(
-            snapshotValue(a.item, "Cash Value"),
-          );
-          const bCashDesc = parseNumericValue(
-            snapshotValue(b.item, "Cash Value"),
-          );
-          return bCashDesc - aCashDesc;
-        case "cash-asc":
-          const aCashAsc = parseNumericValue(
-            snapshotValue(a.item, "Cash Value"),
-          );
-          const bCashAsc = parseNumericValue(
-            snapshotValue(b.item, "Cash Value"),
-          );
-          return aCashAsc - bCashAsc;
-        case "duped-desc":
-          const aDupedDesc = parseNumericValue(
-            snapshotValue(a.item, "Duped Value"),
-          );
-          const bDupedDesc = parseNumericValue(
-            snapshotValue(b.item, "Duped Value"),
-          );
-          return bDupedDesc - aDupedDesc;
-        case "duped-asc":
-          const aDupedAsc = parseNumericValue(
-            snapshotValue(a.item, "Duped Value"),
-          );
-          const bDupedAsc = parseNumericValue(
-            snapshotValue(b.item, "Duped Value"),
-          );
-          return aDupedAsc - bDupedAsc;
-        default:
-          return 0;
-      }
-    });
+    return sortEntries(mappedItems);
   }, [
     showMissingItems,
     mergedInventoryData,
     partialItemsQuery.data,
     catalogById,
+    catalogValuesById,
     searchTerm,
     selectedCategories,
     showOnlyLimited,
@@ -588,6 +561,7 @@ export default function InventoryItems({
         onUntradableFilterToggle={handleUntradableFilterToggle}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
+        sortGroups={sortGroups}
       />
 
       {/* Item Counter */}
@@ -639,13 +613,13 @@ export default function InventoryItems({
         </div>
       )}
 
-      {metadataFilterActive && !showMissingItems && filterItemsQuery.isError ? (
+      {catalogValuesQuery.isError ? (
         <div className="text-secondary-text py-8 text-center">
-          Couldn&apos;t load item details for this filter.{" "}
+          Couldn&apos;t load item values for this filter or sort.{" "}
           <button
             type="button"
             className="text-link underline"
-            onClick={() => void filterItemsQuery.refetch()}
+            onClick={() => void catalogValuesQuery.refetch()}
           >
             Try again
           </button>
@@ -671,9 +645,7 @@ export default function InventoryItems({
           isLoading={
             isFiltering ||
             (showMissingItems && partialItemsQuery.isPending) ||
-            (metadataFilterActive &&
-              !showMissingItems &&
-              filterItemsQuery.isPending)
+            catalogValuesQuery.isLoading
           }
           userId={initialData.user_id}
           itemCounts={itemCounts}

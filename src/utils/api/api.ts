@@ -626,14 +626,21 @@ export interface PartialItem {
   type: string;
 }
 
-export async function fetchPartialItems(
+// `fields` is required by the API (it 500s without it); `id` is always included
+export async function fetchPartialItems<T extends { id: number }>(
+  fields: readonly (keyof T & string)[],
   signal?: AbortSignal,
-): Promise<PartialItem[]> {
+): Promise<T[]> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
     "/items/partial",
   );
-  const response = await fetch(url, {
+  const partialUrl = new URL(url);
+  partialUrl.searchParams.set(
+    "fields",
+    Array.from(new Set(["id", ...fields])).join(","),
+  );
+  const response = await fetch(partialUrl, {
     headers,
     credentials: "include",
     signal,
@@ -645,7 +652,7 @@ export async function fetchPartialItems(
     ? data
     : (data as { items?: unknown })?.items;
   if (!Array.isArray(items)) throw new Error("Invalid partial item response");
-  return items as PartialItem[];
+  return items as T[];
 }
 
 export interface ItemsPage<T> {
@@ -658,9 +665,20 @@ export interface ItemsPage<T> {
 
 export interface ItemsPageOptions {
   sort?: string;
-  type?: string;
+  // Sent as a comma-separated `filter` param: OR'd within a group, AND'd across
+  filters?: string[];
   minValue?: number;
   maxValue?: number;
+}
+
+function applyItemsPageOptions(url: URL, options: ItemsPageOptions) {
+  if (options.sort) url.searchParams.set("sort", options.sort);
+  if (options.filters?.length)
+    url.searchParams.set("filter", options.filters.join(","));
+  if (options.minValue !== undefined)
+    url.searchParams.set("min_value", String(options.minValue));
+  if (options.maxValue !== undefined)
+    url.searchParams.set("max_value", String(options.maxValue));
 }
 
 export async function fetchItemSortGroups(
@@ -688,12 +706,7 @@ export async function fetchItemsClientPage(
   const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items");
   const itemsUrl = new URL(url);
   itemsUrl.searchParams.set("page", String(page));
-  if (options.sort) itemsUrl.searchParams.set("sort", options.sort);
-  if (options.type) itemsUrl.searchParams.set("type", options.type);
-  if (options.minValue !== undefined)
-    itemsUrl.searchParams.set("min_value", String(options.minValue));
-  if (options.maxValue !== undefined)
-    itemsUrl.searchParams.set("max_value", String(options.maxValue));
+  applyItemsPageOptions(itemsUrl, options);
   const response = await fetch(itemsUrl, {
     headers,
     credentials: "include",
@@ -718,12 +731,7 @@ export async function searchItemsClientPage(
   const searchUrl = new URL(url);
   searchUrl.searchParams.set("query", query);
   searchUrl.searchParams.set("page", String(page));
-  if (options.sort) searchUrl.searchParams.set("sort", options.sort);
-  if (options.type) searchUrl.searchParams.set("type", options.type);
-  if (options.minValue !== undefined)
-    searchUrl.searchParams.set("min_value", String(options.minValue));
-  if (options.maxValue !== undefined)
-    searchUrl.searchParams.set("max_value", String(options.maxValue));
+  applyItemsPageOptions(searchUrl, options);
 
   const response = await fetch(searchUrl, {
     headers,

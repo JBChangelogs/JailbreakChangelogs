@@ -11,10 +11,7 @@ import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";
 import { Button } from "../ui/button";
-import {
-  getCatalogItemType,
-  getFilterSortsDisplayNames,
-} from "./valuesFilterOptions";
+import { getFilterSortsDisplayNames } from "./valuesFilterOptions";
 
 interface ValuesItemsGridProps {
   items: Item[];
@@ -93,9 +90,7 @@ export default function ValuesItemsGrid({
   }, [page, setPage, totalPages]);
 
   const hasCategoryActive = selectedFilterSorts.length > 0;
-  const hasLocalFilters =
-    selectedFilterSorts.filter((filter) => getCatalogItemType(filter)).length >
-      1 || selectedFilterSorts.some((filter) => !getCatalogItemType(filter));
+  const hasLocalFilters = selectedFilterSorts.includes("favorites");
   const categoryNames = getFilterSortsDisplayNames(selectedFilterSorts);
 
   const handlePageChange = (
@@ -188,7 +183,7 @@ export default function ValuesItemsGrid({
               : "";
 
             if (hasLocalFilters) {
-              return `Showing ${displayedItems.length} items on this page after local filters (${totalItemsCount} before those filters)`;
+              return `Showing ${displayedItems.length} favorited items on this page (${totalItemsCount} before favorites filter)`;
             }
 
             if (debouncedSearchTerm) {

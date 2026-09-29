@@ -33,7 +33,7 @@ import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import { useValueSortState } from "@/hooks/useValueSortState";
 import { useValuesFilterMode } from "@/hooks/useValuesFilterMode";
 import { useValuesRangePreference } from "@/hooks/useValuesRangePreference";
-import { filterOptions, getCatalogItemType } from "./valuesFilterOptions";
+import { filterOptions, getServerFilters } from "./valuesFilterOptions";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -53,11 +53,6 @@ const parseFilterSorts = (
     : [];
 
 const MAX_VALUE_RANGE = 50_000_000;
-function getBackendType(filters: FilterSort[]): string | undefined {
-  const categories = filters.filter((filter) => getCatalogItemType(filter));
-  if (categories.length !== 1) return undefined;
-  return getCatalogItemType(categories[0]);
-}
 
 export default function ValuesClient() {
   const { user } = useAuthContext();
@@ -275,9 +270,9 @@ export default function ValuesClient() {
     setAppliedMaxValue,
   } = useValuesRangePreference(MAX_VALUE_RANGE, true);
 
-  const backendType = getBackendType(selectedFilterSorts);
-  const backendCategory = selectedFilterSorts.find((filter) =>
-    getCatalogItemType(filter),
+  const serverFilters = useMemo(
+    () => getServerFilters(selectedFilterSorts),
+    [selectedFilterSorts],
   );
   const serverMinValue = appliedMinValue > 0 ? appliedMinValue : undefined;
   const serverMaxValue =
@@ -288,24 +283,21 @@ export default function ValuesClient() {
       page,
       searchQuery,
       valueSort,
-      backendType,
+      serverFilters,
       serverMinValue,
       serverMaxValue,
     ],
-    queryFn: ({ signal }) =>
-      searchQuery
-        ? searchItemsClientPage(searchQuery, Math.max(1, page), signal, {
-            sort: valueSort,
-            type: backendType,
-            minValue: serverMinValue,
-            maxValue: serverMaxValue,
-          })
-        : fetchItemsClientPage(Math.max(1, page), signal, {
-            sort: valueSort,
-            type: backendType,
-            minValue: serverMinValue,
-            maxValue: serverMaxValue,
-          }),
+    queryFn: ({ signal }) => {
+      const options = {
+        sort: valueSort,
+        filters: serverFilters,
+        minValue: serverMinValue,
+        maxValue: serverMaxValue,
+      };
+      return searchQuery
+        ? searchItemsClientPage(searchQuery, Math.max(1, page), signal, options)
+        : fetchItemsClientPage(Math.max(1, page), signal, options);
+    },
   });
   const items = data?.items ?? EMPTY_ITEMS;
 
@@ -373,21 +365,12 @@ export default function ValuesClient() {
 
   const sortedItems = useMemo(() => {
     if (!data) return EMPTY_ITEMS;
+    if (!selectedFilterSorts.includes("favorites")) return items;
     const favoritesData = effectiveFavorites.map((id) => ({
       item_id: String(id),
     }));
-    const clientFilters = selectedFilterSorts.filter(
-      (filter) => !backendType || filter !== backendCategory,
-    );
-    return filterByTypes(items, clientFilters, favoritesData);
-  }, [
-    data,
-    items,
-    selectedFilterSorts,
-    backendType,
-    backendCategory,
-    effectiveFavorites,
-  ]);
+    return filterByTypes(items, ["favorites"], favoritesData);
+  }, [data, items, selectedFilterSorts, effectiveFavorites]);
 
   return (
     <ValuesErrorBoundary>
