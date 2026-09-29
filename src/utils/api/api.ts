@@ -51,6 +51,7 @@ import { parseSortGroups, type SortGroup } from "@/utils/api/sortGroups";
 import {
   Item,
   ItemDetails,
+  type ItemType,
   RobloxUser,
   DuplicateVariantsResponse,
   DupeOwnerSearchResult,
@@ -80,6 +81,26 @@ export const ENABLE_REALTIME_NOTIFICATIONS_WS =
   process.env.NEXT_PUBLIC_ENABLE_REALTIME_NOTIFICATIONS_WS === "true";
 export const INVENTORY_API_SOURCE_HEADER = process.env
   .NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER as string;
+
+const ITEM_TYPES_BY_KEY: Record<string, ItemType> = {
+  vehicle: "Vehicle",
+  spoiler: "Spoiler",
+  rim: "Rim",
+  bodycolor: "Body Color",
+  hyperchrome: "HyperChrome",
+  texture: "Texture",
+  tiresticker: "Tire Sticker",
+  tirestyle: "Tire Style",
+  drift: "Drift",
+  furniture: "Furniture",
+  horn: "Horn",
+  weaponskin: "Weapon Skin",
+};
+
+function canonicalItemType(type: string): string {
+  const key = type.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return ITEM_TYPES_BY_KEY[key] ?? type.trim();
+}
 
 const USER_BANNED_FALLBACK_MESSAGE =
   "This user is banned from Jailbreak Changelogs.";
@@ -796,7 +817,7 @@ export async function fetchItem(
 ): Promise<ItemDetails | null> {
   try {
     const itemName = decodeURIComponent(name);
-    const itemType = decodeURIComponent(type);
+    const itemType = canonicalItemType(decodeURIComponent(type));
 
     const response = await fetch(
       `${BASE_API_URL}/items/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`,
@@ -888,7 +909,7 @@ export async function fetchItemClient(
 ): Promise<ItemDetails | null> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    `/items/${encodeURIComponent(type)}/${encodeURIComponent(name)}`,
+    `/items/${encodeURIComponent(canonicalItemType(type))}/${encodeURIComponent(name)}`,
   );
   const response = await fetch(url, { headers, credentials: "include" });
 
