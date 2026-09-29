@@ -167,7 +167,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/favorites",
+        "/v1/favorites",
       );
       const response = await fetch(url, {
         method: isFavorited ? "DELETE" : "POST",

@@ -12,7 +12,7 @@ export async function submitTestimonial(
 ): Promise<SubmitTestimonialResponse> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    "/testimonials",
+    "/v1/testimonials",
   );
   const response = await fetch(url, {
     method: "POST",

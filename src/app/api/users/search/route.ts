@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     const fields =
       "id,username,global_name,avatar,banner,custom_banner,accent_color,usernumber,premiumtype,created_at,settings,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
 
-    const url = new URL(`${BASE_API_URL}/users/search`);
+    const url = new URL(`${BASE_API_URL}/v1/users/search`);
     url.searchParams.set("username", username);
     url.searchParams.set("limit", limit.toString());
     url.searchParams.set("fields", fields);

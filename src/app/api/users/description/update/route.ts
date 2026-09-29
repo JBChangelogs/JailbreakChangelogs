@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const resp = await fetch(`${BASE_API_URL}/users/description/update`, {
+    const resp = await fetch(`${BASE_API_URL}/v1/users/description/update`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ user: token, description }),

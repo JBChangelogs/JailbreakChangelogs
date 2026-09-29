@@ -242,7 +242,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        editingServer ? `/servers/${editingServer.id}` : "/servers",
+        editingServer ? `/v1/servers/${editingServer.id}` : "/v1/servers",
       );
 
       const response = await fetch(url, {

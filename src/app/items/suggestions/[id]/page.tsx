@@ -490,7 +490,7 @@ export default function ValueSuggestionDetailPage() {
       setRouteError(null);
       try {
         const { url: suggestionUrl, headers: devTokenHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL!, `/value-suggestions/${id}`);
+          buildApiFetchRequest(PUBLIC_API_URL!, `/v1/value-suggestions/${id}`);
         const res = await fetch(suggestionUrl, {
           credentials: "include",
           headers: devTokenHeaders,
@@ -541,7 +541,7 @@ export default function ValueSuggestionDetailPage() {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/value-suggestions/user/${suggesterId}/stats`,
+          `/v1/value-suggestions/user/${suggesterId}/stats`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) return;
@@ -616,7 +616,7 @@ export default function ValueSuggestionDetailPage() {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
-        `/value-suggestions/${id}/votes`,
+        `/v1/value-suggestions/${id}/votes`,
       );
       const res = await fetch(url, { credentials: "include", headers });
       if (!res.ok) return;
@@ -667,7 +667,7 @@ export default function ValueSuggestionDetailPage() {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
-        `/value-suggestions/${id}/vote`,
+        `/v1/value-suggestions/${id}/vote`,
       );
       const res = await fetch(url, {
         method: removing ? "DELETE" : "POST",
@@ -728,7 +728,7 @@ export default function ValueSuggestionDetailPage() {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
-        `/value-suggestions/${id}`,
+        `/v1/value-suggestions/${id}`,
       );
       const res = await fetch(url, {
         method: "PATCH",
@@ -839,7 +839,7 @@ export default function ValueSuggestionDetailPage() {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/items/${item.id}/history`,
+          `/v1/items/${item.id}/history`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) return;

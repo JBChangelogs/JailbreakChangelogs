@@ -130,7 +130,7 @@ export function useConversationList({
 
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          `/users/get?id=${encodeURIComponent(id)}&fields=${USER_LOOKUP_FIELDS}`,
+          `/v1/users/get?id=${encodeURIComponent(id)}&fields=${USER_LOOKUP_FIELDS}`,
         );
         const response = await fetch(url, {
           method: "GET",
@@ -169,7 +169,7 @@ export function useConversationList({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/users/get/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
+        `/v1/users/get/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
       );
       const response = await fetch(url, {
         method: "GET",
@@ -251,7 +251,7 @@ export function useConversationList({
 
         const { url: convUrl, headers: convHeaders } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          "/messages",
+          "/v1/messages",
         );
         const response = await fetch(convUrl, {
           method: "GET",
@@ -441,7 +441,7 @@ export function useConversationList({
         }
 
         const { url: blockedUrl, headers: blockedHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/messages/blocked");
+          buildApiFetchRequest(PUBLIC_API_URL, "/v1/messages/blocked");
         const response = await fetch(blockedUrl, {
           method: "GET",
           credentials: "include",

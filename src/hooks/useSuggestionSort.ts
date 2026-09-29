@@ -21,7 +21,7 @@ export function useSuggestionSort(
 
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      "/value-suggestions/sorts",
+      "/v1/value-suggestions/sorts",
     );
     fetch(url, { credentials: "include", headers })
       .then((response) => (response.ok ? response.json() : []))

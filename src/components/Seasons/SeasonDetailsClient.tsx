@@ -55,7 +55,7 @@ export default function SeasonDetailsClient({
         }
 
         const { url: seasonsUrl, headers: seasonsHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/seasons");
+          buildApiFetchRequest(PUBLIC_API_URL, "/v1/seasons");
         const response = await fetch(seasonsUrl, {
           credentials: "include",
           headers: {

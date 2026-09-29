@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const upstream = await fetch(`${BASE_API_URL}/users/followers/remove`, {
+  const upstream = await fetch(`${BASE_API_URL}/v1/users/followers/remove`, {
     method: "DELETE",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ follower: token, following }),

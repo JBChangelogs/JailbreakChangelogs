@@ -389,7 +389,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
           const { url: reactBaseUrl, headers: reactHeaders } =
             buildApiFetchRequest(
               PUBLIC_API_URL!,
-              `/comments/${commentId}/react`,
+              `/v1/comments/${commentId}/react`,
             );
           const reactUrl = new URL(reactBaseUrl);
           reactUrl.searchParams.set("emoji", emoji);
@@ -488,7 +488,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
   }, []);
 
   useEffect(() => {
-    fetch(`${PUBLIC_API_URL}/comments/sorts`)
+    fetch(`${PUBLIC_API_URL}/v1/comments/sorts`)
       .then((r) => r.json())
       .then((data: unknown) => {
         const groups = parseSortGroups(data);
@@ -545,7 +545,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
   }, [availableSorts, sortPrefKey]);
 
   useEffect(() => {
-    fetch(`${PUBLIC_API_URL}/emojis/string`, {
+    fetch(`${PUBLIC_API_URL}/v1/emojis/string`, {
       credentials: "include",
     })
       .then((r) => r.json())
@@ -647,7 +647,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         const { url: commentsBaseUrl, headers: commentsHeaders } =
           buildApiFetchRequest(
             PUBLIC_API_URL!,
-            `/comments/${commentType}/${changelogId}`,
+            `/v1/comments/${commentType}/${changelogId}`,
           );
         const urlWithPage = new URL(commentsBaseUrl);
         urlWithPage.searchParams.set("page", String(targetPage));
@@ -737,7 +737,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
     try {
       const { url: submitCommentUrl, headers: submitCommentHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL!, "/comments");
+        buildApiFetchRequest(PUBLIC_API_URL!, "/v1/comments");
       const response = await fetch(submitCommentUrl, {
         method: "POST",
         headers: {
@@ -882,7 +882,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       setUpdatingCommentId(commentId);
 
       const { url: editCommentUrl, headers: editCommentHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL!, `/comments/${commentId}`);
+        buildApiFetchRequest(PUBLIC_API_URL!, `/v1/comments/${commentId}`);
       const response = await fetch(editCommentUrl, {
         method: "PATCH",
         headers: { ...editCommentHeaders, "Content-Type": "application/json" },
@@ -1009,7 +1009,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
     try {
       const { url: deleteCommentUrl, headers: deleteCommentHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL!, `/comments/${commentId}`);
+        buildApiFetchRequest(PUBLIC_API_URL!, `/v1/comments/${commentId}`);
       const response = await fetch(deleteCommentUrl, {
         method: "DELETE",
         credentials: "include",
@@ -1103,7 +1103,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
     try {
       const { url: submitReplyUrl, headers: submitReplyHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL!, "/comments");
+        buildApiFetchRequest(PUBLIC_API_URL!, "/v1/comments");
       const response = await fetch(submitReplyUrl, {
         method: "POST",
         headers: { ...submitReplyHeaders, "Content-Type": "application/json" },
@@ -1258,7 +1258,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       const sanitizedReason = sanitizeText(reason.trim());
       const { url: reportUrl, headers: reportHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/comments/${reportingCommentId}/report`,
+        `/v1/comments/${reportingCommentId}/report`,
       );
       const response = await fetch(reportUrl, {
         method: "POST",

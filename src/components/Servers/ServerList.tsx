@@ -91,8 +91,8 @@ const fetchServersPage = async (
   if (query) params.set("query", query);
   if (sort) params.set("sort", sort);
   const path = query
-    ? `/servers/search?${params.toString()}`
-    : `/servers?${params.toString()}`;
+    ? `/v1/servers/search?${params.toString()}`
+    : `/v1/servers?${params.toString()}`;
   const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, path);
   const response = await fetch(url, { cache: "no-store", headers, signal });
   if (!response.ok) {
@@ -190,7 +190,7 @@ const ServerList: React.FC = () => {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          "/servers/sorts",
+          "/v1/servers/sorts",
         );
         const response = await fetch(url, {
           cache: "no-store",
@@ -326,7 +326,7 @@ const ServerList: React.FC = () => {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/servers/${serverToDelete.id}`,
+        `/v1/servers/${serverToDelete.id}`,
       );
       const response = await fetch(url, {
         method: "DELETE",

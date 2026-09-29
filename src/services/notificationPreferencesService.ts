@@ -25,7 +25,7 @@ function getErrorMessage(data: unknown, fallback: string): string {
 export async function fetchAvailableNotificationPreferences(): Promise<
   NotificationPreferenceTitle[]
 > {
-  const url = `${PUBLIC_API_URL}/notifications/preferences/available`;
+  const url = `${PUBLIC_API_URL}/v1/notifications/preferences/available`;
   const resp = await fetch(url, {
     method: "GET",
     credentials: "include",
@@ -48,7 +48,7 @@ export async function fetchUserNotificationPreferences(
 ): Promise<NotificationPreferencesResponse> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    `/notifications/preferences/${encodeURIComponent(userId)}`,
+    `/v1/notifications/preferences/${encodeURIComponent(userId)}`,
   );
   const resp = await fetch(url, {
     method: "GET",
@@ -76,7 +76,7 @@ export async function updateUserNotificationPreferences(
 ): Promise<{ success: boolean; message: string }> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/notifications/preferences",
+    "/v1/notifications/preferences",
   );
   const resp = await fetch(url, {
     method: "PATCH",

@@ -164,7 +164,7 @@ export default function InventoryCheckerClient({
       if (!initialData || !PUBLIC_API_URL || externalIsLoading) return;
       try {
         const { url: latestSeasonUrl, headers: latestDevTokenHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/seasons/latest");
+          buildApiFetchRequest(PUBLIC_API_URL, "/v1/seasons/latest");
         const latestRes = await fetch(latestSeasonUrl, {
           credentials: "include",
           headers: {

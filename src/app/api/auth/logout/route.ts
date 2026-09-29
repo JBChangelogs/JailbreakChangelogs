@@ -9,7 +9,7 @@ export async function POST() {
   if (token) {
     try {
       await fetch(
-        `${BASE_API_URL}/users/token/invalidate?session_token=${encodeURIComponent(token)}`,
+        `${BASE_API_URL}/v1/users/token/invalidate?session_token=${encodeURIComponent(token)}`,
         {
           method: "POST",
           headers: { "content-type": "application/json" },

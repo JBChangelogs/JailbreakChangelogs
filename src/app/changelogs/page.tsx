@@ -27,7 +27,7 @@ export default function ChangelogsPage() {
         const apiBaseUrl = PUBLIC_API_URL;
 
         const { url: changelogsLatestUrl, headers: changelogsLatestHeaders } =
-          buildApiFetchRequest(apiBaseUrl, "/changelogs/latest");
+          buildApiFetchRequest(apiBaseUrl, "/v1/changelogs/latest");
         const response = await fetch(changelogsLatestUrl, {
           credentials: "include",
           headers: {

@@ -12,7 +12,7 @@ export async function DELETE() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const resp = await fetch(
-      `${BASE_API_URL}/users/delete?session_token=${encodeURIComponent(token)}`,
+      `${BASE_API_URL}/v1/users/delete?session_token=${encodeURIComponent(token)}`,
       {
         method: "DELETE",
         headers: { "content-type": "application/json" },
