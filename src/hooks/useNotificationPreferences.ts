@@ -31,7 +31,7 @@ export function useNotificationPreferences(userId: string | null) {
           // These hit Next.js API routes (server-side calls upstream)
           const [available, userPrefs] = await Promise.all([
             fetchAvailableNotificationPreferences(),
-            fetchUserNotificationPreferences(userId!),
+            fetchUserNotificationPreferences(),
           ]);
 
           const explicitMap = new Map(

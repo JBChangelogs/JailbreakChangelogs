@@ -215,7 +215,7 @@ export default function TradeAdsProfileTab({
         const { url: tradeAdsUrl, headers: tradeAdsHeaders } =
           buildApiFetchRequest(
             baseUrl,
-            `/v1/trades/v2/recent?user=${encodeURIComponent(user.id)}&page=${encodeURIComponent(String(page))}`,
+            `/v2/trades?user=${encodeURIComponent(user.id)}&page=${encodeURIComponent(String(page))}`,
           );
         const response = await fetch(tradeAdsUrl, {
           cache: "no-store",

@@ -25,7 +25,7 @@ function getErrorMessage(data: unknown, fallback: string): string {
 export async function fetchAvailableNotificationPreferences(): Promise<
   NotificationPreferenceTitle[]
 > {
-  const url = `${PUBLIC_API_URL}/v1/notifications/preferences/available`;
+  const url = `${PUBLIC_API_URL}/v2/notifications/preference-options`;
   const resp = await fetch(url, {
     method: "GET",
     credentials: "include",
@@ -43,12 +43,10 @@ export async function fetchAvailableNotificationPreferences(): Promise<
   return Array.isArray(data) ? (data as NotificationPreferenceTitle[]) : [];
 }
 
-export async function fetchUserNotificationPreferences(
-  userId: string,
-): Promise<NotificationPreferencesResponse> {
+export async function fetchUserNotificationPreferences(): Promise<NotificationPreferencesResponse> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    `/v1/notifications/preferences/${encodeURIComponent(userId)}`,
+    "/v2/users/me/notification-preferences",
   );
   const resp = await fetch(url, {
     method: "GET",
@@ -76,7 +74,7 @@ export async function updateUserNotificationPreferences(
 ): Promise<{ success: boolean; message: string }> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
-    "/v1/notifications/preferences",
+    "/v2/users/me/notification-preferences",
   );
   const resp = await fetch(url, {
     method: "PATCH",

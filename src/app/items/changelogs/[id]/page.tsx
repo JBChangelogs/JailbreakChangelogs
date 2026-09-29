@@ -153,7 +153,7 @@ export default function ChangelogDetailsPage() {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v1/value-changelogs/${id}`,
+          `/v2/value-changelogs/${id}`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (ignore) return;

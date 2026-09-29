@@ -490,7 +490,7 @@ export default function ValueSuggestionDetailPage() {
       setRouteError(null);
       try {
         const { url: suggestionUrl, headers: devTokenHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL!, `/v1/value-suggestions/${id}`);
+          buildApiFetchRequest(PUBLIC_API_URL!, `/v2/value-suggestions/${id}`);
         const res = await fetch(suggestionUrl, {
           credentials: "include",
           headers: devTokenHeaders,
@@ -541,7 +541,7 @@ export default function ValueSuggestionDetailPage() {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v1/value-suggestions/user/${suggesterId}/stats`,
+          `/v2/users/${suggesterId}/value-suggestion-stats`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) return;
@@ -616,7 +616,7 @@ export default function ValueSuggestionDetailPage() {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
-        `/v1/value-suggestions/${id}/votes`,
+        `/v2/value-suggestions/${id}/votes`,
       );
       const res = await fetch(url, { credentials: "include", headers });
       if (!res.ok) return;
@@ -667,10 +667,10 @@ export default function ValueSuggestionDetailPage() {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
-        `/v1/value-suggestions/${id}/vote`,
+        `/v2/value-suggestions/${id}/votes/me`,
       );
       const res = await fetch(url, {
-        method: removing ? "DELETE" : "POST",
+        method: removing ? "DELETE" : "PUT",
         credentials: "include",
         ...(removing
           ? { headers }
@@ -728,7 +728,7 @@ export default function ValueSuggestionDetailPage() {
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
-        `/v1/value-suggestions/${id}`,
+        `/v2/value-suggestions/${id}`,
       );
       const res = await fetch(url, {
         method: "PATCH",
@@ -839,7 +839,7 @@ export default function ValueSuggestionDetailPage() {
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v1/items/${item.id}/history`,
+          `/v2/items/${item.id}/history`,
         );
         const res = await fetch(url, { credentials: "include", headers });
         if (!res.ok) return;

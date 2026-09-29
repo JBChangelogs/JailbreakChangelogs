@@ -408,7 +408,7 @@ export default function UserProfileClient({
         setIsLoadingFollow(true);
         try {
           const response = await fetch(
-            `${PUBLIC_API_URL}/v1/users/following/get?user=${currentUserId}`,
+            `${PUBLIC_API_URL}/v2/users/${currentUserId}/following`,
             {
               headers: {
                 "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
@@ -463,7 +463,7 @@ export default function UserProfileClient({
         }
 
         const { url: blockedUrl, headers: devTokenHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/v1/messages/blocked");
+          buildApiFetchRequest(PUBLIC_API_URL, "/v2/users/me/blocked-users");
         const response = await fetch(blockedUrl, {
           method: "GET",
           credentials: "include",
@@ -536,7 +536,7 @@ export default function UserProfileClient({
         const { url: messageCheckUrl, headers: devTokenHeaders } =
           buildApiFetchRequest(
             PUBLIC_API_URL,
-            `/v1/messages/${encodeURIComponent(user.id)}`,
+            `/v2/conversations/${encodeURIComponent(user.id)}`,
           );
         const response = await fetch(messageCheckUrl, {
           method: "HEAD",
@@ -591,10 +591,10 @@ export default function UserProfileClient({
 
       const { url: blockUrl, headers: devTokenHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v1/messages/${encodeURIComponent(user.id)}/block`,
+        `/v2/users/me/blocked-users/${encodeURIComponent(user.id)}`,
       );
       const response = await fetch(blockUrl, {
-        method: shouldBlock ? "POST" : "DELETE",
+        method: shouldBlock ? "PUT" : "DELETE",
         credentials: "include",
         cache: "no-store",
         headers: devTokenHeaders,
@@ -631,13 +631,16 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportDescUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/description/report");
+        buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(user.id)}/reports`,
+        );
       const response = await fetch(reportDescUrl, {
         method: "POST",
         credentials: "include",
         headers: { ...devTokenHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: user.id,
+          target: "description",
           reason: reportDescriptionReason.trim(),
         }),
       });
@@ -669,13 +672,16 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportAvatarUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/avatar/report");
+        buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(user.id)}/reports`,
+        );
       const response = await fetch(reportAvatarUrl, {
         method: "POST",
         credentials: "include",
         headers: { ...devTokenHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: user.id,
+          target: "avatar",
           reason: reportAvatarReason.trim(),
         }),
       });
@@ -707,13 +713,16 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportBannerUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/banner/report");
+        buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(user.id)}/reports`,
+        );
       const response = await fetch(reportBannerUrl, {
         method: "POST",
         credentials: "include",
         headers: { ...devTokenHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: user.id,
+          target: "banner",
           reason: reportBannerReason.trim(),
         }),
       });
@@ -745,13 +754,16 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportUsernameUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/username/report");
+        buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(user.id)}/reports`,
+        );
       const response = await fetch(reportUsernameUrl, {
         method: "POST",
         credentials: "include",
         headers: { ...devTokenHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: user.id,
+          target: "username",
           reason: reportUsernameReason.trim(),
         }),
       });
@@ -783,13 +795,16 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportUserUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/report");
+        buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(user.id)}/reports`,
+        );
       const response = await fetch(reportUserUrl, {
         method: "POST",
         credentials: "include",
         headers: { ...devTokenHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: user.id,
+          target: "profile",
           reason: reportUserReason.trim(),
         }),
       });
@@ -825,21 +840,15 @@ export default function UserProfileClient({
         return;
       }
 
-      let response;
-
-      if (isFollowing) {
-        response = await fetch(`/api/users/followers/remove`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ following: userId }),
-        });
-      } else {
-        response = await fetch(`/api/users/followers/add`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ following: userId }),
-        });
-      }
+      const { url: followUrl, headers: followHeaders } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/me/following/${encodeURIComponent(userId)}`,
+      );
+      const response = await fetch(followUrl, {
+        method: isFollowing ? "DELETE" : "PUT",
+        credentials: "include",
+        headers: followHeaders,
+      });
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -1366,9 +1375,11 @@ export default function UserProfileClient({
                             onClick={() =>
                               followerCount > 0 && setIsFollowersModalOpen(true)
                             }
-                            className={`text-primary-text text-base ${followerCount > 0 ? "hover:text-border-focus cursor-pointer transition-colors" : "cursor-default"}`}
+                            className={`group text-primary-text text-base ${followerCount > 0 ? "cursor-pointer" : "cursor-default"}`}
                           >
-                            <span className="font-semibold">
+                            <span
+                              className={`font-semibold ${followerCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                            >
                               {followerCount}
                             </span>{" "}
                             {followerCount === 1 ? "follower" : "followers"}
@@ -1378,9 +1389,11 @@ export default function UserProfileClient({
                               followingCount > 0 &&
                               setIsFollowingModalOpen(true)
                             }
-                            className={`text-primary-text text-base ${followingCount > 0 ? "hover:text-border-focus cursor-pointer transition-colors" : "cursor-default"}`}
+                            className={`group text-primary-text text-base ${followingCount > 0 ? "cursor-pointer" : "cursor-default"}`}
                           >
-                            <span className="font-semibold">
+                            <span
+                              className={`font-semibold ${followingCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                            >
                               {followingCount}
                             </span>{" "}
                             following
@@ -1398,7 +1411,7 @@ export default function UserProfileClient({
                         </>
                       ) : (
                         <>
-                          <Tooltip>
+                          <Tooltip delayDuration={500}>
                             <TooltipTrigger asChild>
                               <Link
                                 href={`https://discord.com/users/${user.id}`}
@@ -1416,7 +1429,7 @@ export default function UserProfileClient({
                           </Tooltip>
 
                           {user.roblox_id && (
-                            <Tooltip>
+                            <Tooltip delayDuration={500}>
                               <TooltipTrigger asChild>
                                 <Link
                                   href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
@@ -1737,11 +1750,9 @@ export default function UserProfileClient({
         isOwnProfile={user.id === currentUserId}
         currentUserId={currentUserId}
         onFollowChange={(type) => {
-          if (type === "remove") {
-            setFollowerCount((prev) => Math.max(0, prev - 1));
-          } else if (type === "add") {
-            setFollowingCount((prev) => prev + 1);
-          }
+          setFollowingCount((prev) =>
+            type === "add" ? prev + 1 : Math.max(0, prev - 1),
+          );
         }}
         onCountUpdate={(count) => {
           setFollowerCount(count);

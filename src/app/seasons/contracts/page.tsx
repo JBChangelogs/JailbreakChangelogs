@@ -46,7 +46,7 @@ export default function SeasonContractsPage() {
     const loadData = async () => {
       try {
         const { url: contractsSeasonUrl, headers: contractsSeasonHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL!, "/v1/seasons/latest");
+          buildApiFetchRequest(PUBLIC_API_URL!, "/v2/seasons/latest");
         const [contractsRes, seasonRes] = await Promise.all([
           fetch(`${INVENTORY_API_URL}/seasons/contract`, {
             headers: {

@@ -167,12 +167,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/v1/favorites",
+        `/v2/users/me/favorites/${encodeURIComponent(String(itemId))}`,
       );
       const response = await fetch(url, {
-        method: isFavorited ? "DELETE" : "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ item_id: String(itemId) }),
+        method: isFavorited ? "DELETE" : "PUT",
+        headers,
         credentials: "include",
       });
       if (!response.ok) {

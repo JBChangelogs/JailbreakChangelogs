@@ -103,7 +103,7 @@ export default function OGNotificationSheet({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/v1/items/partial?fields=id,name,type",
+        "/v2/items/partial?fields=id,name,type",
       );
       const response = await fetch(url, {
         headers,

@@ -156,7 +156,7 @@ export default function TradeDetailsDataClient({
         const { url: tradeUrl, headers: devTokenHeaders } =
           buildApiFetchRequest(
             baseUrl,
-            `/v1/trades/v2/${encodeURIComponent(tradeId)}`,
+            `/v2/trades/${encodeURIComponent(tradeId)}`,
           );
         const response = await fetch(tradeUrl, {
           cache: "no-store",

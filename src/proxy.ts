@@ -96,7 +96,7 @@ async function fetchCurrentUser(token: string): Promise<ProxyUser | null> {
   if (!apiBaseUrl) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/v1/users/me`, {
+    const response = await fetch(`${apiBaseUrl}/v2/users/me`, {
       cache: "no-store",
       headers: {
         Authorization: token,
@@ -136,7 +136,7 @@ async function getLegacyItemRedirectResponse(
 
   try {
     const upstream = await fetch(
-      `${apiBaseUrl}/v1/items/${encodeURIComponent(idSegment)}`,
+      `${apiBaseUrl}/v2/items/${encodeURIComponent(idSegment)}`,
       {
         cache: "no-store",
         headers: {

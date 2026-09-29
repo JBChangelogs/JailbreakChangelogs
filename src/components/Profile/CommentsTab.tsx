@@ -139,7 +139,7 @@ export default function CommentsTab({
       changelogIds.map(async (id) => {
         try {
           const { url: changelogUrl, headers: changelogHeaders } =
-            buildApiFetchRequest(PUBLIC_API_URL, `/v1/changelogs/${id}`);
+            buildApiFetchRequest(PUBLIC_API_URL, `/v2/changelogs/${id}`);
           const response = await fetch(changelogUrl, {
             credentials: "include",
             headers: {
@@ -183,7 +183,7 @@ export default function CommentsTab({
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          `/v1/comments/user/${encodeURIComponent(userId)}?page=${currentPage}`,
+          `/v2/users/${encodeURIComponent(userId)}/comments?page=${currentPage}`,
         );
         const response = await fetch(url, {
           credentials: "include",

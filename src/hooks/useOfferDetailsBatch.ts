@@ -63,7 +63,7 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
       try {
         const { url, headers } = buildApiFetchRequest(
           baseUrl,
-          "/v1/trades/v2/offers/batch",
+          "/v2/trades/offers/batch",
         );
         const response = await fetch(url, {
           method: "POST",

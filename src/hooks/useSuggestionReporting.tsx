@@ -66,7 +66,7 @@ export function useSuggestionReporting({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v1/value-suggestions/${reportTarget.id}/report`,
+        `/v2/value-suggestions/${reportTarget.id}/reports`,
       );
       const response = await fetch(url, {
         method: "POST",

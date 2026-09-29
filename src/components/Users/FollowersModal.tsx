@@ -15,6 +15,8 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { UserSettingsV2 } from "@/types/auth";
 import { createLogger } from "@/services/logger";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 const log = createLogger("UI");
 
@@ -113,15 +115,11 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
           return;
         }
 
-        const response = await fetch(
-          `/api/users/followers/get?user=${userId}`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Followers/1.0",
-            },
-            cache: "no-store",
-          },
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(userId)}/followers`,
         );
+        const response = await fetch(url, { headers, cache: "no-store" });
         if (ignore) return;
 
         if (response.status === 404) {
@@ -204,17 +202,12 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       if (!isOpen || !currentUserId) return;
 
       try {
-        // Use API route instead of direct API call
         // Call this every time the modal opens to get fresh following status
-        const response = await fetch(
-          `/api/users/following/get?user=${currentUserId}`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Followers/1.0",
-            },
-            cache: "no-store",
-          },
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(currentUserId)}/following`,
         );
+        const response = await fetch(url, { headers, cache: "no-store" });
 
         if (!response.ok) return;
 
@@ -257,30 +250,54 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         return;
       }
 
-      const response = await fetch("/api/users/followers/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ following: followerId }),
+      const isCurrentlyFollowing = followingStatus[followerId];
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/me/following/${encodeURIComponent(followerId)}`,
+      );
+      const response = await fetch(url, {
+        method: isCurrentlyFollowing ? "DELETE" : "PUT",
+        credentials: "include",
+        headers,
       });
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
-        log.error("follow user failed", { status: response.status, body });
-        throw new Error("Failed to follow user");
+        log.error(
+          isCurrentlyFollowing ? "unfollow user failed" : "follow user failed",
+          { status: response.status, body },
+        );
+        throw new Error(
+          isCurrentlyFollowing
+            ? "Failed to unfollow user"
+            : "Failed to follow user",
+        );
       }
 
-      setFollowingStatus((prev) => ({ ...prev, [followerId]: true }));
-      onFollowChange?.("add");
-      toast.success("Successfully followed user");
+      setFollowingStatus((prev) => ({
+        ...prev,
+        [followerId]: !isCurrentlyFollowing,
+      }));
+      onFollowChange?.(isCurrentlyFollowing ? "remove" : "add");
+      toast.success(
+        isCurrentlyFollowing
+          ? "Successfully unfollowed user"
+          : "Successfully followed user",
+      );
 
-      window.rybbit?.event("Follow User", { location: "Followers Modal" });
+      window.rybbit?.event(
+        isCurrentlyFollowing ? "Unfollow User" : "Follow User",
+        { location: "Followers Modal" },
+      );
 
       // Refresh followers list after successful follow
       // Trigger a refetch by toggling isOpen or calling fetchFollowers directly
       // The useEffect will handle the refetch when isOpen changes
     } catch (err) {
-      log.error("Error following user:", err);
-      toast.error("Failed to follow user");
+      log.error("Error updating follow status:", err);
+      toast.error(
+        err instanceof Error ? err.message : "Failed to update follow status",
+      );
     } finally {
       setLoadingFollow((prev) => ({ ...prev, [followerId]: false }));
     }
@@ -388,30 +405,6 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
                                     ? user.global_name
                                     : user.username}
                                 </h3>
-                                {isOwnProfile && !followingStatus[user.id] && (
-                                  <>
-                                    {!loadingFollow[user.id] && (
-                                      <span className="text-primary-text">
-                                        ·
-                                      </span>
-                                    )}
-                                    <Button
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleFollow(user.id);
-                                      }}
-                                      disabled={loadingFollow[user.id]}
-                                      variant="ghost"
-                                      size="sm"
-                                      className="text-button-info hover:text-button-info-hover px-2"
-                                    >
-                                      {loadingFollow[user.id]
-                                        ? "..."
-                                        : "Follow"}
-                                    </Button>
-                                  </>
-                                )}
                               </div>
                               <p className="text-secondary-text max-w-45 truncate text-[10px] sm:max-w-62.5 sm:text-sm">
                                 @{user.username}
@@ -419,6 +412,23 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
                             </div>
                           </div>
                         </Link>
+                        {isOwnProfile && (
+                          <Button
+                            variant={
+                              followingStatus[user.id] ? "secondary" : "default"
+                            }
+                            size="sm"
+                            onClick={() => handleFollow(user.id)}
+                            disabled={loadingFollow[user.id]}
+                            className="ml-2"
+                          >
+                            {loadingFollow[user.id]
+                              ? "..."
+                              : followingStatus[user.id]
+                                ? "Unfollow"
+                                : "Follow"}
+                          </Button>
+                        )}
                       </div>
                     );
                   })}

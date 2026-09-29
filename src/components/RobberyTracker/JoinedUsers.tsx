@@ -75,7 +75,7 @@ export default function JoinedUsers({
     queryFn: async () => {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v1/users/get/batch?ids=${userIds.map(encodeURIComponent).join(",")}`,
+        `/v2/users/batch?ids=${userIds.map(encodeURIComponent).join(",")}`,
       );
       const response = await fetch(url, { headers });
       if (!response.ok) throw new Error("Could not load joined users");

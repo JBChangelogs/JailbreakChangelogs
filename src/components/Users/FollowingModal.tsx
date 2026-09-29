@@ -17,6 +17,8 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { toast } from "sonner";
 import { UserSettingsV2 } from "@/types/auth";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 interface Following {
   user_id: string;
@@ -107,15 +109,11 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
           return;
         }
 
-        const response = await fetch(
-          `/api/users/following/get?user=${userId}`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Following/1.0",
-            },
-            cache: "no-store",
-          },
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          `/v2/users/${encodeURIComponent(userId)}/following`,
         );
+        const response = await fetch(url, { headers, cache: "no-store" });
         if (ignore) return;
 
         if (response.status === 404) {
@@ -214,14 +212,15 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
       }
 
       const isCurrentlyFollowing = followingStatus[followingId];
-      const response = await fetch(
-        `/api/users/followers/${isCurrentlyFollowing ? "remove" : "add"}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ following: followingId }),
-        },
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/me/following/${encodeURIComponent(followingId)}`,
       );
+      const response = await fetch(url, {
+        method: isCurrentlyFollowing ? "DELETE" : "PUT",
+        credentials: "include",
+        headers,
+      });
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -384,12 +383,9 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                               followingStatus[user.id] ? "secondary" : "default"
                             }
                             size="sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleFollowToggle(user.id);
-                            }}
+                            onClick={() => handleFollowToggle(user.id)}
                             disabled={loadingFollow[user.id]}
-                            className="ml-2 h-7 px-2 text-xs"
+                            className="ml-2"
                           >
                             {loadingFollow[user.id]
                               ? "..."

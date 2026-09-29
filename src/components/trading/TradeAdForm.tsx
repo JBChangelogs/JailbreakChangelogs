@@ -787,7 +787,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
       const { url: endpoint, headers: devTokenHeaders } = buildApiFetchRequest(
         baseUrl,
-        "/v1/trades/v2/create",
+        "/v2/trades",
       );
       const method = "POST";
       const createPayload = {
