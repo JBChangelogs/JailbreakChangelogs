@@ -289,7 +289,7 @@ function TradeItem({
             {item.category_title}
           </span>
           {item.is_duplicate_branch && (
-            <span className="bg-status-warning/15 text-status-warning inline-flex rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold sm:text-xs">
+            <span className="bg-status-error text-primary-text inline-flex rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold sm:text-xs">
               Duped copy
             </span>
           )}
