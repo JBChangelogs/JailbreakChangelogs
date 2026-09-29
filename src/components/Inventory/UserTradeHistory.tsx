@@ -21,8 +21,7 @@ import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { PendingTradeItemsPlaceholder } from "@/components/Inventory/PendingTradeItemsPlaceholder";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { useBatchItems } from "@/hooks/useBatchItems";
-import { usePartialItems } from "@/hooks/usePartialItems";
+import { usePartialItemFields } from "@/hooks/usePartialItems";
 import { createLogger } from "@/services/logger";
 import { Item } from "@/types";
 import { TradeItem as CatalogTradeItem } from "@/types/trading";
@@ -56,6 +55,37 @@ const PAGE_SIZE = 25;
 const REQUEST_TIMEOUT_MS = 15_000;
 
 type RequestState = "idle" | "loading" | "error";
+
+type TradeCatalogRow = Pick<
+  Item,
+  | "id"
+  | "name"
+  | "type"
+  | "cash_value"
+  | "duped_value"
+  | "is_limited"
+  | "is_seasonal"
+  | "season"
+  | "level"
+  | "tradable"
+  | "trend"
+  | "demand"
+  | "duped_demand"
+>;
+const TRADE_CATALOG_FIELDS = [
+  "name",
+  "type",
+  "cash_value",
+  "duped_value",
+  "is_limited",
+  "is_seasonal",
+  "season",
+  "level",
+  "tradable",
+  "trend",
+  "demand",
+  "duped_demand",
+] as const;
 
 interface CatalogValue {
   cashValue: string | null;
@@ -393,9 +423,6 @@ export default function UserTradeHistory({
   const [nextBefore, setNextBefore] = useState<number | null>(null);
   const [expandedTradeId, setExpandedTradeId] = useState<string | null>(null);
   const [details, setDetails] = useState<Record<string, TradeDetail>>({});
-  const [loadedCatalogItems, setLoadedCatalogItems] = useState<
-    Record<number, Item>
-  >({});
   const [detailStates, setDetailStates] = useState<
     Record<string, { state: RequestState; error?: string }>
   >({});
@@ -411,54 +438,15 @@ export default function UserTradeHistory({
   const { robloxUsers } = useBatchUserData(counterpartyIds, {
     enabled: isActive && counterpartyIds.length > 0,
   });
-  const partialItemsQuery = usePartialItems(
+  const catalogQuery = usePartialItemFields<TradeCatalogRow>(
+    TRADE_CATALOG_FIELDS,
     isActive && expandedTradeId !== null,
   );
-  const tradeCatalogIds = useMemo(() => {
-    const detail = expandedTradeId ? details[expandedTradeId] : undefined;
-    if (!detail) return [];
-    const byName = new Map(
-      (partialItemsQuery.data ?? []).map((item) => [
-        normalizeCatalogKey(item.name, item.type),
-        item.id,
-      ]),
-    );
-    const seenItems = [...detail.items_a_to_b, ...detail.items_b_to_a];
-    return Array.from(
-      new Set(
-        seenItems
-          .map((item) =>
-            byName.get(normalizeCatalogKey(item.title, item.category_title)),
-          )
-          .filter((id): id is number => id !== undefined),
-      ),
-    );
-  }, [partialItemsQuery.data, expandedTradeId, details]);
-  const catalogQuery = useBatchItems(
-    tradeCatalogIds,
-    isActive && expandedTradeId !== null,
-  );
-
-  useEffect(() => {
-    const catalogItems = catalogQuery.data;
-    if (!catalogItems) return;
-    setLoadedCatalogItems((current) => {
-      const next = { ...current };
-      catalogItems.forEach((item) => {
-        next[item.id] = item;
-      });
-      return next;
-    });
-  }, [catalogQuery.data]);
 
   const catalogValues = useMemo(() => {
     const values = new Map<string, CatalogValue>();
 
-    [
-      ...itemsData,
-      ...Object.values(loadedCatalogItems),
-      ...(catalogQuery.data ?? []),
-    ].forEach((item) => {
+    const setCatalogValue = (item: TradeCatalogRow) => {
       values.set(normalizeCatalogKey(item.name, item.type), {
         cashValue: item.cash_value,
         dupedValue: item.duped_value,
@@ -478,7 +466,11 @@ export default function UserTradeHistory({
           duped_demand: item.duped_demand,
         },
       });
+    };
 
+    (catalogQuery.data ?? []).forEach(setCatalogValue);
+    itemsData.forEach((item) => {
+      setCatalogValue(item);
       item.children?.forEach((child) => {
         const childValue = {
           cashValue: child.data.cash_value,
@@ -517,7 +509,7 @@ export default function UserTradeHistory({
     });
 
     return values;
-  }, [catalogQuery.data, itemsData, loadedCatalogItems]);
+  }, [catalogQuery.data, itemsData]);
 
   const getTradeItemValue = useCallback(
     (item: TradeItemDetail): number | null => {
@@ -776,18 +768,11 @@ export default function UserTradeHistory({
           ? ownerReceived.length
           : trade.items_received.length;
         const valueState: "loading" | "error" | "ready" =
-          isExpanded && detail && partialItemsQuery.isPending
+          isExpanded && detail && catalogQuery.isPending
             ? "loading"
-            : isExpanded &&
-                detail &&
-                tradeCatalogIds.length > 0 &&
-                catalogQuery.isPending
-              ? "loading"
-              : isExpanded &&
-                  detail &&
-                  (partialItemsQuery.isError || catalogQuery.isError)
-                ? "error"
-                : "ready";
+            : isExpanded && detail && catalogQuery.isError
+              ? "error"
+              : "ready";
         const ownerGaveValues = detail
           ? summarizeValues(ownerGave, getTradeItemValue)
           : null;
@@ -961,11 +946,7 @@ export default function UserTradeHistory({
                         <button
                           type="button"
                           className="text-link underline"
-                          onClick={() =>
-                            void (partialItemsQuery.isError
-                              ? partialItemsQuery.refetch()
-                              : catalogQuery.refetch())
-                          }
+                          onClick={() => void catalogQuery.refetch()}
                         >
                           Try again
                         </button>
