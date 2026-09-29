@@ -1,4 +1,3 @@
-import { fetchItems } from "@/utils/api/api";
 import DupeComparisonLoader from "@/components/Dupes/DupeComparisonLoader";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { notFound } from "next/navigation";
@@ -17,8 +16,6 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
   if (!id) {
     notFound();
   }
-
-  const itemsData = await fetchItems();
 
   return (
     <>
@@ -43,7 +40,7 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
           </p>
         </div>
 
-        <DupeComparisonLoader id={id} itemsData={itemsData} />
+        <DupeComparisonLoader id={id} />
         <DupeFinderFAQ />
       </div>
     </>

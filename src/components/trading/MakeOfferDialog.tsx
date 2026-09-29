@@ -15,6 +15,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ItemGrid } from "@/components/trading/ItemGrid";
 import TradeItemPickerV2 from "@/components/trading/TradeItemPickerV2";
+import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 import { TradeAd, TradeItem } from "@/types/trading";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -539,8 +540,10 @@ export function MakeOfferDialog({
         rawItems.forEach((entry) => pushEntry(entry, false));
         rawDuplicates.forEach((entry) => pushEntry(entry, true));
 
+        const resolvedItems = await fetchTradeItemsByIds(inventoryIds, items);
+        if (controller.signal.aborted) return;
         const itemById = new Map<number, TradeItem>();
-        items.forEach((it) => itemById.set(it.id, it));
+        resolvedItems.forEach((it) => itemById.set(it.id, it));
 
         const inventoryTradeItems = inventoryIds
           .map((id) => itemById.get(id))
@@ -919,26 +922,19 @@ export function MakeOfferDialog({
 
                 {!inventoryModeGate && itemsInputMode === "values" && (
                   <>
-                    {items.length === 0 ? (
-                      <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
-                        <p className="text-secondary-text text-sm">
-                          Item list is unavailable right now. Try again later.
-                        </p>
-                      </div>
-                    ) : (
-                      <TradeItemPickerV2
-                        items={pickerItems}
-                        selectedItems={[...offeringItems, ...requestingItems]}
-                        onSelect={handleAddItem}
-                        onAddCustomType={handleAddCustomType}
-                        variant="compact"
-                        cardBackground="tertiary"
-                        customTypes={CUSTOM_TRADE_TYPES.map((t) => ({
-                          id: t.id,
-                          label: t.label,
-                        }))}
-                      />
-                    )}
+                    <TradeItemPickerV2
+                      items={pickerItems}
+                      useCatalogApi
+                      selectedItems={[...offeringItems, ...requestingItems]}
+                      onSelect={handleAddItem}
+                      onAddCustomType={handleAddCustomType}
+                      variant="compact"
+                      cardBackground="tertiary"
+                      customTypes={CUSTOM_TRADE_TYPES.map((t) => ({
+                        id: t.id,
+                        label: t.label,
+                      }))}
+                    />
                   </>
                 )}
 

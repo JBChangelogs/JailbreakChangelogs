@@ -34,9 +34,9 @@ interface EntryItem {
   id: number;
   name: string;
   type: string;
-  creator: string;
-  cash_value: string;
-  duped_value: string;
+  creator: string | null;
+  cash_value: string | null;
+  duped_value: string | null;
   tradable: number;
 }
 

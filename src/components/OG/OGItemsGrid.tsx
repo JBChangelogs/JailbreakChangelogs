@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Pagination } from "@/components/ui/Pagination";
+import { useBatchItems } from "@/hooks/useBatchItems";
 import OGItemCard from "./OGItemCard";
 import { Item } from "@/types";
 
@@ -53,21 +54,31 @@ export default function OGItemsGrid({
   const [page, setPage] = useState(1);
   const itemsPerPage = 16;
 
-  // Create items map for quick lookup - map by type and name since OG items use instance IDs
+  // Catalog metadata is keyed by catalog item ID, separate from the physical copy ID.
   const itemsMap = useMemo(() => {
-    const map = new Map<string, Item>();
+    const map = new Map<number, Item>();
     items.forEach((item) => {
-      const key = `${item.type}-${item.name}`;
-      map.set(key, item);
+      map.set(item.id, item);
     });
     return map;
   }, [items]);
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const currentPage = Math.min(page, Math.max(1, totalPages));
   const displayedItems = filteredItems.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage,
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
   );
+  const itemQuery = useBatchItems(
+    displayedItems
+      .filter((item) => !items.some((data) => data.id === item.item_id))
+      .map((item) => item.item_id),
+  );
+  const pageItemsMap = useMemo(() => {
+    const map = new Map(itemsMap);
+    itemQuery.data?.forEach((item) => map.set(item.id, item));
+    return map;
+  }, [itemsMap, itemQuery.data]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -76,7 +87,13 @@ export default function OGItemsGrid({
     setPage(value);
   };
 
-  if (isLoading) {
+  if (
+    isLoading ||
+    (displayedItems.some(
+      (item) => !items.some((data) => data.id === item.item_id),
+    ) &&
+      itemQuery.isPending)
+  ) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 6 }).map((_, index) => (
@@ -107,13 +124,28 @@ export default function OGItemsGrid({
     );
   }
 
+  if (itemQuery.isError) {
+    return (
+      <div className="text-secondary-text py-8 text-center">
+        Couldn&apos;t load item details.{" "}
+        <button
+          type="button"
+          className="text-link underline"
+          onClick={() => void itemQuery.refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
       {totalPages > 1 && (
         <div className="mb-4 flex justify-center">
           <Pagination
             count={totalPages}
-            page={page}
+            page={currentPage}
             onChange={handlePageChange}
           />
         </div>
@@ -126,8 +158,7 @@ export default function OGItemsGrid({
           const uniqueKey = `${item.id}-${item.user_id}-${item.logged_at}`;
           const duplicateOrder = duplicateOrders.get(uniqueKey) || 1;
 
-          // Lookup item metadata by type and name
-          const itemData = itemsMap.get(itemKey);
+          const itemData = pageItemsMap.get(item.item_id);
 
           return (
             <React.Fragment
@@ -152,7 +183,7 @@ export default function OGItemsGrid({
         <div className="mt-8 flex justify-center">
           <Pagination
             count={totalPages}
-            page={page}
+            page={currentPage}
             onChange={handlePageChange}
           />
         </div>

@@ -23,6 +23,9 @@ interface UseMessagesRealtimeOptions {
   isAuthenticated: boolean;
   selectedUserIdRef: RefObject<string | null>;
   wsSendFallbackTimeoutsRef: RefObject<Set<number>>;
+  readMessageIdsRef: RefObject<Set<string>>;
+  isAtBottomRef: RefObject<boolean>;
+  pendingRealtimeReadUserIdsRef: RefObject<Set<string>>;
   localThreadMessagesByUserIdRef: RefObject<Map<string, Message[]>>;
   updateLocalThreadMessage: (
     userId: string,
@@ -44,6 +47,9 @@ export function useMessagesRealtime({
   isAuthenticated,
   selectedUserIdRef,
   wsSendFallbackTimeoutsRef,
+  readMessageIdsRef,
+  isAtBottomRef,
+  pendingRealtimeReadUserIdsRef,
   localThreadMessagesByUserIdRef,
   updateLocalThreadMessage,
   upsertLocalThreadMessage,
@@ -151,6 +157,60 @@ export function useMessagesRealtime({
           });
         }, 5000);
         typingTimeoutsRef.current.set(typingUserId, timeoutId);
+        return;
+      }
+
+      if (
+        action === "messages_read" &&
+        payload &&
+        typeof payload.reader_id === "string" &&
+        Array.isArray(payload.message_ids)
+      ) {
+        const readerId = asId(payload.reader_id);
+        const messageIds = payload.message_ids.map(asId);
+        if (readerId === currentUserId || messageIds.length === 0) {
+          return;
+        }
+
+        const readAt = Date.now();
+        for (const messageId of messageIds) {
+          if (readMessageIdsRef.current.size >= 500) {
+            readMessageIdsRef.current.clear();
+          }
+          readMessageIdsRef.current.add(messageId);
+          updateLocalThreadMessage(
+            readerId,
+            (message) => message.id === messageId,
+            (message) => ({ ...message, readAt }),
+          );
+        }
+
+        if (selectedUserIdRef.current === readerId) {
+          const readIds = new Set(messageIds);
+          setMessages((prev) =>
+            prev.map((message) =>
+              readIds.has(message.id) &&
+              asId(message.senderId) === currentUserId &&
+              asId(message.receiverId) === readerId
+                ? { ...message, readAt }
+                : message,
+            ),
+          );
+        }
+
+        const readIds = new Set(messageIds);
+        setConversations((prev) =>
+          prev.map((conversation) =>
+            conversation.user.id === readerId &&
+            conversation.lastMessage &&
+            readIds.has(conversation.lastMessage.id)
+              ? {
+                  ...conversation,
+                  lastMessage: { ...conversation.lastMessage, readAt },
+                }
+              : conversation,
+          ),
+        );
         return;
       }
 
@@ -304,6 +364,9 @@ export function useMessagesRealtime({
             : null,
         createdAt: Date.now(),
         status: "sent",
+        ...(readMessageIdsRef.current.has(messageId)
+          ? { readAt: Date.now() }
+          : {}),
       };
 
       const isOwnSend =
@@ -387,6 +450,18 @@ export function useMessagesRealtime({
         return;
       }
 
+      if (action === "message_received" && senderId !== currentUserId) {
+        if (isAtBottomRef.current) {
+          window.dispatchEvent(
+            new CustomEvent("sendRealtimeMarkRead", {
+              detail: { sender_id: senderId },
+            }),
+          );
+        } else {
+          pendingRealtimeReadUserIdsRef.current.add(senderId);
+        }
+      }
+
       setMessages((prev) => {
         const existing = prev.find((item) => item.id === realtimeMessage.id);
         if (existing) {
@@ -419,7 +494,14 @@ export function useMessagesRealtime({
             if (idx !== -1) {
               return prev.map((item, i) =>
                 i === idx
-                  ? { ...item, id: realtimeMessage.id, status: "sent" }
+                  ? {
+                      ...item,
+                      id: realtimeMessage.id,
+                      status: "sent",
+                      ...(realtimeMessage.readAt
+                        ? { readAt: realtimeMessage.readAt }
+                        : {}),
+                    }
                   : item,
               );
             }
@@ -443,7 +525,14 @@ export function useMessagesRealtime({
             const indexFromStart = prev.length - 1 - pendingIndex;
             return prev.map((item, idx) =>
               idx === indexFromStart
-                ? { ...item, id: realtimeMessage.id, status: "sent" }
+                ? {
+                    ...item,
+                    id: realtimeMessage.id,
+                    status: "sent",
+                    ...(realtimeMessage.readAt
+                      ? { readAt: realtimeMessage.readAt }
+                      : {}),
+                  }
                 : item,
             );
           }
@@ -472,6 +561,9 @@ export function useMessagesRealtime({
   }, [
     currentUserId,
     isAuthenticated,
+    readMessageIdsRef,
+    isAtBottomRef,
+    pendingRealtimeReadUserIdsRef,
     updateLocalThreadMessage,
     upsertLocalThreadMessage,
     removeLocalThreadMessage,

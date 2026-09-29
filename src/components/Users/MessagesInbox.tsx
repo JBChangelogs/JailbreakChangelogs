@@ -168,6 +168,8 @@ export default function MessagesInbox() {
     showNewMessages,
     prependScrollRestoreRef,
     pendingOwnSendScrollRef,
+    isAtBottomRef,
+    pendingRealtimeReadUserIdsRef,
   } = useMessageNavigationScroll({
     pathname,
     selectedUserId,
@@ -207,6 +209,7 @@ export default function MessagesInbox() {
     };
   }, []);
   const wsSendFallbackTimeoutsRef = useRef<Set<number>>(new Set());
+  const readMessageIdsRef = useRef<Set<string>>(new Set());
   const typingSentAtByUserIdRef = useRef<Map<string, number>>(new Map());
 
   const insertEditEmoji = useCallback(
@@ -242,6 +245,9 @@ export default function MessagesInbox() {
     isAuthenticated,
     selectedUserIdRef,
     wsSendFallbackTimeoutsRef,
+    readMessageIdsRef,
+    isAtBottomRef,
+    pendingRealtimeReadUserIdsRef,
     localThreadMessagesByUserIdRef,
     updateLocalThreadMessage,
     upsertLocalThreadMessage,
@@ -599,6 +605,7 @@ export default function MessagesInbox() {
     selectedUserIdRef,
     pendingOwnSendScrollRef,
     wsSendFallbackTimeoutsRef,
+    readMessageIdsRef,
     prepareMessageContentForApi,
     prepareMessageDisplayContent,
     setIsSending,

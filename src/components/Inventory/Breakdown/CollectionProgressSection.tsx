@@ -18,7 +18,6 @@ import type { useInventoryBreakdownStats } from "@/hooks/useInventoryBreakdownSt
 type InventoryBreakdownStats = ReturnType<typeof useInventoryBreakdownStats>;
 
 interface CollectionProgressSectionProps {
-  itemsAvailable: boolean;
   overallProgress: InventoryBreakdownStats["overallProgress"];
   typeProgress: InventoryBreakdownStats["typeProgress"];
   unverifiableCount: number;
@@ -32,7 +31,6 @@ interface CollectionProgressSectionProps {
 }
 
 export default function CollectionProgressSection({
-  itemsAvailable,
   overallProgress,
   typeProgress,
   unverifiableCount,
@@ -72,13 +70,7 @@ export default function CollectionProgressSection({
             </div>
           </div>
 
-          {!itemsAvailable ? (
-            <div className="py-6 text-center">
-              <p className="text-secondary-text text-sm">
-                Item list unavailable, can&apos;t calculate missing items.
-              </p>
-            </div>
-          ) : overallProgress.total === 0 ? (
+          {overallProgress.total === 0 ? (
             <div className="py-6 text-center">
               <p className="text-secondary-text text-sm">No items found.</p>
             </div>

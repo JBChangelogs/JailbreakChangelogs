@@ -4,7 +4,11 @@ import { useRef, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { ItemHoarder } from "@/utils/api/api";
+import {
+  ItemHoarder,
+  INVENTORY_API_URL,
+  INVENTORY_API_SOURCE_HEADER,
+} from "@/utils/api/api";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -71,7 +75,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch hoarders client-side
   const {
     data: hoarders = [],
     isLoading: isLoadingHoarders,
@@ -79,25 +82,36 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   } = useQuery({
     queryKey: ["item-hoarders", itemName, itemType],
     queryFn: async () => {
+      if (!INVENTORY_API_URL) {
+        throw new Error("Missing NEXT_PUBLIC_INVENTORY_API_URL");
+      }
+
       const response = await fetch(
-        `/api/items/hoarders?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+        `${INVENTORY_API_URL}/items/hoarders?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+        {
+          headers: {
+            "X-Source": INVENTORY_API_SOURCE_HEADER || "",
+          },
+        },
       );
       if (!response.ok) {
+        if (response.status === 404) {
+          return [];
+        }
         const body = await response.json().catch(() => ({}));
         log.error("fetch hoarders failed", { status: response.status, body });
         throw new Error("Failed to fetch hoarders");
       }
-      return response.json() as Promise<ItemHoarder[]>;
+      const data: unknown = await response.json();
+      return Array.isArray(data) ? (data as ItemHoarder[]) : [];
     },
   });
 
-  // Get user IDs from all hoarders (for fetching data)
   const userIds = useMemo(
     () => hoarders.map((h) => h.user_id).filter(Boolean),
     [hoarders],
   );
 
-  // Fetch user data
   const { robloxUsers } = useBatchUserData(userIds, {
     enabled: userIds.length > 0,
   });
@@ -107,7 +121,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     [hoarders],
   );
 
-  // Filter hoarders based on search
   const filteredHoarders = useMemo(() => {
     if (!searchTerm.trim()) {
       return hoarders;
@@ -126,7 +139,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     });
   }, [hoarders, searchTerm, robloxUsers]);
 
-  // TanStack Virtual setup for list
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredHoarders.length,
@@ -139,7 +151,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     return <HoardersTabSkeleton />;
   }
 
-  // Error state
   if (hoardersError) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
@@ -153,7 +164,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     );
   }
 
-  // Empty state (no hoarders)
   if (hoarders.length === 0) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
@@ -187,7 +197,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
         </h3>
       </div>
 
-      {/* Search Input */}
       <div className="relative">
         <input
           type="text"
@@ -212,7 +221,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
         )}
       </div>
 
-      {/* Empty State for Search */}
       {filteredHoarders.length === 0 && searchTerm.trim() && (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
           <div className="py-6">
@@ -239,7 +247,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
         </div>
       )}
 
-      {/* Virtualized List Container */}
       {filteredHoarders.length > 0 && (
         <div
           ref={parentRef}

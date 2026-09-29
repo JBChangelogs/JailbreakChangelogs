@@ -42,7 +42,7 @@ export default function SettingsCard({
   return (
     <div
       id={id}
-      className={`border-border-card bg-secondary-bg text-primary-text mb-8 rounded-xl border p-6 shadow-md${isDanger ? " relative" : ""}${className ? ` ${className}` : ""}`}
+      className={`border-border-card bg-secondary-bg text-primary-text mb-8 rounded-xl border p-6 shadow-md transition-colors duration-500${isDanger ? " relative" : ""}${className ? ` ${className}` : ""}`}
       style={highlightStyle}
       ref={scrollRef}
     >

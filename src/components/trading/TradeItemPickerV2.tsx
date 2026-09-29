@@ -28,12 +28,9 @@ import {
   filterGroups,
   filterOptions,
   getFilterSortsButtonLabel,
+  getServerFilters,
 } from "@/components/Values/valuesFilterOptions";
-import {
-  valueSortGroups,
-  getValueSortLabel,
-  valueSortOptions,
-} from "@/components/Values/valuesSortOptions";
+import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
@@ -51,6 +48,7 @@ import {
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { CustomTypeDialog } from "@/components/trading/CustomTypeDialog";
 import { useRouter } from "nextjs-toploader/app";
+import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 
 type TradeSide = "offering" | "requesting";
 type ItemCondition = "clean" | "duped" | "og";
@@ -81,6 +79,7 @@ interface TradeItemPickerV2Props {
    * Offer dialog keep today's single-select filter behavior unchanged.
    */
   multiSelectFilters?: boolean;
+  useCatalogApi?: boolean;
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
@@ -156,6 +155,7 @@ export default function TradeItemPickerV2({
   favoriteIds,
   onToggleFavorite,
   multiSelectFilters = false,
+  useCatalogApi = false,
 }: TradeItemPickerV2Props) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -203,6 +203,19 @@ export default function TradeItemPickerV2({
     setPage(1);
   };
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
+  const valueSortGroups = useItemSortGroups();
+  const valueSortOptions = useMemo(
+    () => valueSortGroups.flatMap((group) => group.options),
+    [valueSortGroups],
+  );
+  const catalog = useItemCatalogPage(searchQuery, page, useCatalogApi, {
+    sort: valueSort,
+    filters: getServerFilters(multiSelectFilters ? filterSorts : [filterSort]),
+  });
+  const visibleItems: TradeItem[] = useMemo(
+    () => (useCatalogApi ? (catalog.data?.items ?? []) : items),
+    [useCatalogApi, catalog.data?.items, items],
+  );
 
   const supportedFilterSorts = useMemo(
     () =>
@@ -216,7 +229,6 @@ export default function TradeItemPickerV2({
         "name-hyperchromes",
         "name-limited-items",
         "name-rims",
-        "name-seasonal-items",
         "name-spoilers",
         "name-tire-stickers",
         "name-tire-styles",
@@ -243,11 +255,16 @@ export default function TradeItemPickerV2({
     ? getFilterSortsButtonLabel(filterSorts)
     : (filterOptions.find((option) => option.value === filterSort)?.label ??
       "Select category");
-  const sortLabel = getValueSortLabel(valueSort);
+  const sortLabel =
+    valueSortOptions.find((option) => option.value === valueSort)?.label ??
+    "Sort by";
 
   const validValueSorts = useMemo(
-    () => new Set<ValueSort>(valueSortOptions.map((option) => option.value)),
-    [],
+    () =>
+      new Set<ValueSort>(
+        valueSortOptions.map((option) => option.value as ValueSort),
+      ),
+    [valueSortOptions],
   );
   const getConditionFlags = (condition: ItemCondition) => {
     switch (condition) {
@@ -276,9 +293,13 @@ export default function TradeItemPickerV2({
   }, [selectedItems]);
 
   const filteredItems = useMemo(() => {
-    const tradeableItems = items.filter((item) => item.tradable === 1);
+    const tradeableItems = visibleItems.filter((item) => item.tradable === 1);
     const base = tradeableItems.filter((item) => {
-      if (!matchesTextSearch([item.name, item.type], searchQuery)) return false;
+      if (
+        !useCatalogApi &&
+        !matchesTextSearch([item.name, item.type], searchQuery)
+      )
+        return false;
 
       return multiSelectFilters
         ? matchesAnyCategoryFilterSort(item, filterSorts)
@@ -294,13 +315,15 @@ export default function TradeItemPickerV2({
       ? valueSort
       : "cash-desc";
 
-    const sorted = sortByValueSort(filteredByValue, selectedSort, {
-      getCashValue: (item) => item.cash_value ?? "N/A",
-      getDupedValue: (item) => item.duped_value ?? "N/A",
-      getDemand: (item) => item.demand ?? item.data?.demand,
-      getTrend: (item) => item.trend ?? item.data?.trend,
-      fallbackSortForDemandTrend: "none",
-    });
+    const sorted = useCatalogApi
+      ? filteredByValue
+      : sortByValueSort(filteredByValue, selectedSort, {
+          getCashValue: (item) => item.cash_value ?? "N/A",
+          getDupedValue: (item) => item.duped_value ?? "N/A",
+          getDemand: (item) => item.demand ?? item.data?.demand,
+          getTrend: (item) => item.trend ?? item.data?.trend,
+          fallbackSortForDemandTrend: "none",
+        });
 
     if (!favoriteIds?.length) return sorted;
     const favSet = new Set(favoriteIds);
@@ -309,8 +332,9 @@ export default function TradeItemPickerV2({
       ...sorted.filter((item) => !favSet.has(item.id)),
     ];
   }, [
-    items,
+    visibleItems,
     searchQuery,
+    useCatalogApi,
     filterSort,
     filterSorts,
     multiSelectFilters,
@@ -319,22 +343,26 @@ export default function TradeItemPickerV2({
     favoriteIds,
   ]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      filteredItems.length /
-        (variant === "compact"
-          ? ITEMS_PER_PAGE_COMPACT
-          : ITEMS_PER_PAGE_DEFAULT),
-    ),
-  );
+  const totalPages = useCatalogApi
+    ? Math.max(1, catalog.data?.total_pages ?? 1)
+    : Math.max(
+        1,
+        Math.ceil(
+          filteredItems.length /
+            (variant === "compact"
+              ? ITEMS_PER_PAGE_COMPACT
+              : ITEMS_PER_PAGE_DEFAULT),
+        ),
+      );
   const currentPage = Math.min(page, totalPages);
   const itemsPerPage =
     variant === "compact" ? ITEMS_PER_PAGE_COMPACT : ITEMS_PER_PAGE_DEFAULT;
-  const pagedItems = filteredItems.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const pagedItems = useCatalogApi
+    ? filteredItems
+    : filteredItems.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+      );
 
   const gridClassName =
     variant === "compact"
@@ -514,7 +542,10 @@ export default function TradeItemPickerV2({
                 <button
                   type="button"
                   className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setPage(1);
+                  }}
                   aria-label="Clear search"
                 >
                   <Icon icon="heroicons:x-mark" />
@@ -632,6 +663,11 @@ export default function TradeItemPickerV2({
                   align="start"
                   className="border-border-card bg-tertiary-bg text-primary-text max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
+                  {valueSortGroups.length === 0 && (
+                    <DropdownMenuLabel className="text-secondary-text px-3 py-2 text-sm">
+                      Sort options unavailable
+                    </DropdownMenuLabel>
+                  )}
                   <DropdownMenuRadioGroup
                     value={valueSort}
                     onValueChange={(val) => {
@@ -667,7 +703,8 @@ export default function TradeItemPickerV2({
 
         <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-secondary-text text-sm">
-            Total Tradable Items: {filteredItems.length}
+            Total Tradable Items:{" "}
+            {useCatalogApi ? (catalog.data?.total ?? 0) : filteredItems.length}
           </p>
           {showOfferRequestButtons ? (
             <p className="text-secondary-text text-sm">
@@ -699,7 +736,15 @@ export default function TradeItemPickerV2({
           </div>
         )}
 
-        {filteredItems.length === 0 ? (
+        {useCatalogApi && catalog.loading ? (
+          <div className="border-border-card bg-secondary-bg text-secondary-text mb-8 rounded-lg border p-6 text-center text-sm">
+            Loading items...
+          </div>
+        ) : useCatalogApi && catalog.error ? (
+          <div className="border-border-card bg-secondary-bg text-secondary-text mb-8 rounded-lg border p-6 text-center text-sm">
+            Could not load items.
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
             <h3 className="text-secondary-text mb-2 text-base font-medium">
               No items found
@@ -984,7 +1029,7 @@ export default function TradeItemPickerV2({
                           item.is_limited === 1 || item.data?.is_limited === 1
                         }
                         isSeasonal={
-                          item.is_seasonal === 1 || item.data?.is_seasonal === 1
+                          item.season != null || item.data?.season != null
                         }
                         withContainer={false}
                         className="h-4 w-4 sm:h-5 sm:w-5"

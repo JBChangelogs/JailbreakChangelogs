@@ -65,8 +65,6 @@ export default function DupedItemsTab({
     [duplicates, propItemsData],
   );
 
-  const currentItemsData = useMemo(() => propItemsData || [], [propItemsData]);
-
   // Helper functions
   const getUserDisplay = (userId: string) => {
     const user = robloxUsers[userId];
@@ -81,18 +79,6 @@ export default function DupedItemsTab({
   const getHasVerifiedBadge = (userId: string) => {
     const user = robloxUsers[userId];
     return Boolean(user?.hasVerifiedBadge);
-  };
-
-  // Get values (removed variant-specific logic)
-  const getVariantSpecificValues = (
-    item: InventoryItem,
-    baseItemData: Item,
-  ) => {
-    // Use base item values
-    return {
-      cash_value: baseItemData.cash_value,
-      duped_value: baseItemData.duped_value,
-    };
   };
 
   // Get available categories from duplicates
@@ -122,15 +108,7 @@ export default function DupedItemsTab({
     // Filter by search term
     if (searchTerm.trim()) {
       filtered = filtered.filter((item) => {
-        const itemData = currentItemsData.find(
-          (data) => data.id === item.item_id,
-        );
-        if (!itemData) return false;
-
-        return matchesTextSearch(
-          [item.title, item.categoryTitle, itemData.name, itemData.type],
-          searchTerm,
-        );
+        return matchesTextSearch([item.title, item.categoryTitle], searchTerm);
       });
     }
 
@@ -143,9 +121,6 @@ export default function DupedItemsTab({
 
     // Sort items
     filtered.sort((a, b) => {
-      const aData = currentItemsData.find((data) => data.id === a.item_id);
-      const bData = currentItemsData.find((data) => data.id === b.item_id);
-
       switch (sortOrder) {
         case "created-asc":
         case "created-desc": {
@@ -159,20 +134,24 @@ export default function DupedItemsTab({
         }
         case "cash-desc":
         case "cash-asc": {
-          if (!aData || !bData) return 0;
-          const aVariantValues = getVariantSpecificValues(a, aData);
-          const bVariantValues = getVariantSpecificValues(b, bData);
-          const aValue = parseNumericValue(aVariantValues.cash_value);
-          const bValue = parseNumericValue(bVariantValues.cash_value);
+          const aValue = parseNumericValue(
+            a.info.find((entry) => entry.title === "Cash Value")?.value ?? null,
+          );
+          const bValue = parseNumericValue(
+            b.info.find((entry) => entry.title === "Cash Value")?.value ?? null,
+          );
           return sortOrder === "cash-desc" ? bValue - aValue : aValue - bValue;
         }
         case "duped-desc":
         case "duped-asc": {
-          if (!aData || !bData) return 0;
-          const aVariantValues = getVariantSpecificValues(a, aData);
-          const bVariantValues = getVariantSpecificValues(b, bData);
-          const aValue = parseNumericValue(aVariantValues.duped_value);
-          const bValue = parseNumericValue(bVariantValues.duped_value);
+          const aValue = parseNumericValue(
+            a.info.find((entry) => entry.title === "Duped Value")?.value ??
+              null,
+          );
+          const bValue = parseNumericValue(
+            b.info.find((entry) => entry.title === "Duped Value")?.value ??
+              null,
+          );
           return sortOrder === "duped-desc" ? bValue - aValue : aValue - bValue;
         }
         case "alpha-asc":
@@ -185,13 +164,7 @@ export default function DupedItemsTab({
     });
 
     return filtered;
-  }, [
-    mergedDuplicatesData,
-    searchTerm,
-    selectedCategory,
-    sortOrder,
-    currentItemsData,
-  ]);
+  }, [mergedDuplicatesData, searchTerm, selectedCategory, sortOrder]);
 
   if (filteredAndSortedItems.length === 0 && !searchTerm && !selectedCategory) {
     return (
@@ -408,25 +381,10 @@ export default function DupedItemsTab({
       {/* Cards container with secondary background */}
       <div className="bg-secondary-bg rounded-lg p-4">
         <InventoryItemsGrid
-          filteredItems={filteredAndSortedItems.map((item) => {
-            const baseItemData = currentItemsData.find(
-              (data) => data.id === item.item_id,
-            )!;
-            const variantValues = getVariantSpecificValues(item, baseItemData);
-
-            // Create a modified item data object with variant-specific values
-            const itemDataWithVariants = {
-              ...baseItemData,
-              cash_value: variantValues.cash_value,
-              duped_value: variantValues.duped_value,
-            };
-
-            return {
-              item,
-              itemData: itemDataWithVariants,
-              isDupedItem: true,
-            };
-          })}
+          filteredItems={filteredAndSortedItems.map((item) => ({
+            item,
+            isDupedItem: true,
+          }))}
           getUserDisplay={getUserDisplay}
           getUserAvatar={getUserAvatar}
           getHasVerifiedBadge={getHasVerifiedBadge}

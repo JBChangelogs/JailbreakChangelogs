@@ -10,6 +10,7 @@ interface TradeSidePanelProps {
   side: "offering" | "requesting";
   items: TradeItem[];
   catalogItems: TradeItem[];
+  useCatalogApi?: boolean;
   onRemoveItem: (instanceId: string) => void;
   onDuplicateItem: (item: TradeItem) => void;
   onValueTypeChange: (
@@ -26,6 +27,7 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
   side,
   items,
   catalogItems,
+  useCatalogApi = false,
   onRemoveItem,
   onDuplicateItem,
   onValueTypeChange,
@@ -65,6 +67,7 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
       <CalculatorItemGrid
         items={items}
         catalogItems={catalogItems}
+        useCatalogApi={useCatalogApi}
         onRemove={onRemoveItem}
         onDuplicate={onDuplicateItem}
         onValueTypeChange={onValueTypeChange}

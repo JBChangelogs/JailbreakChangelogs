@@ -33,7 +33,9 @@ import { createLogger } from "@/services/logger";
 import {
   fetchEmailLinkedStatus,
   fetchEmailNotificationStatus,
+  PUBLIC_API_URL,
 } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   Tooltip,
   TooltipContent,
@@ -99,7 +101,13 @@ export default function OGNotificationSheet({
   const fetchItems = useCallback(async () => {
     setIsLoadingItems(true);
     try {
-      const response = await fetch("/api/items/list/partial", {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/items/partial?fields=id,name,type",
+      );
+      const response = await fetch(url, {
+        headers,
+        credentials: "include",
         cache: "no-store",
       });
       if (!response.ok) {

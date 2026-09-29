@@ -19,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ItemValueChart = dynamic(
@@ -36,6 +37,7 @@ import HoardersTab from "@/components/Items/HoardersTab";
 import DupesTab from "@/components/Items/DupesTab";
 import ItemSuggestionsTab from "@/components/Items/ItemSuggestionsTab";
 import ItemChangelogsTab from "@/components/Items/ItemChangelogsTab";
+import ItemTradesTab from "@/components/Items/ItemTradesTab";
 import ReportItemInfoButton from "@/components/Items/ReportItemInfoButton";
 import {
   handleImageError,
@@ -52,15 +54,12 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
-import { fetchItemByIdClient } from "@/utils/api/api";
-import {
-  fetchItemUnlockMetadataById,
-  ItemUnlockMetadataEntry,
-} from "@/utils/items/itemUnlockMetadata";
+import { fetchItemByIdClient, fetchItemScanCount } from "@/utils/api/api";
+import { hasSeason, unlockLevel } from "@/utils/items/season";
+import { hasItemValue } from "@/utils/items/itemValue";
 import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import {
   formatUnlockLevelBadge,
-  formatPlacementBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
 } from "@/utils/items/itemUnlockPresentation";
@@ -74,6 +73,7 @@ const log = createLogger("UI");
 const TAB_LABELS = [
   "Details",
   "Charts",
+  "Trades",
   "Changes",
   "Suggestions",
   "Dupes",
@@ -91,23 +91,25 @@ const BLUEBIRD_RAISED_IMAGE =
 
 const TAB_NAME_TO_INDEX: Record<string, number> = {
   charts: 1,
-  changes: 2,
-  suggestions: 3,
-  dupes: 4,
-  hoarders: 5,
-  similar: 6,
-  comments: 7,
+  trades: 2,
+  changes: 3,
+  suggestions: 4,
+  dupes: 5,
+  hoarders: 6,
+  similar: 7,
+  comments: 8,
 };
 
 const TAB_INDEX_TO_NAME: Record<number, string | null> = {
   0: null,
   1: "charts",
-  2: "changes",
-  3: "suggestions",
-  4: "dupes",
-  5: "hoarders",
-  6: "similar",
-  7: "comments",
+  2: "trades",
+  3: "changes",
+  4: "suggestions",
+  5: "dupes",
+  6: "hoarders",
+  7: "similar",
+  8: "comments",
 };
 
 const CHART_UPDATE_TIME = (() => {
@@ -255,7 +257,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
           <CategoryIconBadge
             type={item.type}
             isLimited={item.is_limited === 1}
-            isSeasonal={item.is_seasonal === 1}
+            isSeasonal={hasSeason(item)}
             className="h-5 w-5"
           />
         </div>
@@ -435,13 +437,27 @@ export default function ItemDetailsClient({
   );
   const [tabDirection, setTabDirection] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
-  const [itemMetadata, setItemMetadata] =
-    useState<ItemUnlockMetadataEntry | null>(null);
   const [placementLimit, setPlacementLimit] = useState<number | null>(null);
+  const [scanCount, setScanCount] = useState<{
+    itemId: number;
+    count: number | null;
+  } | null>(null);
 
   useEffect(() => {
     setItem(initialItem);
   }, [initialItem]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchItemScanCount(item.id).then((count) => {
+      if (!cancelled) {
+        setScanCount({ itemId: item.id, count });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [item.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -470,16 +486,6 @@ export default function ItemDetailsClient({
   useEffect(() => {
     let isMounted = true;
 
-    fetchItemUnlockMetadataById()
-      .then((metadataById) => {
-        if (!isMounted) return;
-        setItemMetadata(metadataById.get(item.id) ?? null);
-      })
-      .catch((error) => {
-        log.error("Error loading item metadata:", error);
-        if (isMounted) setItemMetadata(null);
-      });
-
     if (item.type === "Furniture") {
       fetchFurniturePlacementLimits()
         .then((limitsMap) => {
@@ -502,17 +508,17 @@ export default function ItemDetailsClient({
   };
 
   const currentItem = item;
-  const metadataLevel = itemMetadata?.level;
-  const metadataPlacement = itemMetadata?.placement;
+  const currentScanCount =
+    scanCount?.itemId === currentItem.id ? scanCount.count : undefined;
+  const metadataLevel = unlockLevel(currentItem.level);
   const hasMetadataLevel = hasUnlockLevel(metadataLevel);
   const requirementsTooltipText = useMemo(
     () =>
       formatUnlockRequirementsTooltip(
-        itemMetadata?.season,
+        currentItem.season ?? undefined,
         metadataLevel,
-        metadataPlacement,
       ),
-    [itemMetadata, metadataLevel, metadataPlacement],
+    [currentItem.season, metadataLevel],
   );
   const categoryColor = useMemo(
     () => getCategoryColor(currentItem.type),
@@ -568,7 +574,7 @@ export default function ItemDetailsClient({
                     Limited
                   </span>
                 )}
-                {currentItem.is_seasonal === 1 && (
+                {hasSeason(currentItem) && (
                   <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                     <Icon
                       icon="noto-v1:snowflake"
@@ -578,25 +584,18 @@ export default function ItemDetailsClient({
                     Seasonal
                   </span>
                 )}
-                {(typeof itemMetadata?.season === "number" ||
-                  hasMetadataLevel ||
-                  metadataPlacement) && (
+                {(hasSeason(currentItem) || hasMetadataLevel) && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex cursor-help items-center gap-1">
-                        {typeof itemMetadata?.season === "number" && (
+                        {currentItem.season != null && (
                           <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                            S{itemMetadata.season}
+                            S{currentItem.season}
                           </span>
                         )}
                         {hasMetadataLevel && (
                           <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                             {formatUnlockLevelBadge(metadataLevel)}
-                          </span>
-                        )}
-                        {!hasMetadataLevel && metadataPlacement && (
-                          <span className="bg-status-warning inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold text-black">
-                            {formatPlacementBadge(metadataPlacement)}
                           </span>
                         )}
                       </div>
@@ -696,6 +695,29 @@ export default function ItemDetailsClient({
                   </div>
                 )}
 
+              <div className="border-border-card mt-4 flex min-h-14 items-center justify-between gap-4 border-b pb-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-primary-text text-sm font-medium">
+                    Scanned copies · 30 days
+                  </div>
+                  <div className="text-secondary-text text-xs">
+                    Unique copies that have been scanned in inventories
+                  </div>
+                </div>
+                <div
+                  className="text-primary-text w-20 shrink-0 text-right text-lg font-semibold tabular-nums"
+                  aria-live="polite"
+                >
+                  {currentScanCount === undefined ? (
+                    <Skeleton className="ml-auto h-6 w-16" aria-hidden="true" />
+                  ) : currentScanCount === null ? (
+                    <span aria-label="Scan count unavailable">—</span>
+                  ) : (
+                    currentScanCount.toLocaleString()
+                  )}
+                </div>
+              </div>
+
               {/* Mobile Ad - shown only on smaller screens */}
               <div className="mt-4 flex justify-center xl:hidden">
                 <NitroItemMobileAd className="min-h-45 w-full max-w-xs sm:max-w-sm md:max-w-md" />
@@ -721,9 +743,7 @@ export default function ItemDetailsClient({
                 >
                   {activeTab === 0 && (
                     <>
-                      {!currentItem.description ||
-                      currentItem.description === "N/A" ||
-                      currentItem.description === "" ? (
+                      {!hasItemValue(currentItem.description) ? (
                         <div className="space-y-3">
                           <h3 className="text-primary-text text-lg font-semibold">
                             Description
@@ -757,7 +777,7 @@ export default function ItemDetailsClient({
                                           prev + INITIAL_DESCRIPTION_LENGTH,
                                       )
                                     }
-                                    className="text-button-info hover:text-button-info-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                    className="text-link hover:text-link-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                                   >
                                     <Icon
                                       icon="heroicons-outline:chevron-down"
@@ -778,7 +798,7 @@ export default function ItemDetailsClient({
                                   onClick={() =>
                                     setVisibleLength(INITIAL_DESCRIPTION_LENGTH)
                                   }
-                                  className="text-button-info hover:text-button-info-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                  className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                                 >
                                   <Icon
                                     icon="heroicons-outline:chevron-up"
@@ -865,33 +885,39 @@ export default function ItemDetailsClient({
 
                   {activeTab === 2 && (
                     <div className="space-y-6">
-                      <ItemChangelogsTab itemId={item.id} />
+                      <ItemTradesTab itemId={item.id} />
                     </div>
                   )}
 
                   {activeTab === 3 && (
                     <div className="space-y-6">
-                      <ItemSuggestionsTab itemId={item.id} />
+                      <ItemChangelogsTab itemId={item.id} />
                     </div>
                   )}
 
                   {activeTab === 4 && (
                     <div className="space-y-6">
-                      <DupesTab itemId={item.id} />
+                      <ItemSuggestionsTab itemId={item.id} />
                     </div>
                   )}
 
                   {activeTab === 5 && (
                     <div className="space-y-6">
-                      <HoardersTab itemName={item.name} itemType={item.type} />
+                      <DupesTab itemId={item.id} />
                     </div>
                   )}
 
                   {activeTab === 6 && (
+                    <div className="space-y-6">
+                      <HoardersTab itemName={item.name} itemType={item.type} />
+                    </div>
+                  )}
+
+                  {activeTab === 7 && (
                     <div className="space-y-6">{similarItemsSlot}</div>
                   )}
 
-                  {activeTab === 7 && item && commentsSlot}
+                  {activeTab === 8 && item && commentsSlot}
                 </motion.div>
               </AnimatePresence>
             </div>

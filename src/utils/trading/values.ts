@@ -1,9 +1,6 @@
-import { createLogger } from "@/services/logger";
 import { Item, FilterSort, ValueSort } from "@/types";
-import { fetchItemUnlockMetadataById } from "@/utils/items/itemUnlockMetadata";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
-
-const log = createLogger("UI");
+import { hasItemValue } from "@/utils/items/itemValue";
 
 export const demandOrder = [
   "Close To None",
@@ -49,8 +46,8 @@ export const trendValueMap: Record<string, string> = {
   "trend-recovering": "Recovering",
 };
 
-export const parseCashValue = (value: string | null): number => {
-  if (value === null || value === "N/A" || value === "null") return -1;
+export const parseCashValue = (value: string | null | undefined): number => {
+  if (!hasItemValue(value)) return -1;
   const numericPart = value.replace(/[^0-9.]/g, "");
   if (numericPart === "") return -1;
   const num = parseFloat(numericPart);
@@ -62,14 +59,20 @@ export const parseCashValue = (value: string | null): number => {
 };
 
 export const sortByCashValue = (
-  a: string,
-  b: string,
+  a: string | null | undefined,
+  b: string | null | undefined,
   order: "asc" | "desc" = "desc",
 ): number => {
-  const aValue =
-    a === "N/A" ? (order === "desc" ? -1 : Infinity) : parseCashValue(a);
-  const bValue =
-    b === "N/A" ? (order === "desc" ? -1 : Infinity) : parseCashValue(b);
+  const aValue = !hasItemValue(a)
+    ? order === "desc"
+      ? -1
+      : Infinity
+    : parseCashValue(a);
+  const bValue = !hasItemValue(b)
+    ? order === "desc"
+      ? -1
+      : Infinity
+    : parseCashValue(b);
   return order === "desc" ? bValue - aValue : aValue - bValue;
 };
 
@@ -119,8 +122,8 @@ export const sortByTrend = (
 };
 
 type ValueSortGetters<T> = {
-  getCashValue?: (item: T) => string;
-  getDupedValue?: (item: T) => string;
+  getCashValue?: (item: T) => string | null | undefined;
+  getDupedValue?: (item: T) => string | null | undefined;
   getDemand?: (item: T) => string | null | undefined;
   getTrend?: (item: T) => string | null | undefined;
   getLastUpdated?: (item: T) => number | null | undefined;
@@ -187,8 +190,10 @@ export const sortByValueSort = <T>(
 ): T[] => {
   const sorted = [...items];
   const {
-    getCashValue = (item: T) => (item as { cash_value: string }).cash_value,
-    getDupedValue = (item: T) => (item as { duped_value: string }).duped_value,
+    getCashValue = (item: T) =>
+      (item as { cash_value?: string | null }).cash_value,
+    getDupedValue = (item: T) =>
+      (item as { duped_value?: string | null }).duped_value,
     getDemand = (item: T) => (item as { demand?: string | null }).demand,
     getLastUpdated = (item: T) =>
       (item as { last_updated?: number | null }).last_updated ?? 0,
@@ -314,6 +319,31 @@ export const sortByValueSort = <T>(
           (getUniqueCirculation(a) ?? 0) - (getUniqueCirculation(b) ?? 0),
       );
       break;
+    case "season-number-asc":
+    case "season-number-desc":
+    case "season-level-asc":
+    case "season-level-desc": {
+      const field = valueSort.startsWith("season-number") ? "season" : "level";
+      const direction = valueSort.endsWith("desc") ? -1 : 1;
+      const numeric = (item: T) => {
+        const source = item as {
+          season?: number | null;
+          level?: number | string | null;
+          data?: { season?: number | null; level?: number | string | null };
+        };
+        const value = source[field] ?? source.data?.[field];
+        const number = Number(value);
+        return value == null || !Number.isFinite(number) ? null : number;
+      };
+      sorted.sort((a, b) => {
+        const first = numeric(a);
+        const second = numeric(b);
+        if (first === null) return second === null ? 0 : 1;
+        if (second === null) return -1;
+        return (first - second) * direction;
+      });
+      break;
+    }
     case "demand-multiple-desc":
       sorted.sort(
         (a, b) => (getDemandMultiple(b) ?? 0) - (getDemandMultiple(a) ?? 0),
@@ -354,17 +384,17 @@ export const sortByValueSort = <T>(
 };
 
 // Helper function to get the current cash value for an item
-export const getEffectiveCashValue = (item: Item): string => {
+export const getEffectiveCashValue = (item: Item): string | null => {
   return item.cash_value;
 };
 
 // Helper function to get the current duped value for an item
-export const getEffectiveDupedValue = (item: Item): string => {
+export const getEffectiveDupedValue = (item: Item): string | null => {
   return item.duped_value;
 };
 
 // Helper function to get the current demand for an item
-export const getEffectiveDemand = (item: Item): string => {
+export const getEffectiveDemand = (item: Item): string | null => {
   return item.demand;
 };
 
@@ -435,9 +465,9 @@ const matchesFilterSort = (item: Item, filterSort: FilterSort): boolean => {
 };
 
 const TAG_FILTER_SORTS: FilterSort[] = [
-  "name-seasonal-items",
   "name-limited-items",
   "name-untradeable-items",
+  "name-seasonal-items",
 ];
 
 const DEMAND_FILTER_SORTS: FilterSort[] = [
@@ -550,241 +580,6 @@ export const sortAndFilterItems = async (
     }
   }
 
-  if (
-    valueSort === "season-number-asc" ||
-    valueSort === "season-number-desc" ||
-    valueSort === "season-level-asc" ||
-    valueSort === "season-level-desc"
-  ) {
-    const metadataById = await fetchItemUnlockMetadataById().catch((error) => {
-      log.error("Error loading item unlock metadata", error);
-      return null;
-    });
-
-    if (!metadataById) {
-      return result;
-    }
-
-    const parseUnlockLevelForSort = (level: string | null) => {
-      if (!level) {
-        return { kind: "none" as const, value: Infinity };
-      }
-
-      if (level.includes("%")) {
-        const numeric = Number.parseFloat(level.replace(/[^0-9.]/g, ""));
-        return {
-          kind: "percent" as const,
-          value: Number.isFinite(numeric) ? numeric : Infinity,
-        };
-      }
-
-      const numeric = Number.parseFloat(level.replace(/[^0-9.]/g, ""));
-      return {
-        kind: "level" as const,
-        value: Number.isFinite(numeric) ? numeric : Infinity,
-      };
-    };
-
-    const compareSeasons = (
-      aSeason: number | null,
-      bSeason: number | null,
-      direction: "asc" | "desc",
-    ) => {
-      const aScore =
-        typeof aSeason === "number"
-          ? aSeason
-          : direction === "asc"
-            ? Infinity
-            : -1;
-      const bScore =
-        typeof bSeason === "number"
-          ? bSeason
-          : direction === "asc"
-            ? Infinity
-            : -1;
-      if (aScore === bScore) return 0;
-      return direction === "asc" ? aScore - bScore : bScore - aScore;
-    };
-
-    const compareUnlockLevelsForSeasonSort = (
-      aLevel: string | null,
-      bLevel: string | null,
-      direction: "asc" | "desc",
-    ) => {
-      const aParsed = parseUnlockLevelForSort(aLevel);
-      const bParsed = parseUnlockLevelForSort(bLevel);
-
-      const kindOrder = (kind: "level" | "percent" | "none") => {
-        // Keep no-level items first within a season, then numeric levels, then percent unlocks.
-        if (kind === "none") return 0;
-        if (kind === "level") return 1;
-        return 2;
-      };
-
-      const kindDiff = kindOrder(aParsed.kind) - kindOrder(bParsed.kind);
-      if (kindDiff !== 0) return kindDiff;
-
-      if (aParsed.value !== bParsed.value) {
-        return direction === "asc"
-          ? aParsed.value - bParsed.value
-          : bParsed.value - aParsed.value;
-      }
-
-      return 0;
-    };
-
-    if (
-      valueSort === "season-number-asc" ||
-      valueSort === "season-number-desc"
-    ) {
-      const seasonDirection =
-        valueSort === "season-number-asc" ? "asc" : "desc";
-      const levelDirection = valueSort === "season-number-asc" ? "asc" : "desc";
-
-      return [...result].sort((a, b) => {
-        const aMeta = metadataById.get(a.id);
-        const bMeta = metadataById.get(b.id);
-
-        const seasonDiff = compareSeasons(
-          typeof aMeta?.season === "number" ? aMeta.season : null,
-          typeof bMeta?.season === "number" ? bMeta.season : null,
-          seasonDirection,
-        );
-        if (seasonDiff !== 0) return seasonDiff;
-
-        const levelDiff = compareUnlockLevelsForSeasonSort(
-          typeof aMeta?.level === "string" ? aMeta.level : null,
-          typeof bMeta?.level === "string" ? bMeta.level : null,
-          levelDirection,
-        );
-        if (levelDiff !== 0) return levelDiff;
-
-        return a.name.localeCompare(b.name);
-      });
-    }
-
-    type LevelSortKind = "level" | "percent" | "none";
-    const getKindRank = (kind: LevelSortKind, direction: "asc" | "desc") => {
-      // `season-level-asc`: numeric levels -> percent -> none
-      // `season-level-desc`: percent -> numeric levels -> none
-      if (direction === "desc") {
-        if (kind === "percent") return 0;
-        if (kind === "level") return 1;
-        return 2;
-      }
-      if (kind === "level") return 0;
-      if (kind === "percent") return 1;
-      return 2;
-    };
-
-    const direction = valueSort === "season-level-asc" ? "asc" : "desc";
-    type Entry = {
-      item: Item;
-      kind: LevelSortKind;
-      levelValue: number;
-      seasonScore: number;
-      name: string;
-    };
-
-    const bySeason = new Map<
-      number,
-      { level: Entry[]; percent: Entry[]; none: Entry[] }
-    >();
-    const ensureSeason = (seasonScore: number) => {
-      const existing = bySeason.get(seasonScore);
-      if (existing) return existing;
-      const created = { level: [], percent: [], none: [] };
-      bySeason.set(seasonScore, created);
-      return created;
-    };
-
-    for (const item of result) {
-      const meta = metadataById.get(item.id);
-      const seasonScore =
-        typeof meta?.season === "number" ? meta.season : Infinity;
-      const level = typeof meta?.level === "string" ? meta.level : null;
-      const parsed = parseUnlockLevelForSort(level);
-      const entry: Entry = {
-        item,
-        kind: parsed.kind,
-        levelValue: parsed.value,
-        seasonScore,
-        name: item.name,
-      };
-      const buckets = ensureSeason(seasonScore);
-      if (parsed.kind === "level") buckets.level.push(entry);
-      else if (parsed.kind === "percent") buckets.percent.push(entry);
-      else buckets.none.push(entry);
-    }
-
-    const sortWithinSeason = (entries: Entry[]) => {
-      entries.sort((a, b) => {
-        if (a.levelValue !== b.levelValue) {
-          return direction === "asc"
-            ? a.levelValue - b.levelValue
-            : b.levelValue - a.levelValue;
-        }
-        return a.name.localeCompare(b.name);
-      });
-    };
-
-    for (const [, buckets] of bySeason) {
-      sortWithinSeason(buckets.level);
-      sortWithinSeason(buckets.percent);
-      // `none` is handled separately (end)
-    }
-
-    type SortKey = {
-      kindRank: number;
-      indexInSeason: number;
-      seasonScore: number;
-      name: string;
-    };
-    const keyByItemId = new Map<number, SortKey>();
-
-    for (const [seasonScore, buckets] of bySeason) {
-      buckets.level.forEach((e, indexInSeason) => {
-        keyByItemId.set(e.item.id, {
-          kindRank: getKindRank("level", direction),
-          indexInSeason,
-          seasonScore,
-          name: e.name,
-        });
-      });
-      buckets.percent.forEach((e, indexInSeason) => {
-        keyByItemId.set(e.item.id, {
-          kindRank: getKindRank("percent", direction),
-          indexInSeason,
-          seasonScore,
-          name: e.name,
-        });
-      });
-      buckets.none.forEach((e) => {
-        keyByItemId.set(e.item.id, {
-          kindRank: getKindRank("none", direction),
-          indexInSeason: 0,
-          seasonScore,
-          name: e.name,
-        });
-      });
-    }
-
-    return [...result].sort((a, b) => {
-      const aKey = keyByItemId.get(a.id);
-      const bKey = keyByItemId.get(b.id);
-      if (!aKey && !bKey) return 0;
-      if (!aKey) return 1;
-      if (!bKey) return -1;
-
-      if (aKey.kindRank !== bKey.kindRank) return aKey.kindRank - bKey.kindRank;
-      if (aKey.indexInSeason !== bKey.indexInSeason)
-        return aKey.indexInSeason - bKey.indexInSeason;
-      if (aKey.seasonScore !== bKey.seasonScore)
-        return aKey.seasonScore - bKey.seasonScore;
-      return aKey.name.localeCompare(bKey.name);
-    });
-  }
-
   return sortByValueSort(result, valueSort, {
     getCashValue: getEffectiveCashValue,
     getDupedValue: getEffectiveDupedValue,
@@ -802,8 +597,8 @@ export const sortAndFilterItems = async (
  * @param value - The value string to format (e.g., "380m", "1.5k", "2b")
  * @returns Formatted string with full number and commas
  */
-export const formatFullValue = (value: string | null): string => {
-  if (value === null || value === "N/A" || value === "null") return "N/A";
+export const formatFullValue = (value: string | null | undefined): string => {
+  if (!hasItemValue(value)) return "N/A";
 
   // Remove any suffix (k, m, b, etc.) and convert to number
   const numericPart = value.toLowerCase().replace(/[kmb]$/, "");
@@ -837,8 +632,8 @@ export const formatFullValue = (value: string | null): string => {
  * @param price - The price string to format (e.g., "100k - 10m", "380m", "1.5k")
  * @returns Formatted string with full number and commas
  */
-export const formatPrice = (price: string | null): string => {
-  if (price === null || price === "N/A") return "N/A";
+export const formatPrice = (price: string | null | undefined): string => {
+  if (!hasItemValue(price)) return "N/A";
 
   // Handle dual-currency prices (e.g., "Free / 499 Robux", "100k / 50 Robux")
   if (price.includes(" / ")) {

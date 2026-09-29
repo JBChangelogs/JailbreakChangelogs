@@ -136,7 +136,7 @@ async function getLegacyItemRedirectResponse(
 
   try {
     const upstream = await fetch(
-      `${apiBaseUrl}/items/get?id=${encodeURIComponent(idSegment)}`,
+      `${apiBaseUrl}/items/${encodeURIComponent(idSegment)}`,
       {
         cache: "no-store",
         headers: {

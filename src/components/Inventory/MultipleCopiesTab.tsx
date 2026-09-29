@@ -143,18 +143,6 @@ export default function DuplicatesTab({
     return Boolean(user?.hasVerifiedBadge);
   };
 
-  // Get values (removed variant-specific logic)
-  const getVariantSpecificValues = (
-    item: InventoryItem,
-    baseItemData: Item,
-  ) => {
-    // Use base item values
-    return {
-      cash_value: baseItemData.cash_value,
-      duped_value: baseItemData.duped_value,
-    };
-  };
-
   // Combine data from both inventory.data and inventory.duplicates (if it exists)
   // Track which items come from duplicates array for visual indication
   const combinedInventoryData = useMemo(() => {
@@ -270,10 +258,6 @@ export default function DuplicatesTab({
     return Array.from(categories).sort();
   }, [itemsWithMultipleCopies]);
 
-  const itemDataById = useMemo(() => {
-    return new Map(itemsData.map((item) => [item.id, item]));
-  }, [itemsData]);
-
   // Filter leaderboard items based on search and category
   const filteredLeaderboardItems = useMemo(() => {
     let items = multiCopyStats.allDuplicateItems;
@@ -337,11 +321,8 @@ export default function DuplicatesTab({
     // Filter by search term
     if (debouncedSearchTerm.trim()) {
       filtered = filtered.filter((item) => {
-        const itemData = itemDataById.get(item.item_id);
-        if (!itemData) return false;
-
         return matchesTextSearch(
-          [item.title, item.categoryTitle, itemData.name, itemData.type],
+          [item.title, item.categoryTitle],
           debouncedSearchTerm,
         );
       });
@@ -356,9 +337,6 @@ export default function DuplicatesTab({
 
     // Sort items
     filtered.sort((a, b) => {
-      const aData = itemDataById.get(a.item_id);
-      const bData = itemDataById.get(b.item_id);
-
       switch (sortOrder) {
         case "count-desc":
         case "count-asc": {
@@ -380,20 +358,24 @@ export default function DuplicatesTab({
         }
         case "cash-desc":
         case "cash-asc": {
-          if (!aData || !bData) return 0;
-          const aVariantValues = getVariantSpecificValues(a, aData);
-          const bVariantValues = getVariantSpecificValues(b, bData);
-          const aValue = parseNumericValue(aVariantValues.cash_value);
-          const bValue = parseNumericValue(bVariantValues.cash_value);
+          const aValue = parseNumericValue(
+            a.info.find((entry) => entry.title === "Cash Value")?.value ?? null,
+          );
+          const bValue = parseNumericValue(
+            b.info.find((entry) => entry.title === "Cash Value")?.value ?? null,
+          );
           return sortOrder === "cash-desc" ? bValue - aValue : aValue - bValue;
         }
         case "duped-desc":
         case "duped-asc": {
-          if (!aData || !bData) return 0;
-          const aVariantValues = getVariantSpecificValues(a, aData);
-          const bVariantValues = getVariantSpecificValues(b, bData);
-          const aValue = parseNumericValue(aVariantValues.duped_value);
-          const bValue = parseNumericValue(bVariantValues.duped_value);
+          const aValue = parseNumericValue(
+            a.info.find((entry) => entry.title === "Duped Value")?.value ??
+              null,
+          );
+          const bValue = parseNumericValue(
+            b.info.find((entry) => entry.title === "Duped Value")?.value ??
+              null,
+          );
           return sortOrder === "duped-desc" ? bValue - aValue : aValue - bValue;
         }
         case "alpha-asc":
@@ -411,7 +393,6 @@ export default function DuplicatesTab({
     selectedCategory,
     sortOrder,
     itemsWithMultipleCopies,
-    itemDataById,
     duplicateCounts,
   ]);
 
@@ -867,27 +848,12 @@ export default function DuplicatesTab({
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         {/* Use InventoryItemsGrid - same as InventoryItems tab */}
         <InventoryItemsGrid
-          filteredItems={filteredAndSortedItems.map((item) => {
-            const baseItemData = itemsData.find(
-              (data) => data.id === item.item_id,
-            )!;
-            const variantValues = getVariantSpecificValues(item, baseItemData);
-
-            // Create a modified item data object with variant-specific values
-            const itemDataWithVariants = {
-              ...baseItemData,
-              cash_value: variantValues.cash_value,
-              duped_value: variantValues.duped_value,
-            };
-
-            return {
-              item,
-              itemData: itemDataWithVariants,
-              isDupedItem:
-                (item as InventoryItem & { _isDupedItem?: boolean })
-                  ._isDupedItem || false,
-            };
-          })}
+          filteredItems={filteredAndSortedItems.map((item) => ({
+            item,
+            isDupedItem:
+              (item as InventoryItem & { _isDupedItem?: boolean })
+                ._isDupedItem || false,
+          }))}
           getUserDisplay={getUserDisplay}
           getUserAvatar={getUserAvatar}
           getHasVerifiedBadge={getHasVerifiedBadge}

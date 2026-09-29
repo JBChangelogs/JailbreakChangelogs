@@ -602,7 +602,7 @@ export default function UserStatsSection({
                 Owned Gamepasses ({gamepasses.length})
               </h3>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-1 gap-2 min-[320px]:grid-cols-2 sm:flex sm:flex-wrap">
               {(() => {
                 const gamepassOrder = [
                   "VIP",
@@ -627,8 +627,8 @@ export default function UserStatsSection({
                   if (!gamepassInfo) return null;
 
                   const gamepassContent = (
-                    <div className="group border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
-                      <div className="relative h-8 w-8 shrink-0">
+                    <div className="group border-border-card bg-tertiary-bg flex h-full min-h-11 items-center gap-2 rounded-lg border px-2 py-2 text-sm transition-all duration-200 sm:gap-3 sm:px-3">
+                      <div className="relative h-7 w-7 shrink-0 sm:h-8 sm:w-8">
                         <Image
                           src={`https://assets.jailbreakchangelogs.com/assets/images/gamepasses/${gamepassInfo.image}.webp`}
                           alt={gamepass}
@@ -638,12 +638,12 @@ export default function UserStatsSection({
                           onError={handleImageError}
                         />
                       </div>
-                      <span className="text-primary-text group-hover:text-link text-sm font-medium transition-colors">
+                      <span className="text-primary-text group-hover:text-link min-w-0 text-xs leading-tight font-medium transition-colors sm:text-sm">
                         {gamepassInfo.displayName}
                       </span>
                       {gamepassInfo.link && (
                         <svg
-                          className="text-secondary-text h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"
+                          className="text-secondary-text hidden h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 sm:block"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -663,7 +663,7 @@ export default function UserStatsSection({
                       href={gamepassInfo.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block"
+                      className="block h-full"
                     >
                       {gamepassContent}
                     </a>

@@ -37,6 +37,7 @@ interface UseSendMessageOptions {
   selectedUserIdRef: RefObject<string | null>;
   pendingOwnSendScrollRef: RefObject<boolean>;
   wsSendFallbackTimeoutsRef: RefObject<Set<number>>;
+  readMessageIdsRef: RefObject<Set<string>>;
   prepareMessageContentForApi: (text: string) => string;
   prepareMessageDisplayContent: (text: string) => string;
   setIsSending: Setter<boolean>;
@@ -62,6 +63,7 @@ export function useSendMessage({
   selectedUserIdRef,
   pendingOwnSendScrollRef,
   wsSendFallbackTimeoutsRef,
+  readMessageIdsRef,
   prepareMessageContentForApi,
   prepareMessageDisplayContent,
   setIsSending,
@@ -312,6 +314,9 @@ export function useSendMessage({
           resolvedParticipants?.receiverId ?? optimisticMessage.receiverId,
         content: parsedBody.message.content,
         status: shouldStayPending ? "pending" : "sent",
+        ...(readMessageIdsRef.current.has(serverMessageId)
+          ? { readAt: Date.now() }
+          : {}),
       };
       updateLocalThreadMessage(
         targetUserId,
@@ -347,6 +352,9 @@ export function useSendMessage({
                     optimisticMessage.receiverId,
                   content: parsedBody.message.content,
                   status: shouldStayPending ? "pending" : "sent",
+                  ...(readMessageIdsRef.current.has(serverMessageId)
+                    ? { readAt: Date.now() }
+                    : {}),
                 }
               : item,
           );

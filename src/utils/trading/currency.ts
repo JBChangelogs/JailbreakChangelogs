@@ -39,7 +39,7 @@ export function formatCurrencyValue(value: number): string {
  * @param value - The currency string to parse (e.g., "1.5M", "100K")
  * @returns The parsed numeric value
  */
-export function parseCurrencyValue(value: string): number {
+export function parseCurrencyValue(value: string | null | undefined): number {
   if (!value) return 0;
 
   // Remove any non-alphanumeric characters except decimal point

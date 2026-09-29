@@ -67,7 +67,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
                 Limited
               </span>
             )}
-            {(item.is_seasonal === 1 || item.data?.is_seasonal === 1) && (
+            {(item.season != null || item.data?.season != null) && (
               <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="noto-v1:snowflake"

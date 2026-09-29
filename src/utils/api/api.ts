@@ -56,6 +56,7 @@ import {
   DupeItemSearchResult,
 } from "@/types";
 import { UserData, UserFlag } from "@/types/auth";
+import type { ValueHistory } from "@/components/Items/ItemValueChart";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
@@ -589,36 +590,172 @@ export async function fetchUserByRobloxId(robloxId: string) {
   }
 }
 
-export async function fetchItems() {
-  try {
-    const response = await fetch(`${BASE_API_URL}/items/list`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-ItemCatalog/1.0",
-      },
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    });
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItems failed", { status: response.status, body });
-      throw new Error("Failed to fetch items");
-    }
-    const data = await response.json();
-    return data as Item[];
-  } catch (error) {
-    log.error("Error fetching items", error);
-    throw error; // Re-throw to allow error boundaries to handle it
+export async function fetchItemsBatch(
+  itemIds: number[],
+  signal?: AbortSignal,
+): Promise<Item[]> {
+  const ids = Array.from(new Set(itemIds.filter(Number.isInteger)));
+  if (ids.length === 0) return [];
+
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items/batch");
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(ids),
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch item metadata (${response.status})`);
   }
+
+  const data: unknown = await response.json();
+  if (
+    !data ||
+    typeof data !== "object" ||
+    !Array.isArray((data as { items?: unknown }).items)
+  ) {
+    throw new Error("Invalid item batch response");
+  }
+  return (data as { items: Item[] }).items;
 }
 
-export async function fetchItemsClient(): Promise<Item[]> {
-  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items/list");
-  const response = await fetch(url, { headers, credentials: "include" });
+export interface PartialItem {
+  id: number;
+  name: string;
+  type: string;
+}
+
+// `fields` is required by the API (it 500s without it); `id` is always included
+export async function fetchPartialItems<T extends { id: number }>(
+  fields: readonly (keyof T & string)[],
+  signal?: AbortSignal,
+): Promise<T[]> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    "/items/partial",
+  );
+  const partialUrl = new URL(url);
+  partialUrl.searchParams.set(
+    "fields",
+    Array.from(new Set(["id", ...fields])).join(","),
+  );
+  const response = await fetch(partialUrl, {
+    headers,
+    credentials: "include",
+    signal,
+  });
+  if (!response.ok)
+    throw new Error(`Failed to fetch item list (${response.status})`);
+  const data: unknown = await response.json();
+  const items = Array.isArray(data)
+    ? data
+    : (data as { items?: unknown })?.items;
+  if (!Array.isArray(items)) throw new Error("Invalid partial item response");
+  return items as T[];
+}
+
+export interface ItemsPage<T> {
+  total: number;
+  items: T[];
+  page: number;
+  total_pages: number;
+  size: number;
+}
+
+export interface ItemsPageOptions {
+  sort?: string;
+  // Sent as a comma-separated `filter` param: OR'd within a group, AND'd across
+  filters?: string[];
+  minValue?: number;
+  maxValue?: number;
+}
+
+function applyItemsPageOptions(url: URL, options: ItemsPageOptions) {
+  if (options.sort) url.searchParams.set("sort", options.sort);
+  if (options.filters?.length)
+    url.searchParams.set("filter", options.filters.join(","));
+  if (options.minValue !== undefined)
+    url.searchParams.set("min_value", String(options.minValue));
+  if (options.maxValue !== undefined)
+    url.searchParams.set("max_value", String(options.maxValue));
+}
+
+export async function fetchItemSortGroups(
+  signal?: AbortSignal,
+): Promise<{ group: string; sorts: { value: string; label: string }[] }[]> {
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items/sorts");
+  const response = await fetch(url, {
+    headers,
+    credentials: "include",
+    signal,
+  });
+  if (!response.ok)
+    throw new Error(`Failed to fetch item sorts (${response.status})`);
+  return (await response.json()) as {
+    group: string;
+    sorts: { value: string; label: string }[];
+  }[];
+}
+
+export async function fetchItemsClientPage(
+  page: number,
+  signal?: AbortSignal,
+  options: ItemsPageOptions = {},
+): Promise<ItemsPage<Item>> {
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items");
+  const itemsUrl = new URL(url);
+  itemsUrl.searchParams.set("page", String(page));
+  applyItemsPageOptions(itemsUrl, options);
+  const response = await fetch(itemsUrl, {
+    headers,
+    credentials: "include",
+    signal,
+  });
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    log.error("fetchItemsClient failed", { status: response.status, body });
-    throw new Error("Failed to fetch items");
+    throw new Error(`Failed to fetch items page ${page} (${response.status})`);
   }
-  return (await response.json()) as Item[];
+  return (await response.json()) as ItemsPage<Item>;
+}
+
+export async function searchItemsClientPage(
+  query: string,
+  page: number,
+  signal?: AbortSignal,
+  options: ItemsPageOptions = {},
+): Promise<ItemsPage<Item>> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    "/items/search",
+  );
+  const searchUrl = new URL(url);
+  searchUrl.searchParams.set("query", query);
+  searchUrl.searchParams.set("page", String(page));
+  applyItemsPageOptions(searchUrl, options);
+
+  const response = await fetch(searchUrl, {
+    headers,
+    credentials: "include",
+    signal,
+  });
+  if (response.status === 404) {
+    const error = await response.json().catch(() => null);
+    if (error?.error === "items_not_found") {
+      return { total: 0, items: [], page, size: 32, total_pages: 0 };
+    }
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to search items (${response.status})`);
+  }
+
+  const result = (await response.json()) as Omit<
+    ItemsPage<Item>,
+    "total_pages"
+  >;
+  return {
+    ...result,
+    total_pages: Math.ceil(result.total / result.size),
+  };
 }
 
 export async function fetchLastUpdated(items: Item[]) {
@@ -661,7 +798,7 @@ export async function fetchItem(
     const itemType = decodeURIComponent(type);
 
     const response = await fetch(
-      `${BASE_API_URL}/items/get?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+      `${BASE_API_URL}/items/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
@@ -688,7 +825,7 @@ export async function fetchItem(
 export async function fetchItemById(id: string): Promise<ItemDetails | null> {
   try {
     const response = await fetchWithRetry(
-      `${BASE_API_URL}/items/get?id=${id}`,
+      `${BASE_API_URL}/items/${encodeURIComponent(id)}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
@@ -723,7 +860,7 @@ export async function fetchItemByIdClient(
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
-      `/items/get?id=${encodeURIComponent(id)}`,
+      `/items/${encodeURIComponent(id)}`,
     );
     const response = await fetch(url, {
       headers,
@@ -738,6 +875,88 @@ export async function fetchItemByIdClient(
     return (await response.json()) as ItemDetails;
   } catch (err) {
     log.error("Error fetching item by ID client-side", err);
+    return null;
+  }
+}
+
+// Returns null when the item doesn't exist; throws on other failures so the
+// route error boundary can handle them.
+export async function fetchItemClient(
+  type: string,
+  name: string,
+): Promise<ItemDetails | null> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    `/items/${encodeURIComponent(type)}/${encodeURIComponent(name)}`,
+  );
+  const response = await fetch(url, { headers, credentials: "include" });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch item (${response.status})`);
+  }
+
+  return (await response.json()) as ItemDetails;
+}
+
+export async function fetchSimilarItemSorts(): Promise<string[]> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    "/items/similar/sorts",
+  );
+  const response = await fetch(url, { headers, credentials: "include" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch similar item sorts (${response.status})`);
+  }
+
+  const data: unknown = await response.json();
+  return Array.isArray(data)
+    ? data.filter((sort): sort is string => typeof sort === "string")
+    : [];
+}
+
+export async function fetchSimilarItems(
+  id: number,
+  sort: string | null,
+  limit: number,
+): Promise<ItemDetails[]> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (sort) params.set("sort", sort);
+
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    `/items/${id}/similar?${params}`,
+  );
+  const response = await fetch(url, { headers, credentials: "include" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch similar items (${response.status})`);
+  }
+
+  const data = (await response.json()) as { items?: ItemDetails[] };
+  return Array.isArray(data.items) ? data.items : [];
+}
+
+export async function fetchItemHistoryClient(
+  id: string,
+): Promise<ValueHistory[] | null> {
+  try {
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      `/items/${encodeURIComponent(id)}/history`,
+    );
+    const response = await fetch(url, { headers, credentials: "include" });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? (data as ValueHistory[]) : null;
+  } catch (err) {
+    log.error("Error fetching item history client-side", err);
     return null;
   }
 }
@@ -1127,39 +1346,6 @@ export interface ItemHoarder {
   count: number;
 }
 
-export async function fetchItemHoarders(
-  name: string,
-  type: string,
-): Promise<ItemHoarder[]> {
-  try {
-    if (!INVENTORY_API_URL) {
-      throw new Error("Missing INVENTORY_API_URL");
-    }
-    const url = `${INVENTORY_API_URL}/items/hoarders?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`;
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
-      },
-      next: { revalidate: 3600 }, // Revalidate every 1 hour
-    });
-    if (!response.ok) {
-      if (response.status === 404) {
-        return [];
-      }
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItemHoarders failed", { status: response.status, body });
-      throw new Error(`Failed to fetch item hoarders: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch (err) {
-    log.error("Error fetching item hoarders", err);
-    return [];
-  }
-}
-
 export interface SeasonContract {
   team: "Criminal" | "Police";
   name: string;
@@ -1301,58 +1487,34 @@ export async function fetchUserFavorites(userId: string) {
   }
 }
 
-export async function fetchItemHistory(id: string) {
-  try {
-    const response = await fetch(`${BASE_API_URL}/item/history?id=${id}`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-ValueHistory/1.0",
-      },
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    });
+export async function fetchItemScanCount(
+  itemId: number,
+): Promise<number | null> {
+  if (!INVENTORY_API_URL) return null;
 
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItemHistory failed", { status: response.status, body });
-      throw new Error("Failed to fetch item history");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    log.error("Error fetching item history", err);
-    return null;
-  }
-}
-
-export async function fetchItemsByType(type: string) {
   try {
     const response = await fetch(
-      `${BASE_API_URL}/items/get?type=${encodeURIComponent(type)}`,
+      `${INVENTORY_API_URL}/items/${itemId}/scans/count?days=30`,
       {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-ItemCatalog/1.0",
-        },
+        headers: { "X-Source": INVENTORY_API_SOURCE_HEADER },
       },
     );
-
-    if (response.status === 404) {
+    if (!response.ok) {
+      log.error("fetchItemScanCount failed", {
+        status: response.status,
+        itemId,
+      });
       return null;
     }
 
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItemsByType failed", { status: response.status, body });
-      throw new Error("Failed to fetch items by type");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    log.error("Error fetching items by type", err);
+    const data = (await response.json()) as { copy_count?: unknown };
+    return typeof data.copy_count === "number" &&
+      Number.isFinite(data.copy_count) &&
+      data.copy_count >= 0
+      ? data.copy_count
+      : null;
+  } catch (error) {
+    log.error("Error fetching item scan count", error);
     return null;
   }
 }
@@ -1711,6 +1873,11 @@ export interface ItemCountStats {
   user_count_str: string;
 }
 
+export interface TradeCountStats {
+  trade_count: number;
+  trade_count_str: string;
+}
+
 export interface UserScan {
   user_id: string;
   upsert_count: number;
@@ -1767,6 +1934,35 @@ export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
     return data as ItemCountStats;
   } catch {
     log.error("Error fetching item count stats");
+    return null;
+  }
+}
+
+export async function fetchTradeCountStats(): Promise<TradeCountStats | null> {
+  try {
+    const response = await fetch(`${INVENTORY_API_URL}/trades/count`, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchTradeCountStats failed", {
+        status: response.status,
+        body,
+      });
+      throw new Error("Failed to fetch trade count stats");
+    }
+
+    return (await response.json()) as TradeCountStats;
+  } catch (error) {
+    log.error("Error fetching trade count stats", error);
     return null;
   }
 }
@@ -2473,17 +2669,9 @@ export async function fetchNotificationHistory(
   size: number = 5,
 ): Promise<NotificationHistory> {
   try {
-    const cookieMatch =
-      typeof document !== "undefined"
-        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-        : null;
-    const token = cookieMatch
-      ? decodeURIComponent(cookieMatch[1])
-      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
-    const tokenParam = token ? `&token=${encodeURIComponent(token)}` : "";
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/notifications/history?page=${page}&size=${size}${tokenParam}`,
+      `/notifications/history?page=${page}&size=${size}`,
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2523,17 +2711,9 @@ export async function fetchUnreadNotifications(
   size: number = 5,
 ): Promise<NotificationHistory> {
   try {
-    const cookieMatch =
-      typeof document !== "undefined"
-        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-        : null;
-    const token = cookieMatch
-      ? decodeURIComponent(cookieMatch[1])
-      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
-    const tokenParam = token ? `&token=${encodeURIComponent(token)}` : "";
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/notifications?page=${page}&size=${size}${tokenParam}`,
+      `/notifications?page=${page}&size=${size}`,
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2569,17 +2749,9 @@ export async function fetchUnreadNotifications(
 
 export async function fetchUnreadNotificationCount(): Promise<number | null> {
   try {
-    const cookieMatch =
-      typeof document !== "undefined"
-        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-        : null;
-    const token = cookieMatch
-      ? decodeURIComponent(cookieMatch[1])
-      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
-    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/notifications/unread${tokenParam}`,
+      "/notifications/unread",
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2633,18 +2805,10 @@ export async function clearNotificationHistory(): Promise<boolean> {
       PUBLIC_API_URL!,
       "/notifications/history/clear",
     );
-    const cookieMatch =
-      typeof document !== "undefined"
-        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-        : null;
-    const token = cookieMatch
-      ? decodeURIComponent(cookieMatch[1])
-      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
     const response = await fetch(url, {
       method: "DELETE",
       credentials: "include",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
+      headers,
     });
 
     return response.ok;
@@ -2689,11 +2853,9 @@ export async function fetchEmailNotificationStatus(): Promise<{
   enabled: boolean;
 }> {
   try {
-    const token = getClientToken();
-    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
-      `/notifications/emails${tokenParam}`,
+      "/notifications/emails",
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2711,9 +2873,13 @@ export async function fetchEmailNotificationStatus(): Promise<{
 export async function enableEmailNotifications(): Promise<{
   ok: boolean;
   status: number;
-  data: { message?: string; detail?: string; error?: string };
+  data: {
+    success?: boolean;
+    message?: string;
+    detail?: string;
+    error?: string;
+  };
 }> {
-  const token = getClientToken();
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     "/notifications/emails",
@@ -2721,27 +2887,23 @@ export async function enableEmailNotifications(): Promise<{
   const response = await fetch(url, {
     method: "POST",
     credentials: "include",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
+    headers,
     cache: "no-store",
   });
-  const data = await response.json().catch(
-    () =>
-      ({ success: true }) as {
-        message?: string;
-        detail?: string;
-        error?: string;
-      },
-  );
+  const data = await response.json().catch(() => ({}));
   return { ok: response.ok, status: response.status, data };
 }
 
 export async function disableEmailNotifications(): Promise<{
   ok: boolean;
   status: number;
-  data: { message?: string; detail?: string };
+  data: {
+    success?: boolean;
+    message?: string;
+    detail?: string;
+    error?: string;
+  };
 }> {
-  const token = getClientToken();
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     "/notifications/emails",
@@ -2749,13 +2911,10 @@ export async function disableEmailNotifications(): Promise<{
   const response = await fetch(url, {
     method: "DELETE",
     credentials: "include",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
+    headers,
     cache: "no-store",
   });
-  const data = await response
-    .json()
-    .catch(() => ({ success: true }) as { message?: string; detail?: string });
+  const data = await response.json().catch(() => ({}));
   return { ok: response.ok, status: response.status, data };
 }
 

@@ -28,11 +28,11 @@ import {
   getFilterSortsButtonLabel,
   getFilterSortsDisplayNames,
 } from "./valuesFilterOptions";
-import { valueSortGroups, getValueSortLabel } from "./valuesSortOptions";
 import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
 
 interface ValuesSearchControlsProps {
   onDebouncedSearchChange: (term: string) => void;
+  initialSearchTerm: string;
   clearTrigger: number;
   selectedFilterSorts: FilterSort[];
   onToggleFilterSort: (sort: FilterSort) => void;
@@ -41,6 +41,10 @@ interface ValuesSearchControlsProps {
   onFilterModeChange: (mode: ValuesFilterMode) => void;
   valueSort: ValueSort;
   setValueSort: (sort: ValueSort) => void;
+  valueSortGroups: {
+    label: string;
+    options: { value: string; label: string }[];
+  }[];
   rangeValue: number[];
   setRangeValue: (value: number[]) => void;
   setAppliedMinValue: (value: number) => void;
@@ -52,6 +56,7 @@ interface ValuesSearchControlsProps {
 
 export default function ValuesSearchControls({
   onDebouncedSearchChange,
+  initialSearchTerm,
   clearTrigger,
   selectedFilterSorts,
   onToggleFilterSort,
@@ -60,6 +65,7 @@ export default function ValuesSearchControls({
   onFilterModeChange,
   valueSort,
   setValueSort,
+  valueSortGroups,
   rangeValue,
   setRangeValue,
   setAppliedMinValue,
@@ -71,8 +77,12 @@ export default function ValuesSearchControls({
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  useEffect(() => {
+    setSearchTerm(initialSearchTerm);
+  }, [initialSearchTerm]);
 
   useEffect(() => {
     onDebouncedSearchChange(debouncedSearchTerm);
@@ -145,9 +155,19 @@ export default function ValuesSearchControls({
     return Math.abs(nearest - value) <= snapDistance ? nearest : value;
   };
 
-  const filterLabel = getFilterSortsButtonLabel(selectedFilterSorts);
+  const typeFilterValues = useMemo(
+    () => filterGroups.flatMap((group) => group.options.map((o) => o.value)),
+    [],
+  );
+  const selectedTypeFilters = selectedFilterSorts.filter((value) =>
+    typeFilterValues.includes(value),
+  );
+  const filterLabel = getFilterSortsButtonLabel(selectedTypeFilters);
 
-  const sortLabel = getValueSortLabel(valueSort);
+  const sortLabel =
+    valueSortGroups
+      .flatMap((group) => group.options)
+      .find((option) => option.value === valueSort)?.label ?? "Sort by";
 
   const advancedFilterValues = useMemo(
     () =>
@@ -274,10 +294,10 @@ export default function ValuesSearchControls({
                   >
                     {filterMode === "multi" ? (
                       <>
-                        {selectedFilterSorts.length > 0 && (
+                        {selectedTypeFilters.length > 0 && (
                           <button
                             type="button"
-                            onClick={() => onClearFilterSorts()}
+                            onClick={() => onClearFilterSorts(typeFilterValues)}
                             className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
                           >
                             Clear Filters
@@ -316,7 +336,7 @@ export default function ValuesSearchControls({
                       </>
                     ) : (
                       <DropdownMenuRadioGroup
-                        value={selectedFilterSorts[0] ?? "name-all-items"}
+                        value={selectedTypeFilters[0] ?? "name-all-items"}
                         onValueChange={(newValue) => {
                           if (newValue === "name-all-items") {
                             onClearFilterSorts();
@@ -385,6 +405,11 @@ export default function ValuesSearchControls({
                     align="start"
                     className="border-border-card bg-secondary-bg text-primary-text max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
+                    {valueSortGroups.length === 0 && (
+                      <DropdownMenuLabel className="text-secondary-text px-3 py-2 text-sm">
+                        Sort options unavailable
+                      </DropdownMenuLabel>
+                    )}
                     <DropdownMenuRadioGroup
                       value={valueSort}
                       onValueChange={(newValue) => {

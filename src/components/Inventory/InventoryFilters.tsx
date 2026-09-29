@@ -14,19 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type SortOrder =
-  | "alpha-asc"
-  | "alpha-desc"
-  | "created-asc"
-  | "created-desc"
-  | "season-asc"
-  | "season-desc"
-  | "level-asc"
-  | "level-desc"
-  | "cash-desc"
-  | "cash-asc"
-  | "duped-desc"
-  | "duped-asc";
+export interface InventorySortGroup {
+  label: string;
+  options: { value: string; label: string }[];
+}
 
 export interface InventoryStats {
   isLargeInventory: boolean;
@@ -58,8 +49,9 @@ interface InventoryFiltersProps {
   onSeasonalFilterToggle: (checked: boolean) => void;
   onTradableFilterToggle: (checked: boolean) => void;
   onUntradableFilterToggle: (checked: boolean) => void;
-  sortOrder: SortOrder;
-  setSortOrder: (order: SortOrder) => void;
+  sortOrder: string;
+  setSortOrder: (order: string) => void;
+  sortGroups: InventorySortGroup[];
 }
 
 export default function InventoryFilters({
@@ -86,24 +78,15 @@ export default function InventoryFilters({
   onUntradableFilterToggle,
   sortOrder,
   setSortOrder,
+  sortGroups,
 }: InventoryFiltersProps) {
   const MAX_SEARCH_LENGTH = 50;
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const selectedCategoryValue = selectedCategories[0] ?? "all";
-  const sortLabels: Record<SortOrder, string> = {
-    "alpha-asc": "Name (A to Z)",
-    "alpha-desc": "Name (Z to A)",
-    "created-asc": "Oldest First",
-    "created-desc": "Newest First",
-    "season-asc": "Season Number (Oldest to Newest)",
-    "season-desc": "Season Number (Newest to Oldest)",
-    "level-asc": "Season Level (Low to High)",
-    "level-desc": "Season Level (High to Low)",
-    "cash-desc": "Cash Value (High to Low)",
-    "cash-asc": "Cash Value (Low to High)",
-    "duped-desc": "Duped Value (High to Low)",
-    "duped-asc": "Duped Value (Low to High)",
-  };
+  const sortLabel =
+    sortGroups
+      .flatMap((group) => group.options)
+      .find((option) => option.value === sortOrder)?.label ?? "Sort";
 
   return (
     <div className="mb-4 flex flex-col gap-4">
@@ -203,9 +186,7 @@ export default function InventoryFilters({
                 className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Sort items"
               >
-                <span className="truncate">
-                  {sortLabels[sortOrder] ?? "Sort"}
-                </span>
+                <span className="truncate">{sortLabel}</span>
                 <Icon
                   icon="heroicons:chevron-down"
                   className="text-secondary-text h-5 w-5"
@@ -219,101 +200,30 @@ export default function InventoryFilters({
             >
               <DropdownMenuRadioGroup
                 value={sortOrder}
-                onValueChange={(val) => {
-                  const nextValue = val as SortOrder;
+                onValueChange={(nextValue) => {
                   setSortOrder(nextValue);
                   window.rybbit?.event("Inventory Sort Change", {
                     sort: nextValue,
                   });
                 }}
               >
-                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                  Alphabetically
-                </DropdownMenuLabel>
-                <DropdownMenuRadioItem
-                  value="alpha-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Name (A to Z)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="alpha-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Name (Z to A)
-                </DropdownMenuRadioItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                  Date
-                </DropdownMenuLabel>
-                <DropdownMenuRadioItem
-                  value="created-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Oldest First
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="created-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Newest First
-                </DropdownMenuRadioItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                  Season
-                </DropdownMenuLabel>
-                <DropdownMenuRadioItem
-                  value="season-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Season Number (Oldest to Newest)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="season-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Season Number (Newest to Oldest)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="level-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Season Level (Low to High)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="level-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Season Level (High to Low)
-                </DropdownMenuRadioItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                  Values
-                </DropdownMenuLabel>
-                <DropdownMenuRadioItem
-                  value="cash-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Cash Value (High to Low)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="cash-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Cash Value (Low to High)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="duped-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Duped Value (High to Low)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="duped-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  Duped Value (Low to High)
-                </DropdownMenuRadioItem>
+                {sortGroups.map((group, index) => (
+                  <div key={group.label}>
+                    {index > 0 && <DropdownMenuSeparator />}
+                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                      {group.label}
+                    </DropdownMenuLabel>
+                    {group.options.map((option) => (
+                      <DropdownMenuRadioItem
+                        key={option.value}
+                        value={option.value}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </div>
+                ))}
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -368,6 +278,12 @@ export default function InventoryFilters({
         </Button>
         <Button
           onClick={() => onLimitedFilterToggle(!showOnlyLimited)}
+          disabled={showMissingItems}
+          title={
+            showMissingItems
+              ? "Limited filtering needs item metadata for the full missing-item list."
+              : undefined
+          }
           size="sm"
           variant={showOnlyLimited ? "default" : "secondary"}
           className="w-fit"
@@ -382,16 +298,12 @@ export default function InventoryFilters({
         </Button>
         <Button
           onClick={() => onSeasonalFilterToggle(!showOnlySeasonal)}
+          disabled={showMissingItems}
           size="sm"
           variant={showOnlySeasonal ? "default" : "secondary"}
           className="w-fit"
         >
-          <Icon
-            icon="noto-v1:snowflake"
-            className="h-4 w-4"
-            style={{ color: "#40c0e7" }}
-            inline={true}
-          />
+          <Icon icon="noto-v1:snowflake" className="h-4 w-4" inline={true} />
           Seasonal Only
         </Button>
       </div>
@@ -411,6 +323,7 @@ export default function InventoryFilters({
                     <input
                       type="radio"
                       name="tradability"
+                      disabled={showMissingItems}
                       checked={!showOnlyTradable && !showOnlyUntradable}
                       onChange={() => {
                         onTradableFilterToggle(false);
@@ -427,6 +340,7 @@ export default function InventoryFilters({
                     <input
                       type="radio"
                       name="tradability"
+                      disabled={showMissingItems}
                       checked={showOnlyTradable}
                       onChange={() => {
                         onTradableFilterToggle(true);
@@ -445,6 +359,7 @@ export default function InventoryFilters({
                     <input
                       type="radio"
                       name="tradability"
+                      disabled={showMissingItems}
                       checked={showOnlyUntradable}
                       onChange={() => {
                         onUntradableFilterToggle(true);
@@ -490,7 +405,7 @@ export default function InventoryFilters({
 
                   <label
                     htmlFor="inventory-show-missing-items"
-                    className="flex cursor-pointer items-center gap-2"
+                    className="flex items-center gap-2"
                   >
                     <Checkbox
                       id="inventory-show-missing-items"

@@ -1,9 +1,7 @@
-import React, { Suspense } from "react";
+import React from "react";
 import TradingDescription from "@/components/trading/TradingDescription";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TradeAds from "@/components/trading/TradeAds";
-import { fetchItems } from "@/utils/api/api";
-import Loading from "./loading";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 export const dynamic = "force-dynamic";
@@ -24,20 +22,8 @@ export default function TradingPage() {
         <Breadcrumb />
 
         <TradingDescription />
-        <Suspense fallback={<Loading />}>
-          <TradeAdsWrapper />
-        </Suspense>
+        <TradeAds />
       </main>
     </>
   );
-}
-
-async function TradeAdsWrapper() {
-  const items = await fetchItems();
-  const tradeItems = items.map((item) => ({
-    ...item,
-    is_sub: false,
-    side: undefined,
-  }));
-  return <TradeAds initialItems={tradeItems} />;
 }

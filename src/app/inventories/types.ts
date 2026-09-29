@@ -54,3 +54,47 @@ export interface UserConnectionData {
   roblox_id: string | null;
   roblox_username?: string;
 }
+
+export type TradeConfidence = "confirmed" | "partial";
+export type TradeStatus = "completed" | "pending";
+
+export interface TradeList<T> {
+  completed: T[];
+  pending: T[];
+}
+
+export interface UserTradeSummary {
+  trade_id: string;
+  counterparty_user_id: string;
+  items_given: TradeItemDetail[];
+  items_received: TradeItemDetail[];
+  first_time: number;
+  last_time: number;
+  confidence: TradeConfidence;
+  status: TradeStatus;
+}
+
+export interface TradeItemDetail {
+  item_id: string;
+  branch_id: string;
+  title: string;
+  category_title: string;
+  trade_time: number;
+  confidence: "confirmed" | "gap";
+  is_duplicate_branch: boolean;
+  original_owner: string | null;
+  given_by_original_owner: boolean;
+  received_by_original_owner: boolean;
+}
+
+export interface TradeDetail {
+  trade_id: string;
+  user_a: string;
+  user_b: string;
+  items_a_to_b: TradeItemDetail[];
+  items_b_to_a: TradeItemDetail[];
+  first_time: number;
+  last_time: number;
+  confidence: TradeConfidence;
+  status: TradeStatus;
+}

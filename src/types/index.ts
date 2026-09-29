@@ -55,10 +55,6 @@ export type ValueSort =
   | "cash-asc"
   | "duped-desc"
   | "duped-asc"
-  | "season-number-asc"
-  | "season-number-desc"
-  | "season-level-asc"
-  | "season-level-desc"
   | "demand-desc"
   | "demand-asc"
   | "last-updated-desc"
@@ -67,6 +63,10 @@ export type ValueSort =
   | "times-traded-asc"
   | "unique-circulation-desc"
   | "unique-circulation-asc"
+  | "season-number-asc"
+  | "season-number-desc"
+  | "season-level-asc"
+  | "season-level-desc"
   | "demand-multiple-desc"
   | "demand-multiple-asc"
   | "demand-close-to-none"
@@ -108,25 +108,28 @@ export interface Item {
   id: number;
   name: string;
   type: string;
-  creator: string;
+  creator: string | null;
   is_seasonal: number;
-  cash_value: string;
-  duped_value: string;
+  season: number | null;
+  level: number | string | null;
+  cash_value: string | null;
+  duped_value: string | null;
   price: string;
   is_limited: number;
   duped_owners: DupedOwner[] | [];
-  notes: string;
-  demand: string;
+  notes: string | null;
+  demand: string | null;
   duped_demand: string | null;
   trend: string | null;
-  description: string;
-  health: number;
+  description: string | null;
+  health: number | null;
   tradable: number;
   last_updated: number;
   recent_changes?: RecentChange[] | null;
   metadata?: {
     TimesTraded?: number;
     UniqueCirculation?: number;
+    TimesScanned?: number;
     DemandMultiple?: number;
     LastUpdated?: number;
   };
@@ -138,19 +141,21 @@ export interface Item {
     data: {
       name: string;
       type: string;
-      creator: string;
+      creator: string | null;
       is_seasonal: number | null;
-      cash_value: string;
-      duped_value: string;
+      season?: number | null;
+      level?: number | string | null;
+      cash_value: string | null;
+      duped_value: string | null;
       price: string;
       is_limited: number | null;
       duped_owners: string;
-      notes: string;
-      demand: string;
+      notes: string | null;
+      demand: string | null;
       duped_demand: string | null;
       trend?: string | null;
-      description: string;
-      health: number;
+      description: string | null;
+      health: number | null;
       tradable: boolean;
       last_updated: number;
     };
@@ -197,25 +202,28 @@ export interface ItemDetails {
   id: number;
   name: string;
   type: string;
-  creator: string;
+  creator: string | null;
   is_seasonal: number | null;
-  cash_value: string;
-  duped_value: string;
+  season: number | null;
+  level: number | string | null;
+  cash_value: string | null;
+  duped_value: string | null;
   price: string;
   is_limited: number | null;
   duped_owners: DupedOwner[] | string;
-  notes: string;
-  demand: string;
+  notes: string | null;
+  demand: string | null;
   duped_demand: string | null;
-  trend: string;
-  description: string;
-  health: number;
+  trend: string | null;
+  description: string | null;
+  health: number | null;
   tradable: boolean | number;
   last_updated: number;
   recent_changes?: RecentChange[] | null;
   metadata?: {
     TimesTraded?: number;
     UniqueCirculation?: number;
+    TimesScanned?: number;
     DemandMultiple?: number;
     LastUpdated?: number;
   };

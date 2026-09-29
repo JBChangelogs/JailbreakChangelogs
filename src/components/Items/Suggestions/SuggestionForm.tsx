@@ -33,6 +33,7 @@ import {
   type CommonTradeDraft,
 } from "@/components/Items/Suggestions/CommonTrades";
 import { getTextSearchRank } from "@/utils/helpers/itemSearch";
+import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 import {
   getItemImagePath,
   getVideoPath,
@@ -56,8 +57,6 @@ export interface SuggestionFormUser {
 }
 
 export interface SuggestionFormProps {
-  items: Item[];
-  loadingItems: boolean;
   limits: SuggestionLimits | null;
   loadingLimits: boolean;
   isVtEligible: boolean;
@@ -75,8 +74,6 @@ export interface SuggestionFormProps {
 }
 
 export function SuggestionForm({
-  items,
-  loadingItems,
   limits,
   loadingLimits,
   isVtEligible,
@@ -86,6 +83,8 @@ export function SuggestionForm({
   onOpenGuidelines,
 }: SuggestionFormProps) {
   const [itemSearch, setItemSearch] = useState("");
+  const [itemPage, setItemPage] = useState(1);
+  const catalog = useItemCatalogPage(itemSearch, itemPage);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [field, setField] = useState("cash_value");
   const [suggestedValue, setSuggestedValue] = useState("");
@@ -114,13 +113,12 @@ export function SuggestionForm({
   const itemSearchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (loadingItems) return;
     const frame = requestAnimationFrame(() => {
       itemSearchInputRef.current?.focus();
       setShowItemDropdown(true);
     });
     return () => cancelAnimationFrame(frame);
-  }, [loadingItems]);
+  }, []);
 
   useEffect(() => {
     if (!rateLimitUntil) return;
@@ -138,11 +136,13 @@ export function SuggestionForm({
   const maxNoteLength = limits?.max_note_length ?? 300;
   const validFields = limits?.valid_fields ?? ["cash_value", "duped_value"];
 
-  const filteredItems = items
+  const filteredItems = (catalog.data?.items ?? [])
     .filter((item) => item.tradable === 1 || item.id === 587 || item.id === 713)
     .map((item) => ({
       item,
-      rank: getTextSearchRank([item.name, item.type], itemSearch),
+      rank: itemSearch
+        ? 0
+        : getTextSearchRank([item.name, item.type], itemSearch),
     }))
     .filter(({ rank }) => rank !== Infinity)
     .sort((a, b) => a.rank - b.rank)
@@ -338,9 +338,8 @@ export function SuggestionForm({
               id="item-search"
               type="text"
               placeholder={
-                loadingItems ? "Loading items..." : "Search for an item..."
+                catalog.loading ? "Loading items..." : "Search for an item..."
               }
-              disabled={loadingItems}
               value={itemSearch}
               onFocus={(e) => {
                 setShowItemDropdown(true);
@@ -349,6 +348,7 @@ export function SuggestionForm({
               onChange={(e) => {
                 const value = e.target.value;
                 setItemSearch(value);
+                setItemPage(1);
                 setShowItemDropdown(true);
                 if (selectedItem && value !== selectedItem.name) {
                   setSelectedItem(null);
@@ -376,6 +376,7 @@ export function SuggestionForm({
                   type="button"
                   onClick={() => {
                     setItemSearch("");
+                    setItemPage(1);
                     setSelectedItem(null);
                     setShowItemDropdown(true);
                     itemSearchInputRef.current?.focus();
@@ -405,13 +406,17 @@ export function SuggestionForm({
                 </p>
               </div>
               <div className="max-h-56 overflow-y-auto">
-                {filteredItems.length === 0 ? (
+                {catalog.loading ? (
+                  <p className="text-secondary-text px-3 py-6 text-sm">
+                    Loading items...
+                  </p>
+                ) : filteredItems.length === 0 ? (
                   <p className="text-secondary-text flex items-center px-3 py-6 text-sm">
                     No items found
                   </p>
                 ) : (
                   <>
-                    {filteredItems.slice(0, 50).map((item) => (
+                    {filteredItems.map((item) => (
                       <SuggestionItemSearchResult
                         key={item.id}
                         item={item}
@@ -423,12 +428,27 @@ export function SuggestionForm({
                         }}
                       />
                     ))}
-                    {filteredItems.length > 50 && (
-                      <div className="border-border-card border-t px-3 py-1.5">
-                        <p className="text-secondary-text text-xs">
-                          Showing 50 of {filteredItems.length} — refine your
-                          search
-                        </p>
+                    {(catalog.data?.total_pages ?? 0) > 1 && (
+                      <div className="border-border-card flex items-center justify-between border-t px-3 py-2 text-xs">
+                        <button
+                          type="button"
+                          disabled={itemPage <= 1}
+                          onClick={() => setItemPage(itemPage - 1)}
+                        >
+                          Previous
+                        </button>
+                        <span>
+                          {itemPage} / {catalog.data?.total_pages}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={
+                            itemPage >= (catalog.data?.total_pages ?? 1)
+                          }
+                          onClick={() => setItemPage(itemPage + 1)}
+                        >
+                          Next
+                        </button>
                       </div>
                     )}
                   </>
@@ -738,7 +758,6 @@ export function SuggestionForm({
 
             {requiresCommonTrades && (
               <CommonTradesEditor
-                items={items}
                 trades={commonTrades}
                 suggestedItem={selectedItem}
                 onChange={(nextTrades) => {

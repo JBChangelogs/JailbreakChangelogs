@@ -2,7 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
-import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api/api";
+import {
+  fetchItemCountStats,
+  fetchTradeCountStats,
+  fetchDuplicatesCount,
+} from "@/utils/api/api";
 import CountUpNumber from "@/components/Home/CountUpNumber";
 
 export default function StatsPolling() {
@@ -20,12 +24,19 @@ export default function StatsPolling() {
     refetchIntervalInBackground: true,
   });
 
-  if (isLoadingStats || isLoadingDuplicates) {
+  const { data: tradeStats, isLoading: isLoadingTrades } = useQuery({
+    queryKey: ["trade-count-stats"],
+    queryFn: fetchTradeCountStats,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: true,
+  });
+
+  if (isLoadingStats || isLoadingDuplicates || isLoadingTrades) {
     return <StatsSkeleton />;
   }
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <StatTile
         icon="heroicons:cube"
         label="Items tracked"
@@ -40,6 +51,11 @@ export default function StatsPolling() {
         icon="heroicons:document-duplicate"
         label="Total duplicates"
         value={duplicatesStats?.total_duplicates ?? 0}
+      />
+      <StatTile
+        icon="heroicons:arrows-right-left"
+        label="Trades tracked"
+        value={tradeStats?.trade_count ?? 0}
       />
     </div>
   );
@@ -69,8 +85,8 @@ function StatTile({
 
 export function StatsSkeleton() {
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-      {[0, 1, 2].map((i) => (
+    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {[0, 1, 2, 3].map((i) => (
         <div
           key={i}
           className="border-border-card bg-secondary-bg rounded-lg border p-5"

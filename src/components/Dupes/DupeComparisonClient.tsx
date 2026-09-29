@@ -271,7 +271,11 @@ export default function DupeComparisonClient({
               <CategoryIconBadge
                 type={duplicateItem.categoryTitle}
                 isLimited={sharedItemData.is_limited === 1}
-                isSeasonal={sharedItemData.is_seasonal === 1}
+                isSeasonal={
+                  sharedItemData.is_seasonal === 1 ||
+                  sharedItemData.season != null ||
+                  duplicateItem.season != null
+                }
                 preferItemType={true}
                 className="h-5 w-5"
               />
@@ -378,7 +382,7 @@ export default function DupeComparisonClient({
                   Limited
                 </span>
               )}
-              {sharedItemData.is_seasonal === 1 && (
+              {sharedItemData.season != null && (
                 <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                   <Icon
                     icon="noto-v1:snowflake"

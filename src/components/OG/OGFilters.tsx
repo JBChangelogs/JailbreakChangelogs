@@ -292,10 +292,7 @@ export default function OGFilters({
       {/* Quick Filter Buttons */}
       <div className="flex flex-wrap gap-2">
         <Button
-          onClick={() => {
-            onLimitedFilterToggle(!showOnlyLimited);
-            if (!showOnlyLimited) onSeasonalFilterToggle(false);
-          }}
+          onClick={() => onLimitedFilterToggle(!showOnlyLimited)}
           size="sm"
           variant={showOnlyLimited ? "default" : "secondary"}
           className="w-fit"
@@ -309,20 +306,12 @@ export default function OGFilters({
           Limiteds Only
         </Button>
         <Button
-          onClick={() => {
-            onSeasonalFilterToggle(!showOnlySeasonal);
-            if (!showOnlySeasonal) onLimitedFilterToggle(false);
-          }}
+          onClick={() => onSeasonalFilterToggle(!showOnlySeasonal)}
           size="sm"
           variant={showOnlySeasonal ? "default" : "secondary"}
           className="w-fit"
         >
-          <Icon
-            icon="noto-v1:snowflake"
-            className="h-4 w-4"
-            style={{ color: "#40c0e7" }}
-            inline={true}
-          />
+          <Icon icon="noto-v1:snowflake" className="h-4 w-4" inline={true} />
           Seasonal Only
         </Button>
       </div>

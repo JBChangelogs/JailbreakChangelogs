@@ -3,6 +3,7 @@
 import { createLogger } from "@/services/logger";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 
 const log = createLogger("UI");
 const EMPTY_FAVORITES: number[] = [];
@@ -12,12 +13,13 @@ const FILTER_SORT_PREFERENCE_KEY = "values_filter_sorts";
 const VALUE_SORT_PREFERENCE_KEY = "values_value_sort";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Item, FilterSort, FavoriteItem } from "@/types";
-import { sortAndFilterItems, parseCashValue } from "@/utils/trading/values";
+import { Item, FilterSort, FavoriteItem, ValueSort } from "@/types";
+import { filterByTypes } from "@/utils/trading/values";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import {
   fetchUserFavorites,
-  fetchItemsClient,
+  fetchItemsClientPage,
+  searchItemsClientPage,
   fetchLastUpdated,
 } from "@/utils/api/api";
 import { useAuthContext, useIsAuthenticated } from "@/contexts/AuthContext";
@@ -31,12 +33,12 @@ import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import { useValueSortState } from "@/hooks/useValueSortState";
 import { useValuesFilterMode } from "@/hooks/useValuesFilterMode";
 import { useValuesRangePreference } from "@/hooks/useValuesRangePreference";
-import { filterOptions } from "./valuesFilterOptions";
-import { valueSortOptions } from "./valuesSortOptions";
+import { filterOptions, getServerFilters } from "./valuesFilterOptions";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatRelativeDate } from "@/utils/helpers/timestamp";
+import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 
 const parseFilterSorts = (
   raw: string | null,
@@ -50,27 +52,36 @@ const parseFilterSorts = (
         )
     : [];
 
+const MAX_VALUE_RANGE = 50_000_000;
+
 export default function ValuesClient() {
   const { user } = useAuthContext();
+  const [{ page, query: debouncedSearchTerm }, setSearchParams] =
+    useQueryStates({
+      page: parseAsInteger.withDefault(1),
+      query: parseAsString.withDefault(""),
+    });
+  const searchQuery = debouncedSearchTerm.trim();
+  const searchQueryRef = useRef(searchQuery);
+  useEffect(() => {
+    searchQueryRef.current = searchQuery;
+  }, [searchQuery]);
+  const handleSearchChange = useCallback(
+    (term: string) => {
+      const nextQuery = term.trim();
+      if (nextQuery === searchQueryRef.current) return;
+      void setSearchParams({ query: nextQuery || null, page: null });
+    },
+    [setSearchParams],
+  );
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["values-items"],
-    queryFn: fetchItemsClient,
-  });
-  const items = data ?? EMPTY_ITEMS;
+  const valueSortGroups = useItemSortGroups();
+  const valueSortOptions = useMemo(
+    () => valueSortGroups.flatMap((group) => group.options),
+    [valueSortGroups],
+  );
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
-  useEffect(() => {
-    const handleRealtimeValues = () => {
-      void refetch();
-    };
-
-    window.addEventListener("realtimeValues", handleRealtimeValues);
-    return () =>
-      window.removeEventListener("realtimeValues", handleRealtimeValues);
-  }, [refetch]);
-
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [clearSearchTrigger, setClearSearchTrigger] = useState(0);
 
   const validFilterSorts = useMemo(
@@ -78,8 +89,8 @@ export default function ValuesClient() {
     [],
   );
   const validValueSorts = useMemo(
-    () => valueSortOptions.map((option) => option.value),
-    [],
+    () => valueSortOptions.map((option) => option.value as ValueSort),
+    [valueSortOptions],
   );
 
   const { valueSort, setValueSort } = useValueSortState({
@@ -248,19 +259,8 @@ export default function ValuesClient() {
     [persistFilterSorts, publishFilterSorts],
   );
 
-  const [sortedItems, setSortedItems] = useState<Item[]>([]);
-  const [isInitialSortPending, setIsInitialSortPending] = useState(true);
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
-  const DYNAMIC_MAX_VALUE = useMemo(() => {
-    return items.reduce((currentMax, item) => {
-      if (item.tradable === 1) {
-        const val = parseCashValue(item.cash_value);
-        return val > currentMax ? val : currentMax;
-      }
-      return currentMax;
-    }, 50_000_000);
-  }, [items]);
   const {
     rangeValue,
     setRangeValue,
@@ -268,13 +268,53 @@ export default function ValuesClient() {
     setAppliedMinValue,
     appliedMaxValue,
     setAppliedMaxValue,
-  } = useValuesRangePreference(DYNAMIC_MAX_VALUE, data !== undefined);
+  } = useValuesRangePreference(MAX_VALUE_RANGE, true);
+
+  const serverFilters = useMemo(
+    () => getServerFilters(selectedFilterSorts),
+    [selectedFilterSorts],
+  );
+  const serverMinValue = appliedMinValue > 0 ? appliedMinValue : undefined;
+  const serverMaxValue =
+    appliedMaxValue < MAX_VALUE_RANGE ? appliedMaxValue : undefined;
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: [
+      "values-items",
+      page,
+      searchQuery,
+      valueSort,
+      serverFilters,
+      serverMinValue,
+      serverMaxValue,
+    ],
+    queryFn: ({ signal }) => {
+      const options = {
+        sort: valueSort,
+        filters: serverFilters,
+        minValue: serverMinValue,
+        maxValue: serverMaxValue,
+      };
+      return searchQuery
+        ? searchItemsClientPage(searchQuery, Math.max(1, page), signal, options)
+        : fetchItemsClientPage(Math.max(1, page), signal, options);
+    },
+  });
+  const items = data?.items ?? EMPTY_ITEMS;
+
+  useEffect(() => {
+    const handleRealtimeValues = () => {
+      void refetch();
+    };
+    window.addEventListener("realtimeValues", handleRealtimeValues);
+    return () =>
+      window.removeEventListener("realtimeValues", handleRealtimeValues);
+  }, [refetch]);
 
   useEffect(() => {
     if (!data) return;
 
     let cancelled = false;
-    fetchLastUpdated(data).then((timestamp) => {
+    fetchLastUpdated(data.items).then((timestamp) => {
       if (!cancelled) setLastUpdated(timestamp);
     });
 
@@ -323,32 +363,14 @@ export default function ValuesClient() {
     ? favorites
     : EMPTY_FAVORITES;
 
-  useEffect(() => {
-    if (isLoading) return;
-
-    const updateSortedItems = async () => {
-      const favoritesData = effectiveFavorites.map((id) => ({
-        item_id: String(id),
-      }));
-      const sorted = await sortAndFilterItems(
-        items,
-        selectedFilterSorts,
-        valueSort,
-        debouncedSearchTerm,
-        favoritesData,
-      );
-      setSortedItems(sorted);
-      setIsInitialSortPending(false);
-    };
-    updateSortedItems();
-  }, [
-    items,
-    debouncedSearchTerm,
-    selectedFilterSorts,
-    valueSort,
-    effectiveFavorites,
-    isLoading,
-  ]);
+  const sortedItems = useMemo(() => {
+    if (!data) return EMPTY_ITEMS;
+    if (!selectedFilterSorts.includes("favorites")) return items;
+    const favoritesData = effectiveFavorites.map((id) => ({
+      item_id: String(id),
+    }));
+    return filterByTypes(items, ["favorites"], favoritesData);
+  }, [data, items, selectedFilterSorts, effectiveFavorites]);
 
   return (
     <ValuesErrorBoundary>
@@ -450,7 +472,8 @@ export default function ValuesClient() {
       </div>
 
       <ValuesSearchControls
-        onDebouncedSearchChange={setDebouncedSearchTerm}
+        onDebouncedSearchChange={handleSearchChange}
+        initialSearchTerm={debouncedSearchTerm}
         clearTrigger={clearSearchTrigger}
         selectedFilterSorts={selectedFilterSorts}
         onToggleFilterSort={handleToggleFilterSort}
@@ -459,13 +482,14 @@ export default function ValuesClient() {
         onFilterModeChange={setFilterMode}
         valueSort={valueSort}
         setValueSort={setValueSort}
+        valueSortGroups={valueSortGroups}
         rangeValue={rangeValue}
         setRangeValue={setRangeValue}
         setAppliedMinValue={setAppliedMinValue}
         appliedMaxValue={appliedMaxValue}
         setAppliedMaxValue={setAppliedMaxValue}
         searchSectionRef={searchSectionRef}
-        maxValueRange={DYNAMIC_MAX_VALUE}
+        maxValueRange={MAX_VALUE_RANGE}
       />
 
       <Link
@@ -489,8 +513,8 @@ export default function ValuesClient() {
       <div className="grid grid-cols-1 gap-8">
         <div className="space-y-6">
           <ValuesItemsGrid
-            items={sortedItems}
-            isLoading={isLoading || isInitialSortPending}
+            items={isLoading ? EMPTY_ITEMS : sortedItems}
+            isLoading={isLoading}
             favorites={favorites}
             onFavoriteChange={(itemId, isFavorited) => {
               setFavorites((prev) =>
@@ -501,23 +525,25 @@ export default function ValuesClient() {
             }}
             appliedMinValue={appliedMinValue}
             appliedMaxValue={appliedMaxValue}
-            MAX_VALUE_RANGE={DYNAMIC_MAX_VALUE}
+            MAX_VALUE_RANGE={MAX_VALUE_RANGE}
             onResetValueRange={() => {
-              setRangeValue([0, DYNAMIC_MAX_VALUE]);
+              setRangeValue([0, MAX_VALUE_RANGE]);
               setAppliedMinValue(0);
-              setAppliedMaxValue(DYNAMIC_MAX_VALUE);
+              setAppliedMaxValue(MAX_VALUE_RANGE);
             }}
             onClearAllFilters={() => {
               handleClearFilterSorts();
               setValueSort("cash-desc");
               setClearSearchTrigger((prev) => prev + 1);
-              setRangeValue([0, DYNAMIC_MAX_VALUE]);
+              setRangeValue([0, MAX_VALUE_RANGE]);
               setAppliedMinValue(0);
-              setAppliedMaxValue(DYNAMIC_MAX_VALUE);
+              setAppliedMaxValue(MAX_VALUE_RANGE);
             }}
             onClearCategoryFilter={handleClearFilterSorts}
             selectedFilterSorts={selectedFilterSorts}
-            totalItemsCount={items.length}
+            totalItemsCount={data?.total ?? 0}
+            totalPages={data?.total_pages ?? 0}
+            pageSize={data?.size ?? 50}
             valueSort={valueSort}
             debouncedSearchTerm={debouncedSearchTerm}
           />

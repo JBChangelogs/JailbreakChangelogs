@@ -15,6 +15,7 @@ import { QuickAddPopover } from "./QuickAddPopover";
 interface CalculatorItemGridProps {
   items: TradeItem[];
   catalogItems?: TradeItem[];
+  useCatalogApi?: boolean;
   onRemove?: (instanceId: string) => void;
   onDuplicate?: (item: TradeItem) => void;
   onValueTypeChange?: (
@@ -36,6 +37,7 @@ interface ItemGroup {
 export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
   items,
   catalogItems,
+  useCatalogApi = false,
   onRemove,
   onDuplicate,
   onValueTypeChange,
@@ -52,6 +54,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
     return (
       <QuickAddPopover
         items={catalogItems ?? []}
+        useCatalogApi={useCatalogApi}
         onSelect={(item) => onDuplicate?.(item)}
       >
         <button
@@ -127,8 +130,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
               : formatCurrencyValue(parseValueString(item.cash_value));
             const isLimited =
               item.is_limited === 1 || item.data?.is_limited === 1;
-            const isSeasonal =
-              item.is_seasonal === 1 || item.data?.is_seasonal === 1;
+            const isSeasonal = item.season != null || item.data?.season != null;
             const lastInstanceId =
               group.instanceIds[group.instanceIds.length - 1];
 
@@ -260,6 +262,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
               needing to hit an empty state first. */}
           <QuickAddPopover
             items={catalogItems ?? []}
+            useCatalogApi={useCatalogApi}
             onSelect={(item) => onDuplicate?.(item)}
           >
             <button

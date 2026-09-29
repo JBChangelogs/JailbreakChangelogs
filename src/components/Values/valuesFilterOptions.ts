@@ -77,12 +77,6 @@ export const chipFilterOptions: {
     iconColor: "#ffd700",
   },
   {
-    value: "name-seasonal-items",
-    label: "Seasonal",
-    icon: "noto-v1:snowflake",
-    iconColor: "#40c0e7",
-  },
-  {
     value: "name-limited-items",
     label: "Limited",
     icon: "mdi:clock",
@@ -94,6 +88,12 @@ export const chipFilterOptions: {
     icon: "heroicons:lock-closed",
     iconColor: "#ef4444",
   },
+  {
+    value: "name-seasonal-items",
+    label: "Seasonal",
+    icon: "noto-v1:snowflake",
+    iconColor: "#60a5fa",
+  },
 ];
 
 export const filterOptions = [
@@ -101,6 +101,12 @@ export const filterOptions = [
   ...advancedFilterGroups.flatMap((group) => group.options),
   ...chipFilterOptions,
 ];
+
+export function getServerFilters(filters: FilterSort[]): FilterSort[] {
+  return filters.filter(
+    (filter) => filter !== "favorites" && filter !== "name-all-items",
+  );
+}
 
 const filterLabelMap: Record<FilterSort, string> = filterOptions.reduce(
   (map, option) => {

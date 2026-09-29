@@ -21,6 +21,7 @@ import {
 import {
   filterGroups,
   filterOptions,
+  getServerFilters,
 } from "@/components/Values/valuesFilterOptions";
 import { Icon } from "../../ui/IconWrapper";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
@@ -30,17 +31,18 @@ import {
   matchesCategoryFilterSort,
 } from "@/utils/trading/tradeItems";
 import { handleImageError } from "@/utils/ui/images";
+import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 
 interface QuickAddPopoverProps {
   items: TradeItem[];
   onSelect: (item: TradeItem) => void;
   children: React.ReactNode;
+  useCatalogApi?: boolean;
 }
 
 const MAX_RESULTS = 8;
 
-// Same subset TradeItemPickerV2 supports — season-based filters aren't
-// relevant here since the calculator has no season context.
+// Same subset TradeItemPickerV2 supports.
 const SUPPORTED_FILTER_SORTS = new Set<FilterSort>([
   "name-all-items",
   "name-body-colors",
@@ -51,7 +53,6 @@ const SUPPORTED_FILTER_SORTS = new Set<FilterSort>([
   "name-hyperchromes",
   "name-limited-items",
   "name-rims",
-  "name-seasonal-items",
   "name-spoilers",
   "name-tire-stickers",
   "name-tire-styles",
@@ -78,34 +79,48 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
   items,
   onSelect,
   children,
+  useCatalogApi = false,
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [page, setPage] = useState(1);
+  const catalog = useItemCatalogPage(searchQuery, page, open && useCatalogApi, {
+    sort: "cash-desc",
+    filters: getServerFilters([filterSort]),
+  });
+  const visibleItems: TradeItem[] = useMemo(
+    () => (useCatalogApi ? (catalog.data?.items ?? []) : items),
+    [useCatalogApi, catalog.data?.items, items],
+  );
 
   const filterLabel =
     filterOptions.find((option) => option.value === filterSort)?.label ??
     "All Items";
 
   const results = useMemo(() => {
-    const tradable = items.filter((item) => item.tradable === 1);
+    const tradable = visibleItems.filter((item) => item.tradable === 1);
     const matched = tradable.filter(
       (item) =>
-        matchesTextSearch([item.name, item.type], searchQuery) &&
+        (useCatalogApi ||
+          matchesTextSearch([item.name, item.type], searchQuery)) &&
         matchesCategoryFilterSort(item, filterSort),
     );
-    const sorted = sortByValueSort(matched, "cash-desc", {
-      getCashValue: (item) => item.cash_value ?? "N/A",
-      getDupedValue: (item) => item.duped_value ?? "N/A",
-      getDemand: (item) => item.demand ?? item.data?.demand,
-    });
-    return sorted.slice(0, MAX_RESULTS);
-  }, [items, searchQuery, filterSort]);
+    const sorted = useCatalogApi
+      ? matched
+      : sortByValueSort(matched, "cash-desc", {
+          getCashValue: (item) => item.cash_value ?? "N/A",
+          getDupedValue: (item) => item.duped_value ?? "N/A",
+          getDemand: (item) => item.demand ?? item.data?.demand,
+        });
+    return useCatalogApi ? sorted : sorted.slice(0, MAX_RESULTS);
+  }, [visibleItems, searchQuery, filterSort, useCatalogApi]);
 
   const handlePick = (item: TradeItem) => {
     onSelect(item);
     setSearchQuery("");
+    setPage(1);
     setHighlightedIndex(0);
   };
 
@@ -118,6 +133,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
           setSearchQuery("");
           setFilterSort("name-all-items");
           setHighlightedIndex(0);
+          setPage(1);
         }
       }}
     >
@@ -134,6 +150,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setHighlightedIndex(0);
+              setPage(1);
             }}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") {
@@ -175,7 +192,10 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
             >
               <DropdownMenuRadioGroup
                 value={filterSort}
-                onValueChange={(val) => setFilterSort(val as FilterSort)}
+                onValueChange={(val) => {
+                  setFilterSort(val as FilterSort);
+                  setPage(1);
+                }}
               >
                 {availableFilterGroups.map((group, index) => (
                   <Fragment key={group.label}>
@@ -202,7 +222,11 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
         </div>
 
         <div className="max-h-72 overflow-y-auto p-1">
-          {results.length === 0 ? (
+          {useCatalogApi && catalog.loading ? (
+            <p className="text-secondary-text px-3 py-4 text-center text-sm">
+              Loading items...
+            </p>
+          ) : results.length === 0 ? (
             <p className="text-secondary-text px-3 py-4 text-center text-sm">
               No items found
             </p>
@@ -235,6 +259,27 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
             ))
           )}
         </div>
+        {useCatalogApi && (catalog.data?.total_pages ?? 0) > 1 && (
+          <div className="border-border-card flex items-center justify-between border-t px-3 py-2 text-xs">
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Previous
+            </button>
+            <span>
+              {page} / {catalog.data?.total_pages}
+            </span>
+            <button
+              type="button"
+              disabled={page >= (catalog.data?.total_pages ?? 1)}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );

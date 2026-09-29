@@ -293,12 +293,12 @@ export default function SettingsPage() {
                     return (
                       <div
                         key={entry.name}
+                        className="-mx-3 mb-1 rounded-lg px-3 py-2 transition-colors duration-500"
                         style={
                           isHighlighted
                             ? {
                                 backgroundColor:
                                   "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                                transition: "background-color 0.5s ease",
                               }
                             : undefined
                         }
@@ -344,21 +344,23 @@ export default function SettingsPage() {
                     );
                   })}
                   {isAppearanceCat && (
-                    <SettingToggle
-                      name="twemoji_enabled"
-                      value={twemojiEnabled}
-                      description="Use Twemoji for emojis instead of your browser's native emoji set"
-                      displayName="Twemoji Emojis"
-                      onChange={(_name, value) => {
-                        setTwemojiEnabled(value);
-                        const displayName =
-                          formatSettingName("twemoji_enabled");
-                        toast.success("Setting Updated", {
-                          description: `"${displayName}" has been ${value ? "enabled" : "disabled"}.`,
-                        });
-                      }}
-                      userData={userData}
-                    />
+                    <div className="-mx-3 mb-1 rounded-lg px-3 py-2 transition-colors duration-500">
+                      <SettingToggle
+                        name="twemoji_enabled"
+                        value={twemojiEnabled}
+                        description="Use Twemoji for emojis instead of your browser's native emoji set"
+                        displayName="Twemoji Emojis"
+                        onChange={(_name, value) => {
+                          setTwemojiEnabled(value);
+                          const displayName =
+                            formatSettingName("twemoji_enabled");
+                          toast.success("Setting Updated", {
+                            description: `"${displayName}" has been ${value ? "enabled" : "disabled"}.`,
+                          });
+                        }}
+                        userData={userData}
+                      />
+                    </div>
                   )}
                 </div>
               </SettingsCard>
@@ -421,12 +423,12 @@ export default function SettingsPage() {
                   return (
                     <div
                       key={pref.title}
+                      className="-mx-3 mb-1 rounded-lg px-3 py-2 transition-colors duration-500"
                       style={
                         isHighlighted
                           ? {
                               backgroundColor:
                                 "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                              transition: "background-color 0.5s ease",
                             }
                           : undefined
                       }

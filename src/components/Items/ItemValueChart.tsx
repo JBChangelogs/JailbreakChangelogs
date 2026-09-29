@@ -45,6 +45,7 @@ export interface ValueHistory {
     Name: string;
     TimesTraded: number;
     UniqueCirculation: number;
+    TimesScanned?: number;
     DemandMultiple: number;
     LastUpdated: number;
   } | null;
@@ -92,6 +93,7 @@ const ItemValueChart = ({
   const dupedGradientId = `fill-duped-${chartId}`;
   const tradedGradientId = `fill-traded-${chartId}`;
   const circulationGradientId = `fill-circulation-${chartId}`;
+  const scannedGradientId = `fill-scanned-${chartId}`;
 
   if (loading) {
     return (
@@ -453,12 +455,17 @@ const ItemValueChart = ({
       label: "Unique Circulation",
       color: "#f59e0b",
     },
+    scanned: {
+      label: "Times Scanned",
+      color: "#8b5cf6",
+    },
   } satisfies ChartConfig;
 
   const tradingChartData = tradingData.map((item) => ({
     timestamp: parseInt(item.date) * 1000,
     traded: item.metadata?.TimesTraded ?? 0,
     circulation: item.metadata?.UniqueCirculation ?? 0,
+    scanned: item.metadata?.TimesScanned ?? null,
   }));
 
   const barTradingChartData = aggregateByWindow(
@@ -468,12 +475,13 @@ const ItemValueChart = ({
       timestamp: chunk[chunk.length - 1].timestamp,
       traded: avg(chunk.map((entry) => entry.traded)),
       circulation: avg(chunk.map((entry) => entry.circulation)),
+      scanned: avgNullable(chunk.map((entry) => entry.scanned)),
     }),
   );
 
   const getTradingTrendSummary = (
     rangeData: typeof tradingChartData,
-    key: "traded" | "circulation",
+    key: "traded" | "circulation" | "scanned",
   ) => {
     const points = rangeData
       .map((entry) => entry[key])
@@ -506,6 +514,7 @@ const ItemValueChart = ({
     tradingChartData,
     "circulation",
   );
+  const scannedTrend = getTradingTrendSummary(tradingChartData, "scanned");
   const tradingRangeLabel = getTradingRangeLabel(tradingChartData);
 
   const currentDateRangeLabel =
@@ -1091,6 +1100,24 @@ const ItemValueChart = ({
                           stopOpacity={0.05}
                         />
                       </linearGradient>
+                      <linearGradient
+                        id={scannedGradientId}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="var(--color-scanned)"
+                          stopOpacity={0.35}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="var(--color-scanned)"
+                          stopOpacity={0.05}
+                        />
+                      </linearGradient>
                     </defs>
                     <CartesianGrid
                       vertical={false}
@@ -1133,14 +1160,21 @@ const ItemValueChart = ({
                             const isTraded =
                               rawName === "traded" ||
                               rawName.includes("traded");
+                            const isScanned =
+                              rawName === "scanned" ||
+                              rawName.includes("scanned");
                             const displayName = isTraded
                               ? "Times Traded"
-                              : "Unique Circulation";
+                              : isScanned
+                                ? "Times Scanned"
+                                : "Unique Circulation";
                             const indicatorColor =
                               item.color ||
                               (isTraded
                                 ? "var(--color-traded)"
-                                : "var(--color-circulation)");
+                                : isScanned
+                                  ? "var(--color-scanned)"
+                                  : "var(--color-circulation)");
 
                             return (
                               <div className="flex w-full items-center justify-between gap-3">
@@ -1224,6 +1258,22 @@ const ItemValueChart = ({
                         strokeWidth: 2,
                       }}
                     />
+                    <Area
+                      type="natural"
+                      dataKey="scanned"
+                      name="Times Scanned"
+                      fill={`url(#${scannedGradientId})`}
+                      fillOpacity={1}
+                      stroke="var(--color-scanned)"
+                      strokeWidth={3}
+                      dot={false}
+                      activeDot={{
+                        r: 5,
+                        fill: "var(--color-secondary-bg)",
+                        stroke: "var(--color-scanned)",
+                        strokeWidth: 2,
+                      }}
+                    />
                   </AreaChart>
                 ) : (
                   <BarChart
@@ -1272,14 +1322,21 @@ const ItemValueChart = ({
                             const isTraded =
                               rawName === "traded" ||
                               rawName.includes("traded");
+                            const isScanned =
+                              rawName === "scanned" ||
+                              rawName.includes("scanned");
                             const displayName = isTraded
                               ? "Times Traded"
-                              : "Unique Circulation";
+                              : isScanned
+                                ? "Times Scanned"
+                                : "Unique Circulation";
                             const indicatorColor =
                               item.color ||
                               (isTraded
                                 ? "var(--color-traded)"
-                                : "var(--color-circulation)");
+                                : isScanned
+                                  ? "var(--color-scanned)"
+                                  : "var(--color-circulation)");
 
                             return (
                               <div className="flex w-full items-center justify-between gap-3">
@@ -1345,11 +1402,21 @@ const ItemValueChart = ({
                       fillOpacity={0.7}
                       radius={[6, 6, 0, 0]}
                     />
+                    <Bar
+                      dataKey="scanned"
+                      name="Times Scanned"
+                      fill="var(--color-scanned)"
+                      fillOpacity={0.7}
+                      radius={[6, 6, 0, 0]}
+                    />
                   </BarChart>
                 )}
               </ChartContainer>
             </div>
-            {(tradedTrend || circulationTrend || tradingRangeLabel) && (
+            {(tradedTrend ||
+              circulationTrend ||
+              scannedTrend ||
+              tradingRangeLabel) && (
               <div className="mt-3 space-y-1 text-sm">
                 {tradedTrend && (
                   <div
@@ -1401,6 +1468,35 @@ const ItemValueChart = ({
                         !circulationTrend.isMeaningful
                           ? "heroicons:minus-20-solid"
                           : circulationTrend.direction === "up"
+                            ? "heroicons:arrow-trending-up-20-solid"
+                            : "heroicons:arrow-trending-down-20-solid"
+                      }
+                      className="h-4 w-4"
+                      inline={true}
+                    />
+                  </div>
+                )}
+                {scannedTrend && (
+                  <div
+                    className="flex items-center gap-1.5 font-medium"
+                    style={{
+                      color: !scannedTrend.isMeaningful
+                        ? "var(--color-secondary-text)"
+                        : scannedTrend.direction === "up"
+                          ? "var(--color-form-success)"
+                          : "var(--color-button-danger)",
+                    }}
+                  >
+                    <span>
+                      {!scannedTrend.isMeaningful
+                        ? "Times Scanned: No meaningful trend"
+                        : `Times Scanned: Trending ${scannedTrend.direction} by ${scannedTrend.percent}%`}
+                    </span>
+                    <Icon
+                      icon={
+                        !scannedTrend.isMeaningful
+                          ? "heroicons:minus-20-solid"
+                          : scannedTrend.direction === "up"
                             ? "heroicons:arrow-trending-up-20-solid"
                             : "heroicons:arrow-trending-down-20-solid"
                       }

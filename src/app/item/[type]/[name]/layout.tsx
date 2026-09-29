@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { fetchItem } from "@/utils/api/api";
+import { hasItemValue } from "@/utils/items/itemValue";
 import { getItemImagePath } from "@/utils/ui/images";
 import { getMaintenanceMetadata } from "@/utils/api/maintenance";
 import { formatFullValue, formatPrice } from "@/utils/trading/values";
@@ -32,8 +33,7 @@ async function generateFAQJsonLd(
     },
   ];
 
-  // Only add duped value if it's not N/A
-  if (item.duped_value && item.duped_value !== "N/A") {
+  if (hasItemValue(item.duped_value)) {
     faqs.push({
       question: `What is the duped value of ${item.name}?`,
       answer: `The duped value of ${item.name} is ${formatFullValue(item.duped_value)}.`,
@@ -53,11 +53,9 @@ async function generateFAQJsonLd(
     {
       question: `Is ${item.name} seasonal?`,
       answer:
-        item.is_seasonal === 1
-          ? `${item.name} is a seasonal item.`
-          : item.is_seasonal === 0
-            ? `${item.name} is not a seasonal item.`
-            : `It is unknown if ${item.name} is a seasonal item.`,
+        item.season != null
+          ? `${item.name} is a seasonal item from Season ${item.season}.`
+          : `${item.name} is not a seasonal item.`,
     },
     {
       question: `Can ${item.name} be traded?`,
@@ -68,12 +66,14 @@ async function generateFAQJsonLd(
     },
     {
       question: `What is the demand for ${item.name}?`,
-      answer: `The demand for ${item.name} is ${item.demand}.`,
+      answer: hasItemValue(item.demand)
+        ? `The demand for ${item.name} is ${item.demand}.`
+        : `The demand for ${item.name} is unknown.`,
     },
   );
 
   // Add creator info if available and clean up the name
-  if (item.creator && item.creator !== "N/A") {
+  if (hasItemValue(item.creator)) {
     // Remove the ID in brackets from creator name
     const cleanCreatorName = item.creator.replace(/\s*\(\d+\)$/, "");
     faqs.push({
@@ -83,7 +83,7 @@ async function generateFAQJsonLd(
   }
 
   // Add price info if available
-  if (item.price && item.price !== "N/A") {
+  if (hasItemValue(item.price)) {
     faqs.push({
       question: `What is the price of ${item.name}?`,
       answer: `The price of ${item.name} is ${formatPrice(item.price)}.`,
@@ -200,19 +200,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: `${item.name} (${item.type})`,
-      description:
-        item.description && item.description !== "N/A"
-          ? `${item.description.slice(0, 155)}...`
-          : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
+      description: hasItemValue(item.description)
+        ? `${item.description.slice(0, 155)}...`
+        : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
       alternates: {
         canonical: canonicalPath,
       },
       openGraph: {
         title: `${item.name} (${item.type}) | Roblox Jailbreak`,
-        description:
-          item.description && item.description !== "N/A"
-            ? `${item.description.slice(0, 155)}...`
-            : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
+        description: hasItemValue(item.description)
+          ? `${item.description.slice(0, 155)}...`
+          : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
         type: "website",
         url: fullUrl,
         siteName: "Jailbreak Changelogs",
@@ -228,10 +226,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       twitter: {
         card: "summary_large_image",
         title: `${item.name} (${item.type}) | Roblox Jailbreak`,
-        description:
-          item.description && item.description !== "N/A"
-            ? `${item.description.slice(0, 155)}...`
-            : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
+        description: hasItemValue(item.description)
+          ? `${item.description.slice(0, 155)}...`
+          : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
         images: [finalImageUrl],
       },
     };

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { getTextSearchRank } from "@/utils/helpers/itemSearch";
+import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { badgeBase } from "@/components/Items/Suggestions/shared";
@@ -311,19 +312,19 @@ export function CommonTradesDisplay({
 
 function TradeSideEditor({
   label,
-  items,
   selected,
   excludedItemIds,
   onChange,
 }: {
   label: string;
-  items: Item[];
   selected: CommonTradeDraftItem[];
   excludedItemIds?: Set<string>;
   onChange: (items: CommonTradeDraftItem[]) => void;
 }) {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
+  const catalog = useItemCatalogPage(search, page, open);
   const totalQty = selected.reduce(
     (sum, entry) => sum + (Number(entry.amount) || 0),
     0,
@@ -332,7 +333,7 @@ function TradeSideEditor({
     selected.length >= MAX_ITEMS_PER_SIDE || totalQty >= MAX_QTY_PER_SIDE;
   const results = useMemo(() => {
     const selectedIds = new Set(selected.map((item) => item.id));
-    return items
+    return (catalog.data?.items ?? [])
       .filter((item) => {
         const id = String(item.id);
         return (
@@ -343,13 +344,13 @@ function TradeSideEditor({
       })
       .map((item) => ({
         item,
-        rank: getTextSearchRank([item.name, item.type], search),
+        rank: search ? 0 : getTextSearchRank([item.name, item.type], search),
       }))
       .filter(({ rank }) => rank !== Infinity)
       .sort((a, b) => a.rank - b.rank)
       .slice(0, 50)
       .map(({ item }) => item);
-  }, [excludedItemIds, items, search, selected]);
+  }, [excludedItemIds, catalog.data, search, selected]);
 
   return (
     <div className="min-w-0 space-y-2">
@@ -466,6 +467,7 @@ function TradeSideEditor({
             onBlur={() => window.setTimeout(() => setOpen(false), 150)}
             onChange={(event) => {
               setSearch(event.target.value);
+              setPage(1);
               setOpen(true);
             }}
             placeholder={`Search ${label.toLowerCase()} items...`}
@@ -483,7 +485,11 @@ function TradeSideEditor({
                 </p>
               </div>
               <div className="max-h-56 overflow-y-auto">
-                {results.length ? (
+                {catalog.loading ? (
+                  <p className="text-secondary-text px-3 py-6 text-sm">
+                    Loading items...
+                  </p>
+                ) : results.length ? (
                   results.map((item) => (
                     <SuggestionItemSearchResult
                       key={item.id}
@@ -511,6 +517,29 @@ function TradeSideEditor({
                   </p>
                 )}
               </div>
+              {(catalog.data?.total_pages ?? 0) > 1 && (
+                <div className="border-border-card flex items-center justify-between border-t px-3 py-2 text-xs">
+                  <button
+                    type="button"
+                    disabled={page <= 1}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    {page} / {catalog.data?.total_pages}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={page >= (catalog.data?.total_pages ?? 1)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -520,13 +549,11 @@ function TradeSideEditor({
 }
 
 export function CommonTradesEditor({
-  items,
   trades,
   suggestedItem,
   onChange,
   error,
 }: {
-  items: Item[];
   trades: CommonTradeDraft[];
   suggestedItem: Item;
   onChange: (trades: CommonTradeDraft[]) => void;
@@ -606,7 +633,6 @@ export function CommonTradesEditor({
             <div className="grid gap-3 sm:grid-cols-2">
               <TradeSideEditor
                 label="Offering"
-                items={items}
                 selected={trade.offering}
                 excludedItemIds={
                   trade.requesting.some((item) => item.id === suggestedItemId)
@@ -619,7 +645,6 @@ export function CommonTradesEditor({
               />
               <TradeSideEditor
                 label="Requesting"
-                items={items}
                 selected={trade.requesting}
                 excludedItemIds={
                   trade.offering.some((item) => item.id === suggestedItemId)

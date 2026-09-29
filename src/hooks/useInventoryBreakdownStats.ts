@@ -3,6 +3,7 @@ import { getCategoryColor } from "@/utils/items/categoryIcons";
 import type { UserNetworthData } from "@/utils/api/api";
 import type { ChartConfig } from "@/components/ui/chart";
 import type { Item } from "@/types";
+import type { PartialItem } from "@/utils/api/api";
 import type { InventoryData } from "@/app/inventories/types";
 import {
   UNVERIFIABLE_COLLECTION_ITEM_IDS,
@@ -13,6 +14,7 @@ export const useInventoryBreakdownStats = (
   networthData: UserNetworthData[],
   itemsData: Item[],
   inventoryData: InventoryData,
+  catalogItems: PartialItem[],
 ) => {
   // Get the latest networth data
   const latestData =
@@ -56,11 +58,7 @@ export const useInventoryBreakdownStats = (
   } satisfies ChartConfig;
 
   const duplicateCategoryValues = useMemo(() => {
-    if (
-      itemsData.length === 0 ||
-      !inventoryData.duplicates ||
-      inventoryData.duplicates.length === 0
-    ) {
+    if (!inventoryData.duplicates || inventoryData.duplicates.length === 0) {
       return {};
     }
 
@@ -75,16 +73,15 @@ export const useInventoryBreakdownStats = (
       return num;
     };
 
-    const itemsMap = new Map(
-      itemsData.map((item) => [item.id.toString(), item]),
-    );
+    const itemsMap = new Map(itemsData.map((item) => [item.id, item]));
     const nextCategoryValues: Record<string, number> = {};
 
     inventoryData.duplicates.forEach((invItem) => {
-      const item = itemsMap.get(invItem.item_id.toString());
-      if (!item) return;
-
-      const val = parseVal(item.duped_value);
+      const item = itemsMap.get(invItem.item_id);
+      const snapshotValue = invItem.info.find(
+        (entry) => entry.title === "Duped Value",
+      )?.value;
+      const val = parseVal(item?.duped_value ?? snapshotValue ?? null);
       nextCategoryValues[invItem.categoryTitle] =
         (nextCategoryValues[invItem.categoryTitle] || 0) + val;
     });
@@ -109,12 +106,7 @@ export const useInventoryBreakdownStats = (
     return ids;
   }, [inventoryData.data]);
 
-  const includeUntradable = true;
-
-  const eligibleItems = useMemo(() => {
-    if (includeUntradable) return itemsData;
-    return itemsData.filter((item) => Boolean(item.tradable));
-  }, [itemsData, includeUntradable]);
+  const eligibleItems = catalogItems;
 
   const unverifiableItemsAll = useMemo(() => {
     const unverifiable = eligibleItems
@@ -154,7 +146,7 @@ export const useInventoryBreakdownStats = (
   }, [ogOwnedItemIds]);
 
   const typeProgress = useMemo(() => {
-    const byType = new Map<string, Item[]>();
+    const byType = new Map<string, PartialItem[]>();
     eligibleItems.forEach((item) => {
       const type = item.type?.trim() || "Unknown";
       const existing = byType.get(type);

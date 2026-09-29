@@ -1,5 +1,4 @@
 import React, { Suspense } from "react";
-import { fetchItems } from "@/utils/api/api";
 import TradeDetailsDataClient from "./TradeDetailsDataClient";
 import Loading from "./loading";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
@@ -36,12 +35,5 @@ async function TradeDetailsWrapper({
 }) {
   const { id } = await params;
 
-  const items = await fetchItems();
-  const tradeItems = items.map((item) => ({
-    ...item,
-    is_sub: false,
-    side: undefined,
-  }));
-
-  return <TradeDetailsDataClient tradeId={id} initialItems={tradeItems} />;
+  return <TradeDetailsDataClient tradeId={id} />;
 }

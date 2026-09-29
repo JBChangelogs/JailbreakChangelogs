@@ -1,21 +1,17 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
-import { useEffect, useState, useMemo } from "react";
-
-const log = createLogger("UI");
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { RobloxUser, Item } from "@/types";
+import { RobloxUser, Item, ValueSort } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
-import InventoryFilters from "./InventoryFilters";
+import InventoryFilters, { type InventorySortGroup } from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../ui/IconWrapper";
 import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
-import {
-  fetchItemUnlockMetadataById,
-  ItemUnlockMetadataEntry,
-} from "@/utils/items/itemUnlockMetadata";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { sortByValueSort } from "@/utils/trading/values";
+import { usePartialItems, useCatalogValues } from "@/hooks/usePartialItems";
+import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 
 interface InventoryItemsProps {
   initialData: InventoryData;
@@ -29,16 +25,30 @@ interface InventoryItemsProps {
   onShowOnlySeasonalChange?: (val: boolean) => void;
 }
 
-const parseNumericValue = (value: string | null): number => {
-  if (!value || value === "N/A") return -1;
-  const lower = value.toLowerCase();
-  const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
-  if (Number.isNaN(num)) return -1;
-  if (lower.includes("k")) return num * 1_000;
-  if (lower.includes("m")) return num * 1_000_000;
-  if (lower.includes("b")) return num * 1_000_000_000;
-  return num;
+const DATE_SORT_GROUP: InventorySortGroup = {
+  label: "Date",
+  options: [
+    { value: "created-desc", label: "Newest First" },
+    { value: "created-asc", label: "Oldest First" },
+  ],
 };
+const SNAPSHOT_SORTS = new Set([
+  "created-desc",
+  "created-asc",
+  "alpha-asc",
+  "alpha-desc",
+  "random",
+  "unique-circulation-desc",
+  "unique-circulation-asc",
+  "season-number-asc",
+  "season-number-desc",
+  "season-level-asc",
+  "season-level-desc",
+]);
+const UNSUPPORTED_SORT_GROUPS = new Set(["Last Updated"]);
+
+const snapshotValue = (item: InventoryItem, field: string) =>
+  item.info.find((entry) => entry.title === field)?.value ?? null;
 
 export default function InventoryItems({
   initialData,
@@ -62,43 +72,17 @@ export default function InventoryItems({
   const [showOnlyUntradable, setShowOnlyUntradable] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
 
-  const [sortOrder, setSortOrder] = useState<
-    | "alpha-asc"
-    | "alpha-desc"
-    | "created-asc"
-    | "created-desc"
-    | "season-asc"
-    | "season-desc"
-    | "level-asc"
-    | "level-desc"
-    | "cash-desc"
-    | "cash-asc"
-    | "duped-desc"
-    | "duped-asc"
-  >("created-desc");
-
-  const [itemUnlockMetadataById, setItemUnlockMetadataById] = useState<Map<
-    number,
-    ItemUnlockMetadataEntry
-  > | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    fetchItemUnlockMetadataById()
-      .then((metadata) => {
-        if (!isMounted) return;
-        setItemUnlockMetadataById(metadata);
-      })
-      .catch((error) => {
-        log.error("Error loading item unlock metadata", error);
-        if (isMounted) setItemUnlockMetadataById(null);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const [sortOrder, setSortOrder] = useState("created-desc");
+  const itemSortGroups = useItemSortGroups();
+  const sortGroups = useMemo(
+    () => [
+      DATE_SORT_GROUP,
+      ...itemSortGroups.filter(
+        (group) => !UNSUPPORTED_SORT_GROUPS.has(group.label),
+      ),
+    ],
+    [itemSortGroups],
+  );
 
   // Merge inventory data with metadata from item/list endpoint
   // This ensures fields like timesTraded and uniqueCirculation
@@ -167,6 +151,15 @@ export default function InventoryItems({
       setShowMissingItems(false);
     } else {
       setHideDuplicates(false);
+      setShowOnlyLimited(false);
+      setShowOnlySeasonal(false);
+      setShowOnlyTradable(false);
+      setShowOnlyUntradable(false);
+      onShowOnlyLimitedChange?.(false);
+      onShowOnlySeasonalChange?.(false);
+      if (sortOrder.startsWith("cash-") || sortOrder.startsWith("duped-")) {
+        setSortOrder("alpha-asc");
+      }
     }
     setTimeout(() => {
       setIsFiltering(false);
@@ -233,6 +226,25 @@ export default function InventoryItems({
   };
 
   const currentItemsData = useMemo(() => propItemsData || [], [propItemsData]);
+  const partialItemsQuery = usePartialItems(showMissingItems);
+  const metadataFilterActive =
+    (showOnlyLimited ||
+      showOnlySeasonal ||
+      showOnlyTradable ||
+      showOnlyUntradable) &&
+    !showMissingItems;
+  const catalogValuesQuery = useCatalogValues(
+    metadataFilterActive || !SNAPSHOT_SORTS.has(sortOrder),
+  );
+  const catalogValuesById = useMemo(
+    () =>
+      new Map((catalogValuesQuery.data ?? []).map((item) => [item.id, item])),
+    [catalogValuesQuery.data],
+  );
+  const catalogById = useMemo(
+    () => new Map(currentItemsData.map((item) => [item.id, item])),
+    [currentItemsData],
+  );
 
   const getUserDisplay = (userId: string) => {
     const user = robloxUsers[userId];
@@ -288,322 +300,33 @@ export default function InventoryItems({
       return 0;
     };
 
-    const getDisplayedSeasonNumber = (item: InventoryItem) => {
-      const seasonFromMetadata = itemUnlockMetadataById?.get(
-        item.item_id,
-      )?.season;
-      if (typeof seasonFromMetadata === "number") return seasonFromMetadata;
-      if (typeof item.season === "number") return item.season;
-      return null;
-    };
-
-    const getDisplayedUnlockLevel = (item: InventoryItem) => {
-      const levelFromMetadata = itemUnlockMetadataById?.get(
-        item.item_id,
-      )?.level;
-      if (
-        typeof levelFromMetadata === "string" &&
-        levelFromMetadata.length > 0
-      ) {
-        return levelFromMetadata;
+    const sortEntries = <E extends { item: InventoryItem }>(entries: E[]) => {
+      if (sortOrder === "created-asc" || sortOrder === "created-desc") {
+        const direction = sortOrder === "created-asc" ? 1 : -1;
+        return [...entries].sort(
+          (a, b) => (getLatestTime(a.item) - getLatestTime(b.item)) * direction,
+        );
       }
-      if (typeof item.level === "number") return String(item.level);
-      return null;
-    };
-
-    const parseUnlockLevelForSort = (level: string | null) => {
-      if (!level) {
-        return { kind: "none" as const, value: Infinity };
-      }
-
-      if (level.includes("%")) {
-        const numeric = Number.parseFloat(level.replace(/[^0-9.]/g, ""));
+      const keyed = entries.map((entry) => {
+        const values = catalogValuesById.get(entry.item.item_id);
         return {
-          kind: "percent" as const,
-          value: Number.isFinite(numeric) ? numeric : Infinity,
+          entry,
+          name: entry.item.title,
+          season: entry.item.season,
+          level: entry.item.level,
+          cash_value:
+            values?.cash_value ?? snapshotValue(entry.item, "Cash Value"),
+          duped_value:
+            values?.duped_value ?? snapshotValue(entry.item, "Duped Value"),
+          demand: values?.demand ?? null,
+          trend: values?.trend ?? null,
+          uniqueCirculation: entry.item.uniqueCirculation,
         };
-      }
-
-      const numeric = Number.parseFloat(level.replace(/[^0-9.]/g, ""));
-      return {
-        kind: "level" as const,
-        value: Number.isFinite(numeric) ? numeric : Infinity,
-      };
-    };
-
-    const compareUnlockLevels = (
-      aLevel: string | null,
-      bLevel: string | null,
-      direction: "asc" | "desc",
-    ) => {
-      const aParsed = parseUnlockLevelForSort(aLevel);
-      const bParsed = parseUnlockLevelForSort(bLevel);
-
-      const kindOrder = (kind: "level" | "percent" | "none") => {
-        // For season sorting, keep "season-only" (no level) items first, then numeric levels, then percent unlocks.
-        if (kind === "none") return 0;
-        if (kind === "level") return 1;
-        return 2;
-      };
-
-      const kindDiff = kindOrder(aParsed.kind) - kindOrder(bParsed.kind);
-      if (kindDiff !== 0) return kindDiff;
-
-      if (aParsed.value !== bParsed.value) {
-        return direction === "asc"
-          ? aParsed.value - bParsed.value
-          : bParsed.value - aParsed.value;
-      }
-
-      return 0;
-    };
-
-    const compareSeasons = (
-      aSeason: number | null,
-      bSeason: number | null,
-      direction: "asc" | "desc",
-    ) => {
-      const aScore =
-        typeof aSeason === "number"
-          ? aSeason
-          : direction === "asc"
-            ? Infinity
-            : -1;
-      const bScore =
-        typeof bSeason === "number"
-          ? bSeason
-          : direction === "asc"
-            ? Infinity
-            : -1;
-      if (aScore === bScore) return 0;
-      return direction === "asc" ? aScore - bScore : bScore - aScore;
-    };
-
-    type LevelSortKind = "level" | "percent" | "none";
-    const getLevelSortKindRank = (
-      kind: LevelSortKind,
-      direction: "asc" | "desc",
-    ) => {
-      // `level-asc`: numeric levels -> percent -> none
-      // `level-desc`: percent -> numeric levels -> none
-      if (direction === "desc") {
-        if (kind === "percent") return 0;
-        if (kind === "level") return 1;
-        return 2;
-      }
-
-      if (kind === "level") return 0;
-      if (kind === "percent") return 1;
-      return 2;
-    };
-
-    type LevelSortKey = {
-      kindRank: number;
-      indexInSeason: number; // used to "cycle" seasons by lowest available, then next lowest, etc.
-      seasonScore: number; // Infinity for unknown season
-      timeScore: number;
-      title: string;
-    };
-
-    const buildLevelSortKeyByInventoryItemId = (
-      items: Array<{ item: InventoryItem; itemData: Item }>,
-      direction: "asc" | "desc",
-    ) => {
-      type Entry = {
-        inventoryId: string;
-        kind: LevelSortKind;
-        levelValue: number;
-        seasonScore: number;
-        timeScore: number;
-        title: string;
-      };
-
-      const bySeason = new Map<
-        number,
-        { level: Entry[]; percent: Entry[]; none: Entry[] }
-      >();
-
-      const ensure = (seasonScore: number) => {
-        const existing = bySeason.get(seasonScore);
-        if (existing) return existing;
-        const created = { level: [], percent: [], none: [] };
-        bySeason.set(seasonScore, created);
-        return created;
-      };
-
-      for (const { item } of items) {
-        const season = getDisplayedSeasonNumber(item);
-        const seasonScore = typeof season === "number" ? season : Infinity;
-        const level = getDisplayedUnlockLevel(item);
-        const parsed = parseUnlockLevelForSort(level);
-        const kind = parsed.kind;
-
-        const bucket = ensure(seasonScore);
-        const entry: Entry = {
-          inventoryId: item.id,
-          kind,
-          levelValue: parsed.value,
-          seasonScore,
-          timeScore: getLatestTime(item),
-          title: item.title,
-        };
-
-        if (kind === "level") bucket.level.push(entry);
-        else if (kind === "percent") bucket.percent.push(entry);
-        else bucket.none.push(entry);
-      }
-
-      const keyById = new Map<string, LevelSortKey>();
-
-      const sortWithinSeason = (entries: Entry[]) => {
-        entries.sort((a, b) => {
-          // Level sort wants "lowest available per season" first (or highest when direction is desc),
-          // but then cycles seasons by index. So we sort each season's list here.
-          if (a.levelValue !== b.levelValue) {
-            return direction === "asc"
-              ? a.levelValue - b.levelValue
-              : b.levelValue - a.levelValue;
-          }
-          const timeDiff = b.timeScore - a.timeScore;
-          if (timeDiff !== 0) return timeDiff;
-          return a.title.localeCompare(b.title);
-        });
-      };
-
-      for (const [, buckets] of bySeason) {
-        sortWithinSeason(buckets.level);
-        sortWithinSeason(buckets.percent);
-
-        buckets.level.forEach((e, indexInSeason) => {
-          keyById.set(e.inventoryId, {
-            kindRank: getLevelSortKindRank("level", direction),
-            indexInSeason,
-            seasonScore: e.seasonScore,
-            timeScore: e.timeScore,
-            title: e.title,
-          });
-        });
-
-        buckets.percent.forEach((e, indexInSeason) => {
-          keyById.set(e.inventoryId, {
-            kindRank: getLevelSortKindRank("percent", direction),
-            indexInSeason,
-            seasonScore: e.seasonScore,
-            timeScore: e.timeScore,
-            title: e.title,
-          });
-        });
-
-        // No-level items go last and are ordered by season (not cycled), then by newest/title.
-        buckets.none.forEach((e) => {
-          keyById.set(e.inventoryId, {
-            kindRank: getLevelSortKindRank("none", direction),
-            indexInSeason: 0,
-            seasonScore: e.seasonScore,
-            timeScore: e.timeScore,
-            title: e.title,
-          });
-        });
-      }
-
-      return keyById;
-    };
-
-    const buildLevelSortKeyByItemId = (
-      itemsData: Item[],
-      direction: "asc" | "desc",
-    ) => {
-      type Entry = {
-        itemId: number;
-        kind: LevelSortKind;
-        levelValue: number;
-        seasonScore: number;
-        title: string;
-      };
-
-      const bySeason = new Map<
-        number,
-        { level: Entry[]; percent: Entry[]; none: Entry[] }
-      >();
-
-      const ensure = (seasonScore: number) => {
-        const existing = bySeason.get(seasonScore);
-        if (existing) return existing;
-        const created = { level: [], percent: [], none: [] };
-        bySeason.set(seasonScore, created);
-        return created;
-      };
-
-      for (const itemData of itemsData) {
-        const meta = itemUnlockMetadataById?.get(itemData.id);
-        const season = typeof meta?.season === "number" ? meta.season : null;
-        const seasonScore = typeof season === "number" ? season : Infinity;
-        const level = typeof meta?.level === "string" ? meta.level : null;
-        const parsed = parseUnlockLevelForSort(level);
-
-        const bucket = ensure(seasonScore);
-        const entry: Entry = {
-          itemId: itemData.id,
-          kind: parsed.kind,
-          levelValue: parsed.value,
-          seasonScore,
-          title: itemData.name,
-        };
-
-        if (parsed.kind === "level") bucket.level.push(entry);
-        else if (parsed.kind === "percent") bucket.percent.push(entry);
-        else bucket.none.push(entry);
-      }
-
-      const keyById = new Map<number, LevelSortKey>();
-
-      const sortWithinSeason = (entries: Entry[]) => {
-        entries.sort((a, b) => {
-          if (a.levelValue !== b.levelValue) {
-            return direction === "asc"
-              ? a.levelValue - b.levelValue
-              : b.levelValue - a.levelValue;
-          }
-          return a.title.localeCompare(b.title);
-        });
-      };
-
-      for (const [, buckets] of bySeason) {
-        sortWithinSeason(buckets.level);
-        sortWithinSeason(buckets.percent);
-
-        buckets.level.forEach((e, indexInSeason) => {
-          keyById.set(e.itemId, {
-            kindRank: getLevelSortKindRank("level", direction),
-            indexInSeason,
-            seasonScore: e.seasonScore,
-            timeScore: 0,
-            title: e.title,
-          });
-        });
-
-        buckets.percent.forEach((e, indexInSeason) => {
-          keyById.set(e.itemId, {
-            kindRank: getLevelSortKindRank("percent", direction),
-            indexInSeason,
-            seasonScore: e.seasonScore,
-            timeScore: 0,
-            title: e.title,
-          });
-        });
-
-        buckets.none.forEach((e) => {
-          keyById.set(e.itemId, {
-            kindRank: getLevelSortKindRank("none", direction),
-            indexInSeason: 0,
-            seasonScore: e.seasonScore,
-            timeScore: 0,
-            title: e.title,
-          });
-        });
-      }
-
-      return keyById;
+      });
+      return sortByValueSort(keyed, sortOrder as ValueSort, {
+        getUniqueCirculation: (key) => key.uniqueCirculation,
+        fallbackSortForDemandTrend: "none",
+      }).map((key) => key.entry);
     };
 
     if (showMissingItems) {
@@ -622,7 +345,7 @@ export default function InventoryItems({
        */
       const excludedItemIds = new Set([142, 467, 171, 640, 634, 152]);
 
-      const missingItems = currentItemsData.filter((itemData) => {
+      const missingItems = (partialItemsQuery.data ?? []).filter((itemData) => {
         if (ownedItemIds.has(itemData.id)) {
           return false;
         }
@@ -643,29 +366,6 @@ export default function InventoryItems({
           }
         }
 
-        // Filter by limited/seasonal (OR logic when both are active)
-        if (showOnlyLimited || showOnlySeasonal) {
-          const isLimited = itemData.is_limited === 1;
-          const isSeasonal = itemData.is_seasonal === 1;
-          if (
-            !(showOnlyLimited && isLimited) &&
-            !(showOnlySeasonal && isSeasonal)
-          ) {
-            return false;
-          }
-        }
-
-        // Filter by tradability
-        if (showOnlyTradable) {
-          if (itemData.tradable !== 1) {
-            return false;
-          }
-        } else if (showOnlyUntradable) {
-          if (itemData.tradable !== 0) {
-            return false;
-          }
-        }
-
         // For missing items, we don't filter by original/non-original since the user doesn't own them
         // These filters are disabled when showMissingItems is true
 
@@ -680,8 +380,8 @@ export default function InventoryItems({
           title: itemData.name,
           id: `missing-${itemData.id}`, // Unique ID for missing items
           info: [
-            { title: "Cash Value", value: itemData.cash_value || "N/A" },
-            { title: "Duped Value", value: itemData.duped_value || "N/A" },
+            { title: "Cash Value", value: "N/A" },
+            { title: "Duped Value", value: "N/A" },
             { title: "Original Owner", value: "???" },
             { title: "Created At", value: "???" },
           ],
@@ -698,115 +398,31 @@ export default function InventoryItems({
 
         return {
           item: mockInventoryItem,
-          itemData: itemData,
+          itemData: undefined as Item | undefined,
+          name: itemData.name,
         };
       });
 
-      if (sortOrder === "level-asc" || sortOrder === "level-desc") {
-        const direction = sortOrder === "level-asc" ? "asc" : "desc";
-        const keyById = buildLevelSortKeyByItemId(
-          mappedMissingItems.map((x) => x.itemData),
-          direction,
-        );
-
-        return [...mappedMissingItems].sort((a, b) => {
-          const aKey = keyById.get(a.itemData.id);
-          const bKey = keyById.get(b.itemData.id);
-          if (!aKey && !bKey) return 0;
-          if (!aKey) return 1;
-          if (!bKey) return -1;
-
-          if (aKey.kindRank !== bKey.kindRank)
-            return aKey.kindRank - bKey.kindRank;
-          if (aKey.indexInSeason !== bKey.indexInSeason)
-            return aKey.indexInSeason - bKey.indexInSeason;
-          if (aKey.seasonScore !== bKey.seasonScore)
-            return aKey.seasonScore - bKey.seasonScore;
-          return aKey.title.localeCompare(bKey.title);
-        });
-      }
-
-      // Sort missing items
-      return [...mappedMissingItems].sort((a, b) => {
-        switch (sortOrder) {
-          case "alpha-asc":
-            return a.itemData.name.localeCompare(b.itemData.name);
-          case "alpha-desc":
-            return b.itemData.name.localeCompare(a.itemData.name);
-          case "season-asc": {
-            const aSeason =
-              itemUnlockMetadataById?.get(a.itemData.id)?.season ?? null;
-            const bSeason =
-              itemUnlockMetadataById?.get(b.itemData.id)?.season ?? null;
-            const seasonDiff = compareSeasons(aSeason, bSeason, "asc");
-            if (seasonDiff !== 0) return seasonDiff;
-
-            const aLevel =
-              itemUnlockMetadataById?.get(a.itemData.id)?.level ?? null;
-            const bLevel =
-              itemUnlockMetadataById?.get(b.itemData.id)?.level ?? null;
-            const levelDiff = compareUnlockLevels(aLevel, bLevel, "asc");
-            if (levelDiff !== 0) return levelDiff;
-
-            return a.itemData.name.localeCompare(b.itemData.name);
-          }
-          case "season-desc": {
-            const aSeason =
-              itemUnlockMetadataById?.get(a.itemData.id)?.season ?? null;
-            const bSeason =
-              itemUnlockMetadataById?.get(b.itemData.id)?.season ?? null;
-            const seasonDiff = compareSeasons(aSeason, bSeason, "desc");
-            if (seasonDiff !== 0) return seasonDiff;
-
-            const aLevel =
-              itemUnlockMetadataById?.get(a.itemData.id)?.level ?? null;
-            const bLevel =
-              itemUnlockMetadataById?.get(b.itemData.id)?.level ?? null;
-            const levelDiff = compareUnlockLevels(aLevel, bLevel, "desc");
-            if (levelDiff !== 0) return levelDiff;
-
-            return a.itemData.name.localeCompare(b.itemData.name);
-          }
-          case "cash-desc":
-            const aCashDesc = parseNumericValue(a.itemData.cash_value);
-            const bCashDesc = parseNumericValue(b.itemData.cash_value);
-            return bCashDesc - aCashDesc;
-          case "cash-asc":
-            const aCashAsc = parseNumericValue(a.itemData.cash_value);
-            const bCashAsc = parseNumericValue(b.itemData.cash_value);
-            return aCashAsc - bCashAsc;
-          case "duped-desc":
-            const aDupedDesc = parseNumericValue(a.itemData.duped_value);
-            const bDupedDesc = parseNumericValue(b.itemData.duped_value);
-            return bDupedDesc - aDupedDesc;
-          case "duped-asc":
-            const aDupedAsc = parseNumericValue(a.itemData.duped_value);
-            const bDupedAsc = parseNumericValue(b.itemData.duped_value);
-            return aDupedAsc - bDupedAsc;
-          default:
-            return a.itemData.name.localeCompare(b.itemData.name);
-        }
-      });
+      return sortOrder === "created-asc" || sortOrder === "created-desc"
+        ? [...mappedMissingItems].sort((a, b) => a.name.localeCompare(b.name))
+        : sortEntries(mappedMissingItems);
     }
 
     // Original logic for showing owned items
     const filtered = mergedInventoryData.filter((item) => {
-      const itemData = currentItemsData.find(
-        (data) => data.id === item.item_id,
-      );
-      if (!itemData) return false;
+      const itemData = catalogValuesById.get(item.item_id);
 
       // Search filter
       if (
         searchTerm &&
-        !matchesTextSearch([itemData.name, itemData.type], searchTerm)
+        !matchesTextSearch([item.title, item.categoryTitle], searchTerm)
       ) {
         return false;
       }
 
       // Category filter
       if (selectedCategories.length > 0) {
-        if (!selectedCategories.includes(itemData.type)) {
+        if (!selectedCategories.includes(item.categoryTitle)) {
           return false;
         }
       }
@@ -822,25 +438,16 @@ export default function InventoryItems({
         }
       }
 
-      // Filter by limited/seasonal (OR logic when both are active)
-      if (showOnlyLimited || showOnlySeasonal) {
-        const isLimited = itemData.is_limited === 1;
-        const isSeasonal = itemData.is_seasonal === 1;
-        if (
-          !(showOnlyLimited && isLimited) &&
-          !(showOnlySeasonal && isSeasonal)
-        ) {
-          return false;
-        }
-      }
+      if (showOnlyLimited && itemData?.is_limited !== 1) return false;
+      if (showOnlySeasonal && itemData?.is_seasonal !== 1) return false;
 
       // Filter by tradability
       if (showOnlyTradable) {
-        if (itemData.tradable !== 1) {
+        if (itemData?.tradable !== 1) {
           return false;
         }
       } else if (showOnlyUntradable) {
-        if (itemData.tradable !== 0) {
+        if (itemData?.tradable !== 0) {
           return false;
         }
       }
@@ -863,9 +470,7 @@ export default function InventoryItems({
     }
 
     const mappedItems = finalFiltered.map((item) => {
-      const baseItemData = currentItemsData.find(
-        (data) => data.id === item.item_id,
-      )!;
+      const baseItemData = catalogById.get(item.item_id);
 
       return {
         item,
@@ -876,106 +481,13 @@ export default function InventoryItems({
       };
     });
 
-    // Sort the items
-    if (sortOrder === "level-asc" || sortOrder === "level-desc") {
-      const direction = sortOrder === "level-asc" ? "asc" : "desc";
-      const keyByInventoryId = buildLevelSortKeyByInventoryItemId(
-        mappedItems,
-        direction,
-      );
-
-      return [...mappedItems].sort((a, b) => {
-        const aKey = keyByInventoryId.get(a.item.id);
-        const bKey = keyByInventoryId.get(b.item.id);
-        if (!aKey && !bKey) return 0;
-        if (!aKey) return 1;
-        if (!bKey) return -1;
-
-        if (aKey.kindRank !== bKey.kindRank)
-          return aKey.kindRank - bKey.kindRank;
-        if (aKey.indexInSeason !== bKey.indexInSeason)
-          return aKey.indexInSeason - bKey.indexInSeason;
-        if (aKey.seasonScore !== bKey.seasonScore)
-          return aKey.seasonScore - bKey.seasonScore;
-
-        // Within the same "cycle position", keep newest first.
-        const timeDiff = bKey.timeScore - aKey.timeScore;
-        if (timeDiff !== 0) return timeDiff;
-        return aKey.title.localeCompare(bKey.title);
-      });
-    }
-
-    return [...mappedItems].sort((a, b) => {
-      switch (sortOrder) {
-        case "alpha-asc":
-          return a.item.title.localeCompare(b.item.title);
-        case "alpha-desc":
-          return b.item.title.localeCompare(a.item.title);
-        case "created-asc": {
-          return getLatestTime(a.item) - getLatestTime(b.item);
-        }
-        case "created-desc": {
-          return getLatestTime(b.item) - getLatestTime(a.item);
-        }
-        case "season-asc": {
-          const aSeason = getDisplayedSeasonNumber(a.item);
-          const bSeason = getDisplayedSeasonNumber(b.item);
-          const seasonDiff = compareSeasons(aSeason, bSeason, "asc");
-          if (seasonDiff !== 0) return seasonDiff;
-
-          const levelDiff = compareUnlockLevels(
-            getDisplayedUnlockLevel(a.item),
-            getDisplayedUnlockLevel(b.item),
-            "asc",
-          );
-          if (levelDiff !== 0) return levelDiff;
-
-          // Keep newest items first within a season+level group
-          const timeDiff = getLatestTime(b.item) - getLatestTime(a.item);
-          if (timeDiff !== 0) return timeDiff;
-          return a.item.title.localeCompare(b.item.title);
-        }
-        case "season-desc": {
-          const aSeason = getDisplayedSeasonNumber(a.item);
-          const bSeason = getDisplayedSeasonNumber(b.item);
-          const seasonDiff = compareSeasons(aSeason, bSeason, "desc");
-          if (seasonDiff !== 0) return seasonDiff;
-
-          const levelDiff = compareUnlockLevels(
-            getDisplayedUnlockLevel(a.item),
-            getDisplayedUnlockLevel(b.item),
-            "desc",
-          );
-          if (levelDiff !== 0) return levelDiff;
-
-          const timeDiff = getLatestTime(b.item) - getLatestTime(a.item);
-          if (timeDiff !== 0) return timeDiff;
-          return a.item.title.localeCompare(b.item.title);
-        }
-        case "cash-desc":
-          const aCashDesc = parseNumericValue(a.itemData?.cash_value);
-          const bCashDesc = parseNumericValue(b.itemData?.cash_value);
-          return bCashDesc - aCashDesc;
-        case "cash-asc":
-          const aCashAsc = parseNumericValue(a.itemData?.cash_value);
-          const bCashAsc = parseNumericValue(b.itemData?.cash_value);
-          return aCashAsc - bCashAsc;
-        case "duped-desc":
-          const aDupedDesc = parseNumericValue(a.itemData?.duped_value);
-          const bDupedDesc = parseNumericValue(b.itemData?.duped_value);
-          return bDupedDesc - aDupedDesc;
-        case "duped-asc":
-          const aDupedAsc = parseNumericValue(a.itemData?.duped_value);
-          const bDupedAsc = parseNumericValue(b.itemData?.duped_value);
-          return aDupedAsc - bDupedAsc;
-        default:
-          return 0;
-      }
-    });
+    return sortEntries(mappedItems);
   }, [
     showMissingItems,
     mergedInventoryData,
-    currentItemsData,
+    partialItemsQuery.data,
+    catalogById,
+    catalogValuesById,
     searchTerm,
     selectedCategories,
     showOnlyLimited,
@@ -986,7 +498,6 @@ export default function InventoryItems({
     showOnlyNonOriginal,
     hideDuplicates,
     sortOrder,
-    itemUnlockMetadataById,
   ]);
 
   // Use the pre-calculated duplicate counts from full inventory
@@ -1029,13 +540,16 @@ export default function InventoryItems({
   // Available categories
   const availableCategories = useMemo(() => {
     const categories = new Set<string>();
-    currentItemsData.forEach((item) => {
-      if (item.type) {
-        categories.add(item.type);
+    const source = showMissingItems
+      ? (partialItemsQuery.data ?? []).map((item) => item.type)
+      : mergedInventoryData.map((item) => item.categoryTitle);
+    source.forEach((category) => {
+      if (category) {
+        categories.add(category);
       }
     });
     return Array.from(categories).sort();
-  }, [currentItemsData]);
+  }, [mergedInventoryData, partialItemsQuery.data, showMissingItems]);
 
   return (
     <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
@@ -1068,6 +582,7 @@ export default function InventoryItems({
         onUntradableFilterToggle={handleUntradableFilterToggle}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
+        sortGroups={sortGroups}
       />
 
       {/* Item Counter */}
@@ -1093,15 +608,7 @@ export default function InventoryItems({
                     : ""
               }${hideDuplicates ? " (Duplicates hidden)" : ""}${
                 showMissingItems ? " (Missing items)" : ""
-              }${
-                showOnlyLimited && showOnlySeasonal
-                  ? " (Limited + Seasonal)"
-                  : showOnlyLimited
-                    ? " (Limited only)"
-                    : showOnlySeasonal
-                      ? " (Seasonal only)"
-                      : ""
-              }${showOnlyTradable ? " (Tradable only)" : ""}${
+              }${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}${showOnlyTradable ? " (Tradable only)" : ""}${
                 showOnlyUntradable ? " (Untradable only)" : ""
               }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`
             : `Total Items: ${filteredAndSortedItems.length}`}
@@ -1128,17 +635,45 @@ export default function InventoryItems({
         </div>
       )}
 
-      <InventoryItemsGrid
-        filteredItems={filteredAndSortedItems}
-        getUserDisplay={getUserDisplay}
-        getUserAvatar={getUserAvatar}
-        getHasVerifiedBadge={getHasVerifiedBadge}
-        onCardClick={handleCardClick}
-        isLoading={isFiltering}
-        userId={initialData.user_id}
-        itemCounts={itemCounts}
-        duplicateOrders={duplicateOrders}
-      />
+      {catalogValuesQuery.isError ? (
+        <div className="text-secondary-text py-8 text-center">
+          Couldn&apos;t load item values for this filter or sort.{" "}
+          <button
+            type="button"
+            className="text-link underline"
+            onClick={() => void catalogValuesQuery.refetch()}
+          >
+            Try again
+          </button>
+        </div>
+      ) : showMissingItems && partialItemsQuery.isError ? (
+        <div className="text-secondary-text py-8 text-center">
+          Couldn&apos;t load the missing-item list.{" "}
+          <button
+            type="button"
+            className="text-link underline"
+            onClick={() => void partialItemsQuery.refetch()}
+          >
+            Try again
+          </button>
+        </div>
+      ) : (
+        <InventoryItemsGrid
+          filteredItems={filteredAndSortedItems}
+          getUserDisplay={getUserDisplay}
+          getUserAvatar={getUserAvatar}
+          getHasVerifiedBadge={getHasVerifiedBadge}
+          onCardClick={handleCardClick}
+          isLoading={
+            isFiltering ||
+            (showMissingItems && partialItemsQuery.isPending) ||
+            catalogValuesQuery.isLoading
+          }
+          userId={initialData.user_id}
+          itemCounts={itemCounts}
+          duplicateOrders={duplicateOrders}
+        />
+      )}
 
       {/* Action Modal */}
     </div>

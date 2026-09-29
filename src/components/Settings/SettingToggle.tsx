@@ -35,7 +35,7 @@ export const SettingToggle = ({
   };
 
   return (
-    <div className="mb-4 w-full">
+    <div className="w-full">
       <div
         className={`mb-1 flex w-full items-center justify-between gap-4 ${
           disabled ? "cursor-not-allowed" : ""
