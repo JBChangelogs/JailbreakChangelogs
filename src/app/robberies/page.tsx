@@ -220,6 +220,8 @@ function RobberyTrackerContent() {
   const { user } = useAuthContext();
   const {
     robberies,
+    joinHistory,
+    reportJoin,
     isConnected,
     isConnecting,
     isIdle,
@@ -1491,6 +1493,8 @@ function RobberyTrackerContent() {
                         serverId={combo.serverId}
                         robberies={combo.robberies}
                         comboLabel={combo.comboLabel}
+                        joinedUsers={joinHistory[combo.serverId] ?? []}
+                        onJoin={reportJoin}
                         regionData={mergedServerRegionsByJobId[combo.serverId]}
                         useExternalRegionData
                       />
@@ -1518,6 +1522,8 @@ function RobberyTrackerContent() {
                         key={group.jobId}
                         serverId={group.jobId}
                         robberies={group.robberies}
+                        joinedUsers={joinHistory[group.jobId] ?? []}
+                        onJoin={reportJoin}
                         regionData={mergedServerRegionsByJobId[group.jobId]}
                         useExternalRegionData
                       />
@@ -1545,6 +1551,8 @@ function RobberyTrackerContent() {
                       <RobberyCard
                         key={`${robbery.marker_name}-${jobId}-${robbery.timestamp}`}
                         robbery={robbery}
+                        joinedUsers={joinHistory[jobId] ?? []}
+                        onJoin={reportJoin}
                         regionData={mergedServerRegionsByJobId[jobId]}
                         useExternalRegionData
                       />

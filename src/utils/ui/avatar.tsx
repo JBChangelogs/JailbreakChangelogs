@@ -264,6 +264,7 @@ export const UserAvatar = memo(
   (prev, next) =>
     prev.userId === next.userId &&
     prev.avatarHash === next.avatarHash &&
+    prev.forceAvatarUrl === next.forceAvatarUrl &&
     prev.username === next.username &&
     prev.size === next.size &&
     prev.custom_avatar === next.custom_avatar &&

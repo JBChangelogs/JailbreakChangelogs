@@ -22,8 +22,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
-import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
+import JoinedUsers from "./JoinedUsers";
+import type {
+  TrackerJoinUser,
+  TrackerJoinReport,
+} from "@/hooks/trackerJoinHistory";
 import {
   formatServerTime,
   getStatusBadgeClass,
@@ -52,20 +56,22 @@ export default function RobberyServerGroupCard({
   regionData: externalRegionData,
   useExternalRegionData = false,
   onRegionData,
+  joinedUsers,
+  onJoin,
 }: {
   serverId: string;
   robberies: RobberyData[];
   regionData?: ServerRegionData | null;
   useExternalRegionData?: boolean;
   onRegionData?: (jobId: string, data: ServerRegionData | null) => void;
+  joinedUsers: TrackerJoinUser[];
+  onJoin: (report: TrackerJoinReport) => void;
 }) {
   const [isJoining, setIsJoining] = useState(false);
   const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
   const { fetchRegionData } = useServerRegions();
   const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
-  const isLastJoined = Boolean(
-    serverId && lastJoined?.kind === "grouped" && lastJoined.jobId === serverId,
-  );
+  const isLastJoined = Boolean(serverId && lastJoined?.jobId === serverId);
   const showLastJoinedState = isLastJoined && !isJoining;
   const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
     isLastJoined ? lastJoined?.joinedAt : null,
@@ -174,12 +180,7 @@ export default function RobberyServerGroupCard({
     : regionData;
 
   return (
-    <div
-      className={cn(
-        "border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg",
-        showLastJoinedState && "bg-tertiary-bg",
-      )}
-    >
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
       <div className="flex flex-col gap-3 p-3 sm:flex-row">
         {/* Thumbnail (adaptive layout) */}
         <div className="aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:aspect-auto sm:h-24 sm:w-40">
@@ -323,6 +324,7 @@ export default function RobberyServerGroupCard({
           </div>
 
           <InlineTeamPlayers players={players} className="mt-1" />
+          <JoinedUsers users={joinedUsers} />
 
           <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
             <Icon icon="heroicons:map-pin" className="h-4 w-4 shrink-0" />
@@ -394,6 +396,12 @@ export default function RobberyServerGroupCard({
               data-rybbit-prop-term="Grouped_Server"
               onClick={() => {
                 setIsJoining(true);
+                onJoin({
+                  server_id: serverId,
+                  marker_name: "Grouped Server",
+                  display_name: "Grouped Server",
+                  tracker_type: "robbery",
+                });
                 setLastJoined({
                   kind: "grouped",
                   jobId: serverId,

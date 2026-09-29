@@ -136,7 +136,7 @@ const BountyRangeFilter = memo(function BountyRangeFilter({
               onCommit(nextRange);
               setMinInput(val.toLocaleString());
             }}
-            className="border-border-card bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
             placeholder="Min"
           />
           <span className="text-secondary-text text-xs">-</span>
@@ -159,7 +159,7 @@ const BountyRangeFilter = memo(function BountyRangeFilter({
               onCommit(nextRange);
               setMaxInput(val.toLocaleString());
             }}
-            className="border-border-card bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
             placeholder="Max"
           />
         </div>
@@ -225,6 +225,8 @@ function BountyTrackerContent() {
   const { user } = useAuthContext();
   const {
     bounties,
+    joinHistory,
+    reportJoin,
     isConnected,
     isConnecting,
     isIdle,
@@ -591,7 +593,7 @@ function BountyTrackerContent() {
               </span>
               {bountyStats.highValue > 0 && (
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="text-yellow-400">
+                  <span className="text-status-warning">
                     {bountyStats.highValue} High Value ($5K+)
                   </span>
                 </div>
@@ -659,12 +661,14 @@ function BountyTrackerContent() {
           <>
             {/* Server Groups */}
             {serverGroups.length > 0 ? (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-8">
                 {serverGroups.map((group) => (
                   <ServerBountyGroup
                     key={group.serverId}
                     serverId={group.serverId}
                     bounties={group.bounties}
+                    joinedUsers={joinHistory[group.serverId] ?? []}
+                    onJoin={reportJoin}
                     regionData={serverRegionsByJobId[group.serverId]}
                     useExternalRegionData
                   />

@@ -13,12 +13,20 @@ import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import { buildRobloxServerDeepLink } from "./deepLink";
 import { Spinner } from "@/components/ui/Spinner";
 import { formatServerTime } from "./utils";
+import JoinedUsers from "./JoinedUsers";
+import type {
+  TrackerJoinUser,
+  TrackerJoinReport,
+} from "@/hooks/trackerJoinHistory";
+import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 
 interface ServerBountyGroupProps {
   serverId: string;
   bounties: BountyData[];
   regionData?: ServerRegionData | null;
   useExternalRegionData?: boolean;
+  joinedUsers: TrackerJoinUser[];
+  onJoin: (report: TrackerJoinReport) => void;
 }
 
 export default function ServerBountyGroup({
@@ -26,6 +34,8 @@ export default function ServerBountyGroup({
   bounties,
   regionData: externalRegionData,
   useExternalRegionData = false,
+  joinedUsers,
+  onJoin,
 }: ServerBountyGroupProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -41,6 +51,12 @@ export default function ServerBountyGroup({
   const totalBounty = bounties.reduce((sum, b) => sum + b.bounty, 0);
 
   const jobId = bounties[0]?.server?.job_id || "";
+  const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
+  const isLastJoined = Boolean(jobId && lastJoined?.jobId === jobId);
+  const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
+    isLastJoined ? lastJoined?.joinedAt : null,
+    `bounty-last-joined-${jobId || "unknown"}`,
+  );
 
   // Get unique cop count from server players
   const players = bounties[0]?.server?.players || [];
@@ -69,9 +85,9 @@ export default function ServerBountyGroup({
   }, [useExternalRegionData, jobId, fetchRegionData]);
 
   return (
-    <div className="border-border-card flex flex-col overflow-hidden rounded-xl border">
+    <div className="flex flex-col gap-3">
       {/* Header Section */}
-      <div className="bg-tertiary-bg border-border-card flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="bg-tertiary-bg border-border-card flex flex-col gap-4 rounded-xl border p-4 lg:flex-row lg:items-start lg:justify-between">
         {/* Left Side: Stats */}
         <div className="flex flex-col gap-2">
           {/* Total Value & Counts */}
@@ -80,22 +96,20 @@ export default function ServerBountyGroup({
               <span className="text-secondary-text text-xs font-medium tracking-wider uppercase">
                 Total Server Bounty
               </span>
-              <div className="flex items-center gap-1.5">
-                <Icon
-                  icon="heroicons:currency-dollar"
-                  className="h-6 w-6 text-yellow-400"
-                />
-                <span className="text-2xl font-bold text-yellow-400">
-                  ${totalBounty.toLocaleString()}
-                </span>
-              </div>
+              <span className="text-status-warning text-2xl font-bold">
+                ${totalBounty.toLocaleString()}
+              </span>
             </div>
 
             <span className="text-tertiary-text hidden text-2xl font-light sm:inline">
               |
             </span>
 
-            <div className="flex items-center gap-3">
+            <div className="text-secondary-text flex items-center gap-2 text-sm">
+              <Icon
+                icon="heroicons-outline:users"
+                className="h-4 w-4 shrink-0"
+              />
               <span className="text-secondary-text text-sm font-medium">
                 {bounties.length}{" "}
                 {bounties.length === 1 ? "Bounty" : "Bounties"}
@@ -107,12 +121,13 @@ export default function ServerBountyGroup({
               </span>
             </div>
           </div>
+          <JoinedUsers users={joinedUsers} variant="bounty" />
         </div>
 
         {/* Right Side: Actions & Info */}
         <div className="flex flex-col gap-3 lg:items-end">
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
             {/* View Players Button */}
             {players.length > 0 && (
               <Button
@@ -136,6 +151,19 @@ export default function ServerBountyGroup({
                 data-rybbit-prop-term="Bounty"
                 onClick={() => {
                   setIsJoining(true);
+                  onJoin({
+                    server_id: jobId,
+                    marker_name: "Bounty",
+                    display_name: "Bounty",
+                    tracker_type: "bounty",
+                  });
+                  setLastJoined({
+                    kind: "bounty",
+                    jobId,
+                    joinedAt: Math.floor(Date.now() / 1000),
+                    label: "Bounty",
+                    tracker: "bounties",
+                  });
                   const joiningToastId = toast.loading("Joining server...");
                   window.setTimeout(() => {
                     toast.dismiss(joiningToastId);
@@ -148,10 +176,20 @@ export default function ServerBountyGroup({
                   icon="heroicons:arrow-top-right-on-square"
                   className="h-3.5 w-3.5"
                 />
-                {isJoining ? "Joining..." : "Join Server"}
+                {isJoining
+                  ? "Joining..."
+                  : isLastJoined
+                    ? "Rejoin Server"
+                    : "Join Server"}
               </Button>
             )}
           </div>
+
+          {isLastJoined && !isJoining && lastJoinedRelative && (
+            <div className="border-status-success/30 bg-status-success/10 text-primary-text inline-flex max-w-full items-center self-start rounded-lg border px-2 py-1 text-xs font-semibold lg:self-end">
+              Last joined {lastJoinedRelative}
+            </div>
+          )}
 
           {/* Server Region */}
           <div className="flex items-center gap-1.5 text-sm">
@@ -174,7 +212,10 @@ export default function ServerBountyGroup({
           {/* Server Time */}
           {serverTime && (
             <div className="flex items-center gap-1.5 text-sm">
-              <span className="text-secondary-text">Server Time:</span>
+              <Icon
+                icon="heroicons:clock"
+                className="text-secondary-text h-4 w-4 shrink-0"
+              />
               <span className="text-primary-text font-mono font-medium">
                 {formatServerTime(serverTime)}
               </span>
@@ -188,17 +229,14 @@ export default function ServerBountyGroup({
         </div>
       </div>
 
-      {/* Content Section: Bounties Grid */}
-      <div className="bg-secondary-bg p-4">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {bounties.map((bounty, index) => (
-            <BountyCard
-              key={`${bounty.userid}-${bounty.server?.job_id || index}-${bounty.timestamp}`}
-              bounty={bounty}
-              simplified={true}
-            />
-          ))}
-        </div>
+      <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {bounties.map((bounty, index) => (
+          <BountyCard
+            key={`${bounty.userid}-${bounty.server?.job_id || index}-${bounty.timestamp}`}
+            bounty={bounty}
+            simplified={true}
+          />
+        ))}
       </div>
 
       {/* Players Modal */}

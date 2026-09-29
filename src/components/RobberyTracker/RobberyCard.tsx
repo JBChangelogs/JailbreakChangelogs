@@ -28,14 +28,20 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
-import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
+import JoinedUsers from "./JoinedUsers";
+import type {
+  TrackerJoinUser,
+  TrackerJoinReport,
+} from "@/hooks/trackerJoinHistory";
 
 interface RobberyCardProps {
   robbery: RobberyData;
   regionData?: ServerRegionData | null;
   useExternalRegionData?: boolean;
   onRegionData?: (jobId: string, data: ServerRegionData | null) => void;
+  joinedUsers: TrackerJoinUser[];
+  onJoin: (report: TrackerJoinReport) => void;
 }
 
 export default function RobberyCard({
@@ -43,6 +49,8 @@ export default function RobberyCard({
   regionData: externalRegionData,
   useExternalRegionData = false,
   onRegionData,
+  joinedUsers,
+  onJoin,
 }: RobberyCardProps) {
   const [isJoining, setIsJoining] = useState(false);
   const [planeCountdown, setPlaneCountdown] = useState<string | null>(null);
@@ -69,12 +77,7 @@ export default function RobberyCard({
     timerId,
   );
 
-  const isLastJoined = Boolean(
-    jobId &&
-    lastJoined?.kind === "robbery" &&
-    lastJoined.jobId === jobId &&
-    lastJoined.markerName === robbery.marker_name,
-  );
+  const isLastJoined = Boolean(jobId && lastJoined?.jobId === jobId);
   const showLastJoinedState = isLastJoined && !isJoining;
   const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
     isLastJoined ? lastJoined?.joinedAt : null,
@@ -288,12 +291,7 @@ export default function RobberyCard({
   const players = robbery.server?.players || [];
 
   return (
-    <div
-      className={cn(
-        "border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg",
-        showLastJoinedState && "bg-tertiary-bg",
-      )}
-    >
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
       <div className="flex flex-col gap-3 p-3 sm:flex-row">
         {/* Thumbnail */}
         <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:aspect-auto sm:h-16 sm:w-24">
@@ -325,6 +323,7 @@ export default function RobberyCard({
 
           {/* Players */}
           <InlineTeamPlayers players={players} className="mt-1" />
+          <JoinedUsers users={joinedUsers} />
 
           {/* Region */}
           <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
@@ -421,6 +420,12 @@ export default function RobberyCard({
                 data-rybbit-prop-term={displayName}
                 onClick={() => {
                   setIsJoining(true);
+                  onJoin({
+                    server_id: jobId,
+                    marker_name: robbery.marker_name,
+                    display_name: displayName,
+                    tracker_type: "robbery",
+                  });
                   setLastJoined({
                     kind: "robbery",
                     jobId,

@@ -42,7 +42,7 @@ export default function BountyCard({
       <div className="bg-tertiary-bg p-4">
         <div className="mb-3 flex items-center gap-3">
           {/* Avatar */}
-          <div className="border-border-card relative h-12 w-12 shrink-0 overflow-hidden rounded-full border">
+          <div className="border-border-card bg-quaternary-bg relative h-12 w-12 shrink-0 overflow-hidden rounded-full border">
             <Image
               src={getAvatarUrl(bounty.userid)}
               alt={bounty.display_name}
@@ -58,7 +58,7 @@ export default function BountyCard({
               href={`https://www.roblox.com/users/${bounty.userid}/profile`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary-text hover:text-link block truncate text-lg font-semibold transition-colors duration-200"
+              className="text-link hover:text-link-hover block truncate text-lg font-semibold transition-colors duration-200"
             >
               {bounty.display_name}
             </a>
@@ -66,15 +66,9 @@ export default function BountyCard({
         </div>
 
         {/* Bounty Amount */}
-        <div className="flex items-center gap-2">
-          <Icon
-            icon="heroicons:currency-dollar"
-            className="h-6 w-6 text-yellow-400"
-          />
-          <span className="text-2xl font-bold text-yellow-400">
-            ${bounty.bounty.toLocaleString()}
-          </span>
-        </div>
+        <span className="text-status-warning text-2xl font-bold">
+          ${bounty.bounty.toLocaleString()}
+        </span>
       </div>
 
       {/* Content */}
@@ -91,7 +85,7 @@ export default function BountyCard({
               {bounty.inventory.map((item, index) => (
                 <span
                   key={`${item}-${index}`}
-                  className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex items-center rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm"
+                  className="text-primary-text bg-tertiary-bg border-border-card inline-flex items-center rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm"
                 >
                   {item}
                 </span>

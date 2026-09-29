@@ -4,6 +4,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_API_URL, INVENTORY_WS_URL } from "@/utils/api/api";
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import {
+  type TrackerJoinHistory,
+  type TrackerJoinReport,
+  type TrackerJoinUser,
+  updateTrackerJoinHistory,
+} from "./trackerJoinHistory";
 
 const log = createLogger("WS");
 
@@ -31,6 +37,8 @@ interface TrackerWebSocketOptions {
 
 export interface TrackerWebSocketReturn<TData> {
   data: TData[];
+  joinHistory: TrackerJoinHistory;
+  reportJoin: (report: TrackerJoinReport) => void;
   isConnected: boolean;
   isConnecting: boolean;
   isIdle: boolean;
@@ -51,6 +59,7 @@ export function useTrackerWebSocket<TData = unknown>({
   logPrefix,
 }: TrackerWebSocketOptions): TrackerWebSocketReturn<TData> {
   const [data, setData] = useState<TData[]>([]);
+  const [joinHistory, setJoinHistory] = useState<TrackerJoinHistory>({});
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isIdle, setIsIdle] = useState(false);
@@ -107,6 +116,7 @@ export function useTrackerWebSocket<TData = unknown>({
         });
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
+        setJoinHistory({});
 
         ws.addEventListener("open", () => {
           setIsConnected(true);
@@ -136,9 +146,21 @@ export function useTrackerWebSocket<TData = unknown>({
             const msg = JSON.parse(event.data as string) as {
               action: string;
               data?: TData[];
+              servers?: TrackerJoinHistory;
+              users?: TrackerJoinUser[];
             };
             if (msg.action === messageAction && msg.data) {
               setData(msg.data);
+            } else if (
+              msg.action === "join_history_sync" ||
+              msg.action === "update_join_history"
+            ) {
+              setJoinHistory((current) =>
+                updateTrackerJoinHistory(current, {
+                  ...msg,
+                  data: msg.data as { server_id?: string },
+                }),
+              );
             }
           } catch (err) {
             log.error(`${logPrefix}: Parse error`, err);
@@ -230,6 +252,15 @@ export function useTrackerWebSocket<TData = unknown>({
     setIsConnecting(true);
     connect(true);
   }, [connect, enabled]);
+
+  const reportJoin = useCallback((report: TrackerJoinReport) => {
+    if (wsRef.current?.readyState !== WebSocket.OPEN) return;
+    try {
+      wsRef.current.send(JSON.stringify({ action: "join_server", ...report }));
+    } catch (err) {
+      log.error("Tracker: Join report failed", err);
+    }
+  }, []);
 
   const reconnectFromBan = useCallback(() => {
     if (!enabled) return;
@@ -368,6 +399,8 @@ export function useTrackerWebSocket<TData = unknown>({
 
   return {
     data,
+    joinHistory,
+    reportJoin,
     isConnected,
     isConnecting,
     isIdle,

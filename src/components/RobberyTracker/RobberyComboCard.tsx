@@ -14,9 +14,13 @@ import { toast } from "sonner";
 import { buildRobloxServerDeepLink } from "./deepLink";
 import InlineTeamPlayers from "./InlineTeamPlayers";
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
-import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
 import { formatServerTime, getStatusBadgeClass } from "./utils";
+import JoinedUsers from "./JoinedUsers";
+import type {
+  TrackerJoinUser,
+  TrackerJoinReport,
+} from "@/hooks/trackerJoinHistory";
 
 interface RobberyComboCardProps {
   comboId: string;
@@ -25,6 +29,8 @@ interface RobberyComboCardProps {
   comboLabel: string;
   regionData?: ServerRegionData | null;
   useExternalRegionData?: boolean;
+  joinedUsers: TrackerJoinUser[];
+  onJoin: (report: TrackerJoinReport) => void;
 }
 
 function getStatusText(status: number): string {
@@ -52,6 +58,8 @@ export default function RobberyComboCard({
   comboLabel,
   regionData: externalRegionData,
   useExternalRegionData = false,
+  joinedUsers,
+  onJoin,
 }: RobberyComboCardProps) {
   const [isJoining, setIsJoining] = useState(false);
   const [internalRegionData, setInternalRegionData] =
@@ -61,12 +69,7 @@ export default function RobberyComboCard({
     ? (externalRegionData ?? null)
     : internalRegionData;
   const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
-  const isLastJoined = Boolean(
-    serverId &&
-    lastJoined?.kind === "combo" &&
-    lastJoined.jobId === serverId &&
-    lastJoined.comboId === comboId,
-  );
+  const isLastJoined = Boolean(serverId && lastJoined?.jobId === serverId);
   const showLastJoinedState = isLastJoined && !isJoining;
   const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
     isLastJoined ? lastJoined?.joinedAt : null,
@@ -124,12 +127,7 @@ export default function RobberyComboCard({
   const remainingCount = sortedRobberies.length - displayRobberies.length;
 
   return (
-    <div
-      className={cn(
-        "border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg",
-        showLastJoinedState && "bg-tertiary-bg",
-      )}
-    >
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
       <div className="flex flex-col gap-3 p-3 sm:flex-row">
         {/* Thumbnail */}
         <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
@@ -190,6 +188,7 @@ export default function RobberyComboCard({
           </div>
 
           <InlineTeamPlayers players={players} className="mt-1" />
+          <JoinedUsers users={joinedUsers} />
 
           <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
             <Icon icon="heroicons:map-pin" className="h-4 w-4 shrink-0" />
@@ -223,6 +222,14 @@ export default function RobberyComboCard({
               data-rybbit-prop-term="Power Combo"
               onClick={() => {
                 setIsJoining(true);
+                onJoin({
+                  server_id: serverId,
+                  marker_name: sortedRobberies
+                    .map((robbery) => robbery.marker_name)
+                    .join(","),
+                  display_name: comboLabel,
+                  tracker_type: "robbery",
+                });
                 setLastJoined({
                   kind: "combo",
                   jobId: serverId,
