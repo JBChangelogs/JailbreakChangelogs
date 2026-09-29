@@ -8,7 +8,14 @@ import { UseScanWebSocketReturn } from "@/hooks/useScanWebSocket";
 import UserProfileSection from "./UserProfileSection";
 import UserStatsSection from "./UserStatsSection";
 import { UserNetworthData } from "@/utils/api/api";
-import { useBatchItems } from "@/hooks/useBatchItems";
+import { useCatalogValues } from "@/hooks/usePartialItems";
+
+type CatalogFlags = {
+  cash_value: string | null;
+  duped_value: string | null;
+  is_limited: number | null;
+  is_seasonal: number | null;
+};
 
 interface UserStatsProps {
   initialData: InventoryData;
@@ -21,6 +28,7 @@ interface UserStatsProps {
   showOnlyNonOriginal: boolean;
   showOnlyOriginal: boolean;
   showOnlyLimited: boolean;
+  showOnlySeasonal: boolean;
   scanWebSocket: UseScanWebSocketReturn;
   scanErrorBanner?: { title: string; subtitle?: string } | null;
   queuePosition?: { position: number; delay: number } | null;
@@ -40,6 +48,7 @@ export default function UserStats({
   showOnlyNonOriginal,
   showOnlyOriginal,
   showOnlyLimited,
+  showOnlySeasonal,
   scanWebSocket,
   scanErrorBanner,
   queuePosition,
@@ -87,18 +96,8 @@ export default function UserStats({
 
   const totalNetworth = latestNetworthData?.networth || 0;
   const totalCashValue = latestNetworthData?.inventory_value || 0;
-  const limitedFilterIds = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          [...initialData.data, ...(initialData.duplicates ?? [])].map(
-            (item) => item.item_id,
-          ),
-        ),
-      ),
-    [initialData.data, initialData.duplicates],
-  );
-  const limitedItemsQuery = useBatchItems(limitedFilterIds, showOnlyLimited);
+  const catalogFilterActive = showOnlyLimited || showOnlySeasonal;
+  const catalogValuesQuery = useCatalogValues(catalogFilterActive);
 
   const parseValue = (val: string | null): number => {
     if (!val || val === "N/A") return 0;
@@ -128,16 +127,19 @@ export default function UserStats({
 
   const activeFilteredStats = useMemo(() => {
     const anyFilterActive =
-      showOnlyOriginal || showOnlyNonOriginal || showOnlyLimited;
-    if (!anyFilterActive || (showOnlyLimited && !limitedItemsQuery.data))
+      showOnlyOriginal || showOnlyNonOriginal || catalogFilterActive;
+    if (!anyFilterActive || (catalogFilterActive && !catalogValuesQuery.data))
       return null;
 
-    const itemsMap = new Map(
-      (limitedItemsQuery.data ?? itemsData).map((item) => [
+    const itemsMap = new Map<string, CatalogFlags>(
+      (catalogValuesQuery.data ?? itemsData).map((item) => [
         item.id.toString(),
         item,
       ]),
     );
+    const excludedByCatalog = (item: CatalogFlags | undefined) =>
+      (showOnlyLimited && item?.is_limited !== 1) ||
+      (showOnlySeasonal && item?.is_seasonal !== 1);
 
     let inventoryValue = 0;
     let dupedValue = 0;
@@ -148,7 +150,7 @@ export default function UserStats({
       if (showOnlyOriginal && !invItem.isOriginalOwner) return;
       if (showOnlyNonOriginal && invItem.isOriginalOwner) return;
       const item = itemsMap.get(invItem.item_id.toString());
-      if (showOnlyLimited && item?.is_limited !== 1) return;
+      if (excludedByCatalog(item)) return;
       itemCount++;
       inventoryValue += parseValue(
         invItem.info.find((entry) => entry.title === "Cash Value")?.value ??
@@ -161,7 +163,7 @@ export default function UserStats({
       if (showOnlyOriginal && !invItem.isOriginalOwner) return;
       if (showOnlyNonOriginal && invItem.isOriginalOwner) return;
       const item = itemsMap.get(invItem.item_id.toString());
-      if (showOnlyLimited && item?.is_limited !== 1) return;
+      if (excludedByCatalog(item)) return;
       itemCount++;
       dupedItemCount++;
       dupedValue += parseValue(
@@ -186,7 +188,9 @@ export default function UserStats({
     showOnlyOriginal,
     showOnlyNonOriginal,
     showOnlyLimited,
-    limitedItemsQuery.data,
+    showOnlySeasonal,
+    catalogFilterActive,
+    catalogValuesQuery.data,
   ]);
 
   const filterLabel = useMemo(() => {
@@ -194,12 +198,18 @@ export default function UserStats({
     if (showOnlyOriginal) parts.push("OG");
     if (showOnlyNonOriginal) parts.push("Non-OG");
     if (showOnlyLimited) parts.push("Limited");
+    if (showOnlySeasonal) parts.push("Seasonal");
     return parts.join(" + ");
-  }, [showOnlyOriginal, showOnlyNonOriginal, showOnlyLimited]);
+  }, [
+    showOnlyOriginal,
+    showOnlyNonOriginal,
+    showOnlyLimited,
+    showOnlySeasonal,
+  ]);
 
   // Since we are deriving values directly from props, they are always available (or 0)
   // We can treat loading as false since there's no async operation here
-  const isLoadingValues = showOnlyLimited && limitedItemsQuery.isPending;
+  const isLoadingValues = catalogFilterActive && catalogValuesQuery.isPending;
 
   // Set loading state
 

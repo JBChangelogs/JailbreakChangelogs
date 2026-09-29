@@ -88,6 +88,12 @@ export const chipFilterOptions: {
     icon: "heroicons:lock-closed",
     iconColor: "#ef4444",
   },
+  {
+    value: "name-seasonal-items",
+    label: "Seasonal",
+    icon: "noto-v1:snowflake",
+    iconColor: "#60a5fa",
+  },
 ];
 
 export const filterOptions = [

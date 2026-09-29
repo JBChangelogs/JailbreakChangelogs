@@ -49,6 +49,8 @@ interface OGFiltersProps {
   initialData: OGSearchData | null;
   showOnlyLimited: boolean;
   onLimitedFilterToggle: (checked: boolean) => void;
+  showOnlySeasonal: boolean;
+  onSeasonalFilterToggle: (checked: boolean) => void;
 }
 
 export default function OGFilters({
@@ -61,6 +63,8 @@ export default function OGFilters({
   initialData,
   showOnlyLimited,
   onLimitedFilterToggle,
+  showOnlySeasonal,
+  onSeasonalFilterToggle,
 }: OGFiltersProps) {
   const MAX_SEARCH_LENGTH = 50;
 
@@ -300,6 +304,15 @@ export default function OGFilters({
             inline={true}
           />
           Limiteds Only
+        </Button>
+        <Button
+          onClick={() => onSeasonalFilterToggle(!showOnlySeasonal)}
+          size="sm"
+          variant={showOnlySeasonal ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon icon="noto-v1:snowflake" className="h-4 w-4" inline={true} />
+          Seasonal Only
         </Button>
       </div>
     </div>

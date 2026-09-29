@@ -130,6 +130,7 @@ export default function InventoryCheckerClient({
   const [showOnlyOriginal, setShowOnlyOriginal] = useState(false);
   const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
+  const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
   const [queuePosition, setQueuePosition] = useState<{
     position: number;
     delay: number;
@@ -1199,6 +1200,7 @@ export default function InventoryCheckerClient({
                 showOnlyNonOriginal={showOnlyNonOriginal}
                 showOnlyOriginal={showOnlyOriginal}
                 showOnlyLimited={showOnlyLimited}
+                showOnlySeasonal={showOnlySeasonal}
                 scanWebSocket={scanWebSocket}
                 scanErrorBanner={scanErrorBanner}
                 queuePosition={queuePosition}
@@ -1234,6 +1236,7 @@ export default function InventoryCheckerClient({
                       onShowOnlyOriginalChange={setShowOnlyOriginal}
                       onShowOnlyNonOriginalChange={setShowOnlyNonOriginal}
                       onShowOnlyLimitedChange={setShowOnlyLimited}
+                      onShowOnlySeasonalChange={setShowOnlySeasonal}
                     />
                   </div>
 

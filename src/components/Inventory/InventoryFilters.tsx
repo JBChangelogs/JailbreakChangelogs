@@ -37,6 +37,7 @@ interface InventoryFiltersProps {
   hideDuplicates: boolean;
   showMissingItems: boolean;
   showOnlyLimited: boolean;
+  showOnlySeasonal: boolean;
   showOnlyTradable: boolean;
   showOnlyUntradable: boolean;
   availableCategories: string[];
@@ -45,6 +46,7 @@ interface InventoryFiltersProps {
   onHideDuplicatesToggle: (checked: boolean) => void;
   onShowMissingItemsToggle: (checked: boolean) => void;
   onLimitedFilterToggle: (checked: boolean) => void;
+  onSeasonalFilterToggle: (checked: boolean) => void;
   onTradableFilterToggle: (checked: boolean) => void;
   onUntradableFilterToggle: (checked: boolean) => void;
   sortOrder: string;
@@ -62,6 +64,7 @@ export default function InventoryFilters({
   hideDuplicates,
   showMissingItems,
   showOnlyLimited,
+  showOnlySeasonal,
   showOnlyTradable,
   showOnlyUntradable,
   availableCategories,
@@ -70,6 +73,7 @@ export default function InventoryFilters({
   onHideDuplicatesToggle,
   onShowMissingItemsToggle,
   onLimitedFilterToggle,
+  onSeasonalFilterToggle,
   onTradableFilterToggle,
   onUntradableFilterToggle,
   sortOrder,
@@ -291,6 +295,16 @@ export default function InventoryFilters({
             inline={true}
           />
           Limiteds Only
+        </Button>
+        <Button
+          onClick={() => onSeasonalFilterToggle(!showOnlySeasonal)}
+          disabled={showMissingItems}
+          size="sm"
+          variant={showOnlySeasonal ? "default" : "secondary"}
+          className="w-fit"
+        >
+          <Icon icon="noto-v1:snowflake" className="h-4 w-4" inline={true} />
+          Seasonal Only
         </Button>
       </div>
 

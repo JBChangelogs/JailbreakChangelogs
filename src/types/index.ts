@@ -16,6 +16,7 @@ export type FilterSort =
   | "name-all-items"
   | "name-limited-items"
   | "name-untradeable-items"
+  | "name-seasonal-items"
   | "name-vehicles"
   | "name-spoilers"
   | "name-rims"

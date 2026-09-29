@@ -22,6 +22,7 @@ interface InventoryItemsProps {
   onShowOnlyOriginalChange?: (val: boolean) => void;
   onShowOnlyNonOriginalChange?: (val: boolean) => void;
   onShowOnlyLimitedChange?: (val: boolean) => void;
+  onShowOnlySeasonalChange?: (val: boolean) => void;
 }
 
 const DATE_SORT_GROUP: InventorySortGroup = {
@@ -57,6 +58,7 @@ export default function InventoryItems({
   onShowOnlyOriginalChange,
   onShowOnlyNonOriginalChange,
   onShowOnlyLimitedChange,
+  onShowOnlySeasonalChange,
 }: InventoryItemsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -65,6 +67,7 @@ export default function InventoryItems({
   const [hideDuplicates, setHideDuplicates] = useState(false);
   const [showMissingItems, setShowMissingItems] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
+  const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
   const [showOnlyTradable, setShowOnlyTradable] = useState(false);
   const [showOnlyUntradable, setShowOnlyUntradable] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -149,9 +152,11 @@ export default function InventoryItems({
     } else {
       setHideDuplicates(false);
       setShowOnlyLimited(false);
+      setShowOnlySeasonal(false);
       setShowOnlyTradable(false);
       setShowOnlyUntradable(false);
       onShowOnlyLimitedChange?.(false);
+      onShowOnlySeasonalChange?.(false);
       if (sortOrder.startsWith("cash-") || sortOrder.startsWith("duped-")) {
         setSortOrder("alpha-asc");
       }
@@ -180,6 +185,15 @@ export default function InventoryItems({
     setIsFiltering(true);
     setShowOnlyLimited(checked);
     onShowOnlyLimitedChange?.(checked);
+    setTimeout(() => {
+      setIsFiltering(false);
+    }, 300);
+  };
+
+  const handleSeasonalFilterToggle = (checked: boolean) => {
+    setIsFiltering(true);
+    setShowOnlySeasonal(checked);
+    onShowOnlySeasonalChange?.(checked);
     setTimeout(() => {
       setIsFiltering(false);
     }, 300);
@@ -214,7 +228,10 @@ export default function InventoryItems({
   const currentItemsData = useMemo(() => propItemsData || [], [propItemsData]);
   const partialItemsQuery = usePartialItems(showMissingItems);
   const metadataFilterActive =
-    (showOnlyLimited || showOnlyTradable || showOnlyUntradable) &&
+    (showOnlyLimited ||
+      showOnlySeasonal ||
+      showOnlyTradable ||
+      showOnlyUntradable) &&
     !showMissingItems;
   const catalogValuesQuery = useCatalogValues(
     metadataFilterActive || !SNAPSHOT_SORTS.has(sortOrder),
@@ -422,6 +439,7 @@ export default function InventoryItems({
       }
 
       if (showOnlyLimited && itemData?.is_limited !== 1) return false;
+      if (showOnlySeasonal && itemData?.is_seasonal !== 1) return false;
 
       // Filter by tradability
       if (showOnlyTradable) {
@@ -473,6 +491,7 @@ export default function InventoryItems({
     searchTerm,
     selectedCategories,
     showOnlyLimited,
+    showOnlySeasonal,
     showOnlyTradable,
     showOnlyUntradable,
     showOnlyOriginal,
@@ -549,6 +568,7 @@ export default function InventoryItems({
         hideDuplicates={hideDuplicates}
         showMissingItems={showMissingItems}
         showOnlyLimited={showOnlyLimited}
+        showOnlySeasonal={showOnlySeasonal}
         showOnlyTradable={showOnlyTradable}
         showOnlyUntradable={showOnlyUntradable}
         availableCategories={availableCategories}
@@ -557,6 +577,7 @@ export default function InventoryItems({
         onHideDuplicatesToggle={handleHideDuplicatesToggle}
         onShowMissingItemsToggle={handleShowMissingItemsToggle}
         onLimitedFilterToggle={handleLimitedFilterToggle}
+        onSeasonalFilterToggle={handleSeasonalFilterToggle}
         onTradableFilterToggle={handleTradableFilterToggle}
         onUntradableFilterToggle={handleUntradableFilterToggle}
         sortOrder={sortOrder}
@@ -573,6 +594,7 @@ export default function InventoryItems({
           hideDuplicates ||
           showMissingItems ||
           showOnlyLimited ||
+          showOnlySeasonal ||
           showOnlyTradable ||
           showOnlyUntradable ||
           selectedCategories.length > 0
@@ -586,7 +608,7 @@ export default function InventoryItems({
                     : ""
               }${hideDuplicates ? " (Duplicates hidden)" : ""}${
                 showMissingItems ? " (Missing items)" : ""
-              }${showOnlyLimited ? " (Limited only)" : ""}${showOnlyTradable ? " (Tradable only)" : ""}${
+              }${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}${showOnlyTradable ? " (Tradable only)" : ""}${
                 showOnlyUntradable ? " (Untradable only)" : ""
               }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`
             : `Total Items: ${filteredAndSortedItems.length}`}

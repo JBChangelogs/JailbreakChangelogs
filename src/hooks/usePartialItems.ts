@@ -24,6 +24,7 @@ export type CatalogValues = {
   demand: string | null;
   trend: string | null;
   is_limited: number | null;
+  is_seasonal: number | null;
   tradable: number;
 };
 const CATALOG_VALUE_FIELDS = [
@@ -32,6 +33,7 @@ const CATALOG_VALUE_FIELDS = [
   "demand",
   "trend",
   "is_limited",
+  "is_seasonal",
   "tradable",
 ] as const;
 

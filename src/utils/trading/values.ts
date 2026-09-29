@@ -409,6 +409,8 @@ const matchesFilterSort = (item: Item, filterSort: FilterSort): boolean => {
       return item.is_limited === 1;
     case "name-untradeable-items":
       return item.tradable === 0;
+    case "name-seasonal-items":
+      return item.is_seasonal === 1;
     case "name-vehicles":
       return item.type.toLowerCase() === "vehicle";
     case "name-spoilers":
@@ -465,6 +467,7 @@ const matchesFilterSort = (item: Item, filterSort: FilterSort): boolean => {
 const TAG_FILTER_SORTS: FilterSort[] = [
   "name-limited-items",
   "name-untradeable-items",
+  "name-seasonal-items",
 ];
 
 const DEMAND_FILTER_SORTS: FilterSort[] = [

@@ -87,6 +87,7 @@ export default function OGFinderResults({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
+  const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
   const [sortOrder, setSortOrder] = useState<
     | "alpha-asc"
     | "alpha-desc"
@@ -133,9 +134,10 @@ export default function OGFinderResults({
     ...batchedUsers,
   };
 
-  const limitedItemsQuery = useCatalogValues(showOnlyLimited);
+  const catalogFilterActive = showOnlyLimited || showOnlySeasonal;
+  const catalogValuesQuery = useCatalogValues(catalogFilterActive);
   const catalogValuesById = new Map(
-    (limitedItemsQuery.data ?? []).map((item) => [item.id, item]),
+    (catalogValuesQuery.data ?? []).map((item) => [item.id, item]),
   );
 
   // Parse values like "23.4m" -> 23400000
@@ -228,9 +230,9 @@ export default function OGFinderResults({
         selectedCategories.length === 0 ||
         selectedCategories.includes(item.categoryTitle);
 
-      if (showOnlyLimited) {
-        if (catalogValuesById.get(item.item_id)?.is_limited !== 1) return false;
-      }
+      const catalogValues = catalogValuesById.get(item.item_id);
+      if (showOnlyLimited && catalogValues?.is_limited !== 1) return false;
+      if (showOnlySeasonal && catalogValues?.is_seasonal !== 1) return false;
 
       return matchesSearch && matchesCategory;
     });
@@ -563,11 +565,15 @@ export default function OGFinderResults({
             getHasVerifiedBadge={getHasVerifiedBadge}
             originalItemsCount={filteredAndSortedItems.length}
             itemsLabel={
-              showOnlyLimited
+              showOnlyLimited && !showOnlySeasonal
                 ? "Limited Original Items"
-                : searchTerm || selectedCategories.length > 0
-                  ? "Filtered Items"
-                  : "Original Items"
+                : showOnlySeasonal && !showOnlyLimited
+                  ? "Seasonal Original Items"
+                  : searchTerm ||
+                      selectedCategories.length > 0 ||
+                      catalogFilterActive
+                    ? "Filtered Items"
+                    : "Original Items"
             }
           />
 
@@ -589,15 +595,19 @@ export default function OGFinderResults({
                 initialData={initialData}
                 showOnlyLimited={showOnlyLimited}
                 onLimitedFilterToggle={setShowOnlyLimited}
+                showOnlySeasonal={showOnlySeasonal}
+                onSeasonalFilterToggle={setShowOnlySeasonal}
               />
             </div>
             {/* Item Counter */}
             <div className="mb-4">
               <p className="text-secondary-text">
-                {searchTerm || selectedCategories.length > 0 || showOnlyLimited
+                {searchTerm ||
+                selectedCategories.length > 0 ||
+                catalogFilterActive
                   ? `Found ${filteredAndSortedItems.length} ${filteredAndSortedItems.length === 1 ? "item" : "items"}${
                       searchTerm ? ` matching "${searchTerm}"` : ""
-                    }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}${showOnlyLimited ? " (Limited only)" : ""}`
+                    }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}`
                   : `Total Items: ${filteredAndSortedItems.length}`}
               </p>
             </div>
@@ -618,13 +628,13 @@ export default function OGFinderResults({
               </div>
             )}
 
-            {showOnlyLimited && limitedItemsQuery.isError ? (
+            {catalogFilterActive && catalogValuesQuery.isError ? (
               <div className="text-secondary-text py-8 text-center">
-                Couldn&apos;t load limited-item details.{" "}
+                Couldn&apos;t load item details for this filter.{" "}
                 <button
                   type="button"
                   className="text-link underline"
-                  onClick={() => void limitedItemsQuery.refetch()}
+                  onClick={() => void catalogValuesQuery.refetch()}
                 >
                   Try again
                 </button>
@@ -632,7 +642,7 @@ export default function OGFinderResults({
             ) : (
               <OGItemsGrid
                 filteredItems={filteredAndSortedItems}
-                isLoading={showOnlyLimited && limitedItemsQuery.isPending}
+                isLoading={catalogFilterActive && catalogValuesQuery.isPending}
                 getUsername={getUsername}
                 getUserAvatar={getUserAvatar}
                 getHasVerifiedBadge={getHasVerifiedBadge}
