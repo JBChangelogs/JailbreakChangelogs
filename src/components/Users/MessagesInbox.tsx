@@ -509,7 +509,7 @@ export default function MessagesInbox() {
 
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          `/messages/${encodeURIComponent(userId)}/hide`,
+          `/v1/messages/${encodeURIComponent(userId)}/hide`,
         );
         const response = await fetch(url, {
           method: "POST",
@@ -564,7 +564,7 @@ export default function MessagesInbox() {
 
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/messages/${encodeURIComponent(userId)}/hide`,
+        `/v1/messages/${encodeURIComponent(userId)}/hide`,
       );
       const response = await fetch(url, {
         method: "DELETE",

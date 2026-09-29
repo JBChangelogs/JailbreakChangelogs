@@ -72,7 +72,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          `/servers/owner/${encodeURIComponent(userId)}`,
+          `/v1/servers/owner/${encodeURIComponent(userId)}`,
         );
         const response = await fetch(url, {
           cache: "no-store",

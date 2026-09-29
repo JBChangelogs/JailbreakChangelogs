@@ -51,8 +51,8 @@ export function useSuggestionsFeed({
         if (sort !== null) query.set("sort", sort);
         if (isSearching) query.set("query", urlQuery.trim());
         const endpoint = isSearching
-          ? `/value-suggestions/search?${query}`
-          : `/value-suggestions/recent?${query}`;
+          ? `/v1/value-suggestions/search?${query}`
+          : `/v1/value-suggestions/recent?${query}`;
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
           endpoint,

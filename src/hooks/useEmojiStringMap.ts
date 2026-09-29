@@ -24,7 +24,7 @@ export function useEmojiStringMap(): EmojiStringMap {
   useEffect(() => {
     if (!PUBLIC_API_URL) return;
 
-    fetch(`${PUBLIC_API_URL}/emojis/string`, { credentials: "include" })
+    fetch(`${PUBLIC_API_URL}/v1/emojis/string`, { credentials: "include" })
       .then((response) => response.json())
       .then((data: unknown) => {
         const map = parseEmojiStringResponse(data);

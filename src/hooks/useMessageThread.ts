@@ -71,7 +71,7 @@ export function useMessageThread({
       const pageParam = page > 1 ? `?page=${page}` : "";
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/messages/${encodeURIComponent(userId)}${pageParam}`,
+        `/v1/messages/${encodeURIComponent(userId)}${pageParam}`,
       );
       const response = await fetch(url, {
         method: "GET",
@@ -298,7 +298,7 @@ export function useMessageThread({
       try {
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
-          `/messages/${encodeURIComponent(selectedUserId)}`,
+          `/v1/messages/${encodeURIComponent(selectedUserId)}`,
         );
         const response = await fetch(url, {
           method: "HEAD",

@@ -688,7 +688,7 @@ export default function TradeDetailsClient({
         const { url: offerCheckUrl, headers: devTokenHeaders } =
           buildApiFetchRequest(
             baseUrl,
-            `/trades/v2/${encodeURIComponent(String(trade.id))}/offers`,
+            `/v1/trades/v2/${encodeURIComponent(String(trade.id))}/offers`,
           );
         const response = await fetch(offerCheckUrl, {
           method: "HEAD",

@@ -79,7 +79,7 @@ export async function fetchBanReferenceDetails(
 ): Promise<BanReferenceDetails | null> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    `/ban-reference/${encodeURIComponent(ref)}`,
+    `/v1/ban-reference/${encodeURIComponent(ref)}`,
   );
   const response = await fetch(url, { headers });
 
@@ -94,7 +94,7 @@ export async function fetchBanReferenceDetails(
 export async function submitHumanVerification(token: string): Promise<void> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
-    "/verify-human",
+    "/v1/verify-human",
   );
   const response = await fetch(url, {
     method: "POST",

@@ -46,7 +46,7 @@ export default function ChangelogDetailsPageClient({
 
         const { url: listUrl, headers: listHeaders } = buildApiFetchRequest(
           apiBaseUrl,
-          "/changelogs",
+          "/v1/changelogs",
         );
         const listResponse = await fetch(listUrl, {
           credentials: "include",

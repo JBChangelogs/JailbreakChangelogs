@@ -41,7 +41,7 @@ export function observeSiteBanResponse(response: Response): void {
 
   const isAuthoritativeClear =
     response.ok &&
-    (responsePath === "/users/me" ||
+    (responsePath === "/v1/users/me" ||
       (siteBanResponsePath !== null && responsePath === siteBanResponsePath));
 
   if (isAuthoritativeClear) {

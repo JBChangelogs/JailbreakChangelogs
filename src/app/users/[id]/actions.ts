@@ -7,7 +7,9 @@ const log = createLogger("API");
 
 async function fetchSeason(id: string) {
   try {
-    const response = await fetch(`${PUBLIC_API_URL}/seasons/get?season=${id}`);
+    const response = await fetch(
+      `${PUBLIC_API_URL}/v1/seasons/get?season=${id}`,
+    );
     if (!response.ok) return null;
     return await response.json();
   } catch {
@@ -18,7 +20,7 @@ async function fetchSeason(id: string) {
 async function fetchItemById(id: string) {
   try {
     const response = await fetchWithRetry(
-      `${PUBLIC_API_URL}/items/${encodeURIComponent(id)}`,
+      `${PUBLIC_API_URL}/v1/items/${encodeURIComponent(id)}`,
       undefined,
       { maxRetries: 3, initialDelayMs: 800, timeoutMs: 10000 },
     );
@@ -33,7 +35,7 @@ export async function fetchFavoritesData(userId: string) {
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
-      `/favorites/user/${userId}`,
+      `/v1/favorites/user/${userId}`,
     );
     const response = await fetch(url, { headers, credentials: "include" });
 

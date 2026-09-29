@@ -116,7 +116,7 @@ export default function RecentJoins({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/join-history/me?page=${nextPage}&tracker_type=${trackerType}`,
+        `/v1/join-history/me?page=${nextPage}&tracker_type=${trackerType}`,
       );
       const response = await fetch(url, {
         headers,

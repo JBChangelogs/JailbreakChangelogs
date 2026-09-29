@@ -61,7 +61,10 @@ export default function UserBansTab() {
     setLoading(true);
     setError(null);
     try {
-      const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/bans/me");
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v1/bans/me",
+      );
       const res = await fetch(url, { credentials: "include", headers });
       if (!res.ok) {
         setError(`Failed to load bans (${res.status})`);

@@ -447,7 +447,7 @@ export default function TradeAds({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/favorites",
+        "/v1/favorites",
       );
       const response = await fetch(url, {
         method: isFavorited ? "DELETE" : "POST",
@@ -739,7 +739,10 @@ export default function TradeAds({
       const query = new URLSearchParams({ page: String(targetPage) });
       if (userId) query.set("user", userId);
       const { url: recentTradesUrl, headers: recentTradesHeaders } =
-        buildApiFetchRequest(baseUrl, `/trades/v2/recent?${query.toString()}`);
+        buildApiFetchRequest(
+          baseUrl,
+          `/v1/trades/v2/recent?${query.toString()}`,
+        );
       const response = await fetch(recentTradesUrl, {
         cache: "no-store",
         credentials: "include",

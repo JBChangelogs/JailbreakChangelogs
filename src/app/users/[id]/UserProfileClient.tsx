@@ -408,7 +408,7 @@ export default function UserProfileClient({
         setIsLoadingFollow(true);
         try {
           const response = await fetch(
-            `${PUBLIC_API_URL}/users/following/get?user=${currentUserId}`,
+            `${PUBLIC_API_URL}/v1/users/following/get?user=${currentUserId}`,
             {
               headers: {
                 "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
@@ -463,7 +463,7 @@ export default function UserProfileClient({
         }
 
         const { url: blockedUrl, headers: devTokenHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/messages/blocked");
+          buildApiFetchRequest(PUBLIC_API_URL, "/v1/messages/blocked");
         const response = await fetch(blockedUrl, {
           method: "GET",
           credentials: "include",
@@ -536,7 +536,7 @@ export default function UserProfileClient({
         const { url: messageCheckUrl, headers: devTokenHeaders } =
           buildApiFetchRequest(
             PUBLIC_API_URL,
-            `/messages/${encodeURIComponent(user.id)}`,
+            `/v1/messages/${encodeURIComponent(user.id)}`,
           );
         const response = await fetch(messageCheckUrl, {
           method: "HEAD",
@@ -591,7 +591,7 @@ export default function UserProfileClient({
 
       const { url: blockUrl, headers: devTokenHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/messages/${encodeURIComponent(user.id)}/block`,
+        `/v1/messages/${encodeURIComponent(user.id)}/block`,
       );
       const response = await fetch(blockUrl, {
         method: shouldBlock ? "POST" : "DELETE",
@@ -631,7 +631,7 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportDescUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/users/description/report");
+        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/description/report");
       const response = await fetch(reportDescUrl, {
         method: "POST",
         credentials: "include",
@@ -669,7 +669,7 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportAvatarUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/users/avatar/report");
+        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/avatar/report");
       const response = await fetch(reportAvatarUrl, {
         method: "POST",
         credentials: "include",
@@ -707,7 +707,7 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportBannerUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/users/banner/report");
+        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/banner/report");
       const response = await fetch(reportBannerUrl, {
         method: "POST",
         credentials: "include",
@@ -745,7 +745,7 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportUsernameUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/users/username/report");
+        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/username/report");
       const response = await fetch(reportUsernameUrl, {
         method: "POST",
         credentials: "include",
@@ -783,7 +783,7 @@ export default function UserProfileClient({
     const toastId = toast.loading("Submitting report...");
     try {
       const { url: reportUserUrl, headers: devTokenHeaders } =
-        buildApiFetchRequest(PUBLIC_API_URL, "/users/report");
+        buildApiFetchRequest(PUBLIC_API_URL, "/v1/users/report");
       const response = await fetch(reportUserUrl, {
         method: "POST",
         credentials: "include",

@@ -212,7 +212,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const fetchUser = () => {
           const { url, headers } = buildApiFetchRequest(
             PUBLIC_API_URL,
-            "/users/me",
+            "/v1/users/me",
           );
           return fetch(url, {
             cache: "no-store",

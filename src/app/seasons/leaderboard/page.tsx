@@ -43,7 +43,7 @@ export default function SeasonLeaderboardPage() {
     const loadData = async () => {
       try {
         const { url: leaderboardSeasonUrl, headers: leaderboardSeasonHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL!, "/seasons/latest");
+          buildApiFetchRequest(PUBLIC_API_URL!, "/v1/seasons/latest");
         const [leaderboardRes, seasonRes] = await Promise.all([
           fetch(`${INVENTORY_API_URL}/seasons/leaderboard`, {
             headers: {

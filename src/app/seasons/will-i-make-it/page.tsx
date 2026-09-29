@@ -36,7 +36,7 @@ export default function WillIMakeItPage() {
         }
 
         const { url: willIMakeItUrl, headers: willIMakeItHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/seasons/latest");
+          buildApiFetchRequest(PUBLIC_API_URL, "/v1/seasons/latest");
         const res = await fetch(willIMakeItUrl, {
           credentials: "include",
           headers: {
