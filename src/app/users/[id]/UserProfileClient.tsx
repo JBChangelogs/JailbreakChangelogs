@@ -1375,9 +1375,11 @@ export default function UserProfileClient({
                             onClick={() =>
                               followerCount > 0 && setIsFollowersModalOpen(true)
                             }
-                            className={`text-primary-text text-base ${followerCount > 0 ? "hover:text-border-focus cursor-pointer transition-colors" : "cursor-default"}`}
+                            className={`group text-primary-text text-base ${followerCount > 0 ? "cursor-pointer" : "cursor-default"}`}
                           >
-                            <span className="font-semibold">
+                            <span
+                              className={`font-semibold ${followerCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                            >
                               {followerCount}
                             </span>{" "}
                             {followerCount === 1 ? "follower" : "followers"}
@@ -1387,9 +1389,11 @@ export default function UserProfileClient({
                               followingCount > 0 &&
                               setIsFollowingModalOpen(true)
                             }
-                            className={`text-primary-text text-base ${followingCount > 0 ? "hover:text-border-focus cursor-pointer transition-colors" : "cursor-default"}`}
+                            className={`group text-primary-text text-base ${followingCount > 0 ? "cursor-pointer" : "cursor-default"}`}
                           >
-                            <span className="font-semibold">
+                            <span
+                              className={`font-semibold ${followingCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                            >
                               {followingCount}
                             </span>{" "}
                             following
@@ -1407,7 +1411,7 @@ export default function UserProfileClient({
                         </>
                       ) : (
                         <>
-                          <Tooltip>
+                          <Tooltip delayDuration={500}>
                             <TooltipTrigger asChild>
                               <Link
                                 href={`https://discord.com/users/${user.id}`}
@@ -1425,7 +1429,7 @@ export default function UserProfileClient({
                           </Tooltip>
 
                           {user.roblox_id && (
-                            <Tooltip>
+                            <Tooltip delayDuration={500}>
                               <TooltipTrigger asChild>
                                 <Link
                                   href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
@@ -1746,11 +1750,9 @@ export default function UserProfileClient({
         isOwnProfile={user.id === currentUserId}
         currentUserId={currentUserId}
         onFollowChange={(type) => {
-          if (type === "remove") {
-            setFollowerCount((prev) => Math.max(0, prev - 1));
-          } else if (type === "add") {
-            setFollowingCount((prev) => prev + 1);
-          }
+          setFollowingCount((prev) =>
+            type === "add" ? prev + 1 : Math.max(0, prev - 1),
+          );
         }}
         onCountUpdate={(count) => {
           setFollowerCount(count);

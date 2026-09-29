@@ -383,12 +383,9 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                               followingStatus[user.id] ? "secondary" : "default"
                             }
                             size="sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleFollowToggle(user.id);
-                            }}
+                            onClick={() => handleFollowToggle(user.id)}
                             disabled={loadingFollow[user.id]}
-                            className="ml-2 h-7 px-2 text-xs"
+                            className="ml-2"
                           >
                             {loadingFollow[user.id]
                               ? "..."
