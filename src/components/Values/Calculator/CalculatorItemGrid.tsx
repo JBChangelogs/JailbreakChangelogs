@@ -11,6 +11,18 @@ import { Icon } from "../../ui/IconWrapper";
 import { formatCurrencyValue, parseValueString } from "./calculatorUtils";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { QuickAddPopover } from "./QuickAddPopover";
+import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { hasItemValue } from "@/utils/items/itemValue";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CalculatorItemGridProps {
   items: TradeItem[];
@@ -33,6 +45,20 @@ interface ItemGroup {
   representative: TradeItem;
   instanceIds: string[];
 }
+
+const NoteButton = ({
+  name,
+  ...buttonProps
+}: { name: string } & React.ComponentProps<"button">) => (
+  <button
+    {...buttonProps}
+    type="button"
+    className="border-border-card bg-secondary-bg text-secondary-text hover:text-primary-text inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md border [@media(hover:hover)]:h-6 [@media(hover:hover)]:w-6"
+    aria-label={`Read note for ${name}`}
+  >
+    <Icon icon="mdi:information-outline" className="h-3.5 w-3.5" />
+  </button>
+);
 
 export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
   items,
@@ -108,12 +134,12 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
   });
 
   return (
-    <div className="rounded-lg p-4">
+    <div className="rounded-lg">
       <div
         className="max-h-120 overflow-y-auto pr-1"
         aria-label="Selected items list"
       >
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {groups.map((group) => {
             const item = group.representative;
             const qty = group.instanceIds.length;
@@ -133,6 +159,12 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             const isSeasonal = item.season != null || item.data?.season != null;
             const lastInstanceId =
               group.instanceIds[group.instanceIds.length - 1];
+            const demand =
+              selectedType === "duped"
+                ? (item.duped_demand ?? item.data?.duped_demand)
+                : (item.demand ?? item.data?.demand);
+            const trend = item.trend ?? item.data?.trend;
+            const notes = item.notes ?? item.data?.notes;
 
             const handleDecrement = () => {
               if (lastInstanceId) onRemove?.(lastInstanceId);
@@ -145,7 +177,10 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
               "flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40";
 
             return (
-              <div key={group.key} className="group relative">
+              <div
+                key={group.key}
+                className="group border-border-card bg-tertiary-bg/50 relative rounded-xl border p-2.5"
+              >
                 <div className="relative">
                   <div className="relative aspect-video overflow-hidden rounded-lg">
                     {isVideoItem(item.name) ? (
@@ -217,19 +252,48 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                   </div>
                 </div>
 
-                <div className="mt-1.5">
-                  <p className="text-secondary-text truncate text-xs font-medium">
-                    {displayName}
-                  </p>
-                  <p className="text-primary-text mt-0.5 truncate text-sm font-bold">
-                    {displayValue}
-                    {qty > 1 && (
-                      <span className="text-secondary-text ml-1 text-xs font-semibold">
-                        ×{qty}
-                      </span>
+                <div className="mt-2 space-y-2">
+                  <div className="flex items-center justify-between gap-1">
+                    <p
+                      className="text-primary-text min-w-0 truncate text-xs font-semibold"
+                      title={displayName}
+                    >
+                      {displayName}
+                    </p>
+                    {hasItemValue(notes) && (
+                      <>
+                        <span className="hidden [@media(hover:hover)]:inline-flex">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <NoteButton name={displayName} />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-h-64 max-w-72 overflow-y-auto whitespace-pre-wrap">
+                              {notes}
+                            </TooltipContent>
+                          </Tooltip>
+                        </span>
+                        <span className="inline-flex [@media(hover:hover)]:hidden">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <NoteButton name={displayName} />
+                            </PopoverTrigger>
+                            <PopoverContent className="max-h-64 w-64 overflow-y-auto p-3 text-sm whitespace-pre-wrap">
+                              {notes}
+                            </PopoverContent>
+                          </Popover>
+                        </span>
+                      </>
                     )}
-                  </p>
-                  <div className="mt-1">
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-1">
+                    <p className="text-primary-text text-sm font-bold">
+                      {displayValue}
+                      {qty > 1 && (
+                        <span className="text-secondary-text ml-1 text-[10px] font-semibold">
+                          ×{qty}
+                        </span>
+                      )}
+                    </p>
                     <button
                       type="button"
                       disabled={!hasDupedValue || !onValueTypeChange}
@@ -253,6 +317,30 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       {selectedType === "duped" ? "Duped" : "Clean"}
                     </button>
                   </div>
+                  <div className="border-border-card space-y-1 border-t pt-2 text-[11px]">
+                    <div className="flex min-w-0 items-center gap-1">
+                      <span className="text-secondary-text w-11 shrink-0">
+                        Demand
+                      </span>
+                      <span
+                        className={`${getDemandColor(demand)} min-w-0 truncate rounded px-1.5 py-0.5 font-semibold whitespace-nowrap`}
+                        title={hasItemValue(demand) ? demand : "Unknown"}
+                      >
+                        {hasItemValue(demand) ? demand : "Unknown"}
+                      </span>
+                    </div>
+                    <div className="flex min-w-0 items-center gap-1">
+                      <span className="text-secondary-text w-11 shrink-0">
+                        Trend
+                      </span>
+                      <span
+                        className={`${getTrendColor(trend)} min-w-0 truncate rounded px-1.5 py-0.5 font-semibold whitespace-nowrap`}
+                        title={hasItemValue(trend) ? trend : "Unknown"}
+                      >
+                        {hasItemValue(trend) ? trend : "Unknown"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             );
@@ -267,7 +355,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
           >
             <button
               type="button"
-              className={`border-border-card bg-tertiary-bg hover:border-border-focus flex aspect-video w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors ${borderColor}`}
+              className={`border-border-card bg-tertiary-bg hover:border-border-focus flex h-full min-h-54 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed transition-colors ${borderColor}`}
               aria-label="Add another item"
             >
               <Icon

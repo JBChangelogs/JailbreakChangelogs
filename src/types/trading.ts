@@ -10,6 +10,7 @@ export interface TradeItem {
   level?: number | string | null;
   tradable: number;
   trend?: string | null;
+  notes?: string | null;
   base_name?: string;
   side?: "offering" | "requesting";
   metadata?: {
