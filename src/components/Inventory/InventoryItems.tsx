@@ -9,6 +9,8 @@ import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../ui/IconWrapper";
 import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { usePartialItems } from "@/hooks/usePartialItems";
+import { useBatchItems } from "@/hooks/useBatchItems";
 
 interface InventoryItemsProps {
   initialData: InventoryData;
@@ -130,6 +132,13 @@ export default function InventoryItems({
       setShowMissingItems(false);
     } else {
       setHideDuplicates(false);
+      setShowOnlyLimited(false);
+      setShowOnlyTradable(false);
+      setShowOnlyUntradable(false);
+      onShowOnlyLimitedChange?.(false);
+      if (sortOrder.startsWith("cash-") || sortOrder.startsWith("duped-")) {
+        setSortOrder("alpha-asc");
+      }
     }
     setTimeout(() => {
       setIsFiltering(false);
@@ -187,6 +196,31 @@ export default function InventoryItems({
   };
 
   const currentItemsData = useMemo(() => propItemsData || [], [propItemsData]);
+  const partialItemsQuery = usePartialItems(showMissingItems);
+  const metadataFilterActive =
+    showOnlyLimited || showOnlyTradable || showOnlyUntradable;
+  const filterIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          [...initialData.data, ...(initialData.duplicates ?? [])].map(
+            (item) => item.item_id,
+          ),
+        ),
+      ),
+    [initialData.data, initialData.duplicates],
+  );
+  const filterItemsQuery = useBatchItems(
+    filterIds,
+    metadataFilterActive && !showMissingItems,
+  );
+  const catalogItems = filterItemsQuery.data ?? currentItemsData;
+  const catalogById = useMemo(
+    () => new Map(catalogItems.map((item) => [item.id, item])),
+    [catalogItems],
+  );
+  const snapshotValue = (item: InventoryItem, field: string) =>
+    item.info.find((entry) => entry.title === field)?.value ?? null;
 
   const getUserDisplay = (userId: string) => {
     const user = robloxUsers[userId];
@@ -258,7 +292,7 @@ export default function InventoryItems({
        */
       const excludedItemIds = new Set([142, 467, 171, 640, 634, 152]);
 
-      const missingItems = currentItemsData.filter((itemData) => {
+      const missingItems = (partialItemsQuery.data ?? []).filter((itemData) => {
         if (ownedItemIds.has(itemData.id)) {
           return false;
         }
@@ -279,19 +313,6 @@ export default function InventoryItems({
           }
         }
 
-        if (showOnlyLimited && itemData.is_limited !== 1) return false;
-
-        // Filter by tradability
-        if (showOnlyTradable) {
-          if (itemData.tradable !== 1) {
-            return false;
-          }
-        } else if (showOnlyUntradable) {
-          if (itemData.tradable !== 0) {
-            return false;
-          }
-        }
-
         // For missing items, we don't filter by original/non-original since the user doesn't own them
         // These filters are disabled when showMissingItems is true
 
@@ -306,8 +327,8 @@ export default function InventoryItems({
           title: itemData.name,
           id: `missing-${itemData.id}`, // Unique ID for missing items
           info: [
-            { title: "Cash Value", value: itemData.cash_value || "N/A" },
-            { title: "Duped Value", value: itemData.duped_value || "N/A" },
+            { title: "Cash Value", value: "N/A" },
+            { title: "Duped Value", value: "N/A" },
             { title: "Original Owner", value: "???" },
             { title: "Created At", value: "???" },
           ],
@@ -324,7 +345,8 @@ export default function InventoryItems({
 
         return {
           item: mockInventoryItem,
-          itemData: itemData,
+          itemData: undefined as Item | undefined,
+          name: itemData.name,
         };
       });
 
@@ -332,49 +354,38 @@ export default function InventoryItems({
       return [...mappedMissingItems].sort((a, b) => {
         switch (sortOrder) {
           case "alpha-asc":
-            return a.itemData.name.localeCompare(b.itemData.name);
+            return a.name.localeCompare(b.name);
           case "alpha-desc":
-            return b.itemData.name.localeCompare(a.itemData.name);
+            return b.name.localeCompare(a.name);
           case "cash-desc":
-            const aCashDesc = parseNumericValue(a.itemData.cash_value);
-            const bCashDesc = parseNumericValue(b.itemData.cash_value);
-            return bCashDesc - aCashDesc;
+            return a.name.localeCompare(b.name);
           case "cash-asc":
-            const aCashAsc = parseNumericValue(a.itemData.cash_value);
-            const bCashAsc = parseNumericValue(b.itemData.cash_value);
-            return aCashAsc - bCashAsc;
+            return a.name.localeCompare(b.name);
           case "duped-desc":
-            const aDupedDesc = parseNumericValue(a.itemData.duped_value);
-            const bDupedDesc = parseNumericValue(b.itemData.duped_value);
-            return bDupedDesc - aDupedDesc;
+            return a.name.localeCompare(b.name);
           case "duped-asc":
-            const aDupedAsc = parseNumericValue(a.itemData.duped_value);
-            const bDupedAsc = parseNumericValue(b.itemData.duped_value);
-            return aDupedAsc - bDupedAsc;
+            return a.name.localeCompare(b.name);
           default:
-            return a.itemData.name.localeCompare(b.itemData.name);
+            return a.name.localeCompare(b.name);
         }
       });
     }
 
     // Original logic for showing owned items
     const filtered = mergedInventoryData.filter((item) => {
-      const itemData = currentItemsData.find(
-        (data) => data.id === item.item_id,
-      );
-      if (!itemData) return false;
+      const itemData = catalogById.get(item.item_id);
 
       // Search filter
       if (
         searchTerm &&
-        !matchesTextSearch([itemData.name, itemData.type], searchTerm)
+        !matchesTextSearch([item.title, item.categoryTitle], searchTerm)
       ) {
         return false;
       }
 
       // Category filter
       if (selectedCategories.length > 0) {
-        if (!selectedCategories.includes(itemData.type)) {
+        if (!selectedCategories.includes(item.categoryTitle)) {
           return false;
         }
       }
@@ -390,15 +401,15 @@ export default function InventoryItems({
         }
       }
 
-      if (showOnlyLimited && itemData.is_limited !== 1) return false;
+      if (showOnlyLimited && itemData?.is_limited !== 1) return false;
 
       // Filter by tradability
       if (showOnlyTradable) {
-        if (itemData.tradable !== 1) {
+        if (itemData?.tradable !== 1) {
           return false;
         }
       } else if (showOnlyUntradable) {
-        if (itemData.tradable !== 0) {
+        if (itemData?.tradable !== 0) {
           return false;
         }
       }
@@ -421,9 +432,7 @@ export default function InventoryItems({
     }
 
     const mappedItems = finalFiltered.map((item) => {
-      const baseItemData = currentItemsData.find(
-        (data) => data.id === item.item_id,
-      )!;
+      const baseItemData = catalogById.get(item.item_id);
 
       return {
         item,
@@ -448,20 +457,36 @@ export default function InventoryItems({
           return getLatestTime(b.item) - getLatestTime(a.item);
         }
         case "cash-desc":
-          const aCashDesc = parseNumericValue(a.itemData?.cash_value);
-          const bCashDesc = parseNumericValue(b.itemData?.cash_value);
+          const aCashDesc = parseNumericValue(
+            snapshotValue(a.item, "Cash Value"),
+          );
+          const bCashDesc = parseNumericValue(
+            snapshotValue(b.item, "Cash Value"),
+          );
           return bCashDesc - aCashDesc;
         case "cash-asc":
-          const aCashAsc = parseNumericValue(a.itemData?.cash_value);
-          const bCashAsc = parseNumericValue(b.itemData?.cash_value);
+          const aCashAsc = parseNumericValue(
+            snapshotValue(a.item, "Cash Value"),
+          );
+          const bCashAsc = parseNumericValue(
+            snapshotValue(b.item, "Cash Value"),
+          );
           return aCashAsc - bCashAsc;
         case "duped-desc":
-          const aDupedDesc = parseNumericValue(a.itemData?.duped_value);
-          const bDupedDesc = parseNumericValue(b.itemData?.duped_value);
+          const aDupedDesc = parseNumericValue(
+            snapshotValue(a.item, "Duped Value"),
+          );
+          const bDupedDesc = parseNumericValue(
+            snapshotValue(b.item, "Duped Value"),
+          );
           return bDupedDesc - aDupedDesc;
         case "duped-asc":
-          const aDupedAsc = parseNumericValue(a.itemData?.duped_value);
-          const bDupedAsc = parseNumericValue(b.itemData?.duped_value);
+          const aDupedAsc = parseNumericValue(
+            snapshotValue(a.item, "Duped Value"),
+          );
+          const bDupedAsc = parseNumericValue(
+            snapshotValue(b.item, "Duped Value"),
+          );
           return aDupedAsc - bDupedAsc;
         default:
           return 0;
@@ -470,7 +495,8 @@ export default function InventoryItems({
   }, [
     showMissingItems,
     mergedInventoryData,
-    currentItemsData,
+    partialItemsQuery.data,
+    catalogById,
     searchTerm,
     selectedCategories,
     showOnlyLimited,
@@ -522,13 +548,16 @@ export default function InventoryItems({
   // Available categories
   const availableCategories = useMemo(() => {
     const categories = new Set<string>();
-    currentItemsData.forEach((item) => {
-      if (item.type) {
-        categories.add(item.type);
+    const source = showMissingItems
+      ? (partialItemsQuery.data ?? []).map((item) => item.type)
+      : mergedInventoryData.map((item) => item.categoryTitle);
+    source.forEach((category) => {
+      if (category) {
+        categories.add(category);
       }
     });
     return Array.from(categories).sort();
-  }, [currentItemsData]);
+  }, [mergedInventoryData, partialItemsQuery.data, showMissingItems]);
 
   return (
     <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
@@ -610,17 +639,47 @@ export default function InventoryItems({
         </div>
       )}
 
-      <InventoryItemsGrid
-        filteredItems={filteredAndSortedItems}
-        getUserDisplay={getUserDisplay}
-        getUserAvatar={getUserAvatar}
-        getHasVerifiedBadge={getHasVerifiedBadge}
-        onCardClick={handleCardClick}
-        isLoading={isFiltering}
-        userId={initialData.user_id}
-        itemCounts={itemCounts}
-        duplicateOrders={duplicateOrders}
-      />
+      {metadataFilterActive && !showMissingItems && filterItemsQuery.isError ? (
+        <div className="text-secondary-text py-8 text-center">
+          Couldn&apos;t load item details for this filter.{" "}
+          <button
+            type="button"
+            className="text-link underline"
+            onClick={() => void filterItemsQuery.refetch()}
+          >
+            Try again
+          </button>
+        </div>
+      ) : showMissingItems && partialItemsQuery.isError ? (
+        <div className="text-secondary-text py-8 text-center">
+          Couldn&apos;t load the missing-item list.{" "}
+          <button
+            type="button"
+            className="text-link underline"
+            onClick={() => void partialItemsQuery.refetch()}
+          >
+            Try again
+          </button>
+        </div>
+      ) : (
+        <InventoryItemsGrid
+          filteredItems={filteredAndSortedItems}
+          getUserDisplay={getUserDisplay}
+          getUserAvatar={getUserAvatar}
+          getHasVerifiedBadge={getHasVerifiedBadge}
+          onCardClick={handleCardClick}
+          isLoading={
+            isFiltering ||
+            (showMissingItems && partialItemsQuery.isPending) ||
+            (metadataFilterActive &&
+              !showMissingItems &&
+              filterItemsQuery.isPending)
+          }
+          userId={initialData.user_id}
+          itemCounts={itemCounts}
+          duplicateOrders={duplicateOrders}
+        />
+      )}
 
       {/* Action Modal */}
     </div>

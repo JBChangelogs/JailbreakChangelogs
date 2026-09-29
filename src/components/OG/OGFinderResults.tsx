@@ -11,6 +11,7 @@ import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
+import { useBatchItems } from "@/hooks/useBatchItems";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { Spinner } from "@/components/ui/Spinner";
 import OGFinderFAQ from "./OGFinderFAQ";
@@ -132,10 +133,14 @@ export default function OGFinderResults({
     ...batchedUsers,
   };
 
-  // Create items map for quick lookup of cash values - map by type and name since OG items use instance IDs
-  const itemsMap = new Map(
-    items.map((item) => [`${item.type}-${item.name}`, item]),
+  const limitedItemsQuery = useBatchItems(
+    initialData?.results.map((item) => item.item_id) ?? [],
+    showOnlyLimited,
   );
+  const catalogItems = limitedItemsQuery.data ?? items;
+
+  // Create items map for the limited-item filter.
+  const itemsMap = new Map(catalogItems.map((item) => [item.id, item]));
 
   // Parse values like "23.4m" -> 23400000
   const parseNumericValue = (value: string | null): number => {
@@ -148,6 +153,10 @@ export default function OGFinderResults({
     if (lower.includes("b")) return num * 1_000_000_000;
     return num;
   };
+  const getSnapshotValue = (item: OGItem, field: string) =>
+    parseNumericValue(
+      item.info.find((entry) => entry.title === field)?.value ?? null,
+    );
 
   // Helper functions
   const getUserDisplay = (userId: string) => {
@@ -224,8 +233,7 @@ export default function OGFinderResults({
         selectedCategories.includes(item.categoryTitle);
 
       if (showOnlyLimited) {
-        const itemKey = `${item.categoryTitle}-${item.title}`;
-        const itemData = itemsMap.get(itemKey);
+        const itemData = itemsMap.get(item.item_id);
         if (!itemData || itemData.is_limited !== 1) return false;
       }
 
@@ -268,40 +276,28 @@ export default function OGFinderResults({
         case "created-desc":
           return b.logged_at - a.logged_at;
         case "cash-desc": {
-          const aKey = `${a.categoryTitle}-${a.title}`;
-          const bKey = `${b.categoryTitle}-${b.title}`;
-          const aItemData = itemsMap.get(aKey);
-          const bItemData = itemsMap.get(bKey);
-          const aCashValue = parseNumericValue(aItemData?.cash_value || null);
-          const bCashValue = parseNumericValue(bItemData?.cash_value || null);
-          return bCashValue - aCashValue;
+          return (
+            getSnapshotValue(b, "Cash Value") -
+            getSnapshotValue(a, "Cash Value")
+          );
         }
         case "cash-asc": {
-          const aKey = `${a.categoryTitle}-${a.title}`;
-          const bKey = `${b.categoryTitle}-${b.title}`;
-          const aItemData = itemsMap.get(aKey);
-          const bItemData = itemsMap.get(bKey);
-          const aCashValue = parseNumericValue(aItemData?.cash_value || null);
-          const bCashValue = parseNumericValue(bItemData?.cash_value || null);
-          return aCashValue - bCashValue;
+          return (
+            getSnapshotValue(a, "Cash Value") -
+            getSnapshotValue(b, "Cash Value")
+          );
         }
         case "duped-desc": {
-          const aKey = `${a.categoryTitle}-${a.title}`;
-          const bKey = `${b.categoryTitle}-${b.title}`;
-          const aItemData = itemsMap.get(aKey);
-          const bItemData = itemsMap.get(bKey);
-          const aDupedValue = parseNumericValue(aItemData?.duped_value || null);
-          const bDupedValue = parseNumericValue(bItemData?.duped_value || null);
-          return bDupedValue - aDupedValue;
+          return (
+            getSnapshotValue(b, "Duped Value") -
+            getSnapshotValue(a, "Duped Value")
+          );
         }
         case "duped-asc": {
-          const aKey = `${a.categoryTitle}-${a.title}`;
-          const bKey = `${b.categoryTitle}-${b.title}`;
-          const aItemData = itemsMap.get(aKey);
-          const bItemData = itemsMap.get(bKey);
-          const aDupedValue = parseNumericValue(aItemData?.duped_value || null);
-          const bDupedValue = parseNumericValue(bItemData?.duped_value || null);
-          return aDupedValue - bDupedValue;
+          return (
+            getSnapshotValue(a, "Duped Value") -
+            getSnapshotValue(b, "Duped Value")
+          );
         }
         default:
           return 0;
@@ -627,16 +623,30 @@ export default function OGFinderResults({
               </div>
             )}
 
-            <OGItemsGrid
-              filteredItems={filteredAndSortedItems}
-              getUsername={getUsername}
-              getUserAvatar={getUserAvatar}
-              getHasVerifiedBadge={getHasVerifiedBadge}
-              onCardClick={handleCardClick}
-              itemCounts={itemCounts}
-              duplicateOrders={duplicateOrders}
-              items={items}
-            />
+            {showOnlyLimited && limitedItemsQuery.isError ? (
+              <div className="text-secondary-text py-8 text-center">
+                Couldn&apos;t load limited-item details.{" "}
+                <button
+                  type="button"
+                  className="text-link underline"
+                  onClick={() => void limitedItemsQuery.refetch()}
+                >
+                  Try again
+                </button>
+              </div>
+            ) : (
+              <OGItemsGrid
+                filteredItems={filteredAndSortedItems}
+                isLoading={showOnlyLimited && limitedItemsQuery.isPending}
+                getUsername={getUsername}
+                getUserAvatar={getUserAvatar}
+                getHasVerifiedBadge={getHasVerifiedBadge}
+                onCardClick={handleCardClick}
+                itemCounts={itemCounts}
+                duplicateOrders={duplicateOrders}
+                items={catalogItems}
+              />
+            )}
           </div>
         </>
       )}

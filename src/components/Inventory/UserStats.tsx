@@ -8,6 +8,7 @@ import { UseScanWebSocketReturn } from "@/hooks/useScanWebSocket";
 import UserProfileSection from "./UserProfileSection";
 import UserStatsSection from "./UserStatsSection";
 import { UserNetworthData } from "@/utils/api/api";
+import { useBatchItems } from "@/hooks/useBatchItems";
 
 interface UserStatsProps {
   initialData: InventoryData;
@@ -86,6 +87,18 @@ export default function UserStats({
 
   const totalNetworth = latestNetworthData?.networth || 0;
   const totalCashValue = latestNetworthData?.inventory_value || 0;
+  const limitedFilterIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          [...initialData.data, ...(initialData.duplicates ?? [])].map(
+            (item) => item.item_id,
+          ),
+        ),
+      ),
+    [initialData.data, initialData.duplicates],
+  );
+  const limitedItemsQuery = useBatchItems(limitedFilterIds, showOnlyLimited);
 
   const parseValue = (val: string | null): number => {
     if (!val || val === "N/A") return 0;
@@ -99,23 +112,31 @@ export default function UserStats({
   };
 
   const totalDupedValue = useMemo(() => {
-    if (!itemsData || itemsData.length === 0) return 0;
-    const itemsMap = new Map(
-      itemsData.map((item) => [item.id.toString(), item]),
+    if (latestNetworthData?.duplicates_value != null) {
+      return latestNetworthData.duplicates_value;
+    }
+    return (initialData.duplicates || []).reduce(
+      (sum, invItem) =>
+        sum +
+        parseValue(
+          invItem.info.find((entry) => entry.title === "Duped Value")?.value ??
+            null,
+        ),
+      0,
     );
-    return (initialData.duplicates || []).reduce((sum, invItem) => {
-      const item = itemsMap.get(invItem.item_id.toString());
-      return sum + (item ? parseValue(item.duped_value) : 0);
-    }, 0);
-  }, [itemsData, initialData.duplicates]);
+  }, [initialData.duplicates, latestNetworthData]);
 
   const activeFilteredStats = useMemo(() => {
     const anyFilterActive =
       showOnlyOriginal || showOnlyNonOriginal || showOnlyLimited;
-    if (!anyFilterActive || !itemsData || itemsData.length === 0) return null;
+    if (!anyFilterActive || (showOnlyLimited && !limitedItemsQuery.data))
+      return null;
 
     const itemsMap = new Map(
-      itemsData.map((item) => [item.id.toString(), item]),
+      (limitedItemsQuery.data ?? itemsData).map((item) => [
+        item.id.toString(),
+        item,
+      ]),
     );
 
     let inventoryValue = 0;
@@ -127,21 +148,27 @@ export default function UserStats({
       if (showOnlyOriginal && !invItem.isOriginalOwner) return;
       if (showOnlyNonOriginal && invItem.isOriginalOwner) return;
       const item = itemsMap.get(invItem.item_id.toString());
-      if (!item) return;
-      if (showOnlyLimited && item.is_limited !== 1) return;
+      if (showOnlyLimited && item?.is_limited !== 1) return;
       itemCount++;
-      inventoryValue += parseValue(item.cash_value);
+      inventoryValue += parseValue(
+        invItem.info.find((entry) => entry.title === "Cash Value")?.value ??
+          item?.cash_value ??
+          null,
+      );
     });
 
     (initialData.duplicates || []).forEach((invItem) => {
       if (showOnlyOriginal && !invItem.isOriginalOwner) return;
       if (showOnlyNonOriginal && invItem.isOriginalOwner) return;
       const item = itemsMap.get(invItem.item_id.toString());
-      if (!item) return;
-      if (showOnlyLimited && item.is_limited !== 1) return;
+      if (showOnlyLimited && item?.is_limited !== 1) return;
       itemCount++;
       dupedItemCount++;
-      dupedValue += parseValue(item.duped_value);
+      dupedValue += parseValue(
+        invItem.info.find((entry) => entry.title === "Duped Value")?.value ??
+          item?.duped_value ??
+          null,
+      );
     });
 
     const money = showOnlyNonOriginal ? Number(initialData.money) || 0 : 0;
@@ -159,6 +186,7 @@ export default function UserStats({
     showOnlyOriginal,
     showOnlyNonOriginal,
     showOnlyLimited,
+    limitedItemsQuery.data,
   ]);
 
   const filterLabel = useMemo(() => {
@@ -171,7 +199,7 @@ export default function UserStats({
 
   // Since we are deriving values directly from props, they are always available (or 0)
   // We can treat loading as false since there's no async operation here
-  const isLoadingValues = false;
+  const isLoadingValues = showOnlyLimited && limitedItemsQuery.isPending;
 
   // Set loading state
 

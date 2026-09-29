@@ -1,20 +1,17 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { Icon } from "../ui/IconWrapper";
-import { createLogger } from "@/services/logger";
-
-const log = createLogger("UI");
 import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
 import DupeSearchInput from "./DupeSearchInput";
-import { mergeDupeFinderArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import { getDupedValueForItem } from "@/utils/trading/dupeUtils";
+import { parseCurrencyValue } from "@/utils/trading/currency";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 
 interface DupeFinderResultsProps {
@@ -49,14 +46,18 @@ export default function DupeFinderResults({
 
   const [selectedItem, setSelectedItem] = useState<DupeFinderItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [itemsData] = useState<Item[]>(items);
-  const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
-
-  // Merge dupe finder data with metadata from item/list endpoint
-  // This ensures fields like timesTraded and uniqueCirculation reflect the latest state
-  const mergedDupeData = useMemo(
-    () => mergeDupeFinderArrayWithMetadata(initialData, itemsData),
-    [initialData, itemsData],
+  const mergedDupeData = initialData;
+  const snapshotDupedValue = (item: DupeFinderItem) => {
+    const value = item.info?.find(
+      (entry) => entry.title === "Duped Value",
+    )?.value;
+    const parsed = parseCurrencyValue(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  const totalDupedValue = useMemo(
+    () =>
+      mergedDupeData.reduce((sum, item) => sum + snapshotDupedValue(item), 0),
+    [mergedDupeData],
   );
 
   // Extract all unique user IDs from dupe data
@@ -111,41 +112,11 @@ export default function DupeFinderResults({
     return Boolean(user?.hasVerifiedBadge);
   };
 
-  // Calculate total duped value
-  useEffect(() => {
-    const calculateTotalDupedValue = () => {
-      try {
-        let totalDuped = 0;
-        const itemMap = new Map(itemsData.map((item) => [item.id, item]));
-
-        mergedDupeData.forEach((dupeItem) => {
-          const itemData = itemMap.get(dupeItem.item_id);
-          if (itemData) {
-            const dupedValue = getDupedValueForItem(itemData);
-            if (!isNaN(dupedValue) && dupedValue > 0) {
-              totalDuped += dupedValue;
-            }
-          }
-        });
-
-        setTotalDupedValue(totalDuped);
-      } catch (error) {
-        log.error("Error calculating duped value", error);
-        setTotalDupedValue(0);
-      }
-    };
-
-    calculateTotalDupedValue();
-  }, [mergedDupeData, itemsData]);
-
   // Filter and sort logic
   const filteredData = (() => {
     return mergedDupeData.filter((item) => {
-      const itemData = itemsData.find((data) => data.id === item.item_id);
-      if (!itemData) return false;
-
       const matchesSearch = matchesTextSearch(
-        [itemData.name, itemData.type, item.categoryTitle],
+        [item.title, item.categoryTitle],
         searchTerm,
       );
 
@@ -198,18 +169,10 @@ export default function DupeFinderResults({
         case "created-desc":
           return b.logged_at - a.logged_at;
         case "duped-desc": {
-          const aItemData = itemsData.find((data) => data.id === a.item_id);
-          const bItemData = itemsData.find((data) => data.id === b.item_id);
-          const aDupedValue = aItemData ? getDupedValueForItem(aItemData) : 0;
-          const bDupedValue = bItemData ? getDupedValueForItem(bItemData) : 0;
-          return bDupedValue - aDupedValue;
+          return snapshotDupedValue(b) - snapshotDupedValue(a);
         }
         case "duped-asc": {
-          const aItemData = itemsData.find((data) => data.id === a.item_id);
-          const bItemData = itemsData.find((data) => data.id === b.item_id);
-          const aDupedValue = aItemData ? getDupedValueForItem(aItemData) : 0;
-          const bDupedValue = bItemData ? getDupedValueForItem(bItemData) : 0;
-          return aDupedValue - bDupedValue;
+          return snapshotDupedValue(a) - snapshotDupedValue(b);
         }
         default:
           return 0;
@@ -358,7 +321,7 @@ export default function DupeFinderResults({
           onCardClick={handleCardClick}
           itemCounts={itemCounts}
           duplicateOrders={duplicateOrders}
-          itemsData={itemsData}
+          itemsData={items}
           robloxId={robloxId}
         />
       </div>

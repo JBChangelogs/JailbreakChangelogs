@@ -118,7 +118,6 @@ export default function InventoryCheckerClient({
   const forceShowErrorHandledRef = useRef<boolean>(false);
   const lastShownErrorRef = useRef<string | null>(null);
   const lastShownSuccessRef = useRef<string | null>(null);
-  const [itemsData] = useState<Item[]>(items);
 
   const [networthData] = useState<UserNetworthData[]>(initialNetworthData);
   const [moneyHistoryData] = useState<MoneyHistory[]>(initialMoneyHistoryData);
@@ -369,6 +368,7 @@ export default function InventoryCheckerClient({
 
   // Derive active tab from robloxId to avoid setState in effect
   const effectiveActiveTab = activeTab > tabIndex.max ? 0 : activeTab;
+  const itemsData: Item[] = items;
 
   // Destructure scanWebSocket properties before useEffect to satisfy exhaustive-deps
   const {

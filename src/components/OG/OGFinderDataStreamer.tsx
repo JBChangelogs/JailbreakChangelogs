@@ -3,7 +3,6 @@ import {
   fetchRobloxUserByUsername,
   fetchRobloxUsersBatch,
   fetchUserByRobloxId,
-  fetchItems,
   MaxStreamsError,
 } from "@/utils/api/api";
 import { RobloxUser } from "@/types";
@@ -146,10 +145,10 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
     result.count = result.results.length;
   }
 
-  // Fetch main user data, connection data, and items metadata
+  // Fetch main user data and connection data.
   // Avatars are now handled client-side with direct URLs
   // Item owners will be fetched client-side in batches
-  const [mainUserData, userConnectionData, items] = await Promise.all([
+  const [mainUserData, userConnectionData] = await Promise.all([
     fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
       log.error("Failed to fetch main user data:", error);
       return {};
@@ -162,10 +161,6 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         log.error("Failed to fetch user connection data:", error);
       }
       return null;
-    }),
-    fetchItems().catch((error) => {
-      log.error("Failed to fetch items metadata:", error);
-      return [];
     }),
   ]);
 
@@ -200,7 +195,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
       robloxId={actualRobloxId}
       robloxUsers={robloxUsers}
       userConnectionData={userConnectionData}
-      items={items}
+      items={[]}
       originalSearchTerm={isUsername ? robloxId : undefined}
     />
   );

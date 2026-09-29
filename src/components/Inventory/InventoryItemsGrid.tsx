@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
+import { useBatchItems } from "@/hooks/useBatchItems";
 import InventoryItemCard from "./InventoryItemCard";
 import { Item } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
@@ -11,7 +12,7 @@ import React from "react";
 interface InventoryItemsGridProps {
   filteredItems: Array<{
     item: InventoryItem;
-    itemData: Item;
+    itemData?: Item;
     isDupedItem?: boolean;
   }>;
   getUserDisplay: (userId: string) => string;
@@ -39,10 +40,17 @@ export default function InventoryItemsGrid({
   const itemsPerPage = 16;
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const currentPage = Math.min(page, Math.max(1, totalPages));
   const displayedItems = filteredItems.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage,
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
   );
+  const itemQuery = useBatchItems(
+    displayedItems
+      .filter(({ itemData }) => !itemData)
+      .map(({ item }) => item.item_id),
+  );
+  const pageItems = new Map(itemQuery.data?.map((item) => [item.id, item]));
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -51,7 +59,10 @@ export default function InventoryItemsGrid({
     setPage(value);
   };
 
-  if (isLoading) {
+  if (
+    isLoading ||
+    (displayedItems.some(({ itemData }) => !itemData) && itemQuery.isPending)
+  ) {
     return (
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
@@ -98,13 +109,28 @@ export default function InventoryItemsGrid({
     );
   }
 
+  if (itemQuery.isError) {
+    return (
+      <div className="text-secondary-text py-8 text-center">
+        Couldn&apos;t load item details.{" "}
+        <button
+          type="button"
+          className="text-link underline"
+          onClick={() => void itemQuery.refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
       {totalPages > 1 && (
         <div className="mb-4 flex justify-center">
           <Pagination
             count={totalPages}
-            page={page}
+            page={currentPage}
             onChange={handlePageChange}
           />
         </div>
@@ -112,6 +138,7 @@ export default function InventoryItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
         {displayedItems.map(({ item, itemData, isDupedItem }, index) => {
+          const currentItemData = pageItems.get(item.item_id) ?? itemData;
           const itemKey = `${item.categoryTitle}-${item.title}`;
           const duplicateCount = itemCounts.get(itemKey) || 1;
           const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;
@@ -133,7 +160,7 @@ export default function InventoryItemsGrid({
             <React.Fragment key={uniqueItemKey}>
               <InventoryItemCard
                 item={item}
-                itemData={itemData}
+                itemData={currentItemData}
                 getUserDisplay={getUserDisplay}
                 getUserAvatar={getUserAvatar}
                 getHasVerifiedBadge={getHasVerifiedBadge}
@@ -152,7 +179,7 @@ export default function InventoryItemsGrid({
         <div className="mt-8 flex justify-center">
           <Pagination
             count={totalPages}
-            page={page}
+            page={currentPage}
             onChange={handlePageChange}
           />
         </div>

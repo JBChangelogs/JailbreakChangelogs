@@ -2,7 +2,6 @@ import {
   fetchDupeFinderData,
   fetchRobloxUserByUsername,
   fetchRobloxUsersBatch,
-  fetchItems,
   MaxStreamsError,
 } from "@/utils/api/api";
 import DupeFinderClient from "./DupeFinderClient";
@@ -99,16 +98,12 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
     );
   }
 
-  const [mainUserData, items] = await Promise.all([
-    fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
+  const mainUserData = await fetchRobloxUsersBatch([actualRobloxId]).catch(
+    (error) => {
       log.error("Failed to fetch main user data:", error);
       return {};
-    }),
-    fetchItems().catch((error) => {
-      log.error("Failed to fetch items metadata:", error);
-      return [];
-    }),
-  ]);
+    },
+  );
 
   // Build the user data objects with just the main user
   const robloxUsers: Record<string, import("@/types").RobloxUser> = {};
@@ -143,7 +138,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
       initialData={result}
       isUserFound={true}
       robloxUsers={robloxUsers}
-      items={items}
+      items={[]}
       originalSearchTerm={isUsername ? robloxId : undefined}
     />
   );

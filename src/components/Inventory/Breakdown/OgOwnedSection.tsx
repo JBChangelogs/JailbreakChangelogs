@@ -17,7 +17,6 @@ import type { useInventoryBreakdownStats } from "@/hooks/useInventoryBreakdownSt
 type InventoryBreakdownStats = ReturnType<typeof useInventoryBreakdownStats>;
 
 interface OgOwnedSectionProps {
-  itemsAvailable: boolean;
   ogOwnedProgress: InventoryBreakdownStats["ogOwnedProgress"];
   typeProgress: InventoryBreakdownStats["typeProgress"];
   ogMissingItemsAll: InventoryBreakdownStats["ogMissingItemsAll"];
@@ -29,7 +28,6 @@ interface OgOwnedSectionProps {
 }
 
 export default function OgOwnedSection({
-  itemsAvailable,
   ogOwnedProgress,
   typeProgress,
   ogMissingItemsAll,
@@ -65,177 +63,163 @@ export default function OgOwnedSection({
             </Tooltip>
           </div>
 
-          {!itemsAvailable ? (
-            <div className="py-6 text-center">
-              <p className="text-secondary-text text-sm">
-                Item list unavailable, can&apos;t calculate OG owned.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <CategoryProgressBar
-                entries={
-                  ogOwnedProgress.ogOwned > 0
-                    ? typeProgress
-                        .filter((entry) => entry.ogOwned > 0)
-                        .map((entry) => ({
-                          key: entry.type,
-                          label: entry.type,
-                          widthPercent:
-                            (entry.ogOwned / ogOwnedProgress.ogOwned) * 100,
-                          color: getCategoryColor(entry.type),
-                          tooltip: (
-                            <div className="grid min-w-48 gap-1.5 text-xs">
-                              <div className="flex items-center gap-1.5">
-                                <span
-                                  className="h-2.5 w-2.5 rounded-xs"
-                                  style={{
-                                    backgroundColor: getCategoryColor(
-                                      entry.type,
-                                    ),
-                                  }}
-                                />
-                                <span className="font-medium">
-                                  {entry.type}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-secondary-text">
-                                  OG Owned
-                                </span>
-                                <span className="text-primary-text font-mono font-medium tabular-nums">
-                                  {formatInventoryCount(entry.ogOwned)}/
-                                  {formatInventoryCount(entry.total)}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-secondary-text">
-                                  Completion
-                                </span>
-                                <span className="text-primary-text font-mono font-medium tabular-nums">
-                                  {formatPercentage(
-                                    entry.total > 0
-                                      ? (entry.ogOwned / entry.total) * 100
-                                      : 0,
-                                  )}
-                                  %
-                                </span>
-                              </div>
+          <div className="space-y-4">
+            <CategoryProgressBar
+              entries={
+                ogOwnedProgress.ogOwned > 0
+                  ? typeProgress
+                      .filter((entry) => entry.ogOwned > 0)
+                      .map((entry) => ({
+                        key: entry.type,
+                        label: entry.type,
+                        widthPercent:
+                          (entry.ogOwned / ogOwnedProgress.ogOwned) * 100,
+                        color: getCategoryColor(entry.type),
+                        tooltip: (
+                          <div className="grid min-w-48 gap-1.5 text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="h-2.5 w-2.5 rounded-xs"
+                                style={{
+                                  backgroundColor: getCategoryColor(entry.type),
+                                }}
+                              />
+                              <span className="font-medium">{entry.type}</span>
                             </div>
-                          ),
-                        }))
-                    : []
-                }
-                emptyMessage="No items owned"
-              />
+                            <div className="flex items-center justify-between">
+                              <span className="text-secondary-text">
+                                OG Owned
+                              </span>
+                              <span className="text-primary-text font-mono font-medium tabular-nums">
+                                {formatInventoryCount(entry.ogOwned)}/
+                                {formatInventoryCount(entry.total)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-secondary-text">
+                                Completion
+                              </span>
+                              <span className="text-primary-text font-mono font-medium tabular-nums">
+                                {formatPercentage(
+                                  entry.total > 0
+                                    ? (entry.ogOwned / entry.total) * 100
+                                    : 0,
+                                )}
+                                %
+                              </span>
+                            </div>
+                          </div>
+                        ),
+                      }))
+                  : []
+              }
+              emptyMessage="No items owned"
+            />
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                  <div className="text-secondary-text mb-1 text-xs">
-                    OG Owned
-                  </div>
-                  <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
-                    {formatInventoryCount(ogOwnedProgress.ogOwned)}/
-                    {formatInventoryCount(ogOwnedProgress.total)}
-                  </div>
-                </div>
-                <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                  <div className="text-secondary-text mb-1 text-xs">
-                    OG Missing
-                  </div>
-                  <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
-                    {formatInventoryCount(ogOwnedProgress.ogMissing)}/
-                    {formatInventoryCount(ogOwnedProgress.total)}
-                  </div>
-                </div>
-                <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                  <div className="text-secondary-text mb-1 text-xs">
-                    Completion
-                  </div>
-                  <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
-                    {formatPercentage(ogOwnedProgress.percentage)}%
-                  </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
+                <div className="text-secondary-text mb-1 text-xs">OG Owned</div>
+                <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                  {formatInventoryCount(ogOwnedProgress.ogOwned)}/
+                  {formatInventoryCount(ogOwnedProgress.total)}
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                {typeProgress.map((entry) => {
-                  const categoryIcon = getCategoryIcon(entry.type);
-                  const ogPct =
-                    entry.total > 0 ? (entry.ogOwned / entry.total) * 100 : 0;
-                  return (
-                    <div
-                      key={entry.type}
-                      className="border-border-card bg-tertiary-bg flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        {categoryIcon ? (
-                          <categoryIcon.Icon
-                            className="h-4 w-4 shrink-0"
-                            style={{ color: getCategoryColor(entry.type) }}
-                          />
-                        ) : (
-                          <div
-                            className="h-3 w-3 shrink-0 rounded-sm"
-                            style={{
-                              backgroundColor: getCategoryColor(entry.type),
-                            }}
-                          />
-                        )}
-                        <span className="text-primary-text font-medium">
-                          {entry.type}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-primary-text text-xs font-semibold">
-                          {formatPercentage(ogPct)}%
-                        </span>
-                        <span className="text-primary-text font-mono text-xs font-semibold tabular-nums">
-                          {formatInventoryCount(entry.ogOwned)}/
-                          {formatInventoryCount(entry.total)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
+                <div className="text-secondary-text mb-1 text-xs">
+                  OG Missing
+                </div>
+                <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                  {formatInventoryCount(ogOwnedProgress.ogMissing)}/
+                  {formatInventoryCount(ogOwnedProgress.total)}
+                </div>
               </div>
-
-              <SearchableInventoryListSection
-                title="Trackable Missing OG Items"
-                tooltipContent={
-                  <>
-                    Items in Jailbreak where this player is not the original
-                    owner, including items not in their inventory. Excludes
-                    unverifiable items.
-                  </>
-                }
-                items={ogMissingItemsAll}
-                searchPlaceholder="Search missing OG items..."
-                filterAriaLabel="Filter non-OG items by type"
-                clearAriaLabel="Clear non-OG item search"
-                emptyMessage="This player is the original owner of every item in Jailbreak."
-                noResultsMessage="No items match your search."
-                helperContent={
-                  unverifiableCount > 0 ? (
-                    <>
-                      Unverifiable:{" "}
-                      <span className="text-primary-text font-mono font-semibold tabular-nums">
-                        {formatInventoryCount(unverifiableCount)}
-                      </span>{" "}
-                      assumed owned. Hidden from missing list.
-                      <button
-                        type="button"
-                        onClick={onViewUnverifiable}
-                        className="text-link hover:text-link-hover ml-2 cursor-pointer underline underline-offset-2"
-                      >
-                        View list
-                      </button>
-                    </>
-                  ) : undefined
-                }
-              />
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
+                <div className="text-secondary-text mb-1 text-xs">
+                  Completion
+                </div>
+                <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                  {formatPercentage(ogOwnedProgress.percentage)}%
+                </div>
+              </div>
             </div>
-          )}
+
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              {typeProgress.map((entry) => {
+                const categoryIcon = getCategoryIcon(entry.type);
+                const ogPct =
+                  entry.total > 0 ? (entry.ogOwned / entry.total) * 100 : 0;
+                return (
+                  <div
+                    key={entry.type}
+                    className="border-border-card bg-tertiary-bg flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      {categoryIcon ? (
+                        <categoryIcon.Icon
+                          className="h-4 w-4 shrink-0"
+                          style={{ color: getCategoryColor(entry.type) }}
+                        />
+                      ) : (
+                        <div
+                          className="h-3 w-3 shrink-0 rounded-sm"
+                          style={{
+                            backgroundColor: getCategoryColor(entry.type),
+                          }}
+                        />
+                      )}
+                      <span className="text-primary-text font-medium">
+                        {entry.type}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-primary-text text-xs font-semibold">
+                        {formatPercentage(ogPct)}%
+                      </span>
+                      <span className="text-primary-text font-mono text-xs font-semibold tabular-nums">
+                        {formatInventoryCount(entry.ogOwned)}/
+                        {formatInventoryCount(entry.total)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <SearchableInventoryListSection
+              title="Trackable Missing OG Items"
+              tooltipContent={
+                <>
+                  Items in Jailbreak where this player is not the original
+                  owner, including items not in their inventory. Excludes
+                  unverifiable items.
+                </>
+              }
+              items={ogMissingItemsAll}
+              searchPlaceholder="Search missing OG items..."
+              filterAriaLabel="Filter non-OG items by type"
+              clearAriaLabel="Clear non-OG item search"
+              emptyMessage="This player is the original owner of every item in Jailbreak."
+              noResultsMessage="No items match your search."
+              helperContent={
+                unverifiableCount > 0 ? (
+                  <>
+                    Unverifiable:{" "}
+                    <span className="text-primary-text font-mono font-semibold tabular-nums">
+                      {formatInventoryCount(unverifiableCount)}
+                    </span>{" "}
+                    assumed owned. Hidden from missing list.
+                    <button
+                      type="button"
+                      onClick={onViewUnverifiable}
+                      className="text-link hover:text-link-hover ml-2 cursor-pointer underline underline-offset-2"
+                    >
+                      View list
+                    </button>
+                  </>
+                ) : undefined
+              }
+            />
+          </div>
         </div>
       </div>
 

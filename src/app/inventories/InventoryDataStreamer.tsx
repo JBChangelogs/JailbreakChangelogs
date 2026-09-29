@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import {
   fetchInventoryData,
   fetchRobloxUserByUsername,
-  fetchItems,
   fetchUserNetworth,
   fetchUserMoneyHistory,
   MaxStreamsError,
@@ -77,9 +76,8 @@ async function InventoryDataFetcher({
     comments: initialComments ?? [],
     userMap: initialCommentUserMap ?? {},
   };
-  const [result, items, networthData, moneyHistoryData] = await Promise.all([
+  const [result, networthData, moneyHistoryData] = await Promise.all([
     fetchInventoryData(actualRobloxId),
-    fetchItems(),
     fetchUserNetworth(actualRobloxId),
     fetchUserMoneyHistory(actualRobloxId),
   ]);
@@ -145,7 +143,7 @@ async function InventoryDataFetcher({
         currentSeason={null}
         initialComments={commentsData?.comments || []}
         initialCommentUserMap={commentsData?.userMap || {}}
-        items={items}
+        items={[]}
         networthData={networthData}
         moneyHistoryData={moneyHistoryData}
       />

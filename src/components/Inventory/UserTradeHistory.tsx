@@ -12,17 +12,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { PendingTradeItemsPlaceholder } from "@/components/Inventory/PendingTradeItemsPlaceholder";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
+import { useBatchItems } from "@/hooks/useBatchItems";
+import { usePartialItems } from "@/hooks/usePartialItems";
 import { createLogger } from "@/services/logger";
 import { Item } from "@/types";
 import { TradeItem as CatalogTradeItem } from "@/types/trading";
 import { INVENTORY_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import {
+  CategoryIconBadge,
+  getCategoryColor,
+  getCategoryIcon,
+} from "@/utils/items/categoryIcons";
+import { hasSeason, unlockLevel } from "@/utils/items/season";
+import {
+  formatUnlockLevelBadge,
+  formatUnlockRequirementsTooltip,
+  hasUnlockLevel,
+} from "@/utils/items/itemUnlockPresentation";
 import {
   formatCurrencyValue,
   parseCurrencyValue,
@@ -164,15 +180,42 @@ function TradeItem({
   item,
   currentValue,
   catalogItem,
+  valueState,
 }: {
   item: TradeItemDetail;
   currentValue: number | null;
   catalogItem: CatalogTradeItem | null;
+  valueState: "loading" | "error" | "ready";
 }) {
   const categoryIcon = getCategoryIcon(item.category_title);
   const itemHref = catalogItem ? getTradeItemDetailHref(catalogItem) : null;
+  const season = catalogItem?.season ?? catalogItem?.data?.season;
+  const level = unlockLevel(catalogItem?.level ?? catalogItem?.data?.level);
+  const hasLevel = hasUnlockLevel(level);
   const cardClassName =
     "border-border-card bg-tertiary-bg hover:border-button-info/40 flex w-full min-w-0 self-start overflow-hidden rounded-lg border transition-colors min-[400px]:block min-[400px]:w-40 sm:w-48 xl:w-40";
+  const requirementBadges =
+    season != null || hasLevel ? (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="absolute right-1 bottom-1 z-20 flex cursor-help items-center gap-1">
+            {season != null && (
+              <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded px-1.5 text-[10px] leading-none font-bold">
+                S{season}
+              </span>
+            )}
+            {hasLevel && (
+              <span className="bg-status-success text-form-button-text inline-flex h-5 items-center rounded px-1.5 text-[10px] leading-none font-bold">
+                {formatUnlockLevelBadge(level)}
+              </span>
+            )}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          {formatUnlockRequirementsTooltip(season ?? undefined, level)}
+        </TooltipContent>
+      </Tooltip>
+    ) : null;
 
   const content = (
     <>
@@ -185,6 +228,18 @@ function TradeItem({
           className="object-cover"
           onError={handleImageError}
         />
+        {catalogItem &&
+          (hasSeason(catalogItem) || catalogItem.is_limited === 1) && (
+            <div className="absolute top-1 right-1 z-20">
+              <CategoryIconBadge
+                type={item.category_title}
+                isLimited={catalogItem.is_limited === 1}
+                isSeasonal={hasSeason(catalogItem)}
+                className="h-4 w-4"
+              />
+            </div>
+          )}
+        {requirementBadges}
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center p-2.5 min-[400px]:block">
         <p className="text-primary-text group-hover:text-link group-focus-visible:text-link line-clamp-2 text-sm leading-5 font-semibold wrap-break-word transition-colors">
@@ -238,7 +293,17 @@ function TradeItem({
             Value
           </span>
           <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded-lg px-2 text-[10px] leading-none font-bold sm:h-6 sm:px-2.5 sm:text-xs">
-            {currentValue === null ? "N/A" : formatTradeValue(currentValue)}
+            {valueState === "loading" ? (
+              <>
+                <Spinner className="mr-1 h-3 w-3" /> Loading
+              </>
+            ) : valueState === "error" ? (
+              "Unavailable"
+            ) : currentValue === null ? (
+              "N/A"
+            ) : (
+              formatTradeValue(currentValue)
+            )}
           </span>
         </div>
       </div>
@@ -250,20 +315,22 @@ function TradeItem({
   }
 
   return (
-    <Tooltip delayDuration={150}>
-      <TooltipTrigger asChild>
-        <Link
-          href={itemHref}
-          prefetch={false}
-          className={`${cardClassName} group cursor-pointer`}
-        >
-          {content}
-        </Link>
-      </TooltipTrigger>
-      <TradeItemHoverTooltip
-        item={{ ...catalogItem, isDuped: item.is_duplicate_branch }}
-      />
-    </Tooltip>
+    <div className={`${cardClassName} group relative`}>
+      <Tooltip delayDuration={150}>
+        <TooltipTrigger asChild>
+          <Link
+            href={itemHref}
+            prefetch={false}
+            aria-label={`View ${item.title} details`}
+            className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"
+          />
+        </TooltipTrigger>
+        <TradeItemHoverTooltip
+          item={{ ...catalogItem, isDuped: item.is_duplicate_branch }}
+        />
+      </Tooltip>
+      {content}
+    </div>
   );
 }
 
@@ -271,12 +338,14 @@ function TradeSide({
   label,
   items,
   isPending,
+  valueState,
   getItemValue,
   getCatalogItem,
 }: {
   label: string;
   items: TradeItemDetail[];
   isPending: boolean;
+  valueState: "loading" | "error" | "ready";
   getItemValue: (item: TradeItemDetail) => number | null;
   getCatalogItem: (item: TradeItemDetail) => CatalogTradeItem | null;
 }) {
@@ -293,6 +362,7 @@ function TradeSide({
             item={item}
             currentValue={getItemValue(item)}
             catalogItem={getCatalogItem(item)}
+            valueState={valueState}
           />
         ))}
         {items.length === 0 && isPending && (
@@ -323,6 +393,9 @@ export default function UserTradeHistory({
   const [nextBefore, setNextBefore] = useState<number | null>(null);
   const [expandedTradeId, setExpandedTradeId] = useState<string | null>(null);
   const [details, setDetails] = useState<Record<string, TradeDetail>>({});
+  const [loadedCatalogItems, setLoadedCatalogItems] = useState<
+    Record<number, Item>
+  >({});
   const [detailStates, setDetailStates] = useState<
     Record<string, { state: RequestState; error?: string }>
   >({});
@@ -338,11 +411,53 @@ export default function UserTradeHistory({
   const { robloxUsers } = useBatchUserData(counterpartyIds, {
     enabled: isActive && counterpartyIds.length > 0,
   });
+  const partialItemsQuery = usePartialItems(
+    isActive && expandedTradeId !== null,
+  );
+  const tradeCatalogIds = useMemo(() => {
+    const detail = expandedTradeId ? details[expandedTradeId] : undefined;
+    if (!detail) return [];
+    const byName = new Map(
+      (partialItemsQuery.data ?? []).map((item) => [
+        normalizeCatalogKey(item.name, item.type),
+        item.id,
+      ]),
+    );
+    const seenItems = [...detail.items_a_to_b, ...detail.items_b_to_a];
+    return Array.from(
+      new Set(
+        seenItems
+          .map((item) =>
+            byName.get(normalizeCatalogKey(item.title, item.category_title)),
+          )
+          .filter((id): id is number => id !== undefined),
+      ),
+    );
+  }, [partialItemsQuery.data, expandedTradeId, details]);
+  const catalogQuery = useBatchItems(
+    tradeCatalogIds,
+    isActive && expandedTradeId !== null,
+  );
+
+  useEffect(() => {
+    if (!catalogQuery.data) return;
+    setLoadedCatalogItems((current) => {
+      const next = { ...current };
+      catalogQuery.data.forEach((item) => {
+        next[item.id] = item;
+      });
+      return next;
+    });
+  }, [catalogQuery.data]);
 
   const catalogValues = useMemo(() => {
     const values = new Map<string, CatalogValue>();
 
-    itemsData.forEach((item) => {
+    [
+      ...itemsData,
+      ...Object.values(loadedCatalogItems),
+      ...(catalogQuery.data ?? []),
+    ].forEach((item) => {
       values.set(normalizeCatalogKey(item.name, item.type), {
         cashValue: item.cash_value,
         dupedValue: item.duped_value,
@@ -401,7 +516,7 @@ export default function UserTradeHistory({
     });
 
     return values;
-  }, [itemsData]);
+  }, [catalogQuery.data, itemsData, loadedCatalogItems]);
 
   const getTradeItemValue = useCallback(
     (item: TradeItemDetail): number | null => {
@@ -659,6 +774,19 @@ export default function UserTradeHistory({
         const receivedCount = detail
           ? ownerReceived.length
           : trade.items_received.length;
+        const valueState: "loading" | "error" | "ready" =
+          isExpanded && detail && partialItemsQuery.isPending
+            ? "loading"
+            : isExpanded &&
+                detail &&
+                tradeCatalogIds.length > 0 &&
+                catalogQuery.isPending
+              ? "loading"
+              : isExpanded &&
+                  detail &&
+                  (partialItemsQuery.isError || catalogQuery.isError)
+                ? "error"
+                : "ready";
         const ownerGaveValues = detail
           ? summarizeValues(ownerGave, getTradeItemValue)
           : null;
@@ -820,6 +948,30 @@ export default function UserTradeHistory({
                       </p>
                     )}
                     {detail.status === "completed" &&
+                      valueState === "loading" && (
+                        <div className="border-border-card bg-tertiary-bg text-secondary-text mb-4 flex min-h-28 items-center justify-center gap-2 rounded-lg border p-3 text-sm">
+                          <Spinner className="h-4 w-4" /> Loading current
+                          values...
+                        </div>
+                      )}
+                    {valueState === "error" && (
+                      <div className="border-border-card bg-tertiary-bg text-secondary-text mb-4 rounded-lg border p-3 text-sm">
+                        Couldn&apos;t load current item values.{" "}
+                        <button
+                          type="button"
+                          className="text-link underline"
+                          onClick={() =>
+                            void (partialItemsQuery.isError
+                              ? partialItemsQuery.refetch()
+                              : catalogQuery.refetch())
+                          }
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    )}
+                    {detail.status === "completed" &&
+                      valueState === "ready" &&
                       ownerGaveValues &&
                       ownerReceivedValues && (
                         <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
@@ -891,6 +1043,7 @@ export default function UserTradeHistory({
                         label={`${userDisplayName} gave`}
                         items={ownerGave}
                         isPending={detail.status === "pending"}
+                        valueState={valueState}
                         getItemValue={getTradeItemValue}
                         getCatalogItem={getCatalogItem}
                       />
@@ -898,6 +1051,7 @@ export default function UserTradeHistory({
                         label={`${userDisplayName} received`}
                         items={ownerReceived}
                         isPending={detail.status === "pending"}
+                        valueState={valueState}
                         getItemValue={getTradeItemValue}
                         getCatalogItem={getCatalogItem}
                       />

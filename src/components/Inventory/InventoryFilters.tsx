@@ -252,24 +252,28 @@ export default function InventoryFilters({
                 </DropdownMenuLabel>
                 <DropdownMenuRadioItem
                   value="cash-desc"
+                  disabled={showMissingItems}
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Cash Value (High to Low)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="cash-asc"
+                  disabled={showMissingItems}
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Cash Value (Low to High)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="duped-desc"
+                  disabled={showMissingItems}
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Duped Value (High to Low)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="duped-asc"
+                  disabled={showMissingItems}
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Duped Value (Low to High)
@@ -328,6 +332,12 @@ export default function InventoryFilters({
         </Button>
         <Button
           onClick={() => onLimitedFilterToggle(!showOnlyLimited)}
+          disabled={showMissingItems}
+          title={
+            showMissingItems
+              ? "Limited filtering needs item metadata for the full missing-item list."
+              : undefined
+          }
           size="sm"
           variant={showOnlyLimited ? "default" : "secondary"}
           className="w-fit"
@@ -357,6 +367,7 @@ export default function InventoryFilters({
                     <input
                       type="radio"
                       name="tradability"
+                      disabled={showMissingItems}
                       checked={!showOnlyTradable && !showOnlyUntradable}
                       onChange={() => {
                         onTradableFilterToggle(false);
@@ -373,6 +384,7 @@ export default function InventoryFilters({
                     <input
                       type="radio"
                       name="tradability"
+                      disabled={showMissingItems}
                       checked={showOnlyTradable}
                       onChange={() => {
                         onTradableFilterToggle(true);
@@ -391,6 +403,7 @@ export default function InventoryFilters({
                     <input
                       type="radio"
                       name="tradability"
+                      disabled={showMissingItems}
                       checked={showOnlyUntradable}
                       onChange={() => {
                         onUntradableFilterToggle(true);
@@ -436,7 +449,7 @@ export default function InventoryFilters({
 
                   <label
                     htmlFor="inventory-show-missing-items"
-                    className="flex cursor-pointer items-center gap-2"
+                    className="flex items-center gap-2"
                   >
                     <Checkbox
                       id="inventory-show-missing-items"

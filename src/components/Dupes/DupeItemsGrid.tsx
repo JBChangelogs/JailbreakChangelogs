@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
+import { useBatchItems } from "@/hooks/useBatchItems";
 import DupeItemCard from "./DupeItemCard";
 import { DupeFinderItem, Item } from "@/types";
 
@@ -36,10 +37,17 @@ export default function DupeItemsGrid({
   const itemsPerPage = 16;
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const currentPage = Math.min(page, Math.max(1, totalPages));
   const displayedItems = filteredItems.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage,
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
   );
+  const itemQuery = useBatchItems(
+    displayedItems
+      .filter((item) => !itemsData.some((data) => data.id === item.item_id))
+      .map((item) => item.item_id),
+  );
+  const pageItems = itemQuery.data ?? itemsData;
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -48,7 +56,13 @@ export default function DupeItemsGrid({
     setPage(value);
   };
 
-  if (isLoading) {
+  if (
+    isLoading ||
+    (displayedItems.some(
+      (item) => !itemsData.some((data) => data.id === item.item_id),
+    ) &&
+      itemQuery.isPending)
+  ) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 6 }).map((_, index) => (
@@ -79,13 +93,28 @@ export default function DupeItemsGrid({
     );
   }
 
+  if (itemQuery.isError) {
+    return (
+      <div className="text-secondary-text py-8 text-center">
+        Couldn&apos;t load item details.{" "}
+        <button
+          type="button"
+          className="text-link underline"
+          onClick={() => void itemQuery.refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
       {totalPages > 1 && (
         <div className="mb-4 flex justify-center">
           <Pagination
             count={totalPages}
-            page={page}
+            page={currentPage}
             onChange={handlePageChange}
           />
         </div>
@@ -93,7 +122,7 @@ export default function DupeItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
         {displayedItems.map((item) => {
-          const itemData = itemsData.find((data) => data.id === item.item_id);
+          const itemData = pageItems.find((data) => data.id === item.item_id);
           if (!itemData) return null;
 
           const itemKey = `${item.categoryTitle}-${item.title}`;
@@ -124,7 +153,7 @@ export default function DupeItemsGrid({
         <div className="mt-8 flex justify-center">
           <Pagination
             count={totalPages}
-            page={page}
+            page={currentPage}
             onChange={handlePageChange}
           />
         </div>

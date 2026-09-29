@@ -59,7 +59,6 @@ import { UserData, UserFlag } from "@/types/auth";
 import type { ValueHistory } from "@/components/Items/ItemValueChart";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { fetchAllItemPages } from "@/utils/api/fetchAllItemPages";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");
@@ -591,30 +590,62 @@ export async function fetchUserByRobloxId(robloxId: string) {
   }
 }
 
-export async function fetchItems() {
-  try {
-    return await fetchAllItemPages<Item>((page) =>
-      fetch(`${BASE_API_URL}/items?page=${page}`, {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-ItemCatalog/1.0",
-        },
-        next: { revalidate: 300 }, // Cache for 5 minutes
-      }),
-    );
-  } catch (error) {
-    log.error("Error fetching items", error);
-    throw error; // Re-throw to allow error boundaries to handle it
+export async function fetchItemsBatch(
+  itemIds: number[],
+  signal?: AbortSignal,
+): Promise<Item[]> {
+  const ids = Array.from(new Set(itemIds.filter(Number.isInteger)));
+  if (ids.length === 0) return [];
+
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, "/items/batch");
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(ids),
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch item metadata (${response.status})`);
   }
+
+  const data: unknown = await response.json();
+  if (
+    !data ||
+    typeof data !== "object" ||
+    !Array.isArray((data as { items?: unknown }).items)
+  ) {
+    throw new Error("Invalid item batch response");
+  }
+  return (data as { items: Item[] }).items;
 }
 
-export async function fetchItemsClient(): Promise<Item[]> {
-  return fetchAllItemPages<Item>((page) => {
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL,
-      `/items?page=${page}`,
-    );
-    return fetch(url, { headers, credentials: "include" });
+export interface PartialItem {
+  id: number;
+  name: string;
+  type: string;
+}
+
+export async function fetchPartialItems(
+  signal?: AbortSignal,
+): Promise<PartialItem[]> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    "/items/partial",
+  );
+  const response = await fetch(url, {
+    headers,
+    credentials: "include",
+    signal,
   });
+  if (!response.ok)
+    throw new Error(`Failed to fetch item list (${response.status})`);
+  const data: unknown = await response.json();
+  const items = Array.isArray(data)
+    ? data
+    : (data as { items?: unknown })?.items;
+  if (!Array.isArray(items)) throw new Error("Invalid partial item response");
+  return items as PartialItem[];
 }
 
 export interface ItemsPage<T> {

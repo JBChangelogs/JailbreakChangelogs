@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { DuplicateVariantsResponse, Item } from "@/types";
+import type { DuplicateVariantsResponse } from "@/types";
+import { useBatchItems } from "@/hooks/useBatchItems";
 import { createLogger } from "@/services/logger";
 import {
   INVENTORY_API_SOURCE_HEADER,
@@ -17,12 +18,10 @@ const log = createLogger("UI");
 
 interface DupeComparisonLoaderProps {
   id: string;
-  itemsData: Item[];
 }
 
 export default function DupeComparisonLoader({
   id,
-  itemsData,
 }: DupeComparisonLoaderProps) {
   const [variants, setVariants] = useState<DuplicateVariantsResponse | null>(
     null,
@@ -30,6 +29,8 @@ export default function DupeComparisonLoader({
   const [isLoading, setIsLoading] = useState(true);
   const [isNotFound, setIsNotFound] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
+  const itemIds = variants ? [variants.duplicate.item_id] : [];
+  const itemQuery = useBatchItems(itemIds);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -85,6 +86,7 @@ export default function DupeComparisonLoader({
   }, [id]);
 
   if (loadError) throw loadError;
+  if (itemQuery.error) throw itemQuery.error;
 
   if (isLoading) {
     return (
@@ -99,12 +101,20 @@ export default function DupeComparisonLoader({
     );
   }
 
+  if (variants && itemQuery.isPending) {
+    return (
+      <div className="border-border-card bg-secondary-bg flex min-h-64 items-center justify-center rounded-xl border">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
+
   if (variants) {
     return (
       <DupeComparisonClient
         ogItem={variants.og}
         duplicateItem={variants.duplicate}
-        itemsData={itemsData}
+        itemsData={itemQuery.data ?? []}
       />
     );
   }

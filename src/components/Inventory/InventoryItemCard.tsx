@@ -162,7 +162,7 @@ export default function InventoryItemCard({
             </TooltipContent>
           </Tooltip>
         )}
-        {!isMissingItem && (displayedSeason != null || hasDisplayedLevel) && (
+        {(displayedSeason != null || hasDisplayedLevel) && (
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">

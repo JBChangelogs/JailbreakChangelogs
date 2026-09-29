@@ -9,6 +9,7 @@ import OgOwnedSection from "@/components/Inventory/Breakdown/OgOwnedSection";
 import OverviewStatsCard from "@/components/Inventory/Breakdown/OverviewStatsCard";
 import ValueBreakdownSection from "@/components/Inventory/Breakdown/ValueBreakdownSection";
 import { useInventoryBreakdownStats } from "@/hooks/useInventoryBreakdownStats";
+import { usePartialItems } from "@/hooks/usePartialItems";
 
 interface InventoryBreakdownProps {
   networthData: UserNetworthData[];
@@ -29,11 +30,13 @@ export default function InventoryBreakdown({
   const hasBeenActiveRef = useRef(isActive);
   if (isActive) hasBeenActiveRef.current = true;
   const renderCharts = hasBeenActiveRef.current;
+  const partialItemsQuery = usePartialItems(isActive);
 
   const stats = useInventoryBreakdownStats(
     networthData,
     itemsData,
     inventoryData,
+    partialItemsQuery.data ?? [],
   );
 
   const unverifiableSectionRef = useRef<HTMLDivElement>(null);
@@ -74,31 +77,48 @@ export default function InventoryBreakdown({
         money={stats.money}
       />
 
-      <CollectionProgressSection
-        itemsAvailable={itemsData.length > 0}
-        overallProgress={stats.overallProgress}
-        typeProgress={stats.typeProgress}
-        unverifiableCount={stats.unverifiableCount}
-        missingItemsAll={stats.missingItemsAll}
-        unverifiableItemsAll={stats.unverifiableItemsAll}
-        collectionChartConfig={stats.collectionChartConfig}
-        collectionChartData={stats.collectionChartData}
-        renderCharts={renderCharts}
-        unverifiableSectionRef={unverifiableSectionRef}
-        onViewUnverifiable={scrollToUnverifiableSection}
-      />
+      {partialItemsQuery.isPending ? (
+        <div className="border-border-card bg-secondary-bg text-secondary-text rounded-lg border p-6 text-center text-sm">
+          Loading collection progress...
+        </div>
+      ) : partialItemsQuery.isError ? (
+        <div className="border-border-card bg-secondary-bg text-secondary-text rounded-lg border p-6 text-center text-sm">
+          Couldn&apos;t load the item list.{" "}
+          <button
+            type="button"
+            className="text-link underline"
+            onClick={() => void partialItemsQuery.refetch()}
+          >
+            Try again
+          </button>
+        </div>
+      ) : (
+        <>
+          <CollectionProgressSection
+            overallProgress={stats.overallProgress}
+            typeProgress={stats.typeProgress}
+            unverifiableCount={stats.unverifiableCount}
+            missingItemsAll={stats.missingItemsAll}
+            unverifiableItemsAll={stats.unverifiableItemsAll}
+            collectionChartConfig={stats.collectionChartConfig}
+            collectionChartData={stats.collectionChartData}
+            renderCharts={renderCharts}
+            unverifiableSectionRef={unverifiableSectionRef}
+            onViewUnverifiable={scrollToUnverifiableSection}
+          />
 
-      <OgOwnedSection
-        itemsAvailable={itemsData.length > 0}
-        ogOwnedProgress={stats.ogOwnedProgress}
-        typeProgress={stats.typeProgress}
-        ogMissingItemsAll={stats.ogMissingItemsAll}
-        unverifiableCount={stats.unverifiableCount}
-        ogChartConfig={stats.ogChartConfig}
-        ogChartData={stats.ogChartData}
-        renderCharts={renderCharts}
-        onViewUnverifiable={scrollToUnverifiableSection}
-      />
+          <OgOwnedSection
+            ogOwnedProgress={stats.ogOwnedProgress}
+            typeProgress={stats.typeProgress}
+            ogMissingItemsAll={stats.ogMissingItemsAll}
+            unverifiableCount={stats.unverifiableCount}
+            ogChartConfig={stats.ogChartConfig}
+            ogChartData={stats.ogChartData}
+            renderCharts={renderCharts}
+            onViewUnverifiable={scrollToUnverifiableSection}
+          />
+        </>
+      )}
 
       <ValueBreakdownSection
         title="Inventory Breakdown"
