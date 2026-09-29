@@ -1030,63 +1030,6 @@ export async function fetchLatestChangelog(): Promise<Changelog> {
   return response.json();
 }
 
-export async function fetchItemsChangelog(id: string) {
-  try {
-    const response = await fetch(
-      `${BASE_API_URL}/v1/items/changelogs/get?id=${id}`,
-      {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
-        },
-        next: { revalidate: 3600 },
-      },
-    );
-
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItemsChangelog failed", {
-        status: response.status,
-        body,
-      });
-      throw new Error("Failed to fetch items changelog");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    log.error("Error fetching items changelog", err);
-    return null;
-  }
-}
-
-export async function fetchItemChanges(id: string) {
-  try {
-    const response = await fetch(`${BASE_API_URL}/item/changes?id=${id}`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
-      },
-      cache: "no-store", // Response exceeds Next.js 2MB cache limit
-    });
-    if (response.status === 404) {
-      return [] as unknown[];
-    }
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchItemChanges failed", { status: response.status, body });
-      throw new Error("Failed to fetch item changes");
-    }
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    log.error("Error fetching item changes", err);
-    return [] as unknown[];
-  }
-}
-
 export async function fetchUsersBatch(userIds: string[]) {
   try {
     if (userIds.length === 0) {
