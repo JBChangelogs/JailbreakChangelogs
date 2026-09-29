@@ -125,21 +125,23 @@ const summarizeValues = (
 function ValueDifferenceBadge({
   value,
   isPartial = false,
+  prominent = false,
   className = "",
 }: {
   value: number | null;
   isPartial?: boolean;
+  prominent?: boolean;
   className?: string;
 }) {
   return (
     <span
-      className={`${className} items-center rounded-lg border px-2.5 py-1 text-xs leading-none font-semibold whitespace-nowrap ${
+      className={`${className} max-w-full items-center justify-center rounded-lg border text-center leading-tight font-bold tabular-nums shadow-sm ${prominent ? "px-3 py-1.5 text-sm" : "px-2.5 py-1 text-[13px]"} ${
         value === null
           ? "border-border-card bg-quaternary-bg text-secondary-text"
           : value > 0
-            ? "border-status-success/40 bg-status-success/80 text-form-button-text"
+            ? "border-status-success bg-status-success text-form-button-text"
             : value < 0
-              ? "border-status-error/40 bg-status-error/80 text-form-button-text"
+              ? "border-status-error bg-status-error text-form-button-text"
               : "border-border-card bg-quaternary-bg text-primary-text"
       }`}
       title={
@@ -962,6 +964,14 @@ export default function UserTradeHistory({
                               ? "Known values"
                               : "Current values"}
                           </p>
+                          <div className="mb-3 flex justify-center lg:hidden">
+                            <ValueDifferenceBadge
+                              value={valueDifference}
+                              isPartial={missingValueCount > 0}
+                              prominent
+                              className="inline-flex"
+                            />
+                          </div>
                           <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0 flex-1">
                               <p className="text-button-danger text-[10px] font-medium tracking-wide uppercase sm:text-xs">
@@ -973,7 +983,7 @@ export default function UserTradeHistory({
                               </p>
                             </div>
 
-                            <div className="flex shrink-0 flex-col items-center gap-1">
+                            <div className="hidden shrink-0 flex-col items-center gap-1 lg:flex">
                               <Icon
                                 icon="heroicons:scale"
                                 className="text-secondary-text/60 h-4 w-4"
@@ -981,6 +991,7 @@ export default function UserTradeHistory({
                               <ValueDifferenceBadge
                                 value={valueDifference}
                                 isPartial={missingValueCount > 0}
+                                prominent
                                 className="inline-flex"
                               />
                             </div>
