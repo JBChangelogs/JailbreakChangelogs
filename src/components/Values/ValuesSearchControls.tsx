@@ -155,7 +155,14 @@ export default function ValuesSearchControls({
     return Math.abs(nearest - value) <= snapDistance ? nearest : value;
   };
 
-  const filterLabel = getFilterSortsButtonLabel(selectedFilterSorts);
+  const typeFilterValues = useMemo(
+    () => filterGroups.flatMap((group) => group.options.map((o) => o.value)),
+    [],
+  );
+  const selectedTypeFilters = selectedFilterSorts.filter((value) =>
+    typeFilterValues.includes(value),
+  );
+  const filterLabel = getFilterSortsButtonLabel(selectedTypeFilters);
 
   const sortLabel =
     valueSortGroups
@@ -287,10 +294,10 @@ export default function ValuesSearchControls({
                   >
                     {filterMode === "multi" ? (
                       <>
-                        {selectedFilterSorts.length > 0 && (
+                        {selectedTypeFilters.length > 0 && (
                           <button
                             type="button"
-                            onClick={() => onClearFilterSorts()}
+                            onClick={() => onClearFilterSorts(typeFilterValues)}
                             className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
                           >
                             Clear Filters
@@ -329,7 +336,7 @@ export default function ValuesSearchControls({
                       </>
                     ) : (
                       <DropdownMenuRadioGroup
-                        value={selectedFilterSorts[0] ?? "name-all-items"}
+                        value={selectedTypeFilters[0] ?? "name-all-items"}
                         onValueChange={(newValue) => {
                           if (newValue === "name-all-items") {
                             onClearFilterSorts();
