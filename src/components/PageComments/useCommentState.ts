@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { parseSortGroups, type SortGroup } from "@/utils/api/sortGroups";
 import {
   CommentData,
   CommentReaction,
@@ -82,7 +83,14 @@ export function useCommentState(props: ChangelogCommentsProps) {
   );
   const sortPrefKey = `comments_sort_${type}`;
   const [sortOrder, setSortOrder] = useState<string | null>(null);
-  const [availableSorts, setAvailableSorts] = useState<string[]>([]);
+  const [sortGroups, setSortGroups] = useState<SortGroup[]>([]);
+  const availableSorts = useMemo(
+    () =>
+      sortGroups.flatMap((group) =>
+        group.options.map((option) => option.value),
+      ),
+    [sortGroups],
+  );
 
   useEffect(() => {
     const cached = getCachedPreference(sortPrefKey);
@@ -483,13 +491,11 @@ export function useCommentState(props: ChangelogCommentsProps) {
     fetch(`${PUBLIC_API_URL}/comments/sorts`)
       .then((r) => r.json())
       .then((data: unknown) => {
-        if (
-          Array.isArray(data) &&
-          data.every((s) => typeof s === "string") &&
-          data.length > 0
-        ) {
-          setAvailableSorts(data as string[]);
-          setSortOrder((prev) => prev ?? (data as string[])[0]);
+        const groups = parseSortGroups(data);
+        const firstSort = groups[0]?.options[0]?.value;
+        if (firstSort) {
+          setSortGroups(groups);
+          setSortOrder((prev) => prev ?? firstSort);
         }
       })
       .catch(() => {});
@@ -1374,7 +1380,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     expandedComments,
     expandedReplies,
     sortOrder,
-    availableSorts,
+    sortGroups,
     reportModalOpen,
     setReportModalOpen,
     reportReason,

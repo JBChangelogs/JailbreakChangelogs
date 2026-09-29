@@ -1,13 +1,17 @@
 "use client";
 
 import { Icon } from "../ui/IconWrapper";
+import { Fragment } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getSortLabel } from "@/utils/api/sortGroups";
 import { useCommentsContext } from "./CommentsContext";
 
 export function CommentHeader() {
@@ -18,7 +22,7 @@ export function CommentHeader() {
     changelogTitle,
     itemType,
     sortOrder,
-    availableSorts,
+    sortGroups,
     handleSortChange,
   } = useCommentsContext();
 
@@ -67,9 +71,7 @@ export function CommentHeader() {
                 type="button"
                 className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
               >
-                {sortOrder
-                  ? sortOrder.charAt(0).toUpperCase() + sortOrder.slice(1)
-                  : ""}
+                {getSortLabel(sortGroups, sortOrder)}
                 <Icon
                   icon="heroicons:chevron-down"
                   className="h-3.5 w-3.5 shrink-0"
@@ -86,14 +88,22 @@ export function CommentHeader() {
               value={sortOrder ?? ""}
               onValueChange={handleSortChange}
             >
-              {availableSorts.map((s) => (
-                <DropdownMenuRadioItem
-                  key={s}
-                  value={s}
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  {s.charAt(0).toUpperCase() + s.slice(1)}
-                </DropdownMenuRadioItem>
+              {sortGroups.map((group, index) => (
+                <Fragment key={group.label}>
+                  {index > 0 && <DropdownMenuSeparator />}
+                  <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                    {group.label}
+                  </DropdownMenuLabel>
+                  {group.options.map((option) => (
+                    <DropdownMenuRadioItem
+                      key={option.value}
+                      value={option.value}
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      {option.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </Fragment>
               ))}
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>

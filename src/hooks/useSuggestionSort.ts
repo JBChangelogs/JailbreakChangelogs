@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
+import { parseSortGroups, type SortGroup } from "@/utils/api/sortGroups";
 
 type SetSort = (value: string, history?: "replace") => void;
 
@@ -12,7 +13,7 @@ export function useSuggestionSort(
   setSort: SetSort,
 ) {
   const initialSortRef = useRef(initialSort);
-  const [availableSorts, setAvailableSorts] = useState<string[]>([]);
+  const [sortGroups, setSortGroups] = useState<SortGroup[]>([]);
   const availableSortsRef = useRef<string[]>([]);
 
   useEffect(() => {
@@ -26,16 +27,19 @@ export function useSuggestionSort(
       .then((response) => (response.ok ? response.json() : []))
       .then((data) => {
         if (ignore) return;
-        if (Array.isArray(data) && data.length > 0) {
-          const sorts = data as string[];
+        const groups = parseSortGroups(data);
+        const sorts = groups.flatMap((group) =>
+          group.options.map((option) => option.value),
+        );
+        if (sorts.length > 0) {
           availableSortsRef.current = sorts;
-          setAvailableSorts(sorts);
+          setSortGroups(groups);
           if (initialSortRef.current === null) {
             const cachedSort = getCachedPreference("vsuggestions_sort");
             const storedSort = localStorage.getItem("vsuggestions_sort");
             setSort(
               (typeof cachedSort === "string" ? cachedSort : storedSort) ??
-                (data as string[])[0],
+                sorts[0],
               "replace",
             );
           }
@@ -104,5 +108,5 @@ export function useSuggestionSort(
     );
   };
 
-  return { availableSorts, handleSortChange };
+  return { sortGroups, handleSortChange };
 }

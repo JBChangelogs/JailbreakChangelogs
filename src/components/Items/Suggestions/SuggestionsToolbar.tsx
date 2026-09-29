@@ -1,13 +1,16 @@
 "use client";
 
-import type { FormEventHandler, RefObject } from "react";
+import { Fragment, type FormEventHandler, type RefObject } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getSortLabel, type SortGroup } from "@/utils/api/sortGroups";
 import { Icon } from "@/components/ui/IconWrapper";
 import { SuggestionFilterBar } from "@/components/Items/Suggestions/SuggestionFilterBar";
 
@@ -15,7 +18,7 @@ interface SuggestionsToolbarProps {
   loadingSuggestions: boolean;
   total: number;
   urlQuery: string;
-  availableSorts: string[];
+  sortGroups: SortGroup[];
   sort: string | null;
   canSeeVt: boolean;
   suggestionsError: string | null;
@@ -44,7 +47,7 @@ export function SuggestionsToolbar({
   loadingSuggestions,
   total,
   urlQuery,
-  availableSorts,
+  sortGroups,
   sort,
   canSeeVt,
   suggestionsError,
@@ -69,6 +72,14 @@ export function SuggestionsToolbar({
   onRefresh,
 }: SuggestionsToolbarProps) {
   const suggestions = { length: suggestionsCount };
+  const visibleSortGroups = sortGroups
+    .map((group) => ({
+      ...group,
+      options: group.options.filter(
+        (option) => option.value !== "value_team" || canSeeVt,
+      ),
+    }))
+    .filter((group) => group.options.length > 0);
 
   return (
     <>
@@ -82,7 +93,7 @@ export function SuggestionsToolbar({
               : "Search Results"
             : "Recent Suggestions"}
         </h2>
-        {availableSorts.length > 0 && (
+        {visibleSortGroups.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="text-secondary-text flex items-center gap-1 text-xs">
@@ -91,12 +102,7 @@ export function SuggestionsToolbar({
                   type="button"
                   className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
                 >
-                  {sort
-                    ? sort
-                        .split("_")
-                        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                        .join(" ")
-                    : ""}
+                  {getSortLabel(sortGroups, sort)}
                   <Icon
                     icon="heroicons:chevron-down"
                     className="h-3.5 w-3.5 shrink-0"
@@ -113,20 +119,23 @@ export function SuggestionsToolbar({
                 value={sort ?? ""}
                 onValueChange={handleSortChange}
               >
-                {availableSorts
-                  .filter((s) => s !== "value_team" || canSeeVt)
-                  .map((s) => (
-                    <DropdownMenuRadioItem
-                      key={s}
-                      value={s}
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      {s
-                        .split("_")
-                        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                        .join(" ")}
-                    </DropdownMenuRadioItem>
-                  ))}
+                {visibleSortGroups.map((group, index) => (
+                  <Fragment key={group.label}>
+                    {index > 0 && <DropdownMenuSeparator />}
+                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                      {group.label}
+                    </DropdownMenuLabel>
+                    {group.options.map((option) => (
+                      <DropdownMenuRadioItem
+                        key={option.value}
+                        value={option.value}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </Fragment>
+                ))}
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>

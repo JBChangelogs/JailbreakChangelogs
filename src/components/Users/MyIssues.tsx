@@ -1,5 +1,6 @@
 "use client";
 
+import { parseSortGroups } from "@/utils/api/sortGroups";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryState } from "nuqs";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -99,6 +100,7 @@ export default function MyIssues() {
   });
   const [issues, setIssues] = useState<Issue[]>([]);
   const [sortTypes, setSortTypes] = useState<string[]>([]);
+  const [sortLabels, setSortLabels] = useState<Record<string, string>>({});
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -176,11 +178,14 @@ export default function MyIssues() {
         });
         if (!response.ok) return;
         const data = (await response.json()) as unknown;
-        if (
-          Array.isArray(data) &&
-          data.every((value) => typeof value === "string")
-        ) {
-          setSortTypes(data);
+        const options = parseSortGroups(data).flatMap((group) => group.options);
+        if (options.length > 0) {
+          setSortTypes(options.map((option) => option.value));
+          setSortLabels(
+            Object.fromEntries(
+              options.map((option) => [option.value, option.label]),
+            ),
+          );
         }
       } catch (sortError) {
         if (!controller.signal.aborted) {
@@ -253,9 +258,10 @@ export default function MyIssues() {
                 >
                   <span>
                     {sort
-                      ? getSortLabel(sort)
+                      ? (sortLabels[sort] ?? getSortLabel(sort))
                       : sortTypes[0]
-                        ? getSortLabel(sortTypes[0])
+                        ? (sortLabels[sortTypes[0]] ??
+                          getSortLabel(sortTypes[0]))
                         : "Sort"}
                   </span>
                   <Icon
@@ -281,7 +287,7 @@ export default function MyIssues() {
                       value={value}
                       className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                     >
-                      {getSortLabel(value)}
+                      {sortLabels[value] ?? getSortLabel(value)}
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>

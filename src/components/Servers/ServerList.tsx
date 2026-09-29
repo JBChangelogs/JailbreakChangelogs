@@ -1,5 +1,6 @@
 "use client";
 
+import { parseSortGroups } from "@/utils/api/sortGroups";
 import React from "react";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { createLogger } from "@/services/logger";
@@ -110,6 +111,9 @@ const ServerList: React.FC = () => {
     sort: parseAsString,
   });
   const [sortTypes, setSortTypes] = React.useState<string[]>([]);
+  const [sortLabels, setSortLabels] = React.useState<Record<string, string>>(
+    {},
+  );
   const [servers, setServers] = React.useState<PrivateServer[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isFetching, setIsFetching] = React.useState(false);
@@ -195,11 +199,14 @@ const ServerList: React.FC = () => {
         });
         if (!response.ok) return;
         const data = (await response.json()) as unknown;
-        if (
-          Array.isArray(data) &&
-          data.every((value) => typeof value === "string")
-        ) {
-          setSortTypes(data);
+        const options = parseSortGroups(data).flatMap((group) => group.options);
+        if (options.length > 0) {
+          setSortTypes(options.map((option) => option.value));
+          setSortLabels(
+            Object.fromEntries(
+              options.map((option) => [option.value, option.label]),
+            ),
+          );
         }
       } catch (sortError) {
         if (!controller.signal.aborted) {
@@ -439,9 +446,9 @@ const ServerList: React.FC = () => {
             >
               <span className="truncate">
                 {sort
-                  ? getSortLabel(sort)
+                  ? (sortLabels[sort] ?? getSortLabel(sort))
                   : sortTypes[0]
-                    ? getSortLabel(sortTypes[0])
+                    ? (sortLabels[sortTypes[0]] ?? getSortLabel(sortTypes[0]))
                     : "Sort"}
               </span>
               <Icon
@@ -469,7 +476,7 @@ const ServerList: React.FC = () => {
                   value={value}
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
-                  {getSortLabel(value)}
+                  {sortLabels[value] ?? getSortLabel(value)}
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>

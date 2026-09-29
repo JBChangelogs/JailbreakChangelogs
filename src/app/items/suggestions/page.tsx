@@ -156,10 +156,7 @@ export default function ValueSuggestionsPage() {
     },
     [setParams],
   );
-  const { availableSorts, handleSortChange } = useSuggestionSort(
-    sort,
-    updateSort,
-  );
+  const { sortGroups, handleSortChange } = useSuggestionSort(sort, updateSort);
   const canSeeVt =
     user?.flags?.some(
       (flag) =>
@@ -550,7 +547,7 @@ export default function ValueSuggestionsPage() {
             loadingSuggestions={loadingSuggestions}
             total={total}
             urlQuery={urlQuery}
-            availableSorts={availableSorts}
+            sortGroups={sortGroups}
             sort={sort}
             canSeeVt={canSeeVt}
             suggestionsError={suggestionsError}
