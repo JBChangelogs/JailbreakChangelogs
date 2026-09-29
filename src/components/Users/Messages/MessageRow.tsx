@@ -331,9 +331,9 @@ export function MessageRow({
             }}
           >
             {message.parentId && (
-              <div className="-mb-1 flex items-center gap-2 sm:gap-3">
-                <div className="flex w-10 shrink-0 justify-end @md/chat:w-12">
-                  <div className="border-secondary-text/40 h-3 w-8 translate-x-2 translate-y-2 rounded-tl-md border-t-2 border-l-2" />
+              <div className="-mb-1 flex items-center gap-2">
+                <div className="relative w-10 shrink-0 self-stretch @md/chat:w-12">
+                  <div className="border-secondary-text/40 absolute top-[calc(50%-1px)] -right-2 -bottom-0.5 left-[calc(50%-1px)] rounded-tl-md border-t-2 border-l-2" />
                 </div>
                 {(() => {
                   const parentMsg = messages.find(
@@ -403,6 +403,7 @@ export function MessageRow({
                       {parentSender && (
                         <UserAvatar
                           userId={parentSender.id}
+                          bgClassName="bg-tertiary-bg"
                           avatarHash={parentSender.avatar}
                           username={parentSender.username}
                           custom_avatar={parentSender.custom_avatar}
@@ -447,6 +448,7 @@ export function MessageRow({
                   >
                     <UserAvatar
                       userId={sender.id}
+                      bgClassName="bg-tertiary-bg"
                       avatarHash={sender.avatar}
                       username={sender.username}
                       custom_avatar={sender.custom_avatar}

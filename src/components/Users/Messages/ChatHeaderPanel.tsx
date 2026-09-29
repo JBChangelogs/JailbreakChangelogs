@@ -81,6 +81,7 @@ export function ChatHeaderPanel({
         >
           <UserAvatar
             userId={selectedUser.id}
+            bgClassName="bg-quaternary-bg"
             avatarHash={selectedUser.avatar}
             username={selectedUser.username}
             custom_avatar={selectedUser.custom_avatar}

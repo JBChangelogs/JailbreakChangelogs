@@ -6,6 +6,11 @@ import { ConversationRowTime } from "@/components/Users/Messages/ConversationRow
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { UserData } from "@/types/auth";
@@ -83,11 +88,11 @@ export function ConversationSidebar({
   return (
     <aside
       className={cn(
-        "border-border-card flex h-full min-h-0 flex-col border-b lg:border-r lg:border-b-0",
+        "border-border-card bg-secondary-bg flex h-full min-h-0 flex-col border-b lg:border-r lg:border-b-0",
         selectedUserId ? "hidden lg:flex" : "",
       )}
     >
-      <div className="border-border-card border-b px-4 py-3">
+      <div className="border-border-card bg-tertiary-bg border-b px-4 py-3">
         <p className="text-primary-text text-sm font-semibold">
           {userSearchQuery.trim()
             ? `${
@@ -172,6 +177,7 @@ export function ConversationSidebar({
               >
                 <UserAvatar
                   userId={user.id}
+                  bgClassName="bg-tertiary-bg"
                   avatarHash={user.avatar}
                   username={user.username}
                   custom_avatar={user.custom_avatar}
@@ -240,6 +246,7 @@ export function ConversationSidebar({
                 >
                   <UserAvatar
                     userId={conversation.user.id}
+                    bgClassName="bg-tertiary-bg"
                     avatarHash={conversation.user.avatar}
                     username={conversation.user.username}
                     custom_avatar={conversation.user.custom_avatar}
@@ -249,7 +256,7 @@ export function ConversationSidebar({
                     presenceBadgeClassName={
                       isActive
                         ? "border-tertiary-bg"
-                        : "group-hover:border-tertiary-bg"
+                        : "border-secondary-bg group-hover:border-tertiary-bg"
                     }
                     settings={conversation.user.settings_v2}
                     premiumType={conversation.user.premiumtype}
@@ -304,18 +311,24 @@ export function ConversationSidebar({
                       cacheKey={`conversation-row-${conversation.user.id}-${conversation.lastMessage?.id ?? "none"}`}
                     />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => hideConversation(conversation)}
-                    className="text-secondary-text hover:bg-tertiary-bg hover:text-primary-text ml-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded opacity-70 transition-all hover:opacity-100 focus:opacity-100 md:absolute md:top-1/2 md:right-0 md:ml-0 md:h-6 md:w-6 md:-translate-y-1/2 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-                    aria-label={`Hide conversation with ${getDisplayName(conversation.user)}`}
-                    title="Hide conversation"
-                  >
-                    <Icon
-                      icon="heroicons:x-mark"
-                      className="h-3.5 w-3.5 shrink-0"
-                    />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => hideConversation(conversation)}
+                        className="text-secondary-text hover:bg-tertiary-bg hover:text-primary-text ml-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded opacity-70 transition-all hover:opacity-100 focus:opacity-100 md:absolute md:top-1/2 md:right-0 md:ml-0 md:h-6 md:w-6 md:-translate-y-1/2 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+                        aria-label={`Hide conversation with ${getDisplayName(conversation.user)}`}
+                      >
+                        <Icon
+                          icon="heroicons:x-mark"
+                          className="h-3.5 w-3.5 shrink-0"
+                        />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      Hide conversation
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             );
