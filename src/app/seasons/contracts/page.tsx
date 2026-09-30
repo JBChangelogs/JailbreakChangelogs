@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -10,14 +10,10 @@ import WeeklyContractsCountdown from "@/components/Seasons/WeeklyContractsCountd
 import ContractsLoading from "@/app/seasons/contracts/loading";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
-  PUBLIC_API_URL,
   INVENTORY_API_URL,
   INVENTORY_API_SOURCE_HEADER,
 } from "@/utils/api/api";
-import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { createLogger } from "@/services/logger";
-
-const log = createLogger("UI");
+import { useLatestSeason } from "@/hooks/useLatestSeason";
 
 interface SeasonContract {
   team: "Criminal" | "Police";
@@ -28,75 +24,33 @@ interface SeasonContract {
   reward: number;
 }
 
-interface LatestSeason {
-  season: number;
-  title: string;
-  end_date: number;
-}
-
 export default function SeasonContractsPage() {
-  const [contracts, setContracts] = useState<SeasonContract[] | null>(null);
-  const [updatedAt, setUpdatedAt] = useState<number>(0);
-  const [latestSeason, setLatestSeason] = useState<LatestSeason | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const seasonQuery = useLatestSeason();
+  const contractsQuery = useQuery({
+    queryKey: ["season-contracts"],
+    queryFn: async ({
+      signal,
+    }): Promise<{ data: SeasonContract[]; updated_at: number }> => {
+      const response = await fetch(`${INVENTORY_API_URL}/seasons/contract`, {
+        signal,
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
+      });
+      if (!response.ok)
+        throw new Error(`Contracts request failed (${response.status})`);
+      return response.json();
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const contracts = contractsQuery.data?.data ?? [];
+  const updatedAt = contractsQuery.data?.updated_at ?? 0;
+  const latestSeason = seasonQuery.data;
 
-  useEffect(() => {
-    let ignore = false;
-
-    const loadData = async () => {
-      try {
-        const { url: contractsSeasonUrl, headers: contractsSeasonHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL!, "/v2/seasons/latest");
-        const [contractsRes, seasonRes] = await Promise.all([
-          fetch(`${INVENTORY_API_URL}/seasons/contract`, {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-              "X-Source": INVENTORY_API_SOURCE_HEADER,
-            },
-          }),
-          fetch(contractsSeasonUrl, {
-            credentials: "include",
-            headers: {
-              ...contractsSeasonHeaders,
-              "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-            },
-          }),
-        ]);
-        if (ignore) return;
-
-        if (contractsRes.ok) {
-          const data = await contractsRes.json();
-          if (ignore) return;
-          setContracts(data.data ?? []);
-          setUpdatedAt(data.updated_at ?? 0);
-        } else {
-          setContracts([]);
-        }
-
-        if (seasonRes.ok) {
-          const seasonData = await seasonRes.json();
-          if (ignore) return;
-          setLatestSeason(seasonData);
-        }
-      } catch (error) {
-        if (ignore) return;
-        log.error("Error loading contracts data", error);
-        setContracts([]);
-      } finally {
-        if (!ignore) {
-          setIsLoaded(true);
-        }
-      }
-    };
-
-    void loadData();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  if (!isLoaded) {
+  if (contractsQuery.isPending || seasonQuery.isPending) {
     return <ContractsLoading />;
   }
 

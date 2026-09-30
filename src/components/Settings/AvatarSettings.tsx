@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 
 import {
@@ -9,11 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { cn } from "@/lib/utils";
-import { createLogger } from "@/services/logger";
 import { fetchCustomAvatar } from "@/services/settingsService";
 import type { UserData } from "@/types/auth";
-
-const log = createLogger("UI");
 
 interface AvatarSettingsProps {
   userData: UserData;
@@ -26,32 +23,20 @@ export const AvatarSettings = ({
   onAvatarUpdate,
   onUploadStateChange,
 }: AvatarSettingsProps) => {
-  const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
-  const [avatarError, setAvatarError] = useState<string | null>(null);
-  const [isLoadingAvatar, setIsLoadingAvatar] = useState(true);
+  const queryClient = useQueryClient();
+  const avatarKey = ["custom-avatar", userData.id] as const;
+  const avatarQuery = useQuery({
+    queryKey: avatarKey,
+    queryFn: fetchCustomAvatar,
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const customAvatarUrl = avatarQuery.data ?? null;
+  const avatarError = avatarQuery.error?.message ?? null;
+  const isLoadingAvatar = avatarQuery.isPending;
   const supporterTier = userData.premiumtype ?? 0;
   const usesSquareAvatar = supporterTier === 3;
-
-  useEffect(() => {
-    const loadAvatar = async () => {
-      try {
-        setIsLoadingAvatar(true);
-        setAvatarError(null);
-        setCustomAvatarUrl(await fetchCustomAvatar());
-      } catch (error) {
-        log.error("Error loading custom avatar:", error);
-        setAvatarError(
-          error instanceof Error
-            ? error.message
-            : "Failed to load your custom avatar",
-        );
-      } finally {
-        setIsLoadingAvatar(false);
-      }
-    };
-
-    void loadAvatar();
-  }, []);
 
   return (
     <div className="mt-3 mb-5">
@@ -63,7 +48,7 @@ export const AvatarSettings = ({
         userData={userData}
         onUploadStateChange={onUploadStateChange}
         onUploaded={(url) => {
-          setCustomAvatarUrl(url);
+          queryClient.setQueryData(avatarKey, url);
           onAvatarUpdate(url);
         }}
       >

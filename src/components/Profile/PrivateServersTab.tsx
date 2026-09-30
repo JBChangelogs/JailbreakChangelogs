@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -11,9 +12,6 @@ import { toast } from "sonner";
 import type { PrivateServer } from "@/types/server";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { createLogger } from "@/services/logger";
-
-const log = createLogger("API");
 
 interface PrivateServersTabProps {
   userId: string;
@@ -58,57 +56,38 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
   userId,
   isOwnProfile,
 }) => {
-  const [servers, setServers] = React.useState<PrivateServer[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchServers = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/v2/users/${encodeURIComponent(userId)}/servers`,
+  const serversQuery = useQuery({
+    queryKey: ["profile-private-servers", userId],
+    queryFn: async ({ signal }): Promise<PrivateServer[]> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/${encodeURIComponent(userId)}/servers`,
+      );
+      const response = await fetch(url, {
+        cache: "no-store",
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(
+            response,
+            "Failed to load private servers",
+          ),
         );
-        const response = await fetch(url, {
-          cache: "no-store",
-          credentials: "include",
-          headers,
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error(
-            await getResponseErrorMessage(
-              response,
-              "Failed to load private servers",
-            ),
-          );
-        }
-
-        const data = (await response.json()) as unknown;
-        if (!controller.signal.aborted) {
-          setServers(Array.isArray(data) ? (data as PrivateServer[]) : []);
-        }
-      } catch (fetchError) {
-        if (controller.signal.aborted) return;
-        log.error("Failed to fetch profile private servers", fetchError);
-        setError(
-          fetchError instanceof Error
-            ? fetchError.message
-            : "Failed to load private servers",
-        );
-      } finally {
-        if (!controller.signal.aborted) setIsLoading(false);
       }
-    };
 
-    void fetchServers();
-    return () => controller.abort();
-  }, [userId]);
+      const data = (await response.json()) as unknown;
+      return Array.isArray(data) ? (data as PrivateServer[]) : [];
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const servers = serversQuery.data ?? [];
+  const isLoading = serversQuery.isPending;
+  const error = serversQuery.data ? null : serversQuery.error?.message;
 
   const handleCopyLink = async (link: string) => {
     try {

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import Link from "next/link";
@@ -18,9 +19,6 @@ import { UserDetailsTooltip } from "../ui/UserDetailsTooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 import { Spinner } from "@/components/ui/Spinner";
-import { createLogger } from "@/services/logger";
-
-const log = createLogger("UI");
 
 function InlineSpinner() {
   return (
@@ -45,161 +43,58 @@ export default function UserSearch() {
   });
 
   const [searchQuery, setSearchQuery] = useState(queryFromUrl);
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [paginationSeed, setPaginationSeed] = useState<string | null>(
-    seedFromUrl,
-  );
-  const [isLoading, setIsLoading] = useState(true);
-  const fetchTimeoutIdRef = useRef<NodeJS.Timeout | null>(null);
-  const latestRequestIdRef = useRef(0);
-  const activeAbortControllerRef = useRef<AbortController | null>(null);
   const usersPerPage = 30;
 
   const currentUserId = user?.id ?? null;
-
-  const cancelPendingFetch = useCallback(() => {
-    if (fetchTimeoutIdRef.current) {
-      clearTimeout(fetchTimeoutIdRef.current);
-      fetchTimeoutIdRef.current = null;
-    }
-    activeAbortControllerRef.current?.abort();
-  }, []);
-
-  const startNewRequest = useCallback(() => {
-    cancelPendingFetch();
-    const controller = new AbortController();
-    activeAbortControllerRef.current = controller;
-    latestRequestIdRef.current += 1;
-    return { requestId: latestRequestIdRef.current, signal: controller.signal };
-  }, [cancelPendingFetch]);
-
-  // Debounced fetch function for search
-  const fetchSearchWithDebounce = useCallback(
-    (query: string) => {
-      const { requestId, signal } = startNewRequest();
-      setIsLoading(true);
-      fetchTimeoutIdRef.current = setTimeout(async () => {
-        try {
-          const searchResultsRaw = await searchUsers(
-            query,
-            usersPerPage,
-            signal,
-          );
-          if (signal.aborted || latestRequestIdRef.current !== requestId)
-            return;
-          const searchResults = Array.isArray(searchResultsRaw)
-            ? searchResultsRaw
+  const trimmedQuery = queryFromUrl.trim();
+  const usersQuery = useQuery({
+    queryKey: ["users", "directory", trimmedQuery, pageFromUrl, seedFromUrl],
+    queryFn: async ({ signal }) => {
+      if (trimmedQuery) {
+        const result = await searchUsers(trimmedQuery, usersPerPage, signal);
+        const items = Array.isArray(result)
+          ? result
+          : Array.isArray(result?.users)
+            ? result.users
             : [];
-          setUsers(searchResults);
-          setTotalPages(0); // No pagination for search results
-          setTotal(searchResults.length);
-        } catch (error) {
-          if (signal.aborted || latestRequestIdRef.current !== requestId)
-            return;
-          log.error("Error searching users:", error);
-          setUsers([]);
-          setTotalPages(0);
-          setTotal(0);
-        } finally {
-          if (!signal.aborted && latestRequestIdRef.current === requestId) {
-            setIsLoading(false);
-          }
-        }
-      }, 300);
+        return {
+          items: items as UserData[],
+          total: items.length,
+          totalPages: 0,
+          seed: null,
+        };
+      }
+      const result = await fetchPaginatedUsers(
+        pageFromUrl,
+        usersPerPage,
+        signal,
+        seedFromUrl,
+      );
+      return {
+        items: (Array.isArray(result?.items) ? result.items : []) as UserData[],
+        total: typeof result?.total === "number" ? result.total : 0,
+        totalPages:
+          typeof result?.total_pages === "number" ? result.total_pages : 0,
+        seed: result?.seed == null ? null : String(result.seed),
+      };
     },
-    [startNewRequest, usersPerPage],
-  );
-
-  // Debounced fetch function for page changes
-  const fetchUsersWithDebounce = useCallback(
-    (pageNum: number) => {
-      const { requestId, signal } = startNewRequest();
-      setIsLoading(true);
-      fetchTimeoutIdRef.current = setTimeout(async () => {
-        try {
-          const effectiveSeed = seedFromUrl || paginationSeed;
-          const data = await fetchPaginatedUsers(
-            pageNum,
-            usersPerPage,
-            signal,
-            effectiveSeed,
-          );
-          if (signal.aborted || latestRequestIdRef.current !== requestId)
-            return;
-          const items = Array.isArray(data?.items) ? data.items : [];
-          const nextTotalPages =
-            typeof data?.total_pages === "number" ? data.total_pages : 0;
-          const nextTotal = typeof data?.total === "number" ? data.total : 0;
-          const nextSeed =
-            data?.seed === null || data?.seed === undefined
-              ? null
-              : String(data.seed);
-
-          setUsers(items);
-          setTotalPages(nextTotalPages);
-          setTotal(nextTotal);
-          if (pageNum === 1 && nextSeed) {
-            setPaginationSeed(nextSeed);
-            if (!seedFromUrl) {
-              void setParams({ seed: nextSeed }, { history: "replace" });
-            }
-          }
-        } catch (error) {
-          if (signal.aborted || latestRequestIdRef.current !== requestId)
-            return;
-          log.error("Error fetching users:", error);
-          setUsers([]);
-          setTotalPages(0);
-          setTotal(0);
-        } finally {
-          if (!signal.aborted && latestRequestIdRef.current === requestId) {
-            setIsLoading(false);
-          }
-        }
-      }, 300);
-    },
-    [startNewRequest, usersPerPage, seedFromUrl, paginationSeed, setParams],
-  );
-
-  // Initial fetch on mount
-  useEffect(() => {
-    fetchUsersWithDebounce(1);
-  }, [fetchUsersWithDebounce]);
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const users = usersQuery.data?.items ?? [];
+  const total = usersQuery.data?.total ?? 0;
+  const totalPages = usersQuery.data?.totalPages ?? 0;
+  const paginationSeed = seedFromUrl ?? usersQuery.data?.seed ?? null;
+  const isLoading = usersQuery.isPending;
 
   // Sync local state with URL params
   useEffect(() => {
     setSearchQuery(queryFromUrl);
-    setPaginationSeed(seedFromUrl);
   }, [queryFromUrl, pageFromUrl, seedFromUrl]);
 
-  // Fetch users when URL params change (with debounce)
-  useEffect(() => {
-    if (queryFromUrl.trim()) {
-      fetchSearchWithDebounce(queryFromUrl.trim());
-    } else {
-      fetchUsersWithDebounce(pageFromUrl);
-    }
-
-    return () => {
-      cancelPendingFetch();
-    };
-  }, [
-    cancelPendingFetch,
-    fetchSearchWithDebounce,
-    fetchUsersWithDebounce,
-    pageFromUrl,
-    queryFromUrl,
-  ]);
-
   const handleClearSearch = () => {
-    cancelPendingFetch();
     setSearchQuery("");
-    setUsers([]);
-    setTotalPages(0);
-    setTotal(0);
-    setIsLoading(true);
     void setParams({ query: null, page: null, seed: null });
   };
 
@@ -209,7 +104,7 @@ export default function UserSearch() {
   ) => {
     void setParams({
       page: value > 1 ? value : null,
-      ...(queryFromUrl ? {} : { seed: paginationSeed }),
+      ...(queryFromUrl ? {} : { seed: value > 1 ? paginationSeed : null }),
     });
   };
 
@@ -217,11 +112,6 @@ export default function UserSearch() {
     const value = e.target.value;
     setSearchQuery(value);
     if (value.trim() === "" && queryFromUrl) {
-      cancelPendingFetch();
-      setUsers([]);
-      setTotalPages(0);
-      setTotal(0);
-      setIsLoading(true);
       void setParams({ query: null, page: null, seed: null });
     }
   };
@@ -328,6 +218,10 @@ export default function UserSearch() {
               <UserCardSkeleton key={index} />
             ))}
           </>
+        ) : usersQuery.isError && !usersQuery.data ? (
+          <div className="text-status-error col-span-full py-8 text-center">
+            Could not load users. Please try again.
+          </div>
         ) : users.length === 0 ? (
           <div className="col-span-full py-8 text-center">
             <p className="text-secondary-text text-lg">No users found</p>

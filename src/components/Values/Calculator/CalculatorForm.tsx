@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useState, useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { TradeItem } from "@/types/trading";
 import TradeItemPickerV2 from "../../trading/TradeItemPickerV2";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -14,15 +15,10 @@ import NitroCalculatorAd from "@/components/Ads/NitroCalculatorAd";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  INVENTORY_API_SOURCE_HEADER,
-  INVENTORY_API_URL,
-  PUBLIC_API_URL,
-  fetchUserFavorites,
-} from "@/utils/api/api";
+import { INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
-import type { FavoriteItem } from "@/types";
+import { userInventoryQueryOptions } from "@/utils/api/userInventoryQuery";
+import { useUserFavorites } from "@/hooks/useUserFavorites";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 
@@ -46,28 +42,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   initialItems = [],
   itemsInputMode = "picker",
 }) => {
-  const sleep = (ms: number) =>
-    new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-  const isRetryableFetchError = (error: unknown): boolean => {
-    if (!(error instanceof Error)) return false;
-    if (error.name === "AbortError") return false;
-    const message = error.message.toLowerCase();
-    return (
-      message.includes("fetch failed") ||
-      message.includes("network") ||
-      message.includes("timeout") ||
-      message.includes("connect") ||
-      message.includes("und_err")
-    );
-  };
-
   const {
     user,
     isAuthenticated,
     isLoading: isAuthLoading,
     setLoginModal,
   } = useAuthContext();
+  const queryClient = useQueryClient();
 
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
@@ -78,6 +59,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
 
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
+  const favoritesQuery = useUserFavorites(user?.id);
   const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
   const [inventoryCopies, setInventoryCopies] = useState<
     Record<number, number>
@@ -145,13 +127,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   }, [requestingItems]);
 
   useEffect(() => {
-    if (!user?.id) return;
-    fetchUserFavorites(user.id).then((data) => {
-      if (Array.isArray(data)) {
-        setFavoriteIds((data as FavoriteItem[]).map((fav) => fav.item.id));
-      }
-    });
-  }, [user?.id]);
+    if (!user?.id) setFavoriteIds([]);
+    else if (favoritesQuery.data) {
+      setFavoriteIds(favoritesQuery.data.map((fav) => fav.item.id));
+    }
+  }, [user?.id, favoritesQuery.data]);
 
   const handleToggleFavorite = async (itemId: number, isFavorited: boolean) => {
     if (!isAuthenticated) {
@@ -180,6 +160,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         );
         toast.error("Failed to update favorite status");
       } else {
+        if (user?.id) {
+          void queryClient.invalidateQueries({
+            queryKey: ["user-favorites", user.id],
+          });
+        }
         toast.success(
           isFavorited ? "Removed from favorites" : "Added to favorites",
         );
@@ -225,72 +210,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       setInventoryError(null);
 
       try {
-        const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(robloxId)}&nocache=false`;
-        const maxAttempts = 3;
-
-        let response: Response | null = null;
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-          if (controller.signal.aborted) {
-            throw new DOMException("Aborted", "AbortError");
-          }
-
-          try {
-            response = await fetch(url, {
-              method: "GET",
-              headers: {
-                "User-Agent": "JailbreakChangelogs-ValuesCalculator/1.0",
-                "X-Source": INVENTORY_API_SOURCE_HEADER ?? "",
-              },
-              cache: "no-store",
-              signal: controller.signal,
-            });
-          } catch (error) {
-            if (controller.signal.aborted) {
-              throw new DOMException("Aborted", "AbortError");
-            }
-
-            if (attempt < maxAttempts - 1 && isRetryableFetchError(error)) {
-              const baseDelayMs = 500 * Math.pow(2, attempt);
-              const jitterMs = Math.floor(Math.random() * 250);
-              await sleep(baseDelayMs + jitterMs);
-              continue;
-            }
-
-            throw error;
-          }
-
-          if (
-            response &&
-            !response.ok &&
-            shouldRetryResponseStatus(response.status) &&
-            attempt < maxAttempts - 1
-          ) {
-            response.body?.cancel();
-            const baseDelayMs = 500 * Math.pow(2, attempt);
-            const jitterMs = Math.floor(Math.random() * 250);
-            await sleep(baseDelayMs + jitterMs);
-            response = null;
-            continue;
-          }
-
-          break;
-        }
-
-        if (!response) {
-          throw new Error("Failed to load inventory (no response)");
-        }
-
-        const data = (await response.json()) as unknown;
-        if (!response.ok) {
-          const message =
-            (data &&
-            typeof data === "object" &&
-            "message" in data &&
-            typeof (data as { message?: unknown }).message === "string"
-              ? (data as { message: string }).message
-              : null) || `Failed to load inventory (${response.status})`;
-          throw new Error(message);
-        }
+        const data = await queryClient.fetchQuery(
+          userInventoryQueryOptions(robloxId),
+        );
+        if (controller.signal.aborted) return;
 
         const record =
           data && typeof data === "object" && !Array.isArray(data)
@@ -369,7 +292,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       controller.abort();
       if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
     };
-  }, [itemsInputMode, canLoadInventory, robloxId, initialItems]);
+  }, [itemsInputMode, canLoadInventory, robloxId, initialItems, queryClient]);
 
   useLockBodyScroll(showClearConfirmModal);
 

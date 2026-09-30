@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
@@ -53,16 +54,13 @@ export default function ValuesItemsGrid({
   debouncedSearchTerm,
 }: ValuesItemsGridProps) {
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [placementLimitsMap, setPlacementLimitsMap] = useState<Map<
-    number,
-    number
-  > | null>(null);
-
-  useEffect(() => {
-    fetchFurniturePlacementLimits()
-      .then(setPlacementLimitsMap)
-      .catch(() => {});
-  }, []);
+  const { data: placementLimitsMap } = useQuery({
+    queryKey: ["furniture-placement-limits"],
+    queryFn: fetchFurniturePlacementLimits,
+    staleTime: Infinity,
+    gcTime: 60 * 60_000,
+    retry: false,
+  });
 
   const filterSortKey = selectedFilterSorts.join(",");
 

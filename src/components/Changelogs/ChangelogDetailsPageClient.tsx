@@ -1,17 +1,16 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
-import { useEffect, useState } from "react";
-
-const log = createLogger("UI");
 import ChangelogDetailsClient from "@/components/Changelogs/ChangelogDetailsClient";
-import { Changelog, CommentData, PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import { notFound } from "next/navigation";
 import ChangelogRouteLoading from "@/app/changelogs/[id]/loading";
 import RateLimitView from "@/components/Layout/RateLimitView";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
+import {
+  ChangelogRateLimitError,
+  useChangelogTimeline,
+} from "@/hooks/useChangelogTimeline";
 
 interface ChangelogDetailsPageClientProps {
   changelogId: string;
@@ -24,85 +23,24 @@ export default function ChangelogDetailsPageClient({
   initialComments = [],
   initialUserMap = {},
 }: ChangelogDetailsPageClientProps) {
-  const [changelogList, setChangelogList] = useState<Changelog[] | null>(null);
-  const [currentChangelog, setCurrentChangelog] = useState<Changelog | null>(
-    null,
+  const timelineQuery = useChangelogTimeline();
+  const changelogList = timelineQuery.data;
+  const currentChangelog = changelogList?.find(
+    (changelog) => changelog.id.toString() === changelogId,
   );
-  const [isNotFound, setIsNotFound] = useState(false);
-  const [isRateLimited, setIsRateLimited] = useState(false);
-  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(
-    null,
-  );
+  const rateLimitError =
+    timelineQuery.error instanceof ChangelogRateLimitError
+      ? timelineQuery.error
+      : null;
 
-  useEffect(() => {
-    let ignore = false;
-
-    const loadPageData = async () => {
-      try {
-        if (!PUBLIC_API_URL) {
-          throw new Error("Missing PUBLIC_API_URL");
-        }
-        const apiBaseUrl = PUBLIC_API_URL;
-
-        const { url: listUrl, headers: listHeaders } = buildApiFetchRequest(
-          apiBaseUrl,
-          "/v2/changelogs",
-        );
-        const listResponse = await fetch(listUrl, {
-          credentials: "include",
-          headers: {
-            ...listHeaders,
-            "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
-          },
-        });
-        if (ignore) return;
-
-        if (!listResponse.ok) {
-          if (listResponse.status === 429) {
-            const raw = listResponse.headers.get("retry-after");
-            setIsRateLimited(true);
-            setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
-            return;
-          }
-          throw new Error("Failed to fetch changelog list");
-        }
-
-        const listData = (await listResponse.json()) as Changelog[];
-        if (ignore) return;
-        const sortedChangelogList = [...listData].sort((a, b) => b.id - a.id);
-
-        const matched = sortedChangelogList.find(
-          (changelog) =>
-            changelog.id.toString() === changelogId ||
-            changelog.id === parseInt(changelogId, 10),
-        );
-
-        if (!matched) {
-          setIsNotFound(true);
-          return;
-        }
-
-        setChangelogList(sortedChangelogList);
-        setCurrentChangelog(matched);
-      } catch (error) {
-        if (ignore) return;
-        log.error("Error loading changelog page data", error);
-        setIsNotFound(true);
-      }
-    };
-
-    void loadPageData();
-
-    return () => {
-      ignore = true;
-    };
-  }, [changelogId]);
-
-  if (isRateLimited) {
-    return <RateLimitView retryAfter={rateLimitRetryAfter} />;
+  if (rateLimitError && !changelogList) {
+    return <RateLimitView retryAfter={rateLimitError.retryAfter} />;
   }
 
-  if (isNotFound) {
+  if (
+    (timelineQuery.isError && !changelogList) ||
+    (changelogList && !currentChangelog)
+  ) {
     notFound();
   }
 

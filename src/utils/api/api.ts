@@ -2679,83 +2679,45 @@ export async function fetchNotificationHistory(
   page: number = 1,
   size: number = 5,
 ): Promise<NotificationHistory> {
-  try {
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL!,
-      `/v2/notifications/history?page=${page}&size=${size}`,
-    );
-    const response = await fetch(url, {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-      headers,
-    });
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    `/v2/notifications/history?page=${page}&size=${size}`,
+  );
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
 
-    if (!response.ok) {
-      return {
-        items: [],
-        total: 0,
-        page: 1,
-        total_pages: 0,
-        size: 10,
-        unread_count: 0,
-      };
-    }
-
-    const data = await response.json();
-    return data as NotificationHistory;
-  } catch (error) {
-    log.error("Error fetching notification history", error);
-    return {
-      items: [],
-      total: 0,
-      page: 1,
-      total_pages: 0,
-      size: 10,
-      unread_count: 0,
-    };
+  if (!response.ok) {
+    throw new Error(`Failed to fetch notification history: ${response.status}`);
   }
+
+  const data = await response.json();
+  return data as NotificationHistory;
 }
 
 export async function fetchUnreadNotifications(
   page: number = 1,
   size: number = 5,
 ): Promise<NotificationHistory> {
-  try {
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL!,
-      `/v2/notifications?page=${page}&size=${size}`,
-    );
-    const response = await fetch(url, {
-      method: "GET",
-      credentials: "include",
-      headers,
-    });
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    `/v2/notifications?page=${page}&size=${size}`,
+  );
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    headers,
+  });
 
-    if (!response.ok) {
-      return {
-        items: [],
-        total: 0,
-        page: 1,
-        total_pages: 0,
-        size: 10,
-        unread_count: 0,
-      };
-    }
-
-    const data = await response.json();
-    return data as NotificationHistory;
-  } catch (error) {
-    log.error("Error fetching unread notifications", error);
-    return {
-      items: [],
-      total: 0,
-      page: 1,
-      total_pages: 0,
-      size: 10,
-      unread_count: 0,
-    };
+  if (!response.ok) {
+    throw new Error(`Failed to fetch unread notifications: ${response.status}`);
   }
+
+  const data = await response.json();
+  return data as NotificationHistory;
 }
 
 export async function fetchUnreadNotificationCount(): Promise<number | null> {
@@ -2840,43 +2802,39 @@ function getClientToken(): string | null {
 }
 
 export async function fetchEmailLinkedStatus(): Promise<{ linked: boolean }> {
-  try {
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL!,
-      "/v2/users/me/email",
-    );
-    const response = await fetch(url, {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-      headers,
-    });
-    if (!response.ok) return { linked: false };
-    return response.json();
-  } catch {
-    return { linked: false };
-  }
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/v2/users/me/email",
+  );
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+  if (!response.ok)
+    throw new Error(`Failed to fetch linked email status: ${response.status}`);
+  return response.json();
 }
 
 export async function fetchEmailNotificationStatus(): Promise<{
   enabled: boolean;
 }> {
-  try {
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL!,
-      "/v2/notifications/email",
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/v2/notifications/email",
+  );
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+  if (!response.ok)
+    throw new Error(
+      `Failed to fetch email notification status: ${response.status}`,
     );
-    const response = await fetch(url, {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-      headers,
-    });
-    if (!response.ok) return { enabled: false };
-    return response.json();
-  } catch {
-    return { enabled: false };
-  }
+  return response.json();
 }
 
 export async function enableEmailNotifications(): Promise<{

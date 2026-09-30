@@ -1,7 +1,8 @@
 "use client";
 
 import { createLogger } from "@/services/logger";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const log = createLogger("UI");
 import { Pagination } from "@/components/ui/Pagination";
@@ -37,6 +38,8 @@ interface CommentData {
   reply_to_id?: number | null;
   reactions?: CommentReaction[];
 }
+
+const EMPTY_COMMENTS: CommentData[] = [];
 
 interface CommentsTabProps {
   currentUserId?: string | null;
@@ -105,12 +108,8 @@ export default function CommentsTab({
   settings,
   sharedItemDetails = {},
 }: CommentsTabProps) {
-  const [comments, setComments] = useState<CommentData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalComments, setTotalComments] = useState(0);
   const [commentDetails, setCommentDetails] = useState<{
     changelogs: Record<string, unknown>;
     items: Record<string, unknown>;
@@ -120,57 +119,67 @@ export default function CommentsTab({
   }>({ changelogs: {}, items: {}, seasons: {}, trades: {}, inventories: {} });
   const [detailsLoading, setDetailsLoading] = useState(false);
 
-  const fetchChangelogDetailsClient = async (
-    commentsForLookup: CommentData[],
-  ): Promise<Record<string, unknown>> => {
-    if (!PUBLIC_API_URL) return {};
+  const fetchChangelogDetailsClient = useCallback(
+    async (
+      commentsForLookup: CommentData[],
+    ): Promise<Record<string, unknown>> => {
+      if (!PUBLIC_API_URL) return {};
 
-    const changelogIds = [
-      ...new Set(
-        commentsForLookup
-          .filter((c) => c.item_type.toLowerCase() === "changelog")
-          .map((c) => c.item_id.toString()),
-      ),
-    ];
+      const changelogIds = [
+        ...new Set(
+          commentsForLookup
+            .filter((c) => c.item_type.toLowerCase() === "changelog")
+            .map((c) => c.item_id.toString()),
+        ),
+      ];
 
-    if (changelogIds.length === 0) return {};
+      if (changelogIds.length === 0) return {};
 
-    const results = await Promise.all(
-      changelogIds.map(async (id) => {
-        try {
-          const { url: changelogUrl, headers: changelogHeaders } =
-            buildApiFetchRequest(PUBLIC_API_URL, `/v2/changelogs/${id}`);
-          const response = await fetch(changelogUrl, {
-            credentials: "include",
-            headers: {
-              ...changelogHeaders,
-              "User-Agent": "JailbreakChangelogs-Comments/1.0",
-            },
-          });
-          if (!response.ok) return null;
-          const data = await response.json();
-          return { id, data };
-        } catch {
-          return null;
-        }
-      }),
-    );
+      const results = await Promise.all(
+        changelogIds.map(async (id) => {
+          try {
+            const data = await queryClient.fetchQuery({
+              queryKey: ["changelog-detail", id],
+              queryFn: async ({ signal }) => {
+                const { url, headers } = buildApiFetchRequest(
+                  PUBLIC_API_URL,
+                  `/v2/changelogs/${id}`,
+                );
+                const response = await fetch(url, {
+                  credentials: "include",
+                  signal,
+                  headers: {
+                    ...headers,
+                    "User-Agent": "JailbreakChangelogs-Comments/1.0",
+                  },
+                });
+                if (!response.ok) return null;
+                return response.json();
+              },
+              staleTime: 60_000,
+              gcTime: 5 * 60_000,
+              retry: false,
+            });
+            if (!data) return null;
+            return { id, data };
+          } catch {
+            return null;
+          }
+        }),
+      );
 
-    return results.reduce(
-      (acc, entry) => {
-        if (entry) acc[entry.id] = entry.data;
-        return acc;
-      },
-      {} as Record<string, unknown>,
-    );
-  };
+      return results.reduce(
+        (acc, entry) => {
+          if (entry) acc[entry.id] = entry.data;
+          return acc;
+        },
+        {} as Record<string, unknown>,
+      );
+    },
+    [queryClient],
+  );
 
   useEffect(() => {
-    if (!userId) return;
-
-    let isCancelled = false;
-    setLoading(true);
-    setError(null);
     setCommentDetails({
       changelogs: {},
       items: {},
@@ -178,39 +187,40 @@ export default function CommentsTab({
       trades: {},
       inventories: {},
     });
+  }, [userId, currentPage]);
 
-    const fetchComments = async () => {
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/v2/users/${encodeURIComponent(userId)}/comments?page=${currentPage}`,
-        );
-        const response = await fetch(url, {
-          credentials: "include",
-          headers: {
-            ...headers,
-            "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
-          },
-        });
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            if (!isCancelled) {
-              setComments([]);
-              setTotalPages(1);
-              setTotalComments(0);
-              setLoading(false);
-            }
-            return;
-          }
-          throw new Error(`Failed to fetch comments (${response.status})`);
-        }
-
-        const data = await response.json();
-        if (isCancelled) return;
-
-        const items = Array.isArray(data.items) ? data.items : [];
-        const mapped: CommentData[] = items.map(
+  const commentsQuery = useQuery({
+    queryKey: ["profile-comments", userId, currentPage, currentUserId],
+    enabled: Boolean(userId),
+    queryFn: async ({
+      signal,
+    }): Promise<{
+      comments: CommentData[];
+      totalPages: number;
+      totalComments: number;
+    }> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/${encodeURIComponent(userId)}/comments?page=${currentPage}`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        signal,
+        headers: {
+          ...headers,
+          "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
+        },
+      });
+      if (response.status === 404) {
+        return { comments: [], totalPages: 1, totalComments: 0 };
+      }
+      if (!response.ok) {
+        throw new Error(`Failed to fetch comments (${response.status})`);
+      }
+      const data = await response.json();
+      const items = Array.isArray(data?.items) ? data.items : [];
+      return {
+        comments: items.map(
           (item: {
             id: number;
             content: string;
@@ -222,7 +232,7 @@ export default function CommentsTab({
             reply_to_id?: number | null;
             user: { id: string; username: string };
             reactions?: unknown;
-          }) => ({
+          }): CommentData => ({
             id: item.id,
             author: item.user?.username ?? "",
             content: item.content,
@@ -235,28 +245,20 @@ export default function CommentsTab({
             reply_to_id: item.reply_to_id ?? null,
             reactions: normalizeReactions(item.reactions),
           }),
-        );
-
-        setComments(mapped);
-        setTotalPages(data.total_pages ?? 1);
-        setTotalComments(data.total ?? 0);
-        setLoading(false);
-      } catch (err) {
-        if (isCancelled) return;
-        log.error("Error fetching comments", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load comments",
-        );
-        setLoading(false);
-      }
-    };
-
-    void fetchComments();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [userId, currentPage]);
+        ),
+        totalPages: data?.total_pages ?? 1,
+        totalComments: data?.total ?? 0,
+      };
+    },
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const comments = commentsQuery.data?.comments ?? EMPTY_COMMENTS;
+  const totalPages = commentsQuery.data?.totalPages ?? 1;
+  const totalComments = commentsQuery.data?.totalComments ?? 0;
+  const loading = commentsQuery.isPending;
+  const error = commentsQuery.data ? null : commentsQuery.error?.message;
 
   useEffect(() => {
     if (comments.length === 0) return;
@@ -277,7 +279,19 @@ export default function CommentsTab({
       setDetailsLoading(true);
       try {
         const [details, changelogDetails] = await Promise.all([
-          fetchCommentDetails(commentsNeedingDetails),
+          queryClient.fetchQuery({
+            queryKey: [
+              "profile-comment-details",
+              commentsNeedingDetails.map((comment) => [
+                comment.item_type,
+                comment.item_id,
+              ]),
+            ],
+            queryFn: () => fetchCommentDetails(commentsNeedingDetails),
+            staleTime: 60_000,
+            gcTime: 5 * 60_000,
+            retry: false,
+          }),
           fetchChangelogDetailsClient(commentsNeedingDetails),
         ]);
         if (ignore) return;
@@ -303,7 +317,7 @@ export default function CommentsTab({
     return () => {
       ignore = true;
     };
-  }, [comments, sharedItemDetails]);
+  }, [comments, sharedItemDetails, queryClient, fetchChangelogDetailsClient]);
 
   const profileComments = comments.filter(
     (c) => c.item_type.toLowerCase() !== "tradev2",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -413,6 +414,7 @@ export default function UserTradeHistory({
   isActive,
   itemsData,
 }: UserTradeHistoryProps) {
+  const queryClient = useQueryClient();
   const [trades, setTrades] = useState<UserTradeSummary[]>([]);
   const [listState, setListState] = useState<RequestState>("idle");
   const [listError, setListError] = useState<string | null>(null);
@@ -556,27 +558,39 @@ export default function UserTradeHistory({
           nocache: "false",
         });
         if (before !== undefined) params.set("before", String(before));
-        const { url, headers } = buildApiFetchRequest(
-          INVENTORY_API_URL,
-          `/trades/user/${encodeURIComponent(userId)}?${params}`,
-        );
-        const response = await fetch(url, {
-          headers,
-          signal: controller.signal,
-          cache: "no-store",
+        const page = await queryClient.fetchQuery({
+          queryKey: ["user-trade-history", userId, before ?? null, PAGE_SIZE],
+          queryFn: async (): Promise<TradeList<UserTradeSummary>> => {
+            const { url, headers } = buildApiFetchRequest(
+              INVENTORY_API_URL,
+              `/trades/user/${encodeURIComponent(userId)}?${params}`,
+            );
+            const response = await fetch(url, {
+              headers,
+              signal: controller.signal,
+              cache: "no-store",
+            });
+            if (!response.ok) {
+              throw new Error(
+                await getErrorMessage(
+                  response,
+                  `Failed to load trade history (${response.status})`,
+                ),
+              );
+            }
+            const data = (await response.json()) as TradeList<UserTradeSummary>;
+            if (
+              !Array.isArray(data.completed) ||
+              !Array.isArray(data.pending)
+            ) {
+              throw new Error("Invalid trade history response");
+            }
+            return data;
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
-        if (!response.ok) {
-          throw new Error(
-            await getErrorMessage(
-              response,
-              `Failed to load trade history (${response.status})`,
-            ),
-          );
-        }
-
-        const page = (await response.json()) as TradeList<UserTradeSummary>;
-        if (!Array.isArray(page.completed) || !Array.isArray(page.pending))
-          throw new Error("Invalid trade history response");
 
         const pageTrades = [...page.completed, ...page.pending];
 
@@ -616,7 +630,7 @@ export default function UserTradeHistory({
         window.clearTimeout(timeoutId);
       }
     },
-    [listState, userId],
+    [listState, userId, queryClient],
   );
 
   useEffect(() => {
@@ -641,24 +655,32 @@ export default function UserTradeHistory({
     }));
 
     try {
-      const { url, headers } = buildApiFetchRequest(
-        INVENTORY_API_URL,
-        `/trades/${encodeURIComponent(tradeId)}?nocache=false`,
-      );
-      const response = await fetch(url, {
-        headers,
-        signal: controller.signal,
-        cache: "no-store",
+      const detail = await queryClient.fetchQuery({
+        queryKey: ["user-trade-detail", userId, tradeId],
+        queryFn: async (): Promise<TradeDetail> => {
+          const { url, headers } = buildApiFetchRequest(
+            INVENTORY_API_URL,
+            `/trades/${encodeURIComponent(tradeId)}?nocache=false`,
+          );
+          const response = await fetch(url, {
+            headers,
+            signal: controller.signal,
+            cache: "no-store",
+          });
+          if (!response.ok) {
+            throw new Error(
+              await getErrorMessage(
+                response,
+                `Failed to load trade details (${response.status})`,
+              ),
+            );
+          }
+          return response.json();
+        },
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
       });
-      if (!response.ok) {
-        throw new Error(
-          await getErrorMessage(
-            response,
-            `Failed to load trade details (${response.status})`,
-          ),
-        );
-      }
-      const detail = (await response.json()) as TradeDetail;
       setDetails((current) => ({ ...current, [tradeId]: detail }));
       setDetailStates((current) => ({
         ...current,
@@ -767,7 +789,7 @@ export default function UserTradeHistory({
         const valueState: "loading" | "error" | "ready" =
           isExpanded && detail && catalogQuery.isPending
             ? "loading"
-            : isExpanded && detail && catalogQuery.isError
+            : isExpanded && detail && catalogQuery.isError && !catalogQuery.data
               ? "error"
               : "ready";
         const ownerGaveValues = detail

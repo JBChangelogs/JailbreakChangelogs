@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo } from "react";
 import { notFound } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchItemClient, fetchItemHistoryClient } from "@/utils/api/api";
 import ItemDetailsClient from "@/components/Items/ItemDetailsClient";
 import ItemCommentsServer from "@/components/Items/SuspenseWrapper/ItemCommentsServer";
@@ -16,17 +16,28 @@ interface Props {
 }
 
 export default function ItemPageClient({ type, name }: Props) {
+  const queryClient = useQueryClient();
   const { data: item, isPending } = useQuery({
     queryKey: ["item", type, name],
     queryFn: () =>
       fetchItemClient(decodeURIComponent(type), decodeURIComponent(name)),
-    throwOnError: true,
+    throwOnError: (_error, query) => !query.state.data,
   });
 
   // Promises consumed via use() must stay stable across renders.
+  const itemId = item?.id;
   const historyPromise = useMemo(
-    () => (item ? fetchItemHistoryClient(String(item.id)) : null),
-    [item],
+    () =>
+      itemId != null
+        ? queryClient.fetchQuery({
+            queryKey: ["item", itemId, "history"],
+            queryFn: () => fetchItemHistoryClient(String(itemId)),
+            staleTime: 30_000,
+            gcTime: 5 * 60_000,
+            retry: false,
+          })
+        : null,
+    [itemId, queryClient],
   );
 
   if (isPending) {

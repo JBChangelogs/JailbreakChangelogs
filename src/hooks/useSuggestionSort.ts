@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
@@ -13,44 +14,47 @@ export function useSuggestionSort(
   setSort: SetSort,
 ) {
   const initialSortRef = useRef(initialSort);
-  const [sortGroups, setSortGroups] = useState<SortGroup[]>([]);
   const availableSortsRef = useRef<string[]>([]);
+  const sortGroupsQuery = useQuery({
+    queryKey: ["value-suggestion-sorts"],
+    queryFn: async ({ signal }): Promise<SortGroup[]> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        "/v2/value-suggestions/sorts",
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok)
+        throw new Error(`Suggestion sorts request failed (${response.status})`);
+      return parseSortGroups(await response.json());
+    },
+    enabled: Boolean(PUBLIC_API_URL),
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const sortGroups = sortGroupsQuery.data ?? EMPTY_SORT_GROUPS;
 
   useEffect(() => {
-    let ignore = false;
-
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL!,
-      "/v2/value-suggestions/sorts",
+    const sorts = sortGroups.flatMap((group) =>
+      group.options.map((option) => option.value),
     );
-    fetch(url, { credentials: "include", headers })
-      .then((response) => (response.ok ? response.json() : []))
-      .then((data) => {
-        if (ignore) return;
-        const groups = parseSortGroups(data);
-        const sorts = groups.flatMap((group) =>
-          group.options.map((option) => option.value),
-        );
-        if (sorts.length > 0) {
-          availableSortsRef.current = sorts;
-          setSortGroups(groups);
-          if (initialSortRef.current === null) {
-            const cachedSort = getCachedPreference("vsuggestions_sort");
-            const storedSort = localStorage.getItem("vsuggestions_sort");
-            setSort(
-              (typeof cachedSort === "string" ? cachedSort : storedSort) ??
-                sorts[0],
-              "replace",
-            );
-          }
-        }
-      })
-      .catch(() => {});
-
-    return () => {
-      ignore = true;
-    };
-  }, [setSort]);
+    if (sorts.length === 0) return;
+    availableSortsRef.current = sorts;
+    if (initialSortRef.current === null) {
+      const cachedSort = getCachedPreference("vsuggestions_sort");
+      const storedSort = localStorage.getItem("vsuggestions_sort");
+      setSort(
+        (typeof cachedSort === "string" ? cachedSort : storedSort) ?? sorts[0],
+        "replace",
+      );
+      initialSortRef.current = sorts[0];
+    }
+  }, [sortGroups, setSort]);
 
   useEffect(() => {
     const handlePreference = (event: Event) => {
@@ -110,3 +114,5 @@ export function useSuggestionSort(
 
   return { sortGroups, handleSortChange };
 }
+
+const EMPTY_SORT_GROUPS: SortGroup[] = [];

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type Dispatch, type SetStateAction } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { SupporterGift, UserData } from "@/types/auth";
 import { giftSupporterGift } from "@/services/settingsService";
@@ -15,6 +16,7 @@ export function useSupporterGifting({
   userId,
   setSupporterGifts,
 }: UseSupporterGiftingOptions) {
+  const queryClient = useQueryClient();
   const [giftingIds, setGiftingIds] = useState<Record<string, boolean>>({});
   const [giftModalOpen, setGiftModalOpen] = useState(false);
   const [giftModalStep, setGiftModalStep] = useState<"search" | "confirm">(
@@ -79,6 +81,12 @@ export function useSupporterGifting({
       setSupporterGifts((previous) =>
         previous.filter((gift) => gift.share_id !== activeGift.share_id),
       );
+      if (userId) {
+        void queryClient.invalidateQueries({
+          queryKey: ["supporter-gifts", userId],
+          refetchType: "none",
+        });
+      }
       toast.success("Gift sent successfully.");
       closeGiftModal();
     } catch (error) {
@@ -105,6 +113,14 @@ export function useSupporterGifting({
       setSupporterGifts((previous) =>
         previous.filter((gift) => gift.share_id !== shareId),
       );
+      void queryClient.invalidateQueries({
+        queryKey: ["supporter-gifts", userId],
+        refetchType: "none",
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["supporter-history", userId],
+        refetchType: "none",
+      });
       if (activeGift?.share_id === shareId) {
         closeGiftModal();
       }

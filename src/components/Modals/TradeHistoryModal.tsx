@@ -1,9 +1,7 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
-import { useMemo, useState, useEffect } from "react";
-
-const log = createLogger("UI");
+import { useMemo, useState } from "react";
+import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { usePathname } from "next/navigation";
 import {
   Dialog,
@@ -125,92 +123,12 @@ export default function TradeHistoryModal({
     return processed;
   }, [usersData, tradeHistoryUserIds]);
 
-  const [fetchedUsers, setFetchedUsers] = useState<
-    Record<
-      string,
-      { name: string; displayName: string; hasVerifiedBadge: boolean }
-    >
-  >({});
+  const { robloxUsers: fetchedUsers } = useBatchUserData(tradeHistoryUserIds, {
+    enabled: isOpen && !usersData,
+  });
 
   // Use either the passed data or the fetched data
   const finalUsers = usersData ? memoizedUserData : fetchedUsers;
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    // If we have usersData via props, we don't need to fetch
-    if (usersData) {
-      return;
-    }
-
-    if (tradeHistoryUserIds.length === 0) {
-      return;
-    }
-
-    let ignore = false;
-
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/v2`,
-          {
-            method: "POST",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
-              "X-Source":
-                process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userIds: tradeHistoryUserIds }),
-          },
-        );
-
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          log.error("fetch trade history users failed", {
-            status: response.status,
-            body,
-          });
-          return;
-        }
-
-        const userData = await response.json();
-        if (ignore) return;
-        const processedUsers: Record<
-          string,
-          { name: string; displayName: string; hasVerifiedBadge: boolean }
-        > = {};
-
-        Object.values(userData).forEach((user) => {
-          if (user && typeof user === "object" && "id" in user) {
-            // Cast to partial RobloxUser to access properties safely
-            const typedUser = user as RobloxUser;
-            if (typedUser.id) {
-              processedUsers[typedUser.id.toString()] = {
-                name: typedUser.name || typedUser.id.toString(),
-                displayName:
-                  typedUser.displayName ||
-                  typedUser.name ||
-                  typedUser.id.toString(),
-                hasVerifiedBadge: Boolean(typedUser.hasVerifiedBadge),
-              };
-            }
-          }
-        });
-
-        setFetchedUsers(processedUsers);
-      } catch (error) {
-        if (ignore) return;
-        log.error("Failed to fetch users", error);
-      }
-    };
-
-    fetchUsers();
-
-    return () => {
-      ignore = true;
-    };
-  }, [isOpen, tradeHistoryUserIds, usersData]);
 
   const getUsername = (userId: string) => {
     const cachedUser = finalUsers[userId];

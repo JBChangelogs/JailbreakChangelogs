@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import React from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -8,78 +7,19 @@ import XpCalculator from "@/components/Seasons/XpCalculator";
 import XpImportantDates from "@/components/Seasons/XpImportantDates";
 import XpLevelRequirements from "@/components/Seasons/XpLevelRequirements";
 import WillIMakeItLoading from "@/app/seasons/will-i-make-it/loading";
-import { Season } from "@/types/seasons";
-import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import RateLimitView from "@/components/Layout/RateLimitView";
-import { createLogger } from "@/services/logger";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
-
-const log = createLogger("UI");
+import { SeasonRateLimitError, useLatestSeason } from "@/hooks/useLatestSeason";
 
 export default function WillIMakeItPage() {
-  const [season, setSeason] = useState<Season | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isRateLimited, setIsRateLimited] = useState(false);
-  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(
-    null,
-  );
+  const seasonQuery = useLatestSeason();
+  const season = seasonQuery.data;
+  const rateLimitError =
+    seasonQuery.error instanceof SeasonRateLimitError
+      ? seasonQuery.error
+      : null;
 
-  useEffect(() => {
-    let ignore = false;
-
-    const loadData = async () => {
-      try {
-        if (!PUBLIC_API_URL) {
-          throw new Error("Missing PUBLIC_API_URL");
-        }
-
-        const { url: willIMakeItUrl, headers: willIMakeItHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/v2/seasons/latest");
-        const res = await fetch(willIMakeItUrl, {
-          credentials: "include",
-          headers: {
-            ...willIMakeItHeaders,
-            "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-          },
-        });
-        if (ignore) return;
-
-        if (!res.ok) {
-          if (res.status === 429) {
-            const raw = res.headers.get("retry-after");
-            setIsRateLimited(true);
-            setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
-            return;
-          }
-          const body = await res.json().catch(() => ({}));
-          log.error("fetch latest season failed", { status: res.status, body });
-          throw new Error("Failed to fetch latest season");
-        }
-
-        const seasonData = await res.json();
-        if (ignore) return;
-        setSeason(seasonData);
-      } catch (err) {
-        if (ignore) return;
-        log.error("Error loading season data", err);
-        setError("Failed to load season data");
-      } finally {
-        if (!ignore) {
-          setIsLoaded(true);
-        }
-      }
-    };
-
-    void loadData();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  if (isRateLimited) {
+  if (rateLimitError && !season) {
     return (
       <>
         <NitroRailAd
@@ -91,12 +31,12 @@ export default function WillIMakeItPage() {
           adIdWide="np-seasons-calculator-rail-right-wide"
           side="right"
         />
-        <RateLimitView retryAfter={rateLimitRetryAfter} />
+        <RateLimitView retryAfter={rateLimitError.retryAfter} />
       </>
     );
   }
 
-  if (!isLoaded) {
+  if (seasonQuery.isPending) {
     return (
       <>
         <NitroRailAd
@@ -113,7 +53,7 @@ export default function WillIMakeItPage() {
     );
   }
 
-  if (error || !season) {
+  if (!season) {
     return (
       <>
         <NitroRailAd
@@ -127,7 +67,10 @@ export default function WillIMakeItPage() {
         />
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-primary-text text-xl">
-            Error: {error || "Season data not available"}
+            Error:{" "}
+            {seasonQuery.isError
+              ? "Failed to load season data"
+              : "Season data not available"}
           </div>
         </div>
       </>

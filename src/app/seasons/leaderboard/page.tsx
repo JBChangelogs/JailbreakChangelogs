@@ -1,23 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonLeaderboardClient from "@/components/Leaderboard/SeasonLeaderboardClient";
 import SeasonLeaderboardLoading from "@/app/seasons/leaderboard/loading";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import SeasonHeader from "@/components/Leaderboard/SeasonLeaderboardHeader";
-import { Season } from "@/types/seasons";
 import {
-  PUBLIC_API_URL,
   INVENTORY_API_URL,
   INVENTORY_API_SOURCE_HEADER,
 } from "@/utils/api/api";
-import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { createLogger } from "@/services/logger";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
-
-const log = createLogger("UI");
+import { SeasonRateLimitError, useLatestSeason } from "@/hooks/useLatestSeason";
 
 interface SeasonLeaderboardEntry {
   id: number;
@@ -28,76 +23,36 @@ interface SeasonLeaderboardEntry {
 }
 
 export default function SeasonLeaderboardPage() {
-  const [leaderboard, setLeaderboard] = useState<
-    SeasonLeaderboardEntry[] | null
-  >(null);
-  const [updatedAt, setUpdatedAt] = useState<number>(0);
-  const [latestSeason, setLatestSeason] = useState<Season | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isSeasonRateLimited, setIsSeasonRateLimited] = useState(false);
-  const [seasonRetryAfter, setSeasonRetryAfter] = useState<number | null>(null);
+  const seasonQuery = useLatestSeason();
+  const leaderboardQuery = useQuery({
+    queryKey: ["season-leaderboard"],
+    queryFn: async ({
+      signal,
+    }): Promise<{ data: SeasonLeaderboardEntry[]; updated_at: number }> => {
+      const response = await fetch(`${INVENTORY_API_URL}/seasons/leaderboard`, {
+        signal,
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
+      });
+      if (!response.ok)
+        throw new Error(`Leaderboard request failed (${response.status})`);
+      return response.json();
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const leaderboard = leaderboardQuery.data?.data ?? [];
+  const updatedAt = leaderboardQuery.data?.updated_at ?? 0;
+  const latestSeason = seasonQuery.data ?? null;
+  const seasonRateLimitError =
+    seasonQuery.error instanceof SeasonRateLimitError
+      ? seasonQuery.error
+      : null;
 
-  useEffect(() => {
-    let ignore = false;
-
-    const loadData = async () => {
-      try {
-        const { url: leaderboardSeasonUrl, headers: leaderboardSeasonHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL!, "/v2/seasons/latest");
-        const [leaderboardRes, seasonRes] = await Promise.all([
-          fetch(`${INVENTORY_API_URL}/seasons/leaderboard`, {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-              "X-Source": INVENTORY_API_SOURCE_HEADER,
-            },
-          }),
-          fetch(leaderboardSeasonUrl, {
-            credentials: "include",
-            headers: {
-              ...leaderboardSeasonHeaders,
-              "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-            },
-          }),
-        ]);
-        if (ignore) return;
-
-        if (leaderboardRes.ok) {
-          const data = await leaderboardRes.json();
-          if (ignore) return;
-          setLeaderboard(data.data ?? []);
-          setUpdatedAt(data.updated_at ?? 0);
-        } else {
-          setLeaderboard([]);
-        }
-
-        if (seasonRes.ok) {
-          const seasonData = await seasonRes.json();
-          if (ignore) return;
-          setLatestSeason(seasonData);
-        } else if (seasonRes.status === 429) {
-          const raw = seasonRes.headers.get("retry-after");
-          setIsSeasonRateLimited(true);
-          setSeasonRetryAfter(raw ? parseInt(raw, 10) : null);
-        }
-      } catch (error) {
-        if (ignore) return;
-        log.error("Error loading leaderboard data", error);
-        setLeaderboard([]);
-      } finally {
-        if (!ignore) {
-          setIsLoaded(true);
-        }
-      }
-    };
-
-    void loadData();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  if (!isLoaded) {
+  if (leaderboardQuery.isPending || seasonQuery.isPending) {
     return (
       <>
         <NitroRailAd
@@ -190,7 +145,7 @@ export default function SeasonLeaderboardPage() {
               Top 25 players ranked by their total xp
             </p>
 
-            {isSeasonRateLimited && (
+            {seasonRateLimitError && (
               <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm">
                 <Icon
                   icon="material-symbols:hourglass-outline"
@@ -198,8 +153,8 @@ export default function SeasonLeaderboardPage() {
                 />
                 <span className="text-primary-text">
                   Season info unavailable — rate limited
-                  {seasonRetryAfter
-                    ? `. Try again in ${seasonRetryAfter}s`
+                  {seasonRateLimitError.retryAfter
+                    ? `. Try again in ${seasonRateLimitError.retryAfter}s`
                     : ""}
                 </span>
               </div>

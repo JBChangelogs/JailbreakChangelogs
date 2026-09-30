@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import type { DuplicateVariantsResponse } from "@/types";
 import { useBatchItems } from "@/hooks/useBatchItems";
@@ -23,72 +23,46 @@ interface DupeComparisonLoaderProps {
 export default function DupeComparisonLoader({
   id,
 }: DupeComparisonLoaderProps) {
-  const [variants, setVariants] = useState<DuplicateVariantsResponse | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState(true);
-  const [isNotFound, setIsNotFound] = useState(false);
-  const [loadError, setLoadError] = useState<Error | null>(null);
+  const variantsQuery = useQuery({
+    queryKey: ["duplicate-variants", id],
+    queryFn: async ({ signal }): Promise<DuplicateVariantsResponse | null> => {
+      if (!INVENTORY_API_URL) {
+        throw new Error("Inventory API URL is not configured");
+      }
+      const response = await fetch(
+        `${INVENTORY_API_URL}/item/duplicates/variants?id=${encodeURIComponent(id)}`,
+        {
+          headers: { "X-Source": INVENTORY_API_SOURCE_HEADER || "" },
+          cache: "no-store",
+          signal,
+        },
+      );
+      if (response.status === 404) return null;
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("Failed to fetch duplicate variants", {
+          status: response.status,
+          body,
+        });
+        throw new Error(
+          `Failed to fetch duplicate variants: ${response.status}`,
+        );
+      }
+      return response.json() as Promise<DuplicateVariantsResponse>;
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const variants = variantsQuery.data;
   const itemIds = variants ? [variants.duplicate.item_id] : [];
   const itemQuery = useBatchItems(itemIds);
 
-  useEffect(() => {
-    const controller = new AbortController();
+  if (variantsQuery.error && !variantsQuery.data) throw variantsQuery.error;
+  if (itemQuery.error && !itemQuery.data) throw itemQuery.error;
 
-    const loadVariants = async () => {
-      if (!INVENTORY_API_URL) {
-        setLoadError(new Error("Inventory API URL is not configured"));
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `${INVENTORY_API_URL}/item/duplicates/variants?id=${encodeURIComponent(id)}`,
-          {
-            headers: { "X-Source": INVENTORY_API_SOURCE_HEADER || "" },
-            cache: "no-store",
-            signal: controller.signal,
-          },
-        );
-
-        if (response.status === 404) {
-          setIsNotFound(true);
-          return;
-        }
-
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          log.error("Failed to fetch duplicate variants", {
-            status: response.status,
-            body,
-          });
-          throw new Error(
-            `Failed to fetch duplicate variants: ${response.status}`,
-          );
-        }
-
-        setVariants((await response.json()) as DuplicateVariantsResponse);
-      } catch (error) {
-        if (controller.signal.aborted) return;
-        setLoadError(
-          error instanceof Error
-            ? error
-            : new Error("Failed to fetch duplicate variants"),
-        );
-      } finally {
-        if (!controller.signal.aborted) setIsLoading(false);
-      }
-    };
-
-    void loadVariants();
-    return () => controller.abort();
-  }, [id]);
-
-  if (loadError) throw loadError;
-  if (itemQuery.error) throw itemQuery.error;
-
-  if (isLoading) {
+  if (variantsQuery.isPending) {
     return (
       <div className="border-border-card bg-secondary-bg flex min-h-64 items-center justify-center rounded-xl border">
         <div className="text-center">
@@ -119,7 +93,7 @@ export default function DupeComparisonLoader({
     );
   }
 
-  if (!isNotFound) return null;
+  if (!variantsQuery.isSuccess) return null;
 
   return (
     <div className="border-border-card bg-secondary-bg rounded-lg border">

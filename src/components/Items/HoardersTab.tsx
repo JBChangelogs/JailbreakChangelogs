@@ -15,6 +15,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
+const EMPTY_HOARDERS: ItemHoarder[] = [];
 
 const getUserAvatar = (userId: string) =>
   `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
@@ -76,7 +77,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const {
-    data: hoarders = [],
+    data: hoardersData,
     isLoading: isLoadingHoarders,
     error: hoardersError,
   } = useQuery({
@@ -106,6 +107,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       return Array.isArray(data) ? (data as ItemHoarder[]) : [];
     },
   });
+  const hoarders = hoardersData ?? EMPTY_HOARDERS;
 
   const userIds = useMemo(
     () => hoarders.map((h) => h.user_id).filter(Boolean),
@@ -151,7 +153,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     return <HoardersTabSkeleton />;
   }
 
-  if (hoardersError) {
+  if (hoardersError && !hoardersData) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <h3 className="text-primary-text mb-2 text-xl font-semibold">

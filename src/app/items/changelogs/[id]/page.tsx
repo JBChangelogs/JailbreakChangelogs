@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useParams, notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { PUBLIC_API_URL } from "@/utils/api/api";
@@ -139,57 +139,36 @@ function transformToChangelogGroup(data: ValueChangelogDetail) {
 
 export default function ChangelogDetailsPage() {
   const { id } = useParams<{ id: string }>();
-  const [changelog, setChangelog] = useState<ReturnType<
-    typeof transformToChangelogGroup
-  > | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFoundError, setNotFoundError] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let ignore = false;
-
-    const fetchChangelog = async () => {
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/v2/value-changelogs/${id}`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (ignore) return;
-        if (res.status === 404) {
-          setNotFoundError(true);
-          return;
-        }
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          log.error("fetch item changelog failed", {
-            status: res.status,
-            body,
-          });
-          throw new Error("Failed to fetch changelog");
-        }
-        const data: ValueChangelogDetail = await res.json();
-        if (ignore) return;
-        setChangelog(transformToChangelogGroup(data));
-      } catch (err) {
-        if (ignore) return;
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
+  const changelogQuery = useQuery({
+    queryKey: ["value-changelog", id],
+    queryFn: async ({ signal }) => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/value-changelogs/${id}`,
+      );
+      const res = await fetch(url, { credentials: "include", headers, signal });
+      if (res.status === 404) return null;
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        log.error("fetch item changelog failed", {
+          status: res.status,
+          body,
+        });
+        throw new Error("Failed to fetch changelog");
       }
-    };
+      const data: ValueChangelogDetail = await res.json();
+      return transformToChangelogGroup(data);
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const changelog = changelogQuery.data;
+  const loading = changelogQuery.isPending;
+  const error = changelogQuery.data ? null : changelogQuery.error?.message;
 
-    void fetchChangelog();
-
-    return () => {
-      ignore = true;
-    };
-  }, [id]);
-
-  if (notFoundError) {
+  if (changelogQuery.isSuccess && changelog === null) {
     notFound();
   }
 

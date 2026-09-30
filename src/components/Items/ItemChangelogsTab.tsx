@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
@@ -167,6 +168,8 @@ interface ChangelogsResponse {
   size: number;
 }
 
+const EMPTY_CHANGELOGS: ValueChangelog[] = [];
+
 const fieldLabel = (field: string) =>
   field
     .split("_")
@@ -183,13 +186,7 @@ interface ItemChangelogsTabProps {
 export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
   "use no memo";
 
-  const [changelogs, setChangelogs] = useState<ValueChangelog[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [empty, setEmpty] = useState(false);
 
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
     new Set(),
@@ -208,50 +205,41 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
     downCount: number;
   } | null>(null);
 
-  const fetchChangelogs = useCallback(
-    async (p: number) => {
-      setLoading(true);
-      setError(null);
-      setEmpty(false);
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/v2/items/${itemId}/value-changelogs?page=${p}`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (res.status === 404) {
-          setEmpty(true);
-          setChangelogs([]);
-          setTotal(0);
-          setTotalPages(1);
-          return;
-        }
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          log.error("fetch item changelogs failed", {
-            status: res.status,
-            body,
-          });
-          throw new Error("Failed to fetch changelogs");
-        }
-        const data: ChangelogsResponse = await res.json();
-        setChangelogs(data.items ?? []);
-        setTotal(data.total ?? 0);
-        setTotalPages(data.total_pages ?? 1);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load changelogs",
-        );
-      } finally {
-        setLoading(false);
+  const changelogQuery = useQuery({
+    queryKey: ["item-value-changelogs", itemId, page],
+    queryFn: async ({ signal }): Promise<ChangelogsResponse> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/items/${itemId}/value-changelogs?page=${page}`,
+      );
+      const res = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (res.status === 404) {
+        return { total: 0, items: [], page, total_pages: 1, size: 0 };
       }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        log.error("fetch item changelogs failed", {
+          status: res.status,
+          body,
+        });
+        throw new Error("Failed to fetch changelogs");
+      }
+      return res.json() as Promise<ChangelogsResponse>;
     },
-    [itemId],
-  );
-
-  useEffect(() => {
-    fetchChangelogs(page);
-  }, [fetchChangelogs, page]);
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const changelogs = changelogQuery.data?.items ?? EMPTY_CHANGELOGS;
+  const totalPages = changelogQuery.data?.total_pages ?? 1;
+  const total = changelogQuery.data?.total ?? 0;
+  const loading = changelogQuery.isPending;
+  const error = changelogQuery.data ? null : changelogQuery.error?.message;
 
   useEffect(() => {
     if (loading) return;
@@ -321,14 +309,14 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
           Failed to Load Changelogs
         </h3>
         <p className="text-secondary-text mb-4 text-sm">{error}</p>
-        <Button onClick={() => fetchChangelogs(page)} size="sm">
+        <Button onClick={() => void changelogQuery.refetch()} size="sm">
           Try Again
         </Button>
       </div>
     );
   }
 
-  if (empty || changelogs.length === 0) {
+  if (changelogs.length === 0) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <h2 className="text-primary-text mb-3 text-lg font-semibold">

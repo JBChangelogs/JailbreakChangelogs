@@ -44,6 +44,8 @@ interface ItemDupedUser {
   avatar: string;
 }
 
+const EMPTY_DUPED_USERS: ItemDupedUser[] = [];
+
 const INVENTORY_API_URL = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
 const INVENTORY_API_SOURCE_HEADER =
   process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER;
@@ -58,7 +60,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const {
-    data: dupedUsers = [],
+    data: dupedUsersData,
     isLoading: isLoadingDupes,
     error: dupesError,
   } = useQuery({
@@ -88,6 +90,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
       return response.json() as Promise<ItemDupedUser[]>;
     },
   });
+  const dupedUsers = dupedUsersData ?? EMPTY_DUPED_USERS;
 
   const dupeRankMap = useMemo(
     () => new Map(dupedUsers.map((u, i) => [u.id, i + 1])),
@@ -126,7 +129,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   }
 
   // Error state
-  if (dupesError) {
+  if (dupesError && !dupedUsersData) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
@@ -140,7 +143,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   }
 
   // Empty state (no dupes)
-  if (!isLoadingDupes && !dupesError && dupedUsers.length === 0) {
+  if (!isLoadingDupes && dupedUsers.length === 0) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <h2 className="text-primary-text mb-3 text-lg font-semibold">

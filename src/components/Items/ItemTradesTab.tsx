@@ -246,20 +246,20 @@ export default function ItemTradesTab({
     <section className="space-y-4">
       <div>
         <h3 className="text-primary-text text-2xl font-bold">Recent Trades</h3>
-        {!isFetching && !isError && trades.length > 0 && (
+        {data && trades.length > 0 && (
           <p className="text-secondary-text mt-1 text-sm">
             {completedCount} completed · {pendingCount} pending
           </p>
         )}
       </div>
 
-      {isFetching ? (
+      {isFetching && !data ? (
         <div className="space-y-2" aria-label="Loading recent trades">
           {Array.from({ length: 4 }, (_, index) => (
             <Skeleton key={index} className="h-24 w-full" />
           ))}
         </div>
-      ) : isError ? (
+      ) : isError && !data ? (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
           <p className="text-primary-text font-semibold">
             Couldn&apos;t load recent trades

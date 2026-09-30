@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
+import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ENABLE_REALTIME_NOTIFICATIONS_WS, WS_URL } from "@/utils/api/api";
 import {
@@ -172,10 +173,18 @@ function openValidatedExternalNotificationUrl(validatedExternalHref: string) {
 
 function showDesktopNotificationUnlessAppConnected(
   notification: Parameters<typeof showDesktopNotification>[0],
+  queryClient: QueryClient,
 ): void {
   if (!shouldShowDesktopNotification()) return;
 
-  void fetchHasAppConnection()
+  void queryClient
+    .fetchQuery({
+      queryKey: ["users", "me", "app-connection"],
+      queryFn: fetchHasAppConnection,
+      staleTime: 10_000,
+      gcTime: 30_000,
+      retry: false,
+    })
     .then((hasAppConnection) => {
       if (!hasAppConnection) {
         showDesktopNotification(notification);
@@ -194,6 +203,7 @@ export function useRealtimeNotificationsWebSocket(
   onSupporterUpdated?: (level: number) => void,
   preferenceUserId?: string | null,
 ): void {
+  const queryClient = useQueryClient();
   const isRealtimeNotificationsEnabled =
     enabled && ENABLE_REALTIME_NOTIFICATIONS_WS;
   const wsRef = useRef<WebSocket | null>(null);
@@ -806,14 +816,17 @@ export function useRealtimeNotificationsWebSocket(
                   const messagePreview =
                     toNotificationBody(dmData.content) ??
                     "Check your messages.";
-                  showDesktopNotificationUnlessAppConnected({
-                    title: "New message",
-                    body: messagePreview,
-                    target: {
-                      internalPath: `/messages/${encodeURIComponent(senderId)}`,
+                  showDesktopNotificationUnlessAppConnected(
+                    {
+                      title: "New message",
+                      body: messagePreview,
+                      target: {
+                        internalPath: `/messages/${encodeURIComponent(senderId)}`,
+                      },
+                      tag: `realtime-dm:${String(dmData.id)}`,
                     },
-                    tag: `realtime-dm:${String(dmData.id)}`,
-                  });
+                    queryClient,
+                  );
                   if (
                     !isViewingMessageConversation(
                       locationPathRef.current,
@@ -1047,7 +1060,10 @@ export function useRealtimeNotificationsWebSocket(
               tag: toastId,
             };
 
-            showDesktopNotificationUnlessAppConnected(desktopNotification);
+            showDesktopNotificationUnlessAppConnected(
+              desktopNotification,
+              queryClient,
+            );
 
             const now = Date.now();
             const isOnCooldown =
@@ -1221,5 +1237,6 @@ export function useRealtimeNotificationsWebSocket(
     onWebsiteBan,
     onSupporterUpdated,
     preferenceScope,
+    queryClient,
   ]);
 }

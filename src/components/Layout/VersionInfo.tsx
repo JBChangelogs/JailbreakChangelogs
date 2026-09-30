@@ -2,6 +2,7 @@
 
 import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const log = createLogger("UI");
 import { formatFullDate } from "@/utils/helpers/timestamp";
@@ -20,16 +21,17 @@ interface VersionInfoProps {
 
 export default function VersionInfo({ initialData }: VersionInfoProps = {}) {
   const [formattedDate, setFormattedDate] = useState<string>("");
-  const [versionInfo, setVersionInfo] = useState<VersionInfoState | null>(
-    initialData || null,
-  );
-
-  useEffect(() => {
-    let ignore = false;
-
-    const fetchVersion = async () => {
+  const [fallback] = useState<VersionInfoState>(() => ({
+    version: "unknown",
+    date: Date.now(),
+    branch: "development",
+    commitUrl: "#",
+  }));
+  const versionQuery = useQuery({
+    queryKey: ["version-info"],
+    queryFn: async ({ signal }): Promise<VersionInfoState> => {
       try {
-        const response = await fetch("/api/version");
+        const response = await fetch("/api/version", { signal });
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
           log.error("fetch version info failed", {
@@ -38,30 +40,19 @@ export default function VersionInfo({ initialData }: VersionInfoProps = {}) {
           });
           throw new Error("Failed to fetch version info");
         }
-        const data: VersionInfoState = await response.json();
-        if (ignore) return;
-        setVersionInfo(data);
+        return response.json() as Promise<VersionInfoState>;
       } catch (error) {
-        if (ignore) return;
         log.error("Error fetching version info", error);
-        const fallback: VersionInfoState = {
-          version: "unknown",
-          date: Date.now(),
-          branch: "development",
-          commitUrl: "#",
-        };
-        setVersionInfo(fallback);
+        throw error;
       }
-    };
-
-    if (!versionInfo) {
-      fetchVersion();
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, [versionInfo]);
+    },
+    initialData,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: false,
+  });
+  const versionInfo =
+    versionQuery.data ?? (versionQuery.isError ? fallback : null);
 
   // Handle date formatting on client only to avoid hydration mismatch
   // and ensure local timezone display

@@ -2,6 +2,7 @@
 
 import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useCallback, useEffect, useLayoutEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
 import type { ConversationSummary, Message } from "@/utils/messages/types";
@@ -62,43 +63,51 @@ export function useMessageThread({
   setIsUnmessageable,
   upsertLocalThreadMessage,
 }: UseMessageThreadOptions) {
+  const queryClient = useQueryClient();
   const fetchMessagesPage = useCallback(
     async (userId: string, page: number) => {
-      if (!PUBLIC_API_URL) {
-        throw new Error("Public API URL is not configured");
-      }
-
-      const pageParam = page > 1 ? `?page=${page}` : "";
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL,
-        `/v2/conversations/${encodeURIComponent(userId)}/messages${pageParam}`,
-      );
-      const response = await fetch(url, {
-        method: "GET",
-        credentials: "include",
-        cache: "no-store",
-        headers,
+      return queryClient.fetchQuery({
+        queryKey: ["message-thread-page", currentUserId, userId, page],
+        queryFn: async ({ signal }) => {
+          if (!PUBLIC_API_URL) {
+            throw new Error("Public API URL is not configured");
+          }
+          const pageParam = page > 1 ? `?page=${page}` : "";
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL,
+            `/v2/conversations/${encodeURIComponent(userId)}/messages${pageParam}`,
+          );
+          const response = await fetch(url, {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+            headers,
+            signal,
+          });
+          if (!response.ok) {
+            throw new Error(
+              await getResponseErrorMessage(
+                response,
+                "Failed to load messages",
+              ),
+            );
+          }
+          const rawBody = await response.text();
+          const parsed = rawBody ? (JSON.parse(rawBody) as unknown) : null;
+          const items = extractItems(parsed);
+          const pagination = extractPagination(parsed);
+          const parsedMessages = items
+            .map((item) => parseMessageRecord(item))
+            .filter((item): item is Message => Boolean(item))
+            .reverse();
+          return { messages: parsedMessages, pagination };
+        },
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
       });
-
-      if (!response.ok) {
-        throw new Error(
-          await getResponseErrorMessage(response, "Failed to load messages"),
-        );
-      }
-
-      const rawBody = await response.text();
-      const parsed = rawBody ? (JSON.parse(rawBody) as unknown) : null;
-      const items = extractItems(parsed);
-      const pagination = extractPagination(parsed);
-
-      // API returns newest → oldest; UI expects oldest → newest.
-      const parsedMessages = items
-        .map((item) => parseMessageRecord(item))
-        .filter((item): item is Message => Boolean(item))
-        .reverse();
-      return { messages: parsedMessages, pagination };
     },
-    [],
+    [queryClient, currentUserId],
   );
 
   const loadOlderMessages = useCallback(async () => {
@@ -296,19 +305,29 @@ export function useMessageThread({
 
     const checkEligibility = async () => {
       try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/v2/conversations/${encodeURIComponent(selectedUserId)}`,
-        );
-        const response = await fetch(url, {
-          method: "HEAD",
-          credentials: "include",
-          headers,
+        const status = await queryClient.fetchQuery({
+          queryKey: ["message-eligibility", currentUserId, selectedUserId],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              `/v2/conversations/${encodeURIComponent(selectedUserId)}`,
+            );
+            const response = await fetch(url, {
+              method: "HEAD",
+              credentials: "include",
+              headers,
+              signal,
+            });
+            return response.status;
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
 
         if (isCancelled) return;
 
-        if (response.status === 403) {
+        if (status === 403) {
           setIsUnmessageable(true);
           const systemContent = "You are not allowed to message this user.";
           toast.error(systemContent);
@@ -339,6 +358,7 @@ export function useMessageThread({
   }, [
     currentUserId,
     isAuthenticated,
+    queryClient,
     selectedUserId,
     setIsUnmessageable,
     setMessages,

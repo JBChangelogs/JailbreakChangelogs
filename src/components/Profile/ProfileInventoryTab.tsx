@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
+import { INVENTORY_API_URL } from "@/utils/api/api";
 import {
-  INVENTORY_API_SOURCE_HEADER,
-  INVENTORY_API_URL,
-} from "@/utils/api/api";
-import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
+  InventoryRequestError,
+  userInventoryQueryOptions,
+} from "@/utils/api/userInventoryQuery";
 import Image from "next/image";
 import { Pagination } from "@/components/ui/Pagination";
 import {
@@ -29,9 +29,8 @@ import {
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { bangers } from "@/app/fonts";
-import { createLogger } from "@/services/logger";
-
-const log = createLogger("UI");
+import { useBatchUserData } from "@/hooks/useBatchUserData";
+import { useQuery } from "@tanstack/react-query";
 
 interface InventoryApiItem {
   id: number | string;
@@ -60,21 +59,7 @@ interface InventoryItemNormalized {
   copyCount: number;
 }
 
-const sleep = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-const isRetryableFetchError = (error: unknown): boolean => {
-  if (!(error instanceof Error)) return false;
-  if (error.name === "AbortError") return false;
-  const message = error.message.toLowerCase();
-  return (
-    message.includes("fetch failed") ||
-    message.includes("network") ||
-    message.includes("timeout") ||
-    message.includes("connect") ||
-    message.includes("und_err")
-  );
-};
+const EMPTY_ITEMS: InventoryItemNormalized[] = [];
 
 const getProxyRobloxHeadshotUrl = (robloxId: string | null | undefined) => {
   const baseUrl = INVENTORY_API_URL;
@@ -102,297 +87,104 @@ export default function ProfileInventoryTab({
 }) {
   const trimmedId = (robloxId ?? "").trim();
   const hasValidRobloxId = /^\d+$/.test(trimmedId);
-
-  const [status, setStatus] = useState<"idle" | "loading" | "loaded" | "error">(
-    "idle",
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [isNotFound, setIsNotFound] = useState(false);
-  const [items, setItems] = useState<InventoryItemNormalized[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
-  const [tradeNote, setTradeNote] = useState<string | null>(null);
-  const [ownerUsers, setOwnerUsers] = useState<
-    Record<string, { name: string; displayName: string }>
-  >({});
-
-  const lastFetchedIdRef = useRef<string | null>(null);
-  const controllerRef = useRef<AbortController | null>(null);
-  const ownerFetchControllerRef = useRef<AbortController | null>(null);
-  const lastOwnerFetchKeyRef = useRef<string | null>(null);
-
-  const shouldShowLoadingUi =
-    active &&
-    hasValidRobloxId &&
-    Boolean(INVENTORY_API_URL) &&
-    lastFetchedIdRef.current !== trimmedId &&
-    status === "idle";
-  const effectiveStatus = shouldShowLoadingUi ? "loading" : status;
-
-  useEffect(() => {
-    if (!active) {
-      controllerRef.current?.abort();
-      return;
-    }
-
-    if (!hasValidRobloxId) {
-      setStatus("error");
-      setError("This user does not have a connected Roblox account.");
-      setItems([]);
-      setTotalCount(0);
-      return;
-    }
-
-    if (!INVENTORY_API_URL) {
-      setStatus("error");
-      setError(
-        "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing).",
-      );
-      setItems([]);
-      setTotalCount(0);
-      return;
-    }
-
-    if (lastFetchedIdRef.current === trimmedId) {
-      return;
-    }
-
-    controllerRef.current?.abort();
-    const controller = new AbortController();
-    controllerRef.current = controller;
-
-    const fetchInventory = async () => {
-      setStatus("loading");
-      setError(null);
-      setIsNotFound(false);
-
-      try {
-        const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(trimmedId)}&nocache=false`;
-        const maxAttempts = 3;
-
-        let response: Response | null = null;
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-          if (controller.signal.aborted) {
-            throw new DOMException("Aborted", "AbortError");
-          }
-
-          try {
-            response = await fetch(url, {
-              method: "GET",
-              headers: {
-                "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
-                "X-Source": INVENTORY_API_SOURCE_HEADER ?? "",
-              },
-              cache: "no-store",
-              signal: controller.signal,
-            });
-          } catch (err) {
-            if (controller.signal.aborted) {
-              throw new DOMException("Aborted", "AbortError");
-            }
-            if (attempt < maxAttempts - 1 && isRetryableFetchError(err)) {
-              const baseDelayMs = 500 * Math.pow(2, attempt);
-              const jitterMs = Math.floor(Math.random() * 250);
-              await sleep(baseDelayMs + jitterMs);
-              continue;
-            }
-            throw err;
-          }
-
-          if (
-            response &&
-            !response.ok &&
-            shouldRetryResponseStatus(response.status) &&
-            attempt < maxAttempts - 1
-          ) {
-            response.body?.cancel();
-            const baseDelayMs = 500 * Math.pow(2, attempt);
-            const jitterMs = Math.floor(Math.random() * 250);
-            await sleep(baseDelayMs + jitterMs);
-            response = null;
-            continue;
-          }
-
-          break;
-        }
-
-        if (!response) {
-          throw new Error("Failed to load inventory (no response)");
-        }
-
-        const payload = (await response.json()) as unknown;
-        if (!response.ok) {
-          if (response.status === 404) setIsNotFound(true);
-          const message =
-            (payload &&
-            typeof payload === "object" &&
-            "message" in payload &&
-            typeof (payload as { message?: unknown }).message === "string"
-              ? (payload as { message: string }).message
-              : null) || `Failed to load inventory (${response.status})`;
-          throw new Error(message);
-        }
-
-        const data =
-          payload && typeof payload === "object" && !Array.isArray(payload)
-            ? (payload as InventoryApiResponse)
-            : null;
-        const rawData = Array.isArray(data?.data) ? data.data : [];
-        const rawDupes = Array.isArray(data?.duplicates) ? data.duplicates : [];
-
-        const out: InventoryItemNormalized[] = [];
-        const combinedCount = rawData.length + rawDupes.length;
-
-        const idCounts = new Map<string, number>();
-        const bumpCount = (it: InventoryApiItem) => {
-          const idKey = normalizeInventoryItemId(it?.id);
-          if (!idKey) return;
-          idCounts.set(idKey, (idCounts.get(idKey) || 0) + 1);
-        };
-        rawData.forEach(bumpCount);
-        rawDupes.forEach(bumpCount);
-
-        const idSeen = new Map<string, number>();
-
-        const pushItem = (it: InventoryApiItem, isDuped: boolean) => {
-          const idKey = normalizeInventoryItemId(it?.id);
-          if (!idKey) return;
-          const nextOrder = (idSeen.get(idKey) || 0) + 1;
-          idSeen.set(idKey, nextOrder);
-          const copyCount = idCounts.get(idKey) || 1;
-          const originalOwner =
-            typeof it["Original Owner"] === "string" &&
-            it["Original Owner"].trim()
-              ? it["Original Owner"].trim()
-              : null;
-          const createdAt =
-            typeof it["Created At"] === "string" && it["Created At"].trim()
-              ? it["Created At"].trim()
-              : null;
-          out.push({
-            id: idKey,
-            name: it.name,
-            type: it.type,
-            originalOwner,
-            createdAt,
-            isDuped,
-            isOG: Boolean(originalOwner && originalOwner === trimmedId),
-            copyOrder: nextOrder,
-            copyCount,
-          });
-        };
-
-        rawData.forEach((it) => {
-          pushItem(it, false);
-        });
-        rawDupes.forEach((it) => {
-          pushItem(it, true);
-        });
-
-        setItems(out);
-        setTotalCount(combinedCount);
-        setTradeNote(data?.trade_note?.note?.trim() || null);
-        setStatus("loaded");
-        lastFetchedIdRef.current = trimmedId;
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          // StrictMode can replay effects and trigger aborts; don't cache failed/aborted attempts.
-          lastFetchedIdRef.current = null;
-          setStatus("idle");
-          return;
-        }
-        setStatus("error");
-        setError(
-          err instanceof Error ? err.message : "Failed to load inventory",
-        );
-        setItems([]);
-        setTotalCount(0);
-        setTradeNote(null);
-        lastFetchedIdRef.current = null;
-      }
+  const inventoryQuery = useQuery({
+    ...userInventoryQueryOptions(trimmedId),
+    enabled: active && hasValidRobloxId && Boolean(INVENTORY_API_URL),
+    refetchOnWindowFocus: false,
+  });
+  const normalizedInventory = useMemo(() => {
+    if (inventoryQuery.data === undefined) return null;
+    const payload = inventoryQuery.data;
+    const data =
+      payload && typeof payload === "object" && !Array.isArray(payload)
+        ? (payload as InventoryApiResponse)
+        : null;
+    const rawData = Array.isArray(data?.data) ? data.data : [];
+    const rawDupes = Array.isArray(data?.duplicates) ? data.duplicates : [];
+    const out: InventoryItemNormalized[] = [];
+    const idCounts = new Map<string, number>();
+    const bumpCount = (item: InventoryApiItem) => {
+      const idKey = normalizeInventoryItemId(item?.id);
+      if (idKey) idCounts.set(idKey, (idCounts.get(idKey) || 0) + 1);
     };
+    rawData.forEach(bumpCount);
+    rawDupes.forEach(bumpCount);
+    const idSeen = new Map<string, number>();
+    const pushItem = (item: InventoryApiItem, isDuped: boolean) => {
+      const idKey = normalizeInventoryItemId(item?.id);
+      if (!idKey) return;
+      const nextOrder = (idSeen.get(idKey) || 0) + 1;
+      idSeen.set(idKey, nextOrder);
+      const originalOwner =
+        typeof item["Original Owner"] === "string" &&
+        item["Original Owner"].trim()
+          ? item["Original Owner"].trim()
+          : null;
+      const createdAt =
+        typeof item["Created At"] === "string" && item["Created At"].trim()
+          ? item["Created At"].trim()
+          : null;
+      out.push({
+        id: idKey,
+        name: item.name,
+        type: item.type,
+        originalOwner,
+        createdAt,
+        isDuped,
+        isOG: originalOwner === trimmedId,
+        copyOrder: nextOrder,
+        copyCount: idCounts.get(idKey) || 1,
+      });
+    };
+    rawData.forEach((item) => pushItem(item, false));
+    rawDupes.forEach((item) => pushItem(item, true));
+    return {
+      items: out,
+      totalCount: rawData.length + rawDupes.length,
+      tradeNote: data?.trade_note?.note?.trim() || null,
+    };
+  }, [inventoryQuery.data, trimmedId]);
+  const items = normalizedInventory?.items ?? EMPTY_ITEMS;
+  const totalCount = normalizedInventory?.totalCount ?? 0;
+  const tradeNote = normalizedInventory?.tradeNote ?? null;
+  const status =
+    !hasValidRobloxId || !INVENTORY_API_URL
+      ? "error"
+      : inventoryQuery.data !== undefined
+        ? "loaded"
+        : inventoryQuery.isError
+          ? "error"
+          : active
+            ? "loading"
+            : "idle";
+  const effectiveStatus = status;
+  const error = !hasValidRobloxId
+    ? "This user does not have a connected Roblox account."
+    : !INVENTORY_API_URL
+      ? "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing)."
+      : (inventoryQuery.error?.message ?? null);
+  const isNotFound =
+    inventoryQuery.error instanceof InventoryRequestError &&
+    inventoryQuery.error.status === 404;
 
-    void fetchInventory();
-  }, [active, hasValidRobloxId, trimmedId]);
-
-  useEffect(() => {
-    if (!active) return;
-    if (status !== "loaded") return;
-    if (!INVENTORY_API_URL) return;
-    if (items.length === 0) return;
-
-    const userIds = Array.from(
-      new Set(
-        items
-          .map((item) => (item.originalOwner || "").trim())
-          .filter((id) => /^\d+$/.test(id))
-          .concat(trimmedId),
+  const ownerIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          items
+            .map((item) => (item.originalOwner || "").trim())
+            .filter((id) => /^\d+$/.test(id))
+            .concat(trimmedId),
+        ),
       ),
-    );
-
-    const key = userIds.sort().join(",");
-    if (lastOwnerFetchKeyRef.current === key) return;
-    lastOwnerFetchKeyRef.current = key;
-
-    ownerFetchControllerRef.current?.abort();
-    const controller = new AbortController();
-    ownerFetchControllerRef.current = controller;
-
-    const fetchOwners = async () => {
-      try {
-        const response = await fetch(`${INVENTORY_API_URL}/proxy/users/v2`, {
-          method: "POST",
-          headers: {
-            "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
-            "X-Source": INVENTORY_API_SOURCE_HEADER ?? "",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userIds }),
-          cache: "no-store",
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          log.error("fetch inventory owners failed", {
-            status: response.status,
-            body,
-          });
-          return;
-        }
-
-        const data = (await response.json()) as unknown;
-        if (!data || typeof data !== "object" || Array.isArray(data)) return;
-
-        const next: Record<string, { name: string; displayName: string }> = {};
-        Object.values(data as Record<string, unknown>).forEach((user) => {
-          if (!user || typeof user !== "object") return;
-          const record = user as Record<string, unknown>;
-          const id = record.id;
-          const name = typeof record.name === "string" ? record.name : "";
-          const displayName =
-            typeof record.displayName === "string" ? record.displayName : "";
-          if (typeof id === "number" || typeof id === "string") {
-            const userId = String(id);
-            next[userId] = {
-              name: name || userId,
-              displayName: displayName || name || userId,
-            };
-          }
-        });
-
-        setOwnerUsers(next);
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") return;
-      }
-    };
-
-    void fetchOwners();
-
-    return () => controller.abort();
-  }, [active, items, status, trimmedId]);
+    [items, trimmedId],
+  );
+  const { robloxUsers: ownerUsers } = useBatchUserData(ownerIds, {
+    enabled: active && status === "loaded" && items.length > 0,
+  });
 
   const hasItems = status === "loaded" && items.length > 0;
 
@@ -591,14 +383,7 @@ export default function ProfileInventoryTab({
           ) : (
             hasValidRobloxId &&
             INVENTORY_API_URL && (
-              <Button
-                size="sm"
-                onClick={() => {
-                  lastFetchedIdRef.current = null;
-                  setStatus("idle");
-                  setError(null);
-                }}
-              >
+              <Button size="sm" onClick={() => void inventoryQuery.refetch()}>
                 Try Again
               </Button>
             )

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { parseSortGroups, type SortGroup } from "@/utils/api/sortGroups";
 import {
   CommentData,
@@ -28,8 +29,8 @@ import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCach
 import {
   prepareEmojiShortcodeContentForApi,
   prepareEmojiShortcodeDisplayContent,
-  type EmojiStringMap,
 } from "@/utils/comments/emojiShortcodes";
+import { useEmojiStringMap } from "@/hooks/useEmojiStringMap";
 import type {
   ChangelogCommentsProps,
   ThreadedComment,
@@ -38,8 +39,10 @@ import type {
 } from "./commentTypes";
 
 const log = createLogger("UI");
+const EMPTY_SORT_GROUPS: SortGroup[] = [];
 
 export function useCommentState(props: ChangelogCommentsProps) {
+  const queryClient = useQueryClient();
   const {
     changelogId,
     changelogTitle,
@@ -83,7 +86,23 @@ export function useCommentState(props: ChangelogCommentsProps) {
   );
   const sortPrefKey = `comments_sort_${type}`;
   const [sortOrder, setSortOrder] = useState<string | null>(null);
-  const [sortGroups, setSortGroups] = useState<SortGroup[]>([]);
+  const sortGroupsQuery = useQuery({
+    queryKey: ["comment-sorts"],
+    queryFn: async ({ signal }): Promise<SortGroup[]> => {
+      const response = await fetch(`${PUBLIC_API_URL}/v2/comments/sorts`, {
+        signal,
+      });
+      if (!response.ok)
+        throw new Error(`Comment sorts request failed (${response.status})`);
+      return parseSortGroups(await response.json());
+    },
+    enabled: Boolean(PUBLIC_API_URL),
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const sortGroups = sortGroupsQuery.data ?? EMPTY_SORT_GROUPS;
   const availableSorts = useMemo(
     () =>
       sortGroups.flatMap((group) =>
@@ -137,8 +156,11 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const [isCommentFormExpanded, setIsCommentFormExpanded] = useState(false);
 
   // --- Reactions & :shortcode: emoji map ---
-  const [emojiStringMap, setEmojiStringMap] = useState<EmojiStringMap>({});
-  const [availableEmojis, setAvailableEmojis] = useState<string[]>([]);
+  const emojiStringMap = useEmojiStringMap();
+  const availableEmojis = useMemo(
+    () => Object.values(emojiStringMap),
+    [emojiStringMap],
+  );
   const [reactionPickerHoverOpenId, setReactionPickerHoverOpenId] = useState<
     number | null
   >(null);
@@ -488,18 +510,9 @@ export function useCommentState(props: ChangelogCommentsProps) {
   }, []);
 
   useEffect(() => {
-    fetch(`${PUBLIC_API_URL}/v2/comments/sorts`)
-      .then((r) => r.json())
-      .then((data: unknown) => {
-        const groups = parseSortGroups(data);
-        const firstSort = groups[0]?.options[0]?.value;
-        if (firstSort) {
-          setSortGroups(groups);
-          setSortOrder((prev) => prev ?? firstSort);
-        }
-      })
-      .catch(() => {});
-  }, []);
+    const firstSort = sortGroups[0]?.options[0]?.value;
+    if (firstSort) setSortOrder((prev) => prev ?? firstSort);
+  }, [sortGroups]);
 
   useEffect(() => {
     const handlePreference = (e: Event) => {
@@ -543,28 +556,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
       );
     };
   }, [availableSorts, sortPrefKey]);
-
-  useEffect(() => {
-    fetch(`${PUBLIC_API_URL}/v2/emojis/string`, {
-      credentials: "include",
-    })
-      .then((r) => r.json())
-      .then((data: unknown) => {
-        if (
-          data &&
-          typeof data === "object" &&
-          "emojis" in data &&
-          typeof (data as { emojis: unknown }).emojis === "object" &&
-          (data as { emojis: unknown }).emojis !== null &&
-          !Array.isArray((data as { emojis: unknown }).emojis)
-        ) {
-          const map = (data as { emojis: EmojiStringMap }).emojis;
-          setEmojiStringMap(map);
-          setAvailableEmojis(Object.values(map));
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const prepareCommentContentForApi = useCallback(
     (text: string) =>
@@ -655,16 +646,28 @@ export function useCommentState(props: ChangelogCommentsProps) {
           urlWithPage.searchParams.set("sort", effectiveSort);
         }
 
-        const res = await fetch(urlWithPage.toString(), {
-          credentials: "include",
-          headers: commentsHeaders,
+        const data = await queryClient.fetchQuery({
+          queryKey: [
+            "comments",
+            commentType,
+            changelogId,
+            targetPage,
+            effectiveSort,
+            currentUserId,
+          ],
+          queryFn: async ({ signal }) => {
+            const response = await fetch(urlWithPage.toString(), {
+              credentials: "include",
+              headers: commentsHeaders,
+              signal,
+            });
+            if (!response.ok) throw new Error("Failed to fetch comments");
+            return response.json();
+          },
+          staleTime: 0,
+          gcTime: 60_000,
+          retry: false,
         });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch comments");
-        }
-
-        const data = await res.json();
         const { comments: commentsArray, userMap } = flattenComments(
           data,
           currentUserId,
@@ -682,7 +685,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         if (!silent) setIsRefreshingComments(false);
       }
     },
-    [changelogId, type, itemType, sortOrder, currentUserId],
+    [changelogId, type, itemType, sortOrder, currentUserId, queryClient],
   );
 
   // Refresh comments when changelogId changes with simple debouncing

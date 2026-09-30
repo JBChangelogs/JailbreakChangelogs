@@ -13,8 +13,9 @@ export default function QueryProvider({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 0, // Always fetch fresh data
-            gcTime: 0, // No caching - garbage collect immediately
+            staleTime: 0, // Data is immediately stale and can refetch on triggers.
+            gcTime: 0, // Remove data when its last observer unmounts.
+            retry: 1, // One retry after the initial request; individual queries can override this.
           },
         },
       }),

@@ -3,6 +3,7 @@
 import { createLogger } from "@/services/logger";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const log = createLogger("UI");
 import Image from "next/image";
@@ -522,6 +523,7 @@ const MobileDrawer = memo(function MobileDrawer({
 });
 
 export default function Header() {
+  const queryClient = useQueryClient();
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -563,38 +565,38 @@ export default function Header() {
     serviceAlert: ServiceAlert | null;
   }>({ newsAnnouncement: null, serviceAlert: null });
 
-  // Fetched client-side so the tickers stay live on statically prerendered
-  // pages (the root layout bakes server flag reads in at build time) and
-  // refresh on SPA navigations.
+  // Include the path so a SPA navigation checks for updated ticker flags.
+  const tickerFlagsQuery = useQuery({
+    queryKey: ["ticker-flags", pathname],
+    queryFn: async ({ signal }) => {
+      const response = await fetch("/api/flags/tickers", { signal });
+      if (!response.ok) throw new Error("Failed to fetch ticker flags");
+      return response.json() as Promise<{
+        newsAnnouncement: NewsTickerAnnouncement | null;
+        serviceAlert: ServiceAlert | null;
+      }>;
+    },
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const response = await fetch("/api/flags/tickers");
-        if (!response.ok) return;
-        const data = (await response.json()) as {
-          newsAnnouncement: NewsTickerAnnouncement | null;
-          serviceAlert: ServiceAlert | null;
-        };
-        if (cancelled) return;
-        setTickerFlags(data);
-      } catch {
-        // Tickers are non-critical; keep whatever we last showed.
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname]);
+    if (tickerFlagsQuery.data) setTickerFlags(tickerFlagsQuery.data);
+  }, [tickerFlagsQuery.data]);
 
   const refreshUnreadNotificationCount = useCallback(async () => {
     const requestId = ++notificationCountRequestRef.current;
-    const count = await fetchUnreadNotificationCount();
+    const count = await queryClient.fetchQuery({
+      queryKey: ["notifications", "unread-count", authUser?.id],
+      queryFn: fetchUnreadNotificationCount,
+      staleTime: 0,
+      gcTime: 0,
+      retry: false,
+    });
     if (requestId === notificationCountRequestRef.current && count !== null) {
       setUnreadCount(count);
     }
-  }, []);
+  }, [queryClient, authUser?.id]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -623,11 +625,17 @@ export default function Header() {
 
   const refreshUnreadMessageCount = useCallback(async () => {
     const requestId = ++messageCountRequestRef.current;
-    const count = await fetchUnreadMessageCount();
+    const count = await queryClient.fetchQuery({
+      queryKey: ["messages", "unread-count", authUser?.id],
+      queryFn: fetchUnreadMessageCount,
+      staleTime: 0,
+      gcTime: 0,
+      retry: false,
+    });
     if (requestId === messageCountRequestRef.current && count !== null) {
       setUnreadMessageCount(count);
     }
-  }, []);
+  }, [queryClient, authUser?.id]);
 
   useEffect(() => {
     if (!isAuthenticated) return;

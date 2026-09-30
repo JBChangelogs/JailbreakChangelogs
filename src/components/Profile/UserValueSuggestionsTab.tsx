@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,8 @@ interface SuggestionsResponse {
   size: number;
 }
 
+const EMPTY_SUGGESTIONS: Suggestion[] = [];
+
 interface UserSuggestionStats {
   total_submitted: number;
   total_accepted: number;
@@ -139,13 +142,63 @@ export default function UserValueSuggestionsTab({
 }: UserValueSuggestionsTabProps) {
   "use no memo";
 
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userStats, setUserStats] = useState<UserSuggestionStats | null>(null);
+  const suggestionsQuery = useQuery({
+    queryKey: ["profile-value-suggestions", userId, page],
+    queryFn: async ({ signal }): Promise<SuggestionsResponse> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/value-suggestions?user=${userId}&page=${page}`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (response.status === 404) {
+        return { items: [], total: 0, page, total_pages: 1, size: 0 };
+      }
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch user suggestions failed", {
+          status: response.status,
+          body,
+        });
+        throw new Error("Failed to fetch suggestions");
+      }
+      return response.json() as Promise<SuggestionsResponse>;
+    },
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const statsQuery = useQuery({
+    queryKey: ["profile-value-suggestion-stats", userId],
+    queryFn: async ({ signal }): Promise<UserSuggestionStats | null> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/users/${userId}/value-suggestion-stats`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok)
+        throw new Error(`Suggestion stats request failed (${response.status})`);
+      const data = await response.json();
+      return data.stats ?? null;
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const suggestions = suggestionsQuery.data?.items ?? EMPTY_SUGGESTIONS;
+  const totalPages = suggestionsQuery.data?.total_pages ?? 1;
+  const total = suggestionsQuery.data?.total ?? 0;
+  const loading = suggestionsQuery.isPending;
+  const error = suggestionsQuery.data ? null : suggestionsQuery.error?.message;
+  const userStats = statsQuery.data ?? null;
 
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
     new Set(),
@@ -163,72 +216,6 @@ export default function UserValueSuggestionsTab({
     upCount: number;
     downCount: number;
   } | null>(null);
-
-  const fetchSuggestions = useCallback(
-    async (p: number) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/v2/value-suggestions?user=${userId}&page=${p}`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (res.status === 404) {
-          setSuggestions([]);
-          setTotal(0);
-          setTotalPages(1);
-          return;
-        }
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          log.error("fetch user suggestions failed", {
-            status: res.status,
-            body,
-          });
-          throw new Error("Failed to fetch suggestions");
-        }
-        const data: SuggestionsResponse = await res.json();
-        setSuggestions(data.items ?? []);
-        setTotal(data.total ?? 0);
-        setTotalPages(data.total_pages ?? 1);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load suggestions",
-        );
-      } finally {
-        setLoading(false);
-      }
-    },
-    [userId],
-  );
-
-  useEffect(() => {
-    fetchSuggestions(page);
-  }, [fetchSuggestions, page]);
-
-  useEffect(() => {
-    let ignore = false;
-    const run = async () => {
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/v2/users/${userId}/value-suggestion-stats`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (ignore) return;
-        setUserStats(data.stats ?? null);
-      } catch {
-        // stats are non-critical
-      }
-    };
-    run();
-    return () => {
-      ignore = true;
-    };
-  }, [userId]);
 
   useEffect(() => {
     if (loading) return;
@@ -338,7 +325,7 @@ export default function UserValueSuggestionsTab({
           Item Suggestions
         </h2>
         <p className="text-status-error mb-4 text-sm">{error}</p>
-        <Button onClick={() => fetchSuggestions(page)} size="sm">
+        <Button onClick={() => void suggestionsQuery.refetch()} size="sm">
           Try Again
         </Button>
       </div>

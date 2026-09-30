@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createLogger } from "@/services/logger";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
@@ -17,93 +18,123 @@ interface UseSuggestionsFeedOptions {
   page: number;
 }
 
+type FeedData = SuggestionsResponse & { noSuggestionsFound: boolean };
+
+function feedKey(urlQuery: string, sort: string | null, page: number) {
+  return ["value-suggestions-feed", urlQuery.trim(), sort, page] as const;
+}
+
+async function loadFeed(
+  urlQuery: string,
+  sort: string | null,
+  page: number,
+  signal: AbortSignal,
+): Promise<FeedData> {
+  const query = new URLSearchParams({ page: String(page) });
+  if (sort !== null) query.set("sort", sort);
+  const isSearching = urlQuery.trim().length > 0;
+  if (isSearching) query.set("query", urlQuery.trim());
+  const endpoint = isSearching
+    ? `/v2/value-suggestions/search?${query}`
+    : `/v2/value-suggestions?${query}`;
+  const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL!, endpoint);
+  const response = await fetch(url, {
+    credentials: "include",
+    headers,
+    signal,
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    if (response.status === 404 && body?.error === "no_suggestions_found") {
+      return {
+        items: [],
+        page,
+        size: 0,
+        total_pages: 1,
+        total: 0,
+        noSuggestionsFound: !isSearching,
+      };
+    }
+    log.error("fetch suggestions failed", { status: response.status, body });
+    throw new Error("Failed to fetch suggestions");
+  }
+  const data = (await response.json()) as SuggestionsResponse;
+  return { ...data, noSuggestionsFound: false };
+}
+
 export function useSuggestionsFeed({
   urlQuery,
   sort,
   page,
 }: UseSuggestionsFeedOptions) {
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(true);
-  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const queryClient = useQueryClient();
   const [pageChanging, setPageChanging] = useState(false);
-  const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
-  const [noSuggestionsFound, setNoSuggestionsFound] = useState(false);
   const [pendingNew, setPendingNew] = useState(0);
   const [pendingTypes, setPendingTypes] = useState<Set<string>>(new Set());
   const hasLoadedOnceRef = useRef(false);
+  const key = useMemo(
+    () => feedKey(urlQuery, sort, page),
+    [urlQuery, sort, page],
+  );
+  const feedQuery = useQuery({
+    queryKey: key,
+    queryFn: ({ signal }) => loadFeed(urlQuery, sort, page, signal),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (feedQuery.isPending) return;
+    hasLoadedOnceRef.current = true;
+    setPageChanging(false);
+  }, [feedQuery.isPending, feedQuery.dataUpdatedAt, urlQuery, sort, page]);
+
+  const setSuggestions = useCallback<
+    React.Dispatch<React.SetStateAction<Suggestion[]>>
+  >(
+    (update) => {
+      queryClient.setQueryData<FeedData>(key, (previous) => {
+        const current = previous ?? {
+          items: [],
+          page,
+          size: 0,
+          total_pages: 1,
+          total: 0,
+          noSuggestionsFound: false,
+        };
+        const items =
+          typeof update === "function" ? update(current.items ?? []) : update;
+        return { ...current, items };
+      });
+    },
+    [queryClient, key, page],
+  );
 
   const fetchSuggestions = useCallback(
     async (requestedPage: number) => {
-      setSuggestionsError(null);
-      setNoSuggestionsFound(false);
       setPendingNew(0);
       setPendingTypes(new Set());
-      const isSearching = urlQuery.trim().length > 0;
-      if (hasLoadedOnceRef.current) {
-        setIsSearchLoading(true);
-      } else {
-        setLoadingSuggestions(true);
-      }
+      await queryClient.invalidateQueries({
+        queryKey: ["value-suggestions-feed"],
+        refetchType: "none",
+      });
       try {
-        const query = new URLSearchParams({ page: String(requestedPage) });
-        if (sort !== null) query.set("sort", sort);
-        if (isSearching) query.set("query", urlQuery.trim());
-        const endpoint = isSearching
-          ? `/v2/value-suggestions/search?${query}`
-          : `/v2/value-suggestions?${query}`;
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          endpoint,
-        );
-        const response = await fetch(url, { credentials: "include", headers });
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          if (
-            response.status === 404 &&
-            body?.error === "no_suggestions_found"
-          ) {
-            if (!isSearching) setNoSuggestionsFound(true);
-            setSuggestions([]);
-            setTotalPages(1);
-            setTotal(0);
-            return;
-          }
-          log.error("fetch suggestions failed", {
-            status: response.status,
-            body,
-          });
-          throw new Error("Failed to fetch suggestions");
-        }
-        const data: SuggestionsResponse = await response.json();
-        setSuggestions(data.items ?? []);
-        setTotalPages(data.total_pages ?? 1);
-        setTotal(data.total ?? 0);
-      } catch (error) {
-        setSuggestionsError(
-          error instanceof Error ? error.message : "Failed to load suggestions",
-        );
-      } finally {
-        hasLoadedOnceRef.current = true;
-        setLoadingSuggestions(false);
-        setIsSearchLoading(false);
-        setPageChanging(false);
+        await queryClient.fetchQuery({
+          queryKey: feedKey(urlQuery, sort, requestedPage),
+          queryFn: ({ signal }) =>
+            loadFeed(urlQuery, sort, requestedPage, signal),
+          staleTime: 30_000,
+          gcTime: 5 * 60_000,
+          retry: false,
+        });
+      } catch {
+        // The active query exposes the error to the results UI.
       }
     },
-    [sort, urlQuery],
+    [queryClient, sort, urlQuery],
   );
-
-  useEffect(() => {
-    if (hasLoadedOnceRef.current) {
-      setSuggestions([]);
-      setLoadingSuggestions(true);
-    }
-  }, [sort]);
-
-  useEffect(() => {
-    void fetchSuggestions(page);
-  }, [fetchSuggestions, page]);
 
   useEffect(() => {
     const handler = (event: Event) => {
@@ -125,15 +156,17 @@ export function useSuggestionsFeed({
   }, []);
 
   return {
-    suggestions,
+    suggestions: feedQuery.data?.items ?? [],
     setSuggestions,
-    totalPages,
-    total,
-    loadingSuggestions,
-    isSearchLoading,
+    totalPages: feedQuery.data?.total_pages ?? 1,
+    total: feedQuery.data?.total ?? 0,
+    loadingSuggestions: feedQuery.isPending,
+    isSearchLoading: hasLoadedOnceRef.current && feedQuery.isPending,
     pageChanging,
-    suggestionsError,
-    noSuggestionsFound,
+    suggestionsError: feedQuery.data
+      ? null
+      : (feedQuery.error?.message ?? null),
+    noSuggestionsFound: feedQuery.data?.noSuggestionsFound ?? false,
     pendingNew,
     pendingTypes,
     fetchSuggestions,

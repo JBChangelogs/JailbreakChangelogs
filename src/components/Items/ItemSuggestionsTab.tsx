@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
@@ -171,6 +172,8 @@ interface SuggestionsResponse {
   size: number;
 }
 
+const EMPTY_SUGGESTIONS: Suggestion[] = [];
+
 const fieldLabel = (field: string) =>
   field
     .split("_")
@@ -219,13 +222,7 @@ export default function ItemSuggestionsTab({
   "use no memo";
   // RE-ADD: voting — const { isAuthenticated, user, setLoginModal } = useAuthContext();
 
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [empty, setEmpty] = useState(false);
 
   // RE-ADD: voting state
   // const [votingIds, setVotingIds] = useState<Set<number>>(new Set());
@@ -250,50 +247,41 @@ export default function ItemSuggestionsTab({
     downCount: number;
   } | null>(null);
 
-  const fetchSuggestions = useCallback(
-    async (p: number) => {
-      setLoading(true);
-      setError(null);
-      setEmpty(false);
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/v2/items/${itemId}/value-suggestions?page=${p}`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (res.status === 404) {
-          setEmpty(true);
-          setSuggestions([]);
-          setTotal(0);
-          setTotalPages(1);
-          return;
-        }
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          log.error("fetch item suggestions failed", {
-            status: res.status,
-            body,
-          });
-          throw new Error("Failed to fetch suggestions");
-        }
-        const data: SuggestionsResponse = await res.json();
-        setSuggestions(data.items ?? []);
-        setTotal(data.total ?? 0);
-        setTotalPages(data.total_pages ?? 1);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load suggestions",
-        );
-      } finally {
-        setLoading(false);
+  const suggestionsQuery = useQuery({
+    queryKey: ["item-value-suggestions", itemId, page],
+    queryFn: async ({ signal }): Promise<SuggestionsResponse> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/items/${itemId}/value-suggestions?page=${page}`,
+      );
+      const res = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (res.status === 404) {
+        return { total: 0, items: [], page, total_pages: 1, size: 0 };
       }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        log.error("fetch item suggestions failed", {
+          status: res.status,
+          body,
+        });
+        throw new Error("Failed to fetch suggestions");
+      }
+      return res.json() as Promise<SuggestionsResponse>;
     },
-    [itemId],
-  );
-
-  useEffect(() => {
-    fetchSuggestions(page);
-  }, [fetchSuggestions, page]);
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const suggestions = suggestionsQuery.data?.items ?? EMPTY_SUGGESTIONS;
+  const totalPages = suggestionsQuery.data?.total_pages ?? 1;
+  const total = suggestionsQuery.data?.total ?? 0;
+  const loading = suggestionsQuery.isPending;
+  const error = suggestionsQuery.data ? null : suggestionsQuery.error?.message;
 
   useEffect(() => {
     if (loading) return;
@@ -350,14 +338,14 @@ export default function ItemSuggestionsTab({
           Failed to Load Suggestions
         </h3>
         <p className="text-secondary-text mb-4 text-sm">{error}</p>
-        <Button onClick={() => fetchSuggestions(page)} size="sm">
+        <Button onClick={() => void suggestionsQuery.refetch()} size="sm">
           Try Again
         </Button>
       </div>
     );
   }
 
-  if (empty || suggestions.length === 0) {
+  if (suggestions.length === 0) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <h2 className="text-primary-text mb-3 text-lg font-semibold">

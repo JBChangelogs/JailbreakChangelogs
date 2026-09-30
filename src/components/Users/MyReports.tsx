@@ -2,6 +2,7 @@
 
 import { parseSortGroups } from "@/utils/api/sortGroups";
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
@@ -21,6 +22,7 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import type { UserData } from "@/types/auth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/contexts/AuthContext";
 import {
   Tooltip,
   TooltipContent,
@@ -652,6 +654,8 @@ export function ReportContext({ report }: { report: Report }) {
 }
 
 export default function MyReports() {
+  const queryClient = useQueryClient();
+  const { user } = useAuthContext();
   const router = useRouter();
   const [pageParam, setPageParam] = useQueryState("page", {
     defaultValue: "1",
@@ -717,38 +721,57 @@ export default function MyReports() {
         const sortQuery = currentSort
           ? `&sort=${encodeURIComponent(currentSort)}`
           : "";
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/v2/users/me/reports?page=${currentPage}${typeQuery}${sortQuery}`,
-        );
-        const response = await fetch(url, {
-          credentials: "include",
-          cache: "no-store",
-          headers,
+        const { status, ok, data } = await queryClient.fetchQuery({
+          queryKey: [
+            "my-reports",
+            user?.id,
+            currentPage,
+            reportType,
+            currentSort,
+          ],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              `/v2/users/me/reports?page=${currentPage}${typeQuery}${sortQuery}`,
+            );
+            const response = await fetch(url, {
+              credentials: "include",
+              cache: "no-store",
+              headers,
+              signal,
+            });
+            return {
+              status: response.status,
+              ok: response.ok,
+              data: (await response.json().catch(() => null)) as unknown,
+            };
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
 
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          if (response.status === 404) {
+        if (!ok) {
+          if (status === 404) {
             setReports([]);
             setTotalPages(1);
             setTotal(0);
             return;
           }
           log.error("Failed to fetch reports", {
-            status: response.status,
-            body,
+            status,
+            body: data,
           });
           throw new Error(
-            (body as { message?: string })?.message ?? "Failed to load reports",
+            (data as { message?: string })?.message ?? "Failed to load reports",
           );
         }
 
-        const data: ReportsResponse = await response.json();
-        const items = data.items ?? [];
+        const reportData = data as ReportsResponse;
+        const items = reportData.items ?? [];
         setReports(items);
-        setTotalPages(data.total_pages ?? 1);
-        setTotal(data.total ?? 0);
+        setTotalPages(reportData.total_pages ?? 1);
+        setTotal(reportData.total ?? 0);
 
         const ids = [
           ...new Set(
@@ -757,13 +780,26 @@ export default function MyReports() {
         ];
         if (ids.length > 0) {
           try {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              `/v2/users/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
-            );
-            const usersRes = await fetch(url, { cache: "no-store", headers });
-            if (usersRes.ok) {
-              const usersArr = (await usersRes.json()) as UserData[];
+            const usersArr = await queryClient.fetchQuery({
+              queryKey: ["report-users", [...ids].sort()],
+              queryFn: async ({ signal }): Promise<UserData[]> => {
+                const { url, headers } = buildApiFetchRequest(
+                  PUBLIC_API_URL,
+                  `/v2/users/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
+                );
+                const response = await fetch(url, {
+                  cache: "no-store",
+                  headers,
+                  signal,
+                });
+                if (!response.ok) return [];
+                return response.json();
+              },
+              staleTime: 5 * 60_000,
+              gcTime: 30 * 60_000,
+              retry: false,
+            });
+            if (usersArr.length > 0) {
               setReportedUsers(
                 usersArr.reduce<Record<string, UserData>>((acc, u) => {
                   acc[u.id] = u;
@@ -782,7 +818,7 @@ export default function MyReports() {
         setLoading(false);
       }
     },
-    [],
+    [queryClient, user?.id],
   );
 
   useEffect(() => {
@@ -790,15 +826,26 @@ export default function MyReports() {
   }, [page, typeFilter, sort, fetchReports]);
 
   useEffect(() => {
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL,
-      "/v2/reports/types",
-    );
-
-    fetch(url, { credentials: "include", cache: "no-store", headers })
-      .then(async (response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json() as Promise<{ types?: string[] }>;
+    queryClient
+      .fetchQuery({
+        queryKey: ["report-types"],
+        queryFn: async ({ signal }): Promise<{ types?: string[] }> => {
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL,
+            "/v2/reports/types",
+          );
+          const response = await fetch(url, {
+            credentials: "include",
+            cache: "no-store",
+            headers,
+            signal,
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        },
+        staleTime: 10 * 60_000,
+        gcTime: 30 * 60_000,
+        retry: false,
       })
       .then((data) => {
         setReportTypes(
@@ -810,23 +857,30 @@ export default function MyReports() {
       .catch((error) => {
         log.error("Failed to fetch report types:", error);
       });
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     const controller = new AbortController();
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL,
-      "/v2/reports/sorts",
-    );
-    fetch(url, {
-      credentials: "include",
-      cache: "no-store",
-      headers,
-      signal: controller.signal,
-    })
-      .then((response) =>
-        response.ok ? (response.json() as Promise<unknown>) : null,
-      )
+    queryClient
+      .fetchQuery({
+        queryKey: ["report-sorts"],
+        queryFn: async (): Promise<unknown> => {
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL,
+            "/v2/reports/sorts",
+          );
+          const response = await fetch(url, {
+            credentials: "include",
+            cache: "no-store",
+            headers,
+            signal: controller.signal,
+          });
+          return response.ok ? response.json() : null;
+        },
+        staleTime: 10 * 60_000,
+        gcTime: 30 * 60_000,
+        retry: false,
+      })
       .then((data) => {
         const options = parseSortGroups(data).flatMap((group) => group.options);
         if (options.length > 0) {
@@ -844,7 +898,7 @@ export default function MyReports() {
         }
       });
     return () => controller.abort();
-  }, []);
+  }, [queryClient]);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     void setPageParam(String(value));

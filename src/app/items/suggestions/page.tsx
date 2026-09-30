@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -112,8 +113,29 @@ export default function ValueSuggestionsPage() {
   // Form state
   const [showForm, setShowForm] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
-  const [limits, setLimits] = useState<SuggestionLimits | null>(null);
-  const [loadingLimits, setLoadingLimits] = useState(false);
+  const limitsQuery = useQuery({
+    queryKey: ["value-suggestion-limits", user?.id],
+    enabled: showForm && isAuthenticated,
+    queryFn: async ({ signal }): Promise<SuggestionLimits> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        "/v2/value-suggestions/limits",
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok)
+        throw new Error(`Limits request failed (${response.status})`);
+      return response.json();
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  });
+  const limits = limitsQuery.data ?? null;
+  const loadingLimits = showForm && limitsQuery.isPending;
 
   const hasAutoOpenedFormRef = useRef(false);
   useEffect(() => {
@@ -144,8 +166,33 @@ export default function ValueSuggestionsPage() {
     }
   }, []);
 
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+  const leaderboardQuery = useQuery({
+    queryKey: ["value-suggestions-leaderboard"],
+    queryFn: async ({ signal }): Promise<LeaderboardEntry[]> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        "/v2/value-suggestions/leaderboard",
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok)
+        throw new Error(`Leaderboard request failed (${response.status})`);
+      const data = await response.json();
+      return Array.isArray(data)
+        ? data
+        : Array.isArray(data?.leaderboard)
+          ? data.leaderboard
+          : [];
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const leaderboard = leaderboardQuery.data ?? [];
+  const loadingLeaderboard = leaderboardQuery.isPending;
 
   const updateSort = useCallback(
     (value: string, history?: "replace") => {
@@ -235,36 +282,6 @@ export default function ValueSuggestionsPage() {
     };
   }, []);
 
-  useEffect(() => {
-    let ignore = false;
-
-    const { url, headers } = buildApiFetchRequest(
-      PUBLIC_API_URL!,
-      "/v2/value-suggestions/leaderboard",
-    );
-    fetch(url, { credentials: "include", headers })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data) => {
-        if (ignore) return;
-        const entries = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.leaderboard)
-            ? data.leaderboard
-            : [];
-        setLeaderboard(entries as LeaderboardEntry[]);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!ignore) {
-          setLoadingLeaderboard(false);
-        }
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
   const handleFormSubmit = async (payload: {
     item: number;
     field: string;
@@ -347,25 +364,8 @@ export default function ValueSuggestionsPage() {
     fetchSuggestions(1);
   };
 
-  const doOpenForm = async () => {
+  const doOpenForm = () => {
     setShowForm(true);
-    if (limits) return;
-    setLoadingLimits(true);
-    try {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL!,
-        "/v2/value-suggestions/limits",
-      );
-      const res = await fetch(url, { credentials: "include", headers });
-      if (res.ok) {
-        const data: SuggestionLimits = await res.json();
-        setLimits(data);
-      }
-    } catch {
-      // fall back to defaults if fetch fails
-    } finally {
-      setLoadingLimits(false);
-    }
   };
 
   const openForm = () => {

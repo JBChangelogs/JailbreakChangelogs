@@ -1,11 +1,9 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 
-const log = createLogger("UI");
 const EMPTY_FAVORITES: number[] = [];
 const EMPTY_ITEMS: Item[] = [];
 const FILTER_SORT_STORAGE_KEY = "valuesFilterSort";
@@ -13,11 +11,11 @@ const FILTER_SORT_PREFERENCE_KEY = "values_filter_sorts";
 const VALUE_SORT_PREFERENCE_KEY = "values_value_sort";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Item, FilterSort, FavoriteItem, ValueSort } from "@/types";
+import { Item, FilterSort, ValueSort } from "@/types";
+import { useUserFavorites } from "@/hooks/useUserFavorites";
 import { filterByTypes } from "@/utils/trading/values";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import {
-  fetchUserFavorites,
   fetchItemsClientPage,
   ItemSearchQueryTooShortError,
   searchItemsClientPage,
@@ -261,6 +259,7 @@ export default function ValuesClient() {
   );
 
   const [favorites, setFavorites] = useState<number[]>([]);
+  const favoritesQuery = useUserFavorites(user?.id);
   const searchSectionRef = useRef<HTMLDivElement>(null);
   const {
     rangeValue,
@@ -299,9 +298,12 @@ export default function ValuesClient() {
         ? searchItemsClientPage(searchQuery, Math.max(1, page), signal, options)
         : fetchItemsClientPage(Math.max(1, page), signal, options);
     },
+    staleTime: 0,
+    gcTime: 5 * 60_000,
     retry: false,
   });
   const items = data?.items ?? EMPTY_ITEMS;
+  const visibleError = data ? null : error;
 
   useEffect(() => {
     const handleRealtimeValues = () => {
@@ -342,24 +344,12 @@ export default function ValuesClient() {
   };
 
   useEffect(() => {
-    const loadFavorites = async () => {
-      if (user && user.id) {
-        try {
-          const favoritesData = await fetchUserFavorites(user.id);
-          if (favoritesData !== null && Array.isArray(favoritesData)) {
-            const favoriteIds = favoritesData.map(
-              (fav: FavoriteItem) => fav.item.id,
-            );
-            setFavorites(favoriteIds);
-          }
-        } catch (err) {
-          log.error("Error loading favorites", err);
-        }
-      }
-    };
-
-    loadFavorites();
-  }, [user]);
+    if (!user?.id) {
+      setFavorites([]);
+    } else if (favoritesQuery.data) {
+      setFavorites(favoritesQuery.data.map((fav) => fav.item.id));
+    }
+  }, [user?.id, favoritesQuery.data]);
 
   const effectiveFavorites = selectedFilterSorts.includes("favorites")
     ? favorites
@@ -518,9 +508,9 @@ export default function ValuesClient() {
             items={isLoading ? EMPTY_ITEMS : sortedItems}
             isLoading={isLoading}
             searchErrorMessage={
-              error instanceof ItemSearchQueryTooShortError
-                ? error.message
-                : error
+              visibleError instanceof ItemSearchQueryTooShortError
+                ? visibleError.message
+                : visibleError
                   ? "Could not load items. Please try again."
                   : null
             }

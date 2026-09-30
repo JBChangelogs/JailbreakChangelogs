@@ -628,7 +628,9 @@ export default function OGFinderResults({
               </div>
             )}
 
-            {catalogFilterActive && catalogValuesQuery.isError ? (
+            {catalogFilterActive &&
+            catalogValuesQuery.isError &&
+            !catalogValuesQuery.data ? (
               <div className="text-secondary-text py-8 text-center">
                 Couldn&apos;t load item details for this filter.{" "}
                 <button

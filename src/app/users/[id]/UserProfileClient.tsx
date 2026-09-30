@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import NextError from "next/error";
 import { notFound } from "next/navigation";
@@ -235,6 +236,7 @@ export default function UserProfileClient({
   isLoadingAdditionalData = false,
   additionalDataError: _additionalDataError,
 }: UserProfileClientProps) {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const { user: currentUser, isLoading: authLoading } = useAuthContext();
   const [user, setUser] = useState<User | null>(initialData?.user || null);
@@ -407,15 +409,26 @@ export default function UserProfileClient({
       if (currentUserId && user && userId) {
         setIsLoadingFollow(true);
         try {
-          const response = await fetch(
-            `${PUBLIC_API_URL}/v2/users/${currentUserId}/following`,
-            {
-              headers: {
-                "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
-              },
+          const followingData = await queryClient.fetchQuery({
+            queryKey: ["following", currentUserId],
+            queryFn: async ({ signal }): Promise<FollowingData[]> => {
+              const response = await fetch(
+                `${PUBLIC_API_URL}/v2/users/${currentUserId}/following`,
+                {
+                  signal,
+                  headers: {
+                    "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
+                  },
+                },
+              );
+              if (!response.ok) return [];
+              const data = await response.json();
+              return Array.isArray(data) ? data : [];
             },
-          );
-          const followingData: FollowingData[] | string = await response.json();
+            staleTime: 0,
+            gcTime: 5 * 60_000,
+            retry: false,
+          });
           if (isCancelled) return;
 
           const isUserFollowing =
@@ -441,7 +454,7 @@ export default function UserProfileClient({
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, userId, user]);
+  }, [currentUserId, userId, user, queryClient]);
 
   useEffect(() => {
     if (
@@ -462,26 +475,35 @@ export default function UserProfileClient({
           throw new Error("Public API URL is not configured");
         }
 
-        const { url: blockedUrl, headers: devTokenHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/v2/users/me/blocked-users");
-        const response = await fetch(blockedUrl, {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-          headers: devTokenHeaders,
+        const parsed = await queryClient.fetchQuery({
+          queryKey: ["blocked-users", currentUserId],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              "/v2/users/me/blocked-users",
+            );
+            const response = await fetch(url, {
+              method: "GET",
+              credentials: "include",
+              cache: "no-store",
+              headers,
+              signal,
+            });
+            if (!response.ok) {
+              const body = await response.json().catch(() => ({}));
+              log.error("fetch blocked users failed", {
+                status: response.status,
+                body,
+              });
+              throw new Error("Failed to fetch blocked users");
+            }
+            const rawBody = await response.text();
+            return rawBody ? parseJsonWithLargeIds(rawBody) : null;
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
-
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          log.error("fetch blocked users failed", {
-            status: response.status,
-            body,
-          });
-          throw new Error("Failed to fetch blocked users");
-        }
-
-        const rawBody = await response.text();
-        const parsed = rawBody ? parseJsonWithLargeIds(rawBody) : null;
         const blockedUsers = Array.isArray(
           (parsed as { blocked_users?: unknown[] } | null)?.blocked_users,
         )
@@ -511,7 +533,7 @@ export default function UserProfileClient({
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, isAuthenticatedUser, user]);
+  }, [currentUserId, isAuthenticatedUser, user, queryClient]);
 
   useEffect(() => {
     if (
@@ -533,20 +555,29 @@ export default function UserProfileClient({
           throw new Error("Public API URL is not configured");
         }
 
-        const { url: messageCheckUrl, headers: devTokenHeaders } =
-          buildApiFetchRequest(
-            PUBLIC_API_URL,
-            `/v2/conversations/${encodeURIComponent(user.id)}`,
-          );
-        const response = await fetch(messageCheckUrl, {
-          method: "HEAD",
-          credentials: "include",
-          cache: "no-store",
-          headers: devTokenHeaders,
+        const status = await queryClient.fetchQuery({
+          queryKey: ["message-eligibility", currentUserId, user.id],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              `/v2/conversations/${encodeURIComponent(user.id)}`,
+            );
+            const response = await fetch(url, {
+              method: "HEAD",
+              credentials: "include",
+              cache: "no-store",
+              headers,
+              signal,
+            });
+            return response.status;
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
 
         if (isCancelled) return;
-        setCanMessageFromProfile(response.status === 200);
+        setCanMessageFromProfile(status === 200);
       } catch (error) {
         if (isCancelled) return;
         log.error("Error checking profile messaging permission:", error);
@@ -560,7 +591,7 @@ export default function UserProfileClient({
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, isAuthenticatedUser, isBlockedByMe, user]);
+  }, [currentUserId, isAuthenticatedUser, isBlockedByMe, user, queryClient]);
 
   const handleBlockToggle = async () => {
     if (
@@ -610,6 +641,12 @@ export default function UserProfileClient({
       }
 
       setIsBlockedByMe((prev) => !prev);
+      void queryClient.invalidateQueries({
+        queryKey: ["blocked-users", currentUserId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["message-eligibility", currentUserId, user.id],
+      });
       toast.success(successMessage, { id: toastId });
     } catch (error) {
       log.error("Error toggling blocked status:", error);
@@ -861,6 +898,10 @@ export default function UserProfileClient({
       }
 
       setIsFollowing(!isFollowing);
+      void queryClient.invalidateQueries({
+        queryKey: ["following", currentUserId],
+      });
+      void queryClient.invalidateQueries({ queryKey: ["followers", userId] });
 
       if (isFollowing) {
         setFollowerCount((prevCount) => Math.max(0, prevCount - 1));

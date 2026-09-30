@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useQueryState } from "nuqs";
 import { toast } from "sonner";
@@ -17,7 +18,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { fetchSupporterGiftLevels } from "@/services/settingsService";
-import { SupporterLevel } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -105,8 +105,6 @@ export default function ModernPricingSection() {
   const BADGE_BASE_URL =
     "https://assets.jailbreakchangelogs.com/assets/website_icons";
   const [highlightedTier, setHighlightedTier] = useState<number | null>(null);
-  const [discordLevels, setDiscordLevels] = useState<SupporterLevel[]>([]);
-  const [discordLevelsLoading, setDiscordLevelsLoading] = useState(false);
   const [tabParam, setTabParam] = useQueryState("tab", {
     defaultValue: "",
     history: "push",
@@ -120,6 +118,16 @@ export default function ModernPricingSection() {
   const { user } = useAuthContext();
   const { resolvedTheme } = useTheme();
   const isYearly = tabParam === "roblox";
+  const discordLevelsQuery = useQuery({
+    queryKey: ["supporter-gift-levels"],
+    queryFn: fetchSupporterGiftLevels,
+    enabled: !isYearly,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+  });
+  const discordLevels = discordLevelsQuery.data ?? [];
+  const discordLevelsLoading = discordLevelsQuery.isPending;
   const isOwner = user?.flags?.some((f) => f.flag === "is_owner");
 
   const discordImagePath =
@@ -162,15 +170,6 @@ export default function ModernPricingSection() {
       toast.error(`Failed to copy ${tierName} link.`);
     }
   };
-
-  useEffect(() => {
-    if (isYearly || discordLevels.length > 0 || discordLevelsLoading) return;
-    setDiscordLevelsLoading(true);
-    fetchSupporterGiftLevels()
-      .then((levels) => setDiscordLevels(levels))
-      .catch((err) => log.error("Failed to fetch discord levels", err))
-      .finally(() => setDiscordLevelsLoading(false));
-  }, [isYearly, discordLevels.length, discordLevelsLoading]);
 
   const discordSelfLevels = discordLevels.filter((l) => !l.is_gift);
 
