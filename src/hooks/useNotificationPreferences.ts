@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   fetchAvailableNotificationPreferences,
@@ -10,97 +11,66 @@ import {
 } from "@/services/notificationPreferencesService";
 
 export function useNotificationPreferences(userId: string | null) {
-  const [prefs, setPrefs] = useState<NotificationPreferenceEntry[] | null>(
-    null,
-  );
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [saving, setSaving] = useState<Record<string, boolean>>({});
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    async function loadNotificationPrefs() {
-      setLoading(true);
-      setError(null);
-
-      let attempts = 0;
-      const MAX_ATTEMPTS = 3;
-
-      while (attempts < MAX_ATTEMPTS) {
-        try {
-          // These hit Next.js API routes (server-side calls upstream)
-          const [available, userPrefs] = await Promise.all([
-            fetchAvailableNotificationPreferences(),
-            fetchUserNotificationPreferences(),
-          ]);
-
-          const explicitMap = new Map(
-            (userPrefs.preferences ?? []).map((preference) => [
-              preference.title,
-              !!preference.enabled,
-            ]),
-          );
-
-          // Missing preference = ON by default
-          const merged: NotificationPreferenceEntry[] = available.map(
-            (title) => ({
-              title,
-              enabled: explicitMap.has(title)
-                ? (explicitMap.get(title) as boolean)
-                : true,
-            }),
-          );
-
-          if (mounted) {
-            setPrefs(merged);
-            setError(null);
-          }
-          break; // Success!
-        } catch (loadError) {
-          attempts++;
-          if (attempts >= MAX_ATTEMPTS || !mounted) {
-            if (mounted) {
-              setPrefs([]);
-              setError(
-                loadError instanceof Error
-                  ? loadError.message
-                  : "Failed to load notification preferences",
-              );
-            }
-            break;
-          }
-
-          // Exponential backoff: 1s, 2s, 4s
-          const delay = Math.pow(2, attempts - 1) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-      }
-
-      if (mounted) setLoading(false);
-    }
-
-    if (userId) loadNotificationPrefs();
-    return () => {
-      mounted = false;
-    };
-  }, [userId]);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const optionsQuery = useQuery({
+    queryKey: ["notification-preference-options"],
+    queryFn: fetchAvailableNotificationPreferences,
+    enabled: Boolean(userId),
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: 1,
+    retryDelay: 1_000,
+  });
+  const userPrefsQuery = useQuery({
+    queryKey: ["notification-preferences", userId],
+    queryFn: fetchUserNotificationPreferences,
+    enabled: Boolean(userId),
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+    retry: 1,
+    retryDelay: 1_000,
+    refetchOnWindowFocus: false,
+  });
+  const prefs = useMemo(() => {
+    if (!optionsQuery.data || !userPrefsQuery.data) return null;
+    const explicitMap = new Map(
+      userPrefsQuery.data.preferences.map((preference) => [
+        preference.title,
+        preference.enabled,
+      ]),
+    );
+    return optionsQuery.data.map((title): NotificationPreferenceEntry => ({
+      title,
+      enabled: explicitMap.get(title) ?? true,
+    }));
+  }, [optionsQuery.data, userPrefsQuery.data]);
+  const loading = !userId || optionsQuery.isPending || userPrefsQuery.isPending;
+  const error =
+    updateError ??
+    (prefs
+      ? null
+      : (optionsQuery.error?.message ?? userPrefsQuery.error?.message ?? null));
 
   const setPreferenceSaving = (title: string, isSaving: boolean) => {
     setSaving((previous) => ({ ...previous, [title]: isSaving }));
   };
 
   const handleToggle = async (title: string, nextEnabled: boolean) => {
-    if (!prefs) return;
+    if (!prefs || !userPrefsQuery.data) return;
 
-    // Optimistic UI update
-    const previous = prefs;
-    const next = previous.map((preference) =>
-      preference.title === title
-        ? { ...preference, enabled: nextEnabled }
-        : preference,
-    );
-    setPrefs(next);
-    setError(null);
+    const previousEnabled = prefs.find(
+      (preference) => preference.title === title,
+    )?.enabled;
+    queryClient.setQueryData(["notification-preferences", userId], {
+      preferences: prefs.map((preference) =>
+        preference.title === title
+          ? { ...preference, enabled: nextEnabled }
+          : preference,
+      ),
+    });
+    setUpdateError(null);
     setPreferenceSaving(title, true);
 
     const humanizedTitle = title
@@ -113,6 +83,12 @@ export function useNotificationPreferences(userId: string | null) {
       await updateUserNotificationPreferences([
         { title, enabled: nextEnabled },
       ]);
+      if (userId) {
+        await queryClient.invalidateQueries({
+          queryKey: ["notification-preferences", userId],
+          refetchType: "none",
+        });
+      }
       toast.success("Setting Updated", {
         description: `Notification preference for "${humanizedTitle}" has been ${nextEnabled ? "enabled" : "disabled"}.`,
       });
@@ -122,13 +98,24 @@ export function useNotificationPreferences(userId: string | null) {
         enabled: nextEnabled,
       });
     } catch (updateError) {
-      // Revert on failure
-      setPrefs(previous);
+      // Revert only this preference; another toggle may have saved meanwhile.
+      queryClient.setQueryData(
+        ["notification-preferences", userId],
+        (current: typeof userPrefsQuery.data) =>
+          current && {
+            ...current,
+            preferences: current.preferences.map((preference) =>
+              preference.title === title && previousEnabled !== undefined
+                ? { ...preference, enabled: previousEnabled }
+                : preference,
+            ),
+          },
+      );
       const message =
         updateError instanceof Error
           ? updateError.message
           : "Failed to update preference";
-      setError(message);
+      setUpdateError(message);
       toast.error(message);
     } finally {
       setPreferenceSaving(title, false);

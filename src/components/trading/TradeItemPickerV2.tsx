@@ -742,7 +742,7 @@ export default function TradeItemPickerV2({
           </div>
         ) : useCatalogApi && catalog.error ? (
           <div className="border-border-card bg-secondary-bg text-secondary-text mb-8 rounded-lg border p-6 text-center text-sm">
-            Could not load items.
+            {catalog.errorMessage ?? "Could not load items."}
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">

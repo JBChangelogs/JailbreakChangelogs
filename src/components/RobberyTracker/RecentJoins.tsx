@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,7 @@ export default function RecentJoins({
   trackerType: TrackerType;
   recentJoin: RecentJoinEvent | null;
 }) {
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [items, setItems] = useState<JoinItem[]>([]);
   const [page, setPage] = useState(0);
@@ -114,24 +116,36 @@ export default function RecentJoins({
     requestRef.current = controller;
 
     try {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL,
-        `/v2/users/me/join-history?page=${nextPage}&tracker_type=${trackerType}`,
-      );
-      const response = await fetch(url, {
-        headers,
-        credentials: "include",
-        cache: "no-store",
-        signal: controller.signal,
+      const { status, data } = await queryClient.fetchQuery({
+        queryKey: ["recent-joins", trackerType, nextPage],
+        queryFn: async () => {
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL,
+            `/v2/users/me/join-history?page=${nextPage}&tracker_type=${trackerType}`,
+          );
+          const response = await fetch(url, {
+            headers,
+            credentials: "include",
+            cache: "no-store",
+            signal: controller.signal,
+          });
+          return {
+            status: response.status,
+            data: (await response.json().catch(() => null)) as unknown,
+          };
+        },
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
       });
 
       if (controller.signal.aborted) return;
-      if (response.status === 401 || response.status === 403) {
+      if (status === 401 || status === 403) {
         setUnauthorized(true);
         return;
       }
-      if (response.status === 404 && nextPage === 1) {
-        const body = (await response.json().catch(() => null)) as {
+      if (status === 404 && nextPage === 1) {
+        const body = data as {
           error?: string;
         } | null;
         if (body?.error === "no_history_found") {
@@ -142,21 +156,21 @@ export default function RecentJoins({
           return;
         }
       }
-      if (!response.ok)
-        throw new Error(`Join history request failed: ${response.status}`);
+      if (status < 200 || status >= 300)
+        throw new Error(`Join history request failed: ${status}`);
 
-      const data = (await response.json()) as JoinHistoryPage;
+      const pageData = data as JoinHistoryPage;
       if (controller.signal.aborted) return;
       setItems((current) => {
-        if (nextPage === 1) return data.items;
+        if (nextPage === 1) return pageData.items;
         const seen = new Set(current.map(itemKey));
         return [
           ...current,
-          ...data.items.filter((item) => !seen.has(itemKey(item))),
+          ...pageData.items.filter((item) => !seen.has(itemKey(item))),
         ];
       });
-      setPage(data.page);
-      setTotalPages(data.total_pages);
+      setPage(pageData.page);
+      setTotalPages(pageData.total_pages);
       setLoaded(true);
     } catch (cause) {
       if (!controller.signal.aborted) {

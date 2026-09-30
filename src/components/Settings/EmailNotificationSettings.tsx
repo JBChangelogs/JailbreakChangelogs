@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Field, Label, Description } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -29,31 +30,31 @@ export const EmailNotificationSettings = ({
   userData,
 }: EmailNotificationSettingsProps) => {
   const userId = userData?.id;
-  const [enabled, setEnabled] = useState(false);
-  const [isLinked, setIsLinked] = useState<boolean | null>(null);
+  const queryClient = useQueryClient();
+  const linkedKey = ["email", "linked", userId] as const;
+  const statusKey = ["email", "notifications", userId] as const;
+  const linkedQuery = useQuery({
+    queryKey: linkedKey,
+    queryFn: fetchEmailLinkedStatus,
+    enabled: !!userId,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  });
+  const statusQuery = useQuery({
+    queryKey: statusKey,
+    queryFn: fetchEmailNotificationStatus,
+    enabled: !!userId,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  });
+  const enabled = statusQuery.data?.enabled === true;
+  const isLinked = linkedQuery.data?.linked === true;
   const [loading, setLoading] = useState(false);
-  const [checkingStatus, setCheckingStatus] = useState(false);
+  const checkingStatus =
+    !!userId && (linkedQuery.isPending || statusQuery.isPending);
   const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
-
-  useEffect(() => {
-    const checkStatus = async () => {
-      if (!userId) return;
-      setCheckingStatus(true);
-      try {
-        const [linkedData, enabledData] = await Promise.all([
-          fetchEmailLinkedStatus(),
-          fetchEmailNotificationStatus(),
-        ]);
-        setIsLinked(linkedData.linked === true);
-        setEnabled(enabledData.enabled === true);
-      } catch (e) {
-        log.error("Failed to check email status", e);
-      } finally {
-        setCheckingStatus(false);
-      }
-    };
-    checkStatus();
-  }, [userId]);
 
   const handleToggle = async (checked: boolean) => {
     if (!userData) return;
@@ -63,11 +64,11 @@ export const EmailNotificationSettings = ({
       if (checked) {
         const { ok, status, data } = await enableEmailNotifications();
         if (ok) {
-          setEnabled(true);
+          queryClient.setQueryData(statusKey, { enabled: true });
           toast.success("Email Notifications Enabled", {
             description: "You will now receive email notifications.",
           });
-          setIsLinked(true);
+          queryClient.setQueryData(linkedKey, { linked: true });
         } else {
           if (status === 404) {
             toast.error("Email Not Linked", {
@@ -86,12 +87,11 @@ export const EmailNotificationSettings = ({
                 "Failed to enable notifications.",
             });
           }
-          setEnabled(false);
         }
       } else {
         const { ok, status, data } = await disableEmailNotifications();
         if (ok) {
-          setEnabled(false);
+          queryClient.setQueryData(statusKey, { enabled: false });
           toast.success("Email Notifications Disabled");
         } else {
           if (status === 404) {
@@ -99,12 +99,10 @@ export const EmailNotificationSettings = ({
               description:
                 data.message || data.detail || "Please link your email first.",
             });
-            setEnabled(true);
           } else if (status >= 500) {
             toast.error("Error", {
               description: "Something went wrong. Please try again later.",
             });
-            setEnabled(true);
           } else {
             toast.error("Error", {
               description:
@@ -112,14 +110,12 @@ export const EmailNotificationSettings = ({
                 data.detail ||
                 "Failed to disable notifications.",
             });
-            setEnabled(true);
           }
         }
       }
     } catch (error) {
       log.error("Error toggling email notifications:", error);
       toast.error("Something went wrong");
-      setEnabled(!checked);
     } finally {
       setLoading(false);
     }
@@ -139,8 +135,8 @@ export const EmailNotificationSettings = ({
       const { ok, status, data } = await unlinkEmail();
       if (ok) {
         toast.success("Email Unlinked");
-        setIsLinked(false);
-        setEnabled(false);
+        queryClient.setQueryData(linkedKey, { linked: false });
+        queryClient.setQueryData(statusKey, { enabled: false });
       } else {
         if (status >= 500) {
           toast.error("Failed to unlink", {
@@ -180,14 +176,37 @@ export const EmailNotificationSettings = ({
             <Switch
               checked={enabled}
               onCheckedChange={handleToggle}
-              disabled={loading || !userData}
+              disabled={
+                loading ||
+                checkingStatus ||
+                !userData ||
+                linkedQuery.isError ||
+                statusQuery.isError
+              }
             />
           </div>
         </Field>
 
+        {(linkedQuery.isError || statusQuery.isError) && (
+          <p className="text-status-error text-sm">
+            Could not load email settings. Please try again.
+          </p>
+        )}
+
         {/* Link/Unlink Email Button */}
         <div className="flex items-center gap-2">
-          {checkingStatus ? (
+          {linkedQuery.isError || statusQuery.isError ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                void linkedQuery.refetch();
+                void statusQuery.refetch();
+              }}
+            >
+              Retry
+            </Button>
+          ) : checkingStatus ? (
             <Button variant="outline" size="sm" disabled>
               Loading...
             </Button>

@@ -81,7 +81,7 @@ export default function InventoryBreakdown({
         <div className="border-border-card bg-secondary-bg text-secondary-text rounded-lg border p-6 text-center text-sm">
           Loading collection progress...
         </div>
-      ) : partialItemsQuery.isError ? (
+      ) : partialItemsQuery.isError && !partialItemsQuery.data ? (
         <div className="border-border-card bg-secondary-bg text-secondary-text rounded-lg border p-6 text-center text-sm">
           Couldn&apos;t load the item list.{" "}
           <button

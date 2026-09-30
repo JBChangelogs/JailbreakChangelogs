@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -66,6 +67,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
   onCountUpdate,
   userData,
 }) => {
+  const queryClient = useQueryClient();
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [followerDetails, setFollowerDetails] = useState<{
     [key: string]: User;
@@ -115,30 +117,45 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
           return;
         }
 
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/v2/users/${encodeURIComponent(userId)}/followers`,
-        );
-        const response = await fetch(url, { headers, cache: "no-store" });
+        const { status, ok, data } = await queryClient.fetchQuery({
+          queryKey: ["followers", userId],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              `/v2/users/${encodeURIComponent(userId)}/followers`,
+            );
+            const response = await fetch(url, {
+              headers,
+              cache: "no-store",
+              signal,
+            });
+            return {
+              status: response.status,
+              ok: response.ok,
+              data: (await response.json().catch(() => null)) as unknown,
+            };
+          },
+          staleTime: 30_000,
+          gcTime: 5 * 60_000,
+          retry: false,
+        });
         if (ignore) return;
 
-        if (response.status === 404) {
+        if (status === 404) {
           setFollowers([]);
           setFollowerDetails({});
           onCloseRef.current();
           return;
         }
 
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
+        if (!ok) {
           log.error("fetch followers failed", {
-            status: response.status,
-            body,
+            status,
+            body: data,
           });
           throw new Error("Failed to fetch followers");
         }
 
-        const data = await response.json();
         if (ignore) return;
 
         if (!Array.isArray(data) || data.length === 0) {
@@ -193,7 +210,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     return () => {
       ignore = true;
     };
-  }, [isOpen, userId]);
+  }, [isOpen, userId, queryClient]);
 
   useEffect(() => {
     let ignore = false;
@@ -203,15 +220,25 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 
       try {
         // Call this every time the modal opens to get fresh following status
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/v2/users/${encodeURIComponent(currentUserId)}/following`,
-        );
-        const response = await fetch(url, { headers, cache: "no-store" });
-
-        if (!response.ok) return;
-
-        const followingData = await response.json();
+        const followingData = await queryClient.fetchQuery({
+          queryKey: ["following", currentUserId],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              `/v2/users/${encodeURIComponent(currentUserId)}/following`,
+            );
+            const response = await fetch(url, {
+              headers,
+              cache: "no-store",
+              signal,
+            });
+            if (!response.ok) return [];
+            return response.json();
+          },
+          staleTime: 0,
+          gcTime: 5 * 60_000,
+          retry: false,
+        });
         if (ignore) return;
         if (!Array.isArray(followingData)) return;
         const statusMap = followingData.reduce(
@@ -238,7 +265,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     return () => {
       ignore = true;
     };
-  }, [isOpen, currentUserId]);
+  }, [isOpen, currentUserId, queryClient]);
 
   const handleFollow = async (followerId: string) => {
     if (!currentUserId || loadingFollow[followerId]) return;
@@ -278,6 +305,9 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         ...prev,
         [followerId]: !isCurrentlyFollowing,
       }));
+      void queryClient.invalidateQueries({
+        queryKey: ["following", currentUserId],
+      });
       onFollowChange?.(isCurrentlyFollowing ? "remove" : "add");
       toast.success(
         isCurrentlyFollowing

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { CommentData } from "@/utils/api/api";
 import type { UserData } from "@/types/auth";
 import type { TradeAd, TradeItem } from "@/types/trading";
@@ -9,6 +10,7 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import TradeDetailsClient from "./TradeDetailsClient";
 import Loading from "./loading";
 import { createLogger } from "@/services/logger";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const log = createLogger("UI");
 
@@ -134,95 +136,82 @@ export default function TradeDetailsDataClient({
   initialUserMap = {},
   initialItems = [],
 }: TradeDetailsDataClientProps) {
-  const [trade, setTrade] = useState<TradeAd | null>(null);
-  const [status, setStatus] = useState<
-    "loading" | "not_found" | "error" | "unauthorized" | "forbidden"
-  >("loading");
-  const [notFoundReason, setNotFoundReason] = useState<
-    "expired" | "unavailable" | null
-  >(null);
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    const run = async () => {
+  const { user, isLoading: isAuthLoading } = useAuthContext();
+  const tradeQuery = useQuery({
+    queryKey: ["trade-details", tradeId, user?.id],
+    enabled: !isAuthLoading,
+    queryFn: async ({
+      signal,
+    }): Promise<
+      | { status: "success"; trade: TradeAd }
+      | { status: "not_found"; reason: "expired" | "unavailable" | null }
+      | { status: "unauthorized" | "forbidden" }
+    > => {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!baseUrl) {
-        if (!isCancelled) setStatus("error");
-        return;
+      if (!baseUrl) throw new Error("Missing NEXT_PUBLIC_API_URL");
+
+      const { url: tradeUrl, headers: devTokenHeaders } = buildApiFetchRequest(
+        baseUrl,
+        `/v2/trades/${encodeURIComponent(tradeId)}`,
+      );
+      const response = await fetch(tradeUrl, {
+        signal,
+        cache: "no-store",
+        credentials: "include",
+        headers: {
+          ...devTokenHeaders,
+          "User-Agent": "JailbreakChangelogs-Trading/2.0",
+        },
+      });
+
+      if (response.status === 404) {
+        return { status: "not_found", reason: null };
       }
 
-      try {
-        const { url: tradeUrl, headers: devTokenHeaders } =
-          buildApiFetchRequest(
-            baseUrl,
-            `/v2/trades/${encodeURIComponent(tradeId)}`,
-          );
-        const response = await fetch(tradeUrl, {
-          cache: "no-store",
-          credentials: "include",
-          headers: {
-            ...devTokenHeaders,
-            "User-Agent": "JailbreakChangelogs-Trading/2.0",
-          },
-        });
-
-        if (response.status === 404) {
-          if (!isCancelled) {
-            setNotFoundReason(null);
-            setStatus("not_found");
-          }
-          return;
-        }
-
-        if (response.status === 401) {
-          if (!isCancelled) setStatus("unauthorized");
-          return;
-        }
-
-        if (response.status === 403) {
-          if (!isCancelled) setStatus("forbidden");
-          return;
-        }
-
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          log.error("fetch trade failed", { status: response.status, body });
-          throw new Error("Failed to fetch trade");
-        }
-
-        const rawTrade = (await response.json()) as V2Trade;
-        const normalizedTrade = normalizeV2Trade(rawTrade);
-
-        if (
-          normalizedTrade.expired === 1 ||
-          !normalizedTrade.user ||
-          !normalizedTrade.user.roblox_id ||
-          !normalizedTrade.user.roblox_username
-        ) {
-          if (!isCancelled) {
-            setNotFoundReason(
-              normalizedTrade.expired === 1 ? "expired" : "unavailable",
-            );
-            setStatus("not_found");
-          }
-          return;
-        }
-
-        if (!isCancelled) {
-          setTrade(normalizedTrade);
-        }
-      } catch {
-        if (!isCancelled) setStatus("error");
+      if (response.status === 401) {
+        return { status: "unauthorized" };
       }
-    };
 
-    void run();
+      if (response.status === 403) {
+        return { status: "forbidden" };
+      }
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [tradeId]);
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch trade failed", { status: response.status, body });
+        throw new Error("Failed to fetch trade");
+      }
+
+      const rawTrade = (await response.json()) as V2Trade;
+      const normalizedTrade = normalizeV2Trade(rawTrade);
+
+      if (
+        normalizedTrade.expired === 1 ||
+        !normalizedTrade.user ||
+        !normalizedTrade.user.roblox_id ||
+        !normalizedTrade.user.roblox_username
+      ) {
+        return {
+          status: "not_found",
+          reason: normalizedTrade.expired === 1 ? "expired" : "unavailable",
+        };
+      }
+
+      return { status: "success", trade: normalizedTrade };
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  });
+  const trade =
+    tradeQuery.data?.status === "success" ? tradeQuery.data.trade : null;
+  const status = tradeQuery.isPending
+    ? "loading"
+    : tradeQuery.isError && !tradeQuery.data
+      ? "error"
+      : (tradeQuery.data?.status ?? "error");
+  const notFoundReason =
+    tradeQuery.data?.status === "not_found" ? tradeQuery.data.reason : null;
 
   if (!trade) {
     if (status === "loading") {

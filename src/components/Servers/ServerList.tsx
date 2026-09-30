@@ -2,6 +2,7 @@
 
 import { parseSortGroups } from "@/utils/api/sortGroups";
 import React from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { createLogger } from "@/services/logger";
 
@@ -104,27 +105,14 @@ const fetchServersPage = async (
 };
 
 const ServerList: React.FC = () => {
+  const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuthContext();
   const [{ query: queryFromUrl, page, sort }, setParams] = useQueryStates({
     query: parseAsString.withDefault(""),
     page: parseAsInteger.withDefault(1),
     sort: parseAsString,
   });
-  const [sortTypes, setSortTypes] = React.useState<string[]>([]);
-  const [sortLabels, setSortLabels] = React.useState<Record<string, string>>(
-    {},
-  );
-  const [servers, setServers] = React.useState<PrivateServer[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [isFetching, setIsFetching] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState(queryFromUrl);
-  const [totalServers, setTotalServers] = React.useState(0);
-  const [totalPages, setTotalPages] = React.useState(0);
-  const [serverNumberMap, setServerNumberMap] = React.useState<
-    Record<number, number>
-  >({});
-  const [refreshVersion, setRefreshVersion] = React.useState(0);
   const loggedInUserId = user?.id ?? null;
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [editingServer, setEditingServer] =
@@ -141,6 +129,58 @@ const ServerList: React.FC = () => {
   );
   const ruleParagraphRefs = React.useRef<Map<number, HTMLParagraphElement>>(
     new Map(),
+  );
+  const sortQuery = useQuery({
+    queryKey: ["server-sorts"],
+    queryFn: async ({ signal }) => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/servers/sorts",
+      );
+      const response = await fetch(url, {
+        cache: "no-store",
+        headers,
+        signal,
+      });
+      if (!response.ok) throw new Error("Failed to fetch server sorts");
+      const data = (await response.json()) as unknown;
+      return parseSortGroups(data).flatMap((group) => group.options);
+    },
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+  });
+  const sortTypes = sortQuery.data?.map((option) => option.value) ?? [];
+  const sortLabels = Object.fromEntries(
+    sortQuery.data?.map((option) => [option.value, option.label]) ?? [],
+  );
+  const serversQuery = useQuery({
+    queryKey: ["servers", page, queryFromUrl.trim(), sort],
+    queryFn: ({ signal }) => {
+      if (!PUBLIC_API_URL) throw new Error("Missing PUBLIC_API_URL");
+      return fetchServersPage(page, queryFromUrl.trim(), sort, signal);
+    },
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const servers = serversQuery.data?.items ?? [];
+  const loading = serversQuery.isPending;
+  const isFetching = serversQuery.isFetching;
+  const error = serversQuery.data
+    ? null
+    : (serversQuery.error?.message ?? null);
+  const refreshError =
+    serversQuery.data && serversQuery.isRefetchError
+      ? serversQuery.error.message
+      : null;
+  const totalServers = serversQuery.data?.total ?? 0;
+  const totalPages = serversQuery.data?.total_pages ?? 0;
+  const serverNumberMap = Object.fromEntries(
+    servers.map((server, index) => [
+      server.id,
+      totalServers - (page - 1) * (serversQuery.data?.size ?? 0) - index,
+    ]),
   );
 
   const measureRulesTruncation = React.useCallback((serverId: number) => {
@@ -175,8 +215,6 @@ const ServerList: React.FC = () => {
     value: number,
   ) => {
     if (value === page) return;
-    setLoading(true);
-    setIsFetching(true);
     void setParams({ page: value > 1 ? value : null });
   };
 
@@ -185,100 +223,21 @@ const ServerList: React.FC = () => {
   }, [queryFromUrl]);
 
   React.useEffect(() => {
-    const controller = new AbortController();
-    const fetchSortTypes = async () => {
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          "/v2/servers/sorts",
-        );
-        const response = await fetch(url, {
-          cache: "no-store",
-          headers,
-          signal: controller.signal,
-        });
-        if (!response.ok) return;
-        const data = (await response.json()) as unknown;
-        const options = parseSortGroups(data).flatMap((group) => group.options);
-        if (options.length > 0) {
-          setSortTypes(options.map((option) => option.value));
-          setSortLabels(
-            Object.fromEntries(
-              options.map((option) => [option.value, option.label]),
-            ),
-          );
-        }
-      } catch (sortError) {
-        if (!controller.signal.aborted) {
-          log.error("Failed to fetch server sort types", sortError);
-        }
-      }
-    };
-    void fetchSortTypes();
-    return () => controller.abort();
-  }, []);
-
-  React.useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchServers = async () => {
-      setLoading(true);
-      setIsFetching(true);
-      setError(null);
-
-      try {
-        if (!PUBLIC_API_URL) {
-          throw new Error("Missing PUBLIC_API_URL");
-        }
-        const data = await fetchServersPage(
-          page,
-          queryFromUrl.trim(),
-          sort,
-          controller.signal,
-        );
-        if (controller.signal.aborted) return;
-
-        if (data.total_pages > 0 && page > data.total_pages) {
-          void setParams({ page: data.total_pages });
-          return;
-        }
-
-        const numbers: Record<number, number> = {};
-        data.items.forEach((server, index) => {
-          numbers[server.id] = data.total - (page - 1) * data.size - index;
-        });
-        setServerNumberMap(numbers);
-        setServers(data.items);
-        setTotalServers(data.total);
-        setTotalPages(data.total_pages);
-      } catch (serverErr) {
-        if (controller.signal.aborted) return;
-        log.error("Failed to fetch servers", serverErr);
-        setError(
-          serverErr instanceof Error
-            ? serverErr.message
-            : "An error occurred while fetching servers",
-        );
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-          setIsFetching(false);
-        }
-      }
-    };
-
-    void fetchServers();
-
-    return () => {
-      controller.abort();
-    };
-  }, [page, queryFromUrl, refreshVersion, setParams, sort]);
+    if (totalPages > 0 && page > totalPages) {
+      void setParams({ page: totalPages });
+    }
+  }, [page, setParams, totalPages]);
 
   const handleServerAdded = () => {
-    setLoading(true);
-    setIsFetching(true);
+    void queryClient.invalidateQueries({
+      queryKey: ["servers"],
+      refetchType: "none",
+    });
+    if (!queryFromUrl && page === 1) {
+      void serversQuery.refetch();
+      return;
+    }
     void setParams({ query: null, page: null });
-    setRefreshVersion((version) => version + 1);
   };
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -286,17 +245,12 @@ const ServerList: React.FC = () => {
     const query = searchQuery.trim();
     if (!query) return;
     if (query === queryFromUrl.trim() && page === 1) return;
-    setLoading(true);
-    setIsFetching(true);
     void setParams({ query, page: null });
   };
 
   const handleClearSearch = () => {
     setSearchQuery("");
     if (!queryFromUrl) return;
-    setServers([]);
-    setLoading(true);
-    setIsFetching(true);
     void setParams({ query: null, page: null });
   };
 
@@ -567,6 +521,11 @@ const ServerList: React.FC = () => {
       <div>
         {searchControls}
         {listHeader}
+        {refreshError && (
+          <p className="text-status-warning mb-4 text-sm">
+            Couldn&apos;t refresh servers. Showing the last loaded result.
+          </p>
+        )}
         <div className="border-border-card bg-secondary-bg hover:border-border-focus rounded-lg border p-8 text-center">
           <Icon
             icon="heroicons-outline:shield-check"
@@ -589,6 +548,11 @@ const ServerList: React.FC = () => {
     <div>
       {searchControls}
       {listHeader}
+      {refreshError && (
+        <p className="text-status-warning mb-4 text-sm">
+          Couldn&apos;t refresh servers. Showing the last loaded result.
+        </p>
+      )}
 
       {totalPages > 1 && (
         <div className="mb-6 flex justify-center">

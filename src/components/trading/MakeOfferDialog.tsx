@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -32,11 +33,8 @@ import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  INVENTORY_API_SOURCE_HEADER,
-  INVENTORY_API_URL,
-} from "@/utils/api/api";
-import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
+import { INVENTORY_API_URL } from "@/utils/api/api";
+import { userInventoryQueryOptions } from "@/utils/api/userInventoryQuery";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -224,6 +222,7 @@ export function MakeOfferDialog({
   items,
   onOfferSent,
 }: MakeOfferDialogProps) {
+  const queryClient = useQueryClient();
   const {
     user,
     isAuthenticated,
@@ -397,22 +396,6 @@ export function MakeOfferDialog({
   const canLoadInventory = Boolean(isAuthenticated && hasValidRobloxId);
   const shouldUseInventoryItems = showCustom && itemsInputMode === "inventory";
 
-  const sleep = (ms: number) =>
-    new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-  const isRetryableFetchError = (error: unknown): boolean => {
-    if (!(error instanceof Error)) return false;
-    if (error.name === "AbortError") return false;
-    const message = error.message.toLowerCase();
-    return (
-      message.includes("fetch failed") ||
-      message.includes("network") ||
-      message.includes("timeout") ||
-      message.includes("connect") ||
-      message.includes("und_err")
-    );
-  };
-
   React.useEffect(() => {
     if (!shouldUseInventoryItems) return;
 
@@ -447,72 +430,10 @@ export function MakeOfferDialog({
       setInventoryError(null);
 
       try {
-        const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(robloxId)}&nocache=false`;
-        const maxAttempts = 3;
-
-        let response: Response | null = null;
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-          if (controller.signal.aborted) {
-            throw new DOMException("Aborted", "AbortError");
-          }
-
-          try {
-            response = await fetch(url, {
-              method: "GET",
-              headers: {
-                "User-Agent": "JailbreakChangelogs-MakeOffer/1.0",
-                "X-Source": INVENTORY_API_SOURCE_HEADER ?? "",
-              },
-              cache: "no-store",
-              signal: controller.signal,
-            });
-          } catch (error) {
-            if (controller.signal.aborted) {
-              throw new DOMException("Aborted", "AbortError");
-            }
-
-            if (attempt < maxAttempts - 1 && isRetryableFetchError(error)) {
-              const baseDelayMs = 500 * Math.pow(2, attempt);
-              const jitterMs = Math.floor(Math.random() * 250);
-              await sleep(baseDelayMs + jitterMs);
-              continue;
-            }
-
-            throw error;
-          }
-
-          if (
-            response &&
-            !response.ok &&
-            shouldRetryResponseStatus(response.status) &&
-            attempt < maxAttempts - 1
-          ) {
-            response.body?.cancel();
-            const baseDelayMs = 500 * Math.pow(2, attempt);
-            const jitterMs = Math.floor(Math.random() * 250);
-            await sleep(baseDelayMs + jitterMs);
-            response = null;
-            continue;
-          }
-
-          break;
-        }
-
-        if (!response) {
-          throw new Error("Failed to load inventory (no response)");
-        }
-
-        const data = (await response.json()) as unknown;
-        if (!response.ok) {
-          const message =
-            (data &&
-            typeof data === "object" &&
-            "message" in data &&
-            typeof (data as { message?: unknown }).message === "string"
-              ? (data as { message: string }).message
-              : null) || `Failed to load inventory (${response.status})`;
-          throw new Error(message);
-        }
+        const data = await queryClient.fetchQuery(
+          userInventoryQueryOptions(robloxId),
+        );
+        if (controller.signal.aborted) return;
 
         const record =
           data && typeof data === "object" && !Array.isArray(data)
@@ -581,7 +502,7 @@ export function MakeOfferDialog({
       controller.abort();
       if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
     };
-  }, [shouldUseInventoryItems, canLoadInventory, robloxId, items]);
+  }, [shouldUseInventoryItems, canLoadInventory, robloxId, items, queryClient]);
 
   const sendExactOffer = async () => {
     try {

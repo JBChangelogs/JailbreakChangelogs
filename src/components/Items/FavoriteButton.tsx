@@ -2,6 +2,7 @@
 
 import { createLogger } from "@/services/logger";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -28,7 +29,8 @@ export default function FavoriteButton({
   initialIsFavorited,
   initialCount,
 }: FavoriteButtonProps) {
-  const { setLoginModal } = useAuthContext();
+  const { setLoginModal, user } = useAuthContext();
+  const queryClient = useQueryClient();
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [favoriteCount, setFavoriteCount] = useState(initialCount);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,6 +62,17 @@ export default function FavoriteButton({
       if (response.ok) {
         setIsFavorited(!isFavorited);
         setFavoriteCount((prev) => (isFavorited ? prev - 1 : prev + 1));
+        if (user?.id) {
+          void queryClient.invalidateQueries({
+            queryKey: ["user-favorites", user.id],
+          });
+          void queryClient.invalidateQueries({
+            queryKey: ["profile", user.id, "favorites"],
+          });
+        }
+        void queryClient.invalidateQueries({
+          queryKey: ["item-favorites", itemId],
+        });
         toast.success(
           isFavorited ? "Removed from favorites" : "Added to favorites",
         );

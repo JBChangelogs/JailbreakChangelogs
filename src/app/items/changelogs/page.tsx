@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import ValuesChangelogHeader from "@/components/Values/ValuesChangelogHeader";
@@ -82,59 +83,40 @@ interface ValueChangelogsResponse {
 }
 
 const MAX_ENTRIES_SHOWN = 3;
+const EMPTY_CHANGELOGS: ValueChangelog[] = [];
 
 export default function ValuesChangelogPage() {
-  const [changelogs, setChangelogs] = useState<ValueChangelog[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
-  const fetchChangelogs = useCallback(
-    async (p: number, isStale?: () => boolean) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/v2/value-changelogs?page=${p}`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (isStale?.()) return;
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          log.error("fetch item changelogs failed", {
-            status: res.status,
-            body,
-          });
-          throw new Error("Failed to fetch changelogs");
-        }
-        const data: ValueChangelogsResponse = await res.json();
-        if (isStale?.()) return;
-        setChangelogs(data.items ?? []);
-        setTotalPages(data.total_pages ?? 1);
-        setTotal(data.total ?? 0);
-      } catch (err) {
-        if (isStale?.()) return;
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        if (!isStale?.()) {
-          setLoading(false);
-        }
+  const changelogQuery = useQuery({
+    queryKey: ["value-changelogs", page],
+    queryFn: async ({ signal }): Promise<ValueChangelogsResponse> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/value-changelogs?page=${page}`,
+      );
+      const res = await fetch(url, { credentials: "include", headers, signal });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        log.error("fetch item changelogs failed", {
+          status: res.status,
+          body,
+        });
+        throw new Error("Failed to fetch changelogs");
       }
+      return res.json() as Promise<ValueChangelogsResponse>;
     },
-    [],
-  );
-
-  useEffect(() => {
-    let ignore = false;
-    void fetchChangelogs(page, () => ignore);
-    return () => {
-      ignore = true;
-    };
-  }, [fetchChangelogs, page]);
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const changelogs = changelogQuery.data?.items ?? EMPTY_CHANGELOGS;
+  const totalPages = changelogQuery.data?.total_pages ?? 1;
+  const total = changelogQuery.data?.total ?? 0;
+  const loading = changelogQuery.isPending;
+  const error = changelogQuery.data ? null : changelogQuery.error?.message;
 
   return (
     <>

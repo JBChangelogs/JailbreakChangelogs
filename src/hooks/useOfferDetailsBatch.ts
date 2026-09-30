@@ -1,9 +1,12 @@
-import { createLogger } from "@/services/logger";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useMemo,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
-
-const log = createLogger("API");
 
 export type OfferDetailsBatchEntry = {
   trade?: number | string;
@@ -21,11 +24,10 @@ export type TradeOfferDetails = {
   status?: number;
 };
 
+const EMPTY_DETAILS: Record<string, TradeOfferDetails | null> = {};
+
 export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
-  const [map, setMap] = useState<Record<string, TradeOfferDetails | null>>({});
-  const [status, setStatus] = useState<"idle" | "loading" | "loaded" | "error">(
-    "idle",
-  );
+  const queryClient = useQueryClient();
 
   // Callers rebuild `events` every render, so key the fetch by content: the
   // serialized payload only changes when the trade/offer pairs actually do.
@@ -40,80 +42,75 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
     [events],
   );
 
-  const eventsRef = useRef(events);
-  useEffect(() => {
-    eventsRef.current = events;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const queryKey = ["offer-details-batch", payloadJson] as const;
+  const detailsQuery = useQuery({
+    queryKey,
+    enabled: events.length > 0 && Boolean(baseUrl),
+    queryFn: async ({
+      signal,
+    }): Promise<Record<string, TradeOfferDetails | null>> => {
+      const entries = events;
+      const { url, headers } = buildApiFetchRequest(
+        baseUrl!,
+        "/v2/trades/offers/batch",
+      );
+      const response = await fetch(url, {
+        method: "POST",
+        cache: "no-store",
+        credentials: "include",
+        signal,
+        headers: {
+          ...headers,
+          "User-Agent": "JailbreakChangelogs-Messages/1.0",
+          "Content-Type": "application/json",
+        },
+        body: payloadJson,
+      });
+      if (!response.ok)
+        throw new Error(`Offer details request failed (${response.status})`);
+      const raw = await response.text();
+      const parsed = raw ? (parseJsonWithLargeIds(raw) as unknown) : null;
+      const items = Array.isArray(parsed) ? parsed : [];
+      const result: Record<string, TradeOfferDetails | null> = {};
+      for (const item of items) {
+        if (!item || typeof item !== "object") continue;
+        const record = item as TradeOfferDetails & { trade?: number };
+        if (record.trade == null || record.id == null) continue;
+        result[`${record.trade}:${record.id}`] =
+          record.status === 1 ? record : null;
+      }
+      for (const entry of entries) {
+        const key = `${entry.trade}:${entry.offer}`;
+        if (!(key in result)) result[key] = null;
+      }
+      return result;
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
+  const setMap: Dispatch<
+    SetStateAction<Record<string, TradeOfferDetails | null>>
+  > = useCallback(
+    (value) => {
+      queryClient.setQueryData<Record<string, TradeOfferDetails | null>>(
+        ["offer-details-batch", payloadJson],
+        (previous) =>
+          typeof value === "function" ? value(previous ?? {}) : value,
+      );
+    },
+    [queryClient, payloadJson],
+  );
+  const status =
+    events.length === 0 || !baseUrl
+      ? "idle"
+      : detailsQuery.data
+        ? "loaded"
+        : detailsQuery.isError
+          ? "error"
+          : "loading";
 
-  useEffect(() => {
-    let ignore = false;
-
-    const run = async () => {
-      const entries = eventsRef.current;
-      if (!entries.length) {
-        setMap({});
-        setStatus("idle");
-        return;
-      }
-
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!baseUrl) return;
-
-      setStatus("loading");
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          baseUrl,
-          "/v2/trades/offers/batch",
-        );
-        const response = await fetch(url, {
-          method: "POST",
-          cache: "no-store",
-          credentials: "include",
-          headers: {
-            ...headers,
-            "User-Agent": "JailbreakChangelogs-Messages/1.0",
-            "Content-Type": "application/json",
-          },
-          body: payloadJson,
-        });
-
-        const raw = await response.text();
-        if (ignore) return;
-        const parsed = raw ? (parseJsonWithLargeIds(raw) as unknown) : null;
-        const items = Array.isArray(parsed) ? parsed : [];
-
-        const next: Record<string, TradeOfferDetails | null> = {};
-        for (const item of items) {
-          if (!item || typeof item !== "object") continue;
-          const record = item as TradeOfferDetails & { trade?: number };
-          if (record.trade == null || record.id == null) continue;
-          if (record.status !== 1) {
-            next[`${record.trade}:${record.id}`] = null;
-            continue;
-          }
-          next[`${record.trade}:${record.id}`] = record;
-        }
-
-        for (const entry of entries) {
-          const key = `${entry.trade}:${entry.offer}`;
-          if (!(key in next)) next[key] = null;
-        }
-
-        setMap(next);
-        setStatus("loaded");
-      } catch (err) {
-        if (ignore) return;
-        log.error("Batch offer details fetch error", err);
-        setMap({});
-        setStatus("error");
-      }
-    };
-
-    void run();
-    return () => {
-      ignore = true;
-    };
-  }, [payloadJson]);
-
-  return { map, setMap, status };
+  return { map: detailsQuery.data ?? EMPTY_DETAILS, setMap, status };
 }

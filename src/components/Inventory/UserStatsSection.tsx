@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
@@ -160,6 +161,7 @@ export default function UserStatsSection({
   totalItemsCount,
   duplicatesCount,
 }: UserStatsSectionProps) {
+  const queryClient = useQueryClient();
   const { user, isAuthenticated } = useAuthContext();
   const isOwnInventory =
     isAuthenticated && Boolean(user?.roblox_id) && user?.roblox_id === userId;
@@ -187,18 +189,27 @@ export default function UserStatsSection({
   const fetchScanHistory = async () => {
     setIsLoadingScanHistory(true);
     try {
-      const response = await fetch(
-        `/api/inventories/scan-history?id=${encodeURIComponent(userId)}`,
-      );
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        log.error("fetch scan history failed", {
-          status: response.status,
-          body,
-        });
-        throw new Error("Failed to fetch scan history");
-      }
-      const data = await response.json();
+      const data = await queryClient.fetchQuery({
+        queryKey: ["inventory-scan-history", userId],
+        queryFn: async ({ signal }) => {
+          const response = await fetch(
+            `/api/inventories/scan-history?id=${encodeURIComponent(userId)}`,
+            { signal },
+          );
+          if (!response.ok) {
+            const body = await response.json().catch(() => ({}));
+            log.error("fetch scan history failed", {
+              status: response.status,
+              body,
+            });
+            throw new Error("Failed to fetch scan history");
+          }
+          return response.json();
+        },
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
+      });
       setScanHistory(Array.isArray(data) ? data : []);
     } catch (error) {
       log.error("Error fetching scan history:", error);
@@ -222,16 +233,26 @@ export default function UserStatsSection({
     setIsLoadingQueuePosition(true);
     setQueueError(null);
     try {
-      const response = await fetch(
-        `/api/inventories/queue/position?id=${encodeURIComponent(userId)}`,
-        { cache: "no-store" },
-      );
-      if (response.status === 404) {
-        const data = await response.json();
+      const { status, data } = await queryClient.fetchQuery({
+        queryKey: ["inventory-queue-position", userId],
+        queryFn: async ({ signal }) => {
+          const response = await fetch(
+            `/api/inventories/queue/position?id=${encodeURIComponent(userId)}`,
+            { cache: "no-store", signal },
+          );
+          return {
+            status: response.status,
+            data: await response.json().catch(() => ({})),
+          };
+        },
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
+      });
+      if (status === 404) {
         setQueueError(data.error || "User not found in queue");
         setQueuePosition(null);
-      } else if (response.ok) {
-        const data = await response.json();
+      } else if (status >= 200 && status < 300) {
         if (
           typeof data.position === "number" &&
           Number.isFinite(data.position) &&
@@ -248,12 +269,11 @@ export default function UserStatsSection({
           setQueuePosition(null);
         }
       } else {
-        const body = await response.json().catch(() => ({}));
         log.error("fetch queue position failed", {
-          status: response.status,
-          body,
+          status,
+          body: data,
         });
-        throw new Error(`Failed to fetch queue position: ${response.status}`);
+        throw new Error(`Failed to fetch queue position: ${status}`);
       }
     } catch (error) {
       log.error("Error fetching queue position:", error);
@@ -262,7 +282,7 @@ export default function UserStatsSection({
     } finally {
       setIsLoadingQueuePosition(false);
     }
-  }, [userId]);
+  }, [userId, queryClient]);
 
   const handleCopyTradeNote = async () => {
     try {

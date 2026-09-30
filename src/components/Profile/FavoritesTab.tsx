@@ -1,9 +1,7 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
-import { useState, useEffect } from "react";
-
-const log = createLogger("UI");
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 
@@ -69,9 +67,6 @@ export default function FavoritesTab({
   currentUserId,
   settings,
 }: FavoritesTabProps) {
-  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const favoritesPerPage = 9;
@@ -79,19 +74,20 @@ export default function FavoritesTab({
   const shouldHideFavorites =
     settings?.hide_favorites === true && currentUserId !== userId;
 
-  useEffect(() => {
-    if (shouldHideFavorites) {
-      setLoading(false);
-      return;
-    }
-    fetchFavoritesData(userId)
-      .then((data) => setFavorites(data))
-      .catch((err) => {
-        log.error("Error fetching favorites", err);
-        setError("Failed to load favorites");
-      })
-      .finally(() => setLoading(false));
-  }, [userId, shouldHideFavorites]);
+  const favoritesQuery = useQuery({
+    queryKey: ["profile", userId, "favorites"],
+    queryFn: () => fetchFavoritesData(userId),
+    enabled: !shouldHideFavorites,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const favorites: FavoriteItem[] = favoritesQuery.data ?? [];
+  const loading = !shouldHideFavorites && favoritesQuery.isPending;
+  const error =
+    !favoritesQuery.data && favoritesQuery.isError
+      ? "Failed to load favorites"
+      : null;
 
   // Sort favorites based on selected order
   const sortedFavorites = [...favorites].sort((a, b) => {

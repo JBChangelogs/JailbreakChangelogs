@@ -1,9 +1,8 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-const log = createLogger("UI");
 import { useRouter } from "nextjs-toploader/app";
 import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -23,6 +22,12 @@ import RateLimitView from "@/components/Layout/RateLimitView";
 
 const LATEST_SEASON = Number(process.env.NEXT_PUBLIC_LATEST_SEASON);
 
+class SeasonListRateLimitError extends Error {
+  constructor(readonly retryAfter: number | null) {
+    super("Season list request was rate limited");
+  }
+}
+
 interface SeasonDetailsClientProps {
   seasonId: string;
   initialComments?: CommentData[];
@@ -35,94 +40,65 @@ export default function SeasonDetailsClient({
   initialUserMap = {},
 }: SeasonDetailsClientProps) {
   const router = useRouter();
-  const [seasonList, setSeasonList] = useState<Season[] | null>(null);
   const [currentSeasonState, setCurrentSeasonState] = useState<Season | null>(
     null,
   );
-  const [isNotFound, setIsNotFound] = useState(false);
-  const [isRateLimited, setIsRateLimited] = useState(false);
-  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(
-    null,
+  const seasonsQuery = useQuery({
+    queryKey: ["seasons-list"],
+    queryFn: async ({ signal }): Promise<Season[]> => {
+      if (!PUBLIC_API_URL) throw new Error("Missing PUBLIC_API_URL");
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/seasons",
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        signal,
+        headers: {
+          ...headers,
+          "User-Agent": "JailbreakChangelogs-Seasons/1.0",
+        },
+      });
+      if (response.status === 429) {
+        const raw = response.headers.get("retry-after");
+        throw new SeasonListRateLimitError(
+          raw ? Number.parseInt(raw, 10) : null,
+        );
+      }
+      if (!response.ok) throw new Error("Failed to fetch season list");
+      return response.json() as Promise<Season[]>;
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const seasonList = seasonsQuery.data;
+  const matchedSeason = seasonList?.find(
+    (season) => season.season.toString() === seasonId,
   );
 
   useEffect(() => {
-    let ignore = false;
-
-    const loadPageData = async () => {
-      try {
-        if (!PUBLIC_API_URL) {
-          throw new Error("Missing PUBLIC_API_URL");
-        }
-
-        const { url: seasonsUrl, headers: seasonsHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/v2/seasons");
-        const response = await fetch(seasonsUrl, {
-          credentials: "include",
-          headers: {
-            ...seasonsHeaders,
-            "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-          },
-        });
-        if (ignore) return;
-
-        if (!response.ok) {
-          if (response.status === 429) {
-            const raw = response.headers.get("retry-after");
-            setIsRateLimited(true);
-            setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
-            return;
-          }
-          throw new Error("Failed to fetch season list");
-        }
-
-        const data = (await response.json()) as Season[];
-        if (ignore) return;
-
-        const matched = data.find(
-          (s) =>
-            s.season.toString() === seasonId ||
-            s.season === parseInt(seasonId, 10),
-        );
-
-        if (!matched) {
-          setIsNotFound(true);
-          return;
-        }
-
-        if (
-          typeof matched.rewards === "string" ||
-          !Array.isArray(matched.rewards) ||
-          matched.rewards.length === 0
-        ) {
-          const latestSeason = data.find((s) => s.is_current === 1);
-          router.replace(`/seasons/${latestSeason?.season ?? LATEST_SEASON}`);
-          return;
-        }
-
-        setSeasonList(data);
-        setCurrentSeasonState(matched);
-      } catch (error) {
-        if (ignore) return;
-        log.error("Error loading season data", error);
-        setIsNotFound(true);
-      }
-    };
-
-    void loadPageData();
-
-    return () => {
-      ignore = true;
-    };
+    if (!matchedSeason || !seasonList) return;
+    if (
+      typeof matchedSeason.rewards === "string" ||
+      !Array.isArray(matchedSeason.rewards) ||
+      matchedSeason.rewards.length === 0
+    ) {
+      const latestSeason = seasonList.find((season) => season.is_current === 1);
+      router.replace(`/seasons/${latestSeason?.season ?? LATEST_SEASON}`);
+      return;
+    }
+    setCurrentSeasonState(matchedSeason);
     // router from nextjs-toploader/app returns a new object reference on every
-    // render, so including it here would re-trigger the fetch in an infinite loop
+    // render, so including it here would re-trigger the redirect.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [seasonId]);
+  }, [seasonId, matchedSeason, seasonList]);
 
-  if (isRateLimited) {
-    return <RateLimitView retryAfter={rateLimitRetryAfter} />;
+  if (!seasonList && seasonsQuery.error instanceof SeasonListRateLimitError) {
+    return <RateLimitView retryAfter={seasonsQuery.error.retryAfter} />;
   }
 
-  if (isNotFound) {
+  if ((seasonsQuery.isError && !seasonList) || (seasonList && !matchedSeason)) {
     notFound();
   }
 

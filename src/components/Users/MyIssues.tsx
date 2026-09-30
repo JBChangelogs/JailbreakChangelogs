@@ -1,7 +1,8 @@
 "use client";
 
 import { parseSortGroups } from "@/utils/api/sortGroups";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,9 +12,9 @@ import SubmissionTabs from "@/components/Users/SubmissionTabs";
 import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { formatCustomDate } from "@/utils/helpers/timestamp";
-import { createLogger } from "@/services/logger";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const log = createLogger("UI");
+const EMPTY_ISSUES: Issue[] = [];
 
 type Issue = {
   id: number;
@@ -88,6 +89,7 @@ function IssueDescription({ description }: { description: string }) {
 }
 
 export default function MyIssues() {
+  const { user, isLoading: isAuthLoading } = useAuthContext();
   const [pageParam, setPageParam] = useQueryState("page", {
     defaultValue: "1",
     history: "push",
@@ -98,13 +100,58 @@ export default function MyIssues() {
     history: "push",
     shallow: true,
   });
-  const [issues, setIssues] = useState<Issue[]>([]);
-  const [sortTypes, setSortTypes] = useState<string[]>([]);
-  const [sortLabels, setSortLabels] = useState<Record<string, string>>({});
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const issuesQuery = useQuery({
+    queryKey: ["my-issues", user?.id, page, sort],
+    enabled: !isAuthLoading,
+    queryFn: async ({ signal }): Promise<IssuesResponse> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/me/issues?page=${page}${sort ? `&sort=${encodeURIComponent(sort)}` : ""}`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        cache: "no-store",
+        headers,
+        signal,
+      });
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to load issues"),
+        );
+      }
+      return response.json() as Promise<IssuesResponse>;
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  });
+  const sortQuery = useQuery({
+    queryKey: ["issue-sorts"],
+    queryFn: async ({ signal }) => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/issues/sorts",
+      );
+      const response = await fetch(url, { headers, signal });
+      if (!response.ok)
+        throw new Error(`Issue sorts request failed (${response.status})`);
+      return parseSortGroups(await response.json()).flatMap(
+        (group) => group.options,
+      );
+    },
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+  });
+  const issues = issuesQuery.data?.items ?? EMPTY_ISSUES;
+  const total = issuesQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, issuesQuery.data?.total_pages ?? 1);
+  const loading = issuesQuery.isPending;
+  const error = issuesQuery.data ? null : issuesQuery.error?.message;
+  const sortTypes = sortQuery.data?.map((option) => option.value) ?? [];
+  const sortLabels = Object.fromEntries(
+    sortQuery.data?.map((option) => [option.value, option.label]) ?? [],
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
@@ -119,83 +166,6 @@ export default function MyIssues() {
       );
     });
   }, [debouncedSearch, issues]);
-
-  const fetchIssues = useCallback(
-    async (currentPage: number, currentSort: string | null) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/v2/users/me/issues?page=${currentPage}${currentSort ? `&sort=${encodeURIComponent(currentSort)}` : ""}`,
-        );
-        const response = await fetch(url, {
-          credentials: "include",
-          cache: "no-store",
-          headers,
-        });
-        if (!response.ok) {
-          throw new Error(
-            await getResponseErrorMessage(response, "Failed to load issues"),
-          );
-        }
-
-        const data = (await response.json()) as IssuesResponse;
-        setIssues(Array.isArray(data.items) ? data.items : []);
-        setTotal(data.total ?? 0);
-        setTotalPages(Math.max(1, data.total_pages ?? 1));
-      } catch (fetchError) {
-        log.error("Error fetching reported issues", fetchError);
-        setIssues([]);
-        setError(
-          fetchError instanceof Error
-            ? fetchError.message
-            : "Failed to load issues",
-        );
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
-
-  useEffect(() => {
-    void fetchIssues(page, sort);
-  }, [fetchIssues, page, sort]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchSortTypes = async () => {
-      try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          "/v2/issues/sorts",
-        );
-        const response = await fetch(url, {
-          cache: "no-store",
-          headers,
-          signal: controller.signal,
-        });
-        if (!response.ok) return;
-        const data = (await response.json()) as unknown;
-        const options = parseSortGroups(data).flatMap((group) => group.options);
-        if (options.length > 0) {
-          setSortTypes(options.map((option) => option.value));
-          setSortLabels(
-            Object.fromEntries(
-              options.map((option) => [option.value, option.label]),
-            ),
-          );
-        }
-      } catch (sortError) {
-        if (!controller.signal.aborted) {
-          log.error("Error fetching issue sort types", sortError);
-        }
-      }
-    };
-    void fetchSortTypes();
-    return () => controller.abort();
-  }, []);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     void setPageParam(String(value));
@@ -336,7 +306,7 @@ export default function MyIssues() {
             <p className="text-secondary-text mt-1 text-sm">{error}</p>
             <button
               type="button"
-              onClick={() => void fetchIssues(page, sort)}
+              onClick={() => void issuesQuery.refetch()}
               className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-4 rounded-lg px-4 py-2 text-sm font-medium"
             >
               Try Again

@@ -2,6 +2,7 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -37,6 +38,7 @@ export function useSuggestionVoting({
   sort,
   page,
 }: UseSuggestionVotingOptions) {
+  const queryClient = useQueryClient();
   // Per-suggestion voting loading state
   const [votingIds, setVotingIds] = useState<Set<number>>(new Set());
   const [votingTypes, setVotingTypes] = useState<
@@ -250,12 +252,20 @@ export function useSuggestionVoting({
             PUBLIC_API_URL!,
             `/v2/value-suggestions/${id}/votes`,
           );
-          const response = await fetch(url, {
-            credentials: "include",
-            headers,
+          const fresh = await queryClient.fetchQuery({
+            queryKey: ["value-suggestion-votes", id],
+            queryFn: async () => {
+              const response = await fetch(url, {
+                credentials: "include",
+                headers,
+              });
+              if (!response.ok) throw new Error("Failed to refresh votes");
+              return (await response.json()) as Suggestion["votes"];
+            },
+            staleTime: 0,
+            gcTime: 0,
+            retry: false,
           });
-          if (!response.ok) return;
-          const fresh: Suggestion["votes"] = await response.json();
           setSuggestions((previous) =>
             previous.map((suggestion) =>
               suggestion.id === id
@@ -278,12 +288,20 @@ export function useSuggestionVoting({
           PUBLIC_API_URL!,
           `/v2/value-suggestions?${query}`,
         );
-        const response = await fetch(url, {
-          credentials: "include",
-          headers,
+        const data = await queryClient.fetchQuery({
+          queryKey: ["suggestion-vote-snapshot", sort, page],
+          queryFn: async () => {
+            const response = await fetch(url, {
+              credentials: "include",
+              headers,
+            });
+            if (!response.ok) throw new Error("Failed to refresh votes");
+            return (await response.json()) as SuggestionsResponse;
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
-        if (!response.ok) return;
-        const data: SuggestionsResponse = await response.json();
         const freshById = new Map(
           data.items.map((suggestion) => [suggestion.id, suggestion]),
         );
@@ -304,7 +322,7 @@ export function useSuggestionVoting({
         // Stale vote counts are acceptable until the next refresh.
       }
     },
-    [page, setSuggestions, sort, syncActiveVoters],
+    [page, queryClient, setSuggestions, sort, syncActiveVoters],
   );
 
   useEffect(() => {

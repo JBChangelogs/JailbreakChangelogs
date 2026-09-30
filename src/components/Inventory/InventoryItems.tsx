@@ -635,7 +635,7 @@ export default function InventoryItems({
         </div>
       )}
 
-      {catalogValuesQuery.isError ? (
+      {catalogValuesQuery.isError && !catalogValuesQuery.data ? (
         <div className="text-secondary-text py-8 text-center">
           Couldn&apos;t load item values for this filter or sort.{" "}
           <button
@@ -646,7 +646,9 @@ export default function InventoryItems({
             Try again
           </button>
         </div>
-      ) : showMissingItems && partialItemsQuery.isError ? (
+      ) : showMissingItems &&
+        partialItemsQuery.isError &&
+        !partialItemsQuery.data ? (
         <div className="text-secondary-text py-8 text-center">
           Couldn&apos;t load the missing-item list.{" "}
           <button

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
@@ -33,6 +34,7 @@ import {
 import { NotifDescription } from "@/components/notifications/NotifDescription";
 import { TwemojiText } from "@/components/ui/TwemojiText";
 import { cn } from "@/lib/utils";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface NotificationPopoverProps {
   unreadCount: number;
@@ -115,42 +117,38 @@ export function NotificationPopover({
   onOpenChange,
 }: NotificationPopoverProps) {
   const [open, setOpen] = useState(false);
+  const { user } = useAuthContext();
   const [tab, setTab] = useState<"history" | "unread">("unread");
-  const [notifications, setNotifications] =
-    useState<NotificationHistory | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const queryClient = useQueryClient();
+  const notificationsQuery = useQuery({
+    queryKey: ["notifications", user?.id, tab, page, 5],
+    queryFn: () =>
+      tab === "unread"
+        ? fetchUnreadNotifications(page, 5)
+        : fetchNotificationHistory(page, 5),
+    enabled: open && isAuthenticated,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const notifications: NotificationHistory | null =
+    notificationsQuery.data ?? null;
+  const isLoading = notificationsQuery.isPending && open && isAuthenticated;
 
-  const fetchUnread = (p: number, limit: number) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(async () => {
-      setIsLoading(true);
-      let data = await fetchUnreadNotifications(p, limit);
-      if (data.items.length === 0 && p > 1) {
-        const prev = p - 1;
-        setPage(prev);
-        data = await fetchUnreadNotifications(prev, limit);
-      }
-      setNotifications(data);
-      const nextUnread =
-        typeof data.unread_count === "number"
-          ? data.unread_count
-          : Math.max(0, data.total || 0);
-      setUnreadCount(Math.max(0, nextUnread));
-      setIsLoading(false);
-    }, 300);
-  };
-
-  const fetchHistory = (p: number, limit: number) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(async () => {
-      setIsLoading(true);
-      const data = await fetchNotificationHistory(p, limit);
-      setNotifications(data);
-      setIsLoading(false);
-    }, 300);
-  };
+  useEffect(() => {
+    if (!open || tab !== "unread" || !notifications) return;
+    if (notifications.items.length === 0 && page > 1) {
+      setPage(page - 1);
+      return;
+    }
+    const nextUnread =
+      typeof notifications.unread_count === "number"
+        ? notifications.unread_count
+        : Math.max(0, notifications.total || 0);
+    setUnreadCount(Math.max(0, nextUnread));
+  }, [open, tab, page, notifications, setUnreadCount]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
@@ -158,12 +156,6 @@ export function NotificationPopover({
     if (nextOpen && isAuthenticated) {
       setTab("unread");
       setPage(1);
-      setIsLoading(true);
-      setNotifications(null);
-      fetchUnread(1, 5);
-    } else if (!nextOpen) {
-      setNotifications(null);
-      setIsLoading(false);
     }
   };
 
@@ -227,11 +219,10 @@ export function NotificationPopover({
                         toast.success("Cleared notification history", {
                           duration: 2000,
                         });
-                        setIsLoading(true);
-                        const data = await fetchNotificationHistory(1, 5);
-                        setNotifications(data);
                         setPage(1);
-                        setIsLoading(false);
+                        await queryClient.invalidateQueries({
+                          queryKey: ["notifications", user?.id, "history"],
+                        });
                       } else {
                         toast.error("Failed to clear notification history", {
                           duration: 3000,
@@ -263,10 +254,6 @@ export function NotificationPopover({
                 if (value !== "unread" && value !== "history") return;
                 setTab(value);
                 setPage(1);
-                setIsLoading(true);
-                setNotifications(null);
-                if (value === "unread") fetchUnread(1, 5);
-                else fetchHistory(1, 5);
               }}
             >
               <TabsList className="w-full rounded-none border-0 p-0" fullWidth>
@@ -319,6 +306,10 @@ export function NotificationPopover({
               <p className="text-secondary-text text-center text-sm">
                 You must be logged in to view notifications
               </p>
+            </div>
+          ) : !notifications && notificationsQuery.isError ? (
+            <div className="text-secondary-text px-4 py-8 text-center text-sm">
+              Could not load notifications. Please try again.
             </div>
           ) : notifications && notifications.items.length > 0 ? (
             <>
@@ -403,8 +394,6 @@ export function NotificationPopover({
                     siblingCount={0}
                     onChange={(_e, value) => {
                       setPage(value);
-                      if (tab === "history") fetchHistory(value, 5);
-                      else fetchUnread(value, 5);
                     }}
                   />
                 </div>

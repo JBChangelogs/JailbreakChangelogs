@@ -1,7 +1,8 @@
 "use client";
 
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
 import type {
@@ -96,6 +97,7 @@ export function useConversationList({
   setCurrentUserEnriched,
   refreshKey,
 }: UseConversationListOptions) {
+  const queryClient = useQueryClient();
   const userLookupCacheRef = useRef<Map<string, MessageUser | null>>(new Map());
   const userLookupPendingRef = useRef<Map<string, Promise<MessageUser | null>>>(
     new Map(),
@@ -105,100 +107,113 @@ export function useConversationList({
     string | null
   >(null);
 
-  const loadUserById = async (
-    id: string,
-    options?: { forceRefresh?: boolean },
-  ): Promise<MessageUser | null> => {
-    const forceRefresh = options?.forceRefresh === true;
-    if (!forceRefresh && userLookupCacheRef.current.has(id)) {
-      const cached = userLookupCacheRef.current.get(id) ?? null;
-      if (hasAvatarSettingsData(cached)) {
-        return cached;
-      }
-    }
-
-    const pending = userLookupPendingRef.current.get(id);
-    if (pending) {
-      return pending;
-    }
-
-    const request = (async () => {
-      try {
-        if (!PUBLIC_API_URL) {
-          return null;
+  const loadUserById = useCallback(
+    async (
+      id: string,
+      options?: { forceRefresh?: boolean },
+    ): Promise<MessageUser | null> => {
+      const forceRefresh = options?.forceRefresh === true;
+      if (!forceRefresh && userLookupCacheRef.current.has(id)) {
+        const cached = userLookupCacheRef.current.get(id) ?? null;
+        if (hasAvatarSettingsData(cached)) {
+          return cached;
         }
-
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/v2/users/${encodeURIComponent(id)}?fields=${USER_LOOKUP_FIELDS}`,
-        );
-        const response = await fetch(url, {
-          method: "GET",
-          cache: "no-store",
-          headers,
-        });
-
-        if (!response.ok) {
-          return null;
-        }
-
-        const data = await response.json();
-        return toMessageUser(data);
-      } catch (error) {
-        log.error("Error loading user by id:", error);
-        return null;
-      } finally {
-        userLookupPendingRef.current.delete(id);
       }
-    })();
 
-    userLookupPendingRef.current.set(id, request);
-    const result = await request;
-    userLookupCacheRef.current.set(id, result);
-    return result;
-  };
+      const pending = userLookupPendingRef.current.get(id);
+      if (pending) {
+        return pending;
+      }
 
-  const loadUsersBatch = async (
-    ids: string[],
-  ): Promise<Map<string, MessageUser>> => {
-    const result = new Map<string, MessageUser>();
-    if (ids.length === 0 || !PUBLIC_API_URL) {
+      const request = (async () => {
+        try {
+          if (!PUBLIC_API_URL) {
+            return null;
+          }
+
+          return await queryClient.fetchQuery({
+            queryKey: ["message-user-lookup", id, USER_LOOKUP_FIELDS],
+            queryFn: async ({ signal }): Promise<MessageUser | null> => {
+              const { url, headers } = buildApiFetchRequest(
+                PUBLIC_API_URL,
+                `/v2/users/${encodeURIComponent(id)}?fields=${USER_LOOKUP_FIELDS}`,
+              );
+              const response = await fetch(url, {
+                method: "GET",
+                cache: "no-store",
+                headers,
+                signal,
+              });
+              if (!response.ok) return null;
+              return toMessageUser(await response.json());
+            },
+            staleTime: forceRefresh ? 0 : 5 * 60_000,
+            gcTime: 30 * 60_000,
+            retry: false,
+          });
+        } catch (error) {
+          log.error("Error loading user by id:", error);
+          return null;
+        } finally {
+          userLookupPendingRef.current.delete(id);
+        }
+      })();
+
+      userLookupPendingRef.current.set(id, request);
+      const result = await request;
+      userLookupCacheRef.current.set(id, result);
       return result;
-    }
+    },
+    [queryClient],
+  );
 
-    try {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL,
-        `/v2/users/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
-      );
-      const response = await fetch(url, {
-        method: "GET",
-        cache: "no-store",
-        headers,
-      });
-
-      if (!response.ok) {
+  const loadUsersBatch = useCallback(
+    async (ids: string[]): Promise<Map<string, MessageUser>> => {
+      const result = new Map<string, MessageUser>();
+      if (ids.length === 0 || !PUBLIC_API_URL) {
         return result;
       }
 
-      const data = await response.json();
-      if (!Array.isArray(data)) {
-        return result;
-      }
-
-      for (const raw of data) {
-        const user = toMessageUser(raw);
-        if (user) {
-          userLookupCacheRef.current.set(user.id, user);
-          result.set(user.id, user);
+      try {
+        const data = await queryClient.fetchQuery({
+          queryKey: ["message-users-batch", [...ids].sort()],
+          queryFn: async ({ signal }): Promise<unknown> => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              `/v2/users/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
+            );
+            const response = await fetch(url, {
+              method: "GET",
+              cache: "no-store",
+              headers,
+              signal,
+            });
+            if (!response.ok) return [];
+            return response.json();
+          },
+          staleTime: 5 * 60_000,
+          gcTime: 30 * 60_000,
+          retry: false,
+        });
+        if (!Array.isArray(data)) {
+          return result;
         }
-      }
-    } catch (error) {
-      log.error("Error loading users batch:", error);
-    }
 
-    return result;
-  };
+        for (const raw of data) {
+          const user = toMessageUser(raw);
+          if (user) {
+            userLookupCacheRef.current.set(user.id, user);
+            result.set(user.id, user);
+          }
+        }
+      } catch (error) {
+        log.error("Error loading users batch:", error);
+      }
+
+      return result;
+    },
+    [queryClient],
+  );
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserMessageUser) {
@@ -229,7 +244,12 @@ export function useConversationList({
     return () => {
       isCancelled = true;
     };
-  }, [currentUserMessageUser, isAuthenticated, setCurrentUserEnriched]);
+  }, [
+    currentUserMessageUser,
+    isAuthenticated,
+    loadUserById,
+    setCurrentUserEnriched,
+  ]);
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) {
@@ -249,28 +269,35 @@ export function useConversationList({
           throw new Error("Public API URL is not configured");
         }
 
-        const { url: convUrl, headers: convHeaders } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          "/v2/conversations",
-        );
-        const response = await fetch(convUrl, {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-          headers: convHeaders,
+        const parsed = await queryClient.fetchQuery({
+          queryKey: ["conversations", currentUserId, refreshKey],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              "/v2/conversations",
+            );
+            const response = await fetch(url, {
+              method: "GET",
+              credentials: "include",
+              cache: "no-store",
+              headers,
+              signal,
+            });
+            if (!response.ok) {
+              throw new Error(
+                await getResponseErrorMessage(
+                  response,
+                  "Failed to load conversations",
+                ),
+              );
+            }
+            const rawBody = await response.text();
+            return rawBody ? parseJsonWithLargeIds(rawBody) : null;
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
-
-        if (!response.ok) {
-          throw new Error(
-            await getResponseErrorMessage(
-              response,
-              "Failed to load conversations",
-            ),
-          );
-        }
-
-        const rawBody = await response.text();
-        const parsed = rawBody ? parseJsonWithLargeIds(rawBody) : null;
         const items = extractItems(parsed);
         const parsedTotalConversations =
           parsed && typeof parsed === "object"
@@ -418,6 +445,8 @@ export function useConversationList({
     conversationListRequestKey,
     currentUserId,
     isAuthenticated,
+    loadUsersBatch,
+    queryClient,
     refreshKey,
     routeConversationIdRef,
     setConversations,
@@ -440,26 +469,35 @@ export function useConversationList({
           throw new Error("Public API URL is not configured");
         }
 
-        const { url: blockedUrl, headers: blockedHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/v2/users/me/blocked-users");
-        const response = await fetch(blockedUrl, {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-          headers: blockedHeaders,
+        const parsed = await queryClient.fetchQuery({
+          queryKey: ["blocked-users", currentUserId],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              "/v2/users/me/blocked-users",
+            );
+            const response = await fetch(url, {
+              method: "GET",
+              credentials: "include",
+              cache: "no-store",
+              headers,
+              signal,
+            });
+            if (!response.ok) {
+              const body = await response.json().catch(() => ({}));
+              log.error("fetch blocked users failed", {
+                status: response.status,
+                body,
+              });
+              throw new Error("Failed to fetch blocked users");
+            }
+            const rawBody = await response.text();
+            return rawBody ? parseJsonWithLargeIds(rawBody) : null;
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
-
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          log.error("fetch blocked users failed", {
-            status: response.status,
-            body,
-          });
-          throw new Error("Failed to fetch blocked users");
-        }
-
-        const rawBody = await response.text();
-        const parsed = rawBody ? parseJsonWithLargeIds(rawBody) : null;
         const blockedUsers = Array.isArray(
           (parsed as { blocked_users?: unknown[] } | null)?.blocked_users,
         )
@@ -495,7 +533,13 @@ export function useConversationList({
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, isAuthenticated, selectedUserId, setBlockedByMeByUserId]);
+  }, [
+    currentUserId,
+    isAuthenticated,
+    queryClient,
+    selectedUserId,
+    setBlockedByMeByUserId,
+  ]);
 
   useEffect(() => {
     if (
@@ -552,6 +596,7 @@ export function useConversationList({
     conversationListRequestKey,
     currentUserId,
     isAuthenticated,
+    loadUserById,
     loadedConversationListKey,
     routeConversationId,
     setConversations,

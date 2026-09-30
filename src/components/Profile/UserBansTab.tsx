@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
@@ -53,35 +54,29 @@ function BanCardSkeleton() {
 }
 
 export default function UserBansTab() {
-  const [bans, setBans] = useState<Ban[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchBans = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  const { user } = useAuthContext();
+  const bansQuery = useQuery({
+    queryKey: ["my-bans", user?.id],
+    queryFn: async ({ signal }): Promise<BansResponse> => {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
         "/v2/users/me/bans",
       );
-      const res = await fetch(url, { credentials: "include", headers });
+      const res = await fetch(url, { credentials: "include", headers, signal });
       if (!res.ok) {
-        setError(`Failed to load bans (${res.status})`);
-        return;
+        throw new Error(`Failed to load bans (${res.status})`);
       }
-      const data: BansResponse = await res.json();
-      setBans(data.items ?? []);
-    } catch {
-      setError("Failed to load bans.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchBans();
-  }, [fetchBans]);
+      return res.json() as Promise<BansResponse>;
+    },
+    enabled: Boolean(user?.id),
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const bans = bansQuery.data?.items ?? [];
+  const loading = bansQuery.isPending;
+  const error = bansQuery.data ? null : bansQuery.error?.message;
 
   return (
     <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
@@ -99,7 +94,7 @@ export default function UserBansTab() {
           />
           <p className="text-secondary-text text-sm">{error}</p>
           <button
-            onClick={() => void fetchBans()}
+            onClick={() => void bansQuery.refetch()}
             className="border-border-card bg-secondary-bg text-primary-text hover:bg-tertiary-bg inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors"
           >
             Retry

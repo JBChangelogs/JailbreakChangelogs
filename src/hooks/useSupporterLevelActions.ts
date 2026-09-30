@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type Dispatch, type SetStateAction } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { SupporterHistoryEntry, UserData } from "@/types/auth";
 import { revertSupporterLevel } from "@/services/settingsService";
@@ -15,6 +16,7 @@ export function useSupporterLevelActions({
   userData,
   setSupporterHistory,
 }: UseSupporterLevelActionsOptions) {
+  const queryClient = useQueryClient();
   const [revertingSupporterLevel, setRevertingSupporterLevel] = useState<
     number | null
   >(null);
@@ -27,6 +29,10 @@ export function useSupporterLevelActions({
     setRevertingSupporterLevel(level);
     try {
       await revertSupporterLevel(level);
+      void queryClient.invalidateQueries({
+        queryKey: ["supporter-history", userData.id],
+        refetchType: "none",
+      });
 
       const updatedUser: UserData = {
         ...userData,
@@ -69,6 +75,10 @@ export function useSupporterLevelActions({
     setRevertingSupporterLevel(0);
     try {
       await revertSupporterLevel(0);
+      void queryClient.invalidateQueries({
+        queryKey: ["supporter-history", userData.id],
+        refetchType: "none",
+      });
 
       const updatedUser: UserData = {
         ...userData,

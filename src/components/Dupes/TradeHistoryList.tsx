@@ -1,22 +1,14 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
-import { useMemo, useState, useEffect } from "react";
-
-const log = createLogger("UI");
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { DupeFinderHistoryEntry } from "@/types";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { formatShortDateTime } from "@/utils/helpers/timestamp";
 
-interface UserData {
-  id: number;
-  name: string;
-  displayName: string;
-  hasVerifiedBadge: boolean;
-}
 import { RobloxUser } from "@/types";
+import { useBatchUserData } from "@/hooks/useBatchUserData";
 
 interface TradeHistoryListProps {
   history: DupeFinderHistoryEntry[];
@@ -238,75 +230,24 @@ export default function TradeHistoryList({
     return processed;
   }, [usersData, tradeHistoryUserIds]);
 
-  const [fetchedUsers, setFetchedUsers] = useState<
-    Record<
-      string,
-      { name: string; displayName: string; hasVerifiedBadge: boolean }
-    >
-  >({});
+  const { robloxUsers } = useBatchUserData(tradeHistoryUserIds, {
+    enabled: !usersData && tradeHistoryUserIds.length > 0,
+  });
+  const fetchedUsers = useMemo(() => {
+    const processed: ResolvedUsers = {};
+    Object.values(robloxUsers).forEach((user) => {
+      if (!user?.id) return;
+      const id = String(user.id);
+      processed[id] = {
+        name: user.name || id,
+        displayName: user.displayName || user.name || id,
+        hasVerifiedBadge: Boolean(user.hasVerifiedBadge),
+      };
+    });
+    return processed;
+  }, [robloxUsers]);
 
   const finalUsers = usersData ? memoizedUserData : fetchedUsers;
-
-  useEffect(() => {
-    if (usersData) return;
-    if (tradeHistoryUserIds.length === 0) return;
-
-    let ignore = false;
-
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/v2`,
-          {
-            method: "POST",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
-              "X-Source":
-                process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userIds: tradeHistoryUserIds }),
-          },
-        );
-
-        if (!response.ok) return;
-
-        const userData = await response.json();
-        if (ignore) return;
-        const processedUsers: Record<
-          string,
-          { name: string; displayName: string; hasVerifiedBadge: boolean }
-        > = {};
-
-        Object.values(userData).forEach((user) => {
-          if (user && typeof user === "object" && "id" in user) {
-            const typedUser = user as UserData;
-            if (typedUser.id) {
-              processedUsers[typedUser.id.toString()] = {
-                name: typedUser.name || typedUser.id.toString(),
-                displayName:
-                  typedUser.displayName ||
-                  typedUser.name ||
-                  typedUser.id.toString(),
-                hasVerifiedBadge: Boolean(typedUser.hasVerifiedBadge),
-              };
-            }
-          }
-        });
-
-        setFetchedUsers(processedUsers);
-      } catch (error) {
-        if (ignore) return;
-        log.error("Failed to fetch users", error);
-      }
-    };
-
-    fetchUsers();
-
-    return () => {
-      ignore = true;
-    };
-  }, [tradeHistoryUserIds, usersData]);
 
   const getDisplayName = (userId: string) =>
     finalUsers[userId]?.displayName ?? userId;

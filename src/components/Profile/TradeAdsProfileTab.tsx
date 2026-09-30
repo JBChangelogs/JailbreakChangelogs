@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import type { TradeAd } from "@/types/trading";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Pagination } from "@/components/ui/Pagination";
 import { TradeAdCard } from "@/components/trading/TradeAdCard";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -72,253 +73,226 @@ export default function TradeAdsProfileTab({
   currentUserId = null,
 }: TradeAdsProfileTabProps) {
   const [page, setPage] = useState(1);
-  const [clientTradeAds, setClientTradeAds] = useState<TradeAd[]>(tradeAds);
-  const [apiTotalPages, setApiTotalPages] = useState(1);
-  const [isFetchingTradeAds, setIsFetchingTradeAds] = useState(false);
-  const [tradeAdsError, setTradeAdsError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (page !== 1) return;
-    setClientTradeAds(tradeAds);
-  }, [page, tradeAds]);
 
   useEffect(() => {
     setPage(1);
-  }, [user?.id]);
+  }, [user.id]);
 
-  useEffect(() => {
-    if (!user?.id) return;
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!baseUrl) return;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-    let isCancelled = false;
-    const controller = new AbortController();
+  interface V2TradeItemInfo {
+    cash_value?: string | null;
+    duped_value?: string | null;
+    trend?: string | null;
+    demand?: string | null;
+    notes?: string | null;
+  }
 
-    interface V2TradeItemInfo {
-      cash_value?: string | null;
-      duped_value?: string | null;
-      trend?: string | null;
-      demand?: string | null;
-      notes?: string | null;
+  interface V2TradeItem {
+    id?: string | number | null;
+    duped?: boolean;
+    amount?: number;
+    og?: boolean;
+    name?: string | null;
+    type?: string | null;
+    info?: V2TradeItemInfo | null;
+  }
+
+  interface V2TradeUser {
+    id?: string;
+    roblox_id?: string;
+    roblox_username?: string;
+    roblox_display_name?: string;
+    roblox_avatar?: string;
+    premiumtype?: number;
+    username?: string;
+    global_name?: string;
+    usernumber?: number;
+  }
+
+  interface V2Trade {
+    id: number;
+    note?: string | null;
+    status?: string | null;
+    requesting?: V2TradeItem[];
+    offering?: V2TradeItem[];
+    user?: V2TradeUser | null;
+    created_at?: number;
+    expires?: number;
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const toValidEpoch = (value: unknown): number => {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
     }
+    return now;
+  };
 
-    interface V2TradeItem {
-      id?: string | number | null;
-      duped?: boolean;
-      amount?: number;
-      og?: boolean;
-      name?: string | null;
-      type?: string | null;
-      info?: V2TradeItemInfo | null;
-    }
+  const normalizeV2Items = (items: V2TradeItem[] = []): TradeAd["offering"] =>
+    items.flatMap((item, index) => {
+      const amount = Math.max(1, Number(item.amount) || 1);
+      const parsedId = Number(item.id);
+      const fallbackId = -(index + 1);
+      const itemId = Number.isFinite(parsedId) ? parsedId : fallbackId;
 
-    interface V2TradeUser {
-      id?: string;
-      roblox_id?: string;
-      roblox_username?: string;
-      roblox_display_name?: string;
-      roblox_avatar?: string;
-      premiumtype?: number;
-      username?: string;
-      global_name?: string;
-      usernumber?: number;
-    }
-
-    interface V2Trade {
-      id: number;
-      note?: string | null;
-      status?: string | null;
-      requesting?: V2TradeItem[];
-      offering?: V2TradeItem[];
-      user?: V2TradeUser | null;
-      created_at?: number;
-      expires?: number;
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const toValidEpoch = (value: unknown): number => {
-      if (typeof value === "number" && Number.isFinite(value)) return value;
-      if (typeof value === "string") {
-        const parsed = Number(value);
-        if (Number.isFinite(parsed)) return parsed;
-      }
-      return now;
-    };
-
-    const normalizeV2Items = (items: V2TradeItem[] = []): TradeAd["offering"] =>
-      items.flatMap((item, index) => {
-        const amount = Math.max(1, Number(item.amount) || 1);
-        const parsedId = Number(item.id);
-        const fallbackId = -(index + 1);
-        const itemId = Number.isFinite(parsedId) ? parsedId : fallbackId;
-
-        const normalized = {
-          id: itemId,
-          instanceId: String(item.id ?? itemId),
-          name: item.name || "Unknown Item",
-          type: item.type || "Unknown",
-          cash_value: item.info?.cash_value || "N/A",
-          duped_value: item.info?.duped_value || "N/A",
-          is_limited: null,
-          is_seasonal: null,
-          tradable: 1,
-          trend: item.info?.trend || "N/A",
-          demand: item.info?.demand || "N/A",
-          isDuped: item.duped ?? false,
-          isOG: item.og ?? false,
-          is_sub: false,
-        };
-
-        return Array.from({ length: amount }, () => normalized);
-      });
-
-    const normalizeV2Trade = (trade: V2Trade): TradeAd => {
-      const createdAt = toValidEpoch(trade.created_at);
-      const expiresAt = toValidEpoch(trade.expires);
-      const isExpired = expiresAt <= now;
-      const status =
-        (trade.status && trade.status.trim()) ||
-        (isExpired ? "Expired" : "Pending");
-
-      return {
-        id: trade.id,
-        note: trade.note ?? "",
-        requesting: normalizeV2Items(trade.requesting),
-        offering: normalizeV2Items(trade.offering),
-        author: trade.user?.id || "",
-        created_at: createdAt,
-        expires: expiresAt,
-        expired: isExpired ? 1 : 0,
-        status,
-        message_id: null,
-        user: trade.user
-          ? {
-              id: trade.user.id || "",
-              username: trade.user.username || "Unknown",
-              global_name: trade.user.global_name,
-              avatar: undefined,
-              roblox_id: trade.user.roblox_id,
-              roblox_username: trade.user.roblox_username,
-              roblox_display_name: trade.user.roblox_display_name,
-              roblox_avatar: trade.user.roblox_avatar,
-              premiumtype: trade.user.premiumtype ?? 0,
-              usernumber: trade.user.usernumber,
-            }
-          : undefined,
+      const normalized = {
+        id: itemId,
+        instanceId: String(item.id ?? itemId),
+        name: item.name || "Unknown Item",
+        type: item.type || "Unknown",
+        cash_value: item.info?.cash_value || "N/A",
+        duped_value: item.info?.duped_value || "N/A",
+        is_limited: null,
+        is_seasonal: null,
+        tradable: 1,
+        trend: item.info?.trend || "N/A",
+        demand: item.info?.demand || "N/A",
+        isDuped: item.duped ?? false,
+        isOG: item.og ?? false,
+        is_sub: false,
       };
-    };
 
-    const fetchTradeAds = async () => {
-      setIsFetchingTradeAds(true);
-      setTradeAdsError(null);
-      try {
-        const { url: tradeAdsUrl, headers: tradeAdsHeaders } =
-          buildApiFetchRequest(
-            baseUrl,
-            `/v2/trades?user=${encodeURIComponent(user.id)}&page=${encodeURIComponent(String(page))}`,
-          );
-        const response = await fetch(tradeAdsUrl, {
-          cache: "no-store",
-          credentials: "include",
-          signal: controller.signal,
-          headers: {
-            ...tradeAdsHeaders,
-            "User-Agent": "JailbreakChangelogs-Profile/1.0",
-          },
-        });
+      return Array.from({ length: amount }, () => normalized);
+    });
 
-        if (isCancelled) return;
+  const normalizeV2Trade = (trade: V2Trade): TradeAd => {
+    const createdAt = toValidEpoch(trade.created_at);
+    const expiresAt = toValidEpoch(trade.expires);
+    const isExpired = expiresAt <= now;
+    const status =
+      (trade.status && trade.status.trim()) ||
+      (isExpired ? "Expired" : "Pending");
 
-        if (response.status === 404) {
-          try {
-            const body = (await response.json()) as unknown;
-            if (
-              body &&
-              typeof body === "object" &&
-              (body as Record<string, unknown>).error === "no_trades_found"
-            ) {
-              setClientTradeAds([]);
-              setApiTotalPages(1);
-              return;
-            }
-          } catch {
-            // Ignore parse errors.
+    return {
+      id: trade.id,
+      note: trade.note ?? "",
+      requesting: normalizeV2Items(trade.requesting),
+      offering: normalizeV2Items(trade.offering),
+      author: trade.user?.id || "",
+      created_at: createdAt,
+      expires: expiresAt,
+      expired: isExpired ? 1 : 0,
+      status,
+      message_id: null,
+      user: trade.user
+        ? {
+            id: trade.user.id || "",
+            username: trade.user.username || "Unknown",
+            global_name: trade.user.global_name,
+            avatar: undefined,
+            roblox_id: trade.user.roblox_id,
+            roblox_username: trade.user.roblox_username,
+            roblox_display_name: trade.user.roblox_display_name,
+            roblox_avatar: trade.user.roblox_avatar,
+            premiumtype: trade.user.premiumtype ?? 0,
+            usernumber: trade.user.usernumber,
           }
-        }
+        : undefined,
+    };
+  };
 
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          log.error("fetch trade ads failed", {
-            status: response.status,
-            body,
-          });
-          throw new Error(`Failed to fetch trade ads (${response.status})`);
-        }
+  const adsQuery = useQuery({
+    queryKey: ["profile-trade-ads", user.id, page],
+    enabled: Boolean(baseUrl && user.id),
+    queryFn: async ({
+      signal,
+    }): Promise<{ items: TradeAd[]; totalPages: number }> => {
+      const { url, headers } = buildApiFetchRequest(
+        baseUrl!,
+        `/v2/trades?user=${encodeURIComponent(user.id)}&page=${encodeURIComponent(String(page))}`,
+      );
+      const response = await fetch(url, {
+        cache: "no-store",
+        credentials: "include",
+        signal,
+        headers: {
+          ...headers,
+          "User-Agent": "JailbreakChangelogs-Profile/1.0",
+        },
+      });
+      const data: unknown = await response.json().catch(() => null);
 
-        const data = (await response.json()) as unknown;
-
-        // Backwards compatibility: older API returned a plain list.
-        if (Array.isArray(data)) {
-          const normalized = data
-            .map((entry) => normalizeV2Trade(entry as V2Trade))
-            .filter((t) => t.requesting.length || t.offering.length);
-          setClientTradeAds(normalized);
-          setApiTotalPages(1);
-          return;
-        }
-
-        if (!data || typeof data !== "object") {
-          setClientTradeAds([]);
-          setApiTotalPages(1);
-          return;
-        }
-
-        const record = data as Record<string, unknown>;
-        const rawItems = record.items;
-        const normalizedItems = Array.isArray(rawItems)
-          ? rawItems
-              .map((entry) => normalizeV2Trade(entry as V2Trade))
-              .filter((t) => t.requesting.length || t.offering.length)
-          : [];
-
-        const totalPagesValue =
-          typeof record.total_pages === "number" ? record.total_pages : 1;
-        if (totalPagesValue > 0 && page > totalPagesValue) {
-          setPage(totalPagesValue);
-          return;
-        }
-
-        setClientTradeAds(normalizedItems);
-        setApiTotalPages(totalPagesValue || 1);
-      } catch (error) {
-        if (isCancelled) return;
-        if (error instanceof DOMException && error.name === "AbortError")
-          return;
-        const message =
-          error instanceof Error ? error.message : "Failed to fetch trade ads";
-        setTradeAdsError(message);
-      } finally {
-        if (!isCancelled) setIsFetchingTradeAds(false);
+      if (
+        response.status === 404 &&
+        data &&
+        typeof data === "object" &&
+        (data as Record<string, unknown>).error === "no_trades_found"
+      ) {
+        return { items: [], totalPages: 1 };
       }
-    };
+      if (!response.ok) {
+        log.error("fetch trade ads failed", {
+          status: response.status,
+          body: data,
+        });
+        throw new Error(`Failed to fetch trade ads (${response.status})`);
+      }
 
-    void fetchTradeAds();
+      // Backwards compatibility: older API returned a plain list.
+      if (Array.isArray(data)) {
+        return {
+          items: data
+            .map((entry) => normalizeV2Trade(entry as V2Trade))
+            .filter(
+              (trade) => trade.requesting.length || trade.offering.length,
+            ),
+          totalPages: 1,
+        };
+      }
+      if (!data || typeof data !== "object") {
+        return { items: [], totalPages: 1 };
+      }
 
-    return () => {
-      isCancelled = true;
-      controller.abort();
-    };
-  }, [page, user]);
+      const record = data as Record<string, unknown>;
+      return {
+        items: Array.isArray(record.items)
+          ? record.items
+              .map((entry) => normalizeV2Trade(entry as V2Trade))
+              .filter(
+                (trade) => trade.requesting.length || trade.offering.length,
+              )
+          : [],
+        totalPages:
+          typeof record.total_pages === "number" && record.total_pages > 0
+            ? record.total_pages
+            : 1,
+      };
+    },
+    initialData:
+      page === 1 && tradeAds.length > 0
+        ? { items: tradeAds, totalPages: 1 }
+        : undefined,
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
 
-  const sortedTradeAds = useMemo(
-    () => [...clientTradeAds].sort((a, b) => b.created_at - a.created_at),
-    [clientTradeAds],
+  const apiTotalPages = adsQuery.data?.totalPages ?? 1;
+  useEffect(() => {
+    if (adsQuery.data && page > apiTotalPages) {
+      setPage(apiTotalPages);
+    }
+  }, [page, apiTotalPages, adsQuery.data]);
+
+  const clientTradeAds = adsQuery.data?.items ?? (page === 1 ? tradeAds : []);
+  const hasVisibleAds = page === 1 && tradeAds.length > 0;
+  const isFetchingTradeAds =
+    Boolean(baseUrl && user.id) && adsQuery.isPending && !hasVisibleAds;
+  const tradeAdsError =
+    adsQuery.data || hasVisibleAds ? null : adsQuery.error?.message;
+
+  const sortedTradeAds = [...clientTradeAds].sort(
+    (a, b) => b.created_at - a.created_at,
   );
   const currentPageAds = sortedTradeAds;
 
   return (
     <div className="mt-6 mb-8">
-      {isLoadingAdditionalData || isFetchingTradeAds ? (
+      {(isLoadingAdditionalData && !adsQuery.data && tradeAds.length === 0) ||
+      isFetchingTradeAds ? (
         <TradeAdsTabSkeleton />
       ) : tradeAdsError ? (
         <div className="mx-auto max-w-lg p-8 text-center">

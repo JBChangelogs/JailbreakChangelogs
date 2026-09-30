@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { notFound, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -357,6 +358,7 @@ function VoteRateLimitBanner({ seconds }: { seconds: number }) {
 }
 
 export default function ValueSuggestionDetailPage() {
+  const queryClient = useQueryClient();
   const { id } = useParams<{ id: string }>();
   const {
     isAuthenticated,
@@ -461,7 +463,13 @@ export default function ValueSuggestionDetailPage() {
       setTradeItemsLoading(true);
       setTradeItemsError(null);
       try {
-        const data = await fetchItemsClientPage(1);
+        const data = await queryClient.fetchQuery({
+          queryKey: ["tradable-items-page", 1],
+          queryFn: () => fetchItemsClientPage(1),
+          staleTime: 30_000,
+          gcTime: 5 * 60_000,
+          retry: false,
+        });
         if (ignore) return;
         setTradeItems(data.items);
         setEditCommonTrades((current) =>
@@ -478,7 +486,12 @@ export default function ValueSuggestionDetailPage() {
     return () => {
       ignore = true;
     };
-  }, [isEditingCommonTrades, suggestion?.field, tradeItems.length]);
+  }, [
+    isEditingCommonTrades,
+    suggestion?.field,
+    tradeItems.length,
+    queryClient,
+  ]);
 
   useEffect(() => {
     if (!id) return;
@@ -489,34 +502,52 @@ export default function ValueSuggestionDetailPage() {
       setShouldShowNotFound(false);
       setRouteError(null);
       try {
-        const { url: suggestionUrl, headers: devTokenHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL!, `/v2/value-suggestions/${id}`);
-        const res = await fetch(suggestionUrl, {
-          credentials: "include",
-          headers: devTokenHeaders,
+        const { status, ok, data } = await queryClient.fetchQuery({
+          queryKey: ["value-suggestion-detail", id],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL!,
+              `/v2/value-suggestions/${id}`,
+            );
+            const response = await fetch(url, {
+              credentials: "include",
+              headers,
+              signal,
+            });
+            return {
+              status: response.status,
+              ok: response.ok,
+              data: (await response.json().catch(() => null)) as unknown,
+            };
+          },
+          staleTime: 0,
+          gcTime: 5 * 60_000,
+          retry: false,
         });
         if (ignore) return;
-        if (!res.ok) {
-          if (res.status === 404) {
+        if (!ok) {
+          if (status === 404) {
             setShouldShowNotFound(true);
-          } else if (res.status >= 500) {
+          } else if (status >= 500) {
             setRouteError(new Error("Failed to load suggestion details."));
           } else {
-            const body = await res.json().catch(() => ({}));
             log.error("fetch suggestion failed", {
-              status: res.status,
-              body,
+              status,
+              body: data,
             });
             if (!ignore) setError("Failed to load suggestion.");
           }
           return;
         }
-        const data: Suggestion = await res.json();
         if (ignore) return;
-        setSuggestion(data);
-        setVoteCounts({ up: data.upvotes, down: data.downvotes });
-        if (data.item) {
-          setItem(data.item);
+        const suggestionData = data as Suggestion;
+        setSuggestion(suggestionData);
+        setVoteCounts({
+          up: suggestionData.upvotes,
+          down: suggestionData.downvotes,
+        });
+        if (suggestionData.item) {
+          setItem(suggestionData.item);
         }
       } catch {
         if (!ignore) setError("Failed to load suggestion.");
@@ -531,7 +562,7 @@ export default function ValueSuggestionDetailPage() {
     return () => {
       ignore = true;
     };
-  }, [id]);
+  }, [id, queryClient]);
 
   const suggesterId = suggestion?.user.id;
   useEffect(() => {
@@ -539,15 +570,28 @@ export default function ValueSuggestionDetailPage() {
     let ignore = false;
     const run = async () => {
       try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/v2/users/${suggesterId}/value-suggestion-stats`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await queryClient.fetchQuery({
+          queryKey: ["profile-value-suggestion-stats", suggesterId],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL!,
+              `/v2/users/${suggesterId}/value-suggestion-stats`,
+            );
+            const response = await fetch(url, {
+              credentials: "include",
+              headers,
+              signal,
+            });
+            if (!response.ok) return null;
+            const body = await response.json();
+            return body.stats ?? null;
+          },
+          staleTime: 60_000,
+          gcTime: 5 * 60_000,
+          retry: false,
+        });
         if (ignore) return;
-        setSuggesterStats(data.stats ?? null);
+        setSuggesterStats(data ?? null);
       } catch {
         // stats are non-critical
       }
@@ -557,7 +601,7 @@ export default function ValueSuggestionDetailPage() {
     return () => {
       ignore = true;
     };
-  }, [suggesterId]);
+  }, [suggesterId, queryClient]);
 
   if (shouldShowNotFound) {
     notFound();
@@ -614,13 +658,26 @@ export default function ValueSuggestionDetailPage() {
   const silentRefreshVotes = useCallback(async () => {
     if (!id) return;
     try {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL!,
-        `/v2/value-suggestions/${id}/votes`,
-      );
-      const res = await fetch(url, { credentials: "include", headers });
-      if (!res.ok) return;
-      const fresh: Suggestion["votes"] = await res.json();
+      const fresh = await queryClient.fetchQuery({
+        queryKey: ["value-suggestion-votes", id],
+        queryFn: async ({ signal }): Promise<Suggestion["votes"]> => {
+          const { url, headers } = buildApiFetchRequest(
+            PUBLIC_API_URL!,
+            `/v2/value-suggestions/${id}/votes`,
+          );
+          const response = await fetch(url, {
+            credentials: "include",
+            headers,
+            signal,
+          });
+          if (!response.ok) throw new Error("Failed to refresh votes");
+          return response.json();
+        },
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
+      });
+      if (!fresh) return;
       setVoteCounts({ up: fresh.upvotes.length, down: fresh.downvotes.length });
       setSuggestion((prev) =>
         prev
@@ -635,7 +692,7 @@ export default function ValueSuggestionDetailPage() {
     } catch {
       // silently fail — stale counts are acceptable
     }
-  }, [id]);
+  }, [id, queryClient]);
 
   const handleVote = async (type: "upvote" | "downvote") => {
     if (!isAuthenticated) {
@@ -751,6 +808,12 @@ export default function ValueSuggestionDetailPage() {
         );
         return false;
       }
+      void queryClient.invalidateQueries({
+        queryKey: ["value-suggestion-detail", id],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["value-suggestions-feed"],
+      });
       return true;
     } catch {
       toast.error("Failed to update suggestion.");
@@ -837,13 +900,24 @@ export default function ValueSuggestionDetailPage() {
     const run = async () => {
       setHistoryLoading(true);
       try {
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL!,
-          `/v2/items/${item.id}/history`,
-        );
-        const res = await fetch(url, { credentials: "include", headers });
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await queryClient.fetchQuery({
+          queryKey: ["item-history", item.id],
+          queryFn: async ({ signal }) => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL!,
+              `/v2/items/${item.id}/history`,
+            );
+            const response = await fetch(url, {
+              credentials: "include",
+              headers,
+              signal,
+            });
+            return response.ok ? response.json() : null;
+          },
+          staleTime: 60_000,
+          gcTime: 5 * 60_000,
+          retry: false,
+        });
         if (ignore) return;
         setItemHistory(Array.isArray(data) ? data : null);
       } catch {
@@ -859,7 +933,7 @@ export default function ValueSuggestionDetailPage() {
     return () => {
       ignore = true;
     };
-  }, [item?.id, isValueSuggestion]);
+  }, [item?.id, isValueSuggestion, queryClient]);
 
   const [activeSuggestionTab, setActiveSuggestionTab] = useState("details");
   const [suggestionTabDirection, setSuggestionTabDirection] = useState(0);

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
@@ -534,6 +535,7 @@ export default function TradeDetailsClient({
   initialComments = [],
   initialUserMap = {},
 }: TradeDetailsClientProps) {
+  const queryClient = useQueryClient();
   type OfferResponseAction = "accept" | "decline";
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
@@ -689,36 +691,52 @@ export default function TradeDetailsClient({
           }
         }
 
-        const { url: offerCheckUrl, headers: devTokenHeaders } =
-          buildApiFetchRequest(
-            baseUrl,
-            `/v2/trades/${encodeURIComponent(String(trade.id))}/offers`,
-          );
-        const response = await fetch(offerCheckUrl, {
-          method: "HEAD",
-          cache: "no-store",
-          credentials: "include",
-          headers: { ...devTokenHeaders, ...headers },
+        const { status, ok, errorMessage } = await queryClient.fetchQuery({
+          queryKey: ["trade-offer-eligibility", trade.id, currentUserId],
+          queryFn: async ({ signal }) => {
+            const { url, headers: devTokenHeaders } = buildApiFetchRequest(
+              baseUrl,
+              `/v2/trades/${encodeURIComponent(String(trade.id))}/offers`,
+            );
+            const response = await fetch(url, {
+              method: "HEAD",
+              cache: "no-store",
+              credentials: "include",
+              signal,
+              headers: { ...devTokenHeaders, ...headers },
+            });
+            return {
+              status: response.status,
+              ok: response.ok,
+              errorMessage:
+                response.ok || response.status === 409
+                  ? null
+                  : await getResponseErrorMessage(
+                      response,
+                      "Failed to check offer status",
+                    ),
+            };
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
 
         if (isCancelled) return;
 
-        if (response.status === 409) {
+        if (status === 409) {
           setOfferState({ status: "already_offered", error: null });
           return;
         }
 
-        if (response.ok) {
+        if (ok) {
           setOfferState({ status: "can_offer", error: null });
           return;
         }
 
         setOfferState({
           status: "error",
-          error: await getResponseErrorMessage(
-            response,
-            "Failed to check offer status",
-          ),
+          error: errorMessage,
         });
       } catch (err) {
         log.error("Error checking offer status:", err);
@@ -736,7 +754,14 @@ export default function TradeDetailsClient({
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, isAuthenticated, isOwner, trade.author, trade.id]);
+  }, [
+    currentUserId,
+    isAuthenticated,
+    isOwner,
+    trade.author,
+    trade.id,
+    queryClient,
+  ]);
 
   const pendingMakeOfferToastIdRef = useRef<string | number | null>(null);
 
@@ -1804,6 +1829,9 @@ export default function TradeDetailsClient({
           items={items}
           onOfferSent={() => {
             setOfferState({ status: "already_offered", error: null });
+            void queryClient.invalidateQueries({
+              queryKey: ["trade-offer-eligibility", trade.id, currentUserId],
+            });
             setOffersRefreshToken((prev) => prev + 1);
           }}
         />

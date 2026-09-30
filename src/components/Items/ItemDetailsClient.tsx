@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
 import React, { Suspense } from "react";
@@ -437,39 +438,46 @@ export default function ItemDetailsClient({
   );
   const [tabDirection, setTabDirection] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
-  const [placementLimit, setPlacementLimit] = useState<number | null>(null);
-  const [scanCount, setScanCount] = useState<{
-    itemId: number;
-    count: number | null;
-  } | null>(null);
+  const queryClient = useQueryClient();
+  const { data: scanCount } = useQuery({
+    queryKey: ["item-scan-count", item.id],
+    queryFn: () => fetchItemScanCount(item.id),
+    enabled: item.id !== 587 && item.id !== 713,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const { data: placementLimitsMap } = useQuery({
+    queryKey: ["furniture-placement-limits"],
+    queryFn: fetchFurniturePlacementLimits,
+    enabled: item.type === "Furniture",
+    staleTime: Infinity,
+    gcTime: 60 * 60_000,
+    retry: false,
+  });
+  const placementLimit = placementLimitsMap?.get(item.id) ?? null;
 
   useEffect(() => {
     setItem(initialItem);
   }, [initialItem]);
 
   useEffect(() => {
-    if (item.id === 587 || item.id === 713) return;
-
-    let cancelled = false;
-    void fetchItemScanCount(item.id).then((count) => {
-      if (!cancelled) {
-        setScanCount({ itemId: item.id, count });
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [item.id]);
-
-  useEffect(() => {
     let cancelled = false;
 
     const handleRealtimeItem = () => {
-      void fetchItemByIdClient(String(initialItem.id)).then((updatedItem) => {
-        if (!cancelled && updatedItem) {
-          setItem(updatedItem);
-        }
-      });
+      void queryClient
+        .fetchQuery({
+          queryKey: ["item", "id", initialItem.id],
+          queryFn: () => fetchItemByIdClient(String(initialItem.id)),
+          staleTime: 0,
+          gcTime: 5 * 60_000,
+          retry: false,
+        })
+        .then((updatedItem) => {
+          if (!cancelled && updatedItem) {
+            setItem(updatedItem);
+          }
+        });
     };
 
     window.addEventListener("realtimeItem", handleRealtimeItem);
@@ -477,7 +485,7 @@ export default function ItemDetailsClient({
       cancelled = true;
       window.removeEventListener("realtimeItem", handleRealtimeItem);
     };
-  }, [initialItem.id]);
+  }, [initialItem.id, queryClient]);
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
@@ -485,33 +493,13 @@ export default function ItemDetailsClient({
     `item-detail-${item?.id}-parent`,
   );
 
-  useEffect(() => {
-    let isMounted = true;
-
-    if (item.type === "Furniture") {
-      fetchFurniturePlacementLimits()
-        .then((limitsMap) => {
-          if (!isMounted) return;
-          setPlacementLimit(limitsMap.get(item.id) ?? null);
-        })
-        .catch(() => {
-          if (isMounted) setPlacementLimit(null);
-        });
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [item.id, item.type]);
-
   const handleTabChange = (newValue: number) => {
     setTabDirection(newValue > activeTab ? 1 : -1);
     void setTabParam(TAB_INDEX_TO_NAME[newValue] ?? null);
   };
 
   const currentItem = item;
-  const currentScanCount =
-    scanCount?.itemId === currentItem.id ? scanCount.count : undefined;
+  const currentScanCount = scanCount;
   const metadataLevel = unlockLevel(currentItem.level);
   const hasMetadataLevel = hasUnlockLevel(metadataLevel);
   const requirementsTooltipText = useMemo(

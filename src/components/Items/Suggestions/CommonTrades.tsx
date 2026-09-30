@@ -489,6 +489,10 @@ function TradeSideEditor({
                   <p className="text-secondary-text px-3 py-6 text-sm">
                     Loading items...
                   </p>
+                ) : catalog.error ? (
+                  <p className="text-secondary-text px-3 py-6 text-sm">
+                    {catalog.errorMessage ?? "Could not load items."}
+                  </p>
                 ) : results.length ? (
                   results.map((item) => (
                     <SuggestionItemSearchResult
@@ -595,6 +599,18 @@ export function CommonTradesEditor({
           combined (quantity counts toward this), matching the in-game trade
           limit.
         </p>
+        <Link
+          href={`/item/${encodeURIComponent(suggestedItem.type)}/${encodeURIComponent(suggestedItem.name)}?tab=trades`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-link hover:text-link-hover mt-1 inline-flex items-center gap-1 text-xs font-medium hover:underline"
+        >
+          View recent recorded trades (opens in new tab)
+          <Icon
+            icon="heroicons:arrow-top-right-on-square"
+            className="h-3 w-3"
+          />
+        </Link>
       </div>
       <div className="space-y-3">
         {trades.map((trade, index) => (

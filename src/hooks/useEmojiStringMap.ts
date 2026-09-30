@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import type { EmojiStringMap } from "@/utils/comments/emojiShortcodes";
 
@@ -19,19 +19,25 @@ function parseEmojiStringResponse(data: unknown): EmojiStringMap | null {
 }
 
 export function useEmojiStringMap(): EmojiStringMap {
-  const [emojiStringMap, setEmojiStringMap] = useState<EmojiStringMap>({});
+  const query = useQuery({
+    queryKey: ["emoji-string-map"],
+    queryFn: async ({ signal }): Promise<EmojiStringMap> => {
+      const response = await fetch(`${PUBLIC_API_URL}/v2/emojis/string`, {
+        credentials: "include",
+        signal,
+      });
+      if (!response.ok)
+        throw new Error(`Emoji request failed (${response.status})`);
+      return parseEmojiStringResponse(await response.json()) ?? {};
+    },
+    enabled: Boolean(PUBLIC_API_URL),
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
-  useEffect(() => {
-    if (!PUBLIC_API_URL) return;
-
-    fetch(`${PUBLIC_API_URL}/v2/emojis/string`, { credentials: "include" })
-      .then((response) => response.json())
-      .then((data: unknown) => {
-        const map = parseEmojiStringResponse(data);
-        if (map) setEmojiStringMap(map);
-      })
-      .catch(() => {});
-  }, []);
-
-  return emojiStringMap;
+  return query.data ?? EMPTY_EMOJI_STRING_MAP;
 }
+
+const EMPTY_EMOJI_STRING_MAP: EmojiStringMap = {};

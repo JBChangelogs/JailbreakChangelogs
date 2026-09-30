@@ -92,7 +92,7 @@ export default function DupeItemsGrid({
     );
   }
 
-  if (itemQuery.isError) {
+  if (itemQuery.isError && !itemQuery.data) {
     return (
       <div className="text-secondary-text py-8 text-center">
         Couldn&apos;t load item details.{" "}

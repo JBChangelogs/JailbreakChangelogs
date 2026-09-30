@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 
 import {
@@ -8,11 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
-import { createLogger } from "@/services/logger";
 import { fetchCustomBanner } from "@/services/settingsService";
 import type { UserData } from "@/types/auth";
-
-const log = createLogger("UI");
 
 interface BannerSettingsProps {
   userData: UserData;
@@ -25,30 +22,18 @@ export const BannerSettings = ({
   onBannerUpdate,
   onUploadStateChange,
 }: BannerSettingsProps) => {
-  const [customBannerUrl, setCustomBannerUrl] = useState<string | null>(null);
-  const [bannerError, setBannerError] = useState<string | null>(null);
-  const [isLoadingBanner, setIsLoadingBanner] = useState(true);
-
-  useEffect(() => {
-    const loadBanner = async () => {
-      try {
-        setIsLoadingBanner(true);
-        setBannerError(null);
-        setCustomBannerUrl(await fetchCustomBanner());
-      } catch (error) {
-        log.error("Error loading custom banner:", error);
-        setBannerError(
-          error instanceof Error
-            ? error.message
-            : "Failed to load your custom banner",
-        );
-      } finally {
-        setIsLoadingBanner(false);
-      }
-    };
-
-    void loadBanner();
-  }, []);
+  const queryClient = useQueryClient();
+  const bannerKey = ["custom-banner", userData.id] as const;
+  const bannerQuery = useQuery({
+    queryKey: bannerKey,
+    queryFn: fetchCustomBanner,
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const customBannerUrl = bannerQuery.data ?? null;
+  const bannerError = bannerQuery.error?.message ?? null;
+  const isLoadingBanner = bannerQuery.isPending;
 
   return (
     <div className="mt-3 mb-5">
@@ -60,7 +45,7 @@ export const BannerSettings = ({
         userData={userData}
         onUploadStateChange={onUploadStateChange}
         onUploaded={(url) => {
-          setCustomBannerUrl(url);
+          queryClient.setQueryData(bannerKey, url);
           onBannerUpdate(url);
         }}
       >

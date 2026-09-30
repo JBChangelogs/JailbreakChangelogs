@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
@@ -16,6 +17,7 @@ import { getFilterSortsDisplayNames } from "./valuesFilterOptions";
 interface ValuesItemsGridProps {
   items: Item[];
   isLoading?: boolean;
+  searchErrorMessage?: string | null;
   favorites: number[];
   onFavoriteChange: (itemId: number, isFavorited: boolean) => void;
   appliedMinValue: number;
@@ -35,6 +37,7 @@ interface ValuesItemsGridProps {
 export default function ValuesItemsGrid({
   items,
   isLoading = false,
+  searchErrorMessage,
   favorites,
   onFavoriteChange,
   appliedMinValue,
@@ -51,16 +54,13 @@ export default function ValuesItemsGrid({
   debouncedSearchTerm,
 }: ValuesItemsGridProps) {
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [placementLimitsMap, setPlacementLimitsMap] = useState<Map<
-    number,
-    number
-  > | null>(null);
-
-  useEffect(() => {
-    fetchFurniturePlacementLimits()
-      .then(setPlacementLimitsMap)
-      .catch(() => {});
-  }, []);
+  const { data: placementLimitsMap } = useQuery({
+    queryKey: ["furniture-placement-limits"],
+    queryFn: fetchFurniturePlacementLimits,
+    staleTime: Infinity,
+    gcTime: 60 * 60_000,
+    retry: false,
+  });
 
   const filterSortKey = selectedFilterSorts.join(",");
 
@@ -160,11 +160,13 @@ export default function ValuesItemsGrid({
   };
 
   const getEmptyStateTitle = () => {
-    return getNoItemsMessage();
+    return searchErrorMessage ?? getNoItemsMessage();
   };
 
   const getEmptyStateDescription = () => {
-    return "Try adjusting your search or filter.";
+    return searchErrorMessage
+      ? "Check your search and try again."
+      : "Try adjusting your search or filter.";
   };
 
   return (
@@ -172,6 +174,7 @@ export default function ValuesItemsGrid({
       <div className="mb-4 flex flex-col gap-4">
         <p className="text-secondary-text">
           {(() => {
+            if (searchErrorMessage) return "Search unavailable";
             const isDefaultRange =
               appliedMinValue === 0 && appliedMaxValue >= MAX_VALUE_RANGE;
             const rangeText = !isDefaultRange

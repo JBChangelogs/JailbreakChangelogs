@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQueryState } from "nuqs";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
@@ -10,18 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React from "react";
 
-import {
-  ENABLE_WS_SCAN,
-  INVENTORY_API_URL,
-  PUBLIC_API_URL,
-} from "@/utils/api/api";
+import { ENABLE_WS_SCAN, INVENTORY_API_URL } from "@/utils/api/api";
 import { trackEvent } from "@/utils/analytics/rybbit";
-import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Season } from "@/types/seasons";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
+import { SeasonRateLimitError, useLatestSeason } from "@/hooks/useLatestSeason";
 
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
@@ -108,6 +105,7 @@ export default function InventoryCheckerClient({
   initialNetworthData = [],
   initialMoneyHistoryData = [],
 }: InventoryCheckerClientProps) {
+  const queryClient = useQueryClient();
   const [searchId, setSearchId] = useState(
     originalSearchTerm || robloxId || "",
   );
@@ -150,64 +148,27 @@ export default function InventoryCheckerClient({
   const { modalState, openModal, closeModal } = useSupporterModal();
   const [showScanModal, setShowScanModal] = useState(false);
 
-  const [activeSeason, setActiveSeason] = useState<Season | null>(
-    currentSeason,
+  const latestSeasonQuery = useLatestSeason(
+    Boolean(initialData) && !externalIsLoading,
   );
-  const [seasonRateLimitMessage, setSeasonRateLimitMessage] = useState<
-    string | undefined
-  >(undefined);
-
-  useEffect(() => {
-    let ignore = false;
-
-    const loadSeason = async () => {
-      if (!initialData || !PUBLIC_API_URL || externalIsLoading) return;
-      try {
-        const { url: latestSeasonUrl, headers: latestDevTokenHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL, "/v2/seasons/latest");
-        const latestRes = await fetch(latestSeasonUrl, {
-          credentials: "include",
-          headers: {
-            ...latestDevTokenHeaders,
-            "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-          },
-        });
-        if (ignore) return;
-        if (!latestRes.ok) {
-          if (latestRes.status === 429) {
-            const raw = latestRes.headers.get("retry-after");
-            const seconds = raw ? parseInt(raw, 10) : null;
-            const formatWait = (s: number) =>
-              s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
-            setSeasonRateLimitMessage(
-              seconds
-                ? `Season XP unavailable — try again in ${formatWait(seconds)}`
-                : "Season XP unavailable — try again later",
-            );
-          }
-          return;
-        }
-        const latest = (await latestRes.json()) as Season;
-
-        // Past seasons' xp_data is often missing from the API, so only show
-        // the bar for scans from the currently active season.
-        const updatedAt = initialData?.updated_at;
-        const resolved =
-          updatedAt && updatedAt >= latest.start_date ? latest : null;
-
-        if (ignore) return;
-        setActiveSeason(resolved);
-      } catch (e) {
-        log.error("Error fetching season data", e);
-      }
-    };
-
-    void loadSeason();
-
-    return () => {
-      ignore = true;
-    };
-  }, [initialData, externalIsLoading]);
+  // Past seasons' xp_data is often missing from the API, so only show
+  // the bar for scans from the currently active season.
+  const activeSeason = latestSeasonQuery.data
+    ? initialData?.updated_at &&
+      initialData.updated_at >= latestSeasonQuery.data.start_date
+      ? latestSeasonQuery.data
+      : null
+    : currentSeason;
+  const rateLimitError =
+    latestSeasonQuery.error instanceof SeasonRateLimitError
+      ? latestSeasonQuery.error
+      : null;
+  const seconds = rateLimitError?.retryAfter;
+  const seasonRateLimitMessage = rateLimitError
+    ? seconds
+      ? `Season XP unavailable — try again in ${seconds >= 60 ? `${Math.floor(seconds / 60)}m ${seconds % 60}s` : `${seconds}s`}`
+      : "Season XP unavailable — try again later"
+    : undefined;
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
@@ -389,20 +350,29 @@ export default function InventoryCheckerClient({
 
     setIsLoadingQueuePosition(true);
     try {
-      const response = await fetch(
-        `/api/inventories/queue/position?id=${encodeURIComponent(robloxId)}`,
-        { cache: "no-store" },
-      );
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
+      const { status, data } = await queryClient.fetchQuery({
+        queryKey: ["inventory-queue-position", robloxId],
+        queryFn: async ({ signal }) => {
+          const response = await fetch(
+            `/api/inventories/queue/position?id=${encodeURIComponent(robloxId)}`,
+            { cache: "no-store", signal },
+          );
+          return {
+            status: response.status,
+            data: await response.json().catch(() => ({})),
+          };
+        },
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
+      });
+      if (status < 200 || status >= 300) {
         log.error("queue position request failed", {
-          status: response.status,
-          body,
+          status,
+          body: data,
         });
-        throw new Error(`Queue request failed: ${response.status}`);
+        throw new Error(`Queue request failed: ${status}`);
       }
-
-      const data = await response.json();
       if (
         typeof data.position === "number" &&
         Number.isFinite(data.position) &&
@@ -425,7 +395,7 @@ export default function InventoryCheckerClient({
     } finally {
       setIsLoadingQueuePosition(false);
     }
-  }, [robloxId]);
+  }, [robloxId, queryClient]);
 
   useEffect(() => {
     const shouldFetchOnLoad =

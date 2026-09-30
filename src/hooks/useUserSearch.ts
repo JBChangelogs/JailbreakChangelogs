@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { createLogger } from "@/services/logger";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { searchUsers } from "@/utils/api/api";
 import type { UserData } from "@/types/auth";
-
-const log = createLogger("UI");
 
 interface UseUserSearchOptions {
   limit?: number;
@@ -17,48 +15,43 @@ export function useUserSearch(
   currentUserId: string | null,
   { limit = 100, enabled = true }: UseUserSearchOptions = {},
 ) {
-  const [results, setResults] = useState<UserData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const requestIdRef = useRef(0);
+  const [debouncedQuery, setDebouncedQuery] = useState(query.trim());
 
   useEffect(() => {
-    const trimmedQuery = query.trim();
-    if (!enabled || !trimmedQuery) {
-      requestIdRef.current += 1;
-      setResults([]);
-      setIsLoading(false);
-      return;
-    }
+    const timeoutId = window.setTimeout(
+      () => setDebouncedQuery(query.trim()),
+      300,
+    );
+    return () => window.clearTimeout(timeoutId);
+  }, [query]);
 
-    const requestId = (requestIdRef.current += 1);
-    setIsLoading(true);
-
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        const resultsRaw = await searchUsers(trimmedQuery, limit);
-        if (requestIdRef.current !== requestId) return;
-
-        const found = Array.isArray(resultsRaw) ? resultsRaw : [];
-        setResults(
-          currentUserId
-            ? found.filter((result) => result?.id !== currentUserId)
-            : found,
-        );
-      } catch (error) {
-        if (requestIdRef.current !== requestId) return;
-        log.error("Error searching users:", error);
-        setResults([]);
-      } finally {
-        if (requestIdRef.current === requestId) {
-          setIsLoading(false);
-        }
-      }
-    }, 300);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [currentUserId, enabled, limit, query]);
+  const searchQuery = useQuery({
+    queryKey: ["users", "search", debouncedQuery, limit],
+    queryFn: async ({ signal }) => {
+      const response = await searchUsers(debouncedQuery, limit, signal);
+      return (
+        Array.isArray(response)
+          ? response
+          : Array.isArray(response?.users)
+            ? response.users
+            : []
+      ) as UserData[];
+    },
+    enabled: enabled && !!debouncedQuery && debouncedQuery === query.trim(),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const results =
+    enabled && query.trim()
+      ? (searchQuery.data ?? []).filter(
+          (result) => result?.id !== currentUserId,
+        )
+      : [];
+  const isLoading =
+    enabled &&
+    !!query.trim() &&
+    (debouncedQuery !== query.trim() || searchQuery.isPending);
 
   return { results, isLoading };
 }

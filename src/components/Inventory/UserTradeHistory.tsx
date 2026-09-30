@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -298,14 +299,6 @@ function TradeItem({
               Duped copy
             </span>
           )}
-          {item.confidence !== "confirmed" && (
-            <span
-              className="text-secondary-text text-[10px] sm:text-xs"
-              title="The previous owner was recovered after a data gap."
-            >
-              Recovered hop
-            </span>
-          )}
           {item.given_by_original_owner && (
             <span
               className="text-primary-text inline-flex rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1.5 py-0.5 text-[10px] leading-none font-semibold sm:text-xs"
@@ -421,6 +414,7 @@ export default function UserTradeHistory({
   isActive,
   itemsData,
 }: UserTradeHistoryProps) {
+  const queryClient = useQueryClient();
   const [trades, setTrades] = useState<UserTradeSummary[]>([]);
   const [listState, setListState] = useState<RequestState>("idle");
   const [listError, setListError] = useState<string | null>(null);
@@ -539,7 +533,7 @@ export default function UserTradeHistory({
   );
 
   const getCounterpartyName = useCallback(
-    (id: string) => robloxUsers[id]?.displayName || robloxUsers[id]?.name || id,
+    (id: string) => robloxUsers[id]?.name || id,
     [robloxUsers],
   );
 
@@ -564,27 +558,39 @@ export default function UserTradeHistory({
           nocache: "false",
         });
         if (before !== undefined) params.set("before", String(before));
-        const { url, headers } = buildApiFetchRequest(
-          INVENTORY_API_URL,
-          `/trades/user/${encodeURIComponent(userId)}?${params}`,
-        );
-        const response = await fetch(url, {
-          headers,
-          signal: controller.signal,
-          cache: "no-store",
+        const page = await queryClient.fetchQuery({
+          queryKey: ["user-trade-history", userId, before ?? null, PAGE_SIZE],
+          queryFn: async (): Promise<TradeList<UserTradeSummary>> => {
+            const { url, headers } = buildApiFetchRequest(
+              INVENTORY_API_URL,
+              `/trades/user/${encodeURIComponent(userId)}?${params}`,
+            );
+            const response = await fetch(url, {
+              headers,
+              signal: controller.signal,
+              cache: "no-store",
+            });
+            if (!response.ok) {
+              throw new Error(
+                await getErrorMessage(
+                  response,
+                  `Failed to load trade history (${response.status})`,
+                ),
+              );
+            }
+            const data = (await response.json()) as TradeList<UserTradeSummary>;
+            if (
+              !Array.isArray(data.completed) ||
+              !Array.isArray(data.pending)
+            ) {
+              throw new Error("Invalid trade history response");
+            }
+            return data;
+          },
+          staleTime: 0,
+          gcTime: 0,
+          retry: false,
         });
-        if (!response.ok) {
-          throw new Error(
-            await getErrorMessage(
-              response,
-              `Failed to load trade history (${response.status})`,
-            ),
-          );
-        }
-
-        const page = (await response.json()) as TradeList<UserTradeSummary>;
-        if (!Array.isArray(page.completed) || !Array.isArray(page.pending))
-          throw new Error("Invalid trade history response");
 
         const pageTrades = [...page.completed, ...page.pending];
 
@@ -624,7 +630,7 @@ export default function UserTradeHistory({
         window.clearTimeout(timeoutId);
       }
     },
-    [listState, userId],
+    [listState, userId, queryClient],
   );
 
   useEffect(() => {
@@ -649,24 +655,32 @@ export default function UserTradeHistory({
     }));
 
     try {
-      const { url, headers } = buildApiFetchRequest(
-        INVENTORY_API_URL,
-        `/trades/${encodeURIComponent(tradeId)}?nocache=false`,
-      );
-      const response = await fetch(url, {
-        headers,
-        signal: controller.signal,
-        cache: "no-store",
+      const detail = await queryClient.fetchQuery({
+        queryKey: ["user-trade-detail", userId, tradeId],
+        queryFn: async (): Promise<TradeDetail> => {
+          const { url, headers } = buildApiFetchRequest(
+            INVENTORY_API_URL,
+            `/trades/${encodeURIComponent(tradeId)}?nocache=false`,
+          );
+          const response = await fetch(url, {
+            headers,
+            signal: controller.signal,
+            cache: "no-store",
+          });
+          if (!response.ok) {
+            throw new Error(
+              await getErrorMessage(
+                response,
+                `Failed to load trade details (${response.status})`,
+              ),
+            );
+          }
+          return response.json();
+        },
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
       });
-      if (!response.ok) {
-        throw new Error(
-          await getErrorMessage(
-            response,
-            `Failed to load trade details (${response.status})`,
-          ),
-        );
-      }
-      const detail = (await response.json()) as TradeDetail;
       setDetails((current) => ({ ...current, [tradeId]: detail }));
       setDetailStates((current) => ({
         ...current,
@@ -775,7 +789,7 @@ export default function UserTradeHistory({
         const valueState: "loading" | "error" | "ready" =
           isExpanded && detail && catalogQuery.isPending
             ? "loading"
-            : isExpanded && detail && catalogQuery.isError
+            : isExpanded && detail && catalogQuery.isError && !catalogQuery.data
               ? "error"
               : "ready";
         const ownerGaveValues = detail
@@ -890,10 +904,10 @@ export default function UserTradeHistory({
                 )}
                 {trade.confidence === "partial" && (
                   <span
-                    className="bg-quaternary-bg rounded px-1.5 py-0.5 text-[10px] font-medium sm:text-xs"
+                    className="bg-quaternary-bg text-primary-text rounded px-1.5 py-0.5 text-[10px] font-medium sm:text-xs"
                     title="Some trade details were recovered from a fallback data source."
                   >
-                    Partial data
+                    Recovered
                   </span>
                 )}
                 <time

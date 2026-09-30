@@ -8,6 +8,7 @@ import React, {
   useMemo,
 } from "react";
 import { useQueryState } from "nuqs";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { TradeAd } from "@/types/trading";
@@ -25,19 +26,15 @@ import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
+import { userInventoryQueryOptions } from "@/utils/api/userInventoryQuery";
 import {
   isCustomTradeItem,
   tradeItemIdsEqual,
 } from "@/utils/trading/tradeItems";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  INVENTORY_API_SOURCE_HEADER,
-  INVENTORY_API_URL,
-  PUBLIC_API_URL,
-  fetchUserFavorites,
-} from "@/utils/api/api";
+import { INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api/api";
 import type { FavoriteItem } from "@/types";
+import { userFavoritesQueryOptions } from "@/hooks/useUserFavorites";
 import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 import {
   DropdownMenu,
@@ -116,6 +113,7 @@ export default function TradeAds({
   initialTradeAds = [],
   initialItems = [],
 }: TradeAdsProps) {
+  const queryClient = useQueryClient();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -209,9 +207,6 @@ export default function TradeAds({
   const shouldUseInventoryItems =
     activeTab === "create" && itemsInputMode === "inventory";
 
-  const sleep = (ms: number) =>
-    new Promise<void>((resolve) => setTimeout(resolve, ms));
-
   const getTradingUrl = useCallback(
     (targetPage: number) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -227,19 +222,6 @@ export default function TradeAds({
     },
     [pathname, searchParams],
   );
-
-  const isRetryableFetchError = (error: unknown): boolean => {
-    if (!(error instanceof Error)) return false;
-    if (error.name === "AbortError") return false;
-    const message = error.message.toLowerCase();
-    return (
-      message.includes("fetch failed") ||
-      message.includes("network") ||
-      message.includes("timeout") ||
-      message.includes("connect") ||
-      message.includes("und_err")
-    );
-  };
 
   useEffect(() => {
     if (!shouldUseInventoryItems) return;
@@ -277,72 +259,10 @@ export default function TradeAds({
       setInventoryError(null);
 
       try {
-        const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(robloxId)}&nocache=false`;
-        const maxAttempts = 3;
-
-        let response: Response | null = null;
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-          if (controller.signal.aborted) {
-            throw new DOMException("Aborted", "AbortError");
-          }
-
-          try {
-            response = await fetch(url, {
-              method: "GET",
-              headers: {
-                "User-Agent": "JailbreakChangelogs-Trading/2.0",
-                "X-Source": INVENTORY_API_SOURCE_HEADER ?? "",
-              },
-              cache: "no-store",
-              signal: controller.signal,
-            });
-          } catch (error) {
-            if (controller.signal.aborted) {
-              throw new DOMException("Aborted", "AbortError");
-            }
-
-            if (attempt < maxAttempts - 1 && isRetryableFetchError(error)) {
-              const baseDelayMs = 500 * Math.pow(2, attempt);
-              const jitterMs = Math.floor(Math.random() * 250);
-              await sleep(baseDelayMs + jitterMs);
-              continue;
-            }
-
-            throw error;
-          }
-
-          if (
-            response &&
-            !response.ok &&
-            shouldRetryResponseStatus(response.status) &&
-            attempt < maxAttempts - 1
-          ) {
-            response.body?.cancel();
-            const baseDelayMs = 500 * Math.pow(2, attempt);
-            const jitterMs = Math.floor(Math.random() * 250);
-            await sleep(baseDelayMs + jitterMs);
-            response = null;
-            continue;
-          }
-
-          break;
-        }
-
-        if (!response) {
-          throw new Error("Failed to load inventory (no response)");
-        }
-
-        const data = (await response.json()) as unknown;
-        if (!response.ok) {
-          const message =
-            (data &&
-            typeof data === "object" &&
-            "message" in data &&
-            typeof (data as { message?: unknown }).message === "string"
-              ? (data as { message: string }).message
-              : null) || `Failed to load inventory (${response.status})`;
-          throw new Error(message);
-        }
+        const data = await queryClient.fetchQuery(
+          userInventoryQueryOptions(robloxId),
+        );
+        if (controller.signal.aborted) return;
 
         const record =
           data && typeof data === "object" && !Array.isArray(data)
@@ -422,16 +342,16 @@ export default function TradeAds({
       controller.abort();
       if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
     };
-  }, [shouldUseInventoryItems, canLoadInventory, robloxId, items]);
+  }, [shouldUseInventoryItems, canLoadInventory, robloxId, items, queryClient]);
 
   useEffect(() => {
     if (!user?.id) return;
-    fetchUserFavorites(user.id).then((data) => {
+    queryClient.fetchQuery(userFavoritesQueryOptions(user.id)).then((data) => {
       if (Array.isArray(data)) {
         setFavoriteIds((data as FavoriteItem[]).map((fav) => fav.item.id));
       }
     });
-  }, [user?.id]);
+  }, [user?.id, queryClient]);
 
   const handleToggleFavorite = async (itemId: number, isFavorited: boolean) => {
     if (!isAuthenticated) {
@@ -460,6 +380,11 @@ export default function TradeAds({
         );
         toast.error("Failed to update favorite status");
       } else {
+        if (user?.id) {
+          void queryClient.invalidateQueries({
+            queryKey: ["user-favorites", user.id],
+          });
+        }
         toast.success(
           isFavorited ? "Removed from favorites" : "Added to favorites",
         );
@@ -730,54 +655,104 @@ export default function TradeAds({
       targetPage: number,
       userId?: string,
     ): Promise<PaginatedTradeAdsResponse> => {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!baseUrl) {
-        throw new Error("NEXT_PUBLIC_API_URL is not configured");
-      }
+      return queryClient.fetchQuery({
+        queryKey: ["recent-trade-ads", user?.id, userId ?? null, targetPage],
+        queryFn: async ({ signal }): Promise<PaginatedTradeAdsResponse> => {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+          if (!baseUrl) {
+            throw new Error("NEXT_PUBLIC_API_URL is not configured");
+          }
 
-      const query = new URLSearchParams({ page: String(targetPage) });
-      if (userId) query.set("user", userId);
-      const { url: recentTradesUrl, headers: recentTradesHeaders } =
-        buildApiFetchRequest(baseUrl, `/v2/trades?${query.toString()}`);
-      const response = await fetch(recentTradesUrl, {
-        cache: "no-store",
-        credentials: "include",
-        headers: {
-          ...recentTradesHeaders,
-          "User-Agent": "JailbreakChangelogs-Trading/2.0",
-        },
-      });
+          const query = new URLSearchParams({ page: String(targetPage) });
+          if (userId) query.set("user", userId);
+          const { url: recentTradesUrl, headers: recentTradesHeaders } =
+            buildApiFetchRequest(baseUrl, `/v2/trades?${query.toString()}`);
+          const response = await fetch(recentTradesUrl, {
+            cache: "no-store",
+            credentials: "include",
+            signal,
+            headers: {
+              ...recentTradesHeaders,
+              "User-Agent": "JailbreakChangelogs-Trading/2.0",
+            },
+          });
 
-      if (response.status === 429) {
-        const retryAfter = parseInt(
-          response.headers.get("retry-after") ?? "60",
-          10,
-        );
-        throw new RateLimitError(retryAfter);
-      }
+          if (response.status === 429) {
+            const retryAfter = parseInt(
+              response.headers.get("retry-after") ?? "60",
+              10,
+            );
+            throw new RateLimitError(retryAfter);
+          }
 
-      if (response.status === 401 || response.status === 403) {
-        let body: unknown = null;
-        try {
-          body = (await response.json()) as unknown;
-        } catch {
-          body = null;
-        }
-        throw new HttpStatusError(
-          response.status === 403 ? "Forbidden" : "Unauthorized",
-          response.status,
-          body,
-        );
-      }
+          if (response.status === 401 || response.status === 403) {
+            let body: unknown = null;
+            try {
+              body = (await response.json()) as unknown;
+            } catch {
+              body = null;
+            }
+            throw new HttpStatusError(
+              response.status === 403 ? "Forbidden" : "Unauthorized",
+              response.status,
+              body,
+            );
+          }
 
-      if (response.status === 404) {
-        try {
-          const body = (await response.json()) as unknown;
-          if (
-            body &&
-            typeof body === "object" &&
-            (body as Record<string, unknown>).error === "no_trades_found"
-          ) {
+          if (response.status === 404) {
+            try {
+              const body = (await response.json()) as unknown;
+              if (
+                body &&
+                typeof body === "object" &&
+                (body as Record<string, unknown>).error === "no_trades_found"
+              ) {
+                return {
+                  items: [],
+                  total: 0,
+                  page: targetPage,
+                  total_pages: 1,
+                  size: 0,
+                };
+              }
+            } catch {
+              // Ignore parse errors and treat as a real 404 below.
+            }
+            throw new Error("Failed to fetch recent trades (404)");
+          }
+
+          if (!response.ok) {
+            let body: unknown = null;
+            try {
+              body = (await response.json()) as unknown;
+            } catch {
+              body = null;
+            }
+            throw new HttpStatusError(
+              "Failed to fetch recent trades",
+              response.status,
+              body,
+            );
+          }
+
+          const data = (await response.json()) as unknown;
+
+          // Backwards compatibility: older API returned a plain list.
+          if (Array.isArray(data)) {
+            const normalized = data
+              .map((entry) => normalizeCreatedTrade(entry))
+              .filter((entry): entry is TradeAd => entry !== null);
+
+            return {
+              items: normalized,
+              total: normalized.length,
+              page: 1,
+              total_pages: 1,
+              size: normalized.length,
+            };
+          }
+
+          if (!data || typeof data !== "object") {
             return {
               items: [],
               total: 0,
@@ -786,78 +761,37 @@ export default function TradeAds({
               size: 0,
             };
           }
-        } catch {
-          // Ignore parse errors and treat as a real 404 below.
-        }
-        throw new Error("Failed to fetch recent trades (404)");
-      }
 
-      if (!response.ok) {
-        let body: unknown = null;
-        try {
-          body = (await response.json()) as unknown;
-        } catch {
-          body = null;
-        }
-        throw new HttpStatusError(
-          "Failed to fetch recent trades",
-          response.status,
-          body,
-        );
-      }
+          const record = data as Record<string, unknown>;
+          const rawItems = record.items;
+          const items = Array.isArray(rawItems)
+            ? rawItems
+                .map((entry) => normalizeCreatedTrade(entry))
+                .filter((entry): entry is TradeAd => entry !== null)
+            : [];
 
-      const data = (await response.json()) as unknown;
+          const total =
+            typeof record.total === "number" ? record.total : items.length;
+          const pageValue =
+            typeof record.page === "number" ? record.page : targetPage;
+          const totalPagesValue =
+            typeof record.total_pages === "number" ? record.total_pages : 1;
+          const sizeValue = typeof record.size === "number" ? record.size : 0;
 
-      // Backwards compatibility: older API returned a plain list.
-      if (Array.isArray(data)) {
-        const normalized = data
-          .map((entry) => normalizeCreatedTrade(entry))
-          .filter((entry): entry is TradeAd => entry !== null);
-
-        return {
-          items: normalized,
-          total: normalized.length,
-          page: 1,
-          total_pages: 1,
-          size: normalized.length,
-        };
-      }
-
-      if (!data || typeof data !== "object") {
-        return {
-          items: [],
-          total: 0,
-          page: targetPage,
-          total_pages: 1,
-          size: 0,
-        };
-      }
-
-      const record = data as Record<string, unknown>;
-      const rawItems = record.items;
-      const items = Array.isArray(rawItems)
-        ? rawItems
-            .map((entry) => normalizeCreatedTrade(entry))
-            .filter((entry): entry is TradeAd => entry !== null)
-        : [];
-
-      const total =
-        typeof record.total === "number" ? record.total : items.length;
-      const pageValue =
-        typeof record.page === "number" ? record.page : targetPage;
-      const totalPagesValue =
-        typeof record.total_pages === "number" ? record.total_pages : 1;
-      const sizeValue = typeof record.size === "number" ? record.size : 0;
-
-      return {
-        items,
-        total,
-        page: pageValue,
-        total_pages: totalPagesValue,
-        size: sizeValue,
-      };
+          return {
+            items,
+            total,
+            page: pageValue,
+            total_pages: totalPagesValue,
+            size: sizeValue,
+          };
+        },
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
+      });
     },
-    [normalizeCreatedTrade],
+    [normalizeCreatedTrade, queryClient, user?.id],
   );
 
   const refreshTradeAds = useCallback(

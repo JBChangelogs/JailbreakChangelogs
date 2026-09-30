@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useCallback, type Dispatch, type SetStateAction } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   UserData,
   ApiSettingsResponse,
@@ -15,6 +16,23 @@ import { toast } from "sonner";
 import { safeLocalStorage, safeSetJSON } from "@/utils/storage/safeStorage";
 import { formatSettingName } from "@/config/settings";
 
+const withSettingValue = (
+  current: ApiSettingsResponse,
+  name: string,
+  value: boolean,
+): ApiSettingsResponse =>
+  Object.fromEntries(
+    Object.entries(current).map(([catKey, cat]) => [
+      catKey,
+      {
+        ...cat,
+        settings: cat.settings.map((entry) =>
+          entry.name === name ? { ...entry, value } : entry,
+        ),
+      },
+    ]),
+  );
+
 export const useSettings = (
   userData: UserData | null,
   openModal?: (state: {
@@ -26,59 +44,71 @@ export const useSettings = (
   }) => void,
   refreshUser?: () => Promise<void>,
 ) => {
-  const [settings, setSettings] = useState<ApiSettingsResponse | null>(null);
-  const [supporterGifts, setSupporterGifts] = useState<SupporterGift[]>([]);
-  const [supporterHistory, setSupporterHistory] = useState<
-    SupporterHistoryEntry[]
-  >([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const userId = userData?.id;
+  const settingsKey = ["user-settings", userId] as const;
+  const giftsKey = ["supporter-gifts", userId] as const;
+  const historyKey = ["supporter-history", userId] as const;
+  const settingsQuery = useQuery({
+    queryKey: settingsKey,
+    queryFn: fetchUserSettings,
+    enabled: Boolean(userId),
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const giftsQuery = useQuery({
+    queryKey: giftsKey,
+    queryFn: fetchSupporterGifts,
+    enabled: Boolean(userId),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const historyQuery = useQuery({
+    queryKey: historyKey,
+    queryFn: fetchSupporterHistory,
+    enabled: Boolean(userId),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const settings: ApiSettingsResponse | null =
+    settingsQuery.data ?? (settingsQuery.isError ? {} : null);
+  const supporterGifts = giftsQuery.data ?? [];
+  const supporterHistory = historyQuery.data ?? [];
+  const loading =
+    !userId ||
+    settingsQuery.isPending ||
+    giftsQuery.isPending ||
+    historyQuery.isPending;
 
-  useEffect(() => {
-    if (!userData?.id) return;
-
-    let mounted = true;
-    setLoading(true);
-
-    Promise.allSettled([
-      fetchUserSettings(),
-      fetchSupporterGifts(),
-      fetchSupporterHistory(),
-    ])
-      .then(([settingsResult, giftsResult, historyResult]) => {
-        if (!mounted) return;
-
-        if (settingsResult.status === "fulfilled") {
-          setSettings(settingsResult.value);
-        } else {
-          setSettings({});
-        }
-
-        if (giftsResult.status === "fulfilled") {
-          setSupporterGifts(giftsResult.value);
-        } else {
-          setSupporterGifts([]);
-        }
-
-        if (historyResult.status === "fulfilled") {
-          setSupporterHistory(historyResult.value);
-        } else {
-          setSupporterHistory([]);
-        }
-      })
-      .catch(() => {
-        if (!mounted) return;
-        setSettings({});
-        setSupporterGifts([]);
-        setSupporterHistory([]);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [userData?.id]);
+  const setSettings = (value: ApiSettingsResponse) => {
+    queryClient.setQueryData(settingsKey, value);
+  };
+  const setSupporterGifts: Dispatch<SetStateAction<SupporterGift[]>> =
+    useCallback(
+      (value) => {
+        queryClient.setQueryData<SupporterGift[]>(
+          ["supporter-gifts", userId],
+          (previous) =>
+            typeof value === "function" ? value(previous ?? []) : value,
+        );
+      },
+      [queryClient, userId],
+    );
+  const setSupporterHistory: Dispatch<SetStateAction<SupporterHistoryEntry[]>> =
+    useCallback(
+      (value) => {
+        queryClient.setQueryData<SupporterHistoryEntry[]>(
+          ["supporter-history", userId],
+          (previous) =>
+            typeof value === "function" ? value(previous ?? []) : value,
+        );
+      },
+      [queryClient, userId],
+    );
 
   const handleSettingChange = async (name: string, value: boolean) => {
     if (!settings || !userData) return;
@@ -92,19 +122,7 @@ export const useSettings = (
         }),
       );
       // Still update the local settings state so the toggle reflects correctly
-      setSettings(
-        Object.fromEntries(
-          Object.entries(settings).map(([catKey, cat]) => [
-            catKey,
-            {
-              ...cat,
-              settings: cat.settings.map((entry) =>
-                entry.name === name ? { ...entry, value } : entry,
-              ),
-            },
-          ]),
-        ),
-      );
+      setSettings(withSettingValue(settings, name, value));
       return;
     }
 
@@ -137,22 +155,19 @@ export const useSettings = (
       description: `Saving "${displayName}"...`,
     });
 
-    const prevSettings = settings;
-    const newSettings = Object.fromEntries(
-      Object.entries(settings).map(([catKey, cat]) => [
-        catKey,
-        {
-          ...cat,
-          settings: cat.settings.map((entry) =>
-            entry.name === name ? { ...entry, value } : entry,
-          ),
-        },
-      ]),
-    );
-    setSettings(newSettings);
-
+    const previousValue = Object.values(settings)
+      .flatMap((category) => category.settings)
+      .find((entry) => entry.name === name)?.value;
     try {
+      await queryClient.cancelQueries({ queryKey: settingsKey });
+      queryClient.setQueryData<ApiSettingsResponse>(settingsKey, (current) =>
+        current ? withSettingValue(current, name, value) : current,
+      );
       await updateUserSettings(name, value);
+      await queryClient.invalidateQueries({
+        queryKey: ["user-settings", userData.id],
+        refetchType: "none",
+      });
 
       toast.success("Setting Updated", {
         id: loadingToast,
@@ -179,7 +194,11 @@ export const useSettings = (
 
       window.rybbit?.event("Update Setting", { setting: name, value });
     } catch (error) {
-      setSettings(prevSettings);
+      if (previousValue !== undefined) {
+        queryClient.setQueryData<ApiSettingsResponse>(settingsKey, (current) =>
+          current ? withSettingValue(current, name, previousValue) : current,
+        );
+      }
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update settings";
       toast.error(errorMessage, { id: loadingToast });

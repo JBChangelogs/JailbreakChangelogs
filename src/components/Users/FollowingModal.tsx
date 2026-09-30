@@ -1,5 +1,6 @@
 import { createLogger } from "@/services/logger";
 import React, { useState, useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const log = createLogger("UI");
 import {
@@ -60,6 +61,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
   onCountUpdate,
   userData,
 }) => {
+  const queryClient = useQueryClient();
   const [following, setFollowing] = useState<Following[]>([]);
   const [followingDetails, setFollowingDetails] = useState<{
     [key: string]: User;
@@ -109,33 +111,37 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
           return;
         }
 
-        const { url, headers } = buildApiFetchRequest(
-          PUBLIC_API_URL,
-          `/v2/users/${encodeURIComponent(userId)}/following`,
-        );
-        const response = await fetch(url, { headers, cache: "no-store" });
+        const data = await queryClient.fetchQuery({
+          queryKey: ["following", userId],
+          queryFn: async ({ signal }): Promise<Following[]> => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              `/v2/users/${encodeURIComponent(userId)}/following`,
+            );
+            const response = await fetch(url, {
+              headers,
+              cache: "no-store",
+              signal,
+            });
+            if (response.status === 404) return [];
+            if (!response.ok) {
+              const body = await response.json().catch(() => ({}));
+              log.error("fetch following failed", {
+                status: response.status,
+                body,
+              });
+              throw new Error("Failed to fetch following");
+            }
+            const result = await response.json();
+            return Array.isArray(result) ? result : [];
+          },
+          staleTime: 0,
+          gcTime: 5 * 60_000,
+          retry: false,
+        });
         if (ignore) return;
 
-        if (response.status === 404) {
-          setFollowing([]);
-          setFollowingDetails({});
-          onCloseRef.current();
-          return;
-        }
-
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          log.error("fetch following failed", {
-            status: response.status,
-            body,
-          });
-          throw new Error("Failed to fetch following");
-        }
-
-        const data = await response.json();
-        if (ignore) return;
-
-        if (!Array.isArray(data) || data.length === 0) {
+        if (data.length === 0) {
           setFollowing([]);
           setFollowingDetails({});
           onCloseRef.current();
@@ -199,7 +205,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
     return () => {
       ignore = true;
     };
-  }, [isOpen, userId]);
+  }, [isOpen, userId, queryClient]);
 
   const handleFollowToggle = async (followingId: string) => {
     if (!currentUserId || loadingFollow[followingId]) return;
@@ -239,6 +245,9 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
         ...prev,
         [followingId]: !isCurrentlyFollowing,
       }));
+      void queryClient.invalidateQueries({
+        queryKey: ["following", currentUserId],
+      });
       onFollowChange?.(!isCurrentlyFollowing);
       toast.success(
         isCurrentlyFollowing
