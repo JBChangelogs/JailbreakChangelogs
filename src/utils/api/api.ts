@@ -766,6 +766,13 @@ export async function fetchItemsClientPage(
   return (await response.json()) as ItemsPage<Item>;
 }
 
+export class ItemSearchQueryTooShortError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ItemSearchQueryTooShortError";
+  }
+}
+
 export async function searchItemsClientPage(
   query: string,
   page: number,
@@ -790,6 +797,22 @@ export async function searchItemsClientPage(
     const error = await response.json().catch(() => null);
     if (error?.error === "items_not_found") {
       return { total: 0, items: [], page, size: 32, total_pages: 0 };
+    }
+  }
+  if (response.status === 400) {
+    const error = (await response.json().catch(() => null)) as {
+      error?: unknown;
+      message?: unknown;
+      min_length?: unknown;
+    } | null;
+    if (error?.error === "query_too_short") {
+      const message =
+        typeof error.message === "string" && error.message.trim()
+          ? error.message
+          : typeof error.min_length === "number"
+            ? `Search query must be at least ${error.min_length} characters.`
+            : "Search query is too short.";
+      throw new ItemSearchQueryTooShortError(message);
     }
   }
   if (!response.ok) {

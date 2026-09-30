@@ -226,6 +226,10 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
             <p className="text-secondary-text px-3 py-4 text-center text-sm">
               Loading items...
             </p>
+          ) : useCatalogApi && catalog.error ? (
+            <p className="text-secondary-text px-3 py-4 text-center text-sm">
+              {catalog.errorMessage ?? "Could not load items."}
+            </p>
           ) : results.length === 0 ? (
             <p className="text-secondary-text px-3 py-4 text-center text-sm">
               No items found

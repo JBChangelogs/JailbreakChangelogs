@@ -19,6 +19,7 @@ import CategoryIcons from "@/components/Items/CategoryIcons";
 import {
   fetchUserFavorites,
   fetchItemsClientPage,
+  ItemSearchQueryTooShortError,
   searchItemsClientPage,
   fetchLastUpdated,
 } from "@/utils/api/api";
@@ -277,7 +278,7 @@ export default function ValuesClient() {
   const serverMinValue = appliedMinValue > 0 ? appliedMinValue : undefined;
   const serverMaxValue =
     appliedMaxValue < MAX_VALUE_RANGE ? appliedMaxValue : undefined;
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: [
       "values-items",
       page,
@@ -298,6 +299,7 @@ export default function ValuesClient() {
         ? searchItemsClientPage(searchQuery, Math.max(1, page), signal, options)
         : fetchItemsClientPage(Math.max(1, page), signal, options);
     },
+    retry: false,
   });
   const items = data?.items ?? EMPTY_ITEMS;
 
@@ -515,6 +517,13 @@ export default function ValuesClient() {
           <ValuesItemsGrid
             items={isLoading ? EMPTY_ITEMS : sortedItems}
             isLoading={isLoading}
+            searchErrorMessage={
+              error instanceof ItemSearchQueryTooShortError
+                ? error.message
+                : error
+                  ? "Could not load items. Please try again."
+                  : null
+            }
             favorites={favorites}
             onFavoriteChange={(itemId, isFavorited) => {
               setFavorites((prev) =>

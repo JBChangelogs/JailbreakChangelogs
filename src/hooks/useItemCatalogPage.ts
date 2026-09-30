@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   fetchItemsClientPage,
+  ItemSearchQueryTooShortError,
   searchItemsClientPage,
   type ItemsPage,
   type ItemsPageOptions,
@@ -19,6 +20,7 @@ export function useItemCatalogPage(
   const [data, setData] = useState<ItemsPage<Item> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { sort, minValue, maxValue } = options;
   const filterKey = options.filters?.join(",") ?? "";
 
@@ -32,6 +34,7 @@ export function useItemCatalogPage(
     const controller = new AbortController();
     setLoading(true);
     setError(false);
+    setErrorMessage(null);
     setData(null);
     const requestOptions = {
       sort,
@@ -51,8 +54,15 @@ export function useItemCatalogPage(
       .then((result) => {
         if (!controller.signal.aborted) setData(result);
       })
-      .catch(() => {
-        if (!controller.signal.aborted) setError(true);
+      .catch((reason: unknown) => {
+        if (!controller.signal.aborted) {
+          setError(true);
+          setErrorMessage(
+            reason instanceof ItemSearchQueryTooShortError
+              ? reason.message
+              : null,
+          );
+        }
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -63,6 +73,7 @@ export function useItemCatalogPage(
   return {
     data: query === debouncedQuery ? data : null,
     loading: loading || query !== debouncedQuery,
-    error,
+    error: query === debouncedQuery && error,
+    errorMessage: query === debouncedQuery ? errorMessage : null,
   };
 }

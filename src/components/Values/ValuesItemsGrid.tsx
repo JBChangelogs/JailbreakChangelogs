@@ -16,6 +16,7 @@ import { getFilterSortsDisplayNames } from "./valuesFilterOptions";
 interface ValuesItemsGridProps {
   items: Item[];
   isLoading?: boolean;
+  searchErrorMessage?: string | null;
   favorites: number[];
   onFavoriteChange: (itemId: number, isFavorited: boolean) => void;
   appliedMinValue: number;
@@ -35,6 +36,7 @@ interface ValuesItemsGridProps {
 export default function ValuesItemsGrid({
   items,
   isLoading = false,
+  searchErrorMessage,
   favorites,
   onFavoriteChange,
   appliedMinValue,
@@ -160,11 +162,13 @@ export default function ValuesItemsGrid({
   };
 
   const getEmptyStateTitle = () => {
-    return getNoItemsMessage();
+    return searchErrorMessage ?? getNoItemsMessage();
   };
 
   const getEmptyStateDescription = () => {
-    return "Try adjusting your search or filter.";
+    return searchErrorMessage
+      ? "Check your search and try again."
+      : "Try adjusting your search or filter.";
   };
 
   return (
@@ -172,6 +176,7 @@ export default function ValuesItemsGrid({
       <div className="mb-4 flex flex-col gap-4">
         <p className="text-secondary-text">
           {(() => {
+            if (searchErrorMessage) return "Search unavailable";
             const isDefaultRange =
               appliedMinValue === 0 && appliedMaxValue >= MAX_VALUE_RANGE;
             const rangeText = !isDefaultRange

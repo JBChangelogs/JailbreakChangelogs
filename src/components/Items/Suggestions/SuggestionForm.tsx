@@ -410,6 +410,10 @@ export function SuggestionForm({
                   <p className="text-secondary-text px-3 py-6 text-sm">
                     Loading items...
                   </p>
+                ) : catalog.error ? (
+                  <p className="text-secondary-text px-3 py-6 text-sm">
+                    {catalog.errorMessage ?? "Could not load items."}
+                  </p>
                 ) : filteredItems.length === 0 ? (
                   <p className="text-secondary-text flex items-center px-3 py-6 text-sm">
                     No items found
