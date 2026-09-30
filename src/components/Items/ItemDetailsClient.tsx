@@ -885,7 +885,11 @@ export default function ItemDetailsClient({
 
                   {activeTab === 2 && (
                     <div className="space-y-6">
-                      <ItemTradesTab itemId={item.id} />
+                      <ItemTradesTab
+                        itemId={item.id}
+                        itemName={item.name}
+                        itemCategory={item.type}
+                      />
                     </div>
                   )}
 

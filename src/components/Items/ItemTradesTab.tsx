@@ -7,8 +7,10 @@ import {
   TradeList,
 } from "@/app/inventories/types";
 import Image from "next/image";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 import { PendingTradeItemsPlaceholder } from "@/components/Inventory/PendingTradeItemsPlaceholder";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
@@ -20,11 +22,14 @@ import {
   INVENTORY_API_URL,
 } from "@/utils/api/api";
 import { formatShortDateTime } from "@/utils/helpers/timestamp";
+import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 
 const log = createLogger("UI");
 
 interface ItemTradesTabProps {
   itemId: number;
+  itemName: string;
+  itemCategory: string;
 }
 
 function TradeAvatarImage({ userId }: { userId: string }) {
@@ -61,64 +66,76 @@ function TradeAvatarImage({ userId }: { userId: string }) {
 }
 
 function TradeItems({
-  label,
+  name,
   items,
   isPending,
+  itemName,
+  itemCategory,
 }: {
-  label: string;
+  name: string;
   items: TradeItemDetail[];
   isPending: boolean;
+  itemName: string;
+  itemCategory: string;
 }) {
   return (
-    <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-      <p className="text-primary-text mb-2 text-xs font-semibold">
-        {label} (
-        {isPending && items.length === 0
-          ? "? items"
-          : `${items.length} ${items.length === 1 ? "item" : "items"}`}
-        )
-      </p>
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+      <div className="flex min-w-0 items-baseline gap-1 sm:w-32 sm:shrink-0 sm:flex-col sm:gap-0">
+        <span
+          className="text-primary-text min-w-0 text-xs font-semibold break-words"
+          title={name}
+        >
+          {name} gave
+        </span>
+        <span className="text-secondary-text text-xs">
+          {isPending && items.length === 0
+            ? "? items"
+            : `${items.length} ${items.length === 1 ? "item" : "items"}`}
+        </span>
+      </div>
       {items.length === 0 ? (
         isPending ? (
-          <PendingTradeItemsPlaceholder />
-        ) : null
+          <div className="min-w-0 flex-1">
+            <PendingTradeItemsPlaceholder />
+          </div>
+        ) : (
+          <span className="text-secondary-text text-xs">No items recorded</span>
+        )
       ) : (
-        <ul className="space-y-2">
+        <ul className="flex min-w-0 flex-1 flex-wrap gap-1.5">
           {items.map((item, index) => (
             <li
               key={`${item.item_id}:${item.branch_id}:${index}`}
-              className="text-primary-text text-sm"
+              className={`inline-flex min-w-0 flex-wrap items-center gap-x-1.5 rounded-md border px-2 py-1 text-xs ${item.title === itemName && item.category_title === itemCategory ? "border-link/50 bg-link/10" : "border-border-card bg-tertiary-bg"}`}
             >
-              <span className="font-medium">{item.title}</span>
-              <span className="text-secondary-text ml-1 text-xs">
-                {item.category_title}
+              <span
+                role="img"
+                aria-label={item.category_title}
+                title={item.category_title}
+                className="inline-flex shrink-0"
+              >
+                <CategoryIconBadge
+                  type={item.category_title}
+                  isLimited={false}
+                  isSeasonal={false}
+                  withContainer={false}
+                  className="h-3.5 w-3.5"
+                />
               </span>
-              <div className="text-secondary-text mt-0.5 flex flex-wrap gap-x-2 text-xs">
-                {item.is_duplicate_branch && (
-                  <span className="text-status-warning">Duped copy</span>
-                )}
-                {item.confidence === "gap" && (
-                  <span title="The previous owner was recovered after a data gap.">
-                    Recovered hop
-                  </span>
-                )}
-                {item.given_by_original_owner && (
-                  <span
-                    className="text-primary-text rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1.5 py-0.5 font-semibold"
-                    title="The original owner gave this item in this trade."
-                  >
-                    OG
-                  </span>
-                )}
-                {item.received_by_original_owner && (
-                  <span
-                    className="text-primary-text rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1.5 py-0.5 font-semibold"
-                    title="The item returned to its original owner in this trade."
-                  >
-                    Returned to OG
-                  </span>
-                )}
-              </div>
+              <span className="text-primary-text font-medium">
+                {item.title}
+              </span>
+              {item.is_duplicate_branch && (
+                <span className="text-status-warning">Duped</span>
+              )}
+              {item.given_by_original_owner && (
+                <span
+                  className="text-primary-text rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1 font-semibold"
+                  title="The original owner gave this item in this trade."
+                >
+                  OG
+                </span>
+              )}
             </li>
           ))}
         </ul>
@@ -127,7 +144,11 @@ function TradeItems({
   );
 }
 
-export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
+export default function ItemTradesTab({
+  itemId,
+  itemName,
+  itemCategory,
+}: ItemTradesTabProps) {
   const { data, isFetching, isError, refetch } = useQuery({
     queryKey: ["item-trades", itemId],
     gcTime: 30 * 60 * 1000,
@@ -168,13 +189,26 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
     retry: false,
   });
 
-  const trades = useMemo(
-    () =>
-      [...(data?.completed ?? []), ...(data?.pending ?? [])].sort(
-        (a, b) => b.last_time - a.last_time,
-      ),
-    [data],
-  );
+  const trades = useMemo(() => {
+    const uniqueTrades = new Map<string, TradeDetail>();
+    // The item endpoint can return the same completed trade multiple times.
+    // Completed trades come first, so they take precedence over pending copies.
+    for (const trade of [
+      ...(data?.completed ?? []),
+      ...(data?.pending ?? []),
+    ]) {
+      if (!uniqueTrades.has(trade.trade_id)) {
+        uniqueTrades.set(trade.trade_id, trade);
+      }
+    }
+    return Array.from(uniqueTrades.values()).sort(
+      (a, b) => b.last_time - a.last_time,
+    );
+  }, [data]);
+  const pendingCount = trades.filter(
+    (trade) => trade.status === "pending",
+  ).length;
+  const completedCount = trades.length - pendingCount;
 
   const userIds = useMemo(
     () =>
@@ -188,10 +222,11 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
   });
 
   const userLink = (userId: string) => (
-    <a
-      href={`https://www.roblox.com/users/${encodeURIComponent(userId)}/profile`}
+    <Link
+      href={`/inventories/${encodeURIComponent(userId)}`}
       target="_blank"
       rel="noopener noreferrer"
+      prefetch={false}
       className="text-link hover:text-link-hover inline-flex items-center gap-2 font-medium hover:underline"
     >
       <TradeAvatarImage userId={userId} />
@@ -200,12 +235,19 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
           robloxUsers[userId]?.name ||
           `User ${userId}`}
       </span>
-    </a>
+    </Link>
   );
 
   return (
     <section className="space-y-4">
-      <h3 className="text-primary-text text-2xl font-bold">Recent Trades</h3>
+      <div>
+        <h3 className="text-primary-text text-2xl font-bold">Recent Trades</h3>
+        {!isFetching && !isError && trades.length > 0 && (
+          <p className="text-secondary-text mt-1 text-sm">
+            {completedCount} completed · {pendingCount} pending
+          </p>
+        )}
+      </div>
 
       {isFetching ? (
         <div className="space-y-2" aria-label="Loading recent trades">
@@ -239,12 +281,16 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
           {trades.map((trade) => (
             <article
               key={trade.trade_id}
-              className="border-border-card bg-secondary-bg rounded-lg border p-4"
+              className="border-border-card bg-secondary-bg rounded-lg border p-3 sm:p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="text-primary-text flex flex-wrap items-center gap-2 text-sm">
                   {userLink(trade.user_a)}
-                  <span aria-hidden="true">↔</span>
+                  <Icon
+                    icon="heroicons:arrows-right-left"
+                    className="h-4 w-4"
+                    aria-hidden="true"
+                  />
                   {userLink(trade.user_b)}
                 </div>
                 <div className="flex items-center gap-2">
@@ -264,22 +310,28 @@ export default function ItemTradesTab({ itemId }: ItemTradesTabProps) {
                   </time>
                 </div>
               </div>
-              {trade.status === "pending" && (
-                <p className="text-secondary-text mt-2 text-xs">
-                  Only one side&apos;s items have been scanned so far. The other
-                  side&apos;s items are still pending.
-                </p>
-              )}
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div className="border-border-card mt-3 space-y-2.5 border-t pt-3">
                 <TradeItems
-                  label={`${robloxUsers[trade.user_a]?.displayName || robloxUsers[trade.user_a]?.name || `User ${trade.user_a}`} gave`}
+                  name={
+                    robloxUsers[trade.user_a]?.displayName ||
+                    robloxUsers[trade.user_a]?.name ||
+                    `User ${trade.user_a}`
+                  }
                   items={trade.items_a_to_b}
                   isPending={trade.status === "pending"}
+                  itemName={itemName}
+                  itemCategory={itemCategory}
                 />
                 <TradeItems
-                  label={`${robloxUsers[trade.user_b]?.displayName || robloxUsers[trade.user_b]?.name || `User ${trade.user_b}`} gave`}
+                  name={
+                    robloxUsers[trade.user_b]?.displayName ||
+                    robloxUsers[trade.user_b]?.name ||
+                    `User ${trade.user_b}`
+                  }
                   items={trade.items_b_to_a}
                   isPending={trade.status === "pending"}
+                  itemName={itemName}
+                  itemCategory={itemCategory}
                 />
               </div>
             </article>
