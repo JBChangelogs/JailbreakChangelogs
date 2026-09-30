@@ -448,6 +448,8 @@ export default function ItemDetailsClient({
   }, [initialItem]);
 
   useEffect(() => {
+    if (item.id === 587 || item.id === 713) return;
+
     let cancelled = false;
     void fetchItemScanCount(item.id).then((count) => {
       if (!cancelled) {
@@ -695,28 +697,33 @@ export default function ItemDetailsClient({
                   </div>
                 )}
 
-              <div className="border-border-card mt-4 flex min-h-14 items-center justify-between gap-4 border-b pb-3">
-                <div className="min-w-0 flex-1">
-                  <div className="text-primary-text text-sm font-medium">
-                    Scanned copies · 30 days
+              {currentItem.id !== 587 && currentItem.id !== 713 && (
+                <div className="border-border-card mt-4 flex min-h-14 items-center justify-between gap-4 border-b pb-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-primary-text text-sm font-medium">
+                      Scanned copies · 30 days
+                    </div>
+                    <div className="text-secondary-text text-xs">
+                      Unique copies that have been scanned in inventories
+                    </div>
                   </div>
-                  <div className="text-secondary-text text-xs">
-                    Unique copies that have been scanned in inventories
+                  <div
+                    className="text-primary-text w-20 shrink-0 text-right text-lg font-semibold tabular-nums"
+                    aria-live="polite"
+                  >
+                    {currentScanCount === undefined ? (
+                      <Skeleton
+                        className="ml-auto h-6 w-16"
+                        aria-hidden="true"
+                      />
+                    ) : currentScanCount === null ? (
+                      <span aria-label="Scan count unavailable">—</span>
+                    ) : (
+                      currentScanCount.toLocaleString()
+                    )}
                   </div>
                 </div>
-                <div
-                  className="text-primary-text w-20 shrink-0 text-right text-lg font-semibold tabular-nums"
-                  aria-live="polite"
-                >
-                  {currentScanCount === undefined ? (
-                    <Skeleton className="ml-auto h-6 w-16" aria-hidden="true" />
-                  ) : currentScanCount === null ? (
-                    <span aria-label="Scan count unavailable">—</span>
-                  ) : (
-                    currentScanCount.toLocaleString()
-                  )}
-                </div>
-              </div>
+              )}
 
               {/* Mobile Ad - shown only on smaller screens */}
               <div className="mt-4 flex justify-center xl:hidden">
