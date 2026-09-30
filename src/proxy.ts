@@ -100,7 +100,7 @@ async function fetchCurrentUser(token: string): Promise<ProxyUser | null> {
       cache: "no-store",
       headers: {
         Authorization: token,
-        "User-Agent": "JailbreakChangelogs-Proxy/1.0",
+        "User-Agent": "JailbreakChangelogs-Auth/1.0",
       },
     });
 
