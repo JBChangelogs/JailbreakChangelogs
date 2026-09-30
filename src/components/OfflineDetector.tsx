@@ -9,20 +9,35 @@ const MAX_RETRY_DELAY = 300000;
 const RETRY_JITTER = 0.75 + Math.random() * 0.5;
 
 let sharedConnectivityProbe: Promise<void> | null = null;
+let sharedProbeController: AbortController | null = null;
+let sharedProbeOnlineState: boolean | null = null;
 
-function probeSiteConnectivity(): Promise<void> {
-  if (sharedConnectivityProbe) return sharedConnectivityProbe;
+export function probeSiteConnectivity(): Promise<void> {
+  const online = navigator.onLine;
+  if (sharedConnectivityProbe && sharedProbeOnlineState === online) {
+    return sharedConnectivityProbe;
+  }
+  // An in-flight probe started offline cannot verify a restored connection.
+  sharedProbeController?.abort();
 
   const controller = new AbortController();
+  sharedProbeController = controller;
+  sharedProbeOnlineState = online;
   const timeout = setTimeout(() => controller.abort(), 8000);
   const request = fetch(`/api/healthcheck?t=${Date.now()}`, {
     cache: "no-store",
     signal: controller.signal,
-  }).then(() => undefined);
+  }).then((response) => {
+    if (!response.ok) throw new Error("Site health check failed");
+  });
 
   const probe = request.finally(() => {
     clearTimeout(timeout);
-    if (sharedConnectivityProbe === probe) sharedConnectivityProbe = null;
+    if (sharedConnectivityProbe === probe) {
+      sharedConnectivityProbe = null;
+      sharedProbeController = null;
+      sharedProbeOnlineState = null;
+    }
   });
 
   sharedConnectivityProbe = probe;
@@ -58,6 +73,7 @@ export default function OfflineDetector() {
 
         if (wasOffline) {
           setStatus("reconnected");
+          window.dispatchEvent(new Event("jbcl:site-online"));
           hideTimerRef.current = setTimeout(() => setStatus("online"), 3000);
         } else {
           setStatus("online");
@@ -66,6 +82,7 @@ export default function OfflineDetector() {
         if (!mounted || checkId !== checkIdRef.current) return;
 
         confirmedOfflineRef.current = true;
+        window.dispatchEvent(new Event("jbcl:site-offline"));
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
         setStatus("offline");
 

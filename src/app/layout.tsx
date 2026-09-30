@@ -12,6 +12,7 @@ import VersionInfoWrapper from "@/components/Layout/VersionInfoWrapper";
 import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
 import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
+import OfflineNavigationRecovery from "@/components/Layout/OfflineNavigationRecovery";
 import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
 import { TwemojiProvider } from "@/contexts/TwemojiContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -175,6 +176,9 @@ export default async function RootLayout({
                     showSpinner={false}
                     shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
                   />
+                  <Suspense fallback={null}>
+                    <OfflineNavigationRecovery />
+                  </Suspense>
 
                   <AuthProvider>
                     <SiteBanGate>
@@ -307,6 +311,9 @@ export default async function RootLayout({
                 showSpinner={false}
                 shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
               />
+              <Suspense fallback={null}>
+                <OfflineNavigationRecovery />
+              </Suspense>
 
               <AuthProvider>
                 <SiteBanGate>
