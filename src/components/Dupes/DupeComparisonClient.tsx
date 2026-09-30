@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import {
   CategoryIconBadge,
   getCategoryColor,
-  getCategoryIcon,
 } from "@/utils/items/categoryIcons";
 import { formatCustomDate, formatProfileDate } from "@/utils/helpers/timestamp";
 import TradeHistoryList from "./TradeHistoryList";
@@ -361,19 +360,6 @@ export default function DupeComparisonClient({
                   backgroundColor: `${getCategoryColor(duplicateItem.categoryTitle)}22`,
                 }}
               >
-                {(() => {
-                  const categoryIcon = getCategoryIcon(
-                    duplicateItem.categoryTitle,
-                  );
-                  return categoryIcon ? (
-                    <categoryIcon.Icon
-                      className="h-3 w-3"
-                      style={{
-                        color: getCategoryColor(duplicateItem.categoryTitle),
-                      }}
-                    />
-                  ) : null;
-                })()}
                 {duplicateItem.categoryTitle}
               </span>
               {sharedItemData.is_limited === 1 && (

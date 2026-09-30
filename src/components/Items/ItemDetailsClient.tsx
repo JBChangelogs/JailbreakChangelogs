@@ -10,7 +10,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
-import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { getCategoryColor } from "@/utils/items/categoryIcons";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import NitroItemMobileAd from "@/components/Ads/NitroItemMobileAd";
 import {
@@ -526,11 +526,6 @@ export default function ItemDetailsClient({
     () => getCategoryColor(currentItem.type),
     [currentItem.type],
   );
-  const categoryIcon = useMemo(
-    () => getCategoryIcon(currentItem.type),
-    [currentItem.type],
-  );
-
   return (
     <main className="min-h-screen">
       <div className="container mx-auto mb-8 px-4">
@@ -561,12 +556,6 @@ export default function ItemDetailsClient({
                     backgroundColor: `${categoryColor}22`,
                   }}
                 >
-                  {categoryIcon && (
-                    <categoryIcon.Icon
-                      className="mr-1.5 h-3 w-3"
-                      style={{ color: categoryColor }}
-                    />
-                  )}
                   {currentItem.type}
                 </span>
                 {currentItem.is_limited === 1 && (
