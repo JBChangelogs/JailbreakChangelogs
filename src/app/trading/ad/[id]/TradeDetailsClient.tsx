@@ -283,6 +283,7 @@ const TradeSidePreview = ({
                               className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                               style={{
                                 borderColor: getCategoryColor(item.type),
+                                backgroundColor: `${getCategoryColor(item.type)}22`,
                               }}
                             >
                               {(() => {
@@ -394,7 +395,10 @@ const TradeSidePreview = ({
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                         <span
                           className="bg-tertiary-bg/40 text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-                          style={{ borderColor: getCategoryColor(item.type) }}
+                          style={{
+                            borderColor: getCategoryColor(item.type),
+                            backgroundColor: `${getCategoryColor(item.type)}22`,
+                          }}
                         >
                           {(() => {
                             const categoryIcon = getCategoryIcon(item.type);

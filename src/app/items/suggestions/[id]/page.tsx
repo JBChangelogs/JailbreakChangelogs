@@ -1108,7 +1108,10 @@ export default function ValueSuggestionDetailPage() {
                         {item && (
                           <span
                             className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
-                            style={{ borderColor: getCategoryColor(item.type) }}
+                            style={{
+                              borderColor: getCategoryColor(item.type),
+                              backgroundColor: `${getCategoryColor(item.type)}22`,
+                            }}
                           >
                             {categoryIcon && (
                               <categoryIcon.Icon

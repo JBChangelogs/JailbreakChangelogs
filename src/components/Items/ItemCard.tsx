@@ -486,6 +486,7 @@ function ItemCard({
                 className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
                 style={{
                   borderColor: getCategoryColor(item.type),
+                  backgroundColor: `${getCategoryColor(item.type)}22`,
                 }}
               >
                 {item.type}

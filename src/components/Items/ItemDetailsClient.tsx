@@ -556,7 +556,10 @@ export default function ItemDetailsClient({
               <div className="mt-2 flex flex-wrap gap-2">
                 <span
                   className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-                  style={{ borderColor: categoryColor }}
+                  style={{
+                    borderColor: categoryColor,
+                    backgroundColor: `${categoryColor}22`,
+                  }}
                 >
                   {categoryIcon && (
                     <categoryIcon.Icon

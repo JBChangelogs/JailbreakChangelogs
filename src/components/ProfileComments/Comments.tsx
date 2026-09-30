@@ -534,6 +534,7 @@ export default function Comment({
                   className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                   style={{
                     borderColor: getCategoryColor(item_type),
+                    backgroundColor: `${getCategoryColor(item_type)}22`,
                   }}
                 >
                   {contentType}

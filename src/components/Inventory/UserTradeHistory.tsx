@@ -280,7 +280,10 @@ function TradeItem({
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
           <span
             className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center gap-1 rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
-            style={{ borderColor: getCategoryColor(item.category_title) }}
+            style={{
+              borderColor: getCategoryColor(item.category_title),
+              backgroundColor: `${getCategoryColor(item.category_title)}22`,
+            }}
           >
             {categoryIcon && (
               <categoryIcon.Icon

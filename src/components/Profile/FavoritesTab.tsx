@@ -190,7 +190,10 @@ export default function FavoritesTab({
                   <div className="mb-1">
                     <span
                       className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-                      style={{ borderColor: getCategoryColor(itemType) }}
+                      style={{
+                        borderColor: getCategoryColor(itemType),
+                        backgroundColor: `${getCategoryColor(itemType)}22`,
+                      }}
                     >
                       {itemType}
                     </span>

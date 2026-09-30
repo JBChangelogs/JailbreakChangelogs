@@ -206,6 +206,7 @@ const TradeSidePreview = ({
                           className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                           style={{
                             borderColor: getCategoryColor(item.type),
+                            backgroundColor: `${getCategoryColor(item.type)}22`,
                           }}
                         >
                           {(() => {

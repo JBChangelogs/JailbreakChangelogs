@@ -705,6 +705,7 @@ export default function ProfileInventoryTab({
                         className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                         style={{
                           borderColor: categoryColor,
+                          backgroundColor: `${categoryColor}22`,
                         }}
                       >
                         {categoryIcon ? (
