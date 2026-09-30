@@ -19,11 +19,6 @@ import type { Components } from "react-markdown";
 import { createLogger } from "@/services/logger";
 import Link from "next/link";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -32,8 +27,6 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
-import type { UserData } from "@/types/auth";
 import { hasMeaningfulCollapsedOverflow } from "@/utils/ui/collapsibleContent";
 
 const log = createLogger("UI");
@@ -138,21 +131,13 @@ function ChangelogsTabSkeleton() {
   );
 }
 
-interface UserSettings {
-  custom_avatar?: boolean;
-  hide_presence?: boolean | number;
-  [key: string]: unknown;
-}
-
 interface ChangelogUser {
   id: string;
   username?: string;
-  global_name?: string;
-  avatar?: string | null;
-  custom_avatar?: string | null;
   premiumtype?: number;
-  usernumber?: number;
-  settings?: UserSettings;
+  roblox_username?: string;
+  roblox_display_name?: string;
+  roblox_avatar?: string;
 }
 
 interface ValueChangelog {
@@ -560,45 +545,28 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                   <div className="flex items-center gap-2">
                     <UserAvatar
                       userId={changelog.user.id}
-                      avatarHash={changelog.user.avatar ?? null}
-                      username={changelog.user.username ?? ""}
-                      custom_avatar={changelog.user.custom_avatar ?? undefined}
-                      premiumType={changelog.user.premiumtype ?? 0}
-                      settings={
-                        changelog.user.settings
-                          ? {
-                              custom_avatar:
-                                !!changelog.user.settings.custom_avatar,
-                              hide_presence:
-                                !!changelog.user.settings.hide_presence,
-                            }
-                          : undefined
+                      avatarHash={null}
+                      username={
+                        changelog.user.roblox_username ??
+                        changelog.user.username ??
+                        ""
                       }
-                      size={6}
+                      forceAvatarUrl={changelog.user.roblox_avatar ?? undefined}
+                      premiumType={changelog.user.premiumtype ?? 0}
+                      size={7}
                       showBadge={false}
+                      bgClassName="bg-tertiary-bg"
                     />
                     <div className="min-w-0 flex-1">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Link
-                            href={`/users/${changelog.user.id}`}
-                            prefetch={false}
-                            className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
-                          >
-                            {(changelog.user.global_name !== "None" &&
-                              changelog.user.global_name) ||
-                              changelog.user.username ||
-                              `User #${changelog.user.id}`}
-                          </Link>
-                        </TooltipTrigger>
-                        {changelog.user.username && (
-                          <TooltipContent className="max-w-sm min-w-75 p-0">
-                            <UserDetailsTooltip
-                              user={changelog.user as unknown as UserData}
-                            />
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
+                      <Link
+                        href={`/users/${changelog.user.id}`}
+                        prefetch={false}
+                        className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
+                      >
+                        {changelog.user.roblox_display_name ||
+                          changelog.user.roblox_username ||
+                          `User #${changelog.user.id}`}
+                      </Link>
                       <p className="text-secondary-text text-xs">
                         {formatMessageDate(changelog.created_at)}
                       </p>
@@ -695,22 +663,15 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                           >
                             <UserAvatar
                               userId={v.user.id}
-                              avatarHash={v.user.avatar ?? null}
-                              username={v.user.username ?? ""}
-                              custom_avatar={v.user.custom_avatar ?? undefined}
-                              premiumType={v.user.premiumtype ?? 0}
-                              settings={
-                                v.user.settings
-                                  ? {
-                                      custom_avatar:
-                                        !!v.user.settings.custom_avatar,
-                                      hide_presence:
-                                        !!v.user.settings.hide_presence,
-                                    }
-                                  : undefined
+                              avatarHash={null}
+                              username={
+                                v.user.roblox_username ?? v.user.username ?? ""
                               }
-                              size={10}
+                              forceAvatarUrl={v.user.roblox_avatar ?? undefined}
+                              premiumType={v.user.premiumtype ?? 0}
+                              size={11}
                               showBadge={false}
+                              bgClassName="bg-tertiary-bg"
                             />
                             <div className="min-w-0 flex-1">
                               <div className="text-primary-text mb-1 text-base font-bold">
@@ -720,9 +681,8 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                                   className="text-link hover:text-link-hover transition-colors hover:underline"
                                   onClick={() => setVotersOpen(false)}
                                 >
-                                  {(v.user.global_name !== "None" &&
-                                    v.user.global_name) ||
-                                    v.user.username ||
+                                  {v.user.roblox_display_name ||
+                                    v.user.roblox_username ||
                                     `User #${v.user.id}`}
                                 </Link>
                               </div>

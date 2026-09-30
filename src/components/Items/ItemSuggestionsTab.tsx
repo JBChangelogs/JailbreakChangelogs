@@ -21,11 +21,6 @@ import { createLogger } from "@/services/logger";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -34,8 +29,6 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
-import type { UserData } from "@/types/auth";
 import { hasMeaningfulCollapsedOverflow } from "@/utils/ui/collapsibleContent";
 
 const log = createLogger("UI");
@@ -141,21 +134,13 @@ function SuggestionsTabSkeleton() {
   );
 }
 
-interface UserSettings {
-  custom_avatar?: boolean;
-  hide_presence?: boolean | number;
-  [key: string]: unknown;
-}
-
 interface SuggestionUser {
   id: string;
   username?: string;
-  global_name?: string;
-  avatar?: string | null;
-  custom_avatar?: string | null;
   premiumtype?: number;
-  usernumber?: number;
-  settings?: UserSettings;
+  roblox_username?: string;
+  roblox_display_name?: string;
+  roblox_avatar?: string;
 }
 
 interface Suggestion {
@@ -614,45 +599,30 @@ export default function ItemSuggestionsTab({
                   <div className="relative z-10 flex items-center gap-2">
                     <UserAvatar
                       userId={suggestion.user.id}
-                      avatarHash={suggestion.user.avatar ?? null}
-                      username={suggestion.user.username ?? ""}
-                      custom_avatar={suggestion.user.custom_avatar ?? undefined}
-                      premiumType={suggestion.user.premiumtype ?? 0}
-                      settings={
-                        suggestion.user.settings
-                          ? {
-                              custom_avatar:
-                                !!suggestion.user.settings.custom_avatar,
-                              hide_presence:
-                                !!suggestion.user.settings.hide_presence,
-                            }
-                          : undefined
+                      avatarHash={null}
+                      username={
+                        suggestion.user.roblox_username ??
+                        suggestion.user.username ??
+                        ""
                       }
-                      size={6}
+                      forceAvatarUrl={
+                        suggestion.user.roblox_avatar ?? undefined
+                      }
+                      premiumType={suggestion.user.premiumtype ?? 0}
+                      size={7}
                       showBadge={false}
+                      bgClassName="bg-tertiary-bg"
                     />
                     <div className="min-w-0 flex-1">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Link
-                            href={`/users/${suggestion.user.id}`}
-                            prefetch={false}
-                            className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
-                          >
-                            {(suggestion.user.global_name !== "None" &&
-                              suggestion.user.global_name) ||
-                              suggestion.user.username ||
-                              `User #${suggestion.user.id}`}
-                          </Link>
-                        </TooltipTrigger>
-                        {suggestion.user.username && (
-                          <TooltipContent className="max-w-sm min-w-75 p-0">
-                            <UserDetailsTooltip
-                              user={suggestion.user as unknown as UserData}
-                            />
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
+                      <Link
+                        href={`/users/${suggestion.user.id}`}
+                        prefetch={false}
+                        className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
+                      >
+                        {suggestion.user.roblox_display_name ||
+                          suggestion.user.roblox_username ||
+                          `User #${suggestion.user.id}`}
+                      </Link>
                       <p className="text-secondary-text text-xs">
                         {formatMessageDate(suggestion.created_at)}
                         {suggestion.updated_at !== suggestion.created_at
@@ -752,22 +722,15 @@ export default function ItemSuggestionsTab({
                           >
                             <UserAvatar
                               userId={v.user.id}
-                              avatarHash={v.user.avatar ?? null}
-                              username={v.user.username ?? ""}
-                              custom_avatar={v.user.custom_avatar ?? undefined}
-                              premiumType={v.user.premiumtype ?? 0}
-                              settings={
-                                v.user.settings
-                                  ? {
-                                      custom_avatar:
-                                        !!v.user.settings.custom_avatar,
-                                      hide_presence:
-                                        !!v.user.settings.hide_presence,
-                                    }
-                                  : undefined
+                              avatarHash={null}
+                              username={
+                                v.user.roblox_username ?? v.user.username ?? ""
                               }
-                              size={10}
+                              forceAvatarUrl={v.user.roblox_avatar ?? undefined}
+                              premiumType={v.user.premiumtype ?? 0}
+                              size={11}
                               showBadge={false}
+                              bgClassName="bg-tertiary-bg"
                             />
                             <div className="min-w-0 flex-1">
                               <div className="text-primary-text mb-1 text-base font-bold">
@@ -777,9 +740,8 @@ export default function ItemSuggestionsTab({
                                   className="text-link hover:text-link-hover transition-colors hover:underline"
                                   onClick={() => setVotersOpen(false)}
                                 >
-                                  {(v.user.global_name !== "None" &&
-                                    v.user.global_name) ||
-                                    v.user.username ||
+                                  {v.user.roblox_display_name ||
+                                    v.user.roblox_username ||
                                     `User #${v.user.id}`}
                                 </Link>
                               </div>
