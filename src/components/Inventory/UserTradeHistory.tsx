@@ -298,14 +298,6 @@ function TradeItem({
               Duped copy
             </span>
           )}
-          {item.confidence !== "confirmed" && (
-            <span
-              className="text-secondary-text text-[10px] sm:text-xs"
-              title="The previous owner was recovered after a data gap."
-            >
-              Recovered hop
-            </span>
-          )}
           {item.given_by_original_owner && (
             <span
               className="text-primary-text inline-flex rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1.5 py-0.5 text-[10px] leading-none font-semibold sm:text-xs"
@@ -539,7 +531,7 @@ export default function UserTradeHistory({
   );
 
   const getCounterpartyName = useCallback(
-    (id: string) => robloxUsers[id]?.displayName || robloxUsers[id]?.name || id,
+    (id: string) => robloxUsers[id]?.name || id,
     [robloxUsers],
   );
 
@@ -890,10 +882,10 @@ export default function UserTradeHistory({
                 )}
                 {trade.confidence === "partial" && (
                   <span
-                    className="bg-quaternary-bg rounded px-1.5 py-0.5 text-[10px] font-medium sm:text-xs"
+                    className="bg-quaternary-bg text-primary-text rounded px-1.5 py-0.5 text-[10px] font-medium sm:text-xs"
                     title="Some trade details were recovered from a fallback data source."
                   >
-                    Partial data
+                    Recovered
                   </span>
                 )}
                 <time

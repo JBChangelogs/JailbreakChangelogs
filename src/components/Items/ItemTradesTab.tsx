@@ -11,7 +11,6 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import { PendingTradeItemsPlaceholder } from "@/components/Inventory/PendingTradeItemsPlaceholder";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
@@ -80,9 +79,9 @@ function TradeItems({
 }) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
-      <div className="flex min-w-0 items-baseline gap-1 sm:w-32 sm:shrink-0 sm:flex-col sm:gap-0">
+      <div className="flex min-w-0 items-baseline gap-1 sm:w-32 sm:shrink-0 sm:flex-col sm:items-stretch sm:gap-0">
         <span
-          className="text-primary-text min-w-0 text-xs font-semibold break-words"
+          className="text-primary-text min-w-0 text-xs font-semibold wrap-anywhere"
           title={name}
         >
           {name} gave
@@ -95,9 +94,15 @@ function TradeItems({
       </div>
       {items.length === 0 ? (
         isPending ? (
-          <div className="min-w-0 flex-1">
-            <PendingTradeItemsPlaceholder />
-          </div>
+          <span className="border-border-card bg-tertiary-bg text-secondary-text inline-flex w-fit items-center gap-1.5 rounded-md border border-dashed px-2 py-1 text-xs">
+            <span
+              aria-hidden="true"
+              className="text-primary-text font-semibold"
+            >
+              ?
+            </span>
+            Items not scanned yet
+          </span>
         ) : (
           <span className="text-secondary-text text-xs">No items recorded</span>
         )
@@ -221,6 +226,9 @@ export default function ItemTradesTab({
     enabled: userIds.length > 0,
   });
 
+  const getUsername = (userId: string) =>
+    robloxUsers[userId]?.name || `User ${userId}`;
+
   const userLink = (userId: string) => (
     <Link
       href={`/inventories/${encodeURIComponent(userId)}`}
@@ -230,11 +238,7 @@ export default function ItemTradesTab({
       className="text-link hover:text-link-hover inline-flex items-center gap-2 font-medium hover:underline"
     >
       <TradeAvatarImage userId={userId} />
-      <span>
-        {robloxUsers[userId]?.displayName ||
-          robloxUsers[userId]?.name ||
-          `User ${userId}`}
-      </span>
+      <span>{getUsername(userId)}</span>
     </Link>
   );
 
@@ -302,6 +306,14 @@ export default function ItemTradesTab({
                       Pending
                     </span>
                   )}
+                  {trade.confidence === "partial" && (
+                    <span
+                      className="bg-quaternary-bg text-primary-text rounded px-1.5 py-0.5 text-xs font-medium"
+                      title="Some trade details were recovered from a fallback data source."
+                    >
+                      Recovered
+                    </span>
+                  )}
                   <time
                     dateTime={new Date(trade.last_time * 1000).toISOString()}
                     className="text-secondary-text text-xs"
@@ -312,22 +324,14 @@ export default function ItemTradesTab({
               </div>
               <div className="border-border-card mt-3 space-y-2.5 border-t pt-3">
                 <TradeItems
-                  name={
-                    robloxUsers[trade.user_a]?.displayName ||
-                    robloxUsers[trade.user_a]?.name ||
-                    `User ${trade.user_a}`
-                  }
+                  name={getUsername(trade.user_a)}
                   items={trade.items_a_to_b}
                   isPending={trade.status === "pending"}
                   itemName={itemName}
                   itemCategory={itemCategory}
                 />
                 <TradeItems
-                  name={
-                    robloxUsers[trade.user_b]?.displayName ||
-                    robloxUsers[trade.user_b]?.name ||
-                    `User ${trade.user_b}`
-                  }
+                  name={getUsername(trade.user_b)}
                   items={trade.items_b_to_a}
                   isPending={trade.status === "pending"}
                   itemName={itemName}
