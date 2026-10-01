@@ -155,7 +155,7 @@ export default function DupeItemCard({
       </div>
 
       {/* Item Image */}
-      <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg">
+      <div className="relative mb-3 aspect-video w-full overflow-hidden rounded-lg">
         {(itemData?.is_limited === 1 || isSeasonal) && (
           <Tooltip>
             <TooltipTrigger asChild>

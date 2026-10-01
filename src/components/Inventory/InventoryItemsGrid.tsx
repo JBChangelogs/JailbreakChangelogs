@@ -76,7 +76,7 @@ export default function InventoryItemsGrid({
             </div>
 
             {/* Image */}
-            <div className="bg-button-secondary mb-3 h-48 w-full rounded-lg"></div>
+            <div className="bg-button-secondary mb-3 aspect-video w-full rounded-lg"></div>
 
             {/* Stats */}
             <div className="flex flex-1 flex-col justify-center space-y-3 text-center">

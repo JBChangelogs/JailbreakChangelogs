@@ -5,3 +5,8 @@ export const bangers = localFont({
   variable: "--font-bangers",
   display: "swap",
 });
+
+export const damion = localFont({
+  src: "../../public/fonts/Damion-Regular.ttf",
+  display: "swap",
+});

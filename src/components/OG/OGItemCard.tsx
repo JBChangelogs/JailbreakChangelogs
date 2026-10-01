@@ -161,7 +161,7 @@ export default function OGItemCard({
       </div>
 
       {/* Item Image - Always show container for consistent layout */}
-      <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg">
+      <div className="relative mb-3 aspect-video w-full overflow-hidden rounded-lg">
         {(itemData?.is_limited === 1 || isSeasonal) && (
           <Tooltip>
             <TooltipTrigger asChild>

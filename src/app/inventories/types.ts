@@ -24,6 +24,7 @@ export interface InventoryItem {
   season: number | null;
   title: string;
   isOriginalOwner: boolean;
+  Sign?: string[] | null;
   scan_id: string;
   is_duplicated: boolean;
 }

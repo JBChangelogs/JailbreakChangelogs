@@ -30,6 +30,7 @@ interface Item {
   categoryTitle?: string;
   history?: TradeHistoryEntry[] | string;
   id?: string;
+  Sign?: string[] | null;
 }
 
 interface TradeHistoryModalProps {
@@ -149,6 +150,7 @@ export default function TradeHistoryModal({
   };
 
   if (!item) return null;
+  const signers = item.Sign?.filter(Boolean) ?? [];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -189,6 +191,14 @@ export default function TradeHistoryModal({
                   </span>
                 )}
               </div>
+              {signers.length > 0 && (
+                <p className="text-secondary-text mt-2 text-sm">
+                  Signed by{" "}
+                  <span className="text-primary-text font-medium">
+                    {signers.join(", ")}
+                  </span>
+                </p>
+              )}
               {tradeHistoryUserIds.length > 0 && (
                 <p className="text-secondary-text mt-1 text-sm">
                   History of {tradeHistoryUserIds.length} owners
