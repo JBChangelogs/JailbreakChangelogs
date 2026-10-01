@@ -355,8 +355,8 @@ function TradeSideEditor({
   return (
     <div className="min-w-0 space-y-2">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-primary-text text-xs font-semibold">{label}</p>
-        <p className="text-secondary-text text-xs">
+        <p className="text-primary-text text-sm font-semibold">{label}</p>
+        <p className="text-secondary-text text-sm">
           {selected.length}/{MAX_ITEMS_PER_SIDE} items · {totalQty}/
           {MAX_QTY_PER_SIDE} qty
         </p>
@@ -582,14 +582,42 @@ export function CommonTradesEditor({
         tradeIndex === index ? { ...trade, [side]: selected } : trade,
       ),
     );
+  const canAddSuggestedItem = (items: CommonTradeDraftItem[]) =>
+    items.length < MAX_ITEMS_PER_SIDE &&
+    items.reduce((total, item) => total + (Number(item.amount) || 0), 0) <
+      MAX_QTY_PER_SIDE;
+  const addSuggestedItem = (index: number, side: "requesting" | "offering") => {
+    const trade = trades[index];
+    if (
+      !trade ||
+      [...trade.requesting, ...trade.offering].some(
+        (item) => item.id === suggestedItemId,
+      ) ||
+      !canAddSuggestedItem(trade[side])
+    ) {
+      return;
+    }
+
+    updateTrade(index, side, [
+      ...trade[side],
+      {
+        id: suggestedItemId,
+        name: suggestedItem.name,
+        type: suggestedItem.type,
+        amount: 1,
+        og: false,
+        duped: false,
+      },
+    ]);
+  };
 
   return (
     <div>
       <div className="mb-2">
-        <p className="text-primary-text text-sm font-medium">
+        <p className="text-primary-text text-base font-semibold">
           Common Trades ({completedTradeCount})
         </p>
-        <p className="text-secondary-text mt-0.5 text-xs">
+        <p className="text-secondary-text mt-1 text-sm">
           Add {MIN_COMMON_TRADES}-{MAX_COMMON_TRADES} real examples. Each trade
           must include{" "}
           <span className="text-primary-text font-medium">
@@ -603,9 +631,10 @@ export function CommonTradesEditor({
           href={`/item/${encodeURIComponent(suggestedItem.type)}/${encodeURIComponent(suggestedItem.name)}?tab=trades`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-link hover:text-link-hover mt-1 inline-flex items-center gap-1 text-xs font-medium hover:underline"
+          className="text-link hover:text-link-hover mt-1.5 inline-flex items-center gap-1 text-sm font-medium hover:underline"
         >
-          View recent recorded trades (opens in new tab)
+          View recent recorded trades
+          <span className="sr-only"> (opens in new tab)</span>
           <Icon
             icon="heroicons:arrow-top-right-on-square"
             className="h-3 w-3"
@@ -620,16 +649,9 @@ export function CommonTradesEditor({
           >
             <div className="mb-2 flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-secondary-text text-xs font-semibold uppercase">
+                <p className="text-secondary-text text-sm font-semibold uppercase">
                   Trade {index + 1}
                 </p>
-                {![...trade.requesting, ...trade.offering].some(
-                  (item) => item.id === suggestedItemId,
-                ) && (
-                  <p className="text-form-error mt-0.5 truncate text-xs">
-                    Add {suggestedItem.name} to either side
-                  </p>
-                )}
               </div>
               {trades.length > MIN_COMMON_TRADES && (
                 <button
@@ -639,13 +661,32 @@ export function CommonTradesEditor({
                       trades.filter((_, tradeIndex) => tradeIndex !== index),
                     )
                   }
-                  className="text-form-error hover:text-button-danger flex cursor-pointer items-center gap-1 text-xs transition-colors"
+                  className="text-form-error hover:text-button-danger flex cursor-pointer items-center gap-1 text-sm transition-colors"
                 >
                   <Icon icon="heroicons:trash" className="h-3.5 w-3.5" />
                   Remove
                 </button>
               )}
             </div>
+            {![...trade.requesting, ...trade.offering].some(
+              (item) => item.id === suggestedItemId,
+            ) && (
+              <div className="text-secondary-text mb-3 flex flex-wrap items-center gap-2 text-sm">
+                <span>Add {suggestedItem.name} to either side:</span>
+                {(["offering", "requesting"] as const).map((side) => (
+                  <button
+                    key={side}
+                    type="button"
+                    onClick={() => addSuggestedItem(index, side)}
+                    disabled={!canAddSuggestedItem(trade[side])}
+                    className="border-border-card bg-secondary-bg text-link hover:border-button-info/60 inline-flex h-8 cursor-pointer items-center rounded-md border px-3 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label={`Add ${suggestedItem.name} to ${side}`}
+                  >
+                    Add to {side === "offering" ? "Offering" : "Requesting"}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="grid gap-3 sm:grid-cols-2">
               <TradeSideEditor
                 label="Offering"

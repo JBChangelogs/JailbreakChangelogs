@@ -461,7 +461,7 @@ export function SuggestionForm({
             </div>
           )}
           {selectedItem && (
-            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
               <span className="text-secondary-text">Selected:</span>
               {(() => {
                 const icon = getCategoryIcon(selectedItem.type);
@@ -566,7 +566,7 @@ export function SuggestionForm({
                   )}
                 </div>
                 <div className="min-w-0 flex-1 py-3 pr-3">
-                  <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
+                  <p className="text-secondary-text mb-1.5 text-sm font-semibold tracking-wide uppercase">
                     Current {fieldLabel(field)}
                   </p>
                   {field === "trend" ? (
