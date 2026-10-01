@@ -11,7 +11,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { toast } from "sonner";
-import Link from "next/link";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { parseBan, showBanToast } from "@/utils/api/ban";
 import { trackEvent } from "@/utils/analytics/rybbit";
@@ -40,6 +39,8 @@ import {
   RateLimitError,
 } from "@/components/Items/Suggestions/errors";
 import { GUIDELINES_DISMISSED_KEY } from "@/components/Items/Suggestions/shared";
+import RelatedValuePages from "@/components/Values/RelatedValuePages";
+import { getSortLabel } from "@/utils/api/sortGroups";
 
 export default function ValueSuggestionsPage() {
   const {
@@ -204,6 +205,9 @@ export default function ValueSuggestionsPage() {
     [setParams],
   );
   const { sortGroups, handleSortChange } = useSuggestionSort(sort, updateSort);
+  const defaultSort = sortGroups[0]?.options[0]?.value;
+  const activeSortLabel =
+    sort && sort !== defaultSort ? getSortLabel(sortGroups, sort) : null;
   const canSeeVt =
     user?.flags?.some(
       (flag) =>
@@ -254,6 +258,7 @@ export default function ValueSuggestionsPage() {
     setFieldFilter("All");
     if (searchInputRef.current) searchInputRef.current.value = "";
     setHasSearchText(false);
+    if (defaultSort && sort !== defaultSort) handleSortChange(defaultSort);
     void setParams({ query: null, page: null });
   };
 
@@ -439,12 +444,6 @@ export default function ValueSuggestionsPage() {
                   applying changes.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-3">
-                  <Button asChild variant="default" size="sm">
-                    <Link href="/values">Value List</Link>
-                  </Button>
-                  <Button asChild variant="default" size="sm">
-                    <Link href="/items/changelogs">Item Changelogs</Link>
-                  </Button>
                   <Button
                     variant="default"
                     size="sm"
@@ -496,6 +495,9 @@ export default function ValueSuggestionsPage() {
                       Login to Suggest
                     </Button>
                   )}
+                </div>
+                <div className="mt-5">
+                  <RelatedValuePages current="suggestions" />
                 </div>
               </div>
               <NitroInlineVideoPlayer
@@ -589,13 +591,19 @@ export default function ValueSuggestionsPage() {
             loadingSuggestions={loadingSuggestions}
             noSuggestionsFound={noSuggestionsFound}
             suggestionsError={suggestionsError}
-            suggestions={suggestions}
             filteredSuggestions={filteredSuggestions}
             isAuthenticated={isAuthenticated}
             userId={user?.id}
             userHasRoblox={Boolean(user?.roblox_id)}
             isBanned={Boolean(ban)}
             urlQuery={urlQuery}
+            activeSortLabel={activeSortLabel}
+            hasActiveFilters={Boolean(
+              urlQuery ||
+              activeSortLabel ||
+              typeFilter !== "All" ||
+              fieldFilter !== "All",
+            )}
             totalPages={totalPages}
             page={page}
             pageChanging={pageChanging}

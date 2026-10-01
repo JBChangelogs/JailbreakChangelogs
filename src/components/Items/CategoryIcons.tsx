@@ -64,11 +64,11 @@ function CategoryIcons({
   };
 
   return (
-    <div className="mb-8">
-      <h3 className="text-primary-text mb-4 text-2xl font-bold">
+    <div className="mt-4 mb-4">
+      <h3 className="text-primary-text mb-2 text-lg font-semibold">
         Item Categories ({STATIC_CATEGORIES.length})
       </h3>
-      <div className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 scrollbar-thin scrollbar-track-transparent grid-cols-1 gap-4 overflow-y-auto p-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 scrollbar-thin scrollbar-track-transparent grid-cols-2 gap-2 overflow-y-auto p-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         {STATIC_CATEGORIES.map((category) => {
           const isSelected = selectedFilters.includes(
             category.id as FilterSort,
@@ -79,7 +79,7 @@ function CategoryIcons({
             <button
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
-              className={`order-(--mobile-order) flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all hover:bg-(--hover-bg) sm:order-0 sm:p-4 ${
+              className={`order-(--mobile-order) flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-all hover:bg-(--hover-bg) sm:order-0 ${
                 isSelected
                   ? "bg-tertiary-bg ring-border-focus ring-2"
                   : "bg-tertiary-bg"
@@ -97,17 +97,17 @@ function CategoryIcons({
             >
               {category.iconComponent ? (
                 <category.iconComponent
-                  className="text-tertiary-text h-5 w-5 sm:h-6 sm:w-6"
+                  className="text-tertiary-text h-4 w-4 shrink-0"
                   style={{ color: category.iconColor }}
                 />
               ) : (
                 <Icon
                   icon={category.icon}
-                  className="text-tertiary-text h-5 w-5 sm:h-6 sm:w-6"
+                  className="text-tertiary-text h-4 w-4 shrink-0"
                   style={{ color: category.iconColor }}
                 />
               )}
-              <span className="text-primary-text text-sm font-semibold sm:text-base">
+              <span className="text-primary-text text-sm font-medium">
                 {category.name}
               </span>
             </button>

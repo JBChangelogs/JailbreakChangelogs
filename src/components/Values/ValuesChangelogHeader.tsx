@@ -1,4 +1,5 @@
 import React from "react";
+import RelatedValuePages from "./RelatedValuePages";
 
 const ValuesChangelogHeader: React.FC = () => {
   return (
@@ -12,6 +13,7 @@ const ValuesChangelogHeader: React.FC = () => {
         Track every value change, price adjustment, and item modification we
         make to keep the value list accurate.
       </p>
+      <RelatedValuePages current="changelogs" />
     </div>
   );
 };

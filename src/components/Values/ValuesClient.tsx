@@ -10,7 +10,6 @@ const FILTER_SORT_STORAGE_KEY = "valuesFilterSort";
 const FILTER_SORT_PREFERENCE_KEY = "values_filter_sorts";
 const VALUE_SORT_PREFERENCE_KEY = "values_value_sort";
 import { useQuery } from "@tanstack/react-query";
-import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, ValueSort } from "@/types";
 import { useUserFavorites } from "@/hooks/useUserFavorites";
 import { filterByTypes } from "@/utils/trading/values";
@@ -34,10 +33,9 @@ import { useValuesFilterMode } from "@/hooks/useValuesFilterMode";
 import { useValuesRangePreference } from "@/hooks/useValuesRangePreference";
 import { filterOptions, getServerFilters } from "./valuesFilterOptions";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { formatRelativeDate } from "@/utils/helpers/timestamp";
 import { useItemSortGroups } from "@/hooks/useItemSortGroups";
+import RelatedValuePages from "./RelatedValuePages";
 
 const parseFilterSorts = (
   raw: string | null,
@@ -366,15 +364,15 @@ export default function ValuesClient() {
 
   return (
     <ValuesErrorBoundary>
-      <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
+      <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex-1">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between">
               <h1 className="text-primary-text text-3xl font-bold">
                 Roblox Jailbreak Value List
               </h1>
             </div>
-            <p className="text-secondary-text mb-4">
+            <p className="text-secondary-text mb-3">
               Welcome to our Roblox Jailbreak trading values database.
               We&apos;ve partnered with{" "}
               <a
@@ -390,46 +388,17 @@ export default function ValuesClient() {
               cosmetics.
             </p>
 
-            <div className="mb-4 flex flex-wrap gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dupes" prefetch={false}>
-                  <Icon icon="heroicons:magnifying-glass" inline={true} />
-                  Dupe Finder
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/hyperchrome-pity" prefetch={false}>
-                  <Icon icon="heroicons:calculator" inline={true} />
-                  Hyperchrome Pity Calculator
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/items/suggestions" prefetch={false}>
-                  <Icon icon="heroicons:light-bulb" inline={true} />
-                  Item Suggestions
-                </Link>
-              </Button>
-            </div>
-
-            <Link
-              href="/items/suggestions"
-              prefetch={false}
-              className="border-border-card bg-tertiary-bg mb-4 flex flex-col gap-1 rounded-lg border px-4 py-3 transition-colors xl:flex-row xl:items-center xl:justify-between xl:gap-3"
-            >
-              <p className="text-secondary-text text-sm">
-                Think a value is wrong?{" "}
-                <span className="text-link font-medium underline">
-                  Vote on community suggestions
-                </span>{" "}
-                to help keep the value list accurate.
-              </p>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+              <RelatedValuePages current="values" />
               {lastUpdated && (
-                <p className="text-secondary-text shrink-0 text-xs">
-                  Last updated: {formatClientDate(lastUpdated)} (
-                  {formatRelativeDate(lastUpdated)})
+                <p
+                  className="text-secondary-text text-xs"
+                  title={`Last updated ${formatClientDate(lastUpdated)}`}
+                >
+                  Updated {formatRelativeDate(lastUpdated)}
                 </p>
               )}
-            </Link>
+            </div>
           </div>
 
           <NitroInlineVideoPlayer
@@ -483,24 +452,6 @@ export default function ValuesClient() {
         searchSectionRef={searchSectionRef}
         maxValueRange={MAX_VALUE_RANGE}
       />
-
-      <Link
-        href="/items/suggestions"
-        prefetch={false}
-        className="border-border-card bg-tertiary-bg mb-4 flex items-center justify-between rounded-lg border px-4 py-2.5 transition-colors"
-      >
-        <p className="text-secondary-text text-sm">
-          Disagree with a value?{" "}
-          <span className="text-link font-medium underline">
-            Vote on community suggestions
-          </span>
-        </p>
-        <Icon
-          icon="heroicons:arrow-right"
-          className="text-secondary-text h-4 w-4 shrink-0"
-          inline={true}
-        />
-      </Link>
 
       <div className="grid grid-cols-1 gap-8">
         <div className="space-y-6">

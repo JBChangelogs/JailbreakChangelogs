@@ -160,17 +160,12 @@ function TradingGuides({
           }
           setIsExpanded(newExpanded);
         }}
-        className="border-border-card bg-tertiary-bg mb-4 flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
+        className="border-border-card bg-tertiary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border px-4 py-2.5 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <h3 className="text-primary-text text-xl font-semibold">
+          <h3 className="text-primary-text text-base font-semibold">
             Trading Guides & Information
           </h3>
-          {!isExpanded && (
-            <span className="bg-button-info text-form-button-text hidden animate-pulse items-center rounded-lg px-2 py-1 text-xs font-medium md:inline-flex">
-              Click me!
-            </span>
-          )}
         </div>
         {isExpanded ? (
           <Icon
@@ -188,14 +183,14 @@ function TradingGuides({
       </button>
 
       {isExpanded && (
-        <div className="flex flex-col gap-8">
+        <div className="mt-4 flex flex-col gap-4">
           {/* Top Section: Notes, Demand, and Video */}
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start xl:grid-cols-[1fr_400px]">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start xl:grid-cols-[1fr_320px]">
             <div className="min-w-0">
-              <h3 className="text-primary-text mb-2 text-xl font-semibold">
+              <h3 className="text-primary-text mb-2 text-base font-semibold">
                 Trader Notes
               </h3>
-              <ul className="text-secondary-text mb-6 list-inside list-disc space-y-2">
+              <ul className="text-secondary-text mb-4 list-inside list-disc space-y-1 text-sm">
                 <li>
                   This is NOT an official list, it is 100% community based
                 </li>
@@ -213,15 +208,15 @@ function TradingGuides({
                 </li>
               </ul>
 
-              <h3 className="text-primary-text mb-4 text-xl font-semibold">
+              <h3 className="text-primary-text mb-2 text-base font-semibold">
                 Demand Levels Guide
               </h3>
-              <div className="mb-4 flex flex-wrap gap-3">
+              <div className="mb-2 flex flex-wrap gap-2">
                 {demandOrder.map((demand) => (
                   <button
                     key={demand}
                     onClick={() => handleDemandClick(demand)}
-                    className={`bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all hover:bg-(--hover-bg) focus:outline-none ${
+                    className={`bg-tertiary-bg flex cursor-pointer items-center rounded-lg border px-2.5 py-1.5 transition-all hover:bg-(--hover-bg) focus:outline-none ${
                       selectedFilterSorts.includes(
                         getDemandValue(demand) as FilterSort,
                       )
@@ -251,73 +246,69 @@ function TradingGuides({
 
             {/* Video positioned at top right */}
             <div className="flex flex-col items-center lg:items-end">
-              <div className="border-border-card bg-tertiary-bg w-full max-w-100 overflow-hidden rounded-xl border shadow-lg">
+              <div className="border-border-card bg-tertiary-bg w-full max-w-80 overflow-hidden rounded-xl border shadow-lg">
                 <YouTubeEmbed
                   videoid="Yn38fUrV7zo"
-                  height={225}
+                  height={180}
                   params="controls=0&rel=0"
                 />
               </div>
-              <p className="text-secondary-text mt-2 w-full max-w-100 text-center text-[10px] italic lg:text-right">
+              <p className="text-secondary-text mt-1 w-full max-w-80 text-center text-[10px] italic lg:text-right">
                 Learn how to access the Trading Hub
               </p>
             </div>
           </div>
 
-          <hr className="border-secondary-text opacity-20" />
-
-          {/* Bottom Sections: Full Width Trend and Terms */}
-          <div className="grid grid-cols-1 gap-8">
-            <div>
-              <h3 className="text-primary-text mb-4 text-xl font-semibold">
+          {/* Detailed references stay available without filling the page. */}
+          <div className="grid gap-2">
+            <details className="border-border-card bg-tertiary-bg rounded-lg border px-4 py-3">
+              <summary className="text-primary-text cursor-pointer text-sm font-semibold">
                 Trend Levels Guide
-              </h3>
-              <div className="border-border-card bg-tertiary-bg mb-4 max-h-100 overflow-y-auto rounded-lg border p-4 sm:max-h-none sm:border-0 sm:bg-transparent sm:p-0">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {trendOrder.map((trend) => (
-                    <button
-                      key={trend}
-                      onClick={() => handleTrendClick(trend)}
-                      className={`bg-tertiary-bg flex cursor-pointer flex-col items-start gap-2 rounded-xl border-2 p-3 text-left transition-all hover:bg-(--hover-bg) focus:outline-none ${
-                        selectedFilterSorts.includes(
-                          getTrendValue(trend) as FilterSort,
-                        )
-                          ? "ring-2"
-                          : ""
-                      }`}
-                      style={
-                        {
-                          borderColor: getTrendHexColor(trend),
-                          "--tw-ring-color": getTrendHexColor(trend),
-                          "--hover-bg": `${getTrendHexColor(trend)}1A`,
-                        } as React.CSSProperties
-                      }
+              </summary>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {trendOrder.map((trend) => (
+                  <button
+                    key={trend}
+                    onClick={() => handleTrendClick(trend)}
+                    className={`bg-secondary-bg flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-2 text-left transition-all hover:bg-(--hover-bg) focus:outline-none ${
+                      selectedFilterSorts.includes(
+                        getTrendValue(trend) as FilterSort,
+                      )
+                        ? "ring-2"
+                        : ""
+                    }`}
+                    style={
+                      {
+                        borderColor: getTrendHexColor(trend),
+                        "--tw-ring-color": getTrendHexColor(trend),
+                        "--hover-bg": `${getTrendHexColor(trend)}1A`,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <span
+                      className="rounded px-2 py-0.5 text-xs font-bold tracking-wider text-white uppercase"
+                      style={{ backgroundColor: getTrendHexColor(trend) }}
                     >
-                      <span
-                        className="rounded px-2 py-0.5 text-xs font-bold tracking-wider text-white uppercase"
-                        style={{ backgroundColor: getTrendHexColor(trend) }}
-                      >
-                        {trend}
-                      </span>
-                      <p className="text-secondary-text text-xs leading-relaxed">
-                        {trendDescriptions[trend]}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+                      {trend}
+                    </span>
+                    <p className="text-secondary-text text-xs leading-snug">
+                      {trendDescriptions[trend]}
+                    </p>
+                  </button>
+                ))}
               </div>
-            </div>
+            </details>
 
-            <div>
-              <h3 className="text-primary-text mb-4 text-xl font-semibold">
+            <details className="border-border-card bg-tertiary-bg rounded-lg border px-4 py-3">
+              <summary className="text-primary-text cursor-pointer text-sm font-semibold">
                 Common Trading Terms
-              </h3>
-              <div className="border-border-card bg-tertiary-bg max-h-75 overflow-y-auto rounded-lg border p-4">
-                <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
+              </summary>
+              <div className="mt-3 max-h-60 overflow-y-auto">
+                <div className="grid grid-cols-1 gap-x-6 gap-y-2 md:grid-cols-2 xl:grid-cols-3">
                   {tradingTerms.map((item) => (
                     <div
                       key={item.term}
-                      className="border-border-secondary border-b pb-3 last:border-0 md:border-0 md:pb-0"
+                      className="border-border-secondary border-b pb-2 last:border-0 md:border-0 md:pb-0"
                     >
                       <span className="text-link font-bold">{item.term}: </span>
                       <span className="text-secondary-text text-sm">
@@ -327,7 +318,7 @@ function TradingGuides({
                   ))}
                 </div>
               </div>
-            </div>
+            </details>
           </div>
         </div>
       )}

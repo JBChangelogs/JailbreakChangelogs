@@ -14,13 +14,14 @@ interface SuggestionResultsProps {
   loadingSuggestions: boolean;
   noSuggestionsFound: boolean;
   suggestionsError: string | null;
-  suggestions: Suggestion[];
   filteredSuggestions: Suggestion[];
   isAuthenticated: boolean;
   userId?: string;
   userHasRoblox: boolean;
   isBanned: boolean;
   urlQuery: string;
+  activeSortLabel: string | null;
+  hasActiveFilters: boolean;
   totalPages: number;
   page: number;
   pageChanging: boolean;
@@ -50,13 +51,14 @@ export function SuggestionResults({
   loadingSuggestions,
   noSuggestionsFound,
   suggestionsError,
-  suggestions,
   filteredSuggestions,
   isAuthenticated,
   userId,
   userHasRoblox,
   isBanned,
   urlQuery,
+  activeSortLabel,
+  hasActiveFilters,
   totalPages,
   page,
   pageChanging,
@@ -78,7 +80,34 @@ export function SuggestionResults({
       {/* Cards */}
       {loadingSuggestions ? (
         <SuggestionCardSkeletons />
-      ) : noSuggestionsFound ? (
+      ) : suggestionsError ? (
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+          <h3 className="text-primary-text mb-2 text-lg font-semibold">
+            Failed to load suggestions
+          </h3>
+          <p className="text-secondary-text mb-6 text-sm">
+            Something went wrong while fetching suggestions. You can try again
+            or return to the values page.
+          </p>
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={onRetry}
+              className="flex items-center gap-2"
+            >
+              <Icon icon="heroicons-outline:arrow-path" className="h-5 w-5" />
+              Try again
+            </Button>
+            <Button variant="default" size="md" asChild>
+              <Link href="/values">
+                <Icon icon="heroicons-outline:arrow-left" className="h-5 w-5" />
+                Back to values
+              </Link>
+            </Button>
+          </div>
+        </div>
+      ) : noSuggestionsFound || filteredSuggestions.length === 0 ? (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
           <Image
             src="/assets/images/404.svg"
@@ -88,17 +117,29 @@ export function SuggestionResults({
             className="mx-auto mb-4"
           />
           <h3 className="text-primary-text mb-2 text-lg font-semibold">
-            No suggestions yet
+            {urlQuery
+              ? `No suggestions matching "${urlQuery}"`
+              : activeSortLabel
+                ? `No results for ${activeSortLabel}`
+                : hasActiveFilters
+                  ? "No suggestions match these filters"
+                  : "No suggestions yet"}
           </h3>
           <p className="text-secondary-text mb-6 text-sm">
-            {!isAuthenticated
-              ? "Log in to be the first to submit a item suggestion."
-              : !userHasRoblox
-                ? "You need to connect your Roblox account before you can submit a suggestion."
-                : "Be the first to suggest a value change."}
+            {hasActiveFilters
+              ? "Try a different sort or clear your filters to see more suggestions."
+              : !isAuthenticated
+                ? "Log in to be the first to submit an item suggestion."
+                : !userHasRoblox
+                  ? "You need to connect your Roblox account before you can submit a suggestion."
+                  : "Be the first to suggest a value change."}
           </p>
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            {!isAuthenticated ? (
+            {hasActiveFilters ? (
+              <Button onClick={onClearAllFilters} variant="secondary">
+                Clear filters and sort
+              </Button>
+            ) : !isAuthenticated ? (
               <Button
                 onClick={onLogin}
                 className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
@@ -133,55 +174,6 @@ export function SuggestionResults({
               </Button>
             )}
           </div>
-        </div>
-      ) : suggestionsError ? (
-        <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-          <h3 className="text-primary-text mb-2 text-lg font-semibold">
-            Failed to load suggestions
-          </h3>
-          <p className="text-secondary-text mb-6 text-sm">
-            Something went wrong while fetching suggestions. You can try again
-            or return to the values page.
-          </p>
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button
-              variant="secondary"
-              size="md"
-              onClick={onRetry}
-              className="flex items-center gap-2"
-            >
-              <Icon icon="heroicons-outline:arrow-path" className="h-5 w-5" />
-              Try again
-            </Button>
-            <Button variant="default" size="md" asChild>
-              <Link href="/values">
-                <Icon icon="heroicons-outline:arrow-left" className="h-5 w-5" />
-                Back to values
-              </Link>
-            </Button>
-          </div>
-        </div>
-      ) : filteredSuggestions.length === 0 ? (
-        <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-          <h3 className="text-primary-text mb-1 font-semibold">
-            {suggestions.length === 0
-              ? "No suggestions yet"
-              : urlQuery
-                ? `No suggestions found matching "${urlQuery}"`
-                : "No results"}
-          </h3>
-          <p className="text-secondary-text text-sm">
-            {suggestions.length === 0
-              ? "Be the first to submit a item suggestion."
-              : "Try adjusting your search or filter."}
-          </p>
-          {suggestions.length > 0 && (
-            <div className="mt-4 flex justify-center">
-              <Button onClick={onClearAllFilters} variant="default">
-                Clear All Filters
-              </Button>
-            </div>
-          )}
         </div>
       ) : (
         <>
@@ -223,11 +215,17 @@ export function SuggestionResults({
       )}
 
       {/* Pagination */}
-      {!loadingSuggestions && totalPages > 1 && (
-        <div className="mt-4 flex justify-center">
-          <Pagination count={totalPages} page={page} onChange={onPageChange} />
-        </div>
-      )}
+      {!loadingSuggestions &&
+        filteredSuggestions.length > 0 &&
+        totalPages > 1 && (
+          <div className="mt-4 flex justify-center">
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={onPageChange}
+            />
+          </div>
+        )}
     </>
   );
 }
