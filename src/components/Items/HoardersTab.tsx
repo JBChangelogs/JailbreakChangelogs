@@ -82,6 +82,8 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     error: hoardersError,
   } = useQuery({
     queryKey: ["item-hoarders", itemName, itemType],
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
     queryFn: async () => {
       if (!INVENTORY_API_URL) {
         throw new Error("Missing NEXT_PUBLIC_INVENTORY_API_URL");

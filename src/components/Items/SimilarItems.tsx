@@ -81,6 +81,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
     queryKey: ["similar-item-sorts"],
     queryFn: fetchSimilarItemSorts,
     staleTime: Infinity,
+    gcTime: 30 * 60_000,
   });
   const sortBy = selectedSort ?? sortGroups[0]?.options[0]?.value ?? null;
 
@@ -88,6 +89,8 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
     queryKey: ["similar-items", currentItem.id, sortBy],
     queryFn: () =>
       fetchSimilarItems(currentItem.id, sortBy, SIMILAR_ITEMS_LIMIT),
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
     // Without sorts, fall back to the endpoint's default sort.
     enabled: !sortsPending,
   });

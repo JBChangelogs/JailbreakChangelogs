@@ -65,6 +65,8 @@ export default function DupesTab({ itemId }: DupesTabProps) {
     error: dupesError,
   } = useQuery({
     queryKey: ["item-dupes", itemId],
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
     queryFn: async () => {
       if (!INVENTORY_API_URL) {
         throw new Error("Missing NEXT_PUBLIC_INVENTORY_API_URL");

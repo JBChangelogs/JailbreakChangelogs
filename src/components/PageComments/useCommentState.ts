@@ -422,7 +422,15 @@ export function useCommentState(props: ChangelogCommentsProps) {
             headers: reactHeaders,
           });
 
-          if (!response.ok) {
+          if (response.ok) {
+            void queryClient.invalidateQueries({
+              queryKey: [
+                "comments",
+                type === "item" ? itemType || type : type,
+                changelogId,
+              ],
+            });
+          } else {
             // Revert by toggling once more (odd toggles → one more = back to server state)
             setComments(applyToggle);
 
@@ -478,6 +486,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
       triggerRateLimit,
       user,
       currentUserId,
+      queryClient,
+      type,
+      itemType,
+      changelogId,
       setBan,
     ],
   );
@@ -629,9 +641,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
    * Refreshes the comment list from the server.
    * User data is embedded in each comment by the API, so no separate fetch needed.
    * @param silent If true, suppresses loading indicators for a seamless update.
+   * @param force If true, fetch even when the cached result is still fresh.
    */
   const refreshCommentsFromServer = useCallback(
-    async (silent = false, targetPage = 1, sort?: string) => {
+    async (silent = false, targetPage = 1, sort?: string, force = false) => {
       if (!silent) setIsRefreshingComments(true);
       try {
         const commentType = type === "item" ? itemType || type : type;
@@ -644,6 +657,12 @@ export function useCommentState(props: ChangelogCommentsProps) {
         const effectiveSort = sort ?? sortOrder;
         if (effectiveSort !== null) {
           urlWithPage.searchParams.set("sort", effectiveSort);
+        }
+
+        if (force) {
+          await queryClient.invalidateQueries({
+            queryKey: ["comments", commentType, changelogId],
+          });
         }
 
         const data = await queryClient.fetchQuery({
@@ -664,8 +683,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
             if (!response.ok) throw new Error("Failed to fetch comments");
             return response.json();
           },
-          staleTime: 0,
-          gcTime: 60_000,
+          staleTime: 60_000,
+          gcTime: 5 * 60_000,
           retry: false,
         });
         const { comments: commentsArray, userMap } = flattenComments(
@@ -713,7 +732,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         editingCommentId !== null;
       const sortAllowed = sortOrder === "newest" || sortOrder === "activity";
       if (page === 1 && !isTyping && sortAllowed)
-        refreshCommentsFromServer(true, 1);
+        refreshCommentsFromServer(true, 1, undefined, true);
     };
     window.addEventListener("realtimeComments", handler);
     return () => window.removeEventListener("realtimeComments", handler);
@@ -838,7 +857,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
       // Refresh page 1 to sync with server (newest comment will be there)
       setPage(1);
-      refreshCommentsFromServer(true, 1);
+      refreshCommentsFromServer(true, 1, undefined, true);
 
       // Track comment post
       window.rybbit?.event("Comment Posted", { type });
@@ -974,7 +993,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       );
 
       // Keep local state synced with canonical backend shape for replies/comments.
-      refreshCommentsFromServer(true, page);
+      refreshCommentsFromServer(true, page, undefined, true);
 
       // Track comment edit
       window.rybbit?.event("Comment Edited", { type });
@@ -1023,6 +1042,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         throw new Error("Failed to delete comment");
       }
       // Comment successfully deleted, track with analytics
+      void refreshCommentsFromServer(true, page, undefined, true);
       window.rybbit?.event("Comment Deleted", { type });
     } catch (err) {
       // If deletion failed, restore the previous state
@@ -1207,7 +1227,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       );
       setExpandedReplies((prev) => new Set([...prev, parentId]));
 
-      refreshCommentsFromServer(true, page);
+      refreshCommentsFromServer(true, page, undefined, true);
       return true;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to post reply");
