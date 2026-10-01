@@ -71,6 +71,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
   const inventoryFetchControllerRef = useRef<AbortController | null>(null);
   const calcSyncDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const localSyncPendingRef = useRef(false);
+  const localEditRevisionRef = useRef(0);
   const offeringItemsRef = useRef<TradeItem[]>([]);
   const requestingItemsRef = useRef<TradeItem[]>([]);
   // Prevents re-broadcasting when items are applied from a WS event (avoids sync loop)
@@ -106,6 +108,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     const previousKey = previousCalculatorStorageKeyRef.current;
     if (previousKey === calculatorStorageKey) return;
     previousCalculatorStorageKeyRef.current = calculatorStorageKey;
+    if (calcSyncDebounceRef.current) clearTimeout(calcSyncDebounceRef.current);
+    calcSyncDebounceRef.current = null;
+    localSyncPendingRef.current = false;
+    localEditRevisionRef.current += 1;
     skipNextCalculatorPersistRef.current = true;
 
     const isGuestLogin =
@@ -395,6 +401,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
   const syncItemsToPreference = useCallback(
     (offering: TradeItem[], requesting: TradeItem[]) => {
+      localSyncPendingRef.current = true;
+      localEditRevisionRef.current += 1;
       if (calcSyncDebounceRef.current)
         clearTimeout(calcSyncDebounceRef.current);
       calcSyncDebounceRef.current = setTimeout(() => {
@@ -413,6 +421,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             detail: { key: "calculator_items", value: JSON.stringify(compact) },
           }),
         );
+        localSyncPendingRef.current = false;
       }, 1000);
     },
     [],
@@ -436,6 +445,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       hadItemsRef.current = false;
       safeLocalStorage.removeItem(calculatorStorageKey);
       if (!fromWS) {
+        localSyncPendingRef.current = true;
+        localEditRevisionRef.current += 1;
         if (calcSyncDebounceRef.current)
           clearTimeout(calcSyncDebounceRef.current);
         calcSyncDebounceRef.current = setTimeout(() => {
@@ -444,6 +455,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               detail: { key: "calculator_items", delete: true },
             }),
           );
+          localSyncPendingRef.current = false;
         }, 1000);
       }
     }
@@ -464,11 +476,23 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         .detail;
       if (key !== "calculator_items" || typeof value !== "string" || !value)
         return;
+      if (localSyncPendingRef.current) return;
+      const editRevision = localEditRevisionRef.current;
 
       try {
         const remote = JSON.parse(value) as {
           offering?: { id: number; isDuped: boolean }[];
           requesting?: { id: number; isDuped: boolean }[];
+        };
+        const remoteCompact = {
+          offering: (remote.offering ?? []).map((it) => ({
+            id: it.id,
+            isDuped: !!it.isDuped,
+          })),
+          requesting: (remote.requesting ?? []).map((it) => ({
+            id: it.id,
+            isDuped: !!it.isDuped,
+          })),
         };
         const resolved = await fetchTradeItemsByIds(
           [...(remote.offering ?? []), ...(remote.requesting ?? [])].map(
@@ -476,7 +500,23 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           ),
           initialItems,
         );
-        if (cancelled) return;
+        if (
+          cancelled ||
+          localSyncPendingRef.current ||
+          editRevision !== localEditRevisionRef.current
+        )
+          return;
+        const current = {
+          offering: offeringItemsRef.current.map((it) => ({
+            id: it.id,
+            isDuped: !!it.isDuped,
+          })),
+          requesting: requestingItemsRef.current.map((it) => ({
+            id: it.id,
+            isDuped: !!it.isDuped,
+          })),
+        };
+        if (JSON.stringify(remoteCompact) === JSON.stringify(current)) return;
         const byId = new Map(resolved.map((it) => [it.id, it]));
         const rehydrate = (
           items: { id: number; isDuped: boolean }[],
@@ -527,7 +567,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
     const handlePreferenceDeleted = (e: Event) => {
       const { key } = (e as CustomEvent<{ key: string }>).detail;
-      if (key !== "calculator_items") return;
+      if (key !== "calculator_items" || localSyncPendingRef.current) return;
       // Mark as WS-sourced so the sync useEffect doesn't re-broadcast the delete
       appliedFromWSRef.current = true;
       setOfferingItems([]);
@@ -616,6 +656,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     item: TradeItem,
     side: "offering" | "requesting",
   ): boolean => {
+    localSyncPendingRef.current = true;
+    localEditRevisionRef.current += 1;
     const itemWithInstance = {
       ...item,
       instanceId: Math.random().toString(36).substring(2, 11),
@@ -695,30 +737,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   ) => {
     const setItems =
       side === "offering" ? setOfferingItems : setRequestingItems;
-    const currentItems =
-      side === "offering"
-        ? offeringItemsRef.current
-        : requestingItemsRef.current;
-    const removedIndex = currentItems.findIndex(
-      (item) => item.instanceId === instanceId,
-    );
-    if (removedIndex === -1) return;
-    const removedItem = currentItems[removedIndex];
-
     setItems((prev) => prev.filter((item) => item.instanceId !== instanceId));
-
-    toast(`Removed ${removedItem.name}`, {
-      action: {
-        label: "Undo",
-        onClick: () => {
-          setItems((prev) => {
-            const next = [...prev];
-            next.splice(Math.min(removedIndex, next.length), 0, removedItem);
-            return next;
-          });
-        },
-      },
-    });
   };
 
   const handleSwapSides = () => {
@@ -787,8 +806,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     }
   };
 
-  // Same catalog TradeItemPickerV2 browses below — reused by the quick-add
-  // popover so it can search/add without needing its own item source.
   const catalogItems =
     itemsInputMode === "picker"
       ? initialItems.filter((i) => !i.is_sub)
@@ -822,15 +839,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       {/* Trade Sides */}
       <div className="space-y-4">
         <ScanTradeFromImage onScanSuccess={handleScanTradeSuccess} />
-
-        <TradeSummaryBar
-          offeringTotal={calculateTotals(offeringItems).total}
-          requestingTotal={calculateTotals(requestingItems).total}
-          offeringCount={offeringItems.length}
-          requestingCount={requestingItems.length}
-          onSwapSides={handleSwapSides}
-          onClearSides={handleClearSides}
-        />
 
         {/* Trade Panels */}
         <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
@@ -867,6 +875,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             onMirror={() => handleMirrorItems("requesting")}
           />
         </div>
+
+        <TradeSummaryBar
+          offeringTotal={calculateTotals(offeringItems).total}
+          requestingTotal={calculateTotals(requestingItems).total}
+          offeringCount={offeringItems.length}
+          requestingCount={requestingItems.length}
+          onSwapSides={handleSwapSides}
+          onClearSides={handleClearSides}
+        />
       </div>
 
       {/* Visible after trade sides; avoids pinning the slot to the very end of the page */}
@@ -889,6 +906,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               items={catalogItems}
               useCatalogApi
               onSelect={handleAddItem}
+              showAddToasts={false}
               selectedItems={[...offeringItems, ...requestingItems]}
               customTypes={[]}
               onAddCustomType={() => {}}
@@ -1000,6 +1018,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 <TradeItemPickerV2
                   items={catalogItems}
                   onSelect={handleAddItem}
+                  showAddToasts={false}
                   selectedItems={[...offeringItems, ...requestingItems]}
                   customTypes={[]}
                   onAddCustomType={() => {}}

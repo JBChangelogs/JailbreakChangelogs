@@ -10,7 +10,7 @@ import {
 import { Icon } from "../../ui/IconWrapper";
 import { formatCurrencyValue, parseValueString } from "./calculatorUtils";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
-import { QuickAddPopover } from "./QuickAddPopover";
+import { QuickAddPopover } from "@/components/trading/QuickAddPopover";
 import {
   TradeItemMarketDetails,
   TradeItemNote,
@@ -53,43 +53,6 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
   const borderColor = isOffering
     ? "border-status-success/30 hover:border-status-success/60"
     : "border-status-error/30 hover:border-status-error/60";
-
-  if (items.length === 0) {
-    return (
-      <QuickAddPopover
-        items={catalogItems ?? []}
-        useCatalogApi={useCatalogApi}
-        onSelect={(item) => onDuplicate?.(item)}
-      >
-        <button
-          type="button"
-          className={`border-border-card bg-tertiary-bg hover:border-border-focus w-full cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
-        >
-          <div className="mb-2">
-            <svg
-              className="text-secondary-text/50 mx-auto h-8 w-8"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-          </div>
-          <p className="text-secondary-text text-sm font-medium">
-            No items selected
-          </p>
-          <p className="text-secondary-text/70 mt-1 text-xs">
-            Search for an item to add it
-          </p>
-        </button>
-      </QuickAddPopover>
-    );
-  }
 
   // Same item + same clean/duped condition merges into a single card with a
   // qty stepper, instead of one card per instance cluttering the grid.
@@ -153,6 +116,22 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                 key={group.key}
                 className="group border-border-card bg-tertiary-bg/50 relative rounded-xl border p-2.5"
               >
+                <button
+                  type="button"
+                  onClick={handleDecrement}
+                  aria-label={
+                    qty > 1
+                      ? `Remove one ${displayName}`
+                      : `Remove ${displayName}`
+                  }
+                  className="group/remove focus-visible:outline-status-error absolute inset-0 z-10 cursor-pointer rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  <span className="pointer-events-none absolute inset-x-2.5 top-2.5 flex aspect-video items-center justify-center rounded-lg bg-black/50 opacity-0 transition-opacity group-hover/remove:opacity-100 group-focus-visible/remove:opacity-100">
+                    <span className="bg-status-error/90 flex h-11 w-11 items-center justify-center rounded-full text-white">
+                      <Icon icon="heroicons:x-mark" className="h-6 w-6" />
+                    </span>
+                  </span>
+                </button>
                 <div className="relative">
                   <div className="relative aspect-video overflow-hidden rounded-lg">
                     {isVideoItem(item.name) ? (
@@ -232,7 +211,9 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                     >
                       {displayName}
                     </p>
-                    <TradeItemNote item={item} name={displayName} />
+                    <span className="relative z-20">
+                      <TradeItemNote item={item} name={displayName} />
+                    </span>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-1">
                     <p className="text-primary-text text-sm font-bold">
@@ -253,7 +234,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                           onValueTypeChange?.(item.id, nextType, id);
                         });
                       }}
-                      className={`inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold transition-colors ${
+                      className={`relative z-20 inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold transition-colors ${
                         selectedType === "duped"
                           ? "bg-status-error text-form-button-text"
                           : "bg-status-success text-form-button-text"
@@ -274,26 +255,29 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
               </div>
             );
           })}
-
-          {/* Persistent add slot — shows how to add another item without
-              needing to hit an empty state first. */}
           <QuickAddPopover
+            key="quick-add"
             items={catalogItems ?? []}
             useCatalogApi={useCatalogApi}
             onSelect={(item) => onDuplicate?.(item)}
           >
             <button
               type="button"
-              className={`border-border-card bg-tertiary-bg hover:border-border-focus flex h-full min-h-54 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed transition-colors ${borderColor}`}
-              aria-label="Add another item"
+              className={`border-border-card bg-tertiary-bg hover:border-border-focus flex min-h-54 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed p-3 text-center transition-colors ${items.length === 0 ? "col-span-2 md:col-span-3" : ""} ${borderColor}`}
+              aria-label={items.length === 0 ? "Add item" : "Add another item"}
             >
               <Icon
                 icon="heroicons:plus"
                 className="text-secondary-text/60 h-5 w-5"
               />
               <span className="text-secondary-text/70 text-xs font-medium">
-                Add item
+                {items.length === 0 ? "No items selected" : "Add item"}
               </span>
+              {items.length === 0 && (
+                <span className="text-secondary-text/70 text-xs">
+                  Search for an item to add it
+                </span>
+              )}
             </button>
           </QuickAddPopover>
         </div>

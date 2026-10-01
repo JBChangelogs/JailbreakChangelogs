@@ -9,6 +9,7 @@ import {
   tradeItemIdsEqual,
 } from "@/utils/trading/tradeItems";
 import { TradeItemMarketDetails, TradeItemNote } from "./TradeItemContext";
+import { QuickAddPopover } from "./QuickAddPopover";
 
 interface ItemGridProps {
   items: TradeItem[];
@@ -16,9 +17,13 @@ interface ItemGridProps {
   showTitle?: boolean;
   onRemove?: (item: TradeItem) => void;
   onAdd?: (item: TradeItem) => void;
+  clickToRemove?: boolean;
   disableInteraction?: boolean;
   variant?: "default" | "compact";
   onEmptyActivate?: () => void;
+  quickAddItems?: TradeItem[];
+  quickAddUseCatalogApi?: boolean;
+  onQuickAdd?: (item: TradeItem) => void;
   emptyScrollTargetSelector?: string;
   emptyScrollOffsetPx?: number;
 }
@@ -103,9 +108,13 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
   showTitle = true,
   onRemove,
   onAdd,
+  clickToRemove = false,
   disableInteraction = false,
   variant = "default",
   onEmptyActivate,
+  quickAddItems = [],
+  quickAddUseCatalogApi = false,
+  onQuickAdd,
   emptyScrollTargetSelector = '[data-component="available-items-grid"]',
   emptyScrollOffsetPx = 140,
 }) => {
@@ -130,8 +139,22 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
     }, 100);
   };
 
+  const renderAddControl = (button: React.ReactNode) =>
+    onQuickAdd ? (
+      <QuickAddPopover
+        items={quickAddItems}
+        useCatalogApi={quickAddUseCatalogApi}
+        allowOg
+        onSelect={onQuickAdd}
+      >
+        {button}
+      </QuickAddPopover>
+    ) : (
+      button
+    );
+
   if (items.length === 0) {
-    return (
+    return renderAddControl(
       <button
         type="button"
         className={`bg-tertiary-bg w-full rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor} ${
@@ -139,9 +162,10 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             ? "cursor-not-allowed opacity-60"
             : "cursor-pointer"
         }`}
-        onClick={activateAdd}
+        onClick={onQuickAdd ? undefined : activateAdd}
+        disabled={disableInteraction}
         onKeyDown={(e) => {
-          if (disableInteraction) return;
+          if (disableInteraction || onQuickAdd) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             activateAdd();
@@ -166,8 +190,10 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
         <p className="text-secondary-text text-sm font-medium">
           No items selected
         </p>
-        <p className="text-secondary-text/70 mt-1 text-xs">Browse items here</p>
-      </button>
+        <p className="text-secondary-text/70 mt-1 text-xs">
+          {onQuickAdd ? "Search for an item to add it" : "Browse items here"}
+        </p>
+      </button>,
     );
   }
 
@@ -280,7 +306,9 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                       {displayName}
                     </p>
                     {!isCustom && (
-                      <TradeItemNote item={item} name={displayName} />
+                      <span className="relative z-20">
+                        <TradeItemNote item={item} name={displayName} />
+                      </span>
                     )}
                   </div>
 
@@ -298,17 +326,14 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                         className={`inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold ${
                           item.isDuped
                             ? "bg-status-error text-form-button-text"
-                            : "bg-status-success text-form-button-text"
+                            : item.isOG
+                              ? "bg-button-info text-form-button-text"
+                              : "bg-status-success text-form-button-text"
                         }`}
                       >
-                        {item.isDuped ? "Duped" : "Clean"}
+                        {item.isDuped ? "Duped" : item.isOG ? "OG" : "Clean"}
                       </span>
                     </div>
-                  )}
-                  {item.isOG && (
-                    <span className="bg-secondary-bg text-primary-text inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold">
-                      OG
-                    </span>
                   )}
                   {!isCustom && (
                     <TradeItemMarketDetails
@@ -327,40 +352,60 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                   disableInteraction ? "cursor-not-allowed opacity-60" : ""
                 }`}
               >
+                {clickToRemove && onRemove && (
+                  <button
+                    type="button"
+                    onClick={() => onRemove(item)}
+                    disabled={disableInteraction}
+                    aria-label={
+                      item.count > 1
+                        ? `Remove one ${displayName}`
+                        : `Remove ${displayName}`
+                    }
+                    className="group/remove focus-visible:outline-status-error absolute inset-0 z-10 cursor-pointer rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed"
+                  >
+                    <span className="pointer-events-none absolute inset-x-2.5 top-2.5 flex aspect-video items-center justify-center rounded-lg bg-black/50 opacity-0 transition-opacity group-hover/remove:opacity-100 group-focus-visible/remove:opacity-100">
+                      <span className="bg-status-error/90 flex h-11 w-11 items-center justify-center rounded-full text-white">
+                        <Icon icon="heroicons:x-mark" className="h-6 w-6" />
+                      </span>
+                    </span>
+                  </button>
+                )}
                 {content}
               </div>
             );
           })}
 
-          {/* Persistent add slot — scrolls to the item picker below. */}
-          <button
-            type="button"
-            onClick={activateAdd}
-            disabled={disableInteraction}
-            className={`border-border-card bg-tertiary-bg hover:border-border-focus flex aspect-video w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors ${borderColor} ${
-              disableInteraction
-                ? "cursor-not-allowed opacity-60"
-                : "cursor-pointer"
-            }`}
-            aria-label="Add another item"
-          >
-            <svg
-              className="text-secondary-text/50 h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {renderAddControl(
+            <button
+              type="button"
+              onClick={onQuickAdd ? undefined : activateAdd}
+              disabled={disableInteraction}
+              className={`border-border-card bg-tertiary-bg hover:border-border-focus flex aspect-video w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors ${borderColor} ${
+                disableInteraction
+                  ? "cursor-not-allowed opacity-60"
+                  : "cursor-pointer"
+              }`}
+              aria-label="Add another item"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            <span className="text-secondary-text/70 text-xs font-medium">
-              Add item
-            </span>
-          </button>
+              <svg
+                className="text-secondary-text/50 h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              <span className="text-secondary-text/70 text-xs font-medium">
+                Add item
+              </span>
+            </button>,
+          )}
         </div>
       </div>
     </div>

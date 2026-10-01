@@ -48,10 +48,7 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
   const netBadgeClass = `inline-flex max-w-full items-center justify-center rounded-lg border px-3 py-1.5 text-center text-sm leading-tight font-bold tabular-nums shadow-sm ${netColorClass}`;
 
   return (
-    <div
-      className="border-border-card bg-secondary-bg/95 sticky z-30 rounded-lg border p-4 shadow-lg backdrop-blur-xl"
-      style={{ top: "calc(var(--header-height, 0px) + 12px)" }}
-    >
+    <div className="border-border-card bg-secondary-bg/95 rounded-lg border p-4 shadow-lg backdrop-blur-xl">
       {/* Keep the larger badge above the totals until there is room between them. */}
       <div className="mb-3 flex justify-center lg:hidden">
         <span className={netBadgeClass}>{netLabel}</span>

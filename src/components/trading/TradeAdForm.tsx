@@ -177,6 +177,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     showItemSourceTabs &&
     isInventoryMode &&
     (isAuthLoading || !isAuthenticated || !hasValidRobloxId);
+  const quickAddAvailable =
+    !inventoryModeGate &&
+    (isInventoryMode
+      ? inventoryStatus === "loaded" && items.length > 0
+      : items.length > 0 || useCatalogApi);
   const tradeDraftStorageKey = user?.id ? `tradeAdFormItems:${user.id}` : null;
 
   useEffect(() => {
@@ -621,10 +626,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     side: "offering" | "requesting",
   ) => {
     const customItem = createCustomTradeItem(customId, side);
-    const success = handleAddItem(customItem, side);
-    if (success) {
-      toast.success(`Added ${customItem.name} to ${side}`);
-    }
+    handleAddItem(customItem, side);
   };
 
   // Drag and drop handlers
@@ -653,12 +655,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     }
 
     if (side) {
-      const success = handleAddItem(item, side);
-      if (success) {
-        toast.success("Item Added", {
-          description: `${item.name} was added to your ${side} list.`,
-        });
-      }
+      handleAddItem(item, side);
     }
   };
 
@@ -1254,31 +1251,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             />
           </div>
 
-          {/* Trade Summary */}
-          <TradeSummaryBar
-            offeringTotal={offeringTotal}
-            requestingTotal={requestingTotal}
-            offeringCount={offeringItems.length}
-            requestingCount={requestingItems.length}
-            onSwapSides={handleSwapSides}
-            onClearSides={handleClearSides}
-          />
-
-          {/* Helpful tip about Shift+Clear */}
-          <div className="text-center">
-            <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
-              <Icon
-                icon="emojione:light-bulb"
-                className="text-sm text-yellow-500"
-              />
-              <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-                Shift
-              </kbd>{" "}
-              while clicking Clear to clear both sides instantly without
-              confirmation
-            </div>
-          </div>
-
           {/* Offering Items */}
           <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
             <DroppableZone
@@ -1318,6 +1290,14 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "offering")}
                 onAdd={(item) => handleAddItem(item, "offering")}
+                clickToRemove
+                quickAddItems={items}
+                quickAddUseCatalogApi={useCatalogApi && !isInventoryMode}
+                onQuickAdd={
+                  quickAddAvailable
+                    ? (item) => handleAddItem(item, "offering")
+                    : undefined
+                }
                 disableInteraction={submitting}
                 onEmptyActivate={() => setPickerActiveSide("offering")}
                 emptyScrollTargetSelector='[data-component="trade-ad-item-picker"]'
@@ -1363,12 +1343,44 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "requesting")}
                 onAdd={(item) => handleAddItem(item, "requesting")}
+                clickToRemove
+                quickAddItems={items}
+                quickAddUseCatalogApi={useCatalogApi && !isInventoryMode}
+                onQuickAdd={
+                  quickAddAvailable
+                    ? (item) => handleAddItem(item, "requesting")
+                    : undefined
+                }
                 disableInteraction={submitting}
                 onEmptyActivate={() => setPickerActiveSide("requesting")}
                 emptyScrollTargetSelector='[data-component="trade-ad-item-picker"]'
                 emptyScrollOffsetPx={140}
               />
             </DroppableZone>
+          </div>
+
+          <TradeSummaryBar
+            offeringTotal={offeringTotal}
+            requestingTotal={requestingTotal}
+            offeringCount={offeringItems.length}
+            requestingCount={requestingItems.length}
+            onSwapSides={handleSwapSides}
+            onClearSides={handleClearSides}
+          />
+
+          {/* Helpful tip about Shift+Clear */}
+          <div className="text-center">
+            <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
+              <Icon
+                icon="emojione:light-bulb"
+                className="text-sm text-yellow-500"
+              />
+              <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+                Shift
+              </kbd>{" "}
+              while clicking Clear to clear both sides instantly without
+              confirmation
+            </div>
           </div>
 
           {/* Rate Limit Banner */}
@@ -1548,6 +1560,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   items={items}
                   useCatalogApi={useCatalogApi}
                   onSelect={handleAddItem}
+                  showAddToasts={false}
                   onAddCustomType={handleAddCustomType}
                   customTypes={CUSTOM_TRADE_TYPES.map((customType) => ({
                     id: customType.id,

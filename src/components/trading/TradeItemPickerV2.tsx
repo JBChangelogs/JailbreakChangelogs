@@ -80,6 +80,7 @@ interface TradeItemPickerV2Props {
    */
   multiSelectFilters?: boolean;
   useCatalogApi?: boolean;
+  showAddToasts?: boolean;
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
@@ -156,6 +157,7 @@ export default function TradeItemPickerV2({
   onToggleFavorite,
   multiSelectFilters = false,
   useCatalogApi = false,
+  showAddToasts = true,
 }: TradeItemPickerV2Props) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -784,7 +786,7 @@ export default function TradeItemPickerV2({
                   },
                   activeSide,
                 );
-                if (added) {
+                if (added && showAddToasts) {
                   toast.success(
                     `Added ${item.name}${variantLabel} to ${activeSide} items`,
                   );
@@ -803,7 +805,7 @@ export default function TradeItemPickerV2({
                   },
                   "offering",
                 );
-                if (added) {
+                if (added && showAddToasts) {
                   toast.success(
                     `Added ${item.name}${variantLabel} to offering`,
                   );
@@ -822,7 +824,7 @@ export default function TradeItemPickerV2({
                   },
                   "requesting",
                 );
-                if (added) {
+                if (added && showAddToasts) {
                   toast.success(
                     `Added ${item.name}${variantLabel} to requesting`,
                   );
