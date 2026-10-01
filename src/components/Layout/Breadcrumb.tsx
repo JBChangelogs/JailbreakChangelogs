@@ -15,6 +15,7 @@ interface BreadcrumbProps {
   userData?: User | null;
   loading?: boolean;
   containerClassName?: string;
+  currentLabel?: string;
 }
 
 interface BreadcrumbItem {
@@ -43,6 +44,7 @@ export default function Breadcrumb({
   userData,
   loading,
   containerClassName,
+  currentLabel,
 }: BreadcrumbProps) {
   const pathname = usePathname();
   const wrapperClassName = containerClassName ?? "container mx-auto px-4 py-4";
@@ -65,6 +67,10 @@ export default function Breadcrumb({
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "Home", href: "/", isHome: true },
     ...pathSegments.map((segment, index) => {
+      if (index === pathSegments.length - 1 && currentLabel) {
+        return { label: currentLabel, href: pathname };
+      }
+
       // Special handling for user profile pages
       if (index === 1 && isUserProfilePage && username) {
         return {

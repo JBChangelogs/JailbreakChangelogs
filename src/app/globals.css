@@ -770,6 +770,10 @@
   max-width: none;
 }
 
+.changelog-prose > :first-child {
+  margin-top: 0;
+}
+
 .changelog-prose h1,
 .changelog-prose h2,
 .changelog-prose h3,
@@ -800,13 +804,13 @@
 }
 
 .changelog-prose a {
-  color: var(--color-button-info);
+  color: var(--color-link);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .changelog-prose a:hover {
-  opacity: 0.8;
+  color: var(--color-link-hover);
 }
 
 .changelog-prose ul,
