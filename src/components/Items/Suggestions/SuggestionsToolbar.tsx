@@ -1,6 +1,11 @@
 "use client";
 
-import { Fragment, type FormEventHandler, type RefObject } from "react";
+import {
+  Fragment,
+  type FormEventHandler,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +20,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { SuggestionFilterBar } from "@/components/Items/Suggestions/SuggestionFilterBar";
 
 interface SuggestionsToolbarProps {
+  actions: ReactNode;
   loadingSuggestions: boolean;
   total: number;
   urlQuery: string;
@@ -44,6 +50,7 @@ interface SuggestionsToolbarProps {
 }
 
 export function SuggestionsToolbar({
+  actions,
   loadingSuggestions,
   total,
   urlQuery,
@@ -84,7 +91,7 @@ export function SuggestionsToolbar({
   return (
     <>
       {/* Title row */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-primary-text font-semibold">
           {loadingSuggestions ? 0 : total}{" "}
           {urlQuery
@@ -93,53 +100,57 @@ export function SuggestionsToolbar({
               : "Search Results"
             : "Recent Suggestions"}
         </h2>
-        {visibleSortGroups.length > 0 && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="text-secondary-text flex items-center gap-1 text-xs">
-                <span>Sorted by:</span>
+        <div className="flex flex-wrap items-center gap-3">
+          {visibleSortGroups.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
+                  aria-label="Sort suggestions"
+                  className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus focus:ring-button-info/50 flex h-10 items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus:ring-1 focus:outline-none"
                 >
-                  {getSortLabel(sortGroups, sort)}
+                  <span className="text-secondary-text">Sort:</span>
+                  <span className="max-w-40 truncate font-medium">
+                    {getSortLabel(sortGroups, sort)}
+                  </span>
                   <Icon
                     icon="heroicons:chevron-down"
-                    className="h-3.5 w-3.5 shrink-0"
+                    className="text-secondary-text h-4 w-4 shrink-0"
                     inline
                   />
                 </button>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="border-border-card bg-secondary-bg text-primary-text rounded-xl border p-1 shadow-lg"
-            >
-              <DropdownMenuRadioGroup
-                value={sort ?? ""}
-                onValueChange={handleSortChange}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
               >
-                {visibleSortGroups.map((group, index) => (
-                  <Fragment key={group.label}>
-                    {index > 0 && <DropdownMenuSeparator />}
-                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                      {group.label}
-                    </DropdownMenuLabel>
-                    {group.options.map((option) => (
-                      <DropdownMenuRadioItem
-                        key={option.value}
-                        value={option.value}
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                      >
-                        {option.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </Fragment>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+                <DropdownMenuRadioGroup
+                  value={sort ?? ""}
+                  onValueChange={handleSortChange}
+                >
+                  {visibleSortGroups.map((group, index) => (
+                    <Fragment key={group.label}>
+                      {index > 0 && <DropdownMenuSeparator />}
+                      <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                        {group.label}
+                      </DropdownMenuLabel>
+                      {group.options.map((option) => (
+                        <DropdownMenuRadioItem
+                          key={option.value}
+                          value={option.value}
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          {option.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </Fragment>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {actions}
+        </div>
       </div>
 
       {/* Search + filter */}

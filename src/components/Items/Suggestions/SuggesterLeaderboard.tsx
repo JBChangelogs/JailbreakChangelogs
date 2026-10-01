@@ -6,6 +6,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { UserAvatar } from "@/utils/ui/avatar";
+import { Icon } from "@/components/ui/IconWrapper";
 import type { LeaderboardEntry } from "@/components/Items/Suggestions/types";
 
 interface SuggesterLeaderboardProps {
@@ -13,26 +14,83 @@ interface SuggesterLeaderboardProps {
   loadingLeaderboard: boolean;
 }
 
+const podiumColors = ["hsl(45,100%,50%)", "hsl(0,0%,75%)", "hsl(30,100%,50%)"];
+
 export function SuggesterLeaderboard({
   leaderboard,
   loadingLeaderboard,
 }: SuggesterLeaderboardProps) {
   return (
     <>
-      {/* Top Suggesters Leaderboard */}
       {(loadingLeaderboard || leaderboard.length > 0) && (
-        <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-primary-text text-lg font-semibold">
-              Top Suggesters
-              {!loadingLeaderboard && leaderboard.length > 0 && (
-                <span className="text-secondary-text ml-1 font-normal">
-                  ({leaderboard.length})
-                </span>
-              )}
+        <details className="border-border-card bg-secondary-bg group/leaderboard mb-4 rounded-lg border px-4 py-3">
+          <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-5 gap-y-2 [&::-webkit-details-marker]:hidden">
+            <span className="text-primary-text font-semibold">
+              Suggestion Leaderboard
             </span>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2">
+            {!loadingLeaderboard && (
+              <span className="hidden flex-wrap gap-2 sm:flex">
+                {leaderboard.slice(0, 3).map((entry, index) => {
+                  const displayName =
+                    entry.user.roblox_display_name ||
+                    entry.user.roblox_username ||
+                    "Unknown";
+                  return (
+                    <span
+                      key={entry.user.id}
+                      className="border-border-card bg-tertiary-bg inline-flex items-center gap-2 rounded-lg border px-3 py-1 text-sm"
+                    >
+                      <span
+                        className="font-bold"
+                        style={{ color: podiumColors[index] }}
+                      >
+                        #{index + 1}
+                      </span>
+                      <UserAvatar
+                        userId={entry.user.id}
+                        avatarHash={entry.user.avatar ?? null}
+                        username={displayName}
+                        forceAvatarUrl={entry.user.roblox_avatar}
+                        size={8}
+                        cdnSize={64}
+                        custom_avatar={entry.user.custom_avatar ?? undefined}
+                        showBadge={false}
+                        premiumType={entry.user.premiumtype}
+                        bgClassName="bg-quaternary-bg"
+                      />
+                      <span className="text-primary-text max-w-28 truncate font-medium">
+                        {displayName}
+                      </span>
+                      <span
+                        className="font-semibold"
+                        style={{ color: podiumColors[index] }}
+                      >
+                        {entry.acceptance_rate.toFixed(1)}%
+                      </span>
+                    </span>
+                  );
+                })}
+                {leaderboard.length > 3 && (
+                  <span className="text-secondary-text self-center text-sm group-open/leaderboard:hidden">
+                    +{leaderboard.length - 3}{" "}
+                    {leaderboard.length === 4 ? "other" : "others"}
+                  </span>
+                )}
+              </span>
+            )}
+            <span className="text-link ml-auto inline-flex items-center gap-1 text-sm font-medium">
+              <span className="group-open/leaderboard:hidden">View all</span>
+              <span className="hidden group-open/leaderboard:inline">
+                Show less
+              </span>
+              <Icon
+                icon="heroicons:chevron-down"
+                className="h-4 w-4 transition-transform group-open/leaderboard:rotate-180"
+                inline
+              />
+            </span>
+          </summary>
+          <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
             {loadingLeaderboard
               ? Array.from({ length: 5 }).map((_, i) => (
                   <div
@@ -69,7 +127,7 @@ export function SuggesterLeaderboard({
                       key={entry.user.id}
                       href={`/users/${entry.user.id}`}
                       prefetch={false}
-                      className="border-border-card bg-tertiary-bg group flex w-52 shrink-0 flex-col items-center gap-3 rounded-xl border p-4"
+                      className="border-border-card bg-tertiary-bg group/card flex w-52 shrink-0 flex-col items-center gap-3 rounded-xl border p-4"
                       style={
                         accentColor ? { borderColor: accentColor } : undefined
                       }
@@ -100,7 +158,7 @@ export function SuggesterLeaderboard({
 
                       {/* Name + supporter */}
                       <div className="flex w-full items-center justify-center gap-1">
-                        <span className="text-primary-text group-hover:text-link truncate text-sm font-semibold transition-colors">
+                        <span className="text-primary-text group-hover/card:text-link truncate text-sm font-semibold transition-colors">
                           {displayName}
                         </span>
                         {entry.user.premiumtype !== undefined &&
@@ -157,7 +215,7 @@ export function SuggesterLeaderboard({
                   );
                 })}
           </div>
-        </div>
+        </details>
       )}
     </>
   );

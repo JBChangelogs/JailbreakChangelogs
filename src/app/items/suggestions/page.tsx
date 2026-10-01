@@ -432,7 +432,7 @@ export default function ValueSuggestionsPage() {
           <Breadcrumb />
 
           {/* Header */}
-          <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6">
+          <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
               <div className="flex-1">
                 <h1 className="text-primary-text mb-1 text-2xl font-semibold">
@@ -443,60 +443,7 @@ export default function ValueSuggestionsPage() {
                   reasoning — the community votes, and our team reviews before
                   applying changes.
                 </p>
-                <div className="mt-3 flex flex-wrap gap-3">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => setGuidelinesOpen(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Icon
-                      icon="material-symbols:info-outline-rounded"
-                      className="h-4 w-4"
-                      inline
-                    />
-                    Guidelines
-                  </Button>
-                  {isAuthenticated ? (
-                    <Button
-                      onClick={openForm}
-                      variant={showForm ? "destructive" : "success"}
-                      disabled={!!ban}
-                      size="sm"
-                      className="flex items-center gap-2 disabled:opacity-50"
-                    >
-                      <Icon
-                        icon={
-                          showForm
-                            ? "material-symbols:close-rounded"
-                            : "material-symbols:add-rounded"
-                        }
-                        className="h-4 w-4"
-                        inline
-                      />
-                      {showForm ? "Cancel" : "Submit Suggestion"}
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => {
-                        toast.info(
-                          "You need to be logged in to submit item suggestions.",
-                        );
-                        setLoginModal({ open: true });
-                      }}
-                      variant="success"
-                      size="sm"
-                    >
-                      <Icon
-                        icon="material-symbols:login-rounded"
-                        className="h-4 w-4"
-                        inline
-                      />
-                      Login to Suggest
-                    </Button>
-                  )}
-                </div>
-                <div className="mt-5">
+                <div className="mt-3">
                   <RelatedValuePages current="suggestions" />
                 </div>
               </div>
@@ -511,41 +458,50 @@ export default function ValueSuggestionsPage() {
             leaderboard={leaderboard}
             loadingLeaderboard={loadingLeaderboard}
           />
-          {/* Upvote Disclaimer */}
-          <div className="border-border-error bg-button-danger/10 mb-6 rounded-lg border px-5 py-4">
-            <p className="text-form-error text-lg font-bold">
-              Please note that a high upvote count does not guarantee a
-              suggestion will be accepted.
-            </p>
-          </div>
 
           {/* Ban Banner */}
           {ban && <BanBanner ban={ban} className="mb-4" />}
 
-          {/* Submit Form */}
-          <div ref={formRef}>
-            {showForm && isAuthenticated && !ban && (
-              <SuggestionForm
-                limits={limits}
-                loadingLimits={loadingLimits}
-                isVtEligible={
-                  user?.flags?.some(
-                    (f) =>
-                      (f.flag === "is_owner" ||
-                        f.flag === "is_vt" ||
-                        f.flag === "is_vtm") &&
-                      f.enabled !== false,
-                  ) ?? false
-                }
-                user={user}
-                onSubmit={handleFormSubmit}
-                onCancel={() => setShowForm(false)}
-                onOpenGuidelines={() => setGuidelinesOpen(true)}
-              />
-            )}
-          </div>
-
           <SuggestionsToolbar
+            actions={
+              <>
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => setGuidelinesOpen(true)}
+                >
+                  <Icon
+                    icon="material-symbols:info-outline-rounded"
+                    className="h-5 w-5"
+                    inline
+                  />
+                  Guidelines
+                </Button>
+                <Button
+                  type="button"
+                  variant={showForm ? "secondary" : "default"}
+                  disabled={Boolean(ban)}
+                  onClick={() => {
+                    if (isAuthenticated) {
+                      openForm();
+                    } else {
+                      toast.info(
+                        "You need to be logged in to submit item suggestions.",
+                      );
+                      setLoginModal({ open: true });
+                    }
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Icon
+                    icon={showForm ? "heroicons:x-mark" : "heroicons:plus"}
+                    className="h-5 w-5"
+                    inline
+                  />
+                  {showForm ? "Close Form" : "Submit Suggestion"}
+                </Button>
+              </>
+            }
             loadingSuggestions={loadingSuggestions}
             total={total}
             urlQuery={urlQuery}
@@ -586,6 +542,39 @@ export default function ValueSuggestionsPage() {
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           />
+
+          {/* Submit Form */}
+          <div ref={formRef}>
+            {showForm && isAuthenticated && !ban && (
+              <SuggestionForm
+                limits={limits}
+                loadingLimits={loadingLimits}
+                isVtEligible={
+                  user?.flags?.some(
+                    (f) =>
+                      (f.flag === "is_owner" ||
+                        f.flag === "is_vt" ||
+                        f.flag === "is_vtm") &&
+                      f.enabled !== false,
+                  ) ?? false
+                }
+                user={user}
+                onSubmit={handleFormSubmit}
+                onCancel={() => setShowForm(false)}
+                onOpenGuidelines={() => setGuidelinesOpen(true)}
+              />
+            )}
+          </div>
+
+          <p className="border-border-card bg-tertiary-bg text-secondary-text mb-4 flex items-start gap-2 rounded-lg border px-3 py-2 text-sm">
+            <Icon
+              icon="material-symbols:info-outline-rounded"
+              className="text-link mt-0.5 h-4 w-4 shrink-0"
+              inline
+            />
+            Please note that a high upvote count does not guarantee a suggestion
+            will be accepted.
+          </p>
 
           <SuggestionResults
             loadingSuggestions={loadingSuggestions}
