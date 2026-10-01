@@ -3,6 +3,7 @@ import Link from "next/link";
 import { siteConfig } from "@/lib/site";
 import { getCachedChangelogEntries } from "@/lib/changelog-parser";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
+import WhatsNewToggle from "@/components/Changelogs/WhatsNewToggle";
 
 export const metadata: Metadata = {
   title: "Development Changelog",
@@ -38,6 +39,7 @@ export default async function DevChangelogPage() {
             <p className="text-secondary-text mx-auto max-w-2xl text-lg">
               {siteConfig.description}
             </p>
+            <WhatsNewToggle />
           </div>
         </div>
         {/* Timeline */}

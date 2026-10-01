@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dialog";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
 import { Icon } from "@/components/ui/IconWrapper";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useWhatsNewPreference } from "@/hooks/useWhatsNewPreference";
 import { omitRepeatedReleaseHeading } from "@/lib/remark-omit-release-heading";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
@@ -40,10 +42,19 @@ export default function LatestReleaseDialogClient({
   release: ReleaseMetadata;
 }) {
   const pathname = usePathname();
+  const { isAuthenticated, isLoading } = useAuthContext();
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<ReleasePreview | null>(null);
+  const { disabled, preferencesSynced, setDisabled } = useWhatsNewPreference();
 
   useEffect(() => {
+    if (isAuthenticated && disabled) setOpen(false);
+  }, [disabled, isAuthenticated]);
+
+  useEffect(() => {
+    if (isLoading || disabled === null) return;
+    if (isAuthenticated && (!preferencesSynced || disabled)) return;
+
     if (pathname === "/access-denied") {
       setOpen(false);
       return;
@@ -82,7 +93,14 @@ export default function LatestReleaseDialogClient({
       .catch(() => {});
 
     return () => controller.abort();
-  }, [pathname, release.slug]);
+  }, [
+    disabled,
+    isAuthenticated,
+    isLoading,
+    pathname,
+    preferencesSynced,
+    release.slug,
+  ]);
 
   const dismiss = () => {
     safeLocalStorage.setItem(
@@ -90,6 +108,11 @@ export default function LatestReleaseDialogClient({
       preview?.slug ?? release.slug,
     );
     setOpen(false);
+  };
+
+  const disable = () => {
+    dismiss();
+    setDisabled(true);
   };
 
   if (!preview) return null;
@@ -159,6 +182,11 @@ export default function LatestReleaseDialogClient({
           >
             View previous changes
           </Link>
+          {isAuthenticated && (
+            <Button size="sm" variant="ghost" onClick={disable}>
+              Don&apos;t show again
+            </Button>
+          )}
           <Button size="sm" onClick={dismiss}>
             Got it
           </Button>
