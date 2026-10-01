@@ -35,17 +35,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { bangers, damion } from "@/app/fonts";
+import { bangers } from "@/app/fonts";
+import ItemSignatures from "@/components/Items/ItemSignatures";
 
 // Helper function to format numbers with commas
 const formatNumber = (num: number) => {
   return new Intl.NumberFormat().format(num);
-};
-
-const signatureRotation: Record<string, string> = {
-  epic_tank: "-rotate-12",
-  asimo3089: "-rotate-12",
-  badcc: "rotate-12",
 };
 
 interface InventoryItemCardProps {
@@ -81,7 +76,6 @@ export default function InventoryItemCard({
   );
   const isDuplicate = duplicateCount > 1;
   const isMissingItem = item.id.startsWith("missing-");
-  const signers = item.Sign?.filter(Boolean) ?? [];
   const displayedSeason = itemData?.season ?? undefined;
   const displayedLevel = unlockLevel(itemData?.level);
   const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
@@ -235,28 +229,7 @@ export default function InventoryItemCard({
             onError={handleImageError}
           />
         )}
-        {signers.length > 0 && (
-          <div className="pointer-events-none absolute inset-x-2 top-1/5 bottom-[8%] z-10 flex flex-col items-center justify-around">
-            {signers.map((signer, index) => (
-              <Tooltip key={`${signer}-${index}`}>
-                <TooltipTrigger asChild>
-                  <span
-                    className={`${damion.className} pointer-events-auto max-w-full cursor-help px-2 text-center leading-none font-bold whitespace-nowrap text-black italic ${signatureRotation[signer.toLowerCase()] ?? "-rotate-12"} ${signers.length > 2 ? "text-3xl" : "text-4xl"}`}
-                    aria-label={`Signed by ${signer}`}
-                    style={{
-                      WebkitTextStroke: "3px rgba(255, 255, 255, 0.95)",
-                      paintOrder: "stroke fill",
-                      filter: "drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8))",
-                    }}
-                  >
-                    {signer}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>Signed by {signer}</TooltipContent>
-              </Tooltip>
-            ))}
-          </div>
-        )}
+        <ItemSignatures signs={item.Sign} />
       </div>
 
       {/* Statistics */}

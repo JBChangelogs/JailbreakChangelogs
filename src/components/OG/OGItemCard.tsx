@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { bangers } from "@/app/fonts";
+import ItemSignatures from "@/components/Items/ItemSignatures";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 
 // Helper function to format numbers with commas
@@ -57,6 +58,7 @@ interface OGItem {
   season: number | null;
   title: string;
   isOriginalOwner: boolean;
+  Sign?: string[] | null;
   user_id: string;
   logged_at: number;
   history?: string | Array<{ UserId: number; TradeTime: number }>;
@@ -243,6 +245,7 @@ export default function OGItemCard({
             onError={handleImageError}
           />
         )}
+        <ItemSignatures signs={item.Sign} />
       </div>
 
       {/* Statistics */}

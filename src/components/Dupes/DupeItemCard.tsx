@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { bangers } from "@/app/fonts";
+import ItemSignatures from "@/components/Items/ItemSignatures";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 
 interface DupeItemCardProps {
@@ -237,6 +238,7 @@ export default function DupeItemCard({
             onError={handleImageError}
           />
         )}
+        <ItemSignatures signs={item.Sign} />
       </div>
 
       {/* Statistics */}

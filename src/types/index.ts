@@ -286,6 +286,7 @@ export interface DupeFinderItem {
   season: number | null;
   title: string;
   isOriginalOwner: boolean;
+  Sign?: string[] | null;
   scan_id?: string;
 }
 
