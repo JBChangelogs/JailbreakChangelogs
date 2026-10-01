@@ -5,6 +5,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { createLogger } from "@/services/logger";
 import { getJbclToken } from "@/contexts/AuthContext";
 import { INVENTORY_API_URL } from "@/utils/api/api";
+import { readInventoryJobResponse } from "@/utils/api/inventoryJobResponse";
 import { SettingsSubsectionHeading } from "./SettingsSubsectionHeading";
 
 const log = createLogger("UI");
@@ -33,19 +34,13 @@ export const DeleteInventoryData = ({
         `${INVENTORY_API_URL}/user/data?token=${encodeURIComponent(token)}`,
         { method: "DELETE" },
       );
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        if (response.status === 400 || response.status === 401) {
-          setOpen(false);
-        }
-        throw new Error(
-          response.status === 400 || response.status === 401
-            ? "Your session is invalid or expired. Please sign in again."
-            : "Failed to schedule data deletion",
-        );
-      }
-      if (data.status !== "scheduled") {
-        throw new Error("Unexpected response from server");
+      const result = await readInventoryJobResponse(
+        response,
+        "Failed to schedule data deletion",
+      );
+      if (!result.scheduled) {
+        if (result.unauthorized) setOpen(false);
+        throw new Error(result.message);
       }
 
       setScheduled(true);

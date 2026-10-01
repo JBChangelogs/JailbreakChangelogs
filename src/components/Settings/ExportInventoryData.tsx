@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { getJbclToken } from "@/contexts/AuthContext";
 import { INVENTORY_API_URL } from "@/utils/api/api";
+import { readInventoryJobResponse } from "@/utils/api/inventoryJobResponse";
 
 const log = createLogger("UI");
 
@@ -23,24 +24,18 @@ export const ExportInventoryData = ({ robloxId }: { robloxId?: string }) => {
         { method: "POST" },
       );
 
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        log.error("export data failed", { status: response.status, body });
-        throw new Error("Failed to schedule export.");
+      const result = await readInventoryJobResponse(
+        response,
+        "Failed to schedule export.",
+      );
+      if (!result.scheduled) {
+        throw new Error(result.message);
       }
 
-      const data = await response.json();
-
-      if (data.status === "scheduled") {
-        toast.success(
-          "Export scheduled! You will be notified via the bell icon when it is ready.",
-          {
-            duration: 5000,
-          },
-        );
-      } else {
-        throw new Error("Unexpected response from server");
-      }
+      toast.success(
+        "Export scheduled! You will be notified via the bell icon when it is ready.",
+        { duration: 5000 },
+      );
     } catch (error) {
       log.error("Export error", error);
       toast.error(
