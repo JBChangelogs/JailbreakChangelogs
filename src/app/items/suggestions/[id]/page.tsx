@@ -964,13 +964,15 @@ export default function ValueSuggestionDetailPage() {
         <div className="container mx-auto px-4 pb-10 sm:px-6">
           <Breadcrumb />
 
-          {/* Upvote Disclaimer */}
-          <div className="border-border-error bg-button-danger/10 mb-5 rounded-lg border px-5 py-4">
-            <p className="text-form-error text-lg font-bold">
-              Please note that a high upvote count does not guarantee a
-              suggestion will be accepted.
-            </p>
-          </div>
+          <p className="border-border-card bg-tertiary-bg text-secondary-text mb-5 flex items-start gap-2 rounded-lg border px-3 py-2 text-sm">
+            <Icon
+              icon="material-symbols:info-outline-rounded"
+              className="text-link mt-0.5 h-4 w-4 shrink-0"
+              inline
+            />
+            Please note that a high upvote count does not guarantee a suggestion
+            will be accepted.
+          </p>
 
           {ban && <BanBanner ban={ban} className="mb-5" />}
 
@@ -1627,11 +1629,8 @@ export default function ValueSuggestionDetailPage() {
                             </span>
                             <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
                               Common Trades
-                              {!!suggestion.common_trades?.length && (
-                                <span className="border-border-card bg-secondary-bg text-secondary-text inline-flex h-5 min-w-5 items-center justify-center rounded-md border px-1.5 text-[0.6875rem] font-semibold">
-                                  {suggestion.common_trades.length}
-                                </span>
-                              )}
+                              {!!suggestion.common_trades?.length &&
+                                ` (${suggestion.common_trades.length})`}
                             </h2>
                           </div>
                           {isAuthenticated &&

@@ -189,7 +189,7 @@ function TradeItemSummary({
     return (
       <Link
         href={itemHref}
-        className="border-border-card bg-tertiary-bg hover:border-button-info/50 flex min-w-0 items-center gap-2.5 rounded-lg border p-2 transition-colors"
+        className="border-border-card bg-secondary-bg hover:border-button-info/50 flex min-w-0 items-center gap-2.5 rounded-lg border p-2 transition-colors"
       >
         {content}
       </Link>
@@ -197,7 +197,7 @@ function TradeItemSummary({
   }
 
   return (
-    <div className="border-border-card bg-tertiary-bg flex min-w-0 items-center gap-2.5 rounded-lg border p-2">
+    <div className="border-border-card bg-secondary-bg flex min-w-0 items-center gap-2.5 rounded-lg border p-2">
       {content}
     </div>
   );
@@ -242,8 +242,8 @@ export function CommonTradesDisplay({
             key={index}
             className={`border-border-card border ${
               appearance === "detail"
-                ? "bg-tertiary-bg/20 rounded-xl p-3 sm:p-4"
-                : "bg-secondary-bg/40 rounded-lg p-2"
+                ? "bg-tertiary-bg rounded-xl p-3 sm:p-4"
+                : "bg-tertiary-bg rounded-lg p-2"
             }`}
           >
             {showTradeLabels && (
@@ -271,23 +271,15 @@ export function CommonTradesDisplay({
                 ))}
               </div>
               <div className="flex items-center justify-center sm:h-full sm:self-stretch">
-                <span
-                  className={`flex items-center justify-center rounded-full ${
+                <Icon
+                  icon="material-symbols:arrow-forward-rounded"
+                  className={`${
                     appearance === "detail"
-                      ? "border-border-card bg-secondary-bg h-9 w-9 border shadow-sm"
-                      : "h-5 w-5"
-                  }`}
-                >
-                  <Icon
-                    icon="material-symbols:arrow-forward-rounded"
-                    className={`${
-                      appearance === "detail"
-                        ? "text-link h-4 w-4"
-                        : "text-tertiary-text h-5 w-5"
-                    } rotate-90 sm:rotate-0`}
-                    inline
-                  />
-                </span>
+                      ? "text-primary-text"
+                      : "text-tertiary-text"
+                  } h-5 w-5 rotate-90 sm:rotate-0`}
+                  inline
+                />
               </div>
               <div className="min-w-0 space-y-1.5">
                 <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
