@@ -109,7 +109,7 @@ export default function ValuesChangelogPage() {
     },
     staleTime: 60_000,
     gcTime: 5 * 60_000,
-    retry: false,
+    retry: 2,
     refetchOnWindowFocus: false,
   });
   const changelogs = changelogQuery.data?.items ?? EMPTY_CHANGELOGS;
@@ -161,7 +161,14 @@ export default function ValuesChangelogPage() {
               ))}
             </div>
           ) : error ? (
-            <div className="text-button-danger mt-8 text-center">{error}</div>
+            <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+              <p className="text-primary-text mb-4">
+                Could not load item changelogs. Please try again.
+              </p>
+              <Button onClick={() => void changelogQuery.refetch()}>
+                Try again
+              </Button>
+            </div>
           ) : (
             <>
               <div className="mb-4 flex items-center justify-between">
