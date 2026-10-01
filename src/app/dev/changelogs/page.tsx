@@ -39,11 +39,11 @@ export default async function DevChangelogPage() {
             <p className="text-secondary-text mx-auto max-w-2xl text-lg">
               {siteConfig.description}
             </p>
-            <WhatsNewToggle />
           </div>
         </div>
         {/* Timeline */}
         <div className="pt-4 pb-12 sm:pt-6">
+          <WhatsNewToggle />
           {sortedPages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="bg-secondary-bg mb-6 rounded-full p-6">
