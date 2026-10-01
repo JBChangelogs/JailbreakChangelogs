@@ -56,7 +56,19 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+const avgChartConfig = {
+  avg_networth: {
+    label: "Avg per Inventory",
+    color: "#06b6d4",
+  },
+} satisfies ChartConfig;
+
 const SNAPSHOT_TILES = [
+  {
+    key: "total_inventories",
+    label: "Inventories",
+    accentColor: "var(--color-button-info)",
+  },
   {
     key: "total_networth_str",
     label: "Total Networth",
@@ -79,11 +91,13 @@ function SnapshotTile({
   value,
   accentColor,
   isLoading,
+  note,
 }: {
   label: string;
-  value?: string;
+  value?: string | number;
   accentColor: string;
   isLoading: boolean;
+  note?: string;
 }) {
   return (
     <div className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border p-3">
@@ -105,7 +119,14 @@ function SnapshotTile({
           <Skeleton className="mt-1 h-5 w-20" />
         ) : (
           <p className="text-primary-text truncate font-mono text-lg font-semibold tabular-nums">
-            {value ?? "???"}
+            {typeof value === "number"
+              ? value.toLocaleString()
+              : (value ?? "???")}
+            {note && (
+              <span className="text-secondary-text ml-2 font-sans text-xs font-medium">
+                {note}
+              </span>
+            )}
           </p>
         )}
       </div>
@@ -113,16 +134,14 @@ function SnapshotTile({
   );
 }
 
+// Matches the API's *_str style (1.94T, 161.41B) without trailing zeros
 const formatValue = (value: number) => {
-  if (value >= 1_000_000_000_000) {
-    return `${(value / 1_000_000_000_000).toFixed(2)}t`;
-  } else if (value >= 1_000_000_000) {
-    return `${(value / 1_000_000_000).toFixed(1)}b`;
-  } else if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1)}m`;
-  } else if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(0)}k`;
-  }
+  const scaled = (divisor: number, suffix: string) =>
+    `${Number((value / divisor).toFixed(2))}${suffix}`;
+  if (value >= 1_000_000_000_000) return scaled(1_000_000_000_000, "T");
+  if (value >= 1_000_000_000) return scaled(1_000_000_000, "B");
+  if (value >= 1_000_000) return scaled(1_000_000, "M");
+  if (value >= 1_000) return scaled(1_000, "K");
   return value.toString();
 };
 
@@ -177,18 +196,21 @@ const getTrendSummary = (points: number[]) => {
 function TrendLine({
   trend,
   label,
+  upIsBad = false,
 }: {
   trend: ReturnType<typeof getTrendSummary>;
   label: string;
+  upIsBad?: boolean;
 }) {
   if (!trend) return null;
+  const isGood = (trend.direction === "up") !== upIsBad;
   return (
     <div
       className="flex items-center gap-1.5 font-medium"
       style={{
         color: !trend.isMeaningful
           ? "var(--color-secondary-text)"
-          : trend.direction === "up"
+          : isGood
             ? "var(--color-form-success)"
             : "var(--color-button-danger)",
       }}
@@ -219,7 +241,7 @@ export default function NetworthCapHistoryChart() {
   const chartId = useId().replace(/:/g, "");
   const networthGradientId = `fill-networth-cap-${chartId}`;
   const dupedGradientId = `fill-duped-cap-${chartId}`;
-  const dupesPercentGradientId = `fill-dupes-pct-${chartId}`;
+  const avgGradientId = `fill-avg-networth-${chartId}`;
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["networth-cap-history"],
@@ -237,7 +259,7 @@ export default function NetworthCapHistoryChart() {
     return (
       <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-4">
         <Skeleton className="mb-4 h-6 w-48" />
-        <Skeleton className="h-87.5 w-full rounded-none" />
+        <Skeleton className="h-75 w-full rounded-none" />
       </div>
     );
   }
@@ -260,9 +282,23 @@ export default function NetworthCapHistoryChart() {
     total_networth: item.total_networth,
     total_duped_networth: item.total_duped_networth,
     duplicates_percentage: item.duplicates_percentage,
+    total_inventories: item.total_inventories,
   }));
 
   const hasChartData = chartData.length > 0;
+
+  // Total networth tracks how many inventories were scanned, so the
+  // per-inventory average is what shows whether values actually moved
+  const avgData = chartData
+    .filter((d) => d.total_inventories > 0)
+    .map((d) => ({
+      timestamp: d.timestamp,
+      avg_networth: d.total_networth / d.total_inventories,
+    }));
+  const hasAvgData = avgData.length > 0;
+  const [avgMin, avgMax] = hasAvgData
+    ? getYAxisDomain(avgData.map((d) => d.avg_networth))
+    : [0, 1];
 
   const [yMin, yMax] = hasChartData
     ? getYAxisDomain(
@@ -273,11 +309,22 @@ export default function NetworthCapHistoryChart() {
   const networthTrend = hasChartData
     ? getTrendSummary(chartData.map((d) => d.total_networth))
     : null;
+  const cleanTrend = hasChartData
+    ? getTrendSummary(
+        chartData.map((d) => d.total_networth - d.total_duped_networth),
+      )
+    : null;
   const dupedTrend = hasChartData
     ? getTrendSummary(chartData.map((d) => d.total_duped_networth))
     : null;
   const dupesPctTrend = hasChartData
     ? getTrendSummary(chartData.map((d) => d.duplicates_percentage))
+    : null;
+  const avgTrend = hasAvgData
+    ? getTrendSummary(avgData.map((d) => d.avg_networth))
+    : null;
+  const inventoriesTrend = hasChartData
+    ? getTrendSummary(chartData.map((d) => d.total_inventories))
     : null;
 
   const currentLabel =
@@ -295,7 +342,7 @@ export default function NetworthCapHistoryChart() {
           <h2 className="text-primary-text text-lg font-semibold">
             Global Inventory Networth
             <span className="text-secondary-text mt-0.5 block font-normal sm:mt-0 sm:ml-1 sm:inline">
-              (Past 30 Days)
+              (Past {dateRange} Days)
             </span>
           </h2>
           <DropdownMenu>
@@ -332,7 +379,7 @@ export default function NetworthCapHistoryChart() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {SNAPSHOT_TILES.map((tile) => (
           <SnapshotTile
             key={tile.key}
@@ -340,6 +387,12 @@ export default function NetworthCapHistoryChart() {
             value={capStats?.[tile.key]}
             accentColor={tile.accentColor}
             isLoading={isCapStatsLoading}
+            note={
+              tile.key === "total_duped_networth_str" &&
+              capStats?.duplicates_percentage !== undefined
+                ? `${capStats.duplicates_percentage.toFixed(2)}% of total`
+                : undefined
+            }
           />
         ))}
       </div>
@@ -370,11 +423,13 @@ export default function NetworthCapHistoryChart() {
         </div>
       ) : (
         <>
-          <div className="h-87.5">
+          <div className="h-75">
             <ChartContainer config={chartConfig} className="h-full w-full">
               <AreaChart
                 accessibilityLayer
                 data={chartData}
+                syncId={chartId}
+                syncMethod="value"
                 margin={{ left: 6, right: isSmallScreen ? 6 : 48 }}
               >
                 <defs>
@@ -414,26 +469,9 @@ export default function NetworthCapHistoryChart() {
                       stopOpacity={0.04}
                     />
                   </linearGradient>
-                  <linearGradient
-                    id={dupesPercentGradientId}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="5%"
-                      stopColor="var(--color-duplicates_percentage)"
-                      stopOpacity={0.3}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="var(--color-duplicates_percentage)"
-                      stopOpacity={0.02}
-                    />
-                  </linearGradient>
                 </defs>
                 <CartesianGrid
+                  yAxisId="networth"
                   vertical={false}
                   stroke="var(--color-border-card)"
                   strokeOpacity={0.5}
@@ -516,20 +554,24 @@ export default function NetworthCapHistoryChart() {
                       }}
                       labelFormatter={(_, payload) => {
                         const row = payload?.[0]?.payload as
-                          | { timestamp?: number }
+                          | { timestamp?: number; total_inventories?: number }
                           | undefined;
                         const ts =
                           typeof row?.timestamp === "number"
                             ? row.timestamp
                             : Number(row?.timestamp);
                         if (!Number.isFinite(ts)) return "Unknown Date";
-                        return formatMonthDayYear(ts);
+                        const date = formatMonthDayYear(ts);
+                        return row?.total_inventories
+                          ? `${date} · ${row.total_inventories.toLocaleString()} inventories`
+                          : date;
                       }}
                     />
                   }
                 />
                 <RechartsLegend
                   verticalAlign="bottom"
+                  itemSorter={null}
                   formatter={(value) => (
                     <span style={{ color: "var(--color-secondary-text)" }}>
                       {value}
@@ -577,8 +619,7 @@ export default function NetworthCapHistoryChart() {
                   type="monotone"
                   dataKey="duplicates_percentage"
                   name="Dupes %"
-                  fill={`url(#${dupesPercentGradientId})`}
-                  fillOpacity={1}
+                  fill="none"
                   stroke="var(--color-duplicates_percentage)"
                   strokeWidth={2}
                   strokeDasharray="4 2"
@@ -595,10 +636,137 @@ export default function NetworthCapHistoryChart() {
             </ChartContainer>
           </div>
 
-          <div className="space-y-1 text-sm">
-            <TrendLine trend={networthTrend} label="Total Networth" />
-            <TrendLine trend={dupedTrend} label="Duped Networth" />
-            <TrendLine trend={dupesPctTrend} label="Dupes %" />
+          {hasAvgData && (
+            <div className="space-y-2">
+              <h3 className="text-primary-text text-sm font-semibold">
+                Average Networth per Inventory
+              </h3>
+              <div className="h-40">
+                <ChartContainer
+                  config={avgChartConfig}
+                  className="h-full w-full"
+                >
+                  <AreaChart
+                    accessibilityLayer
+                    data={avgData}
+                    syncId={chartId}
+                    syncMethod="value"
+                    margin={{ left: 6, right: isSmallScreen ? 6 : 92 }}
+                  >
+                    <defs>
+                      <linearGradient
+                        id={avgGradientId}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="var(--color-avg_networth)"
+                          stopOpacity={0.35}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="var(--color-avg_networth)"
+                          stopOpacity={0.03}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      vertical={false}
+                      stroke="var(--color-border-card)"
+                      strokeOpacity={0.5}
+                    />
+                    <XAxis
+                      dataKey="timestamp"
+                      type="number"
+                      scale="time"
+                      domain={["dataMin", "dataMax"]}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={false}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={isSmallScreen ? 0 : 8}
+                      width={isSmallScreen ? 0 : 56}
+                      domain={[avgMin, avgMax]}
+                      tickCount={4}
+                      tick={
+                        isSmallScreen
+                          ? false
+                          : {
+                              fill: "var(--color-secondary-text)",
+                              fontSize: 12,
+                            }
+                      }
+                      tickFormatter={(v: number) => formatValue(Number(v))}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={
+                        <ChartTooltipContent
+                          className="min-w-52 px-3 py-2"
+                          formatter={(value) => (
+                            <div className="flex w-full items-center justify-between gap-3">
+                              <span className="text-secondary-text flex items-center gap-2">
+                                <span
+                                  className="h-2.5 w-2.5 shrink-0 rounded-xs"
+                                  style={{
+                                    backgroundColor:
+                                      "var(--color-avg_networth)",
+                                  }}
+                                />
+                                Avg per Inventory
+                              </span>
+                              <span className="text-primary-text font-mono font-semibold tabular-nums">
+                                {formatValue(Math.round(Number(value)))}
+                              </span>
+                            </div>
+                          )}
+                          labelFormatter={(_, payload) => {
+                            const ts = Number(payload?.[0]?.payload?.timestamp);
+                            return Number.isFinite(ts)
+                              ? formatMonthDayYear(ts)
+                              : "Unknown Date";
+                          }}
+                        />
+                      }
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="avg_networth"
+                      name="Avg per Inventory"
+                      fill={`url(#${avgGradientId})`}
+                      fillOpacity={1}
+                      stroke="var(--color-avg_networth)"
+                      strokeWidth={3}
+                      dot={false}
+                      isAnimationActive={false}
+                      activeDot={{
+                        r: 5,
+                        fill: "var(--color-secondary-bg)",
+                        stroke: "var(--color-avg_networth)",
+                        strokeWidth: 2,
+                      }}
+                    />
+                  </AreaChart>
+                </ChartContainer>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2 text-sm">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+              <TrendLine trend={networthTrend} label="Total Networth" />
+              <TrendLine trend={cleanTrend} label="Clean Networth" />
+              <TrendLine trend={dupedTrend} label="Duped Networth" upIsBad />
+              <TrendLine trend={inventoriesTrend} label="Inventories" />
+              <TrendLine trend={avgTrend} label="Avg per Inventory" />
+              <TrendLine trend={dupesPctTrend} label="Dupes %" upIsBad />
+            </div>
             <div className="text-secondary-text">{rangeLabel}</div>
           </div>
         </>

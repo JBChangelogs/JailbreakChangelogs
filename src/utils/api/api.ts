@@ -2931,6 +2931,7 @@ export interface HomepageImpactStats {
 }
 
 export interface NetworthCapStats {
+  total_inventories: number;
   total_networth: number;
   total_duped_networth: number;
   total_clean_networth: number;
@@ -2967,6 +2968,7 @@ export interface NetworthCapSnapshot {
   total_networth: number;
   total_duped_networth: number;
   duplicates_percentage: number;
+  total_inventories: number;
 }
 
 export async function fetchNetworthCapHistory(): Promise<
