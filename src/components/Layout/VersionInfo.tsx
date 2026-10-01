@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 
 const log = createLogger("UI");
 import { formatFullDate } from "@/utils/helpers/timestamp";
-import RailwayBadge from "./RailwayBadge";
 
 export interface VersionInfoState {
   version: string;
@@ -83,9 +82,6 @@ export default function VersionInfo({ initialData }: VersionInfoProps = {}) {
           : "Loading..."}
       </p>
       <p>Updated: {formattedDate || "Loading..."}</p>
-      <div className="pt-1">
-        <RailwayBadge />
-      </div>
     </div>
   );
 }

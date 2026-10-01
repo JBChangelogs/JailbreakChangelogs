@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "../ui/IconWrapper";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
@@ -10,7 +11,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Extend Window interface for CMP API (GDPR)
 declare global {
   interface Window {
     __cmp?: (command: string) => void;
@@ -44,12 +44,157 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
   }, []);
 
   return (
-    <footer className="border-border-card bg-secondary-bg w-full border-t py-8 pb-0">
-      <div className="w-full px-4">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {/* Resources */}
+    <footer className="border-border-card bg-secondary-bg w-full border-t">
+      <div className="mx-auto max-w-7xl px-6 pt-10 pb-8 md:px-10 md:pt-12">
+        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-[1.35fr_0.85fr_0.85fr_1.3fr]">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link
+              href="/"
+              className="inline-block"
+              aria-label="Jailbreak Changelogs home"
+            >
+              <Image
+                src="/logos/JBCL_Long_Transparent.webp"
+                alt="Jailbreak Changelogs"
+                width={256}
+                height={58}
+                className="h-auto w-56"
+              />
+            </Link>
+            <p className="text-secondary-text mt-4 max-w-xs text-sm leading-relaxed">
+              Jailbreak updates, values, and community tools in one place.
+            </p>
+            <div className="mt-6 -ml-1.5 flex flex-wrap items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="https://x.com/JBChangelogs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-1.5 transition-colors duration-200"
+                    aria-label="Twitter/X"
+                  >
+                    <Icon
+                      icon="prime:twitter"
+                      className="text-primary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>Follow us on X (Twitter)</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="https://discord.jailbreakchangelogs.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-1.5 transition-colors duration-200"
+                    aria-label="Discord"
+                  >
+                    <Icon
+                      icon="ic:baseline-discord"
+                      className="text-primary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>Join our Discord server</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-1.5 transition-colors duration-200"
+                    aria-label="Roblox Group"
+                  >
+                    <Icon
+                      icon="simple-icons:roblox"
+                      className="text-primary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>Join our Roblox group</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="https://bsky.app/profile/jbchangelogs.bsky.social"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-1.5 transition-colors duration-200"
+                    aria-label="Bluesky"
+                  >
+                    <Icon
+                      icon="ri:bluesky-fill"
+                      className="text-primary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>Follow us on Bluesky</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/supporting"
+                    className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-1.5 transition-colors duration-200"
+                    aria-label="Support Us"
+                  >
+                    <Icon
+                      icon="heroicons:heart-solid"
+                      className="text-primary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>Support Us</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href={githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-1.5 transition-colors duration-200"
+                    aria-label="View on GitHub"
+                  >
+                    <Icon
+                      icon="mdi:github"
+                      className="text-primary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>View on GitHub</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="https://www.youtube.com/@JailbreakChangelogs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-1.5 transition-colors duration-200"
+                    aria-label="YouTube"
+                  >
+                    <Icon
+                      icon="mdi:youtube"
+                      className="text-primary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>Subscribe on YouTube</TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
           <div className="space-y-4">
-            <h3 className="text-secondary-text text-sm">Resources</h3>
+            <h3 className="text-secondary-text/70 text-xs font-semibold tracking-[0.16em] uppercase">
+              Resources
+            </h3>
             <div className="space-y-2 text-sm">
               <a
                 href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home"
@@ -97,9 +242,10 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
             </div>
           </div>
 
-          {/* Legal */}
           <div className="space-y-3">
-            <h3 className="text-secondary-text text-sm">Legal</h3>
+            <h3 className="text-secondary-text/70 text-xs font-semibold tracking-[0.16em] uppercase">
+              Legal
+            </h3>
             <div className="space-y-2 text-sm">
               <Link
                 href="/privacy"
@@ -134,15 +280,16 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
             </div>
           </div>
 
-          {/* About */}
           <div className="space-y-4">
-            <h3 className="text-secondary-text text-sm">About</h3>
+            <h3 className="text-secondary-text/70 text-xs font-semibold tracking-[0.16em] uppercase">
+              About
+            </h3>
             <div className="space-y-2">
               <p className="text-secondary-text">
                 This project is NOT affiliated with Badimo.
               </p>
 
-              <p className="text-secondary-text flex items-center gap-1">
+              <p className="text-secondary-text text-sm leading-relaxed">
                 Crafted with{" "}
                 <Icon
                   icon="line-md:heart-filled"
@@ -172,133 +319,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
           </div>
         </div>
 
-        <div className="border-border-card mt-12 flex flex-wrap items-center gap-3 border-t pt-8">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="https://x.com/JBChangelogs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
-                aria-label="Twitter/X"
-              >
-                <Icon
-                  icon="prime:twitter"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </a>
-            </TooltipTrigger>
-            <TooltipContent>Follow us on X (Twitter)</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="https://discord.jailbreakchangelogs.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
-                aria-label="Discord"
-              >
-                <Icon
-                  icon="ic:baseline-discord"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </a>
-            </TooltipTrigger>
-            <TooltipContent>Join our Discord server</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
-                aria-label="Roblox Group"
-              >
-                <Icon
-                  icon="simple-icons:roblox"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </a>
-            </TooltipTrigger>
-            <TooltipContent>Join our Roblox group</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="https://bsky.app/profile/jbchangelogs.bsky.social"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
-                aria-label="Bluesky"
-              >
-                <Icon
-                  icon="ri:bluesky-fill"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </a>
-            </TooltipTrigger>
-            <TooltipContent>Follow us on Bluesky</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="/supporting"
-                className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
-                aria-label="Support Us"
-              >
-                <Icon
-                  icon="heroicons:heart-solid"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Support Us</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
-                aria-label="View on GitHub"
-              >
-                <Icon
-                  icon="mdi:github"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </a>
-            </TooltipTrigger>
-            <TooltipContent>View on GitHub</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="https://www.youtube.com/@JailbreakChangelogs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
-                aria-label="YouTube"
-              >
-                <Icon
-                  icon="mdi:youtube"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </a>
-            </TooltipTrigger>
-            <TooltipContent>Subscribe on YouTube</TooltipContent>
-          </Tooltip>
-        </div>
-        <div className="pt-8 pb-8">
+        <div className="border-border-card mt-8 border-t pt-6">
           <p className="text-secondary-text text-xs leading-relaxed">
             &copy; 2024 -&nbsp;{new Date().getFullYear()} Jailbreak Changelogs
             LLC. Jailbreak Changelogs, JBCL, and any associated logos are

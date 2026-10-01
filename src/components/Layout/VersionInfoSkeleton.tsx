@@ -13,12 +13,6 @@ export default function VersionInfoSkeleton() {
         <span>Updated:</span>
         <div className="bg-button-secondary h-3 w-24 animate-pulse rounded"></div>
       </div>
-      <div className="pt-1">
-        <div className="flex items-center gap-2 text-base">
-          <span>Built on</span>
-          <div className="bg-button-secondary h-6 w-28 animate-pulse rounded" />
-        </div>
-      </div>
     </div>
   );
 }
