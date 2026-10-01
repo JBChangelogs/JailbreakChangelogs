@@ -173,7 +173,7 @@ const heroQuickCardClass =
   "group relative block overflow-hidden rounded-2xl border border-white/20 bg-black/35 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-black/40 [.light_&]:border-white/15 [.light_&]:bg-white/[0.04] [.light_&]:backdrop-blur-sm [.light_&]:hover:border-white/25 [.light_&]:hover:bg-white/[0.08]";
 
 const platformGroupClass =
-  "rounded-2xl border border-border-card bg-secondary-bg/90 p-5";
+  "rounded-2xl border border-border-card bg-secondary-bg p-5";
 
 const platformRowClass =
   "group -mx-2 flex items-start gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-tertiary-bg";
