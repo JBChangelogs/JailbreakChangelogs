@@ -95,7 +95,11 @@ const fetchServersPage = async (
     ? `/v2/servers/search?${params.toString()}`
     : `/v2/servers?${params.toString()}`;
   const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, path);
-  const response = await fetch(url, { cache: "no-store", headers, signal });
+  const response = await fetch(url, {
+    ...(query ? { cache: "no-store" as const } : {}),
+    headers,
+    signal,
+  });
   if (!response.ok) {
     throw new Error(
       await getResponseErrorMessage(response, "Failed to fetch servers"),
@@ -138,7 +142,6 @@ const ServerList: React.FC = () => {
         "/v2/servers/sorts",
       );
       const response = await fetch(url, {
-        cache: "no-store",
         headers,
         signal,
       });

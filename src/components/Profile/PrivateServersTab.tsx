@@ -64,7 +64,6 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
         `/v2/users/${encodeURIComponent(userId)}/servers`,
       );
       const response = await fetch(url, {
-        cache: "no-store",
         credentials: "include",
         headers,
         signal,

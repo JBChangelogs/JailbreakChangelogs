@@ -1431,7 +1431,6 @@ export async function fetchSeason(id: string) {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
       },
-      next: { revalidate: 600 }, // Cache for 10 minutes
     });
 
     if (!response.ok) {

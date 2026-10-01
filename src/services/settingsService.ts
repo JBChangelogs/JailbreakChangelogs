@@ -179,7 +179,6 @@ export const fetchSupporterGiftLevels = async (): Promise<SupporterLevel[]> => {
   const resp = await fetch(url, {
     method: "GET",
     credentials: "include",
-    cache: "no-store",
   });
 
   if (!resp.ok) {
