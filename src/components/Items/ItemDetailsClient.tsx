@@ -729,7 +729,7 @@ export default function ItemDetailsClient({
                   transition={tabSlideTransition}
                 >
                   {activeTab === 0 && (
-                    <>
+                    <div className="space-y-6">
                       {!hasItemValue(currentItem.description) ? (
                         <div className="space-y-3">
                           <h3 className="text-primary-text text-lg font-semibold">
@@ -812,7 +812,7 @@ export default function ItemDetailsClient({
                         recentChanges={item.recent_changes}
                         placementLimit={placementLimit}
                       />
-                    </>
+                    </div>
                   )}
 
                   {activeTab === 1 && (
