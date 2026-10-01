@@ -11,6 +11,7 @@ import { checkDupeFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
+import RelatedInventoryPages from "@/components/Inventory/RelatedInventoryPages";
 
 export const dynamic = "force-dynamic";
 
@@ -66,13 +67,16 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
 
         <ExperimentalFeatureBanner className="mb-6" />
 
-        <div className="mb-6 flex items-center gap-3">
-          <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
+        <div className="mb-2 flex items-center gap-3">
+          <h1 className="page-heading">Dupe Finder</h1>
         </div>
-        <p className="text-secondary-text mb-4">
+        <p className="text-secondary-text mb-3">
           Enter a Roblox ID or username to check for any duped items associated
           with that name.
         </p>
+        <div className="mb-6">
+          <RelatedInventoryPages current="dupes" />
+        </div>
         <div className="bg-button-info/10 border-border-card text-primary-text mb-6 rounded-lg border p-4 text-sm">
           If you believe an item is incorrectly flagged, you can report the
           false dupe after reviewing its variants. Select the item, choose

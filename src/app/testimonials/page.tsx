@@ -11,9 +11,7 @@ export default async function TestimonialsPage() {
       <div className="container mx-auto px-4">
         <Breadcrumb />
         <div className="mb-8 text-center">
-          <h1 className="text-primary-text mb-4 text-4xl font-bold md:text-5xl">
-            Community Testimonials
-          </h1>
+          <h1 className="page-heading mb-2">Community Testimonials</h1>
           <p className="text-secondary-text mx-auto max-w-3xl text-lg">
             Here are some of the amazing testimonials from the Jailbreak
             community, content creators, and even the game developers.

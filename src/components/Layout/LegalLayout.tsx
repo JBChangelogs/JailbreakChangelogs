@@ -36,9 +36,7 @@ export default function LegalLayout({
 
         <div className="mb-3 flex items-center gap-2">
           <Icon icon={icon} className="text-secondary-text h-7 w-7" />
-          <h1 className="text-primary-text text-3xl font-bold tracking-tight sm:text-4xl">
-            {title}
-          </h1>
+          <h1 className="page-heading">{title}</h1>
         </div>
 
         {intro && (

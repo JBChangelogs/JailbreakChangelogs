@@ -81,9 +81,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
           containerClassName="pt-6 pb-6 sm:pt-8"
         />
         <header className="pb-2 sm:pb-3">
-          <h1 className="text-primary-text mb-4 text-3xl font-bold sm:text-4xl">
-            {title}
-          </h1>
+          <h1 className="page-heading mb-4">{title}</h1>
 
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-secondary-text text-sm">

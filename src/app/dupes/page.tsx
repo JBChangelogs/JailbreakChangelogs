@@ -12,10 +12,8 @@ import { checkDupeFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/IconWrapper";
-import Link from "next/link";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
+import RelatedInventoryPages from "@/components/Inventory/RelatedInventoryPages";
 
 export const dynamic = "force-dynamic";
 
@@ -53,20 +51,17 @@ export default async function DupeFinderPage() {
 
         <ExperimentalFeatureBanner className="mb-6" />
 
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
-          <Button asChild variant="default" size="sm">
-            <Link href="/values" prefetch={false}>
-              <Icon icon="heroicons:list-bullet" className="mr-2" />
-              Values List
-            </Link>
-          </Button>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
+          <h1 className="page-heading">Dupe Finder</h1>
         </div>
 
-        <p className="text-secondary-text mb-4">
+        <p className="text-secondary-text mb-3">
           Enter a Roblox ID or username to check for any duped items associated
           with that name.
         </p>
+        <div className="mb-6">
+          <RelatedInventoryPages current="dupes" />
+        </div>
 
         <PremiumAwareLayout>
           <DupeFinderClient />

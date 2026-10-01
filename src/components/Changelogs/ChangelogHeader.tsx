@@ -11,8 +11,8 @@ interface ChangelogHeaderProps {
 
 const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
   return (
-    <div className="border-border-card bg-secondary-bg mb-8 space-y-6 rounded-lg border p-6">
-      <h2 className="text-primary-text text-2xl font-semibold">
+    <div className="border-border-card bg-secondary-bg mb-8 space-y-2 rounded-lg border p-6">
+      <h2 className="page-heading">
         Roblox Jailbreak Changelogs & Update History
       </h2>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">

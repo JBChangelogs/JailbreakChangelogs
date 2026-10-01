@@ -10,6 +10,7 @@ import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
+import RelatedInventoryPages from "@/components/Inventory/RelatedInventoryPages";
 
 export const dynamic = "force-dynamic";
 
@@ -61,10 +62,11 @@ export default async function InventoryCheckerPage({
 
         <ExperimentalFeatureBanner className="mb-6" />
 
-        <div className="mb-6 flex items-center gap-3">
-          <h1 className="text-primary-text text-3xl font-bold">
-            Inventory Checker
-          </h1>
+        <div className="mb-3 flex items-center gap-3">
+          <h1 className="page-heading">Inventory Checker</h1>
+        </div>
+        <div className="mb-6">
+          <RelatedInventoryPages current="inventories" />
         </div>
 
         <PremiumAwareLayout>

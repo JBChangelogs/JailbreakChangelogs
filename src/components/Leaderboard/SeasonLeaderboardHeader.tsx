@@ -39,7 +39,7 @@ export default function SeasonHeader({ latestSeason }: SeasonHeaderProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <h1 className="text-primary-text text-3xl font-bold">{title}</h1>
+        <h1 className="page-heading">{title}</h1>
       </div>
 
       {seasonEnded && (

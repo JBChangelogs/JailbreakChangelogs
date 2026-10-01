@@ -7,9 +7,7 @@ export default function HyperchromeCalculatorPage() {
       <Breadcrumb />
 
       <div className="mb-8">
-        <h1 className="text-primary-text mb-4 text-4xl font-bold">
-          Hyperchrome Pity Calculator
-        </h1>
+        <h1 className="page-heading mb-2">Hyperchrome Pity Calculator</h1>
         <p className="text-secondary-text text-lg">
           Estimate robberies needed for your next Hyperchrome level and compare
           pity progression between big and small servers.

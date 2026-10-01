@@ -86,9 +86,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
         {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
         <div className="sm:col-span-12 xl:col-span-8">
           <div className="border-secondary-text mb-8 border-b pb-4">
-            <h1 className="text-primary-text mb-3 text-3xl font-bold tracking-tight sm:text-5xl">
-              {title}
-            </h1>
+            <h1 className="page-heading mb-3">{title}</h1>
             {(contentInfo.mediaTypes.length > 0 ||
               contentInfo.mentions.length > 0) && (
               <div className="flex flex-wrap gap-2">

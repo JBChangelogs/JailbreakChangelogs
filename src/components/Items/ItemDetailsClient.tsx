@@ -530,9 +530,7 @@ export default function ItemDetailsClient({
           {/* Right column - Details */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-primary-text text-3xl font-bold">
-                {currentItem.name}
-              </h2>
+              <h2 className="page-heading">{currentItem.name}</h2>
               <p className="text-secondary-text mt-2 text-sm">
                 Created by <CreatorLink creator={currentItem.creator} />
               </p>

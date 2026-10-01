@@ -435,9 +435,7 @@ export default function ValueSuggestionsPage() {
           <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
               <div className="flex-1">
-                <h1 className="text-primary-text mb-1 text-2xl font-semibold">
-                  Item Suggestions
-                </h1>
+                <h1 className="page-heading mb-2">Item Suggestions</h1>
                 <p className="text-secondary-text text-sm">
                   Help keep item values accurate. Submit a suggestion with your
                   reasoning — the community votes, and our team reviews before

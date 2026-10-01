@@ -34,9 +34,7 @@ export default async function DevChangelogPage() {
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="pt-8 pb-4 sm:pt-10 sm:pb-6">
           <div className="text-center">
-            <h1 className="text-primary-text mb-4 text-4xl font-bold sm:text-5xl">
-              Development Changelog
-            </h1>
+            <h1 className="page-heading mb-2">Development Changelog</h1>
             <p className="text-secondary-text mx-auto max-w-2xl text-lg">
               {siteConfig.description}
             </p>

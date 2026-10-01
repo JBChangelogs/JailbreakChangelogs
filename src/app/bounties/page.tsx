@@ -561,7 +561,7 @@ function BountyTrackerContent() {
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="mb-2 text-3xl font-bold">Bounty Tracker</h1>
+          <h1 className="page-heading mb-2">Bounty Tracker</h1>
           <p className="text-secondary-text mb-6">
             Real-time tracking of high bounty players across servers
           </p>

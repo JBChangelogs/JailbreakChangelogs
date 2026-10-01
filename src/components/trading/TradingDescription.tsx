@@ -6,10 +6,8 @@ const TradingDescription: React.FC = () => {
     <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <div className="flex-1">
-          <div className="mb-4">
-            <h1 className="text-primary-text text-2xl font-semibold">
-              Roblox Jailbreak Trading Hub
-            </h1>
+          <div className="mb-2">
+            <h1 className="page-heading">Roblox Jailbreak Trading Hub</h1>
           </div>
           <p className="text-secondary-text mb-4">
             Create trade advertisements for your Roblox Jailbreak items or

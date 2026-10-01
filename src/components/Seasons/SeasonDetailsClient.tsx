@@ -193,7 +193,7 @@ export default function SeasonDetailsClient({
           <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
             {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
             <div className="sm:col-span-12 xl:col-span-8">
-              <h1 className="border-secondary-text text-primary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tight sm:text-5xl">
+              <h1 className="page-heading border-secondary-text mb-2 border-b pb-2">
                 Season {season.season} / {season.title}
               </h1>
               <p className="text-secondary-text mb-4">{season.description}</p>

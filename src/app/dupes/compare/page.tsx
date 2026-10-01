@@ -32,9 +32,7 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
         <Breadcrumb />
 
         <div className="mb-8">
-          <h1 className="text-primary-text text-3xl font-bold">
-            Duplicate Comparison
-          </h1>
+          <h1 className="page-heading">Duplicate Comparison</h1>
           <p className="text-secondary-text mt-2">
             Comparing item variants to verify duplicates.
           </p>

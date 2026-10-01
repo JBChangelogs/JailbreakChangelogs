@@ -92,10 +92,8 @@ export default function WillIMakeItPage() {
         <div className="container mx-auto px-4">
           <Breadcrumb />
 
-          <div className="mb-4 flex items-center gap-3">
-            <h1 className="text-primary-text text-4xl font-bold">
-              Will I Make It to Level 10?
-            </h1>
+          <div className="mb-2 flex items-center gap-3">
+            <h1 className="page-heading">Will I Make It to Level 10?</h1>
           </div>
           <p className="text-secondary-text mb-8 text-lg">
             Calculate your chances of reaching level 10 in Season{" "}

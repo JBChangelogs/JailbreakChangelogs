@@ -10,7 +10,7 @@ import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
 import StatsPolling, { StatsSkeleton } from "@/components/ui/StatsPolling";
 import { isFeatureEnabled } from "@/utils/api/featureFlags";
-import ScanOptionSection from "@/components/Inventory/ScanOptionSection";
+import RelatedInventoryPages from "@/components/Inventory/RelatedInventoryPages";
 import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import MostScannedLeaderboardClient from "@/components/Inventory/MostScannedLeaderboardClient";
@@ -53,19 +53,17 @@ export default async function InventoriesPage() {
 
         <ExperimentalFeatureBanner className="mb-6" />
 
-        <div className="mb-6 flex items-center gap-3">
-          <h1 className="text-primary-text text-3xl font-bold">
-            Inventory Checker
-          </h1>
+        <div className="mb-2 flex items-center gap-3">
+          <h1 className="page-heading">Inventory Checker</h1>
         </div>
 
-        <p className="text-primary-text mb-4">
-          Enter a username or Roblox ID to check their Jailbreak inventory, or
-          use the option below to view your own inventory.
+        <p className="text-secondary-text mb-3">
+          Enter a username or Roblox ID to check their Jailbreak inventory.
+          Connect your Roblox account to access your own inventory.
         </p>
-
-        {/* Want on-demand scans section */}
-        <ScanOptionSection variant="main" />
+        <div className="mb-6">
+          <RelatedInventoryPages current="inventories" />
+        </div>
 
         <PremiumAwareLayout>
           <InventoryCheckerClient key="inventories-root" />

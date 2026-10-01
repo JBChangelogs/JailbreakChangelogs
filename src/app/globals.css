@@ -2,6 +2,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@utility page-heading {
+  @apply text-primary-text text-3xl leading-tight font-bold;
+}
+
 /* NitroPay CCPA link styling in footer */
 .ccpa-footer [data-ccpa-link] a,
 .ccpa-footer [data-ccpa-link] a span {

@@ -206,11 +206,11 @@ export default function ContributorsClient({
   return (
     <div className="bg-primary-bg">
       <div className="container mx-auto px-6 py-10">
-        <h1 className="text-primary-text text-center text-2xl font-semibold lg:text-3xl">
+        <h1 className="page-heading text-center">
           Meet the <span className="text-button-info">team</span>
         </h1>
 
-        <p className="text-secondary-text mx-auto my-6 max-w-2xl text-center">
+        <p className="text-secondary-text mx-auto mt-2 mb-6 max-w-2xl text-center">
           Our dedicated team of developers, designers, and contributors who make
           Jailbreak Changelogs possible.
         </p>

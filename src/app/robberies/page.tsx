@@ -1009,7 +1009,7 @@ function RobberyTrackerContent() {
           <div className="mb-6">
             <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
               <div className="flex-1">
-                <h1 className="mb-2 text-3xl font-bold">Robbery Tracker</h1>
+                <h1 className="page-heading mb-2">Robbery Tracker</h1>
                 <p className="text-secondary-text mb-6">
                   Real-time tracking of open and in-progress robberies
                 </p>

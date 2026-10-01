@@ -288,9 +288,7 @@ export default function FAQPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="mb-2">
-            <h1 className="text-primary-text text-2xl font-bold">
-              Frequently Asked Questions
-            </h1>
+            <h1 className="page-heading">Frequently Asked Questions</h1>
           </div>
           <p className="text-secondary-text mt-1 text-xs">
             Last updated: June 10th, 2026

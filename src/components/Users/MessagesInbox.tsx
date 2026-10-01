@@ -668,9 +668,7 @@ export default function MessagesInbox() {
           <Breadcrumb containerClassName="py-4" />
           <div className="border-border-card bg-secondary-bg mt-0 flex min-h-0 w-full flex-1 items-center justify-center rounded-lg border p-6 shadow-md sm:p-8">
             <div className="text-center">
-              <h1 className="text-primary-text text-2xl font-bold">
-                Direct Messages
-              </h1>
+              <h1 className="page-heading">Direct Messages</h1>
               <p className="text-secondary-text mt-2 text-sm">
                 Login to view your conversations and send messages.
               </p>

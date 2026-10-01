@@ -368,9 +368,7 @@ export default function ValuesClient() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex-1">
             <div className="mb-2 flex items-center justify-between">
-              <h1 className="text-primary-text text-3xl font-bold">
-                Roblox Jailbreak Value List
-              </h1>
+              <h1 className="page-heading">Roblox Jailbreak Value List</h1>
             </div>
             <p className="text-secondary-text mb-3">
               Welcome to our Roblox Jailbreak trading values database.
