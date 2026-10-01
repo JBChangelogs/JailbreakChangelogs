@@ -112,10 +112,15 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
+              type="button"
               variant="default"
               size="sm"
-              onClick={onSwapSides}
-              disabled={!hasItems}
+              onClick={hasItems ? onSwapSides : undefined}
+              aria-disabled={!hasItems}
+              tabIndex={hasItems ? undefined : -1}
+              className={
+                !hasItems ? "pointer-events-none opacity-50" : undefined
+              }
             >
               <Icon icon="heroicons:arrows-right-left" />
               Swap
@@ -128,10 +133,15 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
+              type="button"
               variant="destructive"
               size="sm"
-              onClick={onClearSides}
-              disabled={!hasItems}
+              onClick={hasItems ? onClearSides : undefined}
+              aria-disabled={!hasItems}
+              tabIndex={hasItems ? undefined : -1}
+              className={
+                !hasItems ? "pointer-events-none opacity-50" : undefined
+              }
             >
               <Icon icon="heroicons-outline:trash" />
               Clear

@@ -19,7 +19,10 @@ import { INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { userInventoryQueryOptions } from "@/utils/api/userInventoryQuery";
 import { useUserFavorites } from "@/hooks/useUserFavorites";
-import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
+import {
+  getCachedPreference,
+  hasSyncedPreferences,
+} from "@/utils/preferences/realtimePreferencesCache";
 import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 
 // Import extracted components and utilities
@@ -73,6 +76,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const calcSyncDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const localSyncPendingRef = useRef(false);
   const localEditRevisionRef = useRef(0);
+  const restoreSessionRef = useRef<"checking" | "prompt" | "ready">("checking");
+  const restoreCandidateRevisionRef = useRef(0);
   const offeringItemsRef = useRef<TradeItem[]>([]);
   const requestingItemsRef = useRef<TradeItem[]>([]);
   // Prevents re-broadcasting when items are applied from a WS event (avoids sync loop)
@@ -112,6 +117,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     calcSyncDebounceRef.current = null;
     localSyncPendingRef.current = false;
     localEditRevisionRef.current += 1;
+    restoreSessionRef.current = "checking";
+    restoreCandidateRevisionRef.current += 1;
     skipNextCalculatorPersistRef.current = true;
 
     const isGuestLogin =
@@ -310,6 +317,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
    */
   useEffect(() => {
     let cancelled = false;
+    const candidateRevision = restoreCandidateRevisionRef.current;
     const hydrateCompact = async (
       items: { id: number; isDuped: boolean }[],
     ): Promise<TradeItem[]> => {
@@ -344,12 +352,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             hydrateCompact(remote.offering ?? []),
             hydrateCompact(remote.requesting ?? []),
           ]);
-          if (cancelled) return;
+          if (
+            cancelled ||
+            candidateRevision !== restoreCandidateRevisionRef.current
+          )
+            return;
           if (hydOff.length > 0 || hydReq.length > 0) {
             safeSetJSON(calculatorStorageKey, {
               offering: hydOff,
               requesting: hydReq,
             });
+            restoreSessionRef.current = "prompt";
             setShowRestoreModal(true);
             return;
           }
@@ -359,6 +372,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       }
 
       try {
+        if (
+          cancelled ||
+          candidateRevision !== restoreCandidateRevisionRef.current
+        )
+          return;
         const saved = safeGetJSON(calculatorStorageKey, {
           offering: [],
           requesting: [],
@@ -369,7 +387,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             (offering && offering.length > 0) ||
             (requesting && requesting.length > 0)
           ) {
-            if (!cancelled) setShowRestoreModal(true);
+            restoreSessionRef.current = "prompt";
+            setShowRestoreModal(true);
             return;
           }
         }
@@ -379,6 +398,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           error,
         );
         safeLocalStorage.removeItem(calculatorStorageKey);
+      }
+      if (!isAuthenticated || hasSyncedPreferences()) {
+        restoreSessionRef.current = "ready";
       }
     };
     void restore();
@@ -478,6 +500,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         return;
       if (localSyncPendingRef.current) return;
       const editRevision = localEditRevisionRef.current;
+      const restoreRevision = restoreCandidateRevisionRef.current;
 
       try {
         const remote = JSON.parse(value) as {
@@ -503,7 +526,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         if (
           cancelled ||
           localSyncPendingRef.current ||
-          editRevision !== localEditRevisionRef.current
+          editRevision !== localEditRevisionRef.current ||
+          restoreRevision !== restoreCandidateRevisionRef.current
         )
           return;
         const current = {
@@ -538,6 +562,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         const hydReq = rehydrate(remote.requesting ?? []);
         if (hydOff.length === 0 && hydReq.length === 0) return;
 
+        if (restoreSessionRef.current !== "ready") {
+          restoreCandidateRevisionRef.current += 1;
+          safeSetJSON(calculatorStorageKey, {
+            offering: hydOff,
+            requesting: hydReq,
+          });
+          restoreSessionRef.current = "prompt";
+          setShowRestoreModal(true);
+          return;
+        }
+
         // Mark as WS-sourced so the sync useEffect doesn't re-broadcast
         appliedFromWSRef.current = true;
         setOfferingItems(hydOff);
@@ -568,6 +603,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     const handlePreferenceDeleted = (e: Event) => {
       const { key } = (e as CustomEvent<{ key: string }>).detail;
       if (key !== "calculator_items" || localSyncPendingRef.current) return;
+      if (restoreSessionRef.current !== "ready") {
+        if (restoreSessionRef.current === "checking") {
+          restoreSessionRef.current = "ready";
+        }
+        return;
+      }
       // Mark as WS-sourced so the sync useEffect doesn't re-broadcast the delete
       appliedFromWSRef.current = true;
       setOfferingItems([]);
@@ -611,6 +652,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             isOG: false,
           }));
 
+        restoreSessionRef.current = "ready";
         setOfferingItems(mapItems(offering || []));
         setRequestingItems(mapItems(requesting || []));
         setShowRestoreModal(false);
@@ -621,6 +663,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   };
 
   const handleStartNew = () => {
+    restoreSessionRef.current = "ready";
+    restoreCandidateRevisionRef.current += 1;
     setOfferingItems([]);
     setRequestingItems([]);
     safeLocalStorage.removeItem(calculatorStorageKey);
@@ -816,10 +860,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       {/* Restore Modal */}
       <ConfirmDialog
         isOpen={showRestoreModal}
-        onClose={() => setShowRestoreModal(false)}
+        onClose={handleStartNew}
         title="Restore Calculator Items?"
         message="Do you want to restore your previously added items or start a new calculation?"
         confirmText="Restore Items"
+        cancelText="Start New"
+        closeOnConfirm={false}
         onConfirm={handleRestoreItems}
         confirmVariant="default"
       />
