@@ -91,7 +91,7 @@ export default function UserProfileSection({
   };
 
   return (
-    <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 xl:flex-row xl:items-start xl:justify-between">
+    <div className="xl:border-border-card xl:bg-tertiary-bg mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between xl:rounded-lg xl:border xl:p-4">
       {/* Avatar and User Info */}
       <div className="flex items-center gap-4">
         {/* Avatar */}

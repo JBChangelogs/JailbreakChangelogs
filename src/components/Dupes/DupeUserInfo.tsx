@@ -47,7 +47,7 @@ export default function DupeUserInfo({
       </h2>
 
       {/* Roblox User Profile with Ad */}
-      <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="lg:border-border-card lg:bg-tertiary-bg mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:rounded-lg lg:border lg:p-4">
         {/* User Info Section */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="border-border-card bg-quaternary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full border">

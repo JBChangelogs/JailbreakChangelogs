@@ -45,7 +45,7 @@ export default function OGUserInfo({
       </h2>
 
       {/* Roblox User Profile */}
-      <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="lg:border-border-card lg:bg-tertiary-bg mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:rounded-lg lg:border lg:p-4">
         <div className="border-border-card bg-quaternary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full border">
           {!avatarError ? (
             <Image
