@@ -8,6 +8,8 @@ import InventoryItemsGrid from "./InventoryItemsGrid";
 import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import { Icon } from "../ui/IconWrapper";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { useCatalogValues } from "@/hooks/usePartialItems";
+import { compareItemsByValue } from "@/utils/trading/itemValueSort";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +66,17 @@ export default function DupedItemsTab({
     () => mergeInventoryArrayWithMetadata(duplicates, propItemsData || []),
     [duplicates, propItemsData],
   );
+  const catalogValuesQuery = useCatalogValues();
+  const catalogValuesById = useMemo(
+    () =>
+      new Map(
+        (catalogValuesQuery.data ?? propItemsData ?? []).map((item) => [
+          item.id,
+          item,
+        ]),
+      ),
+    [catalogValuesQuery.data, propItemsData],
+  );
 
   // Helper functions
   const getUserDisplay = (userId: string) => {
@@ -88,18 +101,6 @@ export default function DupedItemsTab({
     );
     return Array.from(categories).sort();
   }, [mergedDuplicatesData]);
-
-  // Parse numeric values for sorting
-  const parseNumericValue = (value: string | null): number => {
-    if (!value || value === "N/A") return -1;
-    const lower = value.toLowerCase();
-    const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
-    if (Number.isNaN(num)) return -1;
-    if (lower.includes("k")) return num * 1_000;
-    if (lower.includes("m")) return num * 1_000_000;
-    if (lower.includes("b")) return num * 1_000_000_000;
-    return num;
-  };
 
   // Filter and sort logic
   const filteredAndSortedItems = useMemo(() => {
@@ -134,25 +135,23 @@ export default function DupedItemsTab({
         }
         case "cash-desc":
         case "cash-asc": {
-          const aValue = parseNumericValue(
-            a.info.find((entry) => entry.title === "Cash Value")?.value ?? null,
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "cash_value",
+            sortOrder === "cash-desc" ? "desc" : "asc",
           );
-          const bValue = parseNumericValue(
-            b.info.find((entry) => entry.title === "Cash Value")?.value ?? null,
-          );
-          return sortOrder === "cash-desc" ? bValue - aValue : aValue - bValue;
         }
         case "duped-desc":
         case "duped-asc": {
-          const aValue = parseNumericValue(
-            a.info.find((entry) => entry.title === "Duped Value")?.value ??
-              null,
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "duped_value",
+            sortOrder === "duped-desc" ? "desc" : "asc",
           );
-          const bValue = parseNumericValue(
-            b.info.find((entry) => entry.title === "Duped Value")?.value ??
-              null,
-          );
-          return sortOrder === "duped-desc" ? bValue - aValue : aValue - bValue;
         }
         case "alpha-asc":
           return a.title.localeCompare(b.title);
@@ -164,7 +163,13 @@ export default function DupedItemsTab({
     });
 
     return filtered;
-  }, [mergedDuplicatesData, searchTerm, selectedCategory, sortOrder]);
+  }, [
+    mergedDuplicatesData,
+    searchTerm,
+    selectedCategory,
+    sortOrder,
+    catalogValuesById,
+  ]);
 
   if (filteredAndSortedItems.length === 0 && !searchTerm && !selectedCategory) {
     return (

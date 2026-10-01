@@ -11,6 +11,8 @@ import { InventoryItem } from "@/app/inventories/types";
 import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import { getCategoryIcon, getCategoryColor } from "@/utils/items/categoryIcons";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { useCatalogValues } from "@/hooks/usePartialItems";
+import { compareItemsByValue } from "@/utils/trading/itemValueSort";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,6 +110,14 @@ export default function DuplicatesTab({
   const [selectedLeaderboardCategory, setSelectedLeaderboardCategory] =
     useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("count-desc");
+  const catalogValuesQuery = useCatalogValues();
+  const catalogValuesById = useMemo(
+    () =>
+      new Map(
+        (catalogValuesQuery.data ?? itemsData).map((item) => [item.id, item]),
+      ),
+    [catalogValuesQuery.data, itemsData],
+  );
   const parentRef = useRef<HTMLDivElement>(null);
   const MAX_SEARCH_LENGTH = 50;
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
@@ -304,16 +314,6 @@ export default function DuplicatesTab({
     }
   }, [isActive, virtualizer]);
 
-  // Parse numeric values
-  const parseNumericValue = (value: string | null): number => {
-    if (!value || value === "N/A") return 0;
-    const num = parseFloat(value.replace(/[^0-9.]/g, ""));
-    if (value.toLowerCase().includes("k")) return num * 1000;
-    if (value.toLowerCase().includes("m")) return num * 1000000;
-    if (value.toLowerCase().includes("b")) return num * 1000000000;
-    return num;
-  };
-
   // Filter and sort items (same logic as InventoryItems)
   const filteredAndSortedItems = useMemo(() => {
     let filtered = [...itemsWithMultipleCopies];
@@ -358,25 +358,23 @@ export default function DuplicatesTab({
         }
         case "cash-desc":
         case "cash-asc": {
-          const aValue = parseNumericValue(
-            a.info.find((entry) => entry.title === "Cash Value")?.value ?? null,
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "cash_value",
+            sortOrder === "cash-desc" ? "desc" : "asc",
           );
-          const bValue = parseNumericValue(
-            b.info.find((entry) => entry.title === "Cash Value")?.value ?? null,
-          );
-          return sortOrder === "cash-desc" ? bValue - aValue : aValue - bValue;
         }
         case "duped-desc":
         case "duped-asc": {
-          const aValue = parseNumericValue(
-            a.info.find((entry) => entry.title === "Duped Value")?.value ??
-              null,
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "duped_value",
+            sortOrder === "duped-desc" ? "desc" : "asc",
           );
-          const bValue = parseNumericValue(
-            b.info.find((entry) => entry.title === "Duped Value")?.value ??
-              null,
-          );
-          return sortOrder === "duped-desc" ? bValue - aValue : aValue - bValue;
         }
         case "alpha-asc":
           return a.title.localeCompare(b.title);
@@ -394,6 +392,7 @@ export default function DuplicatesTab({
     sortOrder,
     itemsWithMultipleCopies,
     duplicateCounts,
+    catalogValuesById,
   ]);
 
   if (multiCopyStats.uniqueItemsWithCopies === 0) {

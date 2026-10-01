@@ -24,6 +24,7 @@ import OGItemsGrid from "./OGItemsGrid";
 import OGNotificationSheet from "./OGNotificationSheet";
 import { Button } from "@/components/ui/button";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { compareItemsByValue } from "@/utils/trading/itemValueSort";
 
 interface OGItem {
   tradePopularMetric: number;
@@ -135,26 +136,14 @@ export default function OGFinderResults({
   };
 
   const catalogFilterActive = showOnlyLimited || showOnlySeasonal;
-  const catalogValuesQuery = useCatalogValues(catalogFilterActive);
+  const catalogSortActive =
+    sortOrder.startsWith("cash-") || sortOrder.startsWith("duped-");
+  const catalogValuesQuery = useCatalogValues(
+    catalogFilterActive || catalogSortActive,
+  );
   const catalogValuesById = new Map(
     (catalogValuesQuery.data ?? []).map((item) => [item.id, item]),
   );
-
-  // Parse values like "23.4m" -> 23400000
-  const parseNumericValue = (value: string | null): number => {
-    if (!value || value === "N/A") return -1;
-    const lower = value.toLowerCase();
-    const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
-    if (Number.isNaN(num)) return -1;
-    if (lower.includes("k")) return num * 1_000;
-    if (lower.includes("m")) return num * 1_000_000;
-    if (lower.includes("b")) return num * 1_000_000_000;
-    return num;
-  };
-  const getSnapshotValue = (item: OGItem, field: string) =>
-    parseNumericValue(
-      item.info.find((entry) => entry.title === field)?.value ?? null,
-    );
 
   // Helper functions
   const getUserDisplay = (userId: string) => {
@@ -273,27 +262,39 @@ export default function OGFinderResults({
         case "created-desc":
           return b.logged_at - a.logged_at;
         case "cash-desc": {
-          return (
-            getSnapshotValue(b, "Cash Value") -
-            getSnapshotValue(a, "Cash Value")
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "cash_value",
+            "desc",
           );
         }
         case "cash-asc": {
-          return (
-            getSnapshotValue(a, "Cash Value") -
-            getSnapshotValue(b, "Cash Value")
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "cash_value",
+            "asc",
           );
         }
         case "duped-desc": {
-          return (
-            getSnapshotValue(b, "Duped Value") -
-            getSnapshotValue(a, "Duped Value")
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "duped_value",
+            "desc",
           );
         }
         case "duped-asc": {
-          return (
-            getSnapshotValue(a, "Duped Value") -
-            getSnapshotValue(b, "Duped Value")
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "duped_value",
+            "asc",
           );
         }
         default:
@@ -628,11 +629,11 @@ export default function OGFinderResults({
               </div>
             )}
 
-            {catalogFilterActive &&
+            {(catalogFilterActive || catalogSortActive) &&
             catalogValuesQuery.isError &&
             !catalogValuesQuery.data ? (
               <div className="text-secondary-text py-8 text-center">
-                Couldn&apos;t load item details for this filter.{" "}
+                Couldn&apos;t load item values for this filter or sort.{" "}
                 <button
                   type="button"
                   className="text-link underline"
@@ -644,7 +645,10 @@ export default function OGFinderResults({
             ) : (
               <OGItemsGrid
                 filteredItems={filteredAndSortedItems}
-                isLoading={catalogFilterActive && catalogValuesQuery.isPending}
+                isLoading={
+                  (catalogFilterActive || catalogSortActive) &&
+                  catalogValuesQuery.isPending
+                }
                 getUsername={getUsername}
                 getUserAvatar={getUserAvatar}
                 getHasVerifiedBadge={getHasVerifiedBadge}

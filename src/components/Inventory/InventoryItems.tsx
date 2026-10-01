@@ -321,10 +321,12 @@ export default function InventoryItems({
           name: entry.item.title,
           season: entry.item.season,
           level: entry.item.level,
-          cash_value:
-            values?.cash_value ?? snapshotValue(entry.item, "Cash Value"),
-          duped_value:
-            values?.duped_value ?? snapshotValue(entry.item, "Duped Value"),
+          cash_value: values
+            ? values.cash_value
+            : snapshotValue(entry.item, "Cash Value"),
+          duped_value: values
+            ? values.duped_value
+            : snapshotValue(entry.item, "Duped Value"),
           demand: values?.demand ?? null,
           trend: values?.trend ?? null,
           uniqueCirculation: entry.item.uniqueCirculation,

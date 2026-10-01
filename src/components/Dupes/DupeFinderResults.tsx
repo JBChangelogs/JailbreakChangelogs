@@ -11,7 +11,11 @@ import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
 import DupeSearchInput from "./DupeSearchInput";
 import { getDupedValueForItem } from "@/utils/trading/dupeUtils";
-import { parseCurrencyValue } from "@/utils/trading/currency";
+import { useCatalogValues } from "@/hooks/usePartialItems";
+import {
+  compareItemsByValue,
+  getItemValueForSort,
+} from "@/utils/trading/itemValueSort";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 
 interface DupeFinderResultsProps {
@@ -47,17 +51,22 @@ export default function DupeFinderResults({
   const [selectedItem, setSelectedItem] = useState<DupeFinderItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const mergedDupeData = initialData;
-  const snapshotDupedValue = (item: DupeFinderItem) => {
-    const value = item.info?.find(
-      (entry) => entry.title === "Duped Value",
-    )?.value;
-    const parsed = parseCurrencyValue(value);
-    return Number.isFinite(parsed) ? parsed : 0;
-  };
+  const catalogValuesQuery = useCatalogValues();
+  const catalogValuesById = useMemo(
+    () =>
+      new Map(
+        (catalogValuesQuery.data ?? items).map((item) => [item.id, item]),
+      ),
+    [catalogValuesQuery.data, items],
+  );
   const totalDupedValue = useMemo(
     () =>
-      mergedDupeData.reduce((sum, item) => sum + snapshotDupedValue(item), 0),
-    [mergedDupeData],
+      mergedDupeData.reduce(
+        (sum, item) =>
+          sum + getItemValueForSort(item, catalogValuesById, "duped_value"),
+        0,
+      ),
+    [mergedDupeData, catalogValuesById],
   );
 
   // Extract all unique user IDs from dupe data
@@ -169,10 +178,22 @@ export default function DupeFinderResults({
         case "created-desc":
           return b.logged_at - a.logged_at;
         case "duped-desc": {
-          return snapshotDupedValue(b) - snapshotDupedValue(a);
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "duped_value",
+            "desc",
+          );
         }
         case "duped-asc": {
-          return snapshotDupedValue(a) - snapshotDupedValue(b);
+          return compareItemsByValue(
+            a,
+            b,
+            catalogValuesById,
+            "duped_value",
+            "asc",
+          );
         }
         default:
           return 0;
