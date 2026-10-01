@@ -135,7 +135,7 @@ export default function InventoryCheckerClient({
   } | null>(null);
   const [isLoadingQueuePosition, setIsLoadingQueuePosition] = useState(false);
   const [queueStatusMessage, setQueueStatusMessage] =
-    useState<string>("Not in queue");
+    useState<string>("Not in scan queue");
   const hasAutoFetchedQueueRef = useRef(false);
   const [scanErrorBanner, setScanErrorBanner] = useState<{
     title: string;
@@ -143,7 +143,7 @@ export default function InventoryCheckerClient({
   } | null>(null);
 
   // Auth context and scan functionality
-  const { user, isAuthenticated, setLoginModal } = useAuthContext();
+  const { user, isAuthenticated } = useAuthContext();
   const scanWebSocket = useScanWebSocket(robloxId || "");
   const { modalState, openModal, closeModal } = useSupporterModal();
   const [showScanModal, setShowScanModal] = useState(false);
@@ -386,7 +386,12 @@ export default function InventoryCheckerClient({
         setQueueStatusMessage("");
       } else {
         setQueuePosition(null);
-        setQueueStatusMessage(data.error || "Not in queue");
+        setQueueStatusMessage(
+          data.in_queue === false ||
+            /not found in queue/i.test(data.error || "")
+            ? "Not in scan queue"
+            : data.error || "Not in scan queue",
+        );
       }
     } catch (queueError) {
       log.error("Error fetching queue position:", queueError);
@@ -696,464 +701,287 @@ export default function InventoryCheckerClient({
         </div>
       ) : (
         <>
-          {/* Error Display */}
-          {error && !initialData && (
-            <>
-              {/* Inventory not found — mini profile card for non-owner view */}
-              {isInventoryNotFoundError && !isOwnInventory && robloxId && (
-                <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
-                  {/* Profile header */}
-                  <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
-                    <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
-                      {isAvatarLoading && !avatarError && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Spinner className="h-5 w-5" />
-                        </div>
-                      )}
-                      {!avatarError ? (
-                        <Image
-                          src={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
-                          alt="Roblox Avatar"
-                          fill
-                          className="object-cover"
-                          unoptimized
-                          onLoad={() => setIsAvatarLoading(false)}
-                          onError={() => {
-                            setAvatarError(true);
-                            setIsAvatarLoading(false);
-                          }}
-                        />
-                      ) : (
-                        <DefaultAvatar />
-                      )}
+          {/* Missing inventory is an empty state for every viewer. */}
+          {error && !initialData && isInventoryNotFoundError && robloxId && (
+            <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
+              <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
+                <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                  {isAvatarLoading && !avatarError && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Spinner className="h-5 w-5" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-primary-text truncate font-semibold">
-                        {mergedRobloxUsers[robloxId]?.displayName ||
-                          originalSearchTerm ||
-                          robloxId}
-                      </p>
-                      <p className="text-secondary-text truncate text-sm">
-                        @
-                        {mergedRobloxUsers[robloxId]?.name ||
-                          originalSearchTerm ||
-                          robloxId}
-                      </p>
-                      <Link
-                        href={`https://www.roblox.com/users/${robloxId}/profile`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        prefetch={false}
-                        className="text-link mt-1 inline-flex items-center gap-1 text-xs hover:underline"
-                      >
-                        Roblox profile
-                        <Icon
-                          icon="heroicons:arrow-top-right-on-square"
-                          className="h-3 w-3"
-                        />
-                      </Link>
-                    </div>
+                  )}
+                  {!avatarError ? (
+                    <Image
+                      src={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
+                      alt="Roblox Avatar"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                      onLoad={() => setIsAvatarLoading(false)}
+                      onError={() => {
+                        setAvatarError(true);
+                        setIsAvatarLoading(false);
+                      }}
+                    />
+                  ) : (
+                    <DefaultAvatar />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-primary-text truncate font-semibold">
+                    {mergedRobloxUsers[robloxId]?.displayName ||
+                      originalSearchTerm ||
+                      robloxId}
+                  </p>
+                  <p className="text-secondary-text truncate text-sm">
+                    @
+                    {mergedRobloxUsers[robloxId]?.name ||
+                      originalSearchTerm ||
+                      robloxId}
+                  </p>
+                  <Link
+                    href={`https://www.roblox.com/users/${robloxId}/profile`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    prefetch={false}
+                    className="text-link mt-1 inline-flex items-center gap-1 text-xs hover:underline"
+                  >
+                    Roblox profile
+                    <Icon
+                      icon="heroicons:arrow-top-right-on-square"
+                      className="h-3 w-3"
+                    />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="space-y-4 p-5">
+                <div className="flex items-start gap-3">
+                  <div className="bg-secondary-text/10 mt-0.5 shrink-0 rounded-full p-2">
+                    <Icon
+                      icon="heroicons:archive-box-x-mark"
+                      className="text-secondary-text h-5 w-5"
+                    />
                   </div>
-
-                  {/* No inventory message + actions */}
-                  <div className="space-y-4 p-5">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-secondary-text/10 mt-0.5 shrink-0 rounded-full p-2">
-                        <Icon
-                          icon="heroicons:archive-box-x-mark"
-                          className="text-secondary-text h-5 w-5"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-primary-text font-medium">
-                          No inventory found yet
-                        </p>
-                        <p className="text-secondary-text mt-0.5 text-sm">
-                          This user hasn&apos;t been scanned by our bots yet.
-                          Inventories are updated automatically when a bot joins
-                          their trade server.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Queue position */}
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-secondary-text text-xs">
-                        {isLoadingQueuePosition ? (
-                          "Checking queue position..."
-                        ) : queuePosition ? (
-                          <span className="text-primary-text font-medium">
-                            Queue Position: #
-                            {queuePosition.position.toLocaleString()}
-                          </span>
-                        ) : (
-                          queueStatusMessage || "Not in queue"
-                        )}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={fetchQueuePosition}
-                        disabled={isLoadingQueuePosition}
-                        aria-label="Refresh queue position"
-                        className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                      >
-                        {isLoadingQueuePosition ? (
-                          <Spinner className="h-4 w-4" />
-                        ) : (
-                          <Icon
-                            icon="material-symbols:refresh"
-                            className="h-4 w-4"
-                          />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => {
-                          setSearchId("");
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                          const searchInput = document.getElementById(
-                            "searchInput",
-                          ) as HTMLInputElement | null;
-                          searchInput?.focus();
-                        }}
-                      >
-                        Search Another User
-                      </Button>
-                      {isAuthenticated && user?.roblox_id && (
-                        <Button asChild size="sm">
-                          <Link
-                            href={`/inventories/${user.roblox_id}`}
-                            prefetch={false}
-                          >
-                            View My Inventory
-                          </Link>
-                        </Button>
-                      )}
-                    </div>
+                  <div>
+                    <p className="text-primary-text font-medium">
+                      No inventory found yet
+                    </p>
+                    <p className="text-secondary-text mt-0.5 text-sm">
+                      {isOwnInventory
+                        ? "Your inventory hasn’t been scanned yet. Join a trade server for an automatic scan. Manual scans require Supporter III."
+                        : "This user hasn’t been scanned by our bots yet. Inventories are updated automatically when a bot joins their trade server."}
+                    </p>
                   </div>
                 </div>
-              )}
 
-              {/* All other errors (own inventory not found, server errors, etc.) */}
-              {(!isInventoryNotFoundError || isOwnInventory) && (
-                <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
-                  <div className="text-center">
-                    <div className="mb-4 flex justify-center">
-                      <div className="bg-status-error/10 rounded-full p-3">
+                {isOwnInventory && (
+                  <div className="pl-0 sm:pl-11">
+                    <Button
+                      onClick={() => {
+                        trackEvent("Request Scan");
+                        // Show Turnstile modal before scan
+                        if (
+                          ENABLE_WS_SCAN &&
+                          scanWebSocket.status !== "scanning" &&
+                          scanWebSocket.status !== "connecting"
+                        ) {
+                          setShowScanModal(true);
+                        }
+                      }}
+                      disabled={
+                        !ENABLE_WS_SCAN ||
+                        scanWebSocket.status === "scanning" ||
+                        scanWebSocket.status === "connecting"
+                      }
+                      variant={
+                        scanWebSocket.status === "completed"
+                          ? "success"
+                          : scanWebSocket.status === "error"
+                            ? "destructive"
+                            : "default"
+                      }
+                      size="sm"
+                      className="gap-2"
+                    >
+                      {scanWebSocket.status === "connecting" ? (
+                        <>
+                          <Spinner className="h-4 w-4" />
+                          Connecting...
+                        </>
+                      ) : scanWebSocket.status === "scanning" ? (
+                        <>
+                          <Spinner className="h-4 w-4" />
+                          {getScanActiveButtonLabel(
+                            scanWebSocket.phase,
+                            scanWebSocket.message,
+                          )}
+                        </>
+                      ) : scanWebSocket.status === "completed" ? (
+                        <>
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          Scan Complete
+                        </>
+                      ) : scanWebSocket.status === "error" ? (
+                        <>
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                            />
+                          </svg>
+                          Scan Failed
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          {!ENABLE_WS_SCAN
+                            ? "Scanning Disabled"
+                            : "Request a Scan"}
+                        </>
+                      )}
+                    </Button>
+                    {scanErrorBanner && (
+                      <div className="mt-2 flex items-start gap-1.5">
                         <Icon
                           icon="heroicons:exclamation-triangle"
-                          className="text-status-error h-8 w-8"
+                          className="text-button-danger mt-0.5 h-3.5 w-3.5 shrink-0"
                         />
-                      </div>
-                    </div>
-                    <h3 className="text-status-error mb-2 text-lg font-semibold">
-                      {error.includes("Server error")
-                        ? "Server Error"
-                        : "Unable to Load Inventory"}
-                    </h3>
-                    {!isInventoryNotFoundError && (
-                      <p className="text-secondary-text mb-4 wrap-break-word">
-                        {error}
-                      </p>
-                    )}
-
-                    {/* Show scan option for profile owner or login prompt for others */}
-                    {isOwnInventory ? (
-                      <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
-                        <div className="space-y-3">
-                          <p className="text-primary-text mb-3 text-center text-sm">
-                            Your inventory hasn&apos;t been scanned yet.
-                          </p>
-                          <div className="space-y-3">
-                            <div className="text-center">
-                              <p className="text-secondary-text text-sm">
-                                Wait for one of our bots to randomly join your
-                                trade server
-                              </p>
-                            </div>
-                            <div className="text-secondary-text text-center text-sm font-medium">
-                              OR
-                            </div>
-                            <div className="flex justify-center">
-                              <Button
-                                onClick={() => {
-                                  trackEvent("Request Scan");
-                                  // Show Turnstile modal before scan
-                                  if (
-                                    ENABLE_WS_SCAN &&
-                                    scanWebSocket.status !== "scanning" &&
-                                    scanWebSocket.status !== "connecting"
-                                  ) {
-                                    setShowScanModal(true);
-                                  }
-                                }}
-                                disabled={
-                                  !ENABLE_WS_SCAN ||
-                                  scanWebSocket.status === "scanning" ||
-                                  scanWebSocket.status === "connecting"
-                                }
-                                variant={
-                                  scanWebSocket.status === "completed"
-                                    ? "success"
-                                    : scanWebSocket.status === "error"
-                                      ? "destructive"
-                                      : "default"
-                                }
-                                size="md"
-                                className="gap-2"
-                              >
-                                {scanWebSocket.status === "connecting" ? (
-                                  <>
-                                    <Spinner className="h-4 w-4" />
-                                    Connecting...
-                                  </>
-                                ) : scanWebSocket.status === "scanning" ? (
-                                  <>
-                                    <Spinner className="h-4 w-4" />
-                                    {getScanActiveButtonLabel(
-                                      scanWebSocket.phase,
-                                      scanWebSocket.message,
-                                    )}
-                                  </>
-                                ) : scanWebSocket.status === "completed" ? (
-                                  <>
-                                    <svg
-                                      className="h-4 w-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                      />
-                                    </svg>
-                                    Scan Complete
-                                  </>
-                                ) : scanWebSocket.status === "error" ? (
-                                  <>
-                                    <svg
-                                      className="h-4 w-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                                      />
-                                    </svg>
-                                    Scan Failed
-                                  </>
-                                ) : (
-                                  <>
-                                    <svg
-                                      className="h-4 w-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                      />
-                                    </svg>
-                                    {!ENABLE_WS_SCAN
-                                      ? "Scanning Disabled"
-                                      : "Request a Scan"}
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                            {scanErrorBanner ? (
-                              <div className="flex w-full items-start justify-center gap-1.5 text-center">
-                                <Icon
-                                  icon="heroicons:exclamation-triangle"
-                                  className="text-button-danger mt-0.5 h-3.5 w-3.5 shrink-0"
-                                />
-                                <p className="text-button-danger min-w-0 flex-1 text-xs wrap-break-word">
-                                  <span className="font-medium">
-                                    {scanErrorBanner.title}
-                                  </span>
-                                  {scanErrorBanner.subtitle && (
-                                    <> — {scanErrorBanner.subtitle}</>
-                                  )}
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="flex w-full items-center justify-center gap-2">
-                                <p className="text-secondary-text min-w-0 flex-1 text-xs wrap-break-word">
-                                  {isLoadingQueuePosition ? (
-                                    "Checking queue position..."
-                                  ) : queuePosition ? (
-                                    <span className="text-primary-text font-medium">
-                                      Queue Position: #
-                                      {queuePosition.position.toLocaleString()}
-                                    </span>
-                                  ) : wsQueuePosition !== undefined ? (
-                                    <span className="text-primary-text font-medium">
-                                      Queue Position: #
-                                      {wsQueuePosition.toLocaleString()}
-                                    </span>
-                                  ) : (
-                                    queueStatusMessage || "Not in queue"
-                                  )}
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={fetchQueuePosition}
-                                  disabled={isLoadingQueuePosition}
-                                  aria-label="Refresh queue position"
-                                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                                >
-                                  {isLoadingQueuePosition ? (
-                                    <Spinner className="h-4 w-4" />
-                                  ) : (
-                                    <Icon
-                                      icon="material-symbols:refresh"
-                                      className="h-4 w-4"
-                                    />
-                                  )}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
-                        {isInventoryNotFoundError ? (
-                          <>
-                            <p className="text-primary-text mb-1 text-sm font-medium">
-                              No saved inventory found for this user.
-                            </p>
-                            <p className="text-secondary-text text-sm">
-                              Try searching another username.
-                            </p>
-                            <div className="mt-3 flex items-center justify-center gap-2 text-center">
-                              <p className="text-secondary-text text-xs">
-                                {isLoadingQueuePosition ? (
-                                  "Checking queue position..."
-                                ) : queuePosition ? (
-                                  <span className="text-primary-text font-medium">
-                                    Queue Position: #
-                                    {queuePosition.position.toLocaleString()}
-                                  </span>
-                                ) : (
-                                  queueStatusMessage || "Not in queue"
-                                )}
-                              </p>
-                              <button
-                                type="button"
-                                onClick={fetchQueuePosition}
-                                disabled={isLoadingQueuePosition}
-                                aria-label="Refresh queue position"
-                                className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                              >
-                                {isLoadingQueuePosition ? (
-                                  <Spinner className="h-4 w-4" />
-                                ) : (
-                                  <Icon
-                                    icon="material-symbols:refresh"
-                                    className="h-4 w-4"
-                                  />
-                                )}
-                              </button>
-                            </div>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              className="mt-2"
-                              onClick={() => {
-                                setSearchId("");
-                                window.scrollTo({
-                                  top: 0,
-                                  behavior: "smooth",
-                                });
-                                const searchInput = document.getElementById(
-                                  "searchInput",
-                                ) as HTMLInputElement | null;
-                                searchInput?.focus();
-                              }}
-                            >
-                              Search Another User
-                            </Button>
-                            {isAuthenticated && user?.roblox_id && (
-                              <div className="border-border-card mt-4 border-t pt-4">
-                                <p className="text-primary-text mb-1 text-sm font-medium">
-                                  Looking for your inventory?
-                                </p>
-                                <Button asChild size="sm" className="mt-2">
-                                  <Link
-                                    href={`/inventories/${user.roblox_id}`}
-                                    prefetch={false}
-                                  >
-                                    View My Inventory
-                                  </Link>
-                                </Button>
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-primary-text mb-1 text-sm font-medium">
-                              Looking for your inventory?
-                            </p>
-                            {isAuthenticated && user?.roblox_id ? (
-                              <Button asChild size="sm" className="mt-2">
-                                <Link
-                                  href={`/inventories/${user.roblox_id}`}
-                                  prefetch={false}
-                                >
-                                  View My Inventory
-                                </Link>
-                              </Button>
-                            ) : (
-                              <>
-                                <p className="text-secondary-text text-sm">
-                                  Login to request a scan.
-                                </p>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  className="mt-2"
-                                  onClick={() => {
-                                    if (isAuthenticated) {
-                                      setLoginModal({
-                                        open: true,
-                                        tab: "roblox",
-                                      });
-                                    } else {
-                                      setLoginModal({ open: true });
-                                    }
-                                  }}
-                                >
-                                  Login
-                                </Button>
-                              </>
-                            )}
-                          </>
-                        )}
+                        <p className="text-button-danger text-xs wrap-break-word">
+                          <span className="font-medium">
+                            {scanErrorBanner.title}
+                          </span>
+                          {scanErrorBanner.subtitle && (
+                            <> — {scanErrorBanner.subtitle}</>
+                          )}
+                        </p>
                       </div>
                     )}
                   </div>
+                )}
+
+                <div
+                  className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 ${isOwnInventory ? "sm:pl-11" : ""}`}
+                >
+                  <p className="text-secondary-text text-xs">
+                    {isLoadingQueuePosition ? (
+                      "Checking queue position..."
+                    ) : queuePosition ? (
+                      <span className="text-primary-text font-medium">
+                        Queue Position: #
+                        {queuePosition.position.toLocaleString()}
+                      </span>
+                    ) : isOwnInventory && wsQueuePosition !== undefined ? (
+                      <span className="text-primary-text font-medium">
+                        Queue Position: #{wsQueuePosition.toLocaleString()}
+                      </span>
+                    ) : (
+                      queueStatusMessage || "Not in scan queue"
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={fetchQueuePosition}
+                    disabled={isLoadingQueuePosition}
+                    className="text-link inline-flex cursor-pointer items-center gap-1 rounded px-1 py-0.5 text-xs font-medium hover:underline disabled:opacity-50"
+                  >
+                    {isLoadingQueuePosition ? (
+                      <Spinner className="h-4 w-4" />
+                    ) : (
+                      <Icon
+                        icon="material-symbols:refresh"
+                        className="h-4 w-4"
+                      />
+                    )}
+                    Check queue position
+                  </button>
                 </div>
-              )}
-            </>
+
+                {!isOwnInventory && (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        setSearchId("");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        const searchInput = document.getElementById(
+                          "searchInput",
+                        ) as HTMLInputElement | null;
+                        searchInput?.focus();
+                      }}
+                    >
+                      Search Another User
+                    </Button>
+                    {isAuthenticated && user?.roblox_id && (
+                      <Button asChild size="sm">
+                        <Link
+                          href={`/inventories/${user.roblox_id}`}
+                          prefetch={false}
+                        >
+                          View My Inventory
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
+
+          {error &&
+            !initialData &&
+            (!isInventoryNotFoundError || !robloxId) && (
+              <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                <div className="mb-4 flex justify-center">
+                  <div className="bg-status-error/10 rounded-full p-3">
+                    <Icon
+                      icon="heroicons:exclamation-triangle"
+                      className="text-status-error h-8 w-8"
+                    />
+                  </div>
+                </div>
+                <h3 className="text-status-error mb-2 text-lg font-semibold">
+                  {error.includes("Server error")
+                    ? "Server Error"
+                    : "Unable to Load Inventory"}
+                </h3>
+                <p className="text-secondary-text wrap-break-word">{error}</p>
+              </div>
+            )}
 
           {/* User Stats and Inventory Items - Only show when no error and has data */}
           {!error && initialData && currentData && (

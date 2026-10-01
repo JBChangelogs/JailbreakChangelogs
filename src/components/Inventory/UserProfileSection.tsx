@@ -329,7 +329,7 @@ export default function UserProfileSection({
                 </p>
               </div>
             ) : (
-              <div className="mt-2 flex w-full items-center justify-center gap-2">
+              <div className="mt-2 flex w-full flex-wrap items-center justify-center gap-2">
                 <p className="text-secondary-text min-w-0 flex-1 text-xs wrap-break-word">
                   {isLoadingQueuePosition ? (
                     "Checking queue position..."
@@ -343,21 +343,21 @@ export default function UserProfileSection({
                       {scanWebSocket.queuePosition.toLocaleString()}
                     </span>
                   ) : (
-                    queueStatusMessage || "Not in queue"
+                    queueStatusMessage || "Not in scan queue"
                   )}
                 </p>
                 <button
                   type="button"
                   onClick={() => fetchQueuePosition?.()}
                   disabled={isLoadingQueuePosition}
-                  aria-label="Refresh queue position"
-                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                  className="text-link inline-flex cursor-pointer items-center gap-1 rounded px-1 py-0.5 text-xs font-medium hover:underline disabled:opacity-50"
                 >
                   {isLoadingQueuePosition ? (
                     <Spinner className="h-4 w-4" />
                   ) : (
                     <Icon icon="material-symbols:refresh" className="h-4 w-4" />
                   )}
+                  Check queue position
                 </button>
               </div>
             ))}

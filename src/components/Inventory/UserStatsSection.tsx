@@ -812,10 +812,10 @@ export default function UserStatsSection({
                   {/* Queue Position */}
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span className="text-secondary-text">Queue Position:</span>
-                    <div className="text-primary-text flex items-center gap-2 font-medium">
+                    <div className="text-primary-text flex flex-wrap items-center gap-2 font-medium">
                       {!hasCheckedQueuePosition ? (
                         <span className="text-secondary-text text-xs">
-                          Click refresh to check
+                          Not checked yet
                         </span>
                       ) : isLoadingQueuePosition ? (
                         <span className="text-secondary-text text-xs">
@@ -823,7 +823,7 @@ export default function UserStatsSection({
                         </span>
                       ) : queueError ? (
                         <span className="text-secondary-text text-xs">
-                          Not in queue
+                          Not in scan queue
                         </span>
                       ) : queuePosition ? (
                         <span className="text-xs">
@@ -831,37 +831,25 @@ export default function UserStatsSection({
                         </span>
                       ) : (
                         <span className="text-secondary-text text-xs">
-                          Not in queue
+                          Not in scan queue
                         </span>
                       )}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => fetchQueuePosition()}
-                            disabled={isLoadingQueuePosition}
-                            className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                          >
-                            {isLoadingQueuePosition ? (
-                              <Spinner className="h-4 w-4" />
-                            ) : (
-                              <Icon
-                                icon="material-symbols:refresh"
-                                className="h-4 w-4"
-                              />
-                            )}
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="top"
-                          className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                        >
-                          <p>
-                            {hasCheckedQueuePosition
-                              ? "Refresh position"
-                              : "Check position"}
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
+                      <button
+                        type="button"
+                        onClick={() => fetchQueuePosition()}
+                        disabled={isLoadingQueuePosition}
+                        className="text-link inline-flex cursor-pointer items-center gap-1 rounded px-1 py-0.5 text-xs font-medium hover:underline disabled:opacity-50"
+                      >
+                        {isLoadingQueuePosition ? (
+                          <Spinner className="h-4 w-4" />
+                        ) : (
+                          <Icon
+                            icon="material-symbols:refresh"
+                            className="h-4 w-4"
+                          />
+                        )}
+                        Check queue position
+                      </button>
                     </div>
                   </div>
 
