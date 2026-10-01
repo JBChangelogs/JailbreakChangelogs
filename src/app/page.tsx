@@ -462,10 +462,24 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="pt-8">
+      <section className="py-4">
+        <div className="p-4 pb-8">
+          <NitroHomepageAd />
+        </div>
         <div className="container mx-auto px-4">
-          <div className="border-border-card bg-secondary-bg rounded-2xl border p-6 md:p-8">
-            <div className="mb-5 flex items-center gap-2">
+          <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <p className="text-link mb-2 text-xs font-semibold tracking-[0.2em] uppercase">
+                Explore Our Platform
+              </p>
+              <h2 className="text-primary-text text-3xl font-bold md:text-4xl">
+                Something for Every Jailbreak Player
+              </h2>
+            </div>
+          </div>
+
+          <div className={`${platformGroupClass} mb-4`}>
+            <div className="mb-4 flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="bg-status-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
                 <span className="bg-status-success relative inline-flex h-2.5 w-2.5 rounded-full" />
@@ -474,9 +488,6 @@ export default async function Home() {
                 Live Trackers
               </p>
             </div>
-            <h2 className="text-card-headline mb-5 text-2xl font-bold md:text-3xl">
-              Know what&apos;s happening in Jailbreak right now
-            </h2>
             <div className="grid gap-4 md:grid-cols-2">
               {liveTrackers.map((tracker) => (
                 <Link
@@ -507,24 +518,6 @@ export default async function Home() {
                   />
                 </Link>
               ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-4">
-        <div className="p-4 pb-8">
-          <NitroHomepageAd />
-        </div>
-        <div className="container mx-auto px-4">
-          <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-            <div>
-              <p className="text-link mb-2 text-xs font-semibold tracking-[0.2em] uppercase">
-                Explore Our Platform
-              </p>
-              <h2 className="text-primary-text text-3xl font-bold md:text-4xl">
-                Something for Every Jailbreak Player
-              </h2>
             </div>
           </div>
 
