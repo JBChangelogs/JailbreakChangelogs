@@ -244,9 +244,9 @@ export default function InventoryItemCard({
                     className={`${damion.className} pointer-events-auto max-w-full cursor-help px-2 text-center leading-none font-bold whitespace-nowrap text-black italic ${signatureRotation[signer.toLowerCase()] ?? "-rotate-12"} ${signers.length > 2 ? "text-3xl" : "text-4xl"}`}
                     aria-label={`Signed by ${signer}`}
                     style={{
-                      WebkitTextStroke: "2px rgba(255, 255, 255, 0.9)",
+                      WebkitTextStroke: "3px rgba(255, 255, 255, 0.95)",
                       paintOrder: "stroke fill",
-                      filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55))",
+                      filter: "drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8))",
                     }}
                   >
                     {signer}
