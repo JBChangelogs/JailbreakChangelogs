@@ -4,6 +4,7 @@ import {
   fetchRobloxUserByUsername,
   fetchUserNetworth,
   fetchUserMoneyHistory,
+  fetchUserByRobloxId,
   MaxStreamsError,
 } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
@@ -91,11 +92,28 @@ async function InventoryDataFetcher({
       typeof result === "string"
         ? result
         : (result as { message?: string }).message;
+    const userConnectionData =
+      errorMessage?.includes("Inventory not found for this user.") &&
+      /^\d+$/.test(actualRobloxId)
+        ? await fetchUserByRobloxId(actualRobloxId).catch((connectionError) => {
+            if (
+              !(connectionError instanceof Error) ||
+              !connectionError.message.startsWith("PRIVATE_PROFILE:")
+            ) {
+              log.error(
+                "Failed to fetch user connection data",
+                connectionError,
+              );
+            }
+            return null;
+          })
+        : null;
     return (
       <InventoryCheckerClient
         robloxId={actualRobloxId}
         originalSearchTerm={isUsername ? robloxId : undefined}
         error={errorMessage}
+        userConnectionData={userConnectionData}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
         initialNetworthData={[]}

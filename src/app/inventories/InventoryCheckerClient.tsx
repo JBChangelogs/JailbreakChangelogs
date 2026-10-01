@@ -6,9 +6,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
+import { DiscordIcon } from "@/components/Icons/DiscordIcon";
+import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import React from "react";
 
 import { ENABLE_WS_SCAN, INVENTORY_API_URL } from "@/utils/api/api";
@@ -172,6 +179,10 @@ export default function InventoryCheckerClient({
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
+  const linkedProfile =
+    userConnectionData?.id && userConnectionData.roblox_id === robloxId
+      ? userConnectionData
+      : null;
   const shouldBypassTurnstile =
     Boolean(user?.flags?.some((f) => f.flag === "is_owner")) || false;
   const isInventoryNotFoundError = Boolean(
@@ -740,19 +751,61 @@ export default function InventoryCheckerClient({
                       originalSearchTerm ||
                       robloxId}
                   </p>
-                  <Link
-                    href={`https://www.roblox.com/users/${robloxId}/profile`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    prefetch={false}
-                    className="text-link mt-1 inline-flex items-center gap-1 text-xs hover:underline"
-                  >
-                    Roblox profile
-                    <Icon
-                      icon="heroicons:arrow-top-right-on-square"
-                      className="h-3 w-3"
-                    />
-                  </Link>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {linkedProfile && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={`https://discord.com/users/${linkedProfile.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            prefetch={false}
+                            className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                          >
+                            <DiscordIcon className="h-3.5 w-3.5 shrink-0" />
+                            Discord
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>Discord profile</TooltipContent>
+                      </Tooltip>
+                    )}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link
+                          href={`https://www.roblox.com/users/${robloxId}/profile`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          prefetch={false}
+                          className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                        >
+                          <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
+                          Roblox
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>Roblox profile</TooltipContent>
+                    </Tooltip>
+                    {linkedProfile && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={`/users/${linkedProfile.id}`}
+                            prefetch={false}
+                            className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                          >
+                            <Image
+                              src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
+                              alt="JBCL Logo"
+                              width={16}
+                              height={16}
+                              className="h-3.5 w-3.5 shrink-0"
+                            />
+                            Website
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>JBCL profile</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                 </div>
               </div>
 
