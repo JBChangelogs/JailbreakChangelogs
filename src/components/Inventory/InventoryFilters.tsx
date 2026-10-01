@@ -34,6 +34,7 @@ interface InventoryFiltersProps {
   setSelectedCategories: (categories: string[]) => void;
   showOnlyOriginal: boolean;
   showOnlyNonOriginal: boolean;
+  showOnlySigned: boolean;
   hideDuplicates: boolean;
   showMissingItems: boolean;
   showOnlyLimited: boolean;
@@ -43,6 +44,7 @@ interface InventoryFiltersProps {
   availableCategories: string[];
   onFilterToggle: (checked: boolean) => void;
   onNonOriginalFilterToggle: (checked: boolean) => void;
+  onSignedFilterToggle: (checked: boolean) => void;
   onHideDuplicatesToggle: (checked: boolean) => void;
   onShowMissingItemsToggle: (checked: boolean) => void;
   onLimitedFilterToggle: (checked: boolean) => void;
@@ -61,6 +63,7 @@ export default function InventoryFilters({
   setSelectedCategories,
   showOnlyOriginal,
   showOnlyNonOriginal,
+  showOnlySigned,
   hideDuplicates,
   showMissingItems,
   showOnlyLimited,
@@ -70,6 +73,7 @@ export default function InventoryFilters({
   availableCategories,
   onFilterToggle,
   onNonOriginalFilterToggle,
+  onSignedFilterToggle,
   onHideDuplicatesToggle,
   onShowMissingItemsToggle,
   onLimitedFilterToggle,
@@ -275,6 +279,20 @@ export default function InventoryFilters({
             inline={true}
           />
           Non-OG Only
+        </Button>
+        <Button
+          onClick={() => onSignedFilterToggle(!showOnlySigned)}
+          size="sm"
+          variant={showOnlySigned ? "default" : "secondary"}
+          className="w-fit"
+          aria-pressed={showOnlySigned}
+        >
+          <Icon
+            icon="heroicons:pencil-square"
+            className="h-4 w-4"
+            inline={true}
+          />
+          Signed Only
         </Button>
         <Button
           onClick={() => onLimitedFilterToggle(!showOnlyLimited)}

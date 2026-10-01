@@ -64,6 +64,7 @@ export default function InventoryItems({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showOnlyOriginal, setShowOnlyOriginal] = useState(false);
   const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(false);
+  const [showOnlySigned, setShowOnlySigned] = useState(false);
   const [hideDuplicates, setHideDuplicates] = useState(false);
   const [showMissingItems, setShowMissingItems] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
@@ -144,6 +145,11 @@ export default function InventoryItems({
     }, 300);
   };
 
+  const handleSignedFilterToggle = (checked: boolean) => {
+    setShowOnlySigned(checked);
+    if (checked) setShowMissingItems(false);
+  };
+
   const handleHideDuplicatesToggle = (checked: boolean) => {
     setIsFiltering(true);
     if (checked) {
@@ -172,6 +178,7 @@ export default function InventoryItems({
       setShowMissingItems(true);
       setShowOnlyOriginal(false);
       setShowOnlyNonOriginal(false);
+      setShowOnlySigned(false);
       setHideDuplicates(false);
     } else {
       setShowMissingItems(false);
@@ -438,6 +445,8 @@ export default function InventoryItems({
         }
       }
 
+      if (showOnlySigned && !item.Sign?.some(Boolean)) return false;
+
       if (showOnlyLimited && itemData?.is_limited !== 1) return false;
       if (showOnlySeasonal && itemData?.is_seasonal !== 1) return false;
 
@@ -496,6 +505,7 @@ export default function InventoryItems({
     showOnlyUntradable,
     showOnlyOriginal,
     showOnlyNonOriginal,
+    showOnlySigned,
     hideDuplicates,
     sortOrder,
   ]);
@@ -565,6 +575,7 @@ export default function InventoryItems({
         setSelectedCategories={setSelectedCategories}
         showOnlyOriginal={showOnlyOriginal}
         showOnlyNonOriginal={showOnlyNonOriginal}
+        showOnlySigned={showOnlySigned}
         hideDuplicates={hideDuplicates}
         showMissingItems={showMissingItems}
         showOnlyLimited={showOnlyLimited}
@@ -574,6 +585,7 @@ export default function InventoryItems({
         availableCategories={availableCategories}
         onFilterToggle={handleOriginalFilterToggle}
         onNonOriginalFilterToggle={handleNonOriginalFilterToggle}
+        onSignedFilterToggle={handleSignedFilterToggle}
         onHideDuplicatesToggle={handleHideDuplicatesToggle}
         onShowMissingItemsToggle={handleShowMissingItemsToggle}
         onLimitedFilterToggle={handleLimitedFilterToggle}
@@ -591,6 +603,7 @@ export default function InventoryItems({
           {searchTerm ||
           showOnlyOriginal ||
           showOnlyNonOriginal ||
+          showOnlySigned ||
           hideDuplicates ||
           showMissingItems ||
           showOnlyLimited ||
@@ -608,7 +621,7 @@ export default function InventoryItems({
                     : ""
               }${hideDuplicates ? " (Duplicates hidden)" : ""}${
                 showMissingItems ? " (Missing items)" : ""
-              }${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}${showOnlyTradable ? " (Tradable only)" : ""}${
+              }${showOnlySigned ? " (Signed only)" : ""}${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}${showOnlyTradable ? " (Tradable only)" : ""}${
                 showOnlyUntradable ? " (Untradable only)" : ""
               }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`
             : `Total Items: ${filteredAndSortedItems.length}`}
