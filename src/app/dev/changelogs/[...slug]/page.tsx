@@ -10,7 +10,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
-import type { PhrasingContent, Root } from "mdast";
+import { omitRepeatedReleaseHeading } from "@/lib/remark-omit-release-heading";
 import { Icon } from "@/components/ui/IconWrapper";
 
 import {
@@ -28,28 +28,6 @@ interface PageProps {
 async function getChangelogEntry(slugArray: string[]) {
   const slug = slugArray.join("/");
   return await getChangelogEntryBySlug(slug);
-}
-
-function headingText(node: PhrasingContent): string {
-  if ("value" in node && typeof node.value === "string") return node.value;
-  if ("children" in node) return node.children.map(headingText).join("");
-  return "";
-}
-
-function omitRepeatedReleaseHeading(version: string) {
-  return (tree: Root) => {
-    const first = tree.children[0];
-    if (first?.type !== "heading") return;
-
-    const heading = first.children.map(headingText).join("").trim();
-    const normalized = heading.startsWith("v") ? heading.slice(1) : heading;
-    if (
-      normalized === version ||
-      (normalized.startsWith(`${version} (`) && normalized.endsWith(")"))
-    ) {
-      tree.children.shift();
-    }
-  };
 }
 
 // Revalidate every 10 minutes

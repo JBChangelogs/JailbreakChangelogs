@@ -10,6 +10,7 @@ import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import Footer from "@/components/Layout/Footer";
 import VersionInfoWrapper from "@/components/Layout/VersionInfoWrapper";
 import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
+import LatestReleaseDialog from "@/components/Changelogs/LatestReleaseDialog";
 import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
 import OfflineNavigationRecovery from "@/components/Layout/OfflineNavigationRecovery";
@@ -183,6 +184,9 @@ export default async function RootLayout({
                   <AuthProvider>
                     <SiteBanGate>
                       <RybbitIdentity />
+                      <Suspense fallback={null}>
+                        <LatestReleaseDialog />
+                      </Suspense>
                       <AdErrorBoundary>
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
@@ -318,6 +322,9 @@ export default async function RootLayout({
               <AuthProvider>
                 <SiteBanGate>
                   <RybbitIdentity />
+                  <Suspense fallback={null}>
+                    <LatestReleaseDialog />
+                  </Suspense>
                   <NitroBottomAnchor />
                   <NitroVideoPlayer />
                   <NitroAnchorCloseSupporterModal />

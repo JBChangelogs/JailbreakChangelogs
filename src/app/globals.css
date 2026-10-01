@@ -14,6 +14,11 @@
   text-decoration: underline;
 }
 
+body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor,
+body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
+  display: none !important;
+}
+
 @theme {
   /* DARK THEME - Default (current theme) */
   /* Background Colors - Comprehensive Gray Scale */

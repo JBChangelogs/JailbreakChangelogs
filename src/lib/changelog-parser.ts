@@ -104,6 +104,44 @@ export const getCachedChangelogEntries = cache(
   },
 );
 
+export const getCachedLatestChangelogEntry = cache(
+  async (): Promise<ChangelogEntry | null> => {
+    try {
+      const headers: HeadersInit = {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      };
+
+      if (process.env.GITHUB_TOKEN) {
+        headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+      }
+
+      const url = new URL(process.env.GITHUB_API_RELEASES_URL!);
+      url.pathname = `${url.pathname.replace(/\/$/, "")}/latest`;
+      url.search = "";
+
+      const response = await fetch(url, {
+        headers,
+        next: { revalidate: 600 },
+      });
+
+      if (!response.ok) {
+        log.error("fetch latest release failed", {
+          status: response.status,
+          statusText: response.statusText,
+        });
+        return null;
+      }
+
+      const release: GithubRelease = await response.json();
+      return mapGithubReleaseToEntry(release);
+    } catch (error) {
+      log.error("Error fetching latest changelog from GitHub:", error);
+      return null;
+    }
+  },
+);
+
 /**
  * Fetches a single changelog entry from GitHub Releases API by its slug (version/tag).
  * Following the "Get a release" API pattern but using the tag-based variant to preserve human-readable URLs.
