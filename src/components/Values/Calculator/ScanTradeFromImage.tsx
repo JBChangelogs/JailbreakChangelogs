@@ -208,26 +208,27 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
     [onScanSuccess],
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    multiple: false,
-    maxFiles: 1,
-    noClick: false,
-    noKeyboard: true,
-    disabled: isScanning,
-    accept: {
-      "image/png": [".png"],
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/jpg": [".jpg"],
-    },
-    onDrop: (acceptedFiles, _rejected, event) => {
-      const file = acceptedFiles[0];
-      if (file) {
-        const source =
-          event instanceof Event && event.type === "drop" ? "drag" : "picker";
-        void scanFile(file, source);
-      }
-    },
-  });
+  const { getRootProps, getInputProps, isDragActive, isDragReject } =
+    useDropzone({
+      multiple: false,
+      maxFiles: 1,
+      noClick: false,
+      noKeyboard: true,
+      disabled: isScanning,
+      accept: {
+        "image/png": [".png"],
+        "image/jpeg": [".jpg", ".jpeg"],
+        "image/jpg": [".jpg"],
+      },
+      onDrop: (acceptedFiles, _rejected, event) => {
+        const file = acceptedFiles[0];
+        if (file) {
+          const source =
+            event instanceof Event && event.type === "drop" ? "drag" : "picker";
+          void scanFile(file, source);
+        }
+      },
+    });
 
   useEffect(() => {
     const isEditableTarget = (target: EventTarget | null): boolean => {
@@ -262,47 +263,69 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
     <div data-component="scan-trade-from-image">
       <div
         className={[
-          "border-border-card hover:border-border-focus bg-secondary-bg flex items-center gap-3 rounded-lg border-2 border-dashed p-4 text-left transition-colors",
-          isDragActive ? "border-border-focus bg-tertiary-bg" : "",
+          "flex items-center gap-4 rounded-lg border-2 border-dashed p-5 text-left transition-all duration-150",
+          isDragActive
+            ? isDragReject
+              ? "border-status-error bg-status-error/10 ring-2 ring-status-error/25"
+              : "border-button-info bg-button-info/10 ring-2 ring-button-info/25"
+            : "border-border-card hover:border-border-focus bg-secondary-bg",
           isScanning ? "cursor-progress opacity-80" : "cursor-pointer",
         ].join(" ")}
         {...getRootProps({ role: "button", tabIndex: 0 })}
       >
         <input {...getInputProps()} />
         {isScanning ? (
-          <Spinner className="text-secondary-text h-6 w-6 shrink-0" />
+          <Spinner className="text-secondary-text h-7 w-7 shrink-0" />
         ) : (
           <Icon
             icon="material-symbols:cloud-upload"
-            className="text-secondary-text h-6 w-6 shrink-0"
+            className={`h-7 w-7 shrink-0 transition-transform duration-150 ${
+              isDragActive
+                ? isDragReject
+                  ? "text-status-error scale-125"
+                  : "text-button-info scale-125"
+                : "text-secondary-text"
+            }`}
           />
         )}
-        <div className="min-w-0">
+        <div className="min-w-0" aria-live="polite">
           {isScanning ? (
-            <p className="text-primary-text text-sm font-semibold">
+            <p className="text-primary-text text-base font-semibold">
               Scanning{lastFileName ? ` ${lastFileName}` : ""}...
-              <span className="text-secondary-text ml-2 font-normal">
+              <span className="text-secondary-text ml-2 text-sm font-normal">
                 This can take a few seconds
               </span>
             </p>
+          ) : isDragActive ? (
+            <p className="text-primary-text text-base font-semibold">
+              {isDragReject
+                ? "Only PNG and JPG screenshots are supported"
+                : "Drop screenshot to scan"}
+            </p>
           ) : (
-            <p className="text-primary-text text-sm font-semibold">
+            <p className="text-primary-text text-base font-semibold">
               Scan a trade screenshot
-              <span className="text-secondary-text ml-2 font-normal">
+              <span className="text-secondary-text ml-2 text-sm font-normal">
                 — {helpText}
               </span>
             </p>
           )}
-          <p className="text-secondary-text mt-0.5 text-xs">
-            Click, drop, or paste (Ctrl+V / ⌘V) · {acceptedTypesText}
+          <p className="text-secondary-text mt-1 text-sm">
+            {isDragActive
+              ? isDragReject
+                ? "Choose a PNG or JPG/JPEG image."
+                : "Release to upload your trade screenshot."
+              : `Click, drop, or paste (Ctrl+V / ⌘V) · ${acceptedTypesText}`}
           </p>
 
           {lastErrorMessage && (
-            <p className="mt-1 text-xs text-red-400">{lastErrorMessage}</p>
+            <p className="mt-1 text-sm font-medium text-red-400">
+              {lastErrorMessage}
+            </p>
           )}
 
           {lastFileName && !isScanning && (
-            <p className="text-secondary-text/70 mt-1 text-xs">
+            <p className="text-secondary-text mt-1 text-sm">
               Last uploaded file: {lastFileName}
             </p>
           )}
