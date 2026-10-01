@@ -10,6 +10,8 @@ import {
 } from "@/utils/trading/tradeItems";
 import { TradeItemMarketDetails, TradeItemNote } from "./TradeItemContext";
 import { QuickAddPopover } from "./QuickAddPopover";
+import { DupedBadge } from "./DupedBadge";
+import { OgBadge } from "./OgBadge";
 
 interface ItemGridProps {
   items: TradeItem[];
@@ -322,17 +324,15 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                           </span>
                         )}
                       </p>
-                      <span
-                        className={`inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold ${
-                          item.isDuped
-                            ? "bg-status-error text-form-button-text"
-                            : item.isOG
-                              ? "bg-button-info text-form-button-text"
-                              : "bg-status-success text-form-button-text"
-                        }`}
-                      >
-                        {item.isDuped ? "Duped" : item.isOG ? "OG" : "Clean"}
-                      </span>
+                      {item.isDuped ? (
+                        <DupedBadge compact />
+                      ) : item.isOG ? (
+                        <OgBadge compact />
+                      ) : (
+                        <span className="bg-status-success text-form-button-text inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold">
+                          Clean
+                        </span>
+                      )}
                     </div>
                   )}
                   {!isCustom && (

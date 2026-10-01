@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
+import { DupedBadge } from "@/components/trading/DupedBadge";
+import { OgBadge } from "@/components/trading/OgBadge";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { createLogger } from "@/services/logger";
 import { DefaultAvatar } from "@/utils/ui/avatar";
@@ -130,16 +132,12 @@ function TradeItems({
               <span className="text-primary-text font-medium">
                 {item.title}
               </span>
-              {item.is_duplicate_branch && (
-                <span className="text-status-warning">Duped</span>
-              )}
+              {item.is_duplicate_branch && <DupedBadge compact />}
               {item.given_by_original_owner && (
-                <span
-                  className="text-primary-text rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1 font-semibold"
+                <OgBadge
+                  compact
                   title="The original owner gave this item in this trade."
-                >
-                  OG
-                </span>
+                />
               )}
             </li>
           ))}

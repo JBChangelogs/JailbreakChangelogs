@@ -965,7 +965,7 @@ export default function TradeItemPickerV2({
                               }}
                               className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
                                 condition === "og"
-                                  ? "bg-button-info border-button-info text-form-button-text"
+                                  ? "text-primary-text border-[#FFD700]/50 bg-[#FFD700]/10"
                                   : "bg-tertiary-bg border-border-card text-secondary-text"
                               }`}
                             >

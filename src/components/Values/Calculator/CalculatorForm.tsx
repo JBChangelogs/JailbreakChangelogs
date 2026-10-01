@@ -14,6 +14,7 @@ import {
 import NitroCalculatorAd from "@/components/Ads/NitroCalculatorAd";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
@@ -39,11 +40,13 @@ const log = createLogger("UI");
 interface CalculatorFormProps {
   initialItems?: TradeItem[];
   itemsInputMode?: "picker" | "inventory";
+  onItemsInputModeChange?: (mode: "picker" | "inventory") => void;
 }
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   initialItems = [],
   itemsInputMode = "picker",
+  onItemsInputModeChange,
 }) => {
   const {
     user,
@@ -319,7 +322,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     let cancelled = false;
     const candidateRevision = restoreCandidateRevisionRef.current;
     const hydrateCompact = async (
-      items: { id: number; isDuped: boolean }[],
+      items: { id: number; isDuped: boolean; isOG?: boolean }[],
     ): Promise<TradeItem[]> => {
       const resolved = await fetchTradeItemsByIds(
         items.map((item) => item.id),
@@ -327,13 +330,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       );
       const byId = new Map(resolved.map((it) => [it.id, it]));
       return items
-        .map(({ id, isDuped }) => {
+        .map(({ id, isDuped, isOG }) => {
           const base = byId.get(id);
           if (!base) return null;
           return {
             ...base,
             isDuped,
-            isOG: false,
+            isOG: !!isOG,
             instanceId: Math.random().toString(36).substring(2, 11),
           } as TradeItem;
         })
@@ -345,8 +348,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       if (typeof remoteRaw === "string" && remoteRaw) {
         try {
           const remote = JSON.parse(remoteRaw) as {
-            offering?: { id: number; isDuped: boolean }[];
-            requesting?: { id: number; isDuped: boolean }[];
+            offering?: { id: number; isDuped: boolean; isOG?: boolean }[];
+            requesting?: { id: number; isDuped: boolean; isOG?: boolean }[];
           };
           const [hydOff, hydReq] = await Promise.all([
             hydrateCompact(remote.offering ?? []),
@@ -432,10 +435,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           offering: offering.map((it) => ({
             id: it.id,
             isDuped: it.isDuped || false,
+            isOG: it.isOG || false,
           })),
           requesting: requesting.map((it) => ({
             id: it.id,
             isDuped: it.isDuped || false,
+            isOG: it.isOG || false,
           })),
         };
         window.dispatchEvent(
@@ -504,17 +509,19 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
       try {
         const remote = JSON.parse(value) as {
-          offering?: { id: number; isDuped: boolean }[];
-          requesting?: { id: number; isDuped: boolean }[];
+          offering?: { id: number; isDuped: boolean; isOG?: boolean }[];
+          requesting?: { id: number; isDuped: boolean; isOG?: boolean }[];
         };
         const remoteCompact = {
           offering: (remote.offering ?? []).map((it) => ({
             id: it.id,
             isDuped: !!it.isDuped,
+            isOG: !!it.isOG,
           })),
           requesting: (remote.requesting ?? []).map((it) => ({
             id: it.id,
             isDuped: !!it.isDuped,
+            isOG: !!it.isOG,
           })),
         };
         const resolved = await fetchTradeItemsByIds(
@@ -534,25 +541,27 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           offering: offeringItemsRef.current.map((it) => ({
             id: it.id,
             isDuped: !!it.isDuped,
+            isOG: !!it.isOG,
           })),
           requesting: requestingItemsRef.current.map((it) => ({
             id: it.id,
             isDuped: !!it.isDuped,
+            isOG: !!it.isOG,
           })),
         };
         if (JSON.stringify(remoteCompact) === JSON.stringify(current)) return;
         const byId = new Map(resolved.map((it) => [it.id, it]));
         const rehydrate = (
-          items: { id: number; isDuped: boolean }[],
+          items: { id: number; isDuped: boolean; isOG?: boolean }[],
         ): TradeItem[] =>
           (items ?? [])
-            .map(({ id, isDuped }) => {
+            .map(({ id, isDuped, isOG }) => {
               const base = byId.get(id);
               if (!base) return null;
               return {
                 ...base,
                 isDuped,
-                isOG: false,
+                isOG: !!isOG,
                 instanceId: Math.random().toString(36).substring(2, 11),
               } as TradeItem;
             })
@@ -649,7 +658,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             instanceId:
               item.instanceId || Math.random().toString(36).substring(2, 11),
             isDuped: item.isDuped || false,
-            isOG: false,
+            isOG: !!item.isOG,
           }));
 
         restoreSessionRef.current = "ready";
@@ -706,7 +715,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       ...item,
       instanceId: Math.random().toString(36).substring(2, 11),
       isDuped: !!item.isDuped,
-      isOG: false,
+      isOG: !!item.isOG,
     };
 
     if (side === "offering") {
@@ -832,13 +841,21 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         // If instanceId is provided, only update that specific instance
         if (instanceId) {
           if (item.instanceId === instanceId) {
-            return { ...item, isDuped: valueType === "duped" };
+            return {
+              ...item,
+              isDuped: valueType === "duped",
+              isOG: valueType === "duped" ? false : item.isOG,
+            };
           }
           return item;
         }
         // Fallback: update all matching by ID (old behavior or when group toggled)
         if (item.id === itemId) {
-          return { ...item, isDuped: valueType === "duped" };
+          return {
+            ...item,
+            isDuped: valueType === "duped",
+            isOG: valueType === "duped" ? false : item.isOG,
+          };
         }
         return item;
       });
@@ -937,6 +954,25 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
       {/* Browse — full width below panels (matches /trading#create item picker placement) */}
       <div className="mt-6 w-full min-w-0">
+        {onItemsInputModeChange && (
+          <div className="mb-6">
+            <Tabs
+              value={itemsInputMode}
+              onValueChange={(value) =>
+                onItemsInputModeChange(value as "picker" | "inventory")
+              }
+            >
+              <TabsList fullWidth>
+                <TabsTrigger value="inventory" fullWidth>
+                  Inventory Items
+                </TabsTrigger>
+                <TabsTrigger value="picker" fullWidth>
+                  Values List
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        )}
         <h2 className="text-primary-text mb-5 text-xl font-semibold md:mb-6">
           {itemsInputMode === "inventory"
             ? "Browse Inventory Items"
@@ -956,7 +992,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               selectedItems={[...offeringItems, ...requestingItems]}
               customTypes={[]}
               onAddCustomType={() => {}}
-              allowOg={false}
+              allowOg
               activeSide={pickerActiveSide}
               onActiveSideChange={setPickerActiveSide}
               showOfferRequestButtons
@@ -1068,7 +1104,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                   selectedItems={[...offeringItems, ...requestingItems]}
                   customTypes={[]}
                   onAddCustomType={() => {}}
-                  allowOg={false}
+                  allowOg
                   activeSide={pickerActiveSide}
                   onActiveSideChange={setPickerActiveSide}
                   showOfferRequestButtons

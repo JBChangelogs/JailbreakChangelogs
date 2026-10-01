@@ -340,7 +340,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
                               ? "border-status-success bg-status-success text-form-button-text"
                               : option === "duped"
                                 ? "border-status-error bg-status-error text-form-button-text"
-                                : "border-button-info bg-button-info text-form-button-text"
+                                : "text-primary-text border-[#FFD700]/50 bg-[#FFD700]/10"
                             : "border-border-card bg-secondary-bg text-secondary-text hover:text-primary-text"
                         }`}
                       >

@@ -1,5 +1,8 @@
-import { PUBLIC_API_URL } from "@/utils/api/api";
-import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
+import {
+  fetchPartialItems,
+  PUBLIC_API_URL,
+  type PartialItem,
+} from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
@@ -8,20 +11,6 @@ const log = createLogger("API");
 async function fetchSeason(id: string) {
   try {
     const response = await fetch(`${PUBLIC_API_URL}/v2/seasons/${id}`);
-    if (!response.ok) return null;
-    return await response.json();
-  } catch {
-    return null;
-  }
-}
-
-async function fetchItemById(id: string) {
-  try {
-    const response = await fetchWithRetry(
-      `${PUBLIC_API_URL}/v2/items/${encodeURIComponent(id)}`,
-      undefined,
-      { maxRetries: 3, initialDelayMs: 800, timeoutMs: 10000 },
-    );
     if (!response.ok) return null;
     return await response.json();
   } catch {
@@ -81,15 +70,19 @@ export async function fetchCommentDetails(
     ];
 
     const [items, seasons] = await Promise.all([
-      Promise.all(itemIds.map((id) => fetchItemById(id))),
+      itemIds.length > 0
+        ? fetchPartialItems<PartialItem>(["name", "type"])
+        : Promise.resolve([]),
       Promise.all(seasonIds.map((id) => fetchSeason(id))),
     ]);
 
     const itemMap: Record<string, unknown> = {};
     const seasonMap: Record<string, unknown> = {};
 
-    itemIds.forEach((id, index) => {
-      if (items[index]) itemMap[id] = items[index];
+    const requestedItemIds = new Set(itemIds);
+    items.forEach((item) => {
+      if (requestedItemIds.has(String(item.id)))
+        itemMap[String(item.id)] = item;
     });
     seasonIds.forEach((id, index) => {
       if (seasons[index]) seasonMap[id] = seasons[index];

@@ -21,6 +21,8 @@ import {
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { PendingTradeItemsPlaceholder } from "@/components/Inventory/PendingTradeItemsPlaceholder";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
+import { DupedBadge } from "@/components/trading/DupedBadge";
+import { OgBadge } from "@/components/trading/OgBadge";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { usePartialItemFields } from "@/hooks/usePartialItems";
 import { createLogger } from "@/services/logger";
@@ -294,18 +296,12 @@ function TradeItem({
             )}
             {item.category_title}
           </span>
-          {item.is_duplicate_branch && (
-            <span className="bg-status-error text-primary-text inline-flex rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold sm:text-xs">
-              Duped copy
-            </span>
-          )}
+          {item.is_duplicate_branch && <DupedBadge compact />}
           {item.given_by_original_owner && (
-            <span
-              className="text-primary-text inline-flex rounded border border-[#FFD700]/50 bg-[#FFD700]/10 px-1.5 py-0.5 text-[10px] leading-none font-semibold sm:text-xs"
+            <OgBadge
+              compact
               title="The item's original owner gave it in this trade."
-            >
-              OG
-            </span>
+            />
           )}
           {item.received_by_original_owner && (
             <span

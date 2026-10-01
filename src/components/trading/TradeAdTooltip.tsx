@@ -6,6 +6,8 @@ import { formatFullValue } from "@/utils/trading/values";
 import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import { getTradeItemDetailHref } from "@/utils/trading/tradeItems";
 import { Icon } from "@/components/ui/IconWrapper";
+import { DupedBadge } from "@/components/trading/DupedBadge";
+import { OgBadge } from "@/components/trading/OgBadge";
 
 interface TradeAdTooltipProps {
   item: TradeItem;
@@ -78,16 +80,8 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
                 Seasonal
               </span>
             )}
-            {item.isDuped && (
-              <span className="border-status-error bg-status-error/90 text-form-button-text flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-semibold">
-                Duped
-              </span>
-            )}
-            {item.isOG && (
-              <span className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium">
-                OG
-              </span>
-            )}
+            {item.isDuped && <DupedBadge />}
+            {item.isOG && <OgBadge />}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-secondary-text text-xs tracking-wider uppercase">

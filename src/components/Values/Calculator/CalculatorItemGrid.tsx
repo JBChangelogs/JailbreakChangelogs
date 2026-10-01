@@ -11,6 +11,8 @@ import { Icon } from "../../ui/IconWrapper";
 import { formatCurrencyValue, parseValueString } from "./calculatorUtils";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { QuickAddPopover } from "@/components/trading/QuickAddPopover";
+import { DupedBadge } from "@/components/trading/DupedBadge";
+import { OgBadge } from "@/components/trading/OgBadge";
 import {
   TradeItemMarketDetails,
   TradeItemNote,
@@ -159,9 +161,12 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                     )}
                     {isDupedSelected && (
                       <div className="absolute top-1 left-1 z-10">
-                        <span className="bg-status-error/90 text-form-button-text inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold">
-                          Duped
-                        </span>
+                        <DupedBadge compact />
+                      </div>
+                    )}
+                    {item.isOG && !isDupedSelected && (
+                      <div className="absolute top-1 left-1 z-10">
+                        <OgBadge compact />
                       </div>
                     )}
                   </div>
@@ -259,6 +264,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             key="quick-add"
             items={catalogItems ?? []}
             useCatalogApi={useCatalogApi}
+            allowOg
             onSelect={(item) => onDuplicate?.(item)}
           >
             <button

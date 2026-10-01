@@ -1,7 +1,22 @@
-import { fetchItemByIdClient } from "@/utils/api/api";
+import { fetchPartialItems } from "@/utils/api/api";
 import type { TradeItem } from "@/types/trading";
 
-const itemCache = new Map<number, Promise<TradeItem | null>>();
+const TRADE_ITEM_FIELDS = [
+  "name",
+  "type",
+  "cash_value",
+  "duped_value",
+  "is_limited",
+  "is_seasonal",
+  "season",
+  "level",
+  "tradable",
+  "trend",
+  "demand",
+  "duped_demand",
+] as const;
+
+let catalogRequest: Promise<Map<number, TradeItem>> | null = null;
 
 export async function fetchTradeItemsByIds(
   ids: number[],
@@ -9,28 +24,26 @@ export async function fetchTradeItemsByIds(
 ): Promise<TradeItem[]> {
   const known = new Map(knownItems.map((item) => [item.id, item]));
   const uniqueIds = [...new Set(ids)];
-  const results: TradeItem[] = [];
-  for (let index = 0; index < uniqueIds.length; index += 8) {
-    const batch = await Promise.all(
-      uniqueIds.slice(index, index + 8).map(async (id) => {
-        if (known.has(id)) return known.get(id) ?? null;
-        let request = itemCache.get(id);
-        if (!request) {
-          request = fetchItemByIdClient(String(id)).then((item) =>
-            item
-              ? {
-                  ...item,
-                  tradable: Number(item.tradable),
-                  is_sub: false,
-                }
-              : null,
-          );
-          itemCache.set(id, request);
-        }
-        return request;
-      }),
-    );
-    results.push(...batch.filter((item): item is TradeItem => item !== null));
+  const needsCatalog = uniqueIds.some((id) => !known.has(id));
+  if (needsCatalog && !catalogRequest) {
+    catalogRequest = fetchPartialItems<TradeItem>(TRADE_ITEM_FIELDS)
+      .then(
+        (items) =>
+          new Map(
+            items.map((item) => [
+              item.id,
+              { ...item, tradable: Number(item.tradable), is_sub: false },
+            ]),
+          ),
+      )
+      .catch((error) => {
+        catalogRequest = null;
+        throw error;
+      });
   }
-  return results;
+
+  const catalog = needsCatalog && catalogRequest ? await catalogRequest : null;
+  return uniqueIds
+    .map((id) => known.get(id) ?? catalog?.get(id) ?? null)
+    .filter((item): item is TradeItem => item !== null);
 }

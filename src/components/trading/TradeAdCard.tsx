@@ -10,6 +10,8 @@ import { handleImageError } from "@/utils/ui/images";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
+import { DupedBadge } from "./DupedBadge";
+import { OgBadge } from "./OgBadge";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import {
@@ -220,16 +222,8 @@ const TradeSidePreview = ({
                           })()}
                           {item.type}
                         </span>
-                        {item.isDuped && (
-                          <span className="bg-status-error/90 inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-semibold text-white">
-                            Duped
-                          </span>
-                        )}
-                        {item.isOG && (
-                          <span className="inline-flex h-6 items-center rounded-lg border border-white/10 bg-black/40 px-2.5 text-xs leading-none font-semibold text-white">
-                            OG
-                          </span>
-                        )}
+                        {item.isDuped && <DupedBadge />}
+                        {item.isOG && <OgBadge />}
                       </div>
                       {!isCustomTradeItem(item) && (
                         <div className="mt-2 flex items-center justify-between gap-2">

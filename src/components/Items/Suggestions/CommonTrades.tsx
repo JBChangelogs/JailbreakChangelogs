@@ -9,6 +9,8 @@ import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { badgeBase } from "@/components/Items/Suggestions/shared";
+import { DupedBadge } from "@/components/trading/DupedBadge";
+import { OgBadge } from "@/components/trading/OgBadge";
 import type { Item } from "@/types/index";
 import type { TradeItem } from "@/types/trading";
 import type {
@@ -169,16 +171,8 @@ function TradeItemSummary({
                 {item.type}
               </span>
             )}
-            {isOg && (
-              <span className="border-button-info/40 bg-button-info/10 text-link rounded border px-1 py-0.5 text-[10px] font-semibold">
-                OG
-              </span>
-            )}
-            {isDuped && (
-              <span className="border-button-danger/40 bg-button-danger/10 text-form-error rounded border px-1 py-0.5 text-[10px] font-semibold">
-                Duped
-              </span>
-            )}
+            {isOg && <OgBadge compact />}
+            {isDuped && <DupedBadge compact />}
           </div>
         )}
       </div>
