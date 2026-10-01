@@ -117,6 +117,20 @@ export default function LatestReleaseDialogClient({
               ]}
               rehypePlugins={[rehypeRaw, rehypeSanitize]}
               components={{
+                a: ({ href, className, children, ...props }) => {
+                  const external = /^https?:\/\//i.test(href ?? "");
+                  return (
+                    <a
+                      {...props}
+                      href={href}
+                      target={external ? "_blank" : undefined}
+                      rel={external ? "noopener noreferrer" : undefined}
+                      className={`text-link hover:text-link-hover transition-colors ${className || ""}`}
+                    >
+                      {children}
+                    </a>
+                  );
+                },
                 li: ({ children, className, ...props }) => (
                   <li
                     {...props}
