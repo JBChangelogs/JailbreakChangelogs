@@ -623,7 +623,7 @@ export default function InventoryItems({
                     : ""
               }${hideDuplicates ? " (Duplicates hidden)" : ""}${
                 showMissingItems ? " (Missing items)" : ""
-              }${showOnlySigned ? " (Signed only)" : ""}${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}${showOnlyTradable ? " (Tradable only)" : ""}${
+              }${showOnlySigned ? " (Autographed only)" : ""}${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}${showOnlyTradable ? " (Tradable only)" : ""}${
                 showOnlyUntradable ? " (Untradable only)" : ""
               }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`
             : `Total Items: ${filteredAndSortedItems.length}`}

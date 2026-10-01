@@ -193,7 +193,7 @@ export default function TradeHistoryModal({
               </div>
               {signers.length > 0 && (
                 <p className="text-secondary-text mt-2 text-sm">
-                  Signed by{" "}
+                  Autographed by{" "}
                   <span className="text-primary-text font-medium">
                     {signers.join(", ")}
                   </span>

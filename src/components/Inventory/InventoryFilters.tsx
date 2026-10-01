@@ -292,7 +292,7 @@ export default function InventoryFilters({
             className="h-4 w-4"
             inline={true}
           />
-          Signed Only
+          Autographed Only
         </Button>
         <Button
           onClick={() => onLimitedFilterToggle(!showOnlyLimited)}

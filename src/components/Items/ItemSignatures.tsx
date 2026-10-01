@@ -28,7 +28,7 @@ export default function ItemSignatures({ signs }: ItemSignaturesProps) {
           <TooltipTrigger asChild>
             <span
               className={`${damion.className} pointer-events-auto max-w-full cursor-help px-2 text-center leading-none font-bold whitespace-nowrap text-black italic ${signatureRotation[signer.toLowerCase()] ?? "-rotate-12"} ${signers.length > 2 ? "text-3xl" : "text-4xl"}`}
-              aria-label={`Signed by ${signer}`}
+              aria-label={`Autographed by ${signer}`}
               style={{
                 WebkitTextStroke: "3px rgba(255, 255, 255, 0.95)",
                 paintOrder: "stroke fill",
@@ -38,7 +38,7 @@ export default function ItemSignatures({ signs }: ItemSignaturesProps) {
               {signer}
             </span>
           </TooltipTrigger>
-          <TooltipContent>Signed by {signer}</TooltipContent>
+          <TooltipContent>Autographed by {signer}</TooltipContent>
         </Tooltip>
       ))}
     </div>
