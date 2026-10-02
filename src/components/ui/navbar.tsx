@@ -247,8 +247,8 @@ export const NavbarModern = ({
     setShowLoginModal,
     setLoginModal,
     user: authUser,
-    isAuthenticated,
-    isLoading,
+    isAuthenticated: isAuthenticatedRaw,
+    isLoading: isLoadingRaw,
     logout,
     wsConnected,
   } = useAuthContext();
@@ -256,6 +256,12 @@ export const NavbarModern = ({
     useWsConnectionPending(wsConnected);
 
   const { resolvedTheme } = useTheme();
+  // Auth resolves from cache in an effect, which can run before this Suspense
+  // boundary hydrates; render the server's logged-out shape until mounted
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  const isLoading = !mounted || isLoadingRaw;
+  const isAuthenticated = mounted && isAuthenticatedRaw;
   const userData = isAuthenticated ? authUser : null;
   const shouldShowSupportButton = (userData?.premiumtype ?? 0) <= 0;
 
