@@ -37,12 +37,13 @@ At this point, you're ready to make your changes! Feel free to ask for help; eve
 
 Your patch should follow the same coding conventions & pass the same code quality checks as the rest of the project. Make sure all features work as intended before you make a Pull Request.
 
-## Formatting & Linting
+## Formatting, Linting & Tests
 
 We enforce Oxlint + Oxfmt via Git hooks (Husky + lint-staged).
 
 - On commit: staged files are auto-fixed and formatted
   - Runs `oxlint --fix` and `oxfmt` on staged JS/TS files
+  - Runs the full test suite with `bun run test`
   - If issues remain, the commit is blocked; fix and re-commit
 
 - On push: formatting and linting are verified
@@ -52,8 +53,12 @@ Manual commands (if needed):
 
 ```
 bun run format  # auto-fix formatting
-bun run check   # type-check + lint + format check
+bun run check   # formatting check + type-check + lint + tests
+bun test        # run all tests
+bun test src/utils/trading/values.test.ts  # run one test file
 ```
+
+All tests must pass before submitting a Pull Request. GitHub Actions also runs the tests for every PR. For bug fixes and changes to business logic, add or update focused tests that cover the affected behavior. Keep test files beside the code they cover, using `.test.ts` or `.test.tsx`.
 
 Notes:
 
