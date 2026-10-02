@@ -52,7 +52,7 @@ export default function TestimonialsSection({
                   <h3 className="text-card-headline group-hover:text-link mb-1 font-bold transition-colors">
                     {testimonial.name}
                   </h3>
-                  <p className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                  <p className="text-primary-text bg-tertiary-bg border-border-card inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                     {testimonial.role}
                   </p>
                 </div>
