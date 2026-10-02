@@ -9,6 +9,7 @@ import UserProfileSection from "./UserProfileSection";
 import UserStatsSection from "./UserStatsSection";
 import { UserNetworthData } from "@/utils/api/api";
 import { useCatalogValues } from "@/hooks/usePartialItems";
+import { getSnapshotDupedValue } from "@/utils/trading/inventoryValues";
 
 type CatalogFlags = {
   cash_value: string | null;
@@ -114,16 +115,12 @@ export default function UserStats({
     if (latestNetworthData?.duplicates_value != null) {
       return latestNetworthData.duplicates_value;
     }
-    return (initialData.duplicates || []).reduce(
-      (sum, invItem) =>
-        sum +
-        parseValue(
-          invItem.info.find((entry) => entry.title === "Duped Value")?.value ??
-            null,
-        ),
-      0,
-    );
-  }, [initialData.duplicates, latestNetworthData]);
+    const itemsMap = new Map(itemsData.map((item) => [item.id, item]));
+    return (initialData.duplicates || []).reduce((sum, invItem) => {
+      const item = itemsMap.get(invItem.item_id);
+      return sum + parseValue(getSnapshotDupedValue(invItem, item) ?? null);
+    }, 0);
+  }, [initialData.duplicates, latestNetworthData, itemsData]);
 
   const activeFilteredStats = useMemo(() => {
     const anyFilterActive =
@@ -166,11 +163,7 @@ export default function UserStats({
       if (excludedByCatalog(item)) return;
       itemCount++;
       dupedItemCount++;
-      dupedValue += parseValue(
-        invItem.info.find((entry) => entry.title === "Duped Value")?.value ??
-          item?.duped_value ??
-          null,
-      );
+      dupedValue += parseValue(getSnapshotDupedValue(invItem, item) ?? null);
     });
 
     const money = showOnlyNonOriginal ? Number(initialData.money) || 0 : 0;

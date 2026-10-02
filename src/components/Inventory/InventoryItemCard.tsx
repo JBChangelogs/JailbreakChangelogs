@@ -23,6 +23,8 @@ import {
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { Spinner } from "@/components/ui/Spinner";
 import { formatFullValue } from "@/utils/trading/values";
+import { getInventoryDupedValue } from "@/utils/trading/inventoryValues";
+import { hasItemValue } from "@/utils/items/itemValue";
 import { hasSeason, unlockLevel } from "@/utils/items/season";
 import {
   formatUnlockLevelBadge,
@@ -76,6 +78,15 @@ export default function InventoryItemCard({
   );
   const isDuplicate = duplicateCount > 1;
   const isMissingItem = item.id.startsWith("missing-");
+  const usesCleanValue =
+    isDupedItem &&
+    !hasItemValue(itemData?.duped_value) &&
+    hasItemValue(itemData?.cash_value);
+  const displayedDupedValue = itemData
+    ? isDupedItem
+      ? getInventoryDupedValue(itemData)
+      : itemData.duped_value
+    : null;
   const displayedSeason = itemData?.season ?? undefined;
   const displayedLevel = unlockLevel(itemData?.level);
   const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
@@ -281,20 +292,25 @@ export default function InventoryItemCard({
               <TooltipTrigger asChild>
                 <div className="text-primary-text cursor-help text-xl font-bold">
                   <span className="sm:hidden">
-                    {itemData.duped_value === null ||
-                    itemData.duped_value === "N/A"
-                      ? "N/A"
-                      : itemData.duped_value}
+                    {hasItemValue(displayedDupedValue)
+                      ? displayedDupedValue
+                      : "N/A"}
                   </span>
                   <span className="hidden sm:inline">
-                    {formatFullValue(itemData.duped_value)}
+                    {formatFullValue(displayedDupedValue ?? null)}
                   </span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                Duped value: {formatFullValue(itemData.duped_value)}
+                {usesCleanValue ? "Uses clean value" : "Duped value"}:{" "}
+                {formatFullValue(displayedDupedValue ?? null)}
               </TooltipContent>
             </Tooltip>
+            {usesCleanValue && (
+              <div className="text-secondary-text text-xs">
+                Uses clean value
+              </div>
+            )}
           </div>
         )}
 

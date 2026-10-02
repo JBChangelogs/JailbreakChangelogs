@@ -450,8 +450,8 @@ export default function UserStatsSection({
         <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
             {activeFilteredStats
-              ? `${filterLabel} Inventory Value`
-              : "Total Inventory Value"}
+              ? `${filterLabel} Clean Inventory Value`
+              : "Clean Inventory Value"}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Icon
@@ -489,8 +489,8 @@ export default function UserStatsSection({
               </TooltipTrigger>
               <TooltipContent side="top">
                 {activeFilteredStats
-                  ? `${filterLabel} inventory value`
-                  : "Total inventory value"}
+                  ? `${filterLabel} clean inventory value`
+                  : "Clean inventory value"}
                 : $
                 {(activeFilteredStats
                   ? activeFilteredStats.inventoryValue
@@ -519,8 +519,8 @@ export default function UserStatsSection({
               >
                 <p>
                   {activeFilteredStats
-                    ? `Total cash value of all ${filterLabel} items, including duped items.`
-                    : "Includes total cash value of all items, including duped items' cash value."}
+                    ? `Clean ${filterLabel} item value plus duped ${filterLabel} item value${showOnlyNonOriginal ? " and money" : ""}. Duped items use their clean value when no duped value is available.`
+                    : "Clean inventory value plus duped item value and money. Duped items use their clean value when no duped value is available."}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -578,8 +578,8 @@ export default function UserStatsSection({
                 >
                   <p>
                     {activeFilteredStats
-                      ? `Collective duped value of all duped ${filterLabel} items in this inventory.`
-                      : "Collective duped value of all duped items in your inventory."}
+                      ? `Combined value of all duped ${filterLabel} items. Uses clean value when no duped value is available.`
+                      : "Combined value of all duped items in your inventory. Uses clean value when no duped value is available."}
                   </p>
                 </TooltipContent>
               </Tooltip>
