@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Autoplay from "embla-carousel-autoplay";
+import type { UseEmblaCarouselType } from "embla-carousel-react";
 import {
   Carousel,
   CarouselContent,
@@ -24,12 +26,24 @@ interface ImageGalleryProps {
 }
 
 export default function ImageGallery({ rewards }: ImageGalleryProps) {
-  const plugin = Autoplay({
-    delay: 4000,
-    stopOnInteraction: false,
-    stopOnMouseEnter: true,
-    stopOnFocusIn: true,
-  });
+  const [plugin] = useState(() =>
+    Autoplay({
+      delay: 4000,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+      stopOnFocusIn: true,
+    }),
+  );
+  const [api, setApi] = useState<UseEmblaCarouselType[1]>();
+
+  useEffect(() => {
+    if (!api) return;
+
+    api.on("select", plugin.reset);
+    return () => {
+      api.off("select", plugin.reset);
+    };
+  }, [api, plugin]);
 
   const { resolvedTheme } = useTheme();
 
@@ -64,6 +78,7 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
     <div className="relative w-full">
       <Carousel
         plugins={[plugin]}
+        setApi={setApi}
         className="w-full"
         opts={{
           loop: true,
