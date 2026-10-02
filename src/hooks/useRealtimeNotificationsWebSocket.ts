@@ -41,6 +41,10 @@ import {
 } from "@/utils/preferences/realtimePreferenceOutbox";
 import { setRealtimeConnectionState } from "@/services/realtimeConnection";
 import { fetchHasAppConnection } from "@/services/settingsService";
+import {
+  createRealtimeConnectionNotice,
+  REALTIME_NOTICE_ID,
+} from "@/utils/notifications/realtimeConnectionNotice";
 
 const log = createLogger("WS");
 
@@ -89,7 +93,6 @@ const PING_INTERVAL_MS = 30000;
 const BASE_RECONNECT_DELAY_MS = 1000;
 const MAX_RECONNECT_DELAY_MS = 60000;
 const SOUND_COOLDOWN_MS = 800;
-const OFFLINE_NOTICE_ATTEMPT = 3;
 const FOCUS_ONLY_RECONNECT_CODES = new Set([4000, 4001]);
 const TERMINAL_RECONNECT_CODES = new Set([4001, 4002, 4004]);
 
@@ -219,6 +222,9 @@ export function useRealtimeNotificationsWebSocket(
   const manuallyDisconnectedRef = useRef(false);
   const connectRef = useRef<(() => void) | null>(null);
   const connectedAtRef = useRef<number | null>(null);
+  const connectionNoticeRef = useRef<ReturnType<
+    typeof createRealtimeConnectionNotice
+  > | null>(null);
   const locationPathRef = useRef<string>(
     typeof window !== "undefined"
       ? (window.location?.pathname || "/") + (window.location?.search || "")
@@ -369,7 +375,11 @@ export function useRealtimeNotificationsWebSocket(
   useEffect(() => {
     const handleManualDisconnect = () => {
       manuallyDisconnectedRef.current = true;
-      toast.dismiss("realtime-notifications-reconnecting");
+      connectionNoticeRef.current?.reset();
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -413,7 +423,7 @@ export function useRealtimeNotificationsWebSocket(
     if (!isRealtimeNotificationsEnabled) {
       clearPreferencesCache();
       publishRealtimeConnectionState(false);
-      toast.dismiss("realtime-notifications-reconnecting");
+      connectionNoticeRef.current?.reset();
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -435,6 +445,43 @@ export function useRealtimeNotificationsWebSocket(
     }
 
     let unmounted = false;
+    const connectionNotice = createRealtimeConnectionNotice(
+      (outage) => {
+        if (
+          unmounted ||
+          manuallyDisconnectedRef.current ||
+          document.visibilityState !== "visible"
+        )
+          return false;
+        toast.warning(
+          outage === "paused"
+            ? "Live updates paused"
+            : "Live updates unavailable",
+          {
+            id: REALTIME_NOTICE_ID,
+            description:
+              outage === "duplicate"
+                ? "Live updates are active in another tab or connection. Reconnect to use them here."
+                : outage === "authentication"
+                  ? "Your session could not be verified. Try reconnecting, or sign in again."
+                  : outage === "paused"
+                    ? "Notifications and messages may be delayed. Reconnect to resume live updates."
+                    : "Notifications and messages may be delayed. We're reconnecting automatically.",
+            duration: Infinity,
+            closeButton: true,
+            action: {
+              label: "Reconnect",
+              onClick: () => {
+                window.dispatchEvent(new CustomEvent("realtimeManualConnect"));
+              },
+            },
+          },
+        );
+        return true;
+      },
+      () => toast.dismiss(REALTIME_NOTICE_ID),
+    );
+    connectionNoticeRef.current = connectionNotice;
 
     const AUTH_WS_ERRORS: Record<number, string> = {
       4001: "Authentication token required.",
@@ -456,6 +503,7 @@ export function useRealtimeNotificationsWebSocket(
 
     const scheduleReconnect = (source: string) => {
       if (!canReconnect() || reconnectTimeoutRef.current) return;
+      connectionNotice.unavailable();
       if (document.visibilityState !== "visible") {
         log.info("Reconnect paused while document is hidden", { source });
         return;
@@ -475,20 +523,6 @@ export function useRealtimeNotificationsWebSocket(
         online: navigator.onLine,
         visibility: document.visibilityState,
       });
-
-      if (attempt === OFFLINE_NOTICE_ATTEMPT) {
-        toast.error("Realtime features temporarily unavailable", {
-          id: "realtime-notifications-reconnecting",
-          description: "We'll keep trying to reconnect in the background.",
-          duration: Infinity,
-          action: {
-            label: "Retry now",
-            onClick: () => {
-              window.dispatchEvent(new CustomEvent("realtimeManualConnect"));
-            },
-          },
-        });
-      }
 
       reconnectTimeoutRef.current = setTimeout(() => {
         reconnectTimeoutRef.current = null;
@@ -523,23 +557,14 @@ export function useRealtimeNotificationsWebSocket(
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
         openedForAttemptRef.current = false;
+        connectionNotice.unavailable();
 
         ws.addEventListener("open", () => {
+          if (unmounted || wsRef.current !== ws) return;
           markPreferencesUnsynced();
-          publishRealtimeConnectionState(true);
           openedForAttemptRef.current = true;
           connectedAtRef.current = Date.now();
           terminalCloseRef.current = false;
-          const wasDisconnected =
-            reconnectAttemptsRef.current > 0 || reconnectOnFocusOnlyRef.current;
-          reconnectOnFocusOnlyRef.current = false;
-          reconnectAttemptsRef.current = 0;
-          if (wasDisconnected) {
-            toast.dismiss("realtime-notifications-reconnecting");
-            toast.success("Realtime features reconnected", {
-              id: "realtime-notifications-reconnected",
-            });
-          }
 
           if (pingIntervalRef.current) {
             clearInterval(pingIntervalRef.current);
@@ -563,6 +588,7 @@ export function useRealtimeNotificationsWebSocket(
         });
 
         ws.addEventListener("message", (event) => {
+          if (unmounted || wsRef.current !== ws) return;
           try {
             const rawPayload =
               typeof event.data === "string" ? event.data : String(event.data);
@@ -654,6 +680,10 @@ export function useRealtimeNotificationsWebSocket(
               typeof payload.data === "object"
             ) {
               const serverPreferences = payload.data as Record<string, unknown>;
+              publishRealtimeConnectionState(true);
+              reconnectOnFocusOnlyRef.current = false;
+              reconnectAttemptsRef.current = 0;
+              connectionNotice.reset();
               const preferences = preferenceScope
                 ? overlayPreferenceOutbox(preferenceScope, serverPreferences)
                 : serverPreferences;
@@ -689,17 +719,19 @@ export function useRealtimeNotificationsWebSocket(
                 payload.code,
                 errorMessage,
               );
-              toast.error(
-                focusOnly
-                  ? "Realtime features disabled"
-                  : "Realtime features disconnected",
-                {
-                  id: focusOnly
-                    ? `realtime-notifications-disabled:${payload.code}`
-                    : `realtime-notifications-error:${payload.code}`,
-                  description: errorMessage,
-                },
-              );
+              log.warn("Realtime server rejected connection", {
+                code: payload.code,
+                reason: errorMessage,
+              });
+              if (payload.code !== 4004) {
+                connectionNotice.unavailable(
+                  focusOnly
+                    ? "duplicate"
+                    : TERMINAL_RECONNECT_CODES.has(payload.code)
+                      ? "authentication"
+                      : "reconnecting",
+                );
+              }
               if (focusOnly) {
                 reconnectOnFocusOnlyRef.current = true;
                 if (reconnectTimeoutRef.current) {
@@ -1101,7 +1133,7 @@ export function useRealtimeNotificationsWebSocket(
         });
 
         ws.addEventListener("close", (event) => {
-          if (wsRef.current && wsRef.current !== ws) return;
+          if (unmounted || wsRef.current !== ws) return;
 
           publishRealtimeConnectionState(false);
           if (pingIntervalRef.current) {
@@ -1127,6 +1159,7 @@ export function useRealtimeNotificationsWebSocket(
           });
 
           if (event.code === 4004) {
+            connectionNotice.reset();
             terminalCloseRef.current = true;
             onWebsiteBan?.(event.reason || AUTH_WS_ERRORS[event.code]);
             return;
@@ -1137,25 +1170,20 @@ export function useRealtimeNotificationsWebSocket(
               clearTimeout(reconnectTimeoutRef.current);
               reconnectTimeoutRef.current = null;
             }
-            toast.error("Realtime features disabled", {
-              id: `realtime-notifications-disabled:${event.code}`,
-              description: event.reason || "Connection closed.",
-            });
+            connectionNotice.unavailable("duplicate");
             return;
           }
           if (TERMINAL_RECONNECT_CODES.has(event.code)) {
             terminalCloseRef.current = true;
-            toast.error("Realtime features disconnected", {
-              id: `realtime-notifications-error:${event.code}`,
-              description:
-                event.reason ||
-                AUTH_WS_ERRORS[event.code] ||
-                "Connection closed.",
-            });
+            connectionNotice.unavailable("authentication");
             return;
           }
 
-          if (event.code !== 1000) scheduleReconnect(`close:${event.code}`);
+          if (event.code === 1000) {
+            connectionNotice.unavailable("paused");
+          } else {
+            scheduleReconnect(`close:${event.code}`);
+          }
         });
 
         ws.addEventListener("error", () => {
@@ -1182,7 +1210,11 @@ export function useRealtimeNotificationsWebSocket(
     };
 
     const handleVisibilityChange = () => {
+      if (manuallyDisconnectedRef.current) return;
       if (document.visibilityState !== "visible") return;
+      if (!wsRef.current || !hasSyncedPreferences()) {
+        connectionNotice.unavailable();
+      }
       reconnectNow("visibility");
     };
 
@@ -1204,7 +1236,8 @@ export function useRealtimeNotificationsWebSocket(
     return () => {
       unmounted = true;
       publishRealtimeConnectionState(false);
-      toast.dismiss("realtime-notifications-reconnecting");
+      connectionNotice.reset();
+      connectionNoticeRef.current = null;
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleWindowFocus);
       window.removeEventListener("online", handleOnline);
