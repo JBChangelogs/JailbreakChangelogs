@@ -53,12 +53,22 @@ const MAX_VALUE_RANGE = 50_000_000;
 
 export default function ValuesClient() {
   const { user } = useAuthContext();
-  const [{ page, query: debouncedSearchTerm }, setSearchParams] =
-    useQueryStates({
-      page: parseAsInteger.withDefault(1),
-      query: parseAsString.withDefault(""),
-    });
-  const searchQuery = debouncedSearchTerm.trim();
+  const searchParams = useSearchParams();
+  // `query` is written through nuqs but read from Next directly: once nuqs
+  // flushes its queue it re-reads useSearchParams, which lags the URL and
+  // briefly reports the old query (refetching the grid, wiping the input)
+  const [{ page }, setSearchParams] = useQueryStates({
+    page: parseAsInteger.withDefault(1),
+    query: parseAsString.withDefault(""),
+  });
+  const urlSearchQuery = (searchParams.get("query") ?? "").trim();
+  const [pendingSearchQuery, setPendingSearchQuery] = useState<string | null>(
+    null,
+  );
+  if (pendingSearchQuery !== null && pendingSearchQuery === urlSearchQuery) {
+    setPendingSearchQuery(null);
+  }
+  const searchQuery = pendingSearchQuery ?? urlSearchQuery;
   const searchQueryRef = useRef(searchQuery);
   useEffect(() => {
     searchQueryRef.current = searchQuery;
@@ -67,6 +77,8 @@ export default function ValuesClient() {
     (term: string) => {
       const nextQuery = term.trim();
       if (nextQuery === searchQueryRef.current) return;
+      searchQueryRef.current = nextQuery;
+      setPendingSearchQuery(nextQuery);
       void setSearchParams({ query: nextQuery || null, page: null });
     },
     [setSearchParams],
@@ -103,7 +115,6 @@ export default function ValuesClient() {
     valuePreferenceKey: VALUE_SORT_PREFERENCE_KEY,
   });
 
-  const searchParams = useSearchParams();
   const isAuthenticated = useIsAuthenticated();
   const {
     filterMode,
@@ -432,7 +443,7 @@ export default function ValuesClient() {
 
       <ValuesSearchControls
         onDebouncedSearchChange={handleSearchChange}
-        initialSearchTerm={debouncedSearchTerm}
+        initialSearchTerm={searchQuery}
         clearTrigger={clearSearchTrigger}
         selectedFilterSorts={selectedFilterSorts}
         onToggleFilterSort={handleToggleFilterSort}
@@ -493,7 +504,7 @@ export default function ValuesClient() {
             totalPages={data?.total_pages ?? 0}
             pageSize={data?.size ?? 50}
             valueSort={valueSort}
-            debouncedSearchTerm={debouncedSearchTerm}
+            debouncedSearchTerm={searchQuery}
           />
         </div>
       </div>

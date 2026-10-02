@@ -29,6 +29,14 @@ import {
   getFilterSortsDisplayNames,
 } from "./valuesFilterOptions";
 import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
+import { useRouter } from "nextjs-toploader/app";
+import { usePartialItems } from "@/hooks/usePartialItems";
+import type { PartialItem } from "@/utils/api/api";
+import ValuesSearchSuggestions, {
+  VALUES_SUGGESTIONS_ID,
+  getItemHref,
+  getItemSuggestions,
+} from "./ValuesSearchSuggestions";
 
 interface ValuesSearchControlsProps {
   onDebouncedSearchChange: (term: string) => void;
@@ -79,12 +87,23 @@ export default function ValuesSearchControls({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const router = useRouter();
+  const [hasFocusedSearch, setHasFocusedSearch] = useState(false);
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  // Set when navigating to a suggestion so the pending debounced search
+  // doesn't rewrite the URL on the way out
+  const skipSearchCommitRef = useRef(false);
+  const { data: partialItems } = usePartialItems(hasFocusedSearch);
 
   useEffect(() => {
-    setSearchTerm(initialSearchTerm);
+    setSearchTerm((prev) =>
+      prev.trim() === initialSearchTerm ? prev : initialSearchTerm,
+    );
   }, [initialSearchTerm]);
 
   useEffect(() => {
+    if (skipSearchCommitRef.current) return;
     onDebouncedSearchChange(debouncedSearchTerm);
   }, [debouncedSearchTerm, onDebouncedSearchChange]);
 
@@ -180,6 +199,53 @@ export default function ValuesSearchControls({
     advancedFilterValues.includes(value),
   );
 
+  const suggestions = useMemo(
+    () => (isItemIdSearch ? [] : getItemSuggestions(partialItems, searchTerm)),
+    [isItemIdSearch, partialItems, searchTerm],
+  );
+  const showSuggestions = isSuggestionsOpen && suggestions.length > 0;
+
+  const goToItem = (item: PartialItem) => {
+    skipSearchCommitRef.current = true;
+    setIsSuggestionsOpen(false);
+    searchInputRef.current?.blur();
+    router.push(getItemHref(item));
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      setIsSuggestionsOpen(false);
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (showSuggestions && highlightedIndex >= 0) {
+        goToItem(suggestions[highlightedIndex]);
+        return;
+      }
+      setIsSuggestionsOpen(false);
+      onDebouncedSearchChange(searchTerm);
+      return;
+    }
+    if (!showSuggestions) {
+      if (e.key === "ArrowDown" && suggestions.length > 0) {
+        e.preventDefault();
+        setIsSuggestionsOpen(true);
+        setHighlightedIndex(0);
+      }
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex(
+        (prev) => (prev - 1 + suggestions.length) % suggestions.length,
+      );
+    }
+  };
+
   // Handle Ctrl+F to focus search input
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -221,7 +287,28 @@ export default function ValuesSearchControls({
                   type="text"
                   placeholder={`Search ${getFilterSortsDisplayNames(selectedFilterSorts) || "All Items"}...`}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    skipSearchCommitRef.current = false;
+                    setSearchTerm(e.target.value);
+                    setIsSuggestionsOpen(true);
+                    setHighlightedIndex(-1);
+                  }}
+                  onFocus={() => {
+                    setHasFocusedSearch(true);
+                    setIsSuggestionsOpen(true);
+                  }}
+                  onBlur={() => setIsSuggestionsOpen(false)}
+                  onKeyDown={handleSearchKeyDown}
+                  autoComplete="off"
+                  role="combobox"
+                  aria-expanded={showSuggestions}
+                  aria-controls={VALUES_SUGGESTIONS_ID}
+                  aria-autocomplete="list"
+                  aria-activedescendant={
+                    showSuggestions && highlightedIndex >= 0
+                      ? `${VALUES_SUGGESTIONS_ID}-${highlightedIndex}`
+                      : undefined
+                  }
                   className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
                     isSearchHighlighted
                       ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
@@ -236,12 +323,25 @@ export default function ValuesSearchControls({
                 />
                 {searchTerm && (
                   <button
-                    onClick={() => setSearchTerm("")}
+                    onClick={() => {
+                      skipSearchCommitRef.current = false;
+                      setSearchTerm("");
+                      onDebouncedSearchChange("");
+                      searchInputRef.current?.focus();
+                    }}
                     className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                     aria-label="Clear search"
                   >
                     <Icon icon="heroicons:x-mark" />
                   </button>
+                )}
+                {showSuggestions && (
+                  <ValuesSearchSuggestions
+                    suggestions={suggestions}
+                    highlightedIndex={highlightedIndex}
+                    onHighlight={setHighlightedIndex}
+                    onSelect={goToItem}
+                  />
                 )}
               </div>
             </div>
