@@ -121,8 +121,8 @@ const TabsList = React.forwardRef<
       <TabsPrimitive.List
         ref={setRefs(listRef, ref)}
         className={cn(
-          "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 scrollbar-hide overflow-x-auto overflow-y-hidden bg-transparent p-0 [-webkit-overflow-scrolling:touch]",
-          fullWidth && "w-full min-w-0",
+          "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto overflow-y-hidden bg-transparent p-0 [-webkit-overflow-scrolling:touch]",
+          fullWidth && "w-full min-w-0 gap-0",
           noBottomRadius ? "rounded-t-lg rounded-b-none" : "rounded-lg",
           className,
         )}
