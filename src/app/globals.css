@@ -6,6 +6,13 @@
   @apply text-primary-text text-3xl leading-tight font-bold;
 }
 
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* NitroPay CCPA link styling in footer */
 .ccpa-footer [data-ccpa-link] a,
 .ccpa-footer [data-ccpa-link] a span {
@@ -917,9 +924,11 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   }
 }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-primary) transparent;
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-primary) transparent;
+  }
 }
 
 img.twemoji {
