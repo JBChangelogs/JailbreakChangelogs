@@ -22,6 +22,8 @@ export default function SubmitTestimonialButton() {
     trimmedContent.length <= MAX_CHARACTERS;
 
   const openSubmissionForm = () => {
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       toast.info("Log in to submit a testimonial.");
       setLoginModal({ open: true });
@@ -63,7 +65,7 @@ export default function SubmitTestimonialButton() {
 
   return (
     <>
-      <Button onClick={openSubmissionForm} disabled={isLoading}>
+      <Button onClick={openSubmissionForm}>
         <Icon icon="heroicons:pencil-square" className="h-5 w-5" />
         Add Testimonial
       </Button>
