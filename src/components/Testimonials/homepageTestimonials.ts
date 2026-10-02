@@ -51,7 +51,13 @@ export async function getHomepageTestimonials(): Promise<
       BASE_API_URL,
       "/v2/testimonials/random",
     );
-    const response = await fetch(url, { headers, cache: "no-store" });
+    const response = await fetch(url, {
+      headers: {
+        ...headers,
+        "User-Agent": "JailbreakChangelogs-Testimonials/1.0",
+      },
+      cache: "no-store",
+    });
     if (!response.ok) return [badimoTestimonial];
 
     const data: unknown = await response.json();

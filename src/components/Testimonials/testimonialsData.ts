@@ -1,4 +1,4 @@
-import { BASE_API_URL } from "@/utils/api/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import type { BadimoTestimonial } from "@/components/Testimonials/badimoTestimonial";
 
@@ -52,55 +52,54 @@ function isApiTestimonial(value: unknown): value is ApiTestimonial {
   );
 }
 
-export async function getTestimonials(
+export async function fetchTestimonials(
   page: number,
+  signal?: AbortSignal,
 ): Promise<TestimonialsPageData> {
-  const emptyPage = { total: 0, items: [], page, size: 25 };
-
-  try {
-    const { url, headers } = buildApiFetchRequest(
-      BASE_API_URL,
-      `/v2/testimonials?page=${page}`,
-    );
-    const response = await fetch(url, { headers, cache: "no-store" });
-    if (!response.ok) return emptyPage;
-
-    const data: unknown = await response.json();
-    if (!data || typeof data !== "object") return emptyPage;
-    const result = data as Record<string, unknown>;
-    if (
-      !Array.isArray(result.items) ||
-      typeof result.total !== "number" ||
-      !Number.isSafeInteger(result.total) ||
-      result.total < 0 ||
-      typeof result.page !== "number" ||
-      !Number.isSafeInteger(result.page) ||
-      result.page < 1 ||
-      typeof result.size !== "number" ||
-      !Number.isSafeInteger(result.size) ||
-      result.size < 1
-    ) {
-      return emptyPage;
-    }
-
-    return {
-      total: result.total,
-      page: result.page,
-      size: result.size,
-      items: result.items.filter(isApiTestimonial).map((item) => ({
-        id: item.id,
-        name:
-          item.user.global_name && item.user.global_name !== "None"
-            ? item.user.global_name
-            : item.user.username || "Community Member",
-        role: item.role || "Community Member",
-        quote: item.content,
-        url: item.link || `/users/${item.user.id}`,
-        userId: item.user.id,
-        avatarHash: item.user.avatar,
-      })),
-    };
-  } catch {
-    return emptyPage;
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    `/v2/testimonials?page=${page}`,
+  );
+  const response = await fetch(url, { headers, signal });
+  if (!response.ok) {
+    throw new Error(`Failed to load testimonials (${response.status})`);
   }
+
+  const data: unknown = await response.json();
+  if (!data || typeof data !== "object") {
+    throw new Error("Invalid testimonials response");
+  }
+  const result = data as Record<string, unknown>;
+  if (
+    !Array.isArray(result.items) ||
+    typeof result.total !== "number" ||
+    !Number.isSafeInteger(result.total) ||
+    result.total < 0 ||
+    typeof result.page !== "number" ||
+    !Number.isSafeInteger(result.page) ||
+    result.page < 1 ||
+    typeof result.size !== "number" ||
+    !Number.isSafeInteger(result.size) ||
+    result.size < 1
+  ) {
+    throw new Error("Invalid testimonials response");
+  }
+
+  return {
+    total: result.total,
+    page: result.page,
+    size: result.size,
+    items: result.items.filter(isApiTestimonial).map((item) => ({
+      id: item.id,
+      name:
+        item.user.global_name && item.user.global_name !== "None"
+          ? item.user.global_name
+          : item.user.username || "Community Member",
+      role: item.role || "Community Member",
+      quote: item.content,
+      url: item.link || `/users/${item.user.id}`,
+      userId: item.user.id,
+      avatarHash: item.user.avatar,
+    })),
+  };
 }
