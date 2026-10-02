@@ -115,35 +115,12 @@ export default function FavoritesTab({
 
   // Render a favorite item
   const renderFavorite = (favorite: FavoriteItem) => {
-    const isSubItem = !!favorite.item?.data;
-
-    let itemName = "";
-    let itemType = "";
-    let imageName = "";
-    let itemUrl = "";
-
-    if (isSubItem) {
-      const itemData = favorite.item;
-      if (!itemData?.data) {
-        return null;
-      }
-      itemName = `${itemData.data.name}${itemData.sub_name ? ` (${itemData.sub_name})` : ""}`;
-      itemType = itemData.data.type;
-      imageName = itemData.data.name;
-      itemUrl = `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(itemData.data.name)}?variant=${itemData.sub_name}`;
-    } else {
-      const itemData = favorite.item;
-      if (!itemData?.name || !itemData?.type) {
-        return null;
-      } else {
-        itemName = itemData.name;
-        itemType = itemData.type;
-        imageName = itemName;
-        itemUrl = `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`;
-      }
-    }
-
-    if (!itemName) return null;
+    const item = favorite.item;
+    if (!item?.name || !item?.type) return null;
+    const itemName = item.name;
+    const itemType = item.type;
+    const imageName = itemName;
+    const itemUrl = `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`;
 
     const isVideo = isVideoItem(imageName);
 

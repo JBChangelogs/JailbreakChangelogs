@@ -300,7 +300,6 @@ export default function TradeAds({
           .filter((it): it is TradeItem => Boolean(it))
           .map((it) => ({
             ...it,
-            is_sub: false,
             side: undefined,
             isDuped: isDupedById.get(it.id) || false,
             isOG: isOgById.get(it.id) || false,
@@ -627,7 +626,6 @@ export default function TradeAds({
 
   const getDemandForItem = (it: TradeItem): string | undefined => {
     if (it.demand) return it.demand;
-    if (it.data?.demand) return it.data.demand;
     const match = items.find((base) => tradeItemIdsEqual(base.id, it.id));
     if (!match) return undefined;
     return match.demand ?? undefined;
@@ -635,8 +633,6 @@ export default function TradeAds({
 
   const getTrendForItem = (it: TradeItem): string | undefined => {
     if (it.trend && it.trend !== "N/A") return it.trend;
-    const dataTrend = it.data?.trend;
-    if (dataTrend && dataTrend !== "N/A") return dataTrend;
     const match = items.find((base) => tradeItemIdsEqual(base.id, it.id));
     if (!match) return undefined;
     return match.trend ?? undefined;
@@ -1175,10 +1171,10 @@ export default function TradeAds({
   const baseDisplayTradeAds = sortedTradeAds;
 
   const normalizeItemName = (item: TradeItem): string =>
-    (item.data?.name || item.name || "").toLowerCase().trim();
+    (item.name || "").toLowerCase().trim();
 
   const isVehicleItem = (item: TradeItem): boolean => {
-    const rawType = item.data?.type || item.type || "";
+    const rawType = item.type || "";
     const normalizedType = rawType.toLowerCase();
     return normalizedType.includes("vehicle") || normalizedType.includes("car");
   };
@@ -1195,13 +1191,7 @@ export default function TradeAds({
       return null;
     }
 
-    const candidate = (
-      item.instanceId ||
-      item.id ||
-      item.data?.name ||
-      item.name ||
-      ""
-    )
+    const candidate = (item.instanceId || item.id || item.name || "")
       .toString()
       .toLowerCase()
       .replace(/[_-]+/g, " ")

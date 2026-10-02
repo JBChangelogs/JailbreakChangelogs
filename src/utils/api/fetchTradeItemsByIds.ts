@@ -32,7 +32,7 @@ export async function fetchTradeItemsByIds(
           new Map(
             items.map((item) => [
               item.id,
-              { ...item, tradable: Number(item.tradable), is_sub: false },
+              { ...item, tradable: Number(item.tradable) },
             ]),
           ),
       )

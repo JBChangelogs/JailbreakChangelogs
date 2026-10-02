@@ -471,7 +471,6 @@ export function MakeOfferDialog({
           .filter((it): it is TradeItem => Boolean(it))
           .map((it) => ({
             ...it,
-            is_sub: false,
             side: undefined,
             isDuped: isDupedById.get(it.id) || false,
             isOG: isOgById.get(it.id) || false,

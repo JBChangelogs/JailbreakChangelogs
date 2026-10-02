@@ -111,7 +111,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
     return sortByValueSort(matched, "cash-desc", {
       getCashValue: (item) => item.cash_value ?? "N/A",
       getDupedValue: (item) => item.duped_value ?? "N/A",
-      getDemand: (item) => item.demand ?? item.data?.demand,
+      getDemand: (item) => item.demand,
     });
   }, [visibleItems, searchQuery, filterSort]);
 

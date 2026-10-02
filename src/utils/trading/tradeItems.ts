@@ -6,17 +6,12 @@ type TradeItemLike = {
   instanceId?: string | null;
   type?: string | null;
   name?: string | null;
-  base_name?: string | null;
 };
 
 type CategoryFilterableItem = {
   type: string;
   is_limited?: number | null;
   is_seasonal?: number | null;
-  data?: {
-    is_limited?: number | null;
-    is_seasonal?: number | null;
-  };
 };
 
 const TRADE_ICON_BASE_URL =
@@ -37,7 +32,7 @@ export const isCustomTradeItem = (item: TradeItemLike): boolean => {
 
 export const canUseTradeItemDetailLink = (item: TradeItemLike): boolean => {
   const type = normalizeString(item.type);
-  const name = normalizeString(item.base_name) || normalizeString(item.name);
+  const name = normalizeString(item.name);
 
   if (!type || !name) return false;
   if (type === "Unknown" || name === "Unknown Item") return false;
@@ -47,7 +42,7 @@ export const canUseTradeItemDetailLink = (item: TradeItemLike): boolean => {
 export const getTradeItemDetailHref = (item: TradeItemLike): string | null => {
   if (!canUseTradeItemDetailLink(item)) return null;
   const type = normalizeString(item.type);
-  const name = normalizeString(item.base_name) || normalizeString(item.name);
+  const name = normalizeString(item.name);
   return `/item/${encodeURIComponent(type)}/${encodeURIComponent(name)}`;
 };
 
@@ -67,7 +62,7 @@ export const getTradeItemImagePath = (
   }
 
   const type = normalizeString(item.type) || "Unknown";
-  const name = normalizeString(item.base_name) || normalizeString(item.name);
+  const name = normalizeString(item.name);
   return getItemImagePath(type, name || "Unknown Item", isValuesPage);
 };
 
@@ -98,7 +93,7 @@ export const matchesCategoryFilterSort = (
 ): boolean => {
   switch (filterSort) {
     case "name-limited-items":
-      return item.is_limited === 1 || item.data?.is_limited === 1;
+      return item.is_limited === 1;
     case "name-vehicles":
       return item.type.toLowerCase() === "vehicle";
     case "name-spoilers":

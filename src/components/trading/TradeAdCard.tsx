@@ -41,8 +41,8 @@ interface TradeAdCardProps {
 const groupTradeItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
     (acc, item) => {
-      const rawName = item.data?.name ?? item.name;
-      const rawType = item.data?.type ?? item.type;
+      const rawName = item.name;
+      const rawType = item.type;
       const name = typeof rawName === "string" ? rawName.trim() : "";
       const type = typeof rawType === "string" ? rawType.trim() : "";
 
@@ -164,14 +164,7 @@ const TradeSidePreview = ({
               ) : (
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>{rawNameNode}</TooltipTrigger>
-                  <TradeItemHoverTooltip
-                    side="top"
-                    item={{
-                      ...item,
-                      base_name: item.base_name || item.name,
-                      name: item.name,
-                    }}
-                  />
+                  <TradeItemHoverTooltip side="top" item={item} />
                 </Tooltip>
               );
 

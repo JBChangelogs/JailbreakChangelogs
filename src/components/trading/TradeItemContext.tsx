@@ -36,7 +36,7 @@ export const TradeItemNote = ({
   item: TradeItem;
   name?: string;
 }) => {
-  const notes = item.notes ?? item.data?.notes;
+  const notes = item.notes;
   if (!hasItemValue(notes)) return null;
 
   return (

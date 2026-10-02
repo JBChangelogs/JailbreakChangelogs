@@ -133,33 +133,6 @@ export interface Item {
     DemandMultiple?: number;
     LastUpdated?: number;
   };
-  children?: {
-    id: number;
-    parent: number;
-    sub_name: string;
-    created_at: number;
-    data: {
-      name: string;
-      type: string;
-      creator: string | null;
-      is_seasonal: number | null;
-      season?: number | null;
-      level?: number | string | null;
-      cash_value: string | null;
-      duped_value: string | null;
-      price: string;
-      is_limited: number | null;
-      duped_owners: string;
-      notes: string | null;
-      demand: string | null;
-      duped_demand: string | null;
-      trend?: string | null;
-      description: string | null;
-      health: number | null;
-      tradable: boolean;
-      last_updated: number;
-    };
-  }[];
 }
 
 export interface RobloxUser {
@@ -227,13 +200,6 @@ export interface ItemDetails {
     DemandMultiple?: number;
     LastUpdated?: number;
   };
-  children?: Array<{
-    id: number;
-    parent: number;
-    sub_name: string;
-    created_at: number;
-    data: ItemDetails;
-  }>;
 }
 
 export interface DupeResult {
@@ -250,12 +216,6 @@ export interface FavoriteItem {
     id: number;
     name: string;
     type: string;
-    parent?: number;
-    sub_name?: string;
-    data?: {
-      name: string;
-      type: string;
-    };
   };
 }
 

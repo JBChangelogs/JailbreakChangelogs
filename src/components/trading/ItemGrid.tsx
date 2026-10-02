@@ -6,7 +6,6 @@ import { handleImageError, isVideoItem, getVideoPath } from "@/utils/ui/images";
 import {
   getTradeItemImagePath,
   isCustomTradeItem,
-  tradeItemIdsEqual,
 } from "@/utils/trading/tradeItems";
 import { TradeItemMarketDetails, TradeItemNote } from "./TradeItemContext";
 import { QuickAddPopover } from "./QuickAddPopover";
@@ -30,46 +29,14 @@ interface ItemGridProps {
   emptyScrollOffsetPx?: number;
 }
 
-interface ItemWithData {
-  data: TradeItem;
-  id: number;
-}
-
-const getItemData = (item: TradeItem | ItemWithData): TradeItem => {
-  if ("data" in item && item.data) {
-    return {
-      ...item.data,
-      id: item.id,
-      is_sub: false,
-      tradable: item.data.tradable ? 1 : 0,
-      is_limited: item.data.is_limited ?? 0,
-      name: item.data.name, // Keep original name for image paths
-      type: item.data.type,
-      cash_value: item.data.cash_value,
-      duped_value: item.data.duped_value,
-    };
-  }
-  // If it's not an ItemWithData, it must be a TradeItem
-  return item as TradeItem;
-};
-
-const getDisplayName = (item: TradeItem | ItemWithData): string => {
-  if ("data" in item && item.data) {
-    return item.data.name;
-  }
-  // If it's not an ItemWithData, it must be a TradeItem
-  return (item as TradeItem).name;
-};
-
 const groupItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
     (acc, item) => {
-      const itemData = getItemData(item);
       const key = `${item.id}:${item.isDuped ? 1 : 0}:${item.isOG ? 1 : 0}`;
 
       if (!acc[key]) {
         acc[key] = {
-          ...itemData,
+          ...item,
           count: 1,
           id: item.id,
           isDuped: item.isDuped,
@@ -216,12 +183,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
           }
         >
           {groupItems(items).map((item) => {
-            const originalItem = items.find((i) =>
-              tradeItemIdsEqual(i.id, item.id),
-            );
-            const displayName = originalItem
-              ? getDisplayName(originalItem)
-              : item.name;
+            const displayName = item.name;
             const isCustom = isCustomTradeItem(item);
 
             const rawValue = item.isDuped ? item.duped_value : item.cash_value;

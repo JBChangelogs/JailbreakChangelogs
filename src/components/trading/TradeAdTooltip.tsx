@@ -14,9 +14,9 @@ interface TradeAdTooltipProps {
 }
 
 export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
-  const demand = item.demand ?? item.data?.demand ?? "N/A";
-  const dupedDemand = item.duped_demand ?? item.data?.duped_demand ?? "N/A";
-  const trend = item.trend ?? item.data?.trend ?? null;
+  const demand = item.demand ?? "N/A";
+  const dupedDemand = item.duped_demand ?? "N/A";
+  const trend = item.trend ?? null;
   const itemHref = getTradeItemDetailHref(item);
 
   return (
@@ -60,7 +60,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               })()}
               {item.type}
             </span>
-            {(item.is_limited === 1 || item.data?.is_limited === 1) && (
+            {item.is_limited === 1 && (
               <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="mdi:clock"
@@ -70,7 +70,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
                 Limited
               </span>
             )}
-            {(item.season != null || item.data?.season != null) && (
+            {item.season != null && (
               <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="noto-v1:snowflake"

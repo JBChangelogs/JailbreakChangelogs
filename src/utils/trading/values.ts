@@ -517,23 +517,9 @@ export const filterByTypes = (
       filterSort !== "favorites" && !classifiedFilters.has(filterSort),
   );
 
-  // Create a Set of both direct IDs and parent IDs from variants
-  const favoriteIds =
-    hasFavorites && userFavorites && Array.isArray(userFavorites)
-      ? new Set(
-          userFavorites
-            .map((fav) => {
-              const itemId = String(fav.item_id);
-              // If it's a variant (contains hyphen), get both the full ID and parent ID
-              if (itemId.includes("-")) {
-                const [parentId] = itemId.split("-");
-                return [itemId, parentId];
-              }
-              return [itemId];
-            })
-            .flat(),
-        )
-      : null;
+  const favoriteIds = hasFavorites
+    ? new Set(userFavorites?.map((favorite) => String(favorite.item_id)))
+    : null;
 
   return items.filter((item) => {
     if (hasFavorites && !favoriteIds?.has(String(item.id))) return false;

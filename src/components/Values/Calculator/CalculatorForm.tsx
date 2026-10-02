@@ -281,7 +281,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           .filter((it): it is TradeItem => Boolean(it))
           .map((it) => ({
             ...it,
-            is_sub: false,
             side: undefined,
             isDuped: isDupedById.get(it.id) || false,
             isOG: isOGById.get(it.id) || false,
@@ -740,7 +739,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       side: "offering" | "requesting",
     ): TradeItem => {
       const base = itemById.get(scanned.id);
-      const baseName = base?.base_name || base?.name || scanned.name;
 
       return {
         id: scanned.id,
@@ -753,11 +751,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         season: base?.season ?? null,
         level: base?.level ?? null,
         tradable: base?.tradable ?? 1,
-        demand: base?.demand ?? base?.data?.demand ?? "N/A",
-        duped_demand: base?.duped_demand ?? base?.data?.duped_demand ?? "N/A",
-        trend: base?.trend ?? base?.data?.trend ?? "N/A",
-        notes: base?.notes ?? base?.data?.notes ?? null,
-        base_name: baseName,
+        demand: base?.demand ?? "N/A",
+        duped_demand: base?.duped_demand ?? "N/A",
+        trend: base?.trend ?? "N/A",
+        notes: base?.notes ?? null,
         side,
         isDuped: false,
         isOG: false,
@@ -840,9 +837,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   };
 
   const catalogItems =
-    itemsInputMode === "picker"
-      ? initialItems.filter((i) => !i.is_sub)
-      : inventoryItems;
+    itemsInputMode === "picker" ? initialItems : inventoryItems;
 
   return (
     <div className="space-y-6">

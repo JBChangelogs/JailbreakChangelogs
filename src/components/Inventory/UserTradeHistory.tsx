@@ -224,8 +224,8 @@ function TradeItem({
 }) {
   const categoryIcon = getCategoryIcon(item.category_title);
   const itemHref = catalogItem ? getTradeItemDetailHref(catalogItem) : null;
-  const season = catalogItem?.season ?? catalogItem?.data?.season;
-  const level = unlockLevel(catalogItem?.level ?? catalogItem?.data?.level);
+  const season = catalogItem?.season;
+  const level = unlockLevel(catalogItem?.level);
   const hasLevel = hasUnlockLevel(level);
   const cardClassName =
     "border-border-card bg-tertiary-bg hover:border-button-info/40 flex w-full min-w-0 self-start overflow-hidden rounded-lg border transition-colors min-[400px]:block min-[400px]:w-40 sm:w-48 xl:w-40";
@@ -464,44 +464,7 @@ export default function UserTradeHistory({
     };
 
     (catalogQuery.data ?? []).forEach(setCatalogValue);
-    itemsData.forEach((item) => {
-      setCatalogValue(item);
-      item.children?.forEach((child) => {
-        const childValue = {
-          cashValue: child.data.cash_value,
-          dupedValue: child.data.duped_value,
-          item: {
-            id: child.id,
-            name: child.data.name,
-            base_name: item.name,
-            type: child.data.type,
-            cash_value: child.data.cash_value,
-            duped_value: child.data.duped_value,
-            is_limited: child.data.is_limited,
-            is_seasonal: child.data.is_seasonal,
-            season: child.data.season,
-            level: child.data.level,
-            tradable: Number(child.data.tradable),
-            trend: child.data.trend,
-            demand: child.data.demand,
-            duped_demand: child.data.duped_demand,
-            is_sub: true,
-            sub_name: child.sub_name,
-            data: child.data,
-          },
-        };
-        const candidateNames = new Set([
-          child.data.name,
-          child.sub_name,
-          `${item.name} ${child.sub_name}`,
-        ]);
-        candidateNames.forEach((name) => {
-          if (name?.trim()) {
-            values.set(normalizeCatalogKey(name, item.type), childValue);
-          }
-        });
-      });
-    });
+    itemsData.forEach(setCatalogValue);
 
     return values;
   }, [catalogQuery.data, itemsData]);

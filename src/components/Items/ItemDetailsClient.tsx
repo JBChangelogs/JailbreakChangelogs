@@ -490,7 +490,7 @@ export default function ItemDetailsClient({
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
     item?.last_updated,
-    `item-detail-${item?.id}-parent`,
+    `item-detail-${item?.id}`,
   );
 
   const handleTabChange = (newValue: number) => {

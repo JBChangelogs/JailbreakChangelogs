@@ -29,7 +29,7 @@ function item(id: number, type: string, demand: string): Item {
 }
 
 describe("combined value page filters", () => {
-  test("a favorite variant includes its parent but still respects category and demand", () => {
+  test("favorites still respect category and demand filters", () => {
     const items = [
       item(1, "Vehicle", "High"),
       item(2, "Vehicle", "High"),
@@ -40,10 +40,20 @@ describe("combined value page filters", () => {
     const filtered = filterByTypes(
       items,
       ["favorites", "name-vehicles", "demand-high"],
-      [{ item_id: "1-10" }, { item_id: "3" }, { item_id: "4" }],
+      [{ item_id: "1" }, { item_id: "3" }, { item_id: "4" }],
     );
 
     expect(filtered.map((entry) => entry.id)).toEqual([1]);
+  });
+
+  test("deprecated compound favorite IDs do not match a current item", () => {
+    expect(
+      filterByTypes(
+        [item(1, "Vehicle", "High")],
+        ["favorites"],
+        [{ item_id: "1-10" }],
+      ),
+    ).toEqual([]);
   });
 
   test("includes either selected category but requires the selected demand", () => {

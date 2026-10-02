@@ -233,13 +233,12 @@ function ItemCard({
     };
   }, []);
 
-  // Get the current item data based on selected sub-item or parent item
   const currentItemData = item;
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
     currentItemData.last_updated,
-    `item-${item.id}-parent`,
+    `item-${item.id}`,
   );
 
   const formatLastUpdated = (timestamp: number | null): string => {

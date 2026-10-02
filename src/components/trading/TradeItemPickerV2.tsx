@@ -310,8 +310,8 @@ export default function TradeItemPickerV2({
     });
 
     const filteredByValue = filterByValueSort(base, valueSort, {
-      getDemand: (item) => item.demand ?? item.data?.demand,
-      getTrend: (item) => item.trend ?? item.data?.trend,
+      getDemand: (item) => item.demand,
+      getTrend: (item) => item.trend,
     });
 
     const selectedSort: ValueSort = validValueSorts.has(valueSort)
@@ -323,8 +323,8 @@ export default function TradeItemPickerV2({
       : sortByValueSort(filteredByValue, selectedSort, {
           getCashValue: (item) => item.cash_value ?? "N/A",
           getDupedValue: (item) => item.duped_value ?? "N/A",
-          getDemand: (item) => item.demand ?? item.data?.demand,
-          getTrend: (item) => item.trend ?? item.data?.trend,
+          getDemand: (item) => item.demand,
+          getTrend: (item) => item.trend,
           fallbackSortForDemandTrend: "none",
         });
 
@@ -769,7 +769,7 @@ export default function TradeItemPickerV2({
                 !allowOg && rawCondition === "og" ? "clean" : rawCondition;
               const flags = getConditionFlags(condition);
 
-              const variantLabel =
+              const conditionLabel =
                 condition === "clean"
                   ? ""
                   : condition === "duped"
@@ -780,7 +780,6 @@ export default function TradeItemPickerV2({
                 const added = onSelect(
                   {
                     ...item,
-                    base_name: item.base_name || item.name,
                     isDuped: flags.duped,
                     isOG: flags.og,
                     side: activeSide,
@@ -789,7 +788,7 @@ export default function TradeItemPickerV2({
                 );
                 if (added && showAddToasts) {
                   toast.success(
-                    `Added ${item.name}${variantLabel} to ${activeSide} items`,
+                    `Added ${item.name}${conditionLabel} to ${activeSide} items`,
                   );
                 }
               };
@@ -799,7 +798,6 @@ export default function TradeItemPickerV2({
                 const added = onSelect(
                   {
                     ...item,
-                    base_name: item.base_name || item.name,
                     isDuped: flags.duped,
                     isOG: flags.og,
                     side: "offering",
@@ -808,7 +806,7 @@ export default function TradeItemPickerV2({
                 );
                 if (added && showAddToasts) {
                   toast.success(
-                    `Added ${item.name}${variantLabel} to offering`,
+                    `Added ${item.name}${conditionLabel} to offering`,
                   );
                 }
               };
@@ -818,7 +816,6 @@ export default function TradeItemPickerV2({
                 const added = onSelect(
                   {
                     ...item,
-                    base_name: item.base_name || item.name,
                     isDuped: flags.duped,
                     isOG: flags.og,
                     side: "requesting",
@@ -827,7 +824,7 @@ export default function TradeItemPickerV2({
                 );
                 if (added && showAddToasts) {
                   toast.success(
-                    `Added ${item.name}${variantLabel} to requesting`,
+                    `Added ${item.name}${conditionLabel} to requesting`,
                   );
                 }
               };
@@ -1028,12 +1025,8 @@ export default function TradeItemPickerV2({
                     <div className="absolute top-1.5 right-1.5 z-10">
                       <CategoryIconBadge
                         type={item.type}
-                        isLimited={
-                          item.is_limited === 1 || item.data?.is_limited === 1
-                        }
-                        isSeasonal={
-                          item.season != null || item.data?.season != null
-                        }
+                        isLimited={item.is_limited === 1}
+                        isSeasonal={item.season != null}
                         withContainer={false}
                         className="h-4 w-4 sm:h-5 sm:w-5"
                       />
@@ -1047,10 +1040,7 @@ export default function TradeItemPickerV2({
                             Cash
                           </span>
                           <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                            {formatValue(
-                              item.cash_value ?? item.data?.cash_value,
-                              isMobile,
-                            )}
+                            {formatValue(item.cash_value, isMobile)}
                           </span>
                         </div>
                       ) : (
@@ -1059,10 +1049,7 @@ export default function TradeItemPickerV2({
                             Duped
                           </span>
                           <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
-                            {formatValue(
-                              item.duped_value ?? item.data?.duped_value,
-                              isMobile,
-                            )}
+                            {formatValue(item.duped_value, isMobile)}
                           </span>
                         </div>
                       )}

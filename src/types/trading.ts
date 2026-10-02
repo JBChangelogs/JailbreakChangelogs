@@ -11,36 +11,12 @@ export interface TradeItem {
   tradable: number;
   trend?: string | null;
   notes?: string | null;
-  base_name?: string;
   side?: "offering" | "requesting";
   metadata?: {
     TimesTraded?: number;
     UniqueCirculation?: number;
     DemandMultiple?: number;
     LastUpdated?: number;
-  };
-  is_sub?: boolean;
-  sub_name?: string;
-  data?: {
-    name: string;
-    type: string;
-    creator: string | null;
-    is_seasonal: number | null;
-    season?: number | null;
-    level?: number | string | null;
-    cash_value: string | null;
-    duped_value: string | null;
-    price: string;
-    is_limited: number | null;
-    duped_owners: string;
-    notes: string | null;
-    demand: string | null;
-    duped_demand?: string | null;
-    trend?: string | null;
-    description: string | null;
-    health: number | null;
-    tradable: boolean;
-    last_updated: number;
   };
   demand?: string | null;
   duped_demand?: string | null;

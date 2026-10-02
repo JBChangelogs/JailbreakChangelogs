@@ -97,9 +97,8 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             const displayValue = getSelectedValue
               ? formatCurrencyValue(getSelectedValue(item))
               : formatCurrencyValue(parseValueString(item.cash_value));
-            const isLimited =
-              item.is_limited === 1 || item.data?.is_limited === 1;
-            const isSeasonal = item.season != null || item.data?.season != null;
+            const isLimited = item.is_limited === 1;
+            const isSeasonal = item.season != null;
             const lastInstanceId =
               group.instanceIds[group.instanceIds.length - 1];
 
@@ -147,11 +146,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       />
                     ) : (
                       <Image
-                        src={getItemImagePath(
-                          item.type,
-                          item.base_name || item.name,
-                          true,
-                        )}
+                        src={getItemImagePath(item.type, item.name, true)}
                         alt={item.name}
                         fill
                         className="object-cover"

@@ -152,7 +152,6 @@ export default function TradeAdsProfileTab({
         demand: item.info?.demand || "N/A",
         isDuped: item.duped ?? false,
         isOG: item.og ?? false,
-        is_sub: false,
       };
 
       return Array.from({ length: amount }, () => normalized);
