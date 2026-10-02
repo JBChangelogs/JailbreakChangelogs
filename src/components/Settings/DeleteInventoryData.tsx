@@ -3,7 +3,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { createLogger } from "@/services/logger";
-import { getJbclToken } from "@/contexts/AuthContext";
+import { trackEvent } from "@/utils/analytics/rybbit";
+import { getJbclToken, useAuthContext } from "@/contexts/AuthContext";
 import { INVENTORY_API_URL } from "@/utils/api/api";
 import { readInventoryJobResponse } from "@/utils/api/inventoryJobResponse";
 import { SettingsSubsectionHeading } from "./SettingsSubsectionHeading";
@@ -17,6 +18,7 @@ export const DeleteInventoryData = ({
   robloxId?: string;
   onCopyLink?: () => void;
 }) => {
+  const { user } = useAuthContext();
   const [open, setOpen] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduled, setScheduled] = useState(false);
@@ -43,6 +45,12 @@ export const DeleteInventoryData = ({
         throw new Error(result.message);
       }
 
+      trackEvent("Delete Inventory Data", {
+        roblox_id: robloxId,
+        ...(user?.roblox_username && {
+          roblox_username: user.roblox_username,
+        }),
+      });
       setScheduled(true);
       setOpen(false);
       toast.success("Inventory data deletion scheduled", {
