@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/IconWrapper";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
 import { formatCurrencyValue as formatCompactCurrencyValue } from "@/utils/trading/currency";
 import { Pagination } from "@/components/ui/Pagination";
 import { FilterSort, ValueSort } from "@/types";
@@ -1070,13 +1071,11 @@ export default function TradeItemPickerV2({
                           Demand
                         </span>
                         {(() => {
-                          const d =
-                            condition === "duped"
-                              ? (item.duped_demand ??
-                                item.data?.duped_demand ??
-                                "N/A")
-                              : (item.demand ?? item.data?.demand ?? "N/A");
-                          const dStr = d || "N/A";
+                          const { demand } = getTradeItemMarketDetails(
+                            item,
+                            condition === "duped",
+                          );
+                          const dStr = demand || "N/A";
                           return (
                             <span
                               className={`${getDemandColor(dStr)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
@@ -1095,7 +1094,8 @@ export default function TradeItemPickerV2({
                           Trend
                         </span>
                         {(() => {
-                          const t = item.trend ?? item.data?.trend ?? "N/A";
+                          const t =
+                            getTradeItemMarketDetails(item).trend ?? "N/A";
                           return (
                             <span
                               className={`${getTrendColor(t)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}

@@ -30,3 +30,6 @@ jobs:
 
       - name: Type Check
         run: bun run type-check
+
+      - name: Tests
+        run: bun run test

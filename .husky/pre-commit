@@ -1,2 +1,5 @@
 #!/usr/bin/env sh
+set -e
+
 bunx --bun lint-staged
+bun run test

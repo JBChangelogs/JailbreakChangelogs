@@ -12,7 +12,6 @@ import { formatCurrencyValue, parseValueString } from "./calculatorUtils";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { QuickAddPopover } from "@/components/trading/QuickAddPopover";
 import { DupedBadge } from "@/components/trading/DupedBadge";
-import { OgBadge } from "@/components/trading/OgBadge";
 import {
   TradeItemMarketDetails,
   TradeItemNote,
@@ -89,7 +88,8 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             const displayName = item.name;
             const isDupedSelected = !!item.isDuped;
 
-            const selectedType = getSelectedValueType?.(item) ?? "cash";
+            const selectedType =
+              getSelectedValueType?.(item) ?? (item.isDuped ? "duped" : "cash");
             const hasDupedValue =
               item.duped_value !== null &&
               item.duped_value !== undefined &&
@@ -162,11 +162,6 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                     {isDupedSelected && (
                       <div className="absolute top-1 left-1 z-10">
                         <DupedBadge compact />
-                      </div>
-                    )}
-                    {item.isOG && !isDupedSelected && (
-                      <div className="absolute top-1 left-1 z-10">
-                        <OgBadge compact />
                       </div>
                     )}
                   </div>
@@ -242,14 +237,20 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       className={`relative z-20 inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold transition-colors ${
                         selectedType === "duped"
                           ? "bg-status-error text-form-button-text"
-                          : "bg-status-success text-form-button-text"
+                          : item.isOG
+                            ? "text-primary-text border border-[#FFD700]/50 bg-[#FFD700]/10"
+                            : "bg-status-success text-form-button-text"
                       } ${
                         !hasDupedValue || !onValueTypeChange
                           ? "cursor-default"
                           : "cursor-pointer hover:opacity-90"
                       }`}
                     >
-                      {selectedType === "duped" ? "Duped" : "Clean"}
+                      {selectedType === "duped"
+                        ? "Duped"
+                        : item.isOG
+                          ? "OG"
+                          : "Clean"}
                     </button>
                   </div>
                   <TradeItemMarketDetails

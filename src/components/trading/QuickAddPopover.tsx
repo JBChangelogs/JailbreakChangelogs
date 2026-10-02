@@ -32,6 +32,7 @@ import {
 } from "@/utils/trading/tradeItems";
 import { handleImageError } from "@/utils/ui/images";
 import { usePartialItemFields } from "@/hooks/usePartialItems";
+import { TRADE_ITEM_FIELDS } from "@/utils/api/fetchTradeItemsByIds";
 
 interface QuickAddPopoverProps {
   items: TradeItem[];
@@ -42,16 +43,6 @@ interface QuickAddPopoverProps {
 }
 
 type ItemCondition = "clean" | "duped" | "og";
-const QUICK_ADD_FIELDS = [
-  "name",
-  "type",
-  "cash_value",
-  "duped_value",
-  "is_limited",
-  "is_seasonal",
-  "tradable",
-  "demand",
-] as const satisfies readonly (keyof TradeItem & string)[];
 
 const SUPPORTED_FILTER_SORTS = new Set<FilterSort>([
   "name-all-items",
@@ -98,7 +89,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
     null,
   );
   const catalog = usePartialItemFields<TradeItem>(
-    QUICK_ADD_FIELDS,
+    TRADE_ITEM_FIELDS,
     open && useCatalogApi,
   );
   const visibleItems: TradeItem[] = useMemo(

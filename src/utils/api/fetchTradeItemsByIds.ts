@@ -1,7 +1,7 @@
 import { fetchPartialItems } from "@/utils/api/api";
 import type { TradeItem } from "@/types/trading";
 
-const TRADE_ITEM_FIELDS = [
+export const TRADE_ITEM_FIELDS = [
   "name",
   "type",
   "cash_value",

@@ -3,6 +3,7 @@ import { TradeItem } from "@/types/trading";
 import { Icon } from "@/components/ui/IconWrapper";
 import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import { hasItemValue } from "@/utils/items/itemValue";
+import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
 import {
   Popover,
   PopoverContent,
@@ -66,15 +67,12 @@ export const TradeItemNote = ({
 
 export const TradeItemMarketDetails = ({
   item,
-  isDuped = false,
+  isDuped = item.isDuped ?? false,
 }: {
   item: TradeItem;
   isDuped?: boolean;
 }) => {
-  const demand = isDuped
-    ? (item.duped_demand ?? item.data?.duped_demand)
-    : (item.demand ?? item.data?.demand);
-  const trend = item.trend ?? item.data?.trend;
+  const { demand, trend } = getTradeItemMarketDetails(item, isDuped);
 
   return (
     <div className="border-border-card space-y-1 border-t pt-2 text-[11px]">

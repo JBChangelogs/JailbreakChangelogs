@@ -27,7 +27,12 @@ import {
 import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 
 // Import extracted components and utilities
-import { parseValueString, formatTotalValue } from "./calculatorUtils";
+import {
+  calculateCalculatorTotal,
+  getCalculatorItemValue,
+  updateCalculatorValueType,
+  formatTotalValue,
+} from "./calculatorUtils";
 import { ClearConfirmModal } from "./ClearConfirmModal";
 import { TradeSummaryBar } from "./TradeSummaryBar";
 import { TradeSidePanel } from "./TradeSidePanel";
@@ -687,17 +692,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     );
   };
 
-  /**
-   * Computes totals and a Clean/Duped breakdown for a given side.
-   * Respects per-item selection but coerces to Clean if Duped value is not available.
-   */
   const calculateTotals = (items: TradeItem[]) => {
-    const totalValue = items.reduce((sum, item) => {
-      const value = parseValueString(
-        item.isDuped ? item.duped_value : item.cash_value,
-      );
-      return sum + value;
-    }, 0);
+    const totalValue = calculateCalculatorTotal(items);
 
     return {
       cashValue: formatTotalValue(totalValue),
@@ -825,10 +821,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   };
 
   // Helper function to get selected value for an item
-  const getSelectedValue = (item: TradeItem): number => {
-    const isDuped = item.isDuped;
-    return parseValueString(!isDuped ? item.cash_value : item.duped_value);
-  };
+  const getSelectedValue = getCalculatorItemValue;
 
   const updateItemValueType = (
     itemId: number,
@@ -837,28 +830,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     instanceId?: string,
   ) => {
     const updateFn = (items: TradeItem[]) =>
-      items.map((item) => {
-        // If instanceId is provided, only update that specific instance
-        if (instanceId) {
-          if (item.instanceId === instanceId) {
-            return {
-              ...item,
-              isDuped: valueType === "duped",
-              isOG: valueType === "duped" ? false : item.isOG,
-            };
-          }
-          return item;
-        }
-        // Fallback: update all matching by ID (old behavior or when group toggled)
-        if (item.id === itemId) {
-          return {
-            ...item,
-            isDuped: valueType === "duped",
-            isOG: valueType === "duped" ? false : item.isOG,
-          };
-        }
-        return item;
-      });
+      updateCalculatorValueType(items, itemId, valueType, instanceId);
 
     if (side === "offering") {
       setOfferingItems(updateFn);
