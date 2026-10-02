@@ -7,7 +7,7 @@ import * as requests from "@/utils/api/apiDevToken";
 import { TRADE_ITEM_FIELDS } from "@/utils/api/fetchTradeItemsByIds";
 import { TradeItemMarketDetails } from "./TradeItemContext";
 
-test("Quick Add requests the market fields needed to display a freshly added duped Void", async () => {
+test("Quick Add fetches duped market fields for newly added items", async () => {
   const voidRow = {
     id: 108,
     name: "Void",

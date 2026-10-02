@@ -10,7 +10,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import ChangelogMediaEmbed from "@/components/Changelogs/ChangelogMediaEmbed";
-import { Button } from "@/components/ui/button";
+import PricingTierAction from "./PricingTierAction";
+import { getTierPurchase, getTierShareUrl } from "./pricing";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
@@ -105,6 +106,7 @@ export default function ModernPricingSection() {
   const BADGE_BASE_URL =
     "https://assets.jailbreakchangelogs.com/assets/website_icons";
   const [highlightedTier, setHighlightedTier] = useState<number | null>(null);
+  const [hasMounted, setHasMounted] = useState(false);
   const [tabParam, setTabParam] = useQueryState("tab", {
     defaultValue: "",
     history: "push",
@@ -116,18 +118,20 @@ export default function ModernPricingSection() {
     shallow: true,
   });
   const { user } = useAuthContext();
+  const supporterLevel = user?.premiumtype ?? 0;
   const { resolvedTheme } = useTheme();
   const isYearly = tabParam === "roblox";
   const discordLevelsQuery = useQuery({
     queryKey: ["supporter-gift-levels"],
     queryFn: fetchSupporterGiftLevels,
-    enabled: !isYearly,
+    enabled: hasMounted && !isYearly,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
     retry: false,
   });
-  const discordLevels = discordLevelsQuery.data ?? [];
-  const discordLevelsLoading = discordLevelsQuery.isPending;
+  // Keep SSR and the first client render identical, even with cached query data.
+  const discordLevels = hasMounted ? (discordLevelsQuery.data ?? []) : [];
+  const discordLevelsLoading = !hasMounted || discordLevelsQuery.isPending;
   const isOwner = user?.flags?.some((f) => f.flag === "is_owner");
 
   const discordImagePath =
@@ -151,17 +155,11 @@ export default function ModernPricingSection() {
   };
 
   const copyTierLink = async (tierNumber: number, tierName: string) => {
-    const url = new URL(window.location.href);
+    const url = getTierShareUrl(window.location.href, tierNumber, isYearly);
     const paymentMethodLabel = isYearly ? "Roblox" : "Discord";
-    if (isYearly) {
-      url.searchParams.set("tab", "roblox");
-    } else {
-      url.searchParams.delete("tab");
-    }
-    url.searchParams.set("tier", String(tierNumber));
 
     try {
-      await navigator.clipboard.writeText(url.toString());
+      await navigator.clipboard.writeText(url);
       toast.success("Link Copied", {
         description: `The ${paymentMethodLabel} URL for ${tierName} is now on your clipboard.`,
       });
@@ -171,7 +169,9 @@ export default function ModernPricingSection() {
     }
   };
 
-  const discordSelfLevels = discordLevels.filter((l) => !l.is_gift);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     if (tierParam) {
@@ -254,169 +254,151 @@ export default function ModernPricingSection() {
         </Tabs>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
-          {supporterTiers.map((tier) => (
-            <div
-              key={tier.name}
-              className={`hover:bg-tertiary-bg relative transform rounded-lg transition-all duration-500 ${
-                tier.recommended
-                  ? "border-button-info bg-secondary-bg border-2"
-                  : "border-border-card bg-secondary-bg border"
-              }`}
-              style={
-                highlightedTier === tier.tierNumber
-                  ? {
-                      backgroundColor:
-                        "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                    }
-                  : undefined
-              }
-            >
-              {tier.recommended && (
-                <div className="bg-button-info absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-5 py-2 text-xs font-semibold text-white">
-                  Popular
-                </div>
-              )}
-              <div className="flex h-full flex-col p-6">
-                <div className="mb-2 flex items-center gap-2">
-                  <p className="text-primary-text text-lg font-medium">
-                    {tier.name}
-                  </p>
-                  {tier.name !== "Free" && tier.tierNumber && (
-                    <Image
-                      src={`${BADGE_BASE_URL}/jbcl_supporter_${tier.tierNumber}.svg`}
-                      alt={tier.name}
-                      width={24}
-                      height={24}
-                      className="object-contain"
-                    />
-                  )}
-                  {isOwner && tier.tierNumber ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            copyTierLink(tier.tierNumber!, tier.name)
-                          }
-                          className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                          aria-label={`Copy ${tier.name} link`}
-                        >
-                          <Icon icon="heroicons:link" className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="top"
-                        className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                      >
-                        <p>Copy URL</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : null}
-                </div>
-
-                <h4 className="text-primary-text mt-2 text-3xl font-semibold">
-                  {tier.name === "Free" ? (
-                    <div className="flex items-center gap-2">
-                      <span>0</span>
-                      <span className="text-secondary-text text-base font-normal">
-                        {" "}
-                        {isYearly ? "Robux" : "USD"}
-                      </span>
-                    </div>
-                  ) : isYearly && tier.priceAlt ? (
-                    <div className="flex items-center gap-2">
-                      <span>
-                        {tier.priceAlt.split(" ")[1].replace("R$", "")}
-                      </span>
-                      <span className="text-secondary-text text-base font-normal">
-                        {" "}
-                        Robux
-                      </span>
-                    </div>
-                  ) : (
-                    <>
-                      {discordSelfLevels.find(
-                        (l) => l.level === tier.tierNumber,
-                      )?.price_str ?? "—"}
-                      <span className="text-secondary-text text-base font-normal">
-                        {" "}
-                        USD
-                      </span>
-                    </>
-                  )}
-                </h4>
-
-                <p className="text-secondary-text mt-4">
-                  {tier.name === "Free"
-                    ? "Free for all users, forever."
-                    : "Unlock exclusive features and support the creators."}
-                </p>
-
-                <div className="mt-8 space-y-3">
-                  {tier.features.map((feature, featureIndex) => (
-                    <div key={featureIndex} className="flex items-start">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="text-button-info mt-1 h-5 w-5 shrink-0"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span
-                        className={`text-secondary-text mx-4 ${feature.startsWith("**") ? "text-primary-text font-bold" : ""}`}
-                      >
-                        {feature.replace(/\*\*/g, "")}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {tier.name !== "Free" ? (
-                  <div className="mt-auto">
-                    <Button
-                      onClick={() => {
-                        if (isYearly) {
-                          window.open(
-                            "https://www.roblox.com/games/104188650191561/Support-Us",
-                            "_blank",
-                            "noopener,noreferrer",
-                          );
-                        } else {
-                          const level = discordSelfLevels.find(
-                            (l) => l.level === tier.tierNumber,
-                          );
-                          if (level?.url) {
-                            window.open(
-                              level.url,
-                              "_blank",
-                              "noopener,noreferrer",
-                            );
-                          }
-                        }
-                      }}
-                      disabled={!isYearly && discordLevelsLoading}
-                      className="mt-6 w-full tracking-wide capitalize"
-                    >
-                      {isYearly
-                        ? "Support with Robux"
-                        : discordLevelsLoading
-                          ? "Loading..."
-                          : "Support with Discord"}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="border-border-card bg-tertiary-bg text-primary-text mt-auto w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
-                    Already included
+          {supporterTiers.map((tier) => {
+            const purchase = getTierPurchase(
+              tier.tierNumber ?? 0,
+              tier.priceAlt,
+              isYearly,
+              discordLevels,
+            );
+            return (
+              <div
+                key={tier.name}
+                className={`hover:bg-tertiary-bg relative transform rounded-lg transition-all duration-500 ${
+                  tier.recommended
+                    ? "border-button-info bg-secondary-bg border-2"
+                    : "border-border-card bg-secondary-bg border"
+                }`}
+                style={
+                  highlightedTier === tier.tierNumber
+                    ? {
+                        backgroundColor:
+                          "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                      }
+                    : undefined
+                }
+              >
+                {tier.recommended && (
+                  <div className="bg-button-info absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-5 py-2 text-xs font-semibold text-white">
+                    Popular
                   </div>
                 )}
+                <div className="flex h-full flex-col p-6">
+                  <div className="mb-2 flex items-center gap-2">
+                    <p className="text-primary-text text-lg font-medium">
+                      {tier.name}
+                    </p>
+                    {tier.name !== "Free" && tier.tierNumber && (
+                      <Image
+                        src={`${BADGE_BASE_URL}/jbcl_supporter_${tier.tierNumber}.svg`}
+                        alt={tier.name}
+                        width={24}
+                        height={24}
+                        className="object-contain"
+                      />
+                    )}
+                    {isOwner && tier.tierNumber ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              copyTierLink(tier.tierNumber!, tier.name)
+                            }
+                            className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                            aria-label={`Copy ${tier.name} link`}
+                          >
+                            <Icon icon="heroicons:link" className="h-4 w-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                        >
+                          <p>Copy URL</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : null}
+                  </div>
+
+                  <h4 className="text-primary-text mt-2 text-3xl font-semibold">
+                    {tier.name === "Free" ? (
+                      <div className="flex items-center gap-2">
+                        <span>{purchase.price}</span>
+                        <span className="text-secondary-text text-base font-normal">
+                          {" "}
+                          {purchase.currency}
+                        </span>
+                      </div>
+                    ) : isYearly && tier.priceAlt ? (
+                      <div className="flex items-center gap-2">
+                        <span>{purchase.price}</span>
+                        <span className="text-secondary-text text-base font-normal">
+                          {" "}
+                          Robux
+                        </span>
+                      </div>
+                    ) : (
+                      <>
+                        {purchase.price}
+                        <span className="text-secondary-text text-base font-normal">
+                          {" "}
+                          USD
+                        </span>
+                      </>
+                    )}
+                  </h4>
+
+                  <p className="text-secondary-text mt-4">
+                    {tier.name === "Free"
+                      ? "Free for all users, forever."
+                      : "Unlock exclusive features and support the creators."}
+                  </p>
+
+                  <div className="mt-8 space-y-3">
+                    {tier.features.map((feature, featureIndex) => (
+                      <div key={featureIndex} className="flex items-start">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="text-button-info mt-1 h-5 w-5 shrink-0"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span
+                          className={`text-secondary-text mx-4 ${feature.startsWith("**") ? "text-primary-text font-bold" : ""}`}
+                        >
+                          {feature.replace(/\*\*/g, "")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <PricingTierAction
+                    tierNumber={tier.tierNumber ?? 0}
+                    supporterLevel={supporterLevel}
+                    isRoblox={isYearly}
+                    isLoading={discordLevelsLoading}
+                    isUnavailable={!purchase.url}
+                    onSupport={() => {
+                      if (purchase.url) {
+                        window.open(
+                          purchase.url,
+                          "_blank",
+                          "noopener,noreferrer",
+                        );
+                      }
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Important Information Section */}
