@@ -512,25 +512,25 @@ export const NavbarModern = ({
                       href="/values"
                       icon="material-symbols:price-check-rounded"
                       title="Value List"
-                      description="Browse current item values and track market trends"
+                      description="Browse item values and market trends"
                     />
                     <NavDropdownItem
                       href="/values/calculator"
                       icon="material-symbols:calculate-rounded"
                       title="Value Calculator"
-                      description="Compare items and get fair trade valuations"
+                      description="Compare item values before you trade"
                     />
                     <NavDropdownItem
                       href="/items/suggestions"
                       icon="material-symbols:lightbulb-outline-rounded"
                       title="Item Suggestions"
-                      description="Submit and vote on community value change suggestions"
+                      description="Suggest value changes and vote on proposals"
                     />
                     <NavDropdownItem
                       href="/items/changelogs"
                       icon="material-symbols:history-rounded"
                       title="Item Changelogs"
-                      description="Dig into every value update — the reasoning, who voted, and who made the final call"
+                      description="See value changes, community votes, and decisions"
                     />
                     <NavDropdownItem
                       href="/trading"
@@ -539,35 +539,16 @@ export const NavbarModern = ({
                       description="Browse and post player trade listings"
                     />
                     <NavDropdownItem
-                      href="/dupes"
-                      icon="material-symbols:content-copy-rounded"
-                      title="Dupe Finder"
-                      description="Check if items are duped before you trade"
-                    />
-                    <NavDropdownItem
-                      href="/inventories"
-                      icon="material-symbols:inventory-2-rounded"
-                      title="Inventory Checker"
-                      description="View any player's full inventory and net worth"
-                    />
-                    <NavDropdownItem
-                      href="/og"
-                      icon="material-symbols:star-rounded"
-                      title="OG Finder"
-                      description="Discover who holds the rarest original items"
-                    />
-                    <NavDropdownItem
                       href="/hyperchrome-pity"
                       icon="material-symbols:percent-rounded"
                       title="Hyperchrome Pity"
-                      description="Calculate how many robberies you need for the next Hyperchrome level"
-                      className="col-span-2"
+                      description="Estimate robberies until your next Hyperchrome level"
                     />
                   </div>
                 </NavigationMenu.Content>
               </NavigationMenu.Item>
 
-              {/* Trackers */}
+              {/* Tools & Trackers */}
               <NavigationMenu.Item value="trackers">
                 <NavigationMenu.Trigger
                   ref={(el) => {
@@ -575,7 +556,7 @@ export const NavbarModern = ({
                   }}
                   className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
                 >
-                  Trackers
+                  Tools &amp; Trackers
                   <Icon
                     icon="mdi:chevron-down"
                     className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
@@ -607,6 +588,25 @@ export const NavbarModern = ({
                       title="Bounty Tracker"
                       description="Find the highest bounty players and join their server"
                       badge="live"
+                    />
+                    <NavDropdownItem
+                      href="/inventories"
+                      icon="material-symbols:inventory-2-rounded"
+                      title="Inventory Checker"
+                      description="View any player's full inventory and net worth"
+                    />
+                    <NavDropdownItem
+                      href="/og"
+                      icon="material-symbols:star-rounded"
+                      title="OG Finder"
+                      description="Discover who holds the rarest original items"
+                    />
+                    <NavDropdownItem
+                      href="/dupes"
+                      icon="material-symbols:content-copy-rounded"
+                      title="Dupe Finder"
+                      description="Check if items are duped before you trade"
+                      className="col-span-2"
                     />
                   </div>
                 </NavigationMenu.Content>

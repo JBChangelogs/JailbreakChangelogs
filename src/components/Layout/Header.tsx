@@ -430,9 +430,31 @@ const MobileDrawer = memo(function MobileDrawer({
             onClick={onClose}
           />
           <MobileNavItem
-            href="/dupes"
-            icon="material-symbols:content-copy-rounded"
-            label="Dupe Finder"
+            href="/hyperchrome-pity"
+            icon="material-symbols:percent-rounded"
+            label="Hyperchrome Pity"
+            onClick={onClose}
+          />
+        </MobileNavSection>
+
+        <MobileNavSection
+          title="Tools & Trackers"
+          sectionIcon="material-symbols:sensors-rounded"
+          open={openNavSection === "Tools & Trackers"}
+          onToggle={() => toggleNavSection("Tools & Trackers")}
+        >
+          <MobileNavItem
+            href="/robberies"
+            icon="material-symbols:local-police-rounded"
+            label="Robbery Tracker"
+            badge="Live"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/bounties"
+            icon="mdi:currency-usd"
+            label="Bounty Tracker"
+            badge="Live"
             onClick={onClose}
           />
           <MobileNavItem
@@ -448,31 +470,9 @@ const MobileDrawer = memo(function MobileDrawer({
             onClick={onClose}
           />
           <MobileNavItem
-            href="/hyperchrome-pity"
-            icon="material-symbols:percent-rounded"
-            label="Hyperchrome Pity"
-            onClick={onClose}
-          />
-        </MobileNavSection>
-
-        <MobileNavSection
-          title="Trackers"
-          sectionIcon="material-symbols:sensors-rounded"
-          open={openNavSection === "Trackers"}
-          onToggle={() => toggleNavSection("Trackers")}
-        >
-          <MobileNavItem
-            href="/robberies"
-            icon="material-symbols:local-police-rounded"
-            label="Robbery Tracker"
-            badge="Live"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/bounties"
-            icon="mdi:currency-usd"
-            label="Bounty Tracker"
-            badge="Live"
+            href="/dupes"
+            icon="material-symbols:content-copy-rounded"
+            label="Dupe Finder"
             onClick={onClose}
           />
         </MobileNavSection>
