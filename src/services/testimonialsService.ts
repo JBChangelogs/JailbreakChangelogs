@@ -7,6 +7,43 @@ interface SubmitTestimonialResponse {
   message: string;
 }
 
+export interface MyTestimonial {
+  id: number;
+  user_id: string;
+  content: string;
+  status: "accepted" | "pending";
+  role: string | null;
+  link: string | null;
+  created_at: number | null;
+  reviewed_at: number | null;
+}
+
+export async function fetchMyTestimonial(
+  signal?: AbortSignal,
+): Promise<MyTestimonial | null> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    "/v2/users/me/testimonial",
+  );
+  const response = await fetch(url, {
+    credentials: "include",
+    headers,
+    signal,
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      await getResponseErrorMessage(
+        response,
+        "Failed to check your testimonial status. Please try again.",
+      ),
+    );
+  }
+
+  return response.json();
+}
+
 export async function submitTestimonial(
   content: string,
 ): Promise<SubmitTestimonialResponse> {

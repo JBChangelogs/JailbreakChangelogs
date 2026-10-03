@@ -1,9 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { submitTestimonial } from "@/services/testimonialsService";
+import {
+  fetchMyTestimonial,
+  submitTestimonial,
+  type MyTestimonial,
+} from "@/services/testimonialsService";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -12,7 +17,19 @@ const MIN_CHARACTERS = 100;
 const MAX_CHARACTERS = 1500;
 
 export default function SubmitTestimonialButton() {
-  const { isAuthenticated, isLoading, setLoginModal } = useAuthContext();
+  const { isAuthenticated, isLoading, setLoginModal, user } = useAuthContext();
+  const queryClient = useQueryClient();
+  const testimonialQueryKey = ["my-testimonial", user?.id];
+  const {
+    data: testimonial,
+    isFetching: isCheckingStatus,
+    refetch: refetchStatus,
+  } = useQuery({
+    queryKey: testimonialQueryKey,
+    queryFn: ({ signal }) => fetchMyTestimonial(signal),
+    enabled: isAuthenticated && !isLoading,
+    retry: false,
+  });
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,14 +38,24 @@ export default function SubmitTestimonialButton() {
     trimmedContent.length >= MIN_CHARACTERS &&
     trimmedContent.length <= MAX_CHARACTERS;
 
-  const openSubmissionForm = () => {
-    if (isLoading) return;
+  const openSubmissionForm = async () => {
+    if (isLoading || isCheckingStatus) return;
 
     if (!isAuthenticated) {
       toast.info("Log in to submit a testimonial.");
       setLoginModal({ open: true });
       return;
     }
+
+    const result = await refetchStatus();
+    if (result.isError || result.data === undefined) {
+      toast.error(
+        result.error?.message ||
+          "Failed to check your testimonial status. Please try again.",
+      );
+      return;
+    }
+    if (result.data !== null) return;
 
     setIsOpen(true);
   };
@@ -39,19 +66,38 @@ export default function SubmitTestimonialButton() {
   };
 
   const handleSubmit = async () => {
-    if (!isValidLength || isSubmitting) return;
+    if (
+      !isValidLength ||
+      isSubmitting ||
+      !isAuthenticated ||
+      !user ||
+      testimonial !== null
+    )
+      return;
 
     setIsSubmitting(true);
     const toastId = toast.loading("Submitting your testimonial...");
 
     try {
       const result = await submitTestimonial(trimmedContent);
+      await queryClient.cancelQueries({ queryKey: testimonialQueryKey });
+      queryClient.setQueryData<MyTestimonial>(testimonialQueryKey, {
+        id: result.id,
+        user_id: user.id,
+        content: trimmedContent,
+        status: "pending",
+        role: null,
+        link: null,
+        created_at: Math.floor(Date.now() / 1000),
+        reviewed_at: null,
+      });
       toast.success(result.message || "Testimonial submitted for review.", {
         id: toastId,
       });
       setContent("");
       setIsOpen(false);
     } catch (error) {
+      void refetchStatus();
       toast.error(
         error instanceof Error
           ? error.message
@@ -63,11 +109,26 @@ export default function SubmitTestimonialButton() {
     }
   };
 
+  if (isAuthenticated && testimonial) {
+    if (testimonial.status === "accepted") return null;
+
+    return (
+      <p className="text-secondary-text text-sm">
+        Your testimonial is awaiting review.
+      </p>
+    );
+  }
+
   return (
     <>
-      <Button onClick={openSubmissionForm}>
+      <Button
+        onClick={() => void openSubmissionForm()}
+        disabled={isLoading || (isAuthenticated && isCheckingStatus)}
+      >
         <Icon icon="heroicons:pencil-square" className="h-5 w-5" />
-        Add Testimonial
+        {isAuthenticated && isCheckingStatus
+          ? "Checking..."
+          : "Add Testimonial"}
       </Button>
 
       <ConfirmDialog
@@ -85,10 +146,16 @@ export default function SubmitTestimonialButton() {
             Tell the community how Jailbreak Changelogs has helped you. Your
             submission will be reviewed before it appears on the website.
           </p>
-          <p className="border-border-card bg-tertiary-bg/50 text-secondary-text rounded-lg border p-3 text-sm">
-            Already featured on this page? Resubmit your testimonial here so we
-            can link it to your JBCL account.
-          </p>
+          <div className="bg-button-info/10 border-button-info rounded-lg border p-4 shadow-sm">
+            <p className="text-primary-text text-base font-bold">
+              Testimonials Are Permanent
+            </p>
+            <p className="text-secondary-text mt-1 text-sm">
+              Once accepted, your testimonial is permanent. You cannot delete it
+              yourself; it will only be removed when your JBCL account is
+              deleted.
+            </p>
+          </div>
           <div>
             <label
               htmlFor="testimonial-content"
