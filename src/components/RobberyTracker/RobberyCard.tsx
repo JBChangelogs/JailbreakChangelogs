@@ -1,13 +1,13 @@
 "use client";
 
 import { createLogger } from "@/services/logger";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 const log = createLogger("UI");
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
-import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
+import { RobberyRelativeTime, RobberyCountdown } from "./RobberyTime";
 import {
   type RobberyData,
   type ServerRegionData,
@@ -44,7 +44,7 @@ interface RobberyCardProps {
   onJoin: (report: TrackerJoinReport) => void;
 }
 
-export default function RobberyCard({
+function RobberyCard({
   robbery,
   regionData: externalRegionData,
   useExternalRegionData = false,
@@ -53,8 +53,6 @@ export default function RobberyCard({
   onJoin,
 }: RobberyCardProps) {
   const [isJoining, setIsJoining] = useState(false);
-  const [planeCountdown, setPlaneCountdown] = useState<string | null>(null);
-  const [casinoCountdown, setCasinoCountdown] = useState<string | null>(null);
   const [regionData, setRegionData] = useState(robbery.region_data || null);
   const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
 
@@ -67,22 +65,12 @@ export default function RobberyCard({
   );
   const imageUrl = `https://assets.jailbreakchangelogs.com/assets/images/robberies/${imageName}.webp`;
 
-  // Create unique ID for timer subscription (same pattern as card key)
+  // Each time display owns its timer subscription.
   const jobId = robbery.server?.job_id || robbery.job_id;
   const timerId = `robbery-${robbery.marker_name}-${jobId}-${robbery.timestamp}`;
 
-  // Use real-time updating relative timestamp
-  const relativeTime = useOptimizedRealTimeRelativeDate(
-    robbery.timestamp,
-    timerId,
-  );
-
   const isLastJoined = Boolean(jobId && lastJoined?.jobId === jobId);
   const showLastJoinedState = isLastJoined && !isJoining;
-  const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
-    isLastJoined ? lastJoined?.joinedAt : null,
-    `robbery-last-joined-${jobId || "unknown"}-${robbery.marker_name}`,
-  );
 
   // Check if this is a train with high progress
   const isTrainNearClose =
@@ -118,87 +106,6 @@ export default function RobberyCard({
     robbery.region_id,
     useExternalRegionData,
   ]);
-
-  // Handle cargo plane countdown
-  useEffect(() => {
-    if (robbery.marker_name === "CargoPlane" && robbery.metadata?.plane_time) {
-      const planeTime = robbery.metadata.plane_time;
-
-      const updateCountdown = () => {
-        const now = Math.floor(Date.now() / 1000);
-        const diff = planeTime - now;
-
-        if (diff > 0) {
-          // Plane hasn't flown off yet - show countdown
-          const hours = Math.floor(diff / 3600);
-          const minutes = Math.floor((diff % 3600) / 60);
-          const seconds = diff % 60;
-
-          if (hours > 0) {
-            setPlaneCountdown(`${hours}h ${minutes}m ${seconds}s`);
-          } else if (minutes > 0) {
-            setPlaneCountdown(`${minutes}m ${seconds}s`);
-          } else {
-            setPlaneCountdown(`${seconds}s`);
-          }
-        } else {
-          // Plane has flown off - show relative time
-          const absoluteDiff = Math.abs(diff);
-          const hours = Math.floor(absoluteDiff / 3600);
-          const minutes = Math.floor((absoluteDiff % 3600) / 60);
-          const seconds = absoluteDiff % 60;
-
-          if (hours > 0) {
-            setPlaneCountdown(`Departed ${hours}h ${minutes}m ago`);
-          } else if (minutes > 0) {
-            setPlaneCountdown(`Departed ${minutes}m ${seconds}s ago`);
-          } else {
-            setPlaneCountdown(`Departed ${seconds}s ago`);
-          }
-        }
-      };
-
-      // Update immediately and then every second
-      updateCountdown();
-      const interval = setInterval(updateCountdown, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [robbery.marker_name, robbery.metadata]);
-
-  // Handle casino countdown
-  useEffect(() => {
-    if (
-      robbery.marker_name === "Casino" &&
-      robbery.status === 2 &&
-      robbery.metadata?.casino_time
-    ) {
-      const casinoTime = robbery.metadata.casino_time;
-
-      const updateCountdown = () => {
-        const now = Math.floor(Date.now() / 1000);
-        const diff = casinoTime - now;
-
-        if (diff > 0) {
-          const minutes = Math.floor(diff / 60);
-          const seconds = diff % 60;
-
-          if (minutes > 0) {
-            setCasinoCountdown(`${minutes}m ${seconds}s`);
-          } else {
-            setCasinoCountdown(`${seconds}s`);
-          }
-        } else {
-          setCasinoCountdown("0s");
-        }
-      };
-
-      updateCountdown();
-      const interval = setInterval(updateCountdown, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [robbery.marker_name, robbery.status, robbery.metadata]);
 
   const handleCopyCasinoCode = useCallback(async (code: string) => {
     try {
@@ -249,13 +156,18 @@ export default function RobberyCard({
     // Default handling for other robberies
     switch (robbery.status) {
       case 1:
-        if (robbery.marker_name === "CargoPlane" && planeCountdown) {
+        if (
+          robbery.marker_name === "CargoPlane" &&
+          robbery.metadata?.plane_time
+        ) {
           return (
             <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
               <span>
-                {planeCountdown.includes("Departed")
-                  ? planeCountdown
-                  : `Departs in ${planeCountdown}`}
+                <RobberyCountdown
+                  deadline={robbery.metadata.plane_time}
+                  kind="plane"
+                  id={`plane-countdown-${jobId}`}
+                />
               </span>
             </div>
           );
@@ -286,7 +198,13 @@ export default function RobberyCard({
           </div>
         );
     }
-  }, [isTrainNearClose, robbery.marker_name, robbery.status, planeCountdown]);
+  }, [
+    isTrainNearClose,
+    robbery.marker_name,
+    robbery.status,
+    robbery.metadata?.plane_time,
+    jobId,
+  ]);
 
   const players = robbery.server?.players || [];
 
@@ -344,8 +262,7 @@ export default function RobberyCard({
           {(robbery.metadata?.casino_code ||
             (robbery.marker_name === "Casino" &&
               robbery.status === 2 &&
-              robbery.metadata?.casino_time &&
-              casinoCountdown)) && (
+              robbery.metadata?.casino_time)) && (
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
               {robbery.metadata?.casino_code &&
                 (isValidCasinoCode(robbery.metadata.casino_code) ? (
@@ -381,14 +298,17 @@ export default function RobberyCard({
 
               {robbery.marker_name === "Casino" &&
                 robbery.status === 2 &&
-                robbery.metadata?.casino_time &&
-                casinoCountdown && (
+                robbery.metadata?.casino_time && (
                   <span className="text-secondary-text inline-flex items-center gap-1.5">
                     <Icon icon="mdi:hourglass" className="h-4 w-4" />
                     <span>
                       Closes in{" "}
                       <span className="text-primary-text font-mono font-semibold tabular-nums">
-                        {casinoCountdown}
+                        <RobberyCountdown
+                          deadline={robbery.metadata.casino_time}
+                          kind="casino"
+                          id={`casino-countdown-${jobId}`}
+                        />
                       </span>
                     </span>
                   </span>
@@ -399,10 +319,14 @@ export default function RobberyCard({
           {/* Actions */}
           {jobId && (
             <div className="mt-2">
-              {showLastJoinedState && lastJoinedRelative && (
+              {showLastJoinedState && lastJoined && (
                 <div className="border-status-success/30 bg-status-success/10 text-primary-text mb-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold">
                   <span className="truncate">
-                    Last joined {lastJoinedRelative}
+                    Last joined{" "}
+                    <RobberyRelativeTime
+                      timestamp={lastJoined.joinedAt}
+                      id={`robbery-last-joined-${jobId}-${robbery.marker_name}`}
+                    />
                   </span>
                 </div>
               )}
@@ -455,9 +379,12 @@ export default function RobberyCard({
 
       <div className="border-border-card border-t px-3 py-2">
         <div className="text-secondary-text text-center text-xs font-medium tabular-nums">
-          Logged {relativeTime || "Just now"}
+          Logged{" "}
+          <RobberyRelativeTime timestamp={robbery.timestamp} id={timerId} />
         </div>
       </div>
     </div>
   );
 }
+
+export default memo(RobberyCard);

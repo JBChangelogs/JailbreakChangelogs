@@ -6,6 +6,7 @@ import {
   useEffect,
   useRef,
   useCallback,
+  useDeferredValue,
   type CSSProperties,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +25,10 @@ import TrackerSwitcher from "@/components/RobberyTracker/TrackerSwitcher";
 import RecentJoins, {
   type RecentJoinEvent,
 } from "@/components/RobberyTracker/RecentJoins";
-import type { TrackerJoinReport } from "@/hooks/trackerJoinHistory";
+import type {
+  TrackerJoinReport,
+  TrackerJoinUser,
+} from "@/hooks/trackerJoinHistory";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { Button } from "@/components/ui/button";
@@ -55,6 +59,8 @@ const ROBBERIES_RAIL_WIDE_SIZES: [string, string][] = [
   ["300", "250"],
   ["160", "600"],
 ];
+
+const EMPTY_JOINED_USERS: TrackerJoinUser[] = [];
 
 const ROBBERIES_TIME_SORT_STORAGE_KEY = "robberiesTimeSort";
 const ROBBERIES_SELECTED_TYPES_STORAGE_KEY = "robberiesSelectedTypes";
@@ -245,18 +251,21 @@ function RobberyTrackerContent() {
     checkBanStatus: handleBanStatusCheck,
   } = useRobberyTrackerWebSocket(true, user?.id);
 
-  const handleJoin = (report: TrackerJoinReport) => {
-    reportJoin(report);
-    setRecentJoin({
-      id: crypto.randomUUID(),
-      item: {
-        timestamp: new Date().toISOString(),
-        tracker_type: report.tracker_type,
-        marker_name: report.marker_name,
-        display_name: report.display_name,
-      },
-    });
-  };
+  const handleJoin = useCallback(
+    (report: TrackerJoinReport) => {
+      reportJoin(report);
+      setRecentJoin({
+        id: crypto.randomUUID(),
+        item: {
+          timestamp: new Date().toISOString(),
+          tracker_type: report.tracker_type,
+          marker_name: report.marker_name,
+          display_name: report.display_name,
+        },
+      });
+    },
+    [reportJoin],
+  );
 
   const hasData = robberies.length > 0;
 
@@ -646,6 +655,8 @@ function RobberyTrackerContent() {
   ]);
 
   const groupedRobberies = useMemo(() => {
+    if (isPowerComboMode || robberiesDisplayMode !== "grouped") return [];
+
     const groups = new Map<string, RobberyData[]>();
     for (const robbery of filteredRobberies) {
       const jobId = robbery.server?.job_id || robbery.job_id;
@@ -665,7 +676,7 @@ function RobberyTrackerContent() {
         ),
       }))
       .sort((a, b) => b.latestTimestamp - a.latestTimestamp);
-  }, [filteredRobberies]);
+  }, [filteredRobberies, isPowerComboMode, robberiesDisplayMode]);
 
   const baselineStats = useMemo(() => {
     let total = 0;
@@ -716,6 +727,11 @@ function RobberyTrackerContent() {
     timeSort,
     matchesCountryFilter,
   ]);
+
+  // Keep controls responsive while React renders the updated cards.
+  const visibleRobberies = useDeferredValue(filteredRobberies);
+  const visibleGroups = useDeferredValue(groupedRobberies);
+  const visibleCombos = useDeferredValue(filteredRobberyCombos);
 
   // Calculate robbery statistics
   const robberyStats = useMemo(() => {
@@ -1511,16 +1527,21 @@ function RobberyTrackerContent() {
 
               {/* Robberies Grid */}
               {isPowerComboMode ? (
-                filteredRobberyCombos.length > 0 ? (
-                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                    {filteredRobberyCombos.map((combo) => (
+                visibleCombos.length > 0 ? (
+                  <div
+                    aria-busy={visibleCombos !== filteredRobberyCombos}
+                    className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
+                  >
+                    {visibleCombos.map((combo) => (
                       <RobberyComboCard
                         key={`${combo.comboId}-${combo.serverId}`}
                         comboId={combo.comboId}
                         serverId={combo.serverId}
                         robberies={combo.robberies}
                         comboLabel={combo.comboLabel}
-                        joinedUsers={joinHistory[combo.serverId] ?? []}
+                        joinedUsers={
+                          joinHistory[combo.serverId] ?? EMPTY_JOINED_USERS
+                        }
                         onJoin={handleJoin}
                         regionData={mergedServerRegionsByJobId[combo.serverId]}
                         useExternalRegionData
@@ -1542,14 +1563,19 @@ function RobberyTrackerContent() {
                   </div>
                 )
               ) : robberiesDisplayMode === "grouped" ? (
-                groupedRobberies.length > 0 ? (
-                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                    {groupedRobberies.map((group) => (
+                visibleGroups.length > 0 ? (
+                  <div
+                    aria-busy={visibleGroups !== groupedRobberies}
+                    className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
+                  >
+                    {visibleGroups.map((group) => (
                       <RobberyServerGroupCard
                         key={group.jobId}
                         serverId={group.jobId}
                         robberies={group.robberies}
-                        joinedUsers={joinHistory[group.jobId] ?? []}
+                        joinedUsers={
+                          joinHistory[group.jobId] ?? EMPTY_JOINED_USERS
+                        }
                         onJoin={handleJoin}
                         regionData={mergedServerRegionsByJobId[group.jobId]}
                         useExternalRegionData
@@ -1570,15 +1596,18 @@ function RobberyTrackerContent() {
                     </p>
                   </div>
                 )
-              ) : filteredRobberies.length > 0 ? (
-                <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                  {filteredRobberies.map((robbery) => {
+              ) : visibleRobberies.length > 0 ? (
+                <div
+                  aria-busy={visibleRobberies !== filteredRobberies}
+                  className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
+                >
+                  {visibleRobberies.map((robbery) => {
                     const jobId = robbery.server?.job_id || robbery.job_id;
                     return (
                       <RobberyCard
-                        key={`${robbery.marker_name}-${jobId}-${robbery.timestamp}`}
+                        key={`${robbery.marker_name}-${jobId}`}
                         robbery={robbery}
-                        joinedUsers={joinHistory[jobId] ?? []}
+                        joinedUsers={joinHistory[jobId] ?? EMPTY_JOINED_USERS}
                         onJoin={handleJoin}
                         regionData={mergedServerRegionsByJobId[jobId]}
                         useExternalRegionData

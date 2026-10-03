@@ -1,13 +1,13 @@
 "use client";
 
 import { createLogger } from "@/services/logger";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 const log = createLogger("UI");
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
-import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
+import { RobberyRelativeTime } from "./RobberyTime";
 import {
   type RobberyData,
   type ServerRegionData,
@@ -50,7 +50,7 @@ function getStatusText(status: number) {
   }
 }
 
-export default function RobberyServerGroupCard({
+function RobberyServerGroupCard({
   serverId,
   robberies,
   regionData: externalRegionData,
@@ -73,10 +73,6 @@ export default function RobberyServerGroupCard({
   const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
   const isLastJoined = Boolean(serverId && lastJoined?.jobId === serverId);
   const showLastJoinedState = isLastJoined && !isJoining;
-  const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
-    isLastJoined ? lastJoined?.joinedAt : null,
-    `grouped-last-joined-${serverId || "unknown"}`,
-  );
 
   const latestTimestamp = useMemo(
     () =>
@@ -87,10 +83,6 @@ export default function RobberyServerGroupCard({
     [robberies],
   );
   const timerId = `server-group-${serverId}-${latestTimestamp}`;
-  const relativeTime = useOptimizedRealTimeRelativeDate(
-    latestTimestamp,
-    timerId,
-  );
 
   const representative = robberies[0];
   const players = representative?.server?.players || [];
@@ -379,10 +371,14 @@ export default function RobberyServerGroupCard({
           )}
 
           <div className="mt-2">
-            {showLastJoinedState && lastJoinedRelative && (
+            {showLastJoinedState && lastJoined && (
               <div className="border-status-success/30 bg-status-success/10 text-primary-text mb-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold">
                 <span className="truncate">
-                  Last joined {lastJoinedRelative}
+                  Last joined{" "}
+                  <RobberyRelativeTime
+                    timestamp={lastJoined.joinedAt}
+                    id={`grouped-last-joined-${serverId}`}
+                  />
                 </span>
               </div>
             )}
@@ -426,9 +422,12 @@ export default function RobberyServerGroupCard({
 
       <div className="border-border-card border-t px-3 py-2">
         <div className="text-secondary-text text-center text-xs font-medium tabular-nums">
-          Logged {relativeTime || "Just now"}
+          Logged{" "}
+          <RobberyRelativeTime timestamp={latestTimestamp} id={timerId} />
         </div>
       </div>
     </div>
   );
 }
+
+export default memo(RobberyServerGroupCard);
