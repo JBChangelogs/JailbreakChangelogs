@@ -16,6 +16,7 @@ type NitroAdConfig = {
     position: string;
   };
   mediaQuery: string;
+  renderVisibleOnly: boolean;
 };
 
 type NitroAdsWithRemove = {
@@ -27,6 +28,7 @@ const SLOT_ID_MOBILE = "np-homepage-mobile";
 const SLOT_ID_DESKTOP = "np-homepage-desktop";
 
 const MOBILE_CONFIG = {
+  renderVisibleOnly: true,
   sizes: [
     ["320", "50"],
     ["320", "100"],
@@ -39,10 +41,11 @@ const MOBILE_CONFIG = {
     wording: "Report Ad",
     position: "top-right",
   },
-  mediaQuery: "(max-width: 767px)",
+  mediaQuery: "(width < 768px)",
 };
 
 const DESKTOP_CONFIG = {
+  renderVisibleOnly: true,
   sizes: [
     ["970", "250"],
     ["970", "90"],

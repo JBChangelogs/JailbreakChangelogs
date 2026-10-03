@@ -30,8 +30,14 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Spinner } from "@/components/ui/Spinner";
+import NitroRailAd from "@/components/Ads/NitroRailAd";
 
 const BOUNTY_RANGE_MAX = 200_000;
+const BOUNTIES_RAIL_WIDE_SIZES: [string, string][] = [
+  ["300", "600"],
+  ["300", "250"],
+  ["160", "600"],
+];
 
 function StatusPageAction({ className = "" }: { className?: string }) {
   return (
@@ -756,6 +762,17 @@ export default function BountyTrackerPage() {
       loginDescription="You must be logged in to access live bounty data. This helps prevent abuse and keeps queue times reasonable. One login unlocks both the Bounty and Robbery trackers."
       redirectToastMessage="You need to be logged in to use the Bounty Tracker."
     >
+      <NitroRailAd
+        adIdSmall="np-rail-left-bounties"
+        adIdWide="np-rail-left-bounties-wide"
+        wideSizes={BOUNTIES_RAIL_WIDE_SIZES}
+      />
+      <NitroRailAd
+        adIdSmall="np-rail-right-bounties"
+        adIdWide="np-rail-right-bounties-wide"
+        side="right"
+        wideSizes={BOUNTIES_RAIL_WIDE_SIZES}
+      />
       <BountyTrackerContent />
     </RobberyTrackerAuthWrapper>
   );

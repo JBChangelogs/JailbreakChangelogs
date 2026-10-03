@@ -18,9 +18,18 @@ export default function NitroBottomAnchor() {
   const { user, isLoading } = useAuthContext();
   const pathname = usePathname();
   const createdRef = useRef(false);
+  const generationRef = useRef(0);
   const isAccessDeniedRoute = pathname === "/access-denied";
   const isMessagesRoute =
     pathname === "/messages" || pathname.startsWith("/messages/");
+
+  useEffect(
+    () => () => {
+      generationRef.current++;
+      removeAdReference(ANCHOR_ID);
+    },
+    [],
+  );
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
@@ -29,6 +38,7 @@ export default function NitroBottomAnchor() {
     if (isLoading) return;
 
     if (isAccessDeniedRoute || isMessagesRoute) {
+      generationRef.current++;
       const el = document.getElementById(ANCHOR_ID);
       if (el) {
         el.remove();
@@ -39,6 +49,7 @@ export default function NitroBottomAnchor() {
     }
 
     if (isSupporter) {
+      generationRef.current++;
       const removeAd = () => {
         const el = document.getElementById(ANCHOR_ID);
         if (el) {
@@ -47,6 +58,7 @@ export default function NitroBottomAnchor() {
       };
 
       removeAd();
+      removeAdReference(ANCHOR_ID);
 
       const observer = new MutationObserver(() => {
         if (document.getElementById(ANCHOR_ID)) {
@@ -70,6 +82,7 @@ export default function NitroBottomAnchor() {
     if (!window.nitroAds?.createAd) return;
 
     createdRef.current = true;
+    const generation = ++generationRef.current;
 
     try {
       Promise.resolve(
@@ -93,6 +106,7 @@ export default function NitroBottomAnchor() {
         .then((adInstance) => {
           // Register this ad instance so we can call onNavigate on it later
           if (
+            generation === generationRef.current &&
             adInstance &&
             typeof adInstance === "object" &&
             "onNavigate" in adInstance
@@ -103,18 +117,13 @@ export default function NitroBottomAnchor() {
         .catch((error) => {
           // Silently handle ad creation errors per Nitropay best practices
           log.warn(`[Nitro Ad] Failed to create bottom anchor ad:`, error);
-          createdRef.current = false;
+          if (generation === generationRef.current) createdRef.current = false;
         });
     } catch (error) {
       // Catch synchronous errors
       log.warn(`[Nitro Ad] Error initializing bottom anchor ad:`, error);
       createdRef.current = false;
     }
-
-    // Clean up when component unmounts
-    return () => {
-      removeAdReference(ANCHOR_ID);
-    };
   }, [user?.premiumtype, isLoading, isAccessDeniedRoute, isMessagesRoute]);
 
   return null;

@@ -11,7 +11,6 @@ import {
   safeGetJSON,
   safeSetJSON,
 } from "@/utils/storage/safeStorage";
-import NitroCalculatorAd from "@/components/Ads/NitroCalculatorAd";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -916,11 +915,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         />
       </div>
 
-      {/* Visible after trade sides; avoids pinning the slot to the very end of the page */}
-      <NitroCalculatorAd className="mt-8" />
-
       {/* Browse — full width below panels (matches /trading#create item picker placement) */}
-      <div className="mt-6 w-full min-w-0">
+      <div className="w-full min-w-0">
         {onItemsInputModeChange && (
           <div className="mb-6">
             <Tabs

@@ -4,12 +4,16 @@ import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { removeAdReference } from "@/utils/analytics/nitroAds";
+import {
+  registerAdInstance,
+  removeAdReference,
+  type NitroAdInstance,
+} from "@/utils/analytics/nitroAds";
 
 const VIDEO_PLAYER_ID = "np-video-player";
 
 type NitroAdsWithRemove = {
-  createAd?: (id: string, config: unknown) => Promise<void>;
+  createAd?: (id: string, config: unknown) => Promise<NitroAdInstance>;
   removeAd?: (id: string) => void;
 };
 
@@ -17,6 +21,15 @@ export default function NitroVideoPlayer() {
   const { user, isLoading } = useAuthContext();
   const pathname = usePathname();
   const createdRef = useRef(false);
+  const generationRef = useRef(0);
+
+  useEffect(
+    () => () => {
+      generationRef.current++;
+      removeAdReference(VIDEO_PLAYER_ID);
+    },
+    [],
+  );
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
@@ -51,6 +64,7 @@ export default function NitroVideoPlayer() {
       isSupporter || hasDedicatedVideoNcPlayer || isMessagesRoute;
 
     const removeFloatingPlayer = () => {
+      generationRef.current++;
       const el = document.getElementById(VIDEO_PLAYER_ID);
       if (el) {
         el.remove();
@@ -97,6 +111,7 @@ export default function NitroVideoPlayer() {
     if (!nitroAds?.createAd) return;
 
     createdRef.current = true;
+    const generation = ++generationRef.current;
 
     Promise.resolve(
       nitroAds.createAd(VIDEO_PLAYER_ID, {
@@ -113,9 +128,15 @@ export default function NitroVideoPlayer() {
           mobile: "compact",
         },
       }),
-    ).catch(() => {
-      createdRef.current = false;
-    });
+    )
+      .then((adInstance) => {
+        if (generation === generationRef.current && adInstance?.onNavigate) {
+          registerAdInstance(VIDEO_PLAYER_ID, adInstance);
+        }
+      })
+      .catch(() => {
+        if (generation === generationRef.current) createdRef.current = false;
+      });
   }, [user?.premiumtype, isLoading, pathname]);
 
   return null;

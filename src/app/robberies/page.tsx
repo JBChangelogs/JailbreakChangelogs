@@ -50,6 +50,12 @@ type ServerSize = "all" | "big" | "small";
 type RobberyFilterMode = "any" | "all";
 type RobberiesDisplayMode = "individual" | "grouped";
 
+const ROBBERIES_RAIL_WIDE_SIZES: [string, string][] = [
+  ["300", "600"],
+  ["300", "250"],
+  ["160", "600"],
+];
+
 const ROBBERIES_TIME_SORT_STORAGE_KEY = "robberiesTimeSort";
 const ROBBERIES_SELECTED_TYPES_STORAGE_KEY = "robberiesSelectedTypes";
 const ROBBERIES_FILTER_MODE_STORAGE_KEY = "robberiesFilterMode";
@@ -981,21 +987,13 @@ function RobberyTrackerContent() {
       <NitroRailAd
         adIdSmall="np-rail-left-robberies"
         adIdWide="np-rail-left-robberies-wide"
-        wideSizes={[
-          ["300", "600"],
-          ["300", "250"],
-          ["160", "600"],
-        ]}
+        wideSizes={ROBBERIES_RAIL_WIDE_SIZES}
       />
       <NitroRailAd
         adIdSmall="np-rail-right-robberies"
         adIdWide="np-rail-right-robberies-wide"
         side="right"
-        wideSizes={[
-          ["300", "600"],
-          ["300", "250"],
-          ["160", "600"],
-        ]}
+        wideSizes={ROBBERIES_RAIL_WIDE_SIZES}
       />
       <main className="text-primary-text min-h-screen">
         <div className="container mx-auto mb-8 px-4">

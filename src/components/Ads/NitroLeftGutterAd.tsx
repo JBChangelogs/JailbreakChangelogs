@@ -92,6 +92,7 @@ export default function NitroLeftGutterAd({
     }
 
     if (!ads?.createAd) return;
+    let active = true;
 
     if (!isSmallViewport && smallCreatedRef.current) {
       removeSlot(adIdSmall);
@@ -115,6 +116,7 @@ export default function NitroLeftGutterAd({
         }),
       )
         .then((adInstance) => {
+          if (!active) return;
           if (
             adInstance &&
             typeof adInstance === "object" &&
@@ -126,7 +128,7 @@ export default function NitroLeftGutterAd({
           smallCreatedRef.current = true;
         })
         .catch(() => {
-          smallCreatedRef.current = false;
+          if (active) smallCreatedRef.current = false;
         });
     }
 
@@ -143,6 +145,7 @@ export default function NitroLeftGutterAd({
         }),
       )
         .then((adInstance) => {
+          if (!active) return;
           if (
             adInstance &&
             typeof adInstance === "object" &&
@@ -154,11 +157,12 @@ export default function NitroLeftGutterAd({
           wideCreatedRef.current = true;
         })
         .catch(() => {
-          wideCreatedRef.current = false;
+          if (active) wideCreatedRef.current = false;
         });
     }
 
     return () => {
+      active = false;
       removeSlot(adIdSmall);
       removeSlot(adIdWide);
       smallCreatedRef.current = false;

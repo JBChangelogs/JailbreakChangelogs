@@ -31,6 +31,7 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
 
     if (createdRef.current) return;
     if (typeof window === "undefined") return;
+    let active = true;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -56,19 +57,25 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
                     },
                     mediaQuery: "(min-width: 320px) and (max-width: 767px)",
                   }),
-                ).catch((error) => {
-                  // Silently handle ad creation errors
-                  log.warn(`[Nitro Ad] Failed to create ad ${adId}:`, error);
-                  createdRef.current = false;
-                });
+                )
+                  .then((adInstance) => {
+                    if (!active) return;
+                    if (adInstance) {
+                      observer.disconnect();
+                    } else {
+                      createdRef.current = false;
+                    }
+                  })
+                  .catch((error) => {
+                    log.warn(`[Nitro Ad] Failed to create ad ${adId}:`, error);
+                    if (active) createdRef.current = false;
+                  });
               } catch (error) {
                 // Catch synchronous errors
                 log.warn(`[Nitro Ad] Error initializing ad ${adId}:`, error);
                 createdRef.current = false;
               }
             }
-            // Stop observing once triggered
-            observer.disconnect();
           }
         });
       },
@@ -79,7 +86,17 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
       observer.observe(containerRef.current);
     }
 
+    const retryWhenLoaded = () => {
+      if (!createdRef.current && containerRef.current) {
+        observer.unobserve(containerRef.current);
+        observer.observe(containerRef.current);
+      }
+    };
+    document.addEventListener("nitroAds.loaded", retryWhenLoaded);
+
     return () => {
+      active = false;
+      document.removeEventListener("nitroAds.loaded", retryWhenLoaded);
       observer.disconnect();
       // Cleanup: Remove the ad when component unmounts
       const ads = window.nitroAds as unknown as {

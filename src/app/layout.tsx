@@ -21,6 +21,7 @@ import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSup
 import NitroVideoCloseSupporterModal from "@/components/Ads/NitroVideoCloseSupporterModal";
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
+import NitroAdNavigation from "@/components/Ads/NitroAdNavigation";
 import AdErrorBoundary from "@/components/Ads/AdErrorBoundary";
 import RybbitIdentity from "@/components/Analytics/RybbitIdentity";
 import {
@@ -190,6 +191,7 @@ export default async function RootLayout({
                       <AdErrorBoundary>
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
+                        <NitroAdNavigation />
                         <NitroAnchorCloseSupporterModal />
                         <NitroVideoCloseSupporterModal />
                       </AdErrorBoundary>
@@ -327,6 +329,7 @@ export default async function RootLayout({
                   </Suspense>
                   <NitroBottomAnchor />
                   <NitroVideoPlayer />
+                  <NitroAdNavigation />
                   <NitroAnchorCloseSupporterModal />
                   <NitroVideoCloseSupporterModal />
                   <div className="flex min-h-screen flex-col">

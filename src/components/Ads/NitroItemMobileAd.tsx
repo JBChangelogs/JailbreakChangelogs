@@ -26,8 +26,8 @@ const ITEMS_CONFIG = {
     wording: "Report Ad",
     position: "top-right",
   },
-  mediaQuery:
-    "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
+  // Match the xl:hidden wrapper on item pages.
+  mediaQuery: "(min-width: 320px) and (width < 1280px)",
 };
 
 interface Props {
