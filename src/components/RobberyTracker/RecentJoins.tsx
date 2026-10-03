@@ -255,7 +255,7 @@ export default function RecentJoins({
                           icon={
                             trackerType === "bounty"
                               ? "heroicons:banknotes"
-                              : "heroicons:squares-2x2"
+                              : "material-symbols:money-bag-rounded"
                           }
                           className="text-secondary-text h-5 w-5"
                         />

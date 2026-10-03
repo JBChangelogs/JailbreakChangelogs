@@ -28,7 +28,7 @@ export default function TotalRobberiesLoggedPolling({
       aria-label="Total robberies logged"
     >
       <div className="bg-tertiary-bg text-primary-text flex h-10 w-10 items-center justify-center rounded-lg border border-white/5">
-        <Icon icon="mdi:clipboard-text-clock" className="h-6 w-6" />
+        <Icon icon="material-symbols:money-bag-rounded" className="h-6 w-6" />
       </div>
       <div className="leading-tight">
         <div className="text-secondary-text text-xs font-medium tracking-wide uppercase">

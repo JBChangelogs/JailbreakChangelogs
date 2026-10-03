@@ -132,7 +132,7 @@ const platformGroups = [
       },
       {
         href: "/og",
-        icon: "mdi:crown",
+        icon: "material-symbols:fingerprint-rounded",
         title: "OG Finder",
         description:
           "Track your original items, see where they are now, and get notified when we find them.",
@@ -150,7 +150,7 @@ const platformGroups = [
 const liveTrackers = [
   {
     href: "/robberies",
-    icon: "material-symbols:local-police-rounded",
+    icon: "material-symbols:money-bag-rounded",
     title: "Robbery Tracker",
     description:
       "See which robberies and mansions are open across servers right now.",

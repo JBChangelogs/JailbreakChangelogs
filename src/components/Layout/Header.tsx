@@ -380,12 +380,6 @@ const MobileDrawer = memo(function MobileDrawer({
             onClick={onClose}
           />
           <MobileNavItem
-            href="/seasons/will-i-make-it"
-            icon="material-symbols:trending-up-rounded"
-            label="Will I Make It"
-            onClick={onClose}
-          />
-          <MobileNavItem
             href="/seasons/contracts"
             icon="material-symbols:task-alt-rounded"
             label="Weekly Contracts"
@@ -429,12 +423,6 @@ const MobileDrawer = memo(function MobileDrawer({
             label="Trade Ads"
             onClick={onClose}
           />
-          <MobileNavItem
-            href="/hyperchrome-pity"
-            icon="material-symbols:percent-rounded"
-            label="Hyperchrome Pity"
-            onClick={onClose}
-          />
         </MobileNavSection>
 
         <MobileNavSection
@@ -445,7 +433,7 @@ const MobileDrawer = memo(function MobileDrawer({
         >
           <MobileNavItem
             href="/robberies"
-            icon="material-symbols:local-police-rounded"
+            icon="material-symbols:money-bag-rounded"
             label="Robbery Tracker"
             badge="Live"
             onClick={onClose}
@@ -465,7 +453,7 @@ const MobileDrawer = memo(function MobileDrawer({
           />
           <MobileNavItem
             href="/og"
-            icon="material-symbols:star-rounded"
+            icon="material-symbols:fingerprint-rounded"
             label="OG Finder"
             onClick={onClose}
           />
@@ -473,6 +461,18 @@ const MobileDrawer = memo(function MobileDrawer({
             href="/dupes"
             icon="material-symbols:content-copy-rounded"
             label="Dupe Finder"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/seasons/will-i-make-it"
+            icon="material-symbols:trending-up-rounded"
+            label="Will I Make It"
+            onClick={onClose}
+          />
+          <MobileNavItem
+            href="/hyperchrome-pity"
+            icon="material-symbols:percent-rounded"
+            label="Hyperchrome Pity"
             onClick={onClose}
           />
         </MobileNavSection>

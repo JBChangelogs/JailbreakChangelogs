@@ -466,16 +466,11 @@ export const NavbarModern = ({
                       description="See top-ranked players this season"
                     />
                     <NavDropdownItem
-                      href="/seasons/will-i-make-it"
-                      icon="material-symbols:trending-up-rounded"
-                      title="Will I Make It"
-                      description="Enter your level and XP to see if you'll hit level 10 before the season ends"
-                    />
-                    <NavDropdownItem
                       href="/seasons/contracts"
                       icon="material-symbols:task-alt-rounded"
                       title="Weekly Contracts"
                       description="Check this week's contracts and plan ahead without launching the game"
+                      className="col-span-2"
                     />
                   </div>
                 </NavigationMenu.Content>
@@ -537,12 +532,7 @@ export const NavbarModern = ({
                       icon="material-symbols:swap-horiz-rounded"
                       title="Trade Ads"
                       description="Browse and post player trade listings"
-                    />
-                    <NavDropdownItem
-                      href="/hyperchrome-pity"
-                      icon="material-symbols:percent-rounded"
-                      title="Hyperchrome Pity"
-                      description="Estimate robberies until your next Hyperchrome level"
+                      className="col-span-2"
                     />
                   </div>
                 </NavigationMenu.Content>
@@ -577,7 +567,7 @@ export const NavbarModern = ({
                   <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
                     <NavDropdownItem
                       href="/robberies"
-                      icon="material-symbols:local-police-rounded"
+                      icon="material-symbols:money-bag-rounded"
                       title="Robbery Tracker"
                       description="See which robberies and mansions are open right now"
                       badge="live"
@@ -597,7 +587,7 @@ export const NavbarModern = ({
                     />
                     <NavDropdownItem
                       href="/og"
-                      icon="material-symbols:star-rounded"
+                      icon="material-symbols:fingerprint-rounded"
                       title="OG Finder"
                       description="Discover who holds the rarest original items"
                     />
@@ -606,6 +596,18 @@ export const NavbarModern = ({
                       icon="material-symbols:content-copy-rounded"
                       title="Dupe Finder"
                       description="Check if items are duped before you trade"
+                    />
+                    <NavDropdownItem
+                      href="/seasons/will-i-make-it"
+                      icon="material-symbols:trending-up-rounded"
+                      title="Will I Make It"
+                      description="Enter your level and XP to see if you'll hit level 10 before the season ends"
+                    />
+                    <NavDropdownItem
+                      href="/hyperchrome-pity"
+                      icon="material-symbols:percent-rounded"
+                      title="Hyperchrome Pity"
+                      description="Estimate robberies until your next Hyperchrome level"
                       className="col-span-2"
                     />
                   </div>
