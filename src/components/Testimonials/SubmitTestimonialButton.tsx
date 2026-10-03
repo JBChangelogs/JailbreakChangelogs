@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -16,7 +16,16 @@ import { Icon } from "@/components/ui/IconWrapper";
 const MIN_CHARACTERS = 100;
 const MAX_CHARACTERS = 1500;
 
+const subscribeHydration = () => () => {};
+const getHydratedSnapshot = () => true;
+const getServerHydratedSnapshot = () => false;
+
 export default function SubmitTestimonialButton() {
+  const isHydrated = useSyncExternalStore(
+    subscribeHydration,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot,
+  );
   const { isAuthenticated, isLoading, setLoginModal, user } = useAuthContext();
   const queryClient = useQueryClient();
   const testimonialQueryKey = ["my-testimonial", user?.id];
@@ -27,7 +36,7 @@ export default function SubmitTestimonialButton() {
   } = useQuery({
     queryKey: testimonialQueryKey,
     queryFn: ({ signal }) => fetchMyTestimonial(signal),
-    enabled: isAuthenticated && !isLoading,
+    enabled: isHydrated && isAuthenticated && !isLoading,
     retry: false,
   });
   const [isOpen, setIsOpen] = useState(false);
@@ -46,6 +55,12 @@ export default function SubmitTestimonialButton() {
       setLoginModal({ open: true });
       return;
     }
+
+    if (testimonial === null) {
+      setIsOpen(true);
+      return;
+    }
+    if (testimonial !== undefined) return;
 
     const result = await refetchStatus();
     if (result.isError || result.data === undefined) {
@@ -109,7 +124,7 @@ export default function SubmitTestimonialButton() {
     }
   };
 
-  if (isAuthenticated && testimonial) {
+  if (isHydrated && isAuthenticated && testimonial) {
     if (testimonial.status === "accepted") return null;
 
     return (
@@ -122,13 +137,15 @@ export default function SubmitTestimonialButton() {
   return (
     <>
       <Button
+        {...{ autoComplete: "off" }}
+        type="button"
         onClick={() => void openSubmissionForm()}
-        disabled={isLoading || (isAuthenticated && isCheckingStatus)}
+        disabled={
+          !isHydrated || isLoading || (isAuthenticated && isCheckingStatus)
+        }
       >
         <Icon icon="heroicons:pencil-square" className="h-5 w-5" />
-        {isAuthenticated && isCheckingStatus
-          ? "Checking..."
-          : "Add Testimonial"}
+        Add Testimonial
       </Button>
 
       <ConfirmDialog
@@ -165,6 +182,7 @@ export default function SubmitTestimonialButton() {
             </label>
             <textarea
               id="testimonial-content"
+              aria-describedby="testimonial-length-range testimonial-character-count"
               className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus min-h-40 w-full resize-y rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
               minLength={MIN_CHARACTERS}
               maxLength={MAX_CHARACTERS}
@@ -175,17 +193,26 @@ export default function SubmitTestimonialButton() {
             />
             <div className="mt-1 flex justify-between gap-3 text-xs">
               <span
-                className={
-                  trimmedContent.length > 0 &&
-                  trimmedContent.length < MIN_CHARACTERS
-                    ? "text-status-error"
-                    : "text-secondary-text"
-                }
+                id="testimonial-length-range"
+                className="text-secondary-text"
               >
-                Minimum {MIN_CHARACTERS} characters
+                {MIN_CHARACTERS}–{MAX_CHARACTERS.toLocaleString("en-US")}{" "}
+                characters
               </span>
-              <span className="text-secondary-text">
-                {content.length}/{MAX_CHARACTERS}
+              <span
+                id="testimonial-character-count"
+                className="text-secondary-text"
+              >
+                <span
+                  className={
+                    trimmedContent.length < MIN_CHARACTERS
+                      ? "text-form-error"
+                      : "text-secondary-text"
+                  }
+                >
+                  {trimmedContent.length}
+                </span>
+                /{MAX_CHARACTERS}
               </span>
             </div>
           </div>

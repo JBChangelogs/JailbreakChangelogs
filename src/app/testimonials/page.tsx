@@ -16,7 +16,7 @@ export default function TestimonialsPage() {
             We&apos;re continuously adding more testimonials from our growing
             community!
           </p>
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex min-h-10 items-center justify-center">
             <SubmitTestimonialButton />
           </div>
         </div>
