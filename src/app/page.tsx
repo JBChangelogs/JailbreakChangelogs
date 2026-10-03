@@ -222,7 +222,7 @@ export default async function Home() {
 
   return (
     <main className="bg-primary-bg min-h-screen">
-      <section className="relative overflow-hidden py-16 md:py-20">
+      <section className="relative overflow-hidden pt-16 pb-8 md:py-20">
         <div className="absolute inset-0 z-0">
           <HeroBackgroundCarousel initialImage={initialImage} />
           <div className="absolute inset-0 z-10 bg-gradient-to-br from-slate-950/75 via-slate-900/60 to-black/80" />
@@ -266,7 +266,7 @@ export default async function Home() {
             </div>
 
             <div className="order-3 md:order-2">
-              <div className="mb-4 grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 md:mb-4">
                 {quickLinks.map((link, i) => (
                   <Link
                     key={link.href}
@@ -440,7 +440,7 @@ export default async function Home() {
       </section>
 
       <section className="py-4">
-        <div className="p-4 pb-8">
+        <div className="p-4 pb-8 empty:hidden">
           <NitroHomepageAd />
         </div>
         <div className="container mx-auto px-4">
