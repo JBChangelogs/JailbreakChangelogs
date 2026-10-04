@@ -35,7 +35,7 @@ jobs:
         uses: railwayapp/config@v1
         with:
           command: plan
-          railway-token: ${{ secrets[github.base_ref == 'testing' && 'RAILWAY_TOKEN_TESTING' || 'RAILWAY_TOKEN_PRODUCTION'] }}
+          railway-token: ${{ github.base_ref == 'testing' && secrets.RAILWAY_TOKEN_TESTING || github.base_ref == 'main' && secrets.RAILWAY_TOKEN_PRODUCTION || '' }}
           cli-version: "5.63.1"
           artifact-name: railway-plan-${{ github.base_ref }}
 
@@ -44,7 +44,7 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
-      RAILWAY_TOKEN: ${{ secrets[github.ref_name == 'testing' && 'RAILWAY_TOKEN_TESTING' || 'RAILWAY_TOKEN_PRODUCTION'] }}
+      RAILWAY_TOKEN: ${{ github.ref_name == 'testing' && secrets.RAILWAY_TOKEN_TESTING || github.ref_name == 'main' && secrets.RAILWAY_TOKEN_PRODUCTION || '' }}
     concurrency:
       group: railway-apply-${{ github.ref_name }}
       cancel-in-progress: false
