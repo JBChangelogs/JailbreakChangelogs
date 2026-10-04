@@ -4,6 +4,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Spinner } from "@/components/ui/Spinner";
 import { useSonnerTwemoji } from "@/hooks/useSonnerTwemoji";
 import { Toaster as Sonner } from "sonner";
+import { TriangleAlert, X } from "lucide-react";
 import type { CSSProperties } from "react";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
@@ -12,7 +13,7 @@ const defaultClassNames: NonNullable<
   ToasterProps["toastOptions"]
 >["classNames"] = {
   toast:
-    "relative flex w-full flex-row items-start gap-3 overflow-hidden rounded-xl border border-border-card bg-[color:color-mix(in_srgb,var(--color-tertiary-bg),transparent_55%)] p-3 text-left text-primary-text shadow-(--color-card-shadow) backdrop-blur-xl",
+    "relative flex w-full flex-row items-start gap-3 overflow-hidden rounded-xl border border-border-card bg-[color:color-mix(in_srgb,var(--color-tertiary-bg),transparent_55%)] p-3 text-left text-primary-text shadow-(--color-card-shadow) backdrop-blur-xl [&:has([data-close-button])]:pr-10",
   title: "text-left font-semibold text-primary-text",
   description: "text-left text-secondary-text",
   content: "min-w-0 flex-1 space-y-1 text-left",
@@ -22,7 +23,7 @@ const defaultClassNames: NonNullable<
     "w-fit cursor-pointer rounded-lg bg-button-info px-3 py-1.5 text-xs font-semibold text-form-button-text hover:bg-button-info-hover",
   cancelButton: "hidden",
   closeButton:
-    "bg-secondary-bg text-secondary-text border border-border-card hover:bg-quaternary-bg hover:text-primary-text",
+    "absolute top-2 right-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent! text-secondary-text! transition-colors hover:bg-quaternary-bg! hover:text-primary-text! focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-button-info",
   success:
     "[--toast-accent:var(--color-status-success)] [&_[data-icon]]:text-[var(--toast-accent)]",
   error:
@@ -75,6 +76,8 @@ const Toaster = ({ toastOptions, style, icons, ...props }: ToasterProps) => {
       }}
       icons={{
         loading: <Spinner className="h-4 w-4" />,
+        warning: <TriangleAlert className="h-5 w-5" aria-hidden="true" />,
+        close: <X className="h-4 w-4" aria-hidden="true" />,
         ...icons,
       }}
       {...props}
