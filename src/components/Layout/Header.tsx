@@ -352,8 +352,8 @@ const MobileDrawer = memo(function MobileDrawer({
           title="Updates"
           current={currentSection === "updates"}
           sectionIcon="material-symbols:article-rounded"
-          open={openNavSection === "Updates"}
-          onToggle={() => toggleNavSection("Updates")}
+          open={openNavSection === "updates"}
+          onToggle={() => toggleNavSection("updates")}
         >
           <MobileNavItem
             href="/changelogs"
@@ -373,8 +373,8 @@ const MobileDrawer = memo(function MobileDrawer({
           title="Seasons"
           current={currentSection === "seasons"}
           sectionIcon="material-symbols:layers-rounded"
-          open={openNavSection === "Seasons"}
-          onToggle={() => toggleNavSection("Seasons")}
+          open={openNavSection === "seasons"}
+          onToggle={() => toggleNavSection("seasons")}
         >
           <MobileNavItem
             href="/seasons"
@@ -400,8 +400,8 @@ const MobileDrawer = memo(function MobileDrawer({
           title="Trading"
           current={currentSection === "trading"}
           sectionIcon="material-symbols:price-check-rounded"
-          open={openNavSection === "Trading"}
-          onToggle={() => toggleNavSection("Trading")}
+          open={openNavSection === "trading"}
+          onToggle={() => toggleNavSection("trading")}
         >
           <MobileNavItem
             href="/values"
@@ -439,8 +439,8 @@ const MobileDrawer = memo(function MobileDrawer({
           title="Tools & Trackers"
           current={currentSection === "trackers"}
           sectionIcon="material-symbols:sensors-rounded"
-          open={openNavSection === "Tools & Trackers"}
-          onToggle={() => toggleNavSection("Tools & Trackers")}
+          open={openNavSection === "trackers"}
+          onToggle={() => toggleNavSection("trackers")}
         >
           <MobileNavItem
             href="/robberies"
@@ -492,8 +492,8 @@ const MobileDrawer = memo(function MobileDrawer({
           title="Community"
           current={currentSection === "community"}
           sectionIcon="material-symbols:groups-rounded"
-          open={openNavSection === "Community"}
-          onToggle={() => toggleNavSection("Community")}
+          open={openNavSection === "community"}
+          onToggle={() => toggleNavSection("community")}
         >
           <MobileNavItem
             href="/users"
@@ -539,7 +539,7 @@ export default function Header() {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openNavSection, setOpenNavSection] = useState<string>("Updates");
+  const [openNavSection, setOpenNavSection] = useState<string>("updates");
   const toggleNavSection = useCallback(
     (title: string) =>
       setOpenNavSection((prev) => (prev === title ? "" : title)),
@@ -842,8 +842,11 @@ export default function Header() {
   }, []);
 
   const handleDrawerToggle = useCallback(() => {
-    setMobileOpen((prev) => !prev);
-  }, []);
+    if (!mobileOpen) {
+      setOpenNavSection(getNavigationSection(pathname) ?? "updates");
+    }
+    setMobileOpen(!mobileOpen);
+  }, [mobileOpen, pathname]);
 
   return (
     <>
