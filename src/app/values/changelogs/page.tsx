@@ -238,9 +238,7 @@ export default function ValuesChangelogPage() {
                                 )}
                               </div>
                               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                <span
-                                  className={`${badgeBase} border-border-card bg-tertiary-bg/40 text-secondary-text`}
-                                >
+                                <span className="text-secondary-text text-xs">
                                   {changelog.count}{" "}
                                   {changelog.count === 1 ? "change" : "changes"}
                                 </span>
@@ -253,7 +251,7 @@ export default function ValuesChangelogPage() {
                                   .map((field) => (
                                     <span
                                       key={field}
-                                      className={`${badgeBase} border-border-card bg-tertiary-bg/40 text-secondary-text`}
+                                      className={`${badgeBase} border-border-card bg-tertiary-bg text-secondary-text`}
                                     >
                                       {fieldLabel(field)}
                                     </span>
@@ -298,7 +296,7 @@ export default function ValuesChangelogPage() {
                                         {entry.item.type}
                                       </span>
                                       <span
-                                        className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
+                                        className={`${badgeBase} border-border-card bg-quaternary-bg text-primary-text`}
                                       >
                                         {fieldLabel(entry.field)}
                                       </span>
