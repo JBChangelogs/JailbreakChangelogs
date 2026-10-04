@@ -41,7 +41,7 @@ export default defineRailway((ctx) => {
       builder: "RAILPACK",
       buildCommand: "bun run build && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/",
     },
-    start: "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
+    start: "HOSTNAME=:: node .next/standalone/server.js",
     healthcheck: "/api/healthcheck",
     healthcheckTimeout: 30,
     deploy: {
@@ -59,8 +59,10 @@ export default defineRailway((ctx) => {
         ? {
             BUN_INSTALL_CACHE_DIR: preserve(),
             GEMINI_API_KEY: preserve(),
+            GITHUB_API_RELEASES_URL: preserve(),
             NEXT_PUBLIC_INVENTORY_API_ISSUES: preserve(),
             NEXT_PUBLIC_SHOW_LIVE_EVENT_COUNTDOWN: preserve(),
+            NEXT_TELEMETRY_DISABLED: preserve(),
             OPEN_ROUTER_API_KEY: preserve(),
           }
         : {
