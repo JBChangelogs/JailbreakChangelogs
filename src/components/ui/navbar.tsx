@@ -5,6 +5,7 @@ import React, { useState } from "react";
 const log = createLogger("UI");
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { navigationSections } from "@/utils/ui/navigation-menu";
 import { getNavigationSection } from "@/utils/ui/navigation";
 import Image from "next/image";
 import * as NavigationMenu from "@radix-ui/react-navigation-menu";
@@ -116,8 +117,12 @@ export const NavbarModern = ({
   setUnreadCount,
   onUserMenuOpenChange,
   setUtmModalOpen,
+  sidebarCollapsed,
+  onToggleSidebar,
 }: {
   className?: string;
+  sidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
   unreadCount: number;
   unreadMessageCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
@@ -286,7 +291,23 @@ export const NavbarModern = ({
     >
       <div className="flex h-15 items-center justify-between px-4">
         {/* Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            data-desktop-sidebar-toggle
+            onClick={onToggleSidebar}
+            aria-label={
+              sidebarCollapsed ? "Expand navigation" : "Collapse navigation"
+            }
+            aria-expanded={!sidebarCollapsed}
+            aria-controls="desktop-sidebar-navigation"
+            title={
+              sidebarCollapsed ? "Expand navigation" : "Collapse navigation"
+            }
+            className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link hidden size-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none 2xl:flex"
+          >
+            <Icon icon="mdi:menu" className="size-5" />
+          </button>
           <Link href="/" style={{ display: "block" }}>
             <Image
               src={
@@ -311,6 +332,7 @@ export const NavbarModern = ({
         {/* Desktop Navigation */}
         <div
           ref={navRootWrapperRef}
+          data-desktop-top-navigation
           className="absolute left-1/2 -translate-x-1/2"
         >
           <NavigationMenu.Root
@@ -320,314 +342,43 @@ export const NavbarModern = ({
             onValueChange={handleNavValueChange}
           >
             <NavigationMenu.List className="m-0 flex list-none items-center gap-2 p-0">
-              {/* Updates */}
-              <NavigationMenu.Item value="updates">
-                <NavigationMenu.Trigger
-                  aria-current={
-                    currentSection === "updates" ? "true" : undefined
-                  }
-                  ref={(el) => {
-                    triggerRefs.current["updates"] = el;
-                  }}
-                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
-                >
-                  Updates
-                  <Icon
-                    icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
-                    inline={true}
-                  />
-                </NavigationMenu.Trigger>
-                <NavigationMenu.Content
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    animationDuration: "0ms",
-                    animationTimingFunction: "ease",
-                  }}
-                  onClick={() => setNavMenuValue("")}
-                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
-                >
-                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
-                    <NavDropdownItem
-                      href="/changelogs"
-                      icon="material-symbols:article-rounded"
-                      title="Game Changelogs"
-                      description="Latest Jailbreak updates and patch notes"
+              {navigationSections.map((section) => (
+                <NavigationMenu.Item key={section.id} value={section.id}>
+                  <NavigationMenu.Trigger
+                    aria-current={
+                      currentSection === section.id ? "true" : undefined
+                    }
+                    ref={(el) => {
+                      triggerRefs.current[section.id] = el;
+                    }}
+                    className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+                  >
+                    {section.title}
+                    <Icon
+                      icon="mdi:chevron-down"
+                      className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                      inline={true}
                     />
-                    <NavDropdownItem
-                      href="/changelogs/timeline"
-                      icon="material-symbols:schedule-rounded"
-                      title="Timeline"
-                      description="A simplified tree view of every update at a glance"
-                    />
-                  </div>
-                </NavigationMenu.Content>
-              </NavigationMenu.Item>
-
-              {/* Seasons */}
-              <NavigationMenu.Item value="seasons">
-                <NavigationMenu.Trigger
-                  aria-current={
-                    currentSection === "seasons" ? "true" : undefined
-                  }
-                  ref={(el) => {
-                    triggerRefs.current["seasons"] = el;
-                  }}
-                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
-                >
-                  Seasons
-                  <Icon
-                    icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
-                    inline={true}
-                  />
-                </NavigationMenu.Trigger>
-                <NavigationMenu.Content
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    animationDuration: "0ms",
-                    animationTimingFunction: "ease",
-                  }}
-                  onClick={() => setNavMenuValue("")}
-                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
-                >
-                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
-                    <NavDropdownItem
-                      href="/seasons"
-                      icon="material-symbols:layers-rounded"
-                      title="Browse Seasons"
-                      description="Explore all game seasons and rewards"
-                    />
-                    <NavDropdownItem
-                      href="/seasons/leaderboard"
-                      icon="material-symbols:leaderboard-rounded"
-                      title="Season Leaderboard"
-                      description="See top-ranked players this season"
-                    />
-                    <NavDropdownItem
-                      href="/seasons/contracts"
-                      icon="material-symbols:task-alt-rounded"
-                      title="Weekly Contracts"
-                      description="Check this week's contracts and plan ahead without launching the game"
-                      className="col-span-2"
-                    />
-                  </div>
-                </NavigationMenu.Content>
-              </NavigationMenu.Item>
-
-              {/* Trading */}
-              <NavigationMenu.Item value="trading">
-                <NavigationMenu.Trigger
-                  aria-current={
-                    currentSection === "trading" ? "true" : undefined
-                  }
-                  ref={(el) => {
-                    triggerRefs.current["trading"] = el;
-                  }}
-                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
-                >
-                  Trading
-                  <Icon
-                    icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
-                    inline={true}
-                  />
-                </NavigationMenu.Trigger>
-                <NavigationMenu.Content
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    animationDuration: "0ms",
-                    animationTimingFunction: "ease",
-                  }}
-                  onClick={() => setNavMenuValue("")}
-                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
-                >
-                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
-                    <NavDropdownItem
-                      href="/values"
-                      icon="material-symbols:price-check-rounded"
-                      title="Value List"
-                      description="Browse item values and market trends"
-                    />
-                    <NavDropdownItem
-                      href="/values/calculator"
-                      icon="material-symbols:calculate-rounded"
-                      title="Value Calculator"
-                      description="Compare item values before you trade"
-                    />
-                    <NavDropdownItem
-                      href="/items/suggestions"
-                      icon="material-symbols:lightbulb-outline-rounded"
-                      title="Item Suggestions"
-                      description="Suggest value changes and vote on proposals"
-                    />
-                    <NavDropdownItem
-                      href="/items/changelogs"
-                      icon="material-symbols:history-rounded"
-                      title="Item Changelogs"
-                      description="See value changes, community votes, and decisions"
-                    />
-                    <NavDropdownItem
-                      href="/trading"
-                      icon="material-symbols:swap-horiz-rounded"
-                      title="Trade Ads"
-                      description="Browse and post player trade listings"
-                      className="col-span-2"
-                    />
-                  </div>
-                </NavigationMenu.Content>
-              </NavigationMenu.Item>
-
-              {/* Tools & Trackers */}
-              <NavigationMenu.Item value="trackers">
-                <NavigationMenu.Trigger
-                  aria-current={
-                    currentSection === "trackers" ? "true" : undefined
-                  }
-                  ref={(el) => {
-                    triggerRefs.current["trackers"] = el;
-                  }}
-                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
-                >
-                  Tools &amp; Trackers
-                  <Icon
-                    icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
-                    inline={true}
-                  />
-                </NavigationMenu.Trigger>
-                <NavigationMenu.Content
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    animationDuration: "0ms",
-                    animationTimingFunction: "ease",
-                  }}
-                  onClick={() => setNavMenuValue("")}
-                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
-                >
-                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
-                    <NavDropdownItem
-                      href="/robberies"
-                      icon="material-symbols:money-bag-rounded"
-                      title="Robbery Tracker"
-                      description="See which robberies and mansions are open right now"
-                      badge="live"
-                    />
-                    <NavDropdownItem
-                      href="/bounties"
-                      icon="mdi:currency-usd"
-                      title="Bounty Tracker"
-                      description="Find the highest bounty players and join their server"
-                      badge="live"
-                    />
-                    <NavDropdownItem
-                      href="/inventories"
-                      icon="material-symbols:inventory-2-rounded"
-                      title="Inventory Checker"
-                      description="View any player's full inventory and net worth"
-                    />
-                    <NavDropdownItem
-                      href="/og"
-                      icon="material-symbols:fingerprint-rounded"
-                      title="OG Finder"
-                      description="Discover who holds the rarest original items"
-                    />
-                    <NavDropdownItem
-                      href="/dupes"
-                      icon="material-symbols:content-copy-rounded"
-                      title="Dupe Finder"
-                      description="Check if items are duped before you trade"
-                    />
-                    <NavDropdownItem
-                      href="/seasons/will-i-make-it"
-                      icon="material-symbols:trending-up-rounded"
-                      title="Will I Make It"
-                      description="Enter your level and XP to see if you'll hit level 10 before the season ends"
-                    />
-                    <NavDropdownItem
-                      href="/hyperchrome-pity"
-                      icon="material-symbols:percent-rounded"
-                      title="Hyperchrome Pity"
-                      description="Estimate robberies until your next Hyperchrome level"
-                      className="col-span-2"
-                    />
-                  </div>
-                </NavigationMenu.Content>
-              </NavigationMenu.Item>
-
-              {/* Community */}
-              <NavigationMenu.Item value="community">
-                <NavigationMenu.Trigger
-                  aria-current={
-                    currentSection === "community" ? "true" : undefined
-                  }
-                  ref={(el) => {
-                    triggerRefs.current["community"] = el;
-                  }}
-                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
-                >
-                  Community
-                  <Icon
-                    icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
-                    inline={true}
-                  />
-                </NavigationMenu.Trigger>
-                <NavigationMenu.Content
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    animationDuration: "0ms",
-                    animationTimingFunction: "ease",
-                  }}
-                  onClick={() => setNavMenuValue("")}
-                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
-                >
-                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
-                    <NavDropdownItem
-                      href="/users"
-                      icon="material-symbols:person-search-rounded"
-                      title="User Search"
-                      description="Browse 60k+ Jailbreak Changelogs user profiles"
-                      prefetch={false}
-                    />
-                    <NavDropdownItem
-                      href="/servers"
-                      icon="material-symbols:groups-rounded"
-                      title="Private Servers"
-                      description="Find and join private servers"
-                    />
-                    <NavDropdownItem
-                      href="/contributors"
-                      icon="material-symbols:groups-rounded"
-                      title="Meet the Team"
-                      description="The people behind this site"
-                    />
-                    <NavDropdownItem
-                      href="/testimonials"
-                      icon="material-symbols:rate-review-rounded"
-                      title="Testimonials"
-                      description="What players say about us"
-                    />
-                    <NavDropdownItem
-                      href="/supporting"
-                      icon="material-symbols:favorite-rounded"
-                      title="Support Us"
-                      description="Unlock perks like ad removal, custom avatars, and more"
-                      className="col-span-2"
-                    />
-                  </div>
-                </NavigationMenu.Content>
-              </NavigationMenu.Item>
+                  </NavigationMenu.Trigger>
+                  <NavigationMenu.Content
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      animationDuration: "0ms",
+                      animationTimingFunction: "ease",
+                    }}
+                    onClick={() => setNavMenuValue("")}
+                    className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
+                  >
+                    <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
+                      {section.items.map((item) => (
+                        <NavDropdownItem key={item.href} {...item} />
+                      ))}
+                    </div>
+                  </NavigationMenu.Content>
+                </NavigationMenu.Item>
+              ))}
               {/* Arrow indicator — slides to track active trigger */}
               <NavigationMenu.Indicator
                 style={{
@@ -752,6 +503,20 @@ export const NavbarModern = ({
 
           {/* Theme toggle */}
           <AnimatedThemeToggler className="focus-visible:ring-link data-[state=open]:bg-quaternary-bg border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none" />
+
+          {!isLoading && !userData && (
+            <Link
+              href="/settings"
+              aria-label="Settings"
+              title="Settings"
+              className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link flex size-10 items-center justify-center rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <Icon
+                icon="material-symbols:settings-rounded"
+                className="size-5"
+              />
+            </Link>
+          )}
 
           {/* User menu or login button */}
           {isLoading ? (

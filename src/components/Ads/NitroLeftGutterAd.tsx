@@ -43,7 +43,10 @@ export default function NitroLeftGutterAd({
   wideSizes = DEFAULT_WIDE_SIZES,
   side = "left",
 }: NitroLeftGutterAdProps) {
-  const positionClass = side === "right" ? "right-2.5" : "left-2.5";
+  const positionStyle =
+    side === "right"
+      ? { right: 10 }
+      : { left: "calc(var(--desktop-sidebar-width, 0px) + 10px)" };
   const reportPosition = side === "right" ? "bottom-right" : "bottom-left";
   const isSmallViewport = useMediaQuery(
     "(min-width: 1900px) and (max-width: 2149px)",
@@ -187,7 +190,9 @@ export default function NitroLeftGutterAd({
   return (
     <>
       <div
-        className={`${positionClass} fixed top-1/2 z-2147483644 hidden -translate-y-1/2 [@media(min-width:1900px)]:block [@media(min-width:2150px)]:hidden`}
+        data-rail-side={side}
+        style={positionStyle}
+        className="fixed top-1/2 z-2147483644 hidden -translate-y-1/2 [@media(min-width:1900px)]:block [@media(min-width:2150px)]:hidden"
       >
         <div
           id={adIdSmall}
@@ -195,7 +200,9 @@ export default function NitroLeftGutterAd({
         />
       </div>
       <div
-        className={`${positionClass} fixed top-1/2 z-2147483644 hidden -translate-y-1/2 [@media(min-width:2150px)]:block`}
+        data-rail-side={side}
+        style={positionStyle}
+        className="fixed top-1/2 z-2147483644 hidden -translate-y-1/2 [@media(min-width:2150px)]:block"
       >
         <div
           id={adIdWide}

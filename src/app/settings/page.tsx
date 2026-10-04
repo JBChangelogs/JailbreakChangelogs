@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "nextjs-toploader/app";
+import { useState } from "react";
 import Link from "next/link";
 import { UserData } from "@/types/auth";
 import { formatSettingName } from "@/config/settings";
@@ -9,6 +8,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
 import { BannerSettings } from "@/components/Settings/BannerSettings";
 import { AvatarSettings } from "@/components/Settings/AvatarSettings";
+import DesktopNavigationSettings from "@/components/Settings/DesktopNavigationSettings";
 import SettingsCard from "@/components/Settings/SettingsCard";
 import SupporterHistorySection from "@/components/Settings/SupporterHistorySection";
 import PurchasedGiftsSection from "@/components/Settings/PurchasedGiftsSection";
@@ -42,7 +42,6 @@ export default function SettingsPage() {
   const { user, isLoading, refreshUser } = useAuthContext();
   const { twemojiEnabled, setTwemojiEnabled } = useTwemoji();
   const { modalState, closeModal, openModal } = useSupporterModal();
-  const router = useRouter();
   const {
     highlightSetting,
     showHighlight,
@@ -111,13 +110,6 @@ export default function SettingsPage() {
     error: purchaseGiftLevelsError,
   } = usePurchaseGiftModal();
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      // User is not authenticated and auth is not loading
-      router.push("/");
-    }
-  }, [user, isLoading, router]);
-
   const handleBannerUpdate = (newBannerUrl: string) => {
     if (userData) {
       const updatedUser: UserData = {
@@ -150,13 +142,38 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading || settingsLoading) {
+  const displaySettings = (
+    <SettingsCard
+      id="display"
+      title="Display"
+      icon="material-symbols:settings-rounded"
+      isOwner={userData?.flags?.some((f) => f.flag === "is_owner") ?? false}
+      highlightStyle={getSectionHighlightStyle("display")}
+      scrollRef={(el) => scrollHighlightedSectionIntoView("display", el)}
+      onCopyLink={() => copySectionLink("display", "Display")}
+    >
+      <DesktopNavigationSettings />
+    </SettingsCard>
+  );
+
+  if (loading) {
     return <SettingsLoading />;
   }
 
-  if (!userData || !settings) {
-    return null;
+  if (!userData) {
+    return (
+      <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+        <Breadcrumb />
+        <div className="mt-4">{displaySettings}</div>
+      </div>
+    );
   }
+
+  if (settingsLoading) {
+    return <SettingsLoading />;
+  }
+
+  if (!settings) return null;
 
   const sortedCategories = Object.values(settings).sort(
     (a, b) => a.index - b.index,
@@ -185,6 +202,11 @@ export default function SettingsPage() {
               Navigation
             </p>
             {[
+              {
+                id: "display",
+                title: "Display",
+                icon: "material-symbols:settings-rounded",
+              },
               ...sortedCategories.map((cat) => ({
                 id: cat.name,
                 title: cat.name.charAt(0).toUpperCase() + cat.name.slice(1),
@@ -251,6 +273,7 @@ export default function SettingsPage() {
 
         {/* Settings Content */}
         <div className="settings-content">
+          {displaySettings}
           {sortedCategories.map((cat) => {
             const categoryDisplayName =
               cat.name.charAt(0).toUpperCase() + cat.name.slice(1);

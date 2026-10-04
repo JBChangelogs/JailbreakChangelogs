@@ -968,3 +968,97 @@ img.twemoji {
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
 }
+
+/* Animate section expansion in the mobile navigation drawer. */
+.navigation-section-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms ease-in-out;
+}
+
+.navigation-section-content[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.navigation-section-content > div {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navigation-section-content {
+    transition: none;
+  }
+}
+
+/* Keep content beside the desktop navigation, including in maintenance bypass. */
+@media (min-width: 1536px) {
+  html:not([data-desktop-navigation="top-bar"])
+    [data-desktop-top-navigation] {
+    display: none;
+  }
+
+  html[data-desktop-navigation="top-bar"] [data-desktop-sidebar],
+  html[data-desktop-navigation="top-bar"] [data-desktop-sidebar-toggle] {
+    display: none;
+  }
+
+  .site-layout:has([data-desktop-sidebar]) {
+    --desktop-sidebar-width: 260px;
+  }
+
+  .site-layout:has([data-desktop-sidebar="collapsed"]) {
+    --desktop-sidebar-width: 80px;
+  }
+
+  html[data-desktop-navigation="top-bar"] .site-layout {
+    --desktop-sidebar-width: 0px;
+  }
+
+  .site-layout:has([data-desktop-sidebar]) > main,
+  .site-layout:has([data-desktop-sidebar]) > footer {
+    margin-left: var(--desktop-sidebar-width);
+    width: calc(100% - var(--desktop-sidebar-width));
+    min-width: 0;
+  }
+}
+
+/* Move the sidebar, content, and left ads together when toggling navigation. */
+@media (min-width: 1536px) and (prefers-reduced-motion: no-preference) {
+  .site-layout [data-desktop-sidebar] {
+    transition: width 300ms ease-in-out;
+  }
+
+  .site-layout:has([data-desktop-sidebar]) > main,
+  .site-layout:has([data-desktop-sidebar]) > footer {
+    transition:
+      margin-left 300ms ease-in-out,
+      width 300ms ease-in-out;
+  }
+
+  .site-layout [data-rail-side="left"] {
+    transition: left 300ms ease-in-out;
+  }
+}
+
+/* Reserve space for fixed rail ads only on pages that render them. */
+@media (min-width: 1900px) {
+  .site-layout > main {
+    --rail-gutter-width: 180px;
+  }
+
+  .site-layout > main:has([data-rail-side="left"]) {
+    padding-left: var(--rail-gutter-width);
+  }
+
+  .site-layout > main:has([data-rail-side="right"]) {
+    padding-right: var(--rail-gutter-width);
+  }
+}
+
+@media (min-width: 2150px) {
+  .site-layout > main {
+    /* Wide placements also accept 320px creatives. */
+    --rail-gutter-width: 340px;
+  }
+}

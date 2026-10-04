@@ -4,6 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import Script from "next/script";
 import Image from "next/image";
 import "./globals.css";
+import { DESKTOP_NAVIGATION_INIT_SCRIPT } from "@/utils/ui/desktopNavigation";
 import Header from "@/components/Layout/Header";
 import HideOnAccessDenied from "@/components/Layout/HideOnAccessDenied";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
@@ -107,6 +108,9 @@ export default async function RootLayout({
         <head>
           {/* Apply saved theme class before React hydrates to prevent FOUC */}
           <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+          <script
+            dangerouslySetInnerHTML={{ __html: DESKTOP_NAVIGATION_INIT_SCRIPT }}
+          />
           {/* Rybbit Analytics */}
           {isRailwayDeployed && (
             <Script
@@ -197,7 +201,7 @@ export default async function RootLayout({
                       </AdErrorBoundary>
                       <div
                         id="main-layout"
-                        className="flex min-h-screen flex-col"
+                        className="site-layout flex min-h-screen flex-col"
                       >
                         <Suspense
                           fallback={
@@ -244,6 +248,9 @@ export default async function RootLayout({
       <head>
         {/* Apply saved theme class before React hydrates to prevent FOUC */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script
+          dangerouslySetInnerHTML={{ __html: DESKTOP_NAVIGATION_INIT_SCRIPT }}
+        />
         {/* Preconnect to external asset domains */}
         <link rel="preconnect" href="https://assets.jailbreakchangelogs.com" />
         <link
@@ -332,7 +339,7 @@ export default async function RootLayout({
                   <NitroAdNavigation />
                   <NitroAnchorCloseSupporterModal />
                   <NitroVideoCloseSupporterModal />
-                  <div className="flex min-h-screen flex-col">
+                  <div className="site-layout flex min-h-screen flex-col">
                     <Suspense
                       fallback={
                         <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />

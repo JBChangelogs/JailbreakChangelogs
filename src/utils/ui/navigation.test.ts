@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { getNavigationSection } from "./navigation";
+import { getNavigationHref, getNavigationSection } from "./navigation";
 
 test("highlights the section containing a page, including nested routes", () => {
   for (const [path, section] of [
@@ -21,5 +21,24 @@ test("highlights the section containing a page, including nested routes", () => 
     ["/ogden", null],
   ] as const) {
     expect(getNavigationSection(path)).toBe(section);
+  }
+});
+
+test("sidebar selects the most specific link in the destination's section", () => {
+  for (const [path, href] of [
+    ["/values", "/values"],
+    ["/values/calculator", "/values/calculator"],
+    ["/changelogs/timeline", "/changelogs/timeline"],
+    ["/changelogs/123", "/changelogs"],
+    ["/seasons/contracts", "/seasons/contracts"],
+    ["/seasons/will-i-make-it", "/seasons/will-i-make-it"],
+    ["/items/suggestions/123", "/items/suggestions"],
+    ["/trading/ad/123", "/trading"],
+    ["/inventories/123", "/inventories"],
+    ["/", null],
+    ["/settings", null],
+    ["/values-other", null],
+  ] as const) {
+    expect(getNavigationHref(path)).toBe(href);
   }
 });

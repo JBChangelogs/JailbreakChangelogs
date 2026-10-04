@@ -1,3 +1,5 @@
+import { navigationSections } from "@/utils/ui/navigation-menu";
+
 const sectionPaths = {
   trackers: [
     "/robberies",
@@ -27,5 +29,18 @@ export function getNavigationSection(pathname: string) {
         (path) => pathname === path || pathname.startsWith(`${path}/`),
       ),
     )?.[0] ?? null
+  );
+}
+
+export function getNavigationHref(pathname: string) {
+  const section = navigationSections.find(
+    ({ id }) => id === getNavigationSection(pathname),
+  );
+  return (
+    section?.items
+      .filter(
+        ({ href }) => pathname === href || pathname.startsWith(`${href}/`),
+      )
+      .sort((a, b) => b.href.length - a.href.length)[0]?.href ?? null
   );
 }

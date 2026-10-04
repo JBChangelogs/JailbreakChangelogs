@@ -12,7 +12,6 @@ import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useCallback, memo } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { logout, trackLogoutSource } from "@/utils/auth/auth";
 import LoginModal from "../Auth/LoginModal";
 import EscapeLoginModal from "../Auth/EscapeLoginModal";
@@ -25,6 +24,9 @@ import type { UserData } from "@/types/auth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
 import { Spinner } from "@/components/ui/Spinner";
+import { syncDesktopNavigationPreferences } from "@/utils/ui/desktopNavigation";
+import DesktopSidebar from "./DesktopSidebar";
+import { navigationSections } from "@/utils/ui/navigation-menu";
 import { getNavigationSection } from "@/utils/ui/navigation";
 
 const AnimatedThemeToggler = dynamic(
@@ -85,7 +87,7 @@ const MobileNavSection = ({
         onClick={onToggle}
         aria-expanded={open}
         aria-current={current ? "true" : undefined}
-        className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link aria-[current=true]:border-primary-text aria-[current=true]:bg-tertiary-bg flex min-h-11 w-full items-center justify-between border-l-2 border-transparent py-2.5 pr-4 pl-3.5 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+        className="group hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link aria-[current=true]:border-primary-text aria-[current=true]:bg-tertiary-bg flex min-h-11 w-full items-center justify-between border-l-2 border-transparent py-2.5 pr-4 pl-3.5 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
       >
         <div className="flex items-center gap-2.5">
           <Icon
@@ -98,24 +100,21 @@ const MobileNavSection = ({
           </span>
         </div>
         <Icon
-          icon={open ? "mdi:chevron-up" : "mdi:chevron-down"}
-          className="text-secondary-text h-4 w-4 transition-colors duration-200"
+          icon="mdi:chevron-down"
+          className="text-secondary-text h-4 w-4 shrink-0 transition-transform duration-300 ease-in-out group-aria-expanded:rotate-180 motion-reduce:transition-none"
           inline={true}
         />
       </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: "auto" }}
-            exit={{ height: 0 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="pb-1">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div
+        className="navigation-section-content"
+        data-open={open}
+        aria-hidden={!open}
+        inert={!open}
+      >
+        <div>
+          <div className="pb-1">{children}</div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -354,7 +353,18 @@ const MobileDrawer = memo(function MobileDrawer({
           </div>
         </>
       ) : (
-        <div className="px-4 py-3">
+        <div className="space-y-3 px-4 py-3">
+          <Link
+            href="/settings"
+            onClick={onClose}
+            className="text-primary-text hover:bg-tertiary-bg focus-visible:ring-link flex min-h-11 items-center gap-3 rounded-md px-3 text-sm focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <Icon
+              icon="material-symbols:settings-rounded"
+              className="h-5 w-5"
+            />
+            Settings
+          </Link>
           <Button
             onClick={() => {
               setLoginModal({ open: true });
@@ -367,185 +377,28 @@ const MobileDrawer = memo(function MobileDrawer({
       )}
 
       <div className="border-border-card border-t">
-        <MobileNavSection
-          title="Updates"
-          current={currentSection === "updates"}
-          sectionIcon="material-symbols:article-rounded"
-          open={openNavSection === "updates"}
-          onToggle={() => toggleNavSection("updates")}
-        >
-          <MobileNavItem
-            href="/changelogs"
-            icon="material-symbols:article-rounded"
-            label="Game Changelogs"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/changelogs/timeline"
-            icon="material-symbols:schedule-rounded"
-            label="Timeline"
-            onClick={onClose}
-          />
-        </MobileNavSection>
-
-        <MobileNavSection
-          title="Seasons"
-          current={currentSection === "seasons"}
-          sectionIcon="material-symbols:layers-rounded"
-          open={openNavSection === "seasons"}
-          onToggle={() => toggleNavSection("seasons")}
-        >
-          <MobileNavItem
-            href="/seasons"
-            icon="material-symbols:layers-rounded"
-            label="Browse Seasons"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/seasons/leaderboard"
-            icon="material-symbols:leaderboard-rounded"
-            label="Season Leaderboard"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/seasons/contracts"
-            icon="material-symbols:task-alt-rounded"
-            label="Weekly Contracts"
-            onClick={onClose}
-          />
-        </MobileNavSection>
-
-        <MobileNavSection
-          title="Trading"
-          current={currentSection === "trading"}
-          sectionIcon="material-symbols:price-check-rounded"
-          open={openNavSection === "trading"}
-          onToggle={() => toggleNavSection("trading")}
-        >
-          <MobileNavItem
-            href="/values"
-            icon="material-symbols:price-check-rounded"
-            label="Value List"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/values/calculator"
-            icon="material-symbols:calculate-rounded"
-            label="Value Calculator"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/items/suggestions"
-            icon="material-symbols:lightbulb-outline-rounded"
-            label="Item Suggestions"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/items/changelogs"
-            icon="material-symbols:history-rounded"
-            label="Item Changelogs"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/trading"
-            icon="material-symbols:swap-horiz-rounded"
-            label="Trade Ads"
-            onClick={onClose}
-          />
-        </MobileNavSection>
-
-        <MobileNavSection
-          title="Tools & Trackers"
-          current={currentSection === "trackers"}
-          sectionIcon="material-symbols:sensors-rounded"
-          open={openNavSection === "trackers"}
-          onToggle={() => toggleNavSection("trackers")}
-        >
-          <MobileNavItem
-            href="/robberies"
-            icon="material-symbols:money-bag-rounded"
-            label="Robbery Tracker"
-            badge="Live"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/bounties"
-            icon="mdi:currency-usd"
-            label="Bounty Tracker"
-            badge="Live"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/inventories"
-            icon="material-symbols:inventory-2-rounded"
-            label="Inventory Checker"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/og"
-            icon="material-symbols:fingerprint-rounded"
-            label="OG Finder"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/dupes"
-            icon="material-symbols:content-copy-rounded"
-            label="Dupe Finder"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/seasons/will-i-make-it"
-            icon="material-symbols:trending-up-rounded"
-            label="Will I Make It"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/hyperchrome-pity"
-            icon="material-symbols:percent-rounded"
-            label="Hyperchrome Pity"
-            onClick={onClose}
-          />
-        </MobileNavSection>
-
-        <MobileNavSection
-          title="Community"
-          current={currentSection === "community"}
-          sectionIcon="material-symbols:groups-rounded"
-          open={openNavSection === "community"}
-          onToggle={() => toggleNavSection("community")}
-        >
-          <MobileNavItem
-            href="/users"
-            icon="material-symbols:person-search-rounded"
-            label="User Search"
-            prefetch={false}
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/servers"
-            icon="material-symbols:groups-rounded"
-            label="Private Servers"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/contributors"
-            icon="material-symbols:groups-rounded"
-            label="Meet the Team"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/testimonials"
-            icon="material-symbols:rate-review-rounded"
-            label="Testimonials"
-            onClick={onClose}
-          />
-          <MobileNavItem
-            href="/supporting"
-            icon="material-symbols:favorite-rounded"
-            label="Support Us"
-            onClick={onClose}
-          />
-        </MobileNavSection>
+        {navigationSections.map((section) => (
+          <MobileNavSection
+            key={section.id}
+            title={section.title}
+            current={currentSection === section.id}
+            sectionIcon={section.icon}
+            open={openNavSection === section.id}
+            onToggle={() => toggleNavSection(section.id)}
+          >
+            {section.items.map((item) => (
+              <MobileNavItem
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.title}
+                badge={item.badge === "live" ? "Live" : undefined}
+                prefetch={item.prefetch}
+                onClick={onClose}
+              />
+            ))}
+          </MobileNavSection>
+        ))}
       </div>
 
       <div className="border-border-card my-4 border-t" />
@@ -558,6 +411,8 @@ export default function Header() {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  useEffect(syncDesktopNavigationPreferences, []);
   const [openNavSection, setOpenNavSection] = useState<string>("updates");
   const toggleNavSection = useCallback(
     (title: string) =>
@@ -883,11 +738,17 @@ export default function Header() {
             unreadCount={unreadCount}
             unreadMessageCount={unreadMessageCount}
             setUnreadCount={setUnreadCount}
+            sidebarCollapsed={sidebarCollapsed}
+            onToggleSidebar={() =>
+              setSidebarCollapsed((collapsed) => !collapsed)
+            }
             onUserMenuOpenChange={setDesktopUserMenuOpen}
             setUtmModalOpen={setUtmModalOpen}
           />
         </div>
       </div>
+
+      <DesktopSidebar collapsed={sidebarCollapsed} />
 
       {/* Mobile header - hidden on desktop via CSS */}
       <div
