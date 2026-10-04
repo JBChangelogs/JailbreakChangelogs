@@ -36,7 +36,10 @@ export default defineRailway((ctx) => {
   }
 
   const frontend = service(testing ? "JailbreakChangelogs-Testing" : "FrontEnd", {
-    source: github("JBChangelogs/JailbreakChangelogs", testing ? { branch: "testing" } : undefined),
+    source: github("JBChangelogs/JailbreakChangelogs", {
+      branch: testing ? "testing" : "main",
+      checkSuites: true,
+    }),
     build: {
       builder: "RAILPACK",
       buildCommand: "bun run build && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/",
