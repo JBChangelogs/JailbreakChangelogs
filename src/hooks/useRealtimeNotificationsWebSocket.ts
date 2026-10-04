@@ -9,6 +9,7 @@ import {
   parseNotificationUrl,
 } from "@/utils/notifications/notificationUrl";
 import {
+  isNotificationPageActive,
   shouldShowDesktopNotification,
   showDesktopNotification,
 } from "@/utils/notifications/desktopNotifications";
@@ -859,6 +860,7 @@ export function useRealtimeNotificationsWebSocket(
                     queryClient,
                   );
                   if (
+                    isNotificationPageActive() &&
                     !isViewingMessageConversation(
                       locationPathRef.current,
                       senderId,
@@ -1053,13 +1055,15 @@ export function useRealtimeNotificationsWebSocket(
                   }
                 : undefined;
 
-            toast(React.createElement(TwemojiText, null, notificationTitle), {
-              id: toastId,
-              description: React.createElement(NotifDescription, {
-                text: normalizedDescription,
-              }),
-              action,
-            });
+            if (isNotificationPageActive()) {
+              toast(React.createElement(TwemojiText, null, notificationTitle), {
+                id: toastId,
+                description: React.createElement(NotifDescription, {
+                  text: normalizedDescription,
+                }),
+                action,
+              });
+            }
 
             const desktopTarget = (() => {
               if (!link) return undefined;

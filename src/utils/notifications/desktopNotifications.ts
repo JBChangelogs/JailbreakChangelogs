@@ -42,6 +42,14 @@ export function setDesktopNotificationsEnabled(enabled: boolean): void {
   safeSetJSON(DESKTOP_NOTIFICATIONS_STORAGE_KEY, enabled);
 }
 
+export function isNotificationPageActive(): boolean {
+  if (typeof document === "undefined") return false;
+  return (
+    document.visibilityState === "visible" &&
+    (typeof document.hasFocus !== "function" || document.hasFocus())
+  );
+}
+
 export function shouldShowDesktopNotification(options?: {
   allowWhenVisible?: boolean;
 }): boolean {
@@ -51,11 +59,7 @@ export function shouldShowDesktopNotification(options?: {
   if (typeof document === "undefined") return false;
   if (options?.allowWhenVisible) return true;
 
-  const isTabVisible = document.visibilityState === "visible";
-  const isWindowFocused =
-    typeof document.hasFocus === "function" ? document.hasFocus() : true;
-
-  return !isTabVisible || !isWindowFocused;
+  return !isNotificationPageActive();
 }
 
 export function showDesktopNotification(input: {
