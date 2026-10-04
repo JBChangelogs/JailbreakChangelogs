@@ -165,9 +165,9 @@ export default function ValuesChangelogPage() {
           ) : (
             <>
               <div className="mb-4 flex items-center justify-between">
-                <p className="text-secondary-text text-sm">
-                  Total Changelogs: {total}
-                </p>
+                <h2 className="text-primary-text font-semibold">
+                  {total} Total Changelogs
+                </h2>
                 <Button
                   onClick={() =>
                     setSortOrder((prev) =>
