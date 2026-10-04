@@ -1,6 +1,6 @@
 import { defineRailway, github, group, preserve, project, service } from "railway/iac";
 
-// This partial owns only this repository's frontend service in each environment.
+// This partial owns only this repository's frontend services.
 export const partial = "FrontEnd";
 
 const sharedEnv = {
@@ -19,6 +19,7 @@ const sharedEnv = {
   NEXT_PUBLIC_LATEST_SEASON: preserve(),
   NEXT_PUBLIC_ROBBERY_TRACKER_AUTH_REQUIRED: preserve(),
   NEXT_PUBLIC_SCANNING_API_URL: preserve(),
+  NEXT_PUBLIC_SUBMISSIONS_URL: preserve(),
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: preserve(),
   NEXT_PUBLIC_WS_URL: preserve(),
   NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: preserve(),
@@ -29,13 +30,8 @@ const sharedEnv = {
   VGY_ME_USERKEY: preserve(),
 };
 
-export default defineRailway((ctx) => {
-  const testing = ctx.environment === "testing";
-  if (!testing && ctx.environment !== "production") {
-    throw new Error(`No frontend Railway configuration for environment: ${ctx.environment}`);
-  }
-
-  const frontend = service(testing ? "JailbreakChangelogs-Testing" : "FrontEnd", {
+function frontend(testing: boolean) {
+  return service(testing ? "(Testing) FrontEnd" : "(Prod) FrontEnd", {
     source: github("JBChangelogs/JailbreakChangelogs", {
       branch: testing ? "testing" : "main",
       checkSuites: true,
@@ -50,10 +46,7 @@ export default defineRailway((ctx) => {
     deploy: {
       ...(!testing && { drainingSeconds: 20, overlapSeconds: 30 }),
       limitOverride: {
-        containers: {
-          cpu: testing ? 8 : 16,
-          memoryBytes: testing ? 8_000_000_000 : 16_000_000_000,
-        },
+        containers: { cpu: 16, memoryBytes: 16_000_000_000 },
       },
     },
     env: {
@@ -67,14 +60,18 @@ export default defineRailway((ctx) => {
             NEXT_PUBLIC_SHOW_LIVE_EVENT_COUNTDOWN: preserve(),
             OPEN_ROUTER_API_KEY: preserve(),
           }
-        : {
-            GITHUB_API_RELEASES_URL: preserve(),
-            NEXT_PUBLIC_SUBMISSIONS_URL: preserve(),
-          }),
+        : { GITHUB_API_RELEASES_URL: preserve() }),
     },
   });
+}
+
+// Testing and production both run as services in the "production" environment.
+export default defineRailway((ctx) => {
+  if (ctx.environment !== "production") {
+    throw new Error(`No frontend Railway configuration for environment: ${ctx.environment}`);
+  }
 
   return project("Jailbreak Changelogs", {
-    resources: group("Frontend", [frontend]),
+    resources: group("Frontend", [frontend(false), frontend(true)]),
   });
 });

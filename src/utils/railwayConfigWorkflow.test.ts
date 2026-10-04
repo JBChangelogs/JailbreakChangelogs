@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 
-test("Railway jobs reference only named secrets and select the token for their branch", () => {
+test("Railway jobs reference only named secrets and use the production token only for deploy branches", () => {
   const workflow = readFileSync(
     new URL("../../.github/workflows/railway-config.yml", import.meta.url),
     "utf8",
@@ -32,11 +32,7 @@ test("Railway jobs reference only named secrets and select the token for their b
           secrets,
         });
         const expected =
-          branch === "testing"
-            ? secrets.RAILWAY_TOKEN_TESTING
-            : branch === "main"
-              ? secrets.RAILWAY_TOKEN_PRODUCTION
-              : "";
+          branch === "unexpected" ? "" : secrets.RAILWAY_TOKEN_PRODUCTION;
         expect(token).toBe(expected);
       }
     }

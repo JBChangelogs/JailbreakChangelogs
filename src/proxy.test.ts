@@ -5,6 +5,7 @@ import { proxy } from "./proxy";
 const originalFetch = globalThis.fetch;
 const originalEnvironment = process.env.RAILWAY_ENVIRONMENT_NAME;
 const originalApi = process.env.RAILWAY_INTERNAL_API_URL;
+const originalService = process.env.RAILWAY_SERVICE_NAME;
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
@@ -13,6 +14,8 @@ afterEach(() => {
   else process.env.RAILWAY_ENVIRONMENT_NAME = originalEnvironment;
   if (originalApi === undefined) delete process.env.RAILWAY_INTERNAL_API_URL;
   else process.env.RAILWAY_INTERNAL_API_URL = originalApi;
+  if (originalService === undefined) delete process.env.RAILWAY_SERVICE_NAME;
+  else process.env.RAILWAY_SERVICE_NAME = originalService;
 });
 
 test("production experiments routes require a session, including subpaths and token query strings", async () => {
@@ -88,7 +91,7 @@ test("other production routes remain public and testing deployments keep their a
       await proxy(new NextRequest("https://jailbreakchangelogs.com/users"))
     ).headers.get("x-middleware-next"),
   ).toBe("1");
-  process.env.RAILWAY_ENVIRONMENT_NAME = "testing";
+  process.env.RAILWAY_SERVICE_NAME = "(Testing) FrontEnd";
   expect(
     (
       await proxy(

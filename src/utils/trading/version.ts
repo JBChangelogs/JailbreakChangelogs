@@ -1,4 +1,5 @@
 import { createLogger } from "@/services/logger";
+import { isTestingDeploy } from "@/utils/deployment";
 
 const log = createLogger("API");
 
@@ -8,7 +9,7 @@ const log = createLogger("API");
 function getGitBranch(): string {
   const railwayEnv = process.env.RAILWAY_ENVIRONMENT_NAME;
 
-  if (railwayEnv === "production") {
+  if (railwayEnv === "production" && !isTestingDeploy()) {
     return "main";
   }
 
@@ -37,7 +38,9 @@ export async function getWebsiteVersion(): Promise<{
   try {
     const branch = getGitBranch();
     const railwayEnv = process.env.RAILWAY_ENVIRONMENT_NAME;
-    const environment = railwayEnv || "development";
+    const environment = isTestingDeploy()
+      ? "testing"
+      : railwayEnv || "development";
 
     const response = await fetch(
       `${process.env.GITHUB_API_COMMITS_URL}/${branch}`,

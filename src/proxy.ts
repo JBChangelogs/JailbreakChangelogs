@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { isTestingDeploy } from "@/utils/deployment";
 
 interface UserFlag {
   flag?: string | null;
@@ -37,7 +38,7 @@ const legacyItemTypeSegments = new Set([
 ]);
 
 function isRoleRestricted(): boolean {
-  return process.env.RAILWAY_ENVIRONMENT_NAME === "testing";
+  return isTestingDeploy();
 }
 
 function getApiBaseUrl(): string | null {

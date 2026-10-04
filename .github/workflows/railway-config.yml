@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   plan:
-    name: Plan Railway ${{ github.base_ref == 'testing' && 'testing' || 'production' }}
+    name: Plan Railway (from ${{ github.base_ref }})
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
@@ -35,16 +35,16 @@ jobs:
         uses: railwayapp/config@v1
         with:
           command: plan
-          railway-token: ${{ github.base_ref == 'testing' && secrets.RAILWAY_TOKEN_TESTING || github.base_ref == 'main' && secrets.RAILWAY_TOKEN_PRODUCTION || '' }}
+          railway-token: ${{ (github.base_ref == 'testing' || github.base_ref == 'main') && secrets.RAILWAY_TOKEN_PRODUCTION || '' }}
           cli-version: "5.63.1"
           artifact-name: railway-plan-${{ github.base_ref }}
 
   apply:
-    name: Apply Railway ${{ github.ref_name == 'testing' && 'testing' || 'production' }}
+    name: Apply Railway (from ${{ github.ref_name }})
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
-      RAILWAY_TOKEN: ${{ github.ref_name == 'testing' && secrets.RAILWAY_TOKEN_TESTING || github.ref_name == 'main' && secrets.RAILWAY_TOKEN_PRODUCTION || '' }}
+      RAILWAY_TOKEN: ${{ (github.ref_name == 'testing' || github.ref_name == 'main') && secrets.RAILWAY_TOKEN_PRODUCTION || '' }}
     concurrency:
       group: railway-apply-${{ github.ref_name }}
       cancel-in-progress: false

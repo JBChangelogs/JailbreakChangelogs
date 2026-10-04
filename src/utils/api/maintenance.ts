@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getBooleanFlag } from "@/utils/api/runtimeFlags";
+import { isTestingDeploy } from "@/utils/deployment";
 
 // Maintenance switches are runtime flags evaluated per-request, so they can
 // be flipped from the Railway dashboard/CLI without a redeploy.
@@ -8,7 +9,7 @@ export async function checkMaintenanceMode(): Promise<{
   isMaintenanceMode: boolean;
 }> {
   // Testing deployments use tester-role proxy gating instead of maintenance UI.
-  if (process.env.RAILWAY_ENVIRONMENT_NAME === "testing") {
+  if (isTestingDeploy()) {
     return { isMaintenanceMode: false };
   }
 
