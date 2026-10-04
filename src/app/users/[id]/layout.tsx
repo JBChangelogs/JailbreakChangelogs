@@ -1,5 +1,5 @@
 import type { Viewport, Metadata } from "next";
-import { fetchUserByIdForMetadata } from "@/utils/api/api";
+import { fetchUserByIdForMetadata, PUBLIC_API_URL } from "@/utils/api/api";
 import { getMaintenanceMetadata } from "@/utils/api/maintenance";
 
 function formatAccentColor(color: number | string | null | undefined): string {
@@ -108,6 +108,7 @@ export async function generateMetadata({
     const titleFormat = username
       ? `${displayName}'s (@${username}) Profile`
       : `${displayName}'s Profile`;
+    const imageUrl = `${PUBLIC_API_URL}/v2/users/${encodeURIComponent(userId)}/image`;
 
     return {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
@@ -121,10 +122,11 @@ export async function generateMetadata({
         description: `Check out ${displayName}'s profile on Jailbreak Changelogs. View their contributions and stay connected.`,
         images: [
           {
-            url: `/api/og/user?id=${userId}`,
-            width: 1200,
-            height: 630,
-            alt: `${displayName}'s banner`,
+            url: imageUrl,
+            width: 1920,
+            height: 1080,
+            type: "image/webp",
+            alt: `${displayName}'s profile card`,
           },
         ],
         siteName: username
@@ -136,7 +138,7 @@ export async function generateMetadata({
         card: "summary_large_image",
         title: titleFormat,
         description: `Check out ${displayName}'s profile on Jailbreak Changelogs. View their contributions and stay connected.`,
-        images: [`/api/og/user?id=${userId}`],
+        images: [imageUrl],
       },
     };
   } catch (error: unknown) {

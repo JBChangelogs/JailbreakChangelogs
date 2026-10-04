@@ -1,11 +1,6 @@
 import { afterEach, expect, spyOn, test } from "bun:test";
 
-import {
-  BASE_API_URL,
-  fetchUserById,
-  fetchUserByIdForMetadata,
-  fetchUserByIdForOG,
-} from "./api";
+import { BASE_API_URL, fetchUserById, fetchUserByIdForMetadata } from "./api";
 
 const originalFetch = globalThis.fetch;
 
@@ -39,7 +34,6 @@ test("rejects invalid profile IDs before making any request", async () => {
   for (const id of invalidIds) {
     await expect(fetchUserById(id)).rejects.toThrow("NOT_FOUND:");
     await expect(fetchUserByIdForMetadata(id)).rejects.toThrow("NOT_FOUND:");
-    expect(await fetchUserByIdForOG(id)).toBeNull();
   }
 
   expect(fetchMock).not.toHaveBeenCalled();
@@ -50,11 +44,7 @@ test("preserves large numeric IDs and disallows redirects for all profile reques
   const user = { id, username: "test-user" };
   const fetchMock = spyOn(globalThis, "fetch");
 
-  for (const fetchUser of [
-    fetchUserById,
-    fetchUserByIdForMetadata,
-    fetchUserByIdForOG,
-  ]) {
+  for (const fetchUser of [fetchUserById, fetchUserByIdForMetadata]) {
     fetchMock.mockResolvedValueOnce(Response.json(user));
     expect(await fetchUser(id)).toEqual(user);
     const [url, options] = fetchMock.mock.calls.at(-1)!;
@@ -62,5 +52,5 @@ test("preserves large numeric IDs and disallows redirects for all profile reques
     expect(options?.redirect).toBe("error");
   }
 
-  expect(fetchMock).toHaveBeenCalledTimes(3);
+  expect(fetchMock).toHaveBeenCalledTimes(2);
 });
