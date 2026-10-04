@@ -24,6 +24,7 @@ import type { UserData } from "@/types/auth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
 import { Spinner } from "@/components/ui/Spinner";
+import { getNavigationSection } from "@/utils/ui/navigation";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -33,7 +34,7 @@ const AnimatedThemeToggler = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+      <div className="text-primary-text hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200">
         <div className="h-4 w-4" />
       </div>
     ),
@@ -64,12 +65,14 @@ import {
 const MobileNavSection = ({
   title,
   sectionIcon,
+  current,
   children,
   open,
   onToggle,
 }: {
   title: string;
   sectionIcon: string;
+  current: boolean;
   children: React.ReactNode;
   open: boolean;
   onToggle: () => void;
@@ -79,16 +82,16 @@ const MobileNavSection = ({
       <button
         type="button"
         onClick={onToggle}
-        className="hover:bg-button-info-hover/10 flex w-full items-center justify-between px-4 py-2.5 transition-colors"
+        aria-expanded={open}
+        aria-current={current ? "true" : undefined}
+        className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link aria-[current=true]:border-primary-text aria-[current=true]:bg-tertiary-bg flex min-h-11 w-full items-center justify-between border-l-2 border-transparent py-2.5 pr-4 pl-3.5 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
       >
         <div className="flex items-center gap-2.5">
-          <div className="bg-button-info/15 flex h-6 w-6 items-center justify-center rounded-md">
-            <Icon
-              icon={sectionIcon}
-              className="text-link h-3.5 w-3.5"
-              inline={true}
-            />
-          </div>
+          <Icon
+            icon={sectionIcon}
+            className="text-primary-text h-5 w-5 shrink-0"
+            inline={true}
+          />
           <span className="text-primary-text text-sm font-semibold">
             {title}
           </span>
@@ -135,11 +138,13 @@ const MobileNavItem = ({
     href={href}
     prefetch={prefetch}
     onClick={onClick}
-    className="hover:bg-button-info-hover/10 flex items-center gap-2.5 py-2 pr-3 pl-10 transition-colors"
+    className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 items-center gap-2.5 py-2 pr-3 pl-10 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
   >
-    <div className="bg-button-info/15 flex h-6 w-6 shrink-0 items-center justify-center rounded-md">
-      <Icon icon={icon} className="text-link h-3.5 w-3.5" inline={true} />
-    </div>
+    <Icon
+      icon={icon}
+      className="text-primary-text h-5 w-5 shrink-0"
+      inline={true}
+    />
     <span className="text-primary-text min-w-0 flex-1 truncate text-sm">
       {label}
     </span>
@@ -154,6 +159,7 @@ const MobileNavItem = ({
 const MobileDrawer = memo(function MobileDrawer({
   userData,
   openNavSection,
+  currentSection,
   toggleNavSection,
   onClose,
   onLogout,
@@ -164,6 +170,7 @@ const MobileDrawer = memo(function MobileDrawer({
 }: {
   userData: UserData | null;
   openNavSection: string;
+  currentSection: string | null;
   toggleNavSection: (title: string) => void;
   onClose: () => void;
   onLogout: () => void;
@@ -181,7 +188,7 @@ const MobileDrawer = memo(function MobileDrawer({
           <Link
             href={`/users/${userData?.id}`}
             onClick={onClose}
-            className="hover:bg-tertiary-bg border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b p-3 transition-colors"
+            className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
           >
             <UserAvatar
               userId={userData.id}
@@ -214,10 +221,10 @@ const MobileDrawer = memo(function MobileDrawer({
                   onClose();
                   setLoginModal({ open: true, tab: "roblox" });
                 }}
-                className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+                className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
-                <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                  <RobloxIcon className="text-link h-4 w-4" />
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                  <RobloxIcon className="text-primary-text h-5 w-5" />
                 </div>
                 <span className="text-primary-text text-sm font-medium">
                   Connect Roblox
@@ -227,12 +234,12 @@ const MobileDrawer = memo(function MobileDrawer({
             <Link
               href="/settings"
               onClick={onClose}
-              className="hover:bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+              className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
-              <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                 <Icon
                   icon="material-symbols:settings-rounded"
-                  className="text-link h-4 w-4"
+                  className="text-primary-text h-5 w-5"
                   inline={true}
                 />
               </div>
@@ -256,9 +263,9 @@ const MobileDrawer = memo(function MobileDrawer({
                       ? "Disconnect realtime connection"
                       : "Connect realtime connection"
                   }
-                  className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                  className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                     {wsTogglePending ? (
                       <Spinner className="h-4 w-4" />
                     ) : (
@@ -277,12 +284,12 @@ const MobileDrawer = memo(function MobileDrawer({
                     onClose();
                     setUtmModalOpen(true);
                   }}
-                  className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+                  className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
                 >
-                  <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                     <Icon
                       icon="heroicons:link"
-                      className="text-link h-4 w-4"
+                      className="text-primary-text h-5 w-5"
                       inline={true}
                     />
                   </div>
@@ -295,12 +302,12 @@ const MobileDrawer = memo(function MobileDrawer({
             <Link
               href="/reports"
               onClick={onClose}
-              className="hover:bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+              className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
-              <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                 <Icon
                   icon="heroicons:flag"
-                  className="text-link h-4 w-4"
+                  className="text-primary-text h-5 w-5"
                   inline={true}
                 />
               </div>
@@ -311,13 +318,13 @@ const MobileDrawer = memo(function MobileDrawer({
             <button
               type="button"
               onClick={onLogout}
-              className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+              className="hover:bg-button-danger/10 focus-visible:bg-button-danger/10 focus-visible:ring-button-danger flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               data-rybbit-event="Logout"
             >
-              <div className="bg-button-danger/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                 <Icon
                   icon="material-symbols:logout-rounded"
-                  className="text-button-danger h-4 w-4"
+                  className="text-button-danger h-5 w-5"
                   inline={true}
                 />
               </div>
@@ -343,6 +350,7 @@ const MobileDrawer = memo(function MobileDrawer({
       <div className="border-border-card border-t">
         <MobileNavSection
           title="Updates"
+          current={currentSection === "updates"}
           sectionIcon="material-symbols:article-rounded"
           open={openNavSection === "Updates"}
           onToggle={() => toggleNavSection("Updates")}
@@ -363,6 +371,7 @@ const MobileDrawer = memo(function MobileDrawer({
 
         <MobileNavSection
           title="Seasons"
+          current={currentSection === "seasons"}
           sectionIcon="material-symbols:layers-rounded"
           open={openNavSection === "Seasons"}
           onToggle={() => toggleNavSection("Seasons")}
@@ -389,6 +398,7 @@ const MobileDrawer = memo(function MobileDrawer({
 
         <MobileNavSection
           title="Trading"
+          current={currentSection === "trading"}
           sectionIcon="material-symbols:price-check-rounded"
           open={openNavSection === "Trading"}
           onToggle={() => toggleNavSection("Trading")}
@@ -427,6 +437,7 @@ const MobileDrawer = memo(function MobileDrawer({
 
         <MobileNavSection
           title="Tools & Trackers"
+          current={currentSection === "trackers"}
           sectionIcon="material-symbols:sensors-rounded"
           open={openNavSection === "Tools & Trackers"}
           onToggle={() => toggleNavSection("Tools & Trackers")}
@@ -479,6 +490,7 @@ const MobileDrawer = memo(function MobileDrawer({
 
         <MobileNavSection
           title="Community"
+          current={currentSection === "community"}
           sectionIcon="material-symbols:groups-rounded"
           open={openNavSection === "Community"}
           onToggle={() => toggleNavSection("Community")}
@@ -866,7 +878,7 @@ export default function Header() {
           <OfflineDetector />
           <NewsTicker announcement={tickerFlags.newsAnnouncement} />
           <div className="relative z-10">
-            <div className="bg-primary-bg/75 border-border-card border-b backdrop-blur-lg">
+            <div className="bg-secondary-bg border-border-card border-b">
               <div className="flex items-center justify-between px-4 py-2">
                 <div className="flex items-center">
                   <Link href="/" style={{ display: "block" }}>
@@ -899,34 +911,34 @@ export default function Header() {
                   {showAuth && (
                     <Link
                       href="/messages"
-                      className="flex items-center justify-center"
-                      aria-label="Messages"
+                      className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+                      aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
                     >
-                      <button
-                        className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
-                        aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
-                      >
-                        <Icon
-                          icon="ic:baseline-message"
-                          className="text-primary-text h-4 w-4"
-                          inline={true}
+                      <Icon
+                        icon="ic:baseline-message"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
+                      {unreadMessageCount > 0 && (
+                        <UnreadBadge
+                          count={unreadMessageCount}
+                          variant="mobile"
                         />
-                        {unreadMessageCount > 0 && (
-                          <UnreadBadge
-                            count={unreadMessageCount}
-                            variant="mobile"
-                          />
-                        )}
-                      </button>
+                      )}
                     </Link>
                   )}
                   <div className="flex items-center justify-center">
-                    <AnimatedThemeToggler size="sm" />
+                    <AnimatedThemeToggler
+                      size="sm"
+                      className="focus-visible:ring-link data-[state=open]:bg-quaternary-bg border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    />
                   </div>
                   <button
+                    type="button"
                     onClick={handleDrawerToggle}
-                    className="flex cursor-pointer items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
-                    aria-label="toggle menu"
+                    className="hover:bg-quaternary-bg focus-visible:ring-link flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+                    aria-label="Open navigation menu"
+                    aria-expanded={mobileOpen}
                   >
                     <svg
                       className="text-primary-text h-5 w-5 fill-current"
@@ -943,10 +955,15 @@ export default function Header() {
 
           {/* Mobile Drawer */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetContent side="right" className="w-72 overflow-y-auto p-0">
+            <SheetContent
+              side="right"
+              overlayClassName="animation-duration-400 ease-in-out motion-reduce:animate-none"
+              className="bg-secondary-bg animation-duration-800 fill-mode-both w-72 overflow-y-auto p-0 backdrop-blur-none transition-none ease-in-out will-change-transform motion-reduce:animate-none"
+            >
               <MobileDrawer
                 userData={userData}
                 openNavSection={openNavSection}
+                currentSection={mounted ? getNavigationSection(pathname) : null}
                 toggleNavSection={toggleNavSection}
                 onClose={handleDrawerToggle}
                 onLogout={handleLogout}

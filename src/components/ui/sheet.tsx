@@ -53,6 +53,7 @@ interface SheetContentProps
     React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {
   hideOverlay?: boolean;
+  overlayClassName?: string;
 }
 
 const SheetContent = React.forwardRef<
@@ -60,11 +61,18 @@ const SheetContent = React.forwardRef<
   SheetContentProps
 >(
   (
-    { side = "right", className, children, hideOverlay = false, ...props },
+    {
+      side = "right",
+      className,
+      children,
+      hideOverlay = false,
+      overlayClassName,
+      ...props
+    },
     ref,
   ) => (
     <SheetPortal>
-      {!hideOverlay && <SheetOverlay />}
+      {!hideOverlay && <SheetOverlay className={overlayClassName} />}
       <SheetPrimitive.Content
         ref={ref}
         className={cn(sheetVariants({ side }), className)}

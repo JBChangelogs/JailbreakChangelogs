@@ -165,8 +165,8 @@ export function NotificationPopover({
     <button
       suppressHydrationWarning={true}
       className={cn(
-        "border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex cursor-pointer items-center justify-center rounded-lg border transition-all duration-200",
-        isDesktop ? "h-10 w-10" : "h-8 w-8 hover:scale-105 active:scale-95",
+        "text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none data-[state=open]:bg-quaternary-bg",
+        isDesktop ? "h-10 w-10" : "h-8 w-8",
       )}
       aria-label="Notifications"
     >

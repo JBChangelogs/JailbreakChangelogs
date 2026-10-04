@@ -4,8 +4,9 @@ import React, { useState } from "react";
 
 const log = createLogger("UI");
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { getNavigationSection } from "@/utils/ui/navigation";
 import Image from "next/image";
-import { motion, AnimatePresence } from "motion/react";
 import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { cn } from "@/lib/utils";
@@ -35,7 +36,7 @@ const AnimatedThemeToggler = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200">
+      <div className="text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200">
         <div className="h-5 w-5" />
       </div>
     ),
@@ -43,16 +44,14 @@ const AnimatedThemeToggler = dynamic(
 );
 import { Icon } from "./IconWrapper";
 import { Button } from "./button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
-
-const menuTransition = {
-  type: "spring" as const,
-  mass: 0.5,
-  damping: 11.5,
-  stiffness: 100,
-  restDelta: 0.001,
-  restSpeed: 0.001,
-};
 
 export const NavDropdownItem = ({
   href,
@@ -79,15 +78,17 @@ export const NavDropdownItem = ({
       prefetch={prefetch}
       onClick={() => setActive?.(null)}
       className={cn(
-        "group flex items-start gap-3 rounded-xl bg-secondary-bg px-2 py-2 transition-colors hover:bg-tertiary-bg",
+        "focus-visible:ring-link flex items-start gap-3 rounded-md px-3 py-2 transition-colors hover:bg-tertiary-bg focus-visible:ring-2 focus-visible:outline-none",
         className,
       )}
     >
-      <div className="bg-button-info/15 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-        <Icon icon={icon} className="text-link h-4 w-4" inline={true} />
-      </div>
+      <Icon
+        icon={icon}
+        className="text-primary-text mt-0.5 h-5 w-5 shrink-0"
+        inline={true}
+      />
       <div className="min-w-0 flex-1">
-        <div className="text-card-headline group-hover:text-link flex flex-wrap items-center gap-1.5 text-sm leading-tight font-semibold transition-colors">
+        <div className="text-primary-text flex flex-wrap items-center gap-1.5 text-sm leading-tight font-semibold transition-colors">
           {title}
           {badge && (
             <span className="bg-button-info/20 text-link rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
@@ -99,15 +100,10 @@ export const NavDropdownItem = ({
             </span>
           )}
         </div>
-        <div className="text-card-paragraph mt-0.5 text-xs leading-relaxed">
+        <div className="text-secondary-text mt-0.5 text-xs leading-relaxed">
           {description}
         </div>
       </div>
-      <Icon
-        icon="mdi:arrow-right"
-        className="text-tertiary-text group-hover:text-link mt-1 h-4 w-4 shrink-0 transition-colors"
-        inline={true}
-      />
     </Link>
   );
 };
@@ -127,6 +123,7 @@ export const NavbarModern = ({
   onUserMenuOpenChange?: (open: boolean) => void;
   setUtmModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  const pathname = usePathname();
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const setUserMenuOpenWithCallback = React.useCallback(
@@ -136,8 +133,6 @@ export const NavbarModern = ({
     },
     [onUserMenuOpenChange],
   );
-  const userMenuWrapperRef = React.useRef<HTMLDivElement>(null);
-  const userMenuDropdownRef = React.useRef<HTMLDivElement>(null);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
 
   const isCollabPage = useIsCollabPage();
@@ -173,7 +168,7 @@ export const NavbarModern = ({
   };
 
   // Prediction-cone / safe-triangle for the nav menu.
-  // Mirrors the user-menu approach: global mousemove owns the close decision.
+  // Global mousemove owns the close decision.
   // Safe zone = active trigger rect ∪ any other trigger rect (smooth L↔R transitions)
   //           ∪ viewport rect ∪ trapezoid cone between trigger bottom and viewport top.
   React.useEffect(() => {
@@ -260,74 +255,18 @@ export const NavbarModern = ({
   // boundary hydrates; render the server's logged-out shape until mounted
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
+  const currentSection = mounted ? getNavigationSection(pathname) : null;
   const isLoading = !mounted || isLoadingRaw;
   const isAuthenticated = mounted && isAuthenticatedRaw;
   const userData = isAuthenticated ? authUser : null;
   const shouldShowSupportButton = (userData?.premiumtype ?? 0) <= 0;
-
-  // Prediction-cone / safe-triangle for the user menu.
-  // Replaces the old onMouseLeave timer. Tracks the cursor globally and keeps
-  // the menu open while the pointer is inside the trigger, the dropdown panel,
-  // OR the trapezoid between them (so diagonal movement toward any menu item
-  // never accidentally closes it).
-  React.useEffect(() => {
-    if (!userMenuOpen) return;
-
-    let closeTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const inRect = (x: number, y: number, r: DOMRect) =>
-      x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
-
-    // Linearly-interpolated trapezoid between wrapper bottom and dropdown top.
-    // At y=wrapperRect.bottom the cone is as narrow as the trigger button;
-    // at y=dropdownRect.top it is as wide as the dropdown panel.
-    const inCone = (
-      x: number,
-      y: number,
-      wr: DOMRect,
-      dr: DOMRect,
-    ): boolean => {
-      if (y < wr.bottom || y > dr.top) return false;
-      const t = (y - wr.bottom) / (dr.top - wr.bottom);
-      const l = wr.left + t * (dr.left - wr.left);
-      const r = wr.right + t * (dr.right - wr.right);
-      return x >= l && x <= r;
-    };
-
-    const onMove = (e: MouseEvent) => {
-      const wEl = userMenuWrapperRef.current;
-      const dEl = userMenuDropdownRef.current;
-      if (!wEl || !dEl) return;
-
-      const { clientX: x, clientY: y } = e;
-      const wr = wEl.getBoundingClientRect();
-      const dr = dEl.getBoundingClientRect();
-
-      const safe = inRect(x, y, wr) || inRect(x, y, dr) || inCone(x, y, wr, dr);
-
-      if (safe) {
-        if (closeTimer) {
-          clearTimeout(closeTimer);
-          closeTimer = null;
-        }
-      } else if (!closeTimer) {
-        closeTimer = setTimeout(() => setUserMenuOpenWithCallback(false), 100);
-      }
-    };
-
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      if (closeTimer) clearTimeout(closeTimer);
-    };
-  }, [userMenuOpen, setUserMenuOpenWithCallback]);
 
   useToastRuntimeRightOffset({
     enabled: isXlUp,
     rightOffset: notificationMenuOpen
       ? "500px"
       : userMenuOpen
-        ? "304px"
+        ? "272px"
         : "16px",
   });
 
@@ -342,12 +281,9 @@ export const NavbarModern = ({
 
   return (
     <div
-      className={cn(
-        "bg-primary-bg/90 border-border-card border-b backdrop-blur-lg",
-        className,
-      )}
+      className={cn("bg-secondary-bg border-border-card border-b", className)}
     >
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex h-15 items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center">
           <Link href="/" style={{ display: "block" }}>
@@ -364,7 +300,7 @@ export const NavbarModern = ({
               fetchPriority="high"
               loading="eager"
               style={{
-                height: "48px",
+                height: "40px",
                 width: "auto",
               }}
             />
@@ -386,15 +322,18 @@ export const NavbarModern = ({
               {/* Updates */}
               <NavigationMenu.Item value="updates">
                 <NavigationMenu.Trigger
+                  aria-current={
+                    currentSection === "updates" ? "true" : undefined
+                  }
                   ref={(el) => {
                     triggerRefs.current["updates"] = el;
                   }}
-                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                 >
                   Updates
                   <Icon
                     icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
                     inline={true}
                   />
                 </NavigationMenu.Trigger>
@@ -409,7 +348,7 @@ export const NavbarModern = ({
                   onClick={() => setNavMenuValue("")}
                   className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
                 >
-                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
                     <NavDropdownItem
                       href="/changelogs"
                       icon="material-symbols:article-rounded"
@@ -429,15 +368,18 @@ export const NavbarModern = ({
               {/* Seasons */}
               <NavigationMenu.Item value="seasons">
                 <NavigationMenu.Trigger
+                  aria-current={
+                    currentSection === "seasons" ? "true" : undefined
+                  }
                   ref={(el) => {
                     triggerRefs.current["seasons"] = el;
                   }}
-                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                 >
                   Seasons
                   <Icon
                     icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
                     inline={true}
                   />
                 </NavigationMenu.Trigger>
@@ -452,7 +394,7 @@ export const NavbarModern = ({
                   onClick={() => setNavMenuValue("")}
                   className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
                 >
-                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
                     <NavDropdownItem
                       href="/seasons"
                       icon="material-symbols:layers-rounded"
@@ -479,15 +421,18 @@ export const NavbarModern = ({
               {/* Trading */}
               <NavigationMenu.Item value="trading">
                 <NavigationMenu.Trigger
+                  aria-current={
+                    currentSection === "trading" ? "true" : undefined
+                  }
                   ref={(el) => {
                     triggerRefs.current["trading"] = el;
                   }}
-                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                 >
                   Trading
                   <Icon
                     icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
                     inline={true}
                   />
                 </NavigationMenu.Trigger>
@@ -502,7 +447,7 @@ export const NavbarModern = ({
                   onClick={() => setNavMenuValue("")}
                   className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
                 >
-                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
                     <NavDropdownItem
                       href="/values"
                       icon="material-symbols:price-check-rounded"
@@ -541,15 +486,18 @@ export const NavbarModern = ({
               {/* Tools & Trackers */}
               <NavigationMenu.Item value="trackers">
                 <NavigationMenu.Trigger
+                  aria-current={
+                    currentSection === "trackers" ? "true" : undefined
+                  }
                   ref={(el) => {
                     triggerRefs.current["trackers"] = el;
                   }}
-                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                 >
                   Tools &amp; Trackers
                   <Icon
                     icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
                     inline={true}
                   />
                 </NavigationMenu.Trigger>
@@ -564,7 +512,7 @@ export const NavbarModern = ({
                   onClick={() => setNavMenuValue("")}
                   className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
                 >
-                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
                     <NavDropdownItem
                       href="/robberies"
                       icon="material-symbols:money-bag-rounded"
@@ -617,15 +565,18 @@ export const NavbarModern = ({
               {/* Community */}
               <NavigationMenu.Item value="community">
                 <NavigationMenu.Trigger
+                  aria-current={
+                    currentSection === "community" ? "true" : undefined
+                  }
                   ref={(el) => {
                     triggerRefs.current["community"] = el;
                   }}
-                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                  className="group text-primary-text hover:border-secondary-text aria-[current=true]:border-primary-text aria-[current=true]:hover:border-primary-text data-[state=open]:border-primary-text focus-visible:ring-link flex h-15 cursor-pointer items-center gap-1 border-b-2 border-transparent pr-2 pl-3 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                 >
                   Community
                   <Icon
                     icon="mdi:chevron-down"
-                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    className="text-secondary-text group-data-[state=open]:text-primary-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
                     inline={true}
                   />
                 </NavigationMenu.Trigger>
@@ -640,12 +591,12 @@ export const NavbarModern = ({
                   onClick={() => setNavMenuValue("")}
                   className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
                 >
-                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                  <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
                     <NavDropdownItem
                       href="/users"
                       icon="material-symbols:person-search-rounded"
                       title="User Search"
-                      description="Browse 30k+ Jailbreak Changelogs user profiles"
+                      description="Browse 60k+ Jailbreak Changelogs user profiles"
                       prefetch={false}
                     />
                     <NavDropdownItem
@@ -725,10 +676,9 @@ export const NavbarModern = ({
                   height: "var(--radix-navigation-menu-viewport-height)",
                   transition: "height 100ms ease",
                   overflow: "hidden",
-                  borderRadius: "24px",
+                  borderRadius: "8px",
                   border: "1px solid var(--color-border-card)",
-                  backgroundColor: "var(--color-primary-bg)",
-                  backdropFilter: "blur(8px)",
+                  backgroundColor: "var(--color-secondary-bg)",
                 }}
               />
             </div>
@@ -743,9 +693,10 @@ export const NavbarModern = ({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
+                    aria-label="Toggle real-time connection"
                     onClick={toggleWsConnection}
                     disabled={wsTogglePending}
-                    className="border-border-card bg-secondary-bg hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="hover:bg-quaternary-bg focus-visible:ring-link flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {wsTogglePending ? (
                       <Spinner className="h-4 w-4" />
@@ -779,205 +730,166 @@ export const NavbarModern = ({
           {/* Messages button (desktop) */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link href="/messages" prefetch={false}>
-                <button
-                  className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200"
-                  aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
-                >
-                  <Icon
-                    icon="ic:baseline-message"
-                    className="text-primary-text h-5 w-5"
-                    inline={true}
-                  />
-                  {unreadMessageCount > 0 && (
-                    <UnreadBadge count={unreadMessageCount} variant="desktop" />
-                  )}
-                </button>
+              <Link
+                href="/messages"
+                prefetch={false}
+                className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+                aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
+              >
+                <Icon
+                  icon="ic:baseline-message"
+                  className="h-5 w-5"
+                  inline={true}
+                />
+                {unreadMessageCount > 0 && (
+                  <UnreadBadge count={unreadMessageCount} variant="desktop" />
+                )}
               </Link>
             </TooltipTrigger>
             <TooltipContent>Messages</TooltipContent>
           </Tooltip>
 
           {/* Theme toggle */}
-          <AnimatedThemeToggler />
+          <AnimatedThemeToggler className="focus-visible:ring-link data-[state=open]:bg-quaternary-bg border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none" />
 
           {/* User menu or login button */}
           {isLoading ? (
             <Button onClick={() => setShowLoginModal(true)}>Login</Button>
           ) : userData ? (
-            <div ref={userMenuWrapperRef} className="relative">
-              <button
-                className="flex items-center gap-2 rounded-full p-1 transition-colors"
-                onMouseEnter={() => setUserMenuOpenWithCallback(true)}
+            <DropdownMenu
+              open={userMenuOpen}
+              onOpenChange={setUserMenuOpenWithCallback}
+            >
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={`Account menu for ${userData.global_name || userData.username}`}
+                  className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link data-[state=open]:bg-quaternary-bg flex h-10 cursor-pointer items-center gap-2 rounded-lg px-1.5 transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  <UserAvatar
+                    userId={userData.id}
+                    avatarHash={userData.avatar}
+                    username={userData.username}
+                    size={8}
+                    showBadge={false}
+                    settings={userData.settings_v2}
+                    premiumType={userData.premiumtype}
+                  />
+                  <span className="hidden max-w-28 truncate text-sm font-medium 2xl:block">
+                    {userData.global_name || userData.username}
+                  </span>
+                  <Icon
+                    icon="mdi:chevron-down"
+                    className="text-secondary-text h-4 w-4 shrink-0"
+                    inline={true}
+                  />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="bg-secondary-bg z-[2147483647] w-64 rounded-lg p-1 shadow-lg"
               >
-                <UserAvatar
-                  userId={userData.id}
-                  avatarHash={userData.avatar}
-                  username={userData.username}
-                  size={10}
-                  showBadge={false}
-                  settings={userData.settings_v2}
-                  premiumType={userData.premiumtype}
-                />
-              </button>
-
-              {/* pointer-events disabled as soon as userMenuOpen is false so the
-                  exit animation's ghost DOM doesn't capture clicks or hovers */}
-              <div style={{ pointerEvents: userMenuOpen ? "auto" : "none" }}>
-                <AnimatePresence>
-                  {userMenuOpen && (
-                    <motion.div
-                      ref={userMenuDropdownRef}
-                      className="border-border-card bg-primary-bg absolute right-0 z-[2147483647] mt-2 w-72 overflow-hidden rounded-2xl border shadow-lg"
-                      initial={{ opacity: 0, scale: 0.92, y: 8 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.92, y: 8 }}
-                      transition={menuTransition}
-                      onClick={() => setUserMenuOpenWithCallback(false)}
-                    >
-                      {/* User info */}
-                      <Link
-                        href={`/users/${userData.id}`}
-                        className="group hover:bg-tertiary-bg flex items-center gap-3 p-3 transition-colors"
-                      >
-                        <UserAvatar
-                          userId={userData.id}
-                          avatarHash={userData.avatar}
-                          username={userData.username}
-                          size={10}
-                          showBadge={false}
-                          settings={userData.settings_v2}
-                          premiumType={userData.premiumtype}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-primary-text group-hover:text-link truncate font-semibold transition-colors">
-                            {userData.global_name || userData.username}
-                          </div>
-                          <div className="text-secondary-text truncate text-xs">
-                            @{userData.username}
-                          </div>
-                        </div>
-                        <Icon
-                          icon="material-symbols:chevron-right-rounded"
-                          className="text-secondary-text group-hover:text-link h-4 w-4 shrink-0 transition-colors"
-                          inline={true}
-                        />
-                      </Link>
-
-                      {/* Menu items */}
-                      <div className="border-border-secondary border-t p-2">
-                        {!userData.roblox_id && (
-                          <button
-                            className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-                            onClick={() =>
-                              setLoginModal({ open: true, tab: "roblox" })
-                            }
-                          >
-                            <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                              <RobloxIcon className="text-link h-4 w-4" />
-                            </div>
-                            <span className="text-primary-text text-sm font-medium">
-                              Connect Roblox
-                            </span>
-                          </button>
-                        )}
-
-                        <Link
-                          href="/settings"
-                          className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
-                        >
-                          <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                            <Icon
-                              icon="material-symbols:settings-rounded"
-                              className="text-link h-4 w-4"
-                              inline={true}
-                            />
-                          </div>
-                          <span className="text-primary-text text-sm font-medium">
-                            Settings
-                          </span>
-                        </Link>
-
-                        {shouldShowSupportButton && (
-                          <Link
-                            href="/supporting"
-                            className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
-                          >
-                            <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                              <Icon
-                                icon="material-symbols:favorite-rounded"
-                                className="text-link h-4 w-4"
-                                inline={true}
-                              />
-                            </div>
-                            <span className="text-primary-text text-sm font-medium">
-                              Support Us
-                            </span>
-                          </Link>
-                        )}
-
-                        {userData?.flags?.some(
-                          (f) => f.flag === "is_owner",
-                        ) && (
-                          <button
-                            className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-                            onClick={() => {
-                              setUtmModalOpen(true);
-                              setUserMenuOpenWithCallback(false);
-                            }}
-                          >
-                            <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                              <Icon
-                                icon="heroicons:link"
-                                className="text-link h-4 w-4"
-                                inline={true}
-                              />
-                            </div>
-                            <span className="text-primary-text text-sm font-medium">
-                              Generate UTM Link
-                            </span>
-                          </button>
-                        )}
-
-                        <Link
-                          href="/reports"
-                          className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
-                          onClick={() => setUserMenuOpenWithCallback(false)}
-                        >
-                          <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                            <Icon
-                              icon="heroicons:flag"
-                              className="text-link h-4 w-4"
-                              inline={true}
-                            />
-                          </div>
-                          <span className="text-primary-text text-sm font-medium">
-                            My Reports
-                          </span>
-                        </Link>
-
-                        <button
-                          className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-                          onClick={handleLogout}
-                          data-rybbit-event="Logout"
-                        >
-                          <div className="bg-button-danger/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                            <Icon
-                              icon="material-symbols:logout-rounded"
-                              className="text-button-danger h-4 w-4"
-                              inline={true}
-                            />
-                          </div>
-                          <span className="text-button-danger text-sm font-medium">
-                            Logout
-                          </span>
-                        </button>
+                <DropdownMenuItem
+                  asChild
+                  className="gap-3 rounded-md px-3 py-2.5"
+                >
+                  <Link href={`/users/${userData.id}`}>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-semibold">
+                        {userData.global_name || userData.username}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
+                      <div className="text-secondary-text truncate text-xs">
+                        @{userData.username}
+                      </div>
+                    </div>
+                    <Icon
+                      icon="material-symbols:chevron-right-rounded"
+                      className="text-secondary-text h-4 w-4 shrink-0"
+                      inline={true}
+                    />
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {!userData.roblox_id && (
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      setLoginModal({ open: true, tab: "roblox" })
+                    }
+                    className="gap-3 rounded-md px-3 py-2.5"
+                  >
+                    <RobloxIcon className="text-secondary-text h-4 w-4" />
+                    Connect Roblox
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  asChild
+                  className="gap-3 rounded-md px-3 py-2.5"
+                >
+                  <Link href="/settings">
+                    <Icon
+                      icon="material-symbols:settings-rounded"
+                      className="text-secondary-text h-4 w-4"
+                      inline={true}
+                    />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                {shouldShowSupportButton && (
+                  <DropdownMenuItem
+                    asChild
+                    className="gap-3 rounded-md px-3 py-2.5"
+                  >
+                    <Link href="/supporting">
+                      <Icon
+                        icon="material-symbols:favorite-rounded"
+                        className="text-secondary-text h-4 w-4"
+                        inline={true}
+                      />
+                      Support Us
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {userData.flags?.some((f) => f.flag === "is_owner") && (
+                  <DropdownMenuItem
+                    onSelect={() => setUtmModalOpen(true)}
+                    className="gap-3 rounded-md px-3 py-2.5"
+                  >
+                    <Icon
+                      icon="heroicons:link"
+                      className="text-secondary-text h-4 w-4"
+                      inline={true}
+                    />
+                    Generate UTM Link
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  asChild
+                  className="gap-3 rounded-md px-3 py-2.5"
+                >
+                  <Link href="/reports">
+                    <Icon
+                      icon="heroicons:flag"
+                      className="text-secondary-text h-4 w-4"
+                      inline={true}
+                    />
+                    My Reports
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={handleLogout}
+                  data-rybbit-event="Logout"
+                  className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger gap-3 rounded-md px-3 py-2.5"
+                >
+                  <Icon
+                    icon="material-symbols:logout-rounded"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button onClick={() => setShowLoginModal(true)}>Login</Button>
           )}
