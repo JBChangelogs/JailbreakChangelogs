@@ -59,8 +59,8 @@ export const UnreadBadge = ({
       <span
         aria-hidden="true"
         className={cn(
-          "ring-primary-bg pointer-events-none absolute -top-1 -right-1 z-10 flex items-center justify-center rounded-full bg-red-500 text-[9px] leading-none font-bold text-white tabular-nums shadow-sm ring-2",
-          wide ? "h-4 min-w-4 px-1" : "h-4 w-4",
+          "ring-secondary-bg pointer-events-none absolute top-0 right-0 z-10 flex items-center justify-center rounded-full bg-red-500 text-[9px] leading-none font-bold text-white tabular-nums shadow-sm ring-1",
+          wide ? "h-3.5 min-w-3.5 px-1" : "h-3.5 w-3.5",
         )}
       >
         {displayCount}
@@ -72,8 +72,8 @@ export const UnreadBadge = ({
     <span
       aria-hidden="true"
       className={cn(
-        "ring-primary-bg pointer-events-none absolute -top-1.5 -right-1.5 z-10 flex items-center justify-center rounded-full bg-red-500 text-[10px] leading-none font-bold tracking-tight text-white tabular-nums shadow-sm ring-2",
-        wide ? "h-5 min-w-6 px-1" : "h-5 w-5",
+        "ring-secondary-bg pointer-events-none absolute top-0 right-1 z-10 flex items-center justify-center rounded-full bg-red-500 text-[10px] leading-none font-bold tracking-tight text-white tabular-nums shadow-sm ring-2",
+        wide ? "h-4 min-w-5 px-1" : "h-4 w-4",
       )}
     >
       {displayCount}
