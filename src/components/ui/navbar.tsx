@@ -11,6 +11,7 @@ import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { canOverrideExperiments } from "@/utils/api/experiments";
 import { useTheme } from "@/contexts/ThemeContext";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
@@ -834,6 +835,21 @@ export const NavbarModern = ({
                     Settings
                   </Link>
                 </DropdownMenuItem>
+                {canOverrideExperiments(userData) && (
+                  <DropdownMenuItem
+                    asChild
+                    className="gap-3 rounded-md px-3 py-2.5"
+                  >
+                    <Link href="/experiments">
+                      <Icon
+                        icon="mdi:flask-outline"
+                        className="text-secondary-text h-4 w-4"
+                        inline={true}
+                      />
+                      Experiments
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 {shouldShowSupportButton && (
                   <DropdownMenuItem
                     asChild

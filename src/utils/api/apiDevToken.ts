@@ -1,3 +1,5 @@
+import { getExperimentHeader } from "@/utils/api/experiments";
+
 type BuildApiUrlWithDevTokenOptions = {
   tokenParamName?: string;
 };
@@ -60,6 +62,12 @@ export const buildApiFetchRequest = (
 
   if (isDevEnv && injectedToken) {
     headers["Authorization"] = injectedToken;
+  }
+
+  const publicApiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (publicApiUrl && url.origin === new URL(publicApiUrl).origin) {
+    const experiments = getExperimentHeader();
+    if (experiments) headers["X-Experiment"] = experiments;
   }
 
   return { url: url.toString(), headers };

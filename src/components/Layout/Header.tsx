@@ -20,6 +20,7 @@ import { useEscapeLogin } from "@/utils/auth/escapeLogin";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { canOverrideExperiments } from "@/utils/api/experiments";
 import type { UserData } from "@/types/auth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
@@ -247,6 +248,24 @@ const MobileDrawer = memo(function MobileDrawer({
                 Settings
               </span>
             </Link>
+            {canOverrideExperiments(userData) && (
+              <Link
+                href="/experiments"
+                onClick={onClose}
+                className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                  <Icon
+                    icon="mdi:flask-outline"
+                    className="text-primary-text h-5 w-5"
+                    inline={true}
+                  />
+                </div>
+                <span className="text-primary-text text-sm font-medium">
+                  Experiments
+                </span>
+              </Link>
+            )}
             {userData?.flags?.some((f) => f.flag === "is_owner") && (
               <>
                 <button

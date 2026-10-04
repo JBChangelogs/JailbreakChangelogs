@@ -190,6 +190,9 @@ async function getLegacyItemRedirectResponse(
 export async function proxy(request: NextRequest) {
   const isTestingRestricted = isRoleRestricted();
   const isAccessDeniedPath = request.nextUrl.pathname === "/access-denied";
+  const isExperimentsPath =
+    request.nextUrl.pathname === "/experiments" ||
+    request.nextUrl.pathname.startsWith("/experiments/");
 
   if (isAccessDeniedPath && !isTestingRestricted) {
     return NextResponse.redirect(new URL("/", request.url));
@@ -206,13 +209,17 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (isTestingRestricted && !isAllowedWithoutTesterRole(request)) {
+  if (
+    isExperimentsPath ||
+    (isTestingRestricted && !isAllowedWithoutTesterRole(request))
+  ) {
+    const deniedPath = isTestingRestricted ? "/access-denied" : "/";
     const token = request.cookies.get("jbcl_token")?.value;
     if (!token || token === "undefined") {
       if (request.nextUrl.pathname.startsWith("/api/")) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
       }
-      return NextResponse.redirect(new URL("/access-denied", request.url));
+      return NextResponse.redirect(new URL(deniedPath, request.url));
     }
 
     const user = await fetchCurrentUser(token);
@@ -220,7 +227,7 @@ export async function proxy(request: NextRequest) {
       if (request.nextUrl.pathname.startsWith("/api/")) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
       }
-      return NextResponse.redirect(new URL("/access-denied", request.url));
+      return NextResponse.redirect(new URL(deniedPath, request.url));
     }
   }
 
