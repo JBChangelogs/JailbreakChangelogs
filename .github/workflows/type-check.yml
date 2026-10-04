@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Generate icon bundle
+        run: bun run generate:icons
+
       - name: Lint
         run: bun run lint
 
