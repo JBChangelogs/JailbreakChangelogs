@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import { safeSessionStorage } from "@/utils/storage/safeStorage";
 
 const ROBBERY_TRACKER_LAST_JOINED_STORAGE_KEY =
@@ -109,57 +109,85 @@ function readLastJoined(): RobberyTrackerLastJoinedTarget | null {
   return isValidLastJoined(stored) ? stored : null;
 }
 
-function writeLastJoined(value: RobberyTrackerLastJoinedTarget | null) {
-  safeSetSessionJSON(ROBBERY_TRACKER_LAST_JOINED_STORAGE_KEY, value);
+const listeners = new Set<() => void>();
+let snapshot: RobberyTrackerLastJoinedTarget | null = null;
+let initialized = false;
 
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(
-      new CustomEvent(ROBBERY_TRACKER_LAST_JOINED_EVENT_NAME, {
-        detail: value,
-      }),
-    );
+function getLastJoined() {
+  if (!initialized) {
+    snapshot = readLastJoined();
+    initialized = true;
+  }
+  return snapshot;
+}
+
+function publish(value: RobberyTrackerLastJoinedTarget | null) {
+  initialized = true;
+  if (snapshot === value) return;
+  snapshot = value;
+  listeners.forEach((listener) => listener());
+}
+
+function handleStorage(event: StorageEvent) {
+  if (
+    event.key === null ||
+    event.key === ROBBERY_TRACKER_LAST_JOINED_STORAGE_KEY
+  ) {
+    publish(readLastJoined());
   }
 }
 
-export function useRobberyTrackerLastJoinedServer() {
-  const [lastJoined, setLastJoinedState] =
-    useState<RobberyTrackerLastJoinedTarget | null>(readLastJoined);
+function handleCustomEvent(event: Event) {
+  const value = (event as CustomEvent<unknown>).detail;
+  if (value === null || isValidLastJoined(value)) publish(value);
+}
 
-  useEffect(() => {
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key !== ROBBERY_TRACKER_LAST_JOINED_STORAGE_KEY) return;
-      setLastJoinedState(readLastJoined());
-    };
-
-    const handleCustomEvent = (event: Event) => {
-      const custom =
-        event as CustomEvent<RobberyTrackerLastJoinedTarget | null>;
-      setLastJoinedState(custom.detail ?? null);
-    };
-
+function subscribe(listener: () => void) {
+  if (listeners.size === 0) {
     window.addEventListener("storage", handleStorage);
     window.addEventListener(
       ROBBERY_TRACKER_LAST_JOINED_EVENT_NAME,
       handleCustomEvent,
     );
-    return () => {
+    // Catch a storage change between the first render and subscription.
+    snapshot = readLastJoined();
+    initialized = true;
+  }
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) {
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener(
         ROBBERY_TRACKER_LAST_JOINED_EVENT_NAME,
         handleCustomEvent,
       );
-    };
-  }, []);
+      initialized = false;
+    }
+  };
+}
 
-  const setLastJoined = useCallback((value: RobberyTrackerLastJoinedTarget) => {
-    setLastJoinedState(value);
-    writeLastJoined(value);
-  }, []);
+function writeLastJoined(value: RobberyTrackerLastJoinedTarget | null) {
+  safeSetSessionJSON(ROBBERY_TRACKER_LAST_JOINED_STORAGE_KEY, value);
+  publish(value);
+  window.dispatchEvent(
+    new CustomEvent(ROBBERY_TRACKER_LAST_JOINED_EVENT_NAME, { detail: value }),
+  );
+}
 
-  const clearLastJoined = useCallback(() => {
-    setLastJoinedState(null);
-    writeLastJoined(null);
-  }, []);
+const clearLastJoined = () => writeLastJoined(null);
+const getServerSnapshot = () => null;
 
-  return { lastJoined, setLastJoined, clearLastJoined };
+export function useRobberyTrackerLastJoinedServer(serverId?: string) {
+  const getSnapshot = useCallback(() => {
+    const target = getLastJoined();
+    return serverId === undefined || target?.jobId === serverId ? target : null;
+  }, [serverId]);
+  const lastJoined = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
+
+  return { lastJoined, setLastJoined: writeLastJoined, clearLastJoined };
 }

@@ -87,7 +87,7 @@ test("plane cards immediately show departure times and remove them when inactive
   }
 });
 
-test("all card views show last joined time only for the matching server", () => {
+test("all card views render logged time without exposing session state during SSR", () => {
   const storage = spyOn(safeSessionStorage, "getItem");
   const views = [
     <RobberyCard key="individual" {...cardProps} robbery={robbery} />,
@@ -107,24 +107,18 @@ test("all card views show last joined time only for the matching server", () => 
     />,
   ];
   try {
-    for (const serverId of [robbery.job_id, "another-server"]) {
-      storage.mockImplementation((key) =>
-        key === "robberyTrackerLastJoinedTarget"
-          ? JSON.stringify({
-              kind: "robbery",
-              jobId: serverId,
-              markerName: "Casino",
-              joinedAt: 990,
-            })
-          : null,
-      );
-      for (const view of views) {
-        const markup = renderCard(view);
-        expect(markup).toContain("Logged");
-        expect(markup.includes("Last joined")).toBe(
-          serverId === robbery.job_id,
-        );
-      }
+    storage.mockReturnValue(
+      JSON.stringify({
+        kind: "robbery",
+        jobId: robbery.job_id,
+        markerName: "Casino",
+        joinedAt: 990,
+      }),
+    );
+    for (const view of views) {
+      const markup = renderCard(view);
+      expect(markup).toContain("Logged");
+      expect(markup).not.toContain("Last joined");
     }
   } finally {
     storage.mockRestore();

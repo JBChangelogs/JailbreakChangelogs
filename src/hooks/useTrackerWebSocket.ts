@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_API_URL, INVENTORY_WS_URL } from "@/utils/api/api";
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import { shareTrackerSnapshot } from "./trackerSnapshot";
 import {
   type TrackerJoinHistory,
   type TrackerJoinReport,
@@ -27,12 +28,13 @@ function getReconnectDelay(attempt: number): number {
   );
 }
 
-interface TrackerWebSocketOptions {
+interface TrackerWebSocketOptions<TData> {
   endpoint: string;
   messageAction: string;
   enabled: boolean;
   userId?: string | null;
   logPrefix: string;
+  getItemKey?: (item: TData) => string;
 }
 
 export interface TrackerWebSocketReturn<TData> {
@@ -57,7 +59,8 @@ export function useTrackerWebSocket<TData = unknown>({
   enabled,
   userId,
   logPrefix,
-}: TrackerWebSocketOptions): TrackerWebSocketReturn<TData> {
+  getItemKey,
+}: TrackerWebSocketOptions<TData>): TrackerWebSocketReturn<TData> {
   const [data, setData] = useState<TData[]>([]);
   const [joinHistory, setJoinHistory] = useState<TrackerJoinHistory>({});
   const [isConnected, setIsConnected] = useState(false);
@@ -150,7 +153,10 @@ export function useTrackerWebSocket<TData = unknown>({
               users?: TrackerJoinUser[];
             };
             if (msg.action === messageAction && msg.data) {
-              setData(msg.data);
+              const incoming = msg.data;
+              setData((previous) =>
+                shareTrackerSnapshot(previous, incoming, getItemKey),
+              );
             } else if (
               msg.action === "join_history_sync" ||
               msg.action === "update_join_history"
@@ -240,7 +246,7 @@ export function useTrackerWebSocket<TData = unknown>({
         setError("Connection error");
       }
     },
-    [enabled, endpoint, messageAction, logPrefix],
+    [enabled, endpoint, messageAction, logPrefix, getItemKey],
   );
 
   const reconnect = useCallback(() => {

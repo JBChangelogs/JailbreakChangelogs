@@ -13,10 +13,12 @@ import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import {
   useRobberyTrackerWebSocket,
+  getRobberyKey,
   type RobberyData,
   type ServerRegionData,
 } from "@/hooks/useRobberyTrackerWebSocket";
 import { Icon } from "@/components/ui/IconWrapper";
+import RobberyGrid from "@/components/RobberyTracker/RobberyGrid";
 import RobberyCard from "@/components/RobberyTracker/RobberyCard";
 import RobberyComboCard from "@/components/RobberyTracker/RobberyComboCard";
 import RobberyServerGroupCard from "@/components/RobberyTracker/RobberyServerGroupCard";
@@ -103,6 +105,10 @@ type RobberyComboResult = {
   robberies: RobberyData[];
   latestTimestamp: number;
 };
+
+const getComboKey = (combo: RobberyComboResult) =>
+  `${combo.comboId}-${combo.serverId}`;
+const getGroupKey = (group: { jobId: string }) => group.jobId;
 
 function computeComboResults(
   robberies: RobberyData[],
@@ -1528,13 +1534,12 @@ function RobberyTrackerContent() {
               {/* Robberies Grid */}
               {isPowerComboMode ? (
                 visibleCombos.length > 0 ? (
-                  <div
-                    aria-busy={visibleCombos !== filteredRobberyCombos}
-                    className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
-                  >
-                    {visibleCombos.map((combo) => (
+                  <RobberyGrid
+                    items={visibleCombos}
+                    getKey={getComboKey}
+                    isUpdating={visibleCombos !== filteredRobberyCombos}
+                    renderItem={(combo) => (
                       <RobberyComboCard
-                        key={`${combo.comboId}-${combo.serverId}`}
                         comboId={combo.comboId}
                         serverId={combo.serverId}
                         robberies={combo.robberies}
@@ -1546,8 +1551,8 @@ function RobberyTrackerContent() {
                         regionData={mergedServerRegionsByJobId[combo.serverId]}
                         useExternalRegionData
                       />
-                    ))}
-                  </div>
+                    )}
+                  />
                 ) : (
                   <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
                     <Icon
@@ -1564,13 +1569,12 @@ function RobberyTrackerContent() {
                 )
               ) : robberiesDisplayMode === "grouped" ? (
                 visibleGroups.length > 0 ? (
-                  <div
-                    aria-busy={visibleGroups !== groupedRobberies}
-                    className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
-                  >
-                    {visibleGroups.map((group) => (
+                  <RobberyGrid
+                    items={visibleGroups}
+                    getKey={getGroupKey}
+                    isUpdating={visibleGroups !== groupedRobberies}
+                    renderItem={(group) => (
                       <RobberyServerGroupCard
-                        key={group.jobId}
                         serverId={group.jobId}
                         robberies={group.robberies}
                         joinedUsers={
@@ -1580,8 +1584,8 @@ function RobberyTrackerContent() {
                         regionData={mergedServerRegionsByJobId[group.jobId]}
                         useExternalRegionData
                       />
-                    ))}
-                  </div>
+                    )}
+                  />
                 ) : (
                   <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
                     <Icon
@@ -1597,15 +1601,14 @@ function RobberyTrackerContent() {
                   </div>
                 )
               ) : visibleRobberies.length > 0 ? (
-                <div
-                  aria-busy={visibleRobberies !== filteredRobberies}
-                  className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
-                >
-                  {visibleRobberies.map((robbery) => {
+                <RobberyGrid
+                  items={visibleRobberies}
+                  getKey={getRobberyKey}
+                  isUpdating={visibleRobberies !== filteredRobberies}
+                  renderItem={(robbery) => {
                     const jobId = robbery.server?.job_id || robbery.job_id;
                     return (
                       <RobberyCard
-                        key={`${robbery.marker_name}-${jobId}`}
                         robbery={robbery}
                         joinedUsers={joinHistory[jobId] ?? EMPTY_JOINED_USERS}
                         onJoin={handleJoin}
@@ -1613,8 +1616,8 @@ function RobberyTrackerContent() {
                         useExternalRegionData
                       />
                     );
-                  })}
-                </div>
+                  }}
+                />
               ) : (
                 <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
                   <Icon

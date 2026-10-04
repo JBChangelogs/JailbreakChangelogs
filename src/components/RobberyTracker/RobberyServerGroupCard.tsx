@@ -70,7 +70,8 @@ function RobberyServerGroupCard({
   const [isJoining, setIsJoining] = useState(false);
   const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
   const { fetchRegionData } = useServerRegions();
-  const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
+  const { lastJoined, setLastJoined } =
+    useRobberyTrackerLastJoinedServer(serverId);
   const isLastJoined = Boolean(serverId && lastJoined?.jobId === serverId);
   const showLastJoinedState = isLastJoined && !isJoining;
 

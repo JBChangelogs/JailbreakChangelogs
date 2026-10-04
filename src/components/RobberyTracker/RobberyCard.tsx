@@ -54,7 +54,9 @@ function RobberyCard({
 }: RobberyCardProps) {
   const [isJoining, setIsJoining] = useState(false);
   const [regionData, setRegionData] = useState(robbery.region_data || null);
-  const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
+  const jobId = robbery.server?.job_id || robbery.job_id;
+  const { lastJoined, setLastJoined } =
+    useRobberyTrackerLastJoinedServer(jobId);
 
   const { fetchRegionData } = useServerRegions();
 
@@ -65,8 +67,6 @@ function RobberyCard({
   );
   const imageUrl = `https://assets.jailbreakchangelogs.com/assets/images/robberies/${imageName}.webp`;
 
-  // Each time display owns its timer subscription.
-  const jobId = robbery.server?.job_id || robbery.job_id;
   const timerId = `robbery-${robbery.marker_name}-${jobId}-${robbery.timestamp}`;
 
   const isLastJoined = Boolean(jobId && lastJoined?.jobId === jobId);

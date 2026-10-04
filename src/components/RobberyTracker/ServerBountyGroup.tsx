@@ -51,7 +51,8 @@ export default function ServerBountyGroup({
   const totalBounty = bounties.reduce((sum, b) => sum + b.bounty, 0);
 
   const jobId = bounties[0]?.server?.job_id || "";
-  const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
+  const { lastJoined, setLastJoined } =
+    useRobberyTrackerLastJoinedServer(serverId);
   const isLastJoined = Boolean(jobId && lastJoined?.jobId === jobId);
   const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
     isLastJoined ? lastJoined?.joinedAt : null,

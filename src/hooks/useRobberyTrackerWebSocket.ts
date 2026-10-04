@@ -52,6 +52,10 @@ export interface RobberyData {
   };
 }
 
+export function getRobberyKey(robbery: RobberyData): string {
+  return `${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}`;
+}
+
 export function useRobberyTrackerWebSocket(
   enabled: boolean = true,
   userId?: string | null,
@@ -62,6 +66,7 @@ export function useRobberyTrackerWebSocket(
     enabled,
     userId,
     logPrefix: "Robbery tracker",
+    getItemKey: getRobberyKey,
   });
 
   return { robberies, ...rest };

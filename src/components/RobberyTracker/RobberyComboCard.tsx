@@ -68,7 +68,8 @@ function RobberyComboCard({
   const regionData = useExternalRegionData
     ? (externalRegionData ?? null)
     : internalRegionData;
-  const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
+  const { lastJoined, setLastJoined } =
+    useRobberyTrackerLastJoinedServer(serverId);
   const isLastJoined = Boolean(serverId && lastJoined?.jobId === serverId);
   const showLastJoinedState = isLastJoined && !isJoining;
 
