@@ -1,0 +1,90 @@
+name: Railway Config
+
+on:
+  pull_request:
+    branches: [main, testing]
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".railway/**"
+      - ".github/workflows/railway-config.yml"
+  push:
+    branches: [main, testing]
+    paths:
+      - ".railway/**"
+      - ".github/workflows/railway-config.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    name: Plan Railway ${{ github.base_ref == 'testing' && 'testing' || 'production' }}
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: railway-plan-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Preview Railway configuration
+        uses: railwayapp/config@v1
+        with:
+          command: plan
+          railway-token: ${{ secrets[github.base_ref == 'testing' && 'RAILWAY_TOKEN_TESTING' || 'RAILWAY_TOKEN_PRODUCTION'] }}
+          cli-version: "5.63.1"
+          artifact-name: railway-plan-${{ github.base_ref }}
+
+  apply:
+    name: Apply Railway ${{ github.ref_name == 'testing' && 'testing' || 'production' }}
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets[github.ref_name == 'testing' && 'RAILWAY_TOKEN_TESTING' || 'RAILWAY_TOKEN_PRODUCTION'] }}
+    concurrency:
+      group: railway-apply-${{ github.ref_name }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.0"
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Check Railway token
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "::error::Missing Railway project token for this branch."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Railway CLI
+        run: npm install --global @railway/cli@5.63.1
+
+      - name: Plan Railway configuration
+        run: railway config plan --out "$RUNNER_TEMP/railway-plan.json"
+
+      - name: Block destructive changes
+        run: |
+          if ! jq -e '.destructive == false' "$RUNNER_TEMP/railway-plan.json" > /dev/null; then
+            echo "::error::Automatic apply blocked: the Railway plan deletes resources or variables, or is missing its destructive flag. Review the plan and apply manually if intended."
+            exit 1
+          fi
+
+      - name: Apply non-destructive plan
+        # Omitting --confirm-destructive also keeps Railway's own deletion guard enabled.
+        run: railway config apply --plan "$RUNNER_TEMP/railway-plan.json" --yes
