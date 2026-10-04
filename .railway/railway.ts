@@ -22,6 +22,7 @@ const sharedEnv = {
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: preserve(),
   NEXT_PUBLIC_WS_URL: preserve(),
   NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: preserve(),
+  NEXT_TELEMETRY_DISABLED: preserve(),
   RAILWAY_INTERNAL_API_URL: preserve(),
   RAILWAY_TOKEN: preserve(),
   TURNSTILE_SECRET_KEY: preserve(),
@@ -64,7 +65,6 @@ export default defineRailway((ctx) => {
             GITHUB_API_RELEASES_URL: preserve(),
             NEXT_PUBLIC_INVENTORY_API_ISSUES: preserve(),
             NEXT_PUBLIC_SHOW_LIVE_EVENT_COUNTDOWN: preserve(),
-            NEXT_TELEMETRY_DISABLED: preserve(),
             OPEN_ROUTER_API_KEY: preserve(),
           }
         : {
