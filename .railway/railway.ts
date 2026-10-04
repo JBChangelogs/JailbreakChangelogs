@@ -22,7 +22,6 @@ const sharedEnv = {
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: preserve(),
   NEXT_PUBLIC_WS_URL: preserve(),
   NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: preserve(),
-  RAILPACK_BUN_VERSION: preserve(),
   RAILWAY_INTERNAL_API_URL: preserve(),
   RAILWAY_TOKEN: preserve(),
   TURNSTILE_SECRET_KEY: preserve(),
