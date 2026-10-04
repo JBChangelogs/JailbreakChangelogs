@@ -380,10 +380,15 @@ export const searchDupeItemsByOwner = async (
 };
 
 export async function fetchUserById(id: string) {
+  if (typeof id !== "string" || !/^[0-9]+$/.test(id)) {
+    throw new Error(`NOT_FOUND: User not found with id ${id}`);
+  }
+
   try {
     const response = await fetch(
       `${BASE_API_URL}/v2/users/${id}?nocache=false`,
       {
+        redirect: "error",
         headers: {
           "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
         },
@@ -442,6 +447,10 @@ export async function fetchUserById(id: string) {
 }
 
 export async function fetchUserByIdForOG(id: string) {
+  if (typeof id !== "string" || !/^[0-9]+$/.test(id)) {
+    return null;
+  }
+
   try {
     const fields = [
       "id",
@@ -460,6 +469,7 @@ export async function fetchUserByIdForOG(id: string) {
     const response = await fetch(
       `${BASE_API_URL}/v2/users/${id}?fields=${fields}`,
       {
+        redirect: "error",
         headers: {
           "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
         },
@@ -509,12 +519,17 @@ export async function fetchUserByIdForOG(id: string) {
 }
 
 export async function fetchUserByIdForMetadata(id: string) {
+  if (typeof id !== "string" || !/^[0-9]+$/.test(id)) {
+    throw new Error(`NOT_FOUND: User not found with id ${id}`);
+  }
+
   try {
     const fields = ["accent_color", "global_name", "username"].join(",");
 
     const response = await fetch(
       `${BASE_API_URL}/v2/users/${id}?fields=${fields}`,
       {
+        redirect: "error",
         headers: {
           "User-Agent": "JailbreakChangelogs-Metadata/1.0",
         },
