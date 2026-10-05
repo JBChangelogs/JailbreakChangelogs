@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { YouTubeEmbed } from "@next/third-parties/google";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { demandOrder, trendOrder } from "@/utils/trading/values";
 import { FilterSort } from "@/types";
 import { trendDescriptions } from "@/utils/trading/tradingDefinitions";
@@ -183,31 +183,26 @@ function TradingGuides({
       </button>
 
       {isExpanded && (
-        <div className="mt-4 flex flex-col gap-4">
-          {/* Top Section: Notes, Demand, and Video */}
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start xl:grid-cols-[1fr_320px]">
-            <div className="min-w-0">
-              <h3 className="text-primary-text mb-2 text-base font-semibold">
+        <Tabs defaultValue="demand" className="mt-4">
+          <div className="w-full overflow-x-auto">
+            <TabsList fullWidth className="w-full min-w-0">
+              <TabsTrigger value="demand" fullWidth>
+                Demand Levels
+              </TabsTrigger>
+              <TabsTrigger value="trends" fullWidth>
+                Trend Levels
+              </TabsTrigger>
+              <TabsTrigger value="terms" fullWidth>
+                Trading Terms
+              </TabsTrigger>
+              <TabsTrigger value="notes" fullWidth>
                 Trader Notes
-              </h3>
-              <ul className="text-secondary-text mb-4 list-inside list-disc space-y-1 text-sm">
-                <li>
-                  This is NOT an official list, it is 100% community based
-                </li>
-                <li>
-                  Some values may be outdated but we do our best to make sure
-                  it&apos;s accurate as possible
-                </li>
-                <li>
-                  Please don&apos;t 100% rely on the value list, use your own
-                  judgment as well
-                </li>
-                <li>
-                  If an item&apos;s duped value is marked as &quot;N/A&quot;, it
-                  means the duped value is the same as the clean value
-                </li>
-              </ul>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
+          <TabsContent value="demand" className="mt-4">
+            <div className="min-w-0">
               <h3 className="text-primary-text mb-2 text-base font-semibold">
                 Demand Levels Guide
               </h3>
@@ -242,85 +237,84 @@ function TradingGuides({
                 highest. Items with higher demand are generally easier to trade
                 and may have better values.
               </p>
-            </div>
-
-            {/* Video positioned at top right */}
-            <div className="flex flex-col items-center lg:items-end">
-              <div className="border-border-card bg-tertiary-bg w-full max-w-80 overflow-hidden rounded-xl border shadow-lg">
-                <YouTubeEmbed
-                  videoid="Yn38fUrV7zo"
-                  height={180}
-                  params="controls=0&rel=0"
-                />
-              </div>
-              <p className="text-secondary-text mt-1 w-full max-w-80 text-center text-[10px] italic lg:text-right">
-                Learn how to access the Trading Hub
+              <p className="text-secondary-text mt-3 text-xs italic">
+                This is NOT an official list, it is 100% community based, and
+                some values may be outdated.
               </p>
             </div>
-          </div>
+          </TabsContent>
 
-          {/* Detailed references stay available without filling the page. */}
-          <div className="grid gap-2">
-            <details className="border-border-card bg-tertiary-bg rounded-lg border px-4 py-3">
-              <summary className="text-primary-text cursor-pointer text-sm font-semibold">
-                Trend Levels Guide
-              </summary>
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {trendOrder.map((trend) => (
-                  <button
-                    key={trend}
-                    onClick={() => handleTrendClick(trend)}
-                    className={`bg-secondary-bg flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-2 text-left transition-all hover:bg-(--hover-bg) focus:outline-none ${
-                      selectedFilterSorts.includes(
-                        getTrendValue(trend) as FilterSort,
-                      )
-                        ? "ring-2"
-                        : ""
-                    }`}
-                    style={
-                      {
-                        borderColor: getTrendHexColor(trend),
-                        "--tw-ring-color": getTrendHexColor(trend),
-                        "--hover-bg": `${getTrendHexColor(trend)}1A`,
-                      } as React.CSSProperties
-                    }
+          <TabsContent value="trends" className="mt-4">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {trendOrder.map((trend) => (
+                <button
+                  key={trend}
+                  onClick={() => handleTrendClick(trend)}
+                  className={`bg-secondary-bg flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-2 text-left transition-all hover:bg-(--hover-bg) focus:outline-none ${
+                    selectedFilterSorts.includes(
+                      getTrendValue(trend) as FilterSort,
+                    )
+                      ? "ring-2"
+                      : ""
+                  }`}
+                  style={
+                    {
+                      borderColor: getTrendHexColor(trend),
+                      "--tw-ring-color": getTrendHexColor(trend),
+                      "--hover-bg": `${getTrendHexColor(trend)}1A`,
+                    } as React.CSSProperties
+                  }
+                >
+                  <span
+                    className="rounded px-2 py-0.5 text-xs font-bold tracking-wider text-white uppercase"
+                    style={{ backgroundColor: getTrendHexColor(trend) }}
                   >
-                    <span
-                      className="rounded px-2 py-0.5 text-xs font-bold tracking-wider text-white uppercase"
-                      style={{ backgroundColor: getTrendHexColor(trend) }}
-                    >
-                      {trend}
+                    {trend}
+                  </span>
+                  <p className="text-secondary-text text-xs leading-snug">
+                    {trendDescriptions[trend]}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="terms" className="mt-4">
+            <div className="max-h-60 overflow-y-auto">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-2 md:grid-cols-2 xl:grid-cols-3">
+                {tradingTerms.map((item) => (
+                  <div
+                    key={item.term}
+                    className="border-border-secondary border-b pb-2 last:border-0 md:border-0 md:pb-0"
+                  >
+                    <span className="text-link font-bold">{item.term}: </span>
+                    <span className="text-secondary-text text-sm">
+                      {item.description}
                     </span>
-                    <p className="text-secondary-text text-xs leading-snug">
-                      {trendDescriptions[trend]}
-                    </p>
-                  </button>
+                  </div>
                 ))}
               </div>
-            </details>
+            </div>
+          </TabsContent>
 
-            <details className="border-border-card bg-tertiary-bg rounded-lg border px-4 py-3">
-              <summary className="text-primary-text cursor-pointer text-sm font-semibold">
-                Common Trading Terms
-              </summary>
-              <div className="mt-3 max-h-60 overflow-y-auto">
-                <div className="grid grid-cols-1 gap-x-6 gap-y-2 md:grid-cols-2 xl:grid-cols-3">
-                  {tradingTerms.map((item) => (
-                    <div
-                      key={item.term}
-                      className="border-border-secondary border-b pb-2 last:border-0 md:border-0 md:pb-0"
-                    >
-                      <span className="text-link font-bold">{item.term}: </span>
-                      <span className="text-secondary-text text-sm">
-                        {item.description}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </details>
-          </div>
-        </div>
+          <TabsContent value="notes" className="mt-4">
+            <ul className="text-secondary-text list-inside list-disc space-y-1 text-sm">
+              <li>This is NOT an official list, it is 100% community based</li>
+              <li>
+                Some values may be outdated but we do our best to make sure
+                it&apos;s accurate as possible
+              </li>
+              <li>
+                Please don&apos;t 100% rely on the value list, use your own
+                judgment as well
+              </li>
+              <li>
+                If an item&apos;s duped value is marked as &quot;N/A&quot;, it
+                means the duped value is the same as the clean value
+              </li>
+            </ul>
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
