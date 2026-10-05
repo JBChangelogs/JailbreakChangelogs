@@ -2,7 +2,7 @@
   "name": "jailbreakchangelogs",
   "private": true,
   "type": "module",
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.4.2",
   "scripts": {
     "dev": "bun run generate:icons && next dev -p 5500",
     "build": "bun run generate:icons && next build",
