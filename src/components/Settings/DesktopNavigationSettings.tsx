@@ -35,6 +35,8 @@ export default function DesktopNavigationSettings() {
     "sidebar",
   );
   const [manualPreview, setManualPreview] = useState(false);
+  const [navigationMenuOpen, setNavigationMenuOpen] = useState(false);
+  const canSwitchNavigation = useMediaQuery("(min-width: 1536px)");
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   useEffect(() => {
@@ -70,16 +72,30 @@ export default function DesktopNavigationSettings() {
               : " Saved on this browser."}
           </p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <DropdownMenu
+          open={canSwitchNavigation && navigationMenuOpen}
+          onOpenChange={(open) =>
+            setNavigationMenuOpen(canSwitchNavigation && open)
+          }
+        >
+          <DropdownMenuTrigger asChild disabled={!canSwitchNavigation}>
             <button
               type="button"
+              disabled={!canSwitchNavigation}
               aria-labelledby={`${id}-label ${id}-value`}
-              aria-describedby={`${id}-description`}
-              className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus focus-visible:ring-link flex min-h-11 w-full items-center justify-between gap-4 rounded-lg border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none sm:w-48 sm:shrink-0"
+              aria-describedby={
+                canSwitchNavigation
+                  ? `${id}-description`
+                  : `${id}-description ${id}-availability`
+              }
+              className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus focus-visible:ring-link flex min-h-11 w-full items-center justify-between gap-4 rounded-lg border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 sm:w-48 sm:shrink-0"
             >
               <span id={`${id}-value`}>
-                {mode === "sidebar" ? "Sidebar" : "Top bar"}
+                {!canSwitchNavigation
+                  ? "Available on larger screens"
+                  : mode === "sidebar"
+                    ? "Sidebar"
+                    : "Top bar"}
               </span>
               <Icon
                 icon="heroicons:chevron-down"
@@ -94,7 +110,10 @@ export default function DesktopNavigationSettings() {
             <DropdownMenuRadioGroup
               value={mode}
               onValueChange={(value) => {
-                if (value === "sidebar" || value === "top-bar")
+                if (
+                  canSwitchNavigation &&
+                  (value === "sidebar" || value === "top-bar")
+                )
                   setDesktopNavigation(value);
               }}
             >
@@ -107,6 +126,20 @@ export default function DesktopNavigationSettings() {
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+      <div
+        id={`${id}-availability`}
+        className="bg-button-info/10 border-button-info flex items-start gap-4 rounded-lg border p-4 shadow-sm 2xl:hidden"
+      >
+        <div>
+          <p className="text-primary-text text-base font-bold">
+            Larger screen required
+          </p>
+          <p className="text-secondary-text mt-1 text-sm">
+            Navigation layout options are available on larger screens. You can
+            view the examples below.
+          </p>
+        </div>
       </div>
       <figure className="sm:ml-auto sm:w-48">
         <Tooltip>

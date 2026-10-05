@@ -509,7 +509,7 @@ export const NavbarModern = ({
               <Link
                 href="/settings?highlight=display#display"
                 aria-label="Change navigation layout"
-                className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link flex size-10 items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link hidden size-10 items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none 2xl:flex"
               >
                 <svg
                   viewBox="0 0 24 24"
