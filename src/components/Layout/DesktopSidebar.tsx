@@ -99,7 +99,15 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
                       }
                       className={linkClassName(activeHref === item.href)}
                     >
-                      <Icon icon={item.icon} className="h-5 w-5 shrink-0" />
+                      <Icon
+                        icon={item.icon}
+                        className={cn(
+                          "h-5 w-5 shrink-0",
+                          activeHref === item.href
+                            ? "text-primary-text"
+                            : "text-secondary-text",
+                        )}
+                      />
                       <span className={labelClassName}>{item.title}</span>
                       {!collapsed && item.badge === "live" && (
                         <span className="bg-button-info/20 text-link shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase">

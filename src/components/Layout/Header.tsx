@@ -93,7 +93,10 @@ const MobileNavSection = ({
         <div className="flex items-center gap-3">
           <Icon
             icon={sectionIcon}
-            className="text-primary-text h-5 w-5 shrink-0"
+            className={cn(
+              "h-5 w-5 shrink-0",
+              current ? "text-primary-text" : "text-secondary-text",
+            )}
             inline={true}
           />
           <span className="text-primary-text text-sm font-semibold">
@@ -102,7 +105,7 @@ const MobileNavSection = ({
         </div>
         <Icon
           icon="mdi:chevron-down"
-          className="text-primary-text/70 h-4 w-4 shrink-0 transition-transform duration-300 ease-in-out group-aria-expanded:rotate-180 motion-reduce:transition-none"
+          className="text-secondary-text h-4 w-4 shrink-0 transition-transform duration-300 ease-in-out group-aria-expanded:rotate-180 motion-reduce:transition-none"
           inline={true}
         />
       </button>
@@ -149,7 +152,10 @@ const MobileNavItem = ({
   >
     <Icon
       icon={icon}
-      className="text-primary-text h-5 w-5 shrink-0"
+      className={cn(
+        "h-5 w-5 shrink-0",
+        current ? "text-primary-text" : "text-secondary-text",
+      )}
       inline={true}
     />
     <span className="text-primary-text min-w-0 flex-1 truncate text-sm font-semibold">
@@ -234,7 +240,7 @@ const MobileDrawer = memo(function MobileDrawer({
                 className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <div className="flex h-5 w-5 shrink-0 items-center justify-center">
-                  <RobloxIcon className="text-primary-text h-5 w-5" />
+                  <RobloxIcon className="text-secondary-text h-5 w-5" />
                 </div>
                 <span className="text-primary-text text-sm font-semibold">
                   Connect Roblox
@@ -249,7 +255,7 @@ const MobileDrawer = memo(function MobileDrawer({
               <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                 <Icon
                   icon="material-symbols:settings-rounded"
-                  className="text-primary-text h-5 w-5"
+                  className="text-secondary-text h-5 w-5"
                   inline={true}
                 />
               </div>
@@ -260,13 +266,16 @@ const MobileDrawer = memo(function MobileDrawer({
             {(canOverrideExperiments(userData) || isOwner) && (
               <details className="group/tools">
                 <summary className="text-primary-text hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
-                  <Icon icon="mdi:flask-outline" className="h-5 w-5 shrink-0" />
+                  <Icon
+                    icon="mdi:flask-outline"
+                    className="text-secondary-text h-5 w-5 shrink-0"
+                  />
                   <span className="flex-1">
                     {isOwner ? "Owner tools" : "Tester tools"}
                   </span>
                   <Icon
                     icon="mdi:chevron-down"
-                    className="text-primary-text/70 h-4 w-4 shrink-0 transition-transform duration-300 group-open/tools:rotate-180 motion-reduce:transition-none"
+                    className="text-secondary-text h-4 w-4 shrink-0 transition-transform duration-300 group-open/tools:rotate-180 motion-reduce:transition-none"
                   />
                 </summary>
                 <div className="space-y-0.5 pl-3">
@@ -279,7 +288,7 @@ const MobileDrawer = memo(function MobileDrawer({
                       <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                         <Icon
                           icon="mdi:flask-outline"
-                          className="text-primary-text h-5 w-5"
+                          className="text-secondary-text h-5 w-5"
                           inline={true}
                         />
                       </div>
@@ -330,7 +339,7 @@ const MobileDrawer = memo(function MobileDrawer({
                         <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                           <Icon
                             icon="heroicons:link"
-                            className="text-primary-text h-5 w-5"
+                            className="text-secondary-text h-5 w-5"
                             inline={true}
                           />
                         </div>
@@ -351,7 +360,7 @@ const MobileDrawer = memo(function MobileDrawer({
               <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                 <Icon
                   icon="heroicons:flag"
-                  className="text-primary-text h-5 w-5"
+                  className="text-secondary-text h-5 w-5"
                   inline={true}
                 />
               </div>
@@ -387,7 +396,7 @@ const MobileDrawer = memo(function MobileDrawer({
           >
             <Icon
               icon="material-symbols:settings-rounded"
-              className="h-5 w-5"
+              className="text-secondary-text h-5 w-5"
             />
             Settings
           </Link>
