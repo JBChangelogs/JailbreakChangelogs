@@ -14,37 +14,17 @@ import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { toast } from "sonner";
-import { UserSettingsV2 } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import {
+  profileSocialQueryOptions,
+  type ProfileSocialUser as User,
+  type ProfileFollower as Follower,
+  type ProfileFollowing as Following,
+} from "@/utils/api/profileSocialQueries";
 
 const log = createLogger("UI");
-
-interface Follower {
-  user_id: string;
-  follower_id: string;
-  created_at: string;
-  user: User;
-}
-
-interface Following {
-  user_id: string;
-  following_id: string;
-  created_at: string;
-}
-
-interface User {
-  id: string;
-  username: string;
-  avatar: string;
-  global_name: string;
-  usernumber: number;
-  accent_color: string;
-  custom_avatar?: string;
-  settings_v2?: UserSettingsV2;
-  premiumtype?: number;
-}
 
 interface FollowersModalProps {
   isOpen: boolean;
@@ -117,46 +97,12 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
           return;
         }
 
-        const { status, ok, data } = await queryClient.fetchQuery({
-          queryKey: ["followers", userId],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              `/v2/users/${encodeURIComponent(userId)}/followers`,
-            );
-            const response = await fetch(url, {
-              headers,
-              cache: "no-store",
-              signal,
-            });
-            return {
-              status: response.status,
-              ok: response.ok,
-              data: (await response.json().catch(() => null)) as unknown,
-            };
-          },
-          staleTime: 30_000,
-          gcTime: 5 * 60_000,
-          retry: false,
-        });
+        const data = await queryClient.fetchQuery(
+          profileSocialQueryOptions("followers", userId, currentUserId),
+        );
         if (ignore) return;
 
-        if (status === 404) {
-          setFollowers([]);
-          setFollowerDetails({});
-          onCloseRef.current();
-          return;
-        }
-
-        if (!ok) {
-          log.error("fetch followers failed", {
-            status,
-            body: data,
-          });
-          throw new Error("Failed to fetch followers");
-        }
-
-        if (ignore) return;
+        onCountUpdateRef.current?.(data.length);
 
         if (!Array.isArray(data) || data.length === 0) {
           setFollowers([]);
@@ -166,11 +112,6 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         }
 
         setFollowers(data);
-
-        // Update the follower count in the parent component with fresh data
-        if (onCountUpdateRef.current) {
-          onCountUpdateRef.current(data.length);
-        }
 
         // User data is now included in the API response, so we can use it directly
         const detailsMap: Record<string, User> = {};
@@ -202,7 +143,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       }
     };
 
-    // Fetch followers every time the modal opens or userId changes
+    // Reuse fresh list data when the modal opens.
     if (isOpen) {
       fetchFollowers();
     }
@@ -210,7 +151,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     return () => {
       ignore = true;
     };
-  }, [isOpen, userId, queryClient]);
+  }, [isOpen, userId, currentUserId, queryClient]);
 
   useEffect(() => {
     let ignore = false;
@@ -219,26 +160,9 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       if (!isOpen || !currentUserId) return;
 
       try {
-        // Call this every time the modal opens to get fresh following status
-        const followingData = await queryClient.fetchQuery({
-          queryKey: ["following", currentUserId],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              `/v2/users/${encodeURIComponent(currentUserId)}/following`,
-            );
-            const response = await fetch(url, {
-              headers,
-              cache: "no-store",
-              signal,
-            });
-            if (!response.ok) return [];
-            return response.json();
-          },
-          staleTime: 0,
-          gcTime: 5 * 60_000,
-          retry: false,
-        });
+        const followingData = await queryClient.fetchQuery(
+          profileSocialQueryOptions("following", currentUserId, currentUserId),
+        );
         if (ignore) return;
         if (!Array.isArray(followingData)) return;
         const statusMap = followingData.reduce(
@@ -257,7 +181,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       }
     };
 
-    // Fetch following status every time the modal opens
+    // Reuse the profile follow-status query.
     if (isOpen) {
       fetchFollowingStatus();
     }
@@ -307,6 +231,9 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       }));
       void queryClient.invalidateQueries({
         queryKey: ["following", currentUserId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["followers", followerId],
       });
       onFollowChange?.(isCurrentlyFollowing ? "remove" : "add");
       toast.success(

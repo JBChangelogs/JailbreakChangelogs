@@ -1,3 +1,5 @@
+import type { QueryClient } from "@tanstack/react-query";
+import { profileSocialQueryOptions } from "@/utils/api/profileSocialQueries";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
@@ -13,47 +15,30 @@ export interface ProfileDataResult {
 
 export async function fetchProfileData(
   userId: string,
+  queryClient: QueryClient,
+  viewerId: string | null,
 ): Promise<ProfileDataResult> {
   try {
     // Fetch additional data in parallel
-    const [followersResponse, followingResponse, bioResponse] =
-      await Promise.all([
-        fetchWithRetry(
-          `${PUBLIC_API_URL}/v2/users/${userId}/followers`,
-          undefined,
-          {
-            maxRetries: 2,
-            initialDelayMs: 700,
-            timeoutMs: 10000,
-          },
-        ).catch(() => null),
-        fetchWithRetry(
-          `${PUBLIC_API_URL}/v2/users/${userId}/following`,
-          undefined,
-          {
-            maxRetries: 2,
-            initialDelayMs: 700,
-            timeoutMs: 10000,
-          },
-        ).catch(() => null),
-        fetchWithRetry(
-          `${PUBLIC_API_URL}/v2/users/${userId}/description`,
-          undefined,
-          {
-            maxRetries: 2,
-            initialDelayMs: 700,
-            timeoutMs: 10000,
-          },
-        ).catch(() => null),
-      ]);
+    const [followersData, followingData, bioResponse] = await Promise.all([
+      queryClient
+        .fetchQuery(profileSocialQueryOptions("followers", userId, viewerId))
+        .catch(() => []),
+      queryClient
+        .fetchQuery(profileSocialQueryOptions("following", userId, viewerId))
+        .catch(() => []),
+      fetchWithRetry(
+        `${PUBLIC_API_URL}/v2/users/${userId}/description`,
+        undefined,
+        {
+          maxRetries: 2,
+          initialDelayMs: 700,
+          timeoutMs: 10000,
+        },
+      ).catch(() => null),
+    ]);
 
     // Process responses
-    const followersData = followersResponse?.ok
-      ? await followersResponse.json()
-      : [];
-    const followingData = followingResponse?.ok
-      ? await followingResponse.json()
-      : [];
     const bioData = bioResponse?.ok ? await bioResponse.json() : null;
     return {
       followerCount: Array.isArray(followersData) ? followersData.length : 0,

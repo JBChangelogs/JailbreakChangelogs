@@ -17,28 +17,13 @@ import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { toast } from "sonner";
-import { UserSettingsV2 } from "@/types/auth";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-
-interface Following {
-  user_id: string;
-  following_id: string;
-  created_at: string;
-  user: User;
-}
-
-interface User {
-  id: string;
-  username: string;
-  avatar: string;
-  global_name: string;
-  usernumber: number;
-  accent_color: string;
-  custom_avatar?: string;
-  settings_v2?: UserSettingsV2;
-  premiumtype?: number;
-}
+import {
+  profileSocialQueryOptions,
+  type ProfileSocialUser as User,
+  type ProfileFollowing as Following,
+} from "@/utils/api/profileSocialQueries";
 
 interface FollowingModalProps {
   isOpen: boolean;
@@ -111,35 +96,12 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
           return;
         }
 
-        const data = await queryClient.fetchQuery({
-          queryKey: ["following", userId],
-          queryFn: async ({ signal }): Promise<Following[]> => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              `/v2/users/${encodeURIComponent(userId)}/following`,
-            );
-            const response = await fetch(url, {
-              headers,
-              cache: "no-store",
-              signal,
-            });
-            if (response.status === 404) return [];
-            if (!response.ok) {
-              const body = await response.json().catch(() => ({}));
-              log.error("fetch following failed", {
-                status: response.status,
-                body,
-              });
-              throw new Error("Failed to fetch following");
-            }
-            const result = await response.json();
-            return Array.isArray(result) ? result : [];
-          },
-          staleTime: 0,
-          gcTime: 5 * 60_000,
-          retry: false,
-        });
+        const data = await queryClient.fetchQuery(
+          profileSocialQueryOptions("following", userId, currentUserId),
+        );
         if (ignore) return;
+
+        onCountUpdateRef.current?.(data.length);
 
         if (data.length === 0) {
           setFollowing([]);
@@ -150,13 +112,22 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
 
         setFollowing(data);
 
-        // Update the following count in the parent component with fresh data
-        if (onCountUpdateRef.current) {
-          onCountUpdateRef.current(data.length);
-        }
-
         // Initialize following status for all users in the list
-        const initialFollowingStatus = data.reduce(
+        const viewerFollowing = !currentUserId
+          ? []
+          : currentUserId === userId
+            ? data
+            : await queryClient
+                .fetchQuery(
+                  profileSocialQueryOptions(
+                    "following",
+                    currentUserId,
+                    currentUserId,
+                  ),
+                )
+                .catch(() => []);
+        if (ignore) return;
+        const initialFollowingStatus = viewerFollowing.reduce(
           (acc, followingItem) => {
             if (followingItem.following_id) {
               acc[followingItem.following_id] = true;
@@ -197,7 +168,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
       }
     };
 
-    // Fetch following every time the modal opens or userId changes
+    // Reuse fresh list data when the modal opens.
     if (isOpen) {
       fetchFollowing();
     }
@@ -205,7 +176,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
     return () => {
       ignore = true;
     };
-  }, [isOpen, userId, queryClient]);
+  }, [isOpen, userId, currentUserId, queryClient]);
 
   const handleFollowToggle = async (followingId: string) => {
     if (!currentUserId || loadingFollow[followingId]) return;
@@ -247,6 +218,9 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
       }));
       void queryClient.invalidateQueries({
         queryKey: ["following", currentUserId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["followers", followingId],
       });
       onFollowChange?.(!isCurrentlyFollowing);
       toast.success(

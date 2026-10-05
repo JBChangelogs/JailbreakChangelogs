@@ -17,7 +17,11 @@ export default function UserProfileLoader({ userId }: { userId: string }) {
     queryFn: async () => {
       const user = await fetchUserById(userId, PUBLIC_API_URL);
       if (!user) throw new Error("Failed to load user data");
-      const profileData = await fetchProfileData(userId);
+      const profileData = await fetchProfileData(
+        userId,
+        queryClient,
+        currentUser?.id ?? null,
+      );
       return { user, ...profileData };
     },
     staleTime: 0,

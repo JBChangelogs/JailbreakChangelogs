@@ -53,6 +53,7 @@ import ProfileTabs from "@/components/Profile/ProfileTabs";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
+import { profileSocialQueryOptions } from "@/utils/api/profileSocialQueries";
 import type { ProfileDataResult } from "@/services/profileDataService";
 const FollowersModal = dynamic(
   () => import("@/components/Users/FollowersModal"),
@@ -361,21 +362,12 @@ export default function UserProfileClient({
   };
 
   const followingQuery = useQuery({
-    queryKey: ["following", currentUserId],
+    ...profileSocialQueryOptions(
+      "following",
+      currentUserId ?? "",
+      currentUserId,
+    ),
     enabled: Boolean(currentUserId && user),
-    queryFn: async ({ signal }): Promise<FollowingData[]> => {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL,
-        `/v2/users/${currentUserId}/following`,
-      );
-      const response = await fetch(url, { signal, headers });
-      if (!response.ok) throw new Error("Failed to load following status");
-      const data = await response.json();
-      return Array.isArray(data) ? data : [];
-    },
-    staleTime: 0,
-    gcTime: 5 * 60_000,
-    retry: false,
   });
   const isFollowing =
     followingQuery.data?.some(
@@ -833,7 +825,8 @@ export default function UserProfileClient({
       }
 
       queryClient.setQueryData<FollowingData[]>(
-        ["following", currentUserId],
+        profileSocialQueryOptions("following", currentUserId, currentUserId)
+          .queryKey,
         (data = []) =>
           isFollowing
             ? data.filter((entry) => entry.following_id !== userId)
@@ -843,6 +836,7 @@ export default function UserProfileClient({
                   user_id: currentUserId,
                   following_id: userId,
                   created_at: new Date().toISOString(),
+                  ...(user ? { user } : {}),
                 },
               ],
       );
