@@ -447,7 +447,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                 <div
                   className={`${
                     userData[comment.user_id]?.premiumtype === 3
-                      ? "rounded-sm"
+                      ? "rounded-[25%]"
                       : "rounded-full"
                   }`}
                 >
@@ -1133,7 +1133,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                               <div
                                 className={
                                   replyUser?.premiumtype === 3
-                                    ? "rounded-sm"
+                                    ? "rounded-[25%]"
                                     : "rounded-full"
                                 }
                               >

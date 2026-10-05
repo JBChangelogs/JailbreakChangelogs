@@ -107,7 +107,7 @@ export default function ContributorsClient({
 
   const renderUser = (user: UserWithFlags) => {
     const avatarContainerShapeClass =
-      user.premiumtype === 3 ? "rounded-sm" : "rounded-full";
+      user.premiumtype === 3 ? "rounded-[25%]" : "rounded-full";
 
     return (
       <div

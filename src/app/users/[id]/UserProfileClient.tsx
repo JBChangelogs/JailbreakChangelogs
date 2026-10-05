@@ -1254,7 +1254,7 @@ export default function UserProfileClient({
                           className={cn(
                             "absolute inset-0 z-30 hidden cursor-pointer flex-col items-center justify-center gap-1 bg-black/55 px-2 text-center text-white opacity-0 backdrop-blur-[1px] transition-opacity group-hover/avatar:opacity-100 focus-visible:opacity-100 md:flex",
                             user.premiumtype === 3
-                              ? "rounded-sm"
+                              ? "rounded-[25%]"
                               : "rounded-full",
                           )}
                         >

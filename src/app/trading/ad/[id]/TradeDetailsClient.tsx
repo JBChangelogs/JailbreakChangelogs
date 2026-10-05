@@ -1022,7 +1022,7 @@ export default function TradeDetailsClient({
                 <div
                   className={`border-border-card bg-quaternary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
                     trade.user?.premiumtype === 3
-                      ? "rounded-sm"
+                      ? "rounded-[25%]"
                       : "rounded-full"
                   }`}
                 >
@@ -1491,7 +1491,7 @@ export default function TradeDetailsClient({
                                         <div
                                           className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
                                             offerUser?.premiumtype === 3
-                                              ? "rounded-sm"
+                                              ? "rounded-[25%]"
                                               : "rounded-full"
                                           }`}
                                         >

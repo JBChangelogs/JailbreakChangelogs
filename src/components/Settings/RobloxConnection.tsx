@@ -130,7 +130,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
                 alt={userData.roblox_username}
                 width={48}
                 height={48}
-                className={`bg-quaternary-bg ${userData.premiumtype === 3 ? "rounded-sm" : "rounded-full"}`}
+                className={`bg-quaternary-bg ${userData.premiumtype === 3 ? "rounded-[25%]" : "rounded-full"}`}
               />
             )}
             <div className="min-w-0 flex-1">

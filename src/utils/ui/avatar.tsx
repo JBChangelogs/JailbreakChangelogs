@@ -178,7 +178,7 @@ const UserAvatarImpl = ({
     finalShape === "circle"
       ? "rounded-full"
       : finalShape === "square" && premiumType === 3
-        ? "rounded-sm"
+        ? "rounded-[25%]"
         : finalShape === "square"
           ? "rounded-lg"
           : "rounded-full"

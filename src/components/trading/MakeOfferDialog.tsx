@@ -601,7 +601,11 @@ export function MakeOfferDialog({
       >
         <div className="border-border-card flex shrink-0 items-start justify-between gap-3 px-6 pt-6 pb-4">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="border-border-card bg-primary-bg relative mt-0.5 h-10 w-10 shrink-0 overflow-hidden rounded-full border">
+            <div
+              className={`border-border-card bg-primary-bg relative mt-0.5 h-10 w-10 shrink-0 overflow-hidden border ${
+                trade.user?.premiumtype === 3 ? "rounded-[25%]" : "rounded-full"
+              }`}
+            >
               {avatarSrc ? (
                 <Image
                   src={avatarSrc}

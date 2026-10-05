@@ -348,7 +348,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                   ? "bg-quaternary-bg"
                   : "bg-primary-bg"
               } ${
-                trade.user?.premiumtype === 3 ? "rounded-sm" : "rounded-full"
+                trade.user?.premiumtype === 3 ? "rounded-[25%]" : "rounded-full"
               }`}
             >
               {avatarSrc ? (

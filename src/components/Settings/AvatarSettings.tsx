@@ -57,7 +57,7 @@ export const AvatarSettings = ({
             <div
               className={cn(
                 "border-border-card bg-tertiary-bg relative size-16 shrink-0 overflow-hidden border",
-                usesSquareAvatar ? "rounded-sm" : "rounded-full",
+                usesSquareAvatar ? "rounded-[25%]" : "rounded-full",
               )}
             >
               {customAvatarUrl ? (
@@ -66,7 +66,7 @@ export const AvatarSettings = ({
                   alt="Your saved custom avatar"
                   compact
                   previewRadius={
-                    usesSquareAvatar ? "rounded-sm" : "rounded-full"
+                    usesSquareAvatar ? "rounded-[25%]" : "rounded-full"
                   }
                   className="absolute inset-0"
                 >
