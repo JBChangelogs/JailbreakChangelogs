@@ -2,7 +2,7 @@
 
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useRailAdSize } from "@/hooks/useRailAdSize";
 import type { NitroAdInstance } from "@/utils/analytics/nitroAds";
 import {
   registerAdInstance,
@@ -48,10 +48,9 @@ export default function NitroLeftGutterAd({
       ? { right: 10 }
       : { left: "calc(var(--desktop-sidebar-width, 0px) + 10px)" };
   const reportPosition = side === "right" ? "bottom-right" : "bottom-left";
-  const isSmallViewport = useMediaQuery(
-    "(min-width: 1900px) and (max-width: 2149px)",
-  );
-  const isWideViewport = useMediaQuery("(min-width: 2150px)");
+  const railSize = useRailAdSize();
+  const isSmallViewport = railSize === "small";
+  const isWideViewport = railSize === "wide";
   const smallCreatedRef = useRef(false);
   const wideCreatedRef = useRef(false);
 
@@ -191,8 +190,10 @@ export default function NitroLeftGutterAd({
     <>
       <div
         data-rail-side={side}
+        data-rail-size={railSize}
+        hidden={!isSmallViewport}
         style={positionStyle}
-        className="fixed top-1/2 z-2147483644 hidden -translate-y-1/2 [@media(min-width:1900px)]:block [@media(min-width:2150px)]:hidden"
+        className="fixed top-1/2 z-2147483644 -translate-y-1/2"
       >
         <div
           id={adIdSmall}
@@ -201,8 +202,10 @@ export default function NitroLeftGutterAd({
       </div>
       <div
         data-rail-side={side}
+        data-rail-size={railSize}
+        hidden={!isWideViewport}
         style={positionStyle}
-        className="fixed top-1/2 z-2147483644 hidden -translate-y-1/2 [@media(min-width:2150px)]:block"
+        className="fixed top-1/2 z-2147483644 -translate-y-1/2"
       >
         <div
           id={adIdWide}

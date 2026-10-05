@@ -1065,23 +1065,23 @@ img.twemoji {
 }
 
 /* Reserve space for fixed rail ads only on pages that render them. */
-@media (min-width: 1900px) {
-  .site-layout > main {
-    --rail-gutter-width: 180px;
-  }
-
-  .site-layout > main:has([data-rail-side="left"]) {
-    padding-left: var(--rail-gutter-width);
-  }
-
-  .site-layout > main:has([data-rail-side="right"]) {
-    padding-right: var(--rail-gutter-width);
-  }
+.site-layout > main {
+  --rail-gutter-width: 0px;
 }
 
-@media (min-width: 2150px) {
-  .site-layout > main {
-    /* Wide placements also accept 320px creatives. */
-    --rail-gutter-width: 340px;
-  }
+.site-layout > main:has([data-rail-size="small"]) {
+  --rail-gutter-width: 180px;
+}
+
+.site-layout > main:has([data-rail-size="wide"]) {
+  /* Wide placements also accept 320px creatives. */
+  --rail-gutter-width: 340px;
+}
+
+.site-layout > main:has([data-rail-side="left"]) {
+  padding-left: var(--rail-gutter-width);
+}
+
+.site-layout > main:has([data-rail-side="right"]) {
+  padding-right: var(--rail-gutter-width);
 }

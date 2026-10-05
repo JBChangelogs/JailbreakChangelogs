@@ -52,6 +52,10 @@ function mount(filename: string) {
       subscribeDesktopNavigation: () => () => {},
     },
     "next/navigation": { usePathname: () => pathname },
+    "@/hooks/useRailAdSize": {
+      useRailAdSize: () =>
+        viewport === "small" || viewport === "wide" ? viewport : "none",
+    },
     "@/hooks/useMediaQuery": {
       useMediaQuery: (query: string) =>
         query.includes("min-height")

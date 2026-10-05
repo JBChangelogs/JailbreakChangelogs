@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useRailAdSize } from "@/hooks/useRailAdSize";
 import { useSafeAuthContext } from "@/contexts/AuthContext";
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import {
@@ -23,7 +24,7 @@ const CONFIG = {
     ["320", "100"],
     ["320", "50"],
   ],
-  mediaQuery: "(min-width: 1536px) and (width < 1900px)",
+  mediaQuery: "(min-width: 1536px)",
   renderVisibleOnly: true,
   report: {
     enabled: true,
@@ -47,11 +48,13 @@ export default function NitroRailFallbackAd({ adId }: { adId: string }) {
     () => "sidebar",
   );
   const isFallbackViewport = useMediaQuery(CONFIG.mediaQuery);
+  const railSize = useRailAdSize();
   const eligible =
     !auth?.isLoading &&
     !canHideAdsForPremiumType(auth?.user?.premiumtype) &&
     navigation === "sidebar" &&
-    isFallbackViewport;
+    isFallbackViewport &&
+    railSize === "none";
 
   useEffect(() => {
     if (!eligible) return;
