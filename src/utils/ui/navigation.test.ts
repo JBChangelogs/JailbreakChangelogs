@@ -33,6 +33,8 @@ test("sidebar selects the most specific link in the destination's section", () =
     ["/seasons/contracts", "/seasons/contracts"],
     ["/seasons/will-i-make-it", "/seasons/will-i-make-it"],
     ["/items/suggestions/123", "/items/suggestions"],
+    ["/items/changelogs/91", "/items/changelogs"],
+    ["/servers", "/servers"],
     ["/trading/ad/123", "/trading"],
     ["/inventories/123", "/inventories"],
     ["/", null],

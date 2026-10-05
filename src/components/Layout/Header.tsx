@@ -27,7 +27,8 @@ import { Spinner } from "@/components/ui/Spinner";
 import { syncDesktopNavigationPreferences } from "@/utils/ui/desktopNavigation";
 import DesktopSidebar from "./DesktopSidebar";
 import { navigationSections } from "@/utils/ui/navigation-menu";
-import { getNavigationSection } from "@/utils/ui/navigation";
+import { getNavigationHref, getNavigationSection } from "@/utils/ui/navigation";
+import { cn } from "@/lib/utils";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -87,9 +88,9 @@ const MobileNavSection = ({
         onClick={onToggle}
         aria-expanded={open}
         aria-current={current ? "true" : undefined}
-        className="group hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link aria-[current=true]:border-primary-text aria-[current=true]:bg-tertiary-bg flex min-h-11 w-full items-center justify-between border-l-2 border-transparent py-2.5 pr-4 pl-3.5 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+        className="group hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link aria-[current=true]:bg-tertiary-bg flex min-h-11 w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <Icon
             icon={sectionIcon}
             className="text-primary-text h-5 w-5 shrink-0"
@@ -101,7 +102,7 @@ const MobileNavSection = ({
         </div>
         <Icon
           icon="mdi:chevron-down"
-          className="text-secondary-text h-4 w-4 shrink-0 transition-transform duration-300 ease-in-out group-aria-expanded:rotate-180 motion-reduce:transition-none"
+          className="text-primary-text/70 h-4 w-4 shrink-0 transition-transform duration-300 ease-in-out group-aria-expanded:rotate-180 motion-reduce:transition-none"
           inline={true}
         />
       </button>
@@ -112,7 +113,7 @@ const MobileNavSection = ({
         inert={!open}
       >
         <div>
-          <div className="pb-1">{children}</div>
+          <div className="space-y-0.5 pb-1">{children}</div>
         </div>
       </div>
     </div>
@@ -125,6 +126,7 @@ const MobileNavItem = ({
   label,
   badge,
   prefetch,
+  current,
   onClick,
 }: {
   href: string;
@@ -132,20 +134,25 @@ const MobileNavItem = ({
   label: string;
   badge?: string;
   prefetch?: boolean;
+  current?: "page" | "location";
   onClick?: () => void;
 }) => (
   <Link
     href={href}
     prefetch={prefetch}
     onClick={onClick}
-    className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 items-center gap-2.5 py-2 pr-3 pl-10 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+    aria-current={current}
+    className={cn(
+      "hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 items-center gap-3 rounded-lg py-2 pr-3 pl-10 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset",
+      current && "bg-button-info/10",
+    )}
   >
     <Icon
       icon={icon}
       className="text-primary-text h-5 w-5 shrink-0"
       inline={true}
     />
-    <span className="text-primary-text min-w-0 flex-1 truncate text-sm">
+    <span className="text-primary-text min-w-0 flex-1 truncate text-sm font-semibold">
       {label}
     </span>
     {badge && (
@@ -180,6 +187,8 @@ const MobileDrawer = memo(function MobileDrawer({
   onToggleWsConnection: () => void;
 }) {
   const { setLoginModal } = useAuthContext();
+  const pathname = usePathname();
+  const activeHref = getNavigationHref(pathname);
 
   return (
     <div className="flex h-full flex-col">
@@ -188,7 +197,7 @@ const MobileDrawer = memo(function MobileDrawer({
           <Link
             href={`/users/${userData?.id}`}
             onClick={onClose}
-            className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+            className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
           >
             <UserAvatar
               userId={userData.id}
@@ -221,12 +230,12 @@ const MobileDrawer = memo(function MobileDrawer({
                   onClose();
                   setLoginModal({ open: true, tab: "roblox" });
                 }}
-                className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                   <RobloxIcon className="text-primary-text h-5 w-5" />
                 </div>
-                <span className="text-primary-text text-sm font-medium">
+                <span className="text-primary-text text-sm font-semibold">
                   Connect Roblox
                 </span>
               </button>
@@ -234,7 +243,7 @@ const MobileDrawer = memo(function MobileDrawer({
             <Link
               href="/settings"
               onClick={onClose}
-              className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                 <Icon
@@ -243,7 +252,7 @@ const MobileDrawer = memo(function MobileDrawer({
                   inline={true}
                 />
               </div>
-              <span className="text-primary-text text-sm font-medium">
+              <span className="text-primary-text text-sm font-semibold">
                 Settings
               </span>
             </Link>
@@ -251,7 +260,7 @@ const MobileDrawer = memo(function MobileDrawer({
               <Link
                 href="/experiments"
                 onClick={onClose}
-                className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                   <Icon
@@ -260,7 +269,7 @@ const MobileDrawer = memo(function MobileDrawer({
                     inline={true}
                   />
                 </div>
-                <span className="text-primary-text text-sm font-medium">
+                <span className="text-primary-text text-sm font-semibold">
                   Experiments
                 </span>
               </Link>
@@ -281,7 +290,7 @@ const MobileDrawer = memo(function MobileDrawer({
                       ? "Disconnect realtime connection"
                       : "Connect realtime connection"
                   }
-                  className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                  className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                     {wsTogglePending ? (
@@ -292,7 +301,7 @@ const MobileDrawer = memo(function MobileDrawer({
                       />
                     )}
                   </div>
-                  <span className="text-primary-text min-w-0 flex-1 text-sm font-medium">
+                  <span className="text-primary-text min-w-0 flex-1 text-sm font-semibold">
                     Realtime connection
                   </span>
                 </button>
@@ -302,7 +311,7 @@ const MobileDrawer = memo(function MobileDrawer({
                     onClose();
                     setUtmModalOpen(true);
                   }}
-                  className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                  className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
                 >
                   <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                     <Icon
@@ -311,7 +320,7 @@ const MobileDrawer = memo(function MobileDrawer({
                       inline={true}
                     />
                   </div>
-                  <span className="text-primary-text text-sm font-medium">
+                  <span className="text-primary-text text-sm font-semibold">
                     Generate UTM Link
                   </span>
                 </button>
@@ -320,7 +329,7 @@ const MobileDrawer = memo(function MobileDrawer({
             <Link
               href="/reports"
               onClick={onClose}
-              className="hover:bg-tertiary-bg focus-visible:bg-tertiary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                 <Icon
@@ -329,14 +338,14 @@ const MobileDrawer = memo(function MobileDrawer({
                   inline={true}
                 />
               </div>
-              <span className="text-primary-text text-sm font-medium">
+              <span className="text-primary-text text-sm font-semibold">
                 My Reports
               </span>
             </Link>
             <button
               type="button"
               onClick={onLogout}
-              className="hover:bg-button-danger/10 focus-visible:bg-button-danger/10 focus-visible:ring-button-danger flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="hover:bg-button-danger/10 focus-visible:bg-button-danger/10 focus-visible:ring-button-danger flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               data-rybbit-event="Logout"
             >
               <div className="flex h-5 w-5 shrink-0 items-center justify-center">
@@ -346,18 +355,18 @@ const MobileDrawer = memo(function MobileDrawer({
                   inline={true}
                 />
               </div>
-              <span className="text-button-danger text-sm font-medium">
+              <span className="text-button-danger text-sm font-semibold">
                 Logout
               </span>
             </button>
           </div>
         </>
       ) : (
-        <div className="space-y-3 px-4 py-3">
+        <div className="space-y-2 p-2">
           <Link
             href="/settings"
             onClick={onClose}
-            className="text-primary-text hover:bg-tertiary-bg focus-visible:ring-link flex min-h-11 items-center gap-3 rounded-md px-3 text-sm focus-visible:ring-2 focus-visible:outline-none"
+            className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold focus-visible:ring-2 focus-visible:outline-none"
           >
             <Icon
               icon="material-symbols:settings-rounded"
@@ -366,6 +375,7 @@ const MobileDrawer = memo(function MobileDrawer({
             Settings
           </Link>
           <Button
+            className="min-h-11 w-full font-semibold"
             onClick={() => {
               setLoginModal({ open: true });
               onClose();
@@ -376,7 +386,7 @@ const MobileDrawer = memo(function MobileDrawer({
         </div>
       )}
 
-      <div className="border-border-card border-t">
+      <div className="border-border-card space-y-1 border-t p-2">
         {navigationSections.map((section) => (
           <MobileNavSection
             key={section.id}
@@ -394,6 +404,13 @@ const MobileDrawer = memo(function MobileDrawer({
                 label={item.title}
                 badge={item.badge === "live" ? "Live" : undefined}
                 prefetch={item.prefetch}
+                current={
+                  activeHref === item.href
+                    ? pathname === item.href
+                      ? "page"
+                      : "location"
+                    : undefined
+                }
                 onClick={onClose}
               />
             ))}
