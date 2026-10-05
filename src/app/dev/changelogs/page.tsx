@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { siteConfig } from "@/lib/site";
 import { getCachedChangelogEntries } from "@/lib/changelog-parser";
-import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
+import { ReleaseTimelineEntry } from "@/components/Changelogs/ReleaseChanges";
 import WhatsNewToggle from "@/components/Changelogs/WhatsNewToggle";
 
 export const metadata: Metadata = {
@@ -20,19 +19,13 @@ export default async function DevChangelogPage() {
   // Fetch changelogs from GitHub Releases API (cached)
   const entries = await getCachedChangelogEntries();
 
-  const sortedPages = entries.map((entry) => ({
-    url: `/dev/changelogs/${entry.slug}`,
-    data: {
-      title: entry.title || entry.version,
-      date: entry.date,
-      isPrerelease: entry.isPrerelease,
-      isDraft: entry.isDraft,
-    },
-  }));
+  const latestStable = entries.find(
+    (entry) => !entry.isPrerelease && !entry.isDraft,
+  );
 
   return (
     <div className="bg-primary-bg min-h-screen">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="pt-8 pb-4 sm:pt-10 sm:pb-6">
           <div className="text-center">
             <h1 className="page-heading mb-2">Development Changelog</h1>
@@ -44,7 +37,7 @@ export default async function DevChangelogPage() {
         {/* Timeline */}
         <div className="pt-4 pb-12 sm:pt-6">
           <WhatsNewToggle />
-          {sortedPages.length === 0 ? (
+          {entries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="bg-secondary-bg mb-6 rounded-full p-6">
                 <svg
@@ -71,89 +64,15 @@ export default async function DevChangelogPage() {
               </p>
             </div>
           ) : (
-            <div className="relative">
-              <div className="scrollbar-track-secondary-bg scrollbar-thumb-button-info/20 hover:scrollbar-thumb-button-info/40 scrollbar-thin transition-colors md:max-h-250 md:overflow-y-auto md:pr-4">
-                <div className="relative">
-                  {/* Timeline line */}
-                  <div
-                    className="border-border-card absolute top-0 left-0 hidden h-full border-l-2 md:block"
-                    style={{ left: "1.5rem" }}
-                  />
-
-                  {/* Changelog entries */}
-                  <div className="space-y-6 pb-12 sm:space-y-12">
-                    {sortedPages.map((page, index) => {
-                      const isLatest = index === 0;
-                      return (
-                        <article
-                          key={page.url}
-                          className="relative pl-0 md:pl-16"
-                        >
-                          {/* Timeline dot */}
-                          <div className="absolute top-2 left-2 hidden h-8 w-8 md:block">
-                            <div
-                              className={`border-primary-bg flex h-full w-full items-center justify-center rounded-full border-4 ${isLatest ? "bg-button-info animate-pulse" : "bg-button-info"}`}
-                            >
-                              <div className="bg-primary-bg h-2 w-2 rounded-full" />
-                            </div>
-                          </div>
-
-                          <Link
-                            href={page.url}
-                            className="group border-border-card bg-secondary-bg hover:border-border-focus block rounded-lg border p-5 shadow-lg transition-all duration-200 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 sm:p-6"
-                          >
-                            <div className="mb-4 flex min-w-0 flex-wrap items-center gap-2">
-                              <h2 className="text-primary-text group-hover:text-link text-2xl font-bold transition-colors">
-                                {page.data.title}
-                              </h2>
-                              {isLatest && (
-                                <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded-lg px-2 text-xs leading-none font-bold uppercase">
-                                  Latest
-                                </span>
-                              )}
-                              {page.data.isPrerelease && (
-                                <span className="bg-status-warning/10 text-status-warning rounded-lg px-2 py-1 text-xs font-medium">
-                                  Pre-release
-                                </span>
-                              )}
-                              {page.data.isDraft && (
-                                <span className="bg-secondary-text/10 text-secondary-text rounded-lg px-2 py-1 text-xs font-medium">
-                                  Draft
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-secondary-text mb-4 text-sm">
-                              {page.data.isDraft
-                                ? "Created on "
-                                : "Released on "}
-                              <ChangelogDate date={page.data.date as string} />
-                            </p>
-
-                            <span className="text-link group-hover:text-link-hover inline-flex items-center text-sm font-medium transition-colors">
-                              Read full changelog
-                              <svg
-                                className="ml-1 h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 5l7 7-7 7"
-                                />
-                              </svg>
-                            </span>
-                          </Link>
-                        </article>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <div className="from-primary-bg pointer-events-none absolute bottom-0 left-0 hidden h-24 w-full bg-linear-to-t to-transparent md:block" />
+            <div className="border-border-card ml-2 border-l-2 sm:ml-3">
+              {entries.map((entry, index) => (
+                <ReleaseTimelineEntry
+                  key={entry.slug}
+                  entry={entry}
+                  latest={entry.slug === latestStable?.slug}
+                  initiallyOpen={index === 0}
+                />
+              ))}
             </div>
           )}
         </div>

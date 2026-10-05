@@ -3,10 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,11 +13,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
-import { Icon } from "@/components/ui/IconWrapper";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useWhatsNewPreference } from "@/hooks/useWhatsNewPreference";
-import { omitRepeatedReleaseHeading } from "@/lib/remark-omit-release-heading";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
+
+import ReleaseChanges from "./ReleaseChanges";
 
 const LAST_SEEN_RELEASE_KEY = "jbcl:last-seen-dev-release";
 
@@ -132,46 +128,11 @@ export default function LatestReleaseDialogClient({
         </DialogHeader>
 
         <div className="min-h-0 overflow-y-auto px-6 pb-5">
-          <div className="changelog-prose prose prose-invert max-w-none text-sm">
-            <ReactMarkdown
-              remarkPlugins={[
-                remarkGfm,
-                [omitRepeatedReleaseHeading, preview.version],
-              ]}
-              rehypePlugins={[rehypeRaw, rehypeSanitize]}
-              components={{
-                a: ({ href, className, children, ...props }) => {
-                  const external = /^https?:\/\//i.test(href ?? "");
-                  return (
-                    <a
-                      {...props}
-                      href={href}
-                      target={external ? "_blank" : undefined}
-                      rel={external ? "noopener noreferrer" : undefined}
-                      className={`text-link hover:text-link-hover transition-colors ${className || ""}`}
-                    >
-                      {children}
-                    </a>
-                  );
-                },
-                li: ({ children, className, ...props }) => (
-                  <li
-                    {...props}
-                    className={`flex list-none items-start gap-2 ${className || ""}`}
-                  >
-                    <Icon
-                      icon="heroicons-outline:arrow-right"
-                      aria-hidden="true"
-                      className="text-secondary-text mt-0.5 h-4 w-4 shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">{children}</div>
-                  </li>
-                ),
-              }}
-            >
-              {preview.content}
-            </ReactMarkdown>
-          </div>
+          <ReleaseChanges
+            key={preview.slug}
+            content={preview.content}
+            version={preview.version}
+          />
         </div>
 
         <DialogFooter className="border-border-card shrink-0 gap-2 border-t px-6 py-4 sm:items-center">

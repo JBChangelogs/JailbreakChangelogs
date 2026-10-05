@@ -1,6 +1,7 @@
 import type { PhrasingContent, Root } from "mdast";
 
-function headingText(node: PhrasingContent): string {
+export function headingText(node: PhrasingContent): string {
+  if (node.type === "html") return "";
   if ("value" in node && typeof node.value === "string") return node.value;
   if ("children" in node) return node.children.map(headingText).join("");
   return "";

@@ -842,6 +842,21 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   margin-bottom: 0.5rem;
 }
 
+.changelog-prose.release-change-markdown > :is(ul, ol, p),
+.changelog-prose.release-change-markdown > :is(ul, ol) > li,
+.changelog-prose.release-change-markdown > :is(ul, ol) > li > p {
+  margin: 0;
+}
+
+.changelog-prose.release-change-markdown > :is(ul, ol) {
+  list-style: none;
+  padding: 0;
+}
+
+.changelog-prose.release-change-markdown :is(p, li) {
+  color: var(--color-primary-text);
+}
+
 .changelog-prose strong {
   color: var(--color-primary-text);
   font-weight: 600;
