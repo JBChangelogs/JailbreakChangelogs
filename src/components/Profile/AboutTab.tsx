@@ -135,8 +135,8 @@ export default function AboutTab({
   return (
     <div className="space-y-6">
       {/* About Me Section */}
-      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
-        <div className="mb-3 flex items-center gap-2">
+      <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
+        <div className="mb-4 flex items-center justify-between gap-2">
           <h2 className="text-primary-text text-lg font-semibold">About Me</h2>
           {currentUserId === user.id && !isEditingBio && (
             <Tooltip>
@@ -145,7 +145,8 @@ export default function AboutTab({
                   variant="ghost"
                   onClick={() => setIsEditingBio(true)}
                   size="sm"
-                  className="h-auto p-1"
+                  className="h-8 w-8 rounded-lg p-1"
+                  aria-label="Edit bio"
                 >
                   <Icon icon="heroicons:pencil" className="text-link h-5 w-5" />
                 </Button>
@@ -206,7 +207,7 @@ export default function AboutTab({
                     : lines;
                 return (
                   <>
-                    <p className="text-primary-text wrap-break-word whitespace-pre-wrap">
+                    <p className="text-primary-text text-base leading-relaxed wrap-break-word whitespace-pre-wrap">
                       {convertUrlsToLinks(visibleLines.join("\n"))}
                     </p>
                     {shouldTruncate && (
@@ -242,7 +243,7 @@ export default function AboutTab({
               <p className="text-primary-text italic">No bio yet</p>
             )}
             {localBioLastUpdated && (
-              <p className="text-secondary-text mt-2 text-xs">
+              <p className="text-secondary-text mt-4 text-xs">
                 Last updated:{" "}
                 <Tooltip>
                   <TooltipTrigger asChild>

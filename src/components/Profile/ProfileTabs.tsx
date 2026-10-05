@@ -181,7 +181,7 @@ export default function ProfileTabs({
         hasValueSuggestionsTab={hasValueSuggestionsTab}
         isOwnProfile={isOwnProfile}
       />
-      <div className="relative overflow-x-hidden">
+      <div className="relative mt-5 overflow-x-hidden">
         <AnimatePresence mode="popLayout" initial={false} custom={direction}>
           {value !== 5 && (
             <motion.div
@@ -293,14 +293,14 @@ function ProfileOverflowTabs({
         onValueChange={(v) => onChange(Number(v))}
         className="w-full"
       >
-        <TabsList noBottomRadius fullWidth className="w-full">
+        <TabsList className="w-full min-w-0 gap-1 rounded-none">
           {labels.map((label, idx) => (
             <TabsTrigger
               key={label}
               value={String(idx)}
               aria-controls={`profile-tabpanel-${idx}`}
               id={`profile-tab-${idx}`}
-              fullWidth
+              className="shrink-0 rounded-t-lg rounded-b-none px-4 py-3"
             >
               {label}
             </TabsTrigger>

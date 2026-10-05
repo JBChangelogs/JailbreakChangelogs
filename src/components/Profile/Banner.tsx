@@ -84,7 +84,7 @@ export const Banner = ({
   };
 
   return (
-    <div className="relative h-48 md:h-80" key={userId}>
+    <div className="relative h-40 md:h-70" key={userId}>
       <Image
         {...getBannerSource()}
         fill
@@ -98,7 +98,7 @@ export const Banner = ({
         className="pointer-events-none absolute inset-0 z-10"
         style={{
           background:
-            "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 30%, transparent 70%)",
+            "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 35%, transparent 75%)",
         }}
       />
     </div>

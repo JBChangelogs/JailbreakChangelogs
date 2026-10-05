@@ -8,7 +8,7 @@ export default function UserProfileLoading() {
         <Breadcrumb loading={true} />
         <div className="border-border-card overflow-hidden rounded-lg border shadow-md">
           {/* Banner skeleton */}
-          <Skeleton className="rounded-none" style={{ height: 256 }} />
+          <Skeleton className="h-40 rounded-none md:h-70" />
 
           {/* Profile Content skeleton */}
           <div className="p-3 sm:p-4 md:p-6">

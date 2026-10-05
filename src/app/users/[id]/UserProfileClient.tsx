@@ -21,7 +21,6 @@ import { createLogger } from "@/services/logger";
 import {
   AvatarUploadDialog,
   BannerUploadDialog,
-  getImageUploadRequirements,
 } from "@/components/Settings/AvatarUploadDialog";
 import { safeSetJSON } from "@/utils/storage/safeStorage";
 import { cn } from "@/lib/utils";
@@ -939,7 +938,7 @@ export default function UserProfileClient({
           <Breadcrumb loading={true} />
           <div className="border-border-card overflow-hidden rounded-lg border shadow-md">
             {/* Banner skeleton */}
-            <Skeleton className="rounded-none" style={{ height: 256 }} />
+            <Skeleton className="h-40 rounded-none md:h-70" />
 
             {/* Profile Content skeleton */}
             <div className="p-3 sm:p-4 md:p-6">
@@ -1151,143 +1150,81 @@ export default function UserProfileClient({
     );
   }
 
+  const profileActionButtonClassName =
+    "md:h-10! md:gap-2! md:px-5! md:text-base! md:[&_svg]:size-5!";
+
+  const profileConnections = (
+    <>
+      {isLoadingAdditionalData ? (
+        <>
+          <Skeleton style={{ width: 100, height: 32 }} />
+          <Skeleton style={{ width: 100, height: 32 }} />
+        </>
+      ) : (
+        <>
+          <Tooltip delayDuration={500}>
+            <TooltipTrigger asChild>
+              <Link
+                href={`https://discord.com/users/${user.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+              >
+                <DiscordIcon className="h-3.5 w-3.5" />
+                Discord
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>Visit Discord Profile</TooltipContent>
+          </Tooltip>
+
+          {user.roblox_id && (
+            <Tooltip delayDuration={500}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                >
+                  <RobloxIcon className="h-3.5 w-3.5" />
+                  Roblox
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Visit Roblox Profile</TooltipContent>
+            </Tooltip>
+          )}
+        </>
+      )}
+    </>
+  );
+
   return (
     <main className="min-h-screen pb-8">
       <LinSuperIdol userId={userId} />
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
-        <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
+        <div className="border-border-card bg-secondary-bg overflow-hidden rounded-2xl border">
           {/* Banner Section */}
-          {currentUserId === user.id ? (
-            <BannerUploadDialog
-              userData={user}
-              activateAfterUpload
-              onUploaded={handleProfileBannerUploaded}
-            >
-              {(openFilePicker, isUploading) => (
-                <div className="group/banner relative">
-                  <Banner
-                    userId={user.id}
-                    username={user.username}
-                    banner={user.banner}
-                    customBanner={user.custom_banner}
-                    settings={user.settings_v2}
-                    premiumType={user.premiumtype}
-                  />
-                  <button
-                    type="button"
-                    onClick={openFilePicker}
-                    disabled={isUploading}
-                    className="bg-secondary-bg/85 text-primary-text border-border-card hover:bg-tertiary-bg absolute top-3 right-3 z-20 hidden cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-left opacity-0 shadow-md backdrop-blur-sm transition-all group-hover/banner:opacity-100 focus-visible:opacity-100 md:flex"
-                  >
-                    <Icon
-                      icon={
-                        isUploading
-                          ? "svg-spinners:ring-resize"
-                          : "heroicons:pencil"
-                      }
-                      className="size-4"
-                    />
-                    <span className="flex flex-col">
-                      <span className="text-sm font-medium">
-                        {isUploading ? "Uploading..." : "Change Banner"}
-                      </span>
-                      {!isUploading && (
-                        <span className="text-secondary-text text-[10px] font-normal">
-                          {getImageUploadRequirements("banner")}
-                        </span>
-                      )}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={openFilePicker}
-                    disabled={isUploading}
-                    aria-label="Change profile banner"
-                    className="absolute inset-0 z-20 cursor-pointer md:hidden"
-                  />
-                </div>
-              )}
-            </BannerUploadDialog>
-          ) : (
-            <Banner
-              userId={user.id}
-              username={user.username}
-              banner={user.banner}
-              customBanner={user.custom_banner}
-              settings={user.settings_v2}
-              premiumType={user.premiumtype}
-            />
-          )}
+          <Banner
+            userId={user.id}
+            username={user.username}
+            banner={user.banner}
+            customBanner={user.custom_banner}
+            settings={user.settings_v2}
+            premiumType={user.premiumtype}
+          />
 
           {/* Profile Content */}
-          <div className="p-3 sm:p-4 md:p-6">
-            <div className="flex flex-col items-center gap-3 md:flex-row md:items-start md:gap-6">
+          <div className="px-5 pt-5 pb-6 sm:px-6 md:px-8 md:pb-8">
+            <div className="grid grid-cols-[104px_minmax(0,1fr)] items-center gap-x-4 gap-y-3 md:flex md:items-start md:gap-7">
               {/* Avatar - smaller on mobile */}
-              <div className="relative z-30 -mt-14 md:-mt-24">
-                {currentUserId === user.id ? (
-                  <AvatarUploadDialog
-                    userData={user}
-                    activateAfterUpload
-                    onUploaded={handleProfileAvatarUploaded}
-                  >
-                    {(openFilePicker, isUploading) => (
-                      <div className="group/avatar relative">
-                        <UserAvatar
-                          userId={user.id}
-                          avatarHash={user.avatar}
-                          username={user.username}
-                          size={38}
-                          custom_avatar={user.custom_avatar}
-                          isOnline={user.presence?.status === "Online"}
-                          showBadge={true}
-                          className="z-auto"
-                          presenceBadgeClassName="z-40"
-                          settings={user.settings_v2}
-                          premiumType={user.premiumtype}
-                        />
-                        <button
-                          type="button"
-                          onClick={openFilePicker}
-                          disabled={isUploading}
-                          aria-label="Change profile avatar"
-                          className={cn(
-                            "absolute inset-0 z-30 hidden cursor-pointer flex-col items-center justify-center gap-1 bg-black/55 px-2 text-center text-white opacity-0 backdrop-blur-[1px] transition-opacity group-hover/avatar:opacity-100 focus-visible:opacity-100 md:flex",
-                            user.premiumtype === 3
-                              ? "rounded-[25%]"
-                              : "rounded-full",
-                          )}
-                        >
-                          <Icon
-                            icon={
-                              isUploading
-                                ? "svg-spinners:ring-resize"
-                                : "heroicons:pencil"
-                            }
-                            className="size-6"
-                          />
-                          {!isUploading && (
-                            <>
-                              <span className="text-xs font-medium">
-                                Change Avatar
-                              </span>
-                              <span className="text-[9px] leading-tight text-white/80">
-                                {getImageUploadRequirements("avatar")}
-                              </span>
-                            </>
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={openFilePicker}
-                          disabled={isUploading}
-                          aria-label="Change profile avatar"
-                          className="absolute inset-0 z-30 cursor-pointer md:hidden"
-                        />
-                      </div>
-                    )}
-                  </AvatarUploadDialog>
-                ) : (
+              <div className="relative z-30 -mt-10 flex shrink-0 flex-col items-center">
+                <div
+                  className={cn(
+                    "bg-secondary-bg p-1",
+                    user.premiumtype === 3 ? "rounded-[27%]" : "rounded-full",
+                  )}
+                >
                   <UserAvatar
                     userId={user.id}
                     avatarHash={user.avatar}
@@ -1300,302 +1237,288 @@ export default function UserProfileClient({
                         : user.presence?.status === "Online"
                     }
                     showBadge={true}
+                    className="[&>div]:size-24! [&>div]:min-h-24! [&>div]:min-w-24! md:[&>div]:size-38! md:[&>div]:min-h-38! md:[&>div]:min-w-38!"
+                    presenceBadgeClassName="size-6! md:size-8!"
                     settings={user.settings_v2}
                     premiumType={user.premiumtype}
                   />
-                )}
+                </div>
+                <div className="mt-3 hidden max-w-44 flex-wrap items-center justify-center gap-2 md:flex">
+                  {profileConnections}
+                </div>
               </div>
-              <div className="w-full flex-1">
-                <div className="flex flex-col justify-between md:flex-row">
-                  <div className="w-full text-center md:w-auto md:text-left">
-                    <div className="flex max-w-full flex-col items-center justify-center gap-2 md:flex-row md:flex-wrap md:justify-start">
-                      <h1 className="text-primary-text mb-1 max-w-70 truncate text-2xl font-bold md:text-3xl lg:max-w-none">
-                        {user.global_name && user.global_name !== "None"
-                          ? user.global_name
-                          : user.username}
-                      </h1>
-                      <div className="md:ml-0">
-                        <UserBadges
-                          usernumber={user.usernumber}
-                          premiumType={user.premiumtype}
-                          flags={user.flags}
-                          size="lg"
-                          primary_guild={user.primary_guild}
-                        />
-                      </div>
-                    </div>
-                    <p className="text-secondary-text mx-auto mb-1 max-w-70 truncate text-lg md:mx-0 lg:max-w-none">
-                      @{user.username}
-                    </p>
-
-                    {isLoadingAdditionalData ? (
-                      <Skeleton className="w-3/5" style={{ height: 16 }} />
-                    ) : (
-                      <>
-                        {user.settings_v2?.hide_presence === true &&
-                        currentUserId !== user.id ? (
-                          <p className="text-secondary-text text-sm">
-                            Last seen: Hidden
-                          </p>
-                        ) : user.presence?.status === "Online" ? (
-                          <p
-                            className="text-sm"
-                            style={{
-                              color: "var(--color-status-success-vibrant)",
-                            }}
-                          >
-                            Online
-                          </p>
-                        ) : user.last_seen === null ? (
-                          <div className="bg-tertiary-bg mt-2 mb-2 rounded-lg p-4">
-                            <p className="text-secondary-text mb-1 text-sm font-medium">
-                              Are you the owner of this profile?
-                            </p>
-                            <p className="text-primary-text text-sm">
-                              Login to enable status indicators and last seen
-                              timestamps. Your Discord avatar, banner, and
-                              username changes will automatically sync with your
-                              profile.
-                            </p>
-                          </div>
-                        ) : (
-                          user.last_seen && (
-                            <p className="text-secondary-text text-sm">
-                              Last seen:{" "}
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span
-                                    className="cursor-help"
-                                    aria-label={`User was last seen ${lastSeenTime}`}
-                                  >
-                                    {lastSeenTime}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {formatCustomDate(user.last_seen)}
-                                </TooltipContent>
-                              </Tooltip>
-                            </p>
-                          )
-                        )}
-                      </>
-                    )}
-
-                    {isLoadingAdditionalData ? (
-                      <Skeleton className="w-4/5" style={{ height: 20 }} />
-                    ) : (
-                      user.created_at && (
-                        <p className="text-secondary-text mb-1 text-base">
-                          <span className="text-primary-text">Member</span> #
-                          {user.usernumber}{" "}
-                          <span className="text-primary-text">since</span>{" "}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help">
-                                {formatShortDate(user.created_at)}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {formatDayMonthYearTime(user.created_at)}
-                            </TooltipContent>
-                          </Tooltip>
+              <div className="contents md:block md:w-full md:min-w-0 md:flex-1">
+                <div className="contents md:flex md:justify-between md:gap-5">
+                  <div className="contents md:block md:min-w-0 md:flex-1 md:text-left">
+                    <div className="contents md:flex md:flex-wrap md:items-center md:gap-x-3 md:gap-y-1">
+                      <div className="min-w-0 md:contents">
+                        <h1 className="text-primary-text max-w-full min-w-0 truncate text-3xl font-bold tracking-tight md:text-4xl">
+                          {user.global_name && user.global_name !== "None"
+                            ? user.global_name
+                            : user.username}
+                        </h1>
+                        <p className="text-secondary-text mt-1 truncate text-sm md:order-3 md:mt-0 md:w-full">
+                          @{user.username}
                         </p>
-                      )
-                    )}
-
-                    {/* Follower/Following Counts */}
-                    <div className="mt-2 flex items-center justify-center space-x-4 md:justify-start">
-                      {isLoadingAdditionalData ? (
-                        <>
-                          <Skeleton style={{ width: 80, height: 20 }} />
-                          <Skeleton style={{ width: 80, height: 20 }} />
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() =>
-                              followerCount > 0 && setIsFollowersModalOpen(true)
-                            }
-                            className={`group text-primary-text text-base ${followerCount > 0 ? "cursor-pointer" : "cursor-default"}`}
-                          >
-                            <span
-                              className={`font-semibold ${followerCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
-                            >
-                              {followerCount}
-                            </span>{" "}
-                            {followerCount === 1 ? "follower" : "followers"}
-                          </button>
-                          <button
-                            onClick={() =>
-                              followingCount > 0 &&
-                              setIsFollowingModalOpen(true)
-                            }
-                            className={`group text-primary-text text-base ${followingCount > 0 ? "cursor-pointer" : "cursor-default"}`}
-                          >
-                            <span
-                              className={`font-semibold ${followingCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
-                            >
-                              {followingCount}
-                            </span>{" "}
-                            following
-                          </button>
-                        </>
-                      )}
+                      </div>
+                      <UserBadges
+                        usernumber={user.usernumber}
+                        premiumType={user.premiumtype}
+                        flags={user.flags}
+                        size="md"
+                        noContainer
+                        className="col-span-2 max-w-full flex-wrap justify-start md:order-2"
+                        primary_guild={user.primary_guild}
+                      />
                     </div>
-
-                    {/* Connection Icons */}
-                    <div className="mt-2 mb-5 flex flex-wrap items-center justify-center gap-2 md:mb-0 md:justify-start">
+                    <div className="col-span-2 flex flex-wrap items-center gap-x-3 gap-y-1 md:mt-2">
                       {isLoadingAdditionalData ? (
-                        <>
-                          <Skeleton style={{ width: 100, height: 32 }} />
-                          <Skeleton style={{ width: 100, height: 32 }} />
-                        </>
+                        <Skeleton className="w-3/5" style={{ height: 16 }} />
                       ) : (
                         <>
-                          <Tooltip delayDuration={500}>
-                            <TooltipTrigger asChild>
-                              <Link
-                                href={`https://discord.com/users/${user.id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
-                              >
-                                <DiscordIcon className="h-3.5 w-3.5" />
-                                Discord
-                              </Link>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              Visit Discord Profile
-                            </TooltipContent>
-                          </Tooltip>
-
-                          {user.roblox_id && (
-                            <Tooltip delayDuration={500}>
-                              <TooltipTrigger asChild>
-                                <Link
-                                  href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
-                                >
-                                  <RobloxIcon className="h-3.5 w-3.5" />
-                                  Roblox
-                                </Link>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Visit Roblox Profile
-                              </TooltipContent>
-                            </Tooltip>
+                          {user.settings_v2?.hide_presence === true &&
+                          currentUserId !== user.id ? (
+                            <p className="text-secondary-text text-sm">
+                              Last seen: Hidden
+                            </p>
+                          ) : user.presence?.status === "Online" ? (
+                            <p
+                              className="text-sm"
+                              style={{
+                                color: "var(--color-status-success-vibrant)",
+                              }}
+                            >
+                              Online
+                            </p>
+                          ) : user.last_seen === null ? (
+                            <div className="bg-tertiary-bg mt-2 mb-2 rounded-lg p-4">
+                              <p className="text-secondary-text mb-1 text-sm font-medium">
+                                Are you the owner of this profile?
+                              </p>
+                              <p className="text-primary-text text-sm">
+                                Login to enable status indicators and last seen
+                                timestamps. Your Discord avatar, banner, and
+                                username changes will automatically sync with
+                                your profile.
+                              </p>
+                            </div>
+                          ) : (
+                            user.last_seen && (
+                              <p className="text-secondary-text text-sm">
+                                Last seen:{" "}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span
+                                      className="cursor-help"
+                                      aria-label={`User was last seen ${lastSeenTime}`}
+                                    >
+                                      {lastSeenTime}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {formatCustomDate(user.last_seen)}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </p>
+                            )
                           )}
                         </>
                       )}
+
+                      {isLoadingAdditionalData ? (
+                        <Skeleton className="w-4/5" style={{ height: 20 }} />
+                      ) : (
+                        user.created_at && (
+                          <p className="text-secondary-text text-sm">
+                            Member #{user.usernumber}
+                            <span aria-hidden="true" className="mx-2">
+                              ·
+                            </span>
+                            Joined{" "}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-help">
+                                  {formatShortDate(user.created_at)}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {formatDayMonthYearTime(user.created_at)}
+                              </TooltipContent>
+                            </Tooltip>
+                          </p>
+                        )
+                      )}
+                    </div>
+                    <div className="col-span-2 flex flex-col items-start gap-3 md:mt-4">
+                      {/* Follower/Following Counts */}
+                      <div className="flex flex-wrap items-center gap-6">
+                        {isLoadingAdditionalData ? (
+                          <>
+                            <Skeleton style={{ width: 80, height: 20 }} />
+                            <Skeleton style={{ width: 80, height: 20 }} />
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() =>
+                                followerCount > 0 &&
+                                setIsFollowersModalOpen(true)
+                              }
+                              className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followerCount > 0 ? "cursor-pointer" : "cursor-default"}`}
+                            >
+                              <span
+                                className={`text-primary-text text-xl font-semibold tabular-nums ${followerCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                              >
+                                {followerCount}
+                              </span>{" "}
+                              {followerCount === 1 ? "follower" : "followers"}
+                            </button>
+                            <button
+                              onClick={() =>
+                                followingCount > 0 &&
+                                setIsFollowingModalOpen(true)
+                              }
+                              className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followingCount > 0 ? "cursor-pointer" : "cursor-default"}`}
+                            >
+                              <span
+                                className={`text-primary-text text-xl font-semibold tabular-nums ${followingCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                              >
+                                {followingCount}
+                              </span>{" "}
+                              following
+                            </button>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 md:hidden">
+                        {profileConnections}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="mt-1 flex justify-center gap-2 md:mt-0 md:self-start">
-                    {currentUserId === user.id ? (
-                      <Button asChild variant="default" size="md">
-                        <Link href="/settings">
-                          <Icon
-                            icon="material-symbols:settings"
-                            className="h-5 w-5"
-                          />
-                          Settings
-                        </Link>
-                      </Button>
-                    ) : isAuthenticatedUser && currentUserId ? (
-                      <>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
+                  <div className="col-span-2 flex max-w-full shrink-0 flex-col items-start md:max-w-64 md:items-end md:self-start xl:max-w-none">
+                    {/* Action Buttons */}
+                    <div className="flex justify-start gap-2 md:flex-wrap md:justify-end">
+                      {currentUserId === user.id ? (
+                        <>
+                          <AvatarUploadDialog
+                            userData={user}
+                            activateAfterUpload
+                            onUploaded={handleProfileAvatarUploaded}
+                          >
+                            {(openFilePicker, isUploading) => (
                               <Button
-                                variant={isFollowing ? "secondary" : "default"}
-                                onClick={handleFollow}
-                                disabled={isLoadingFollow}
-                                size="md"
+                                variant="secondary"
+                                size="sm"
+                                className={profileActionButtonClassName}
+                                onClick={openFilePicker}
+                                disabled={isUploading}
+                              >
+                                {isUploading ? "Uploading..." : "Edit avatar"}
+                              </Button>
+                            )}
+                          </AvatarUploadDialog>
+                          <BannerUploadDialog
+                            userData={user}
+                            activateAfterUpload
+                            onUploaded={handleProfileBannerUploaded}
+                          >
+                            {(openFilePicker, isUploading) => (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className={profileActionButtonClassName}
+                                onClick={openFilePicker}
+                                disabled={isUploading}
+                              >
+                                {isUploading ? "Uploading..." : "Edit banner"}
+                              </Button>
+                            )}
+                          </BannerUploadDialog>
+                          <Button
+                            asChild
+                            variant="default"
+                            size="sm"
+                            className={profileActionButtonClassName}
+                          >
+                            <Link href="/settings">
+                              <Icon
+                                icon="material-symbols:settings"
+                                className="size-4"
+                              />
+                              Settings
+                            </Link>
+                          </Button>
+                        </>
+                      ) : isAuthenticatedUser && currentUserId ? (
+                        <>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <Button
+                                  variant={
+                                    isFollowing ? "secondary" : "default"
+                                  }
+                                  onClick={handleFollow}
+                                  disabled={isLoadingFollow}
+                                  size="md"
+                                >
+                                  <Icon
+                                    icon={
+                                      isFollowing
+                                        ? "heroicons:user-minus"
+                                        : "heroicons:user-plus"
+                                    }
+                                    className="h-5 w-5"
+                                  />
+                                  {isFollowing ? "Unfollow" : "Follow"}
+                                </Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {isFollowing
+                                ? "Unfollow this user"
+                                : "Follow this user"}
+                            </TooltipContent>
+                          </Tooltip>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="secondary"
+                                size="icon"
+                                disabled={isBlockingAction}
                               >
                                 <Icon
-                                  icon={
-                                    isFollowing
-                                      ? "heroicons:user-minus"
-                                      : "heroicons:user-plus"
-                                  }
+                                  icon="heroicons:ellipsis-horizontal"
                                   className="h-5 w-5"
                                 />
-                                {isFollowing ? "Unfollow" : "Follow"}
                               </Button>
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {isFollowing
-                              ? "Unfollow this user"
-                              : "Follow this user"}
-                          </TooltipContent>
-                        </Tooltip>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              size="icon"
-                              disabled={isBlockingAction}
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-48 p-0"
                             >
-                              <Icon
-                                icon="heroicons:ellipsis-horizontal"
-                                className="h-5 w-5"
-                              />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 p-0">
-                            {canMessageFromProfile && (
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  router.push(
-                                    `/messages/${encodeURIComponent(user.id)}`,
-                                  )
-                                }
-                                className="rounded-none px-3 py-2"
-                              >
-                                <Icon
-                                  icon="heroicons:chat-bubble-left-right"
-                                  className="mr-2 h-4 w-4"
-                                />
-                                Message
-                              </DropdownMenuItem>
-                            )}
-                            {/* Mobile (< sm): flat report actions */}
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setIsReportUserOpen(true);
-                                setReportUserReason("");
-                              }}
-                              className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
-                            >
-                              <Icon
-                                icon="heroicons:flag"
-                                className="mr-2 h-4 w-4"
-                              />
-                              Report User
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="my-0 sm:hidden" />
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setIsReportAvatarOpen(true);
-                                setReportAvatarReason("");
-                              }}
-                              className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
-                            >
-                              <Icon
-                                icon="heroicons:flag"
-                                className="mr-2 h-4 w-4"
-                              />
-                              Report Avatar
-                            </DropdownMenuItem>
-                            {(user.banner ?? user.custom_banner) && (
+                              {canMessageFromProfile && (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    router.push(
+                                      `/messages/${encodeURIComponent(user.id)}`,
+                                    )
+                                  }
+                                  className="rounded-none px-3 py-2"
+                                >
+                                  <Icon
+                                    icon="heroicons:chat-bubble-left-right"
+                                    className="mr-2 h-4 w-4"
+                                  />
+                                  Message
+                                </DropdownMenuItem>
+                              )}
+                              {/* Mobile (< sm): flat report actions */}
                               <DropdownMenuItem
                                 onClick={() => {
-                                  setIsReportBannerOpen(true);
-                                  setReportBannerReason("");
+                                  setIsReportUserOpen(true);
+                                  setReportUserReason("");
                                 }}
                                 className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
                               >
@@ -1603,14 +1526,13 @@ export default function UserProfileClient({
                                   icon="heroicons:flag"
                                   className="mr-2 h-4 w-4"
                                 />
-                                Report Banner
+                                Report User
                               </DropdownMenuItem>
-                            )}
-                            {bio && (
+                              <DropdownMenuSeparator className="my-0 sm:hidden" />
                               <DropdownMenuItem
                                 onClick={() => {
-                                  setIsReportDescriptionOpen(true);
-                                  setReportDescriptionReason("");
+                                  setIsReportAvatarOpen(true);
+                                  setReportAvatarReason("");
                                 }}
                                 className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
                               >
@@ -1618,170 +1540,200 @@ export default function UserProfileClient({
                                   icon="heroicons:flag"
                                   className="mr-2 h-4 w-4"
                                 />
-                                Report Description
+                                Report Avatar
                               </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setIsReportUsernameOpen(true);
-                                setReportUsernameReason("");
-                              }}
-                              className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
-                            >
-                              <Icon
-                                icon="heroicons:flag"
-                                className="mr-2 h-4 w-4"
-                              />
-                              Report Username
-                            </DropdownMenuItem>
-                            {/* Desktop (≥ sm): nested submenu — alphabetical */}
-                            <div className="hidden sm:contents">
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger data-[state=open]:bg-button-danger/10 data-[state=open]:text-button-danger rounded-none px-3 py-2">
+                              {(user.banner ?? user.custom_banner) && (
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setIsReportBannerOpen(true);
+                                    setReportBannerReason("");
+                                  }}
+                                  className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
+                                >
                                   <Icon
                                     icon="heroicons:flag"
                                     className="mr-2 h-4 w-4"
                                   />
-                                  Report
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent className="p-0">
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setIsReportUserOpen(true);
-                                      setReportUserReason("");
-                                    }}
-                                    className="rounded-none px-3 py-2"
-                                  >
-                                    <Icon
-                                      icon="heroicons:user"
-                                      className="mr-2 h-4 w-4"
-                                    />
-                                    <div className="flex flex-col">
-                                      <span>User or behavior</span>
-                                      <span className="text-secondary-text text-xs font-normal">
-                                        General report
-                                      </span>
-                                    </div>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator className="my-0" />
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setIsReportAvatarOpen(true);
-                                      setReportAvatarReason("");
-                                    }}
-                                    className="rounded-none px-3 py-2"
-                                  >
-                                    <Icon
-                                      icon="heroicons:user-circle"
-                                      className="mr-2 h-4 w-4"
-                                    />
-                                    Avatar
-                                  </DropdownMenuItem>
-                                  {(user.banner ?? user.custom_banner) && (
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setIsReportBannerOpen(true);
-                                        setReportBannerReason("");
-                                      }}
-                                      className="rounded-none px-3 py-2"
-                                    >
-                                      <Icon
-                                        icon="heroicons:photo"
-                                        className="mr-2 h-4 w-4"
-                                      />
-                                      Banner
-                                    </DropdownMenuItem>
-                                  )}
-                                  {bio && (
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setIsReportDescriptionOpen(true);
-                                        setReportDescriptionReason("");
-                                      }}
-                                      className="rounded-none px-3 py-2"
-                                    >
-                                      <Icon
-                                        icon="heroicons:document-text"
-                                        className="mr-2 h-4 w-4"
-                                      />
-                                      Description
-                                    </DropdownMenuItem>
-                                  )}
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setIsReportUsernameOpen(true);
-                                      setReportUsernameReason("");
-                                    }}
-                                    className="rounded-none px-3 py-2"
-                                  >
-                                    <Icon
-                                      icon="heroicons:at-symbol"
-                                      className="mr-2 h-4 w-4"
-                                    />
-                                    Username
-                                  </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
-                            </div>
-                            <DropdownMenuSeparator className="my-0" />
-                            <DropdownMenuItem
-                              onClick={() => void handleBlockToggle()}
-                              disabled={isBlockingAction}
-                              className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2"
-                            >
-                              <Icon
-                                icon={
-                                  isBlockedByMe
-                                    ? "heroicons:lock-open"
-                                    : "heroicons:no-symbol"
-                                }
-                                className="mr-2 h-4 w-4"
-                              />
-                              {isBlockedByMe ? "Unblock User" : "Block User"}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </>
-                    ) : (
-                      <>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Button
-                                variant="default"
-                                size="md"
-                                disabled={true}
+                                  Report Banner
+                                </DropdownMenuItem>
+                              )}
+                              {bio && (
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setIsReportDescriptionOpen(true);
+                                    setReportDescriptionReason("");
+                                  }}
+                                  className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
+                                >
+                                  <Icon
+                                    icon="heroicons:flag"
+                                    className="mr-2 h-4 w-4"
+                                  />
+                                  Report Description
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setIsReportUsernameOpen(true);
+                                  setReportUsernameReason("");
+                                }}
+                                className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
                               >
                                 <Icon
-                                  icon="heroicons:user-plus"
-                                  className="h-5 w-5"
+                                  icon="heroicons:flag"
+                                  className="mr-2 h-4 w-4"
                                 />
-                                Follow
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            You need to be logged in to follow users
-                          </TooltipContent>
-                        </Tooltip>
-                      </>
-                    )}
+                                Report Username
+                              </DropdownMenuItem>
+                              {/* Desktop (≥ sm): nested submenu — alphabetical */}
+                              <div className="hidden sm:contents">
+                                <DropdownMenuSub>
+                                  <DropdownMenuSubTrigger className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger data-[state=open]:bg-button-danger/10 data-[state=open]:text-button-danger rounded-none px-3 py-2">
+                                    <Icon
+                                      icon="heroicons:flag"
+                                      className="mr-2 h-4 w-4"
+                                    />
+                                    Report
+                                  </DropdownMenuSubTrigger>
+                                  <DropdownMenuSubContent className="p-0">
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setIsReportUserOpen(true);
+                                        setReportUserReason("");
+                                      }}
+                                      className="rounded-none px-3 py-2"
+                                    >
+                                      <Icon
+                                        icon="heroicons:user"
+                                        className="mr-2 h-4 w-4"
+                                      />
+                                      <div className="flex flex-col">
+                                        <span>User or behavior</span>
+                                        <span className="text-secondary-text text-xs font-normal">
+                                          General report
+                                        </span>
+                                      </div>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator className="my-0" />
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setIsReportAvatarOpen(true);
+                                        setReportAvatarReason("");
+                                      }}
+                                      className="rounded-none px-3 py-2"
+                                    >
+                                      <Icon
+                                        icon="heroicons:user-circle"
+                                        className="mr-2 h-4 w-4"
+                                      />
+                                      Avatar
+                                    </DropdownMenuItem>
+                                    {(user.banner ?? user.custom_banner) && (
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          setIsReportBannerOpen(true);
+                                          setReportBannerReason("");
+                                        }}
+                                        className="rounded-none px-3 py-2"
+                                      >
+                                        <Icon
+                                          icon="heroicons:photo"
+                                          className="mr-2 h-4 w-4"
+                                        />
+                                        Banner
+                                      </DropdownMenuItem>
+                                    )}
+                                    {bio && (
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          setIsReportDescriptionOpen(true);
+                                          setReportDescriptionReason("");
+                                        }}
+                                        className="rounded-none px-3 py-2"
+                                      >
+                                        <Icon
+                                          icon="heroicons:document-text"
+                                          className="mr-2 h-4 w-4"
+                                        />
+                                        Description
+                                      </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setIsReportUsernameOpen(true);
+                                        setReportUsernameReason("");
+                                      }}
+                                      className="rounded-none px-3 py-2"
+                                    >
+                                      <Icon
+                                        icon="heroicons:at-symbol"
+                                        className="mr-2 h-4 w-4"
+                                      />
+                                      Username
+                                    </DropdownMenuItem>
+                                  </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                              </div>
+                              <DropdownMenuSeparator className="my-0" />
+                              <DropdownMenuItem
+                                onClick={() => void handleBlockToggle()}
+                                disabled={isBlockingAction}
+                                className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2"
+                              >
+                                <Icon
+                                  icon={
+                                    isBlockedByMe
+                                      ? "heroicons:lock-open"
+                                      : "heroicons:no-symbol"
+                                  }
+                                  className="mr-2 h-4 w-4"
+                                />
+                                {isBlockedByMe ? "Unblock User" : "Block User"}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </>
+                      ) : (
+                        <>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <Button
+                                  variant="default"
+                                  size="md"
+                                  disabled={true}
+                                >
+                                  <Icon
+                                    icon="heroicons:user-plus"
+                                    className="h-5 w-5"
+                                  />
+                                  Follow
+                                </Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              You need to be logged in to follow users
+                            </TooltipContent>
+                          </Tooltip>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="mt-2 md:mt-6">
-            <ProfileTabs
-              user={user}
-              currentUserId={currentUserId}
-              bio={bio}
-              bioLastUpdated={bioLastUpdated}
-              onBioUpdate={refreshBio}
-              isLoadingAdditionalData={isLoadingAdditionalData}
-              tradeAds={tradeAds}
-            />
-          </div>
+        </div>
+        <div className="mt-5 md:mt-6">
+          <ProfileTabs
+            user={user}
+            currentUserId={currentUserId}
+            bio={bio}
+            bioLastUpdated={bioLastUpdated}
+            onBioUpdate={refreshBio}
+            isLoadingAdditionalData={isLoadingAdditionalData}
+            tradeAds={tradeAds}
+          />
         </div>
       </div>
       <FollowersModal
