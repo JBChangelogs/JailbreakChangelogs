@@ -379,21 +379,25 @@ export const searchDupeItemsByOwner = async (
   return Array.isArray(data) ? data : [];
 };
 
-export async function fetchUserById(id: string) {
+export async function fetchUserById(id: string, baseUrl = BASE_API_URL) {
   if (typeof id !== "string" || !/^[0-9]+$/.test(id)) {
     throw new Error(`NOT_FOUND: User not found with id ${id}`);
   }
 
   try {
-    const response = await fetch(
-      `${BASE_API_URL}/v2/users/${id}?nocache=false`,
-      {
-        redirect: "error",
-        headers: {
-          "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
-        },
-      },
+    const { url, headers } = buildApiFetchRequest(
+      baseUrl,
+      `/v2/users/${id}?nocache=false`,
     );
+    const response = await fetch(url, {
+      redirect: "error",
+      headers: {
+        ...headers,
+        ...(typeof window === "undefined"
+          ? { "User-Agent": "JailbreakChangelogs-UserProfile/1.0" }
+          : {}),
+      },
+    });
     const data = await response.json();
 
     if (!response.ok) {
