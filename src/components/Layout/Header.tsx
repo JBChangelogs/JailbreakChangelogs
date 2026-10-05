@@ -189,6 +189,7 @@ const MobileDrawer = memo(function MobileDrawer({
   const { setLoginModal } = useAuthContext();
   const pathname = usePathname();
   const activeHref = getNavigationHref(pathname);
+  const isOwner = userData?.flags?.some((f) => f.flag === "is_owner") ?? false;
 
   return (
     <div className="flex h-full flex-col">
@@ -256,75 +257,91 @@ const MobileDrawer = memo(function MobileDrawer({
                 Settings
               </span>
             </Link>
-            {canOverrideExperiments(userData) && (
-              <Link
-                href="/experiments"
-                onClick={onClose}
-                className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-              >
-                <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+            {(canOverrideExperiments(userData) || isOwner) && (
+              <details className="group/tools">
+                <summary className="text-primary-text hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+                  <Icon icon="mdi:flask-outline" className="h-5 w-5 shrink-0" />
+                  <span className="flex-1">
+                    {isOwner ? "Owner tools" : "Tester tools"}
+                  </span>
                   <Icon
-                    icon="mdi:flask-outline"
-                    className="text-primary-text h-5 w-5"
-                    inline={true}
+                    icon="mdi:chevron-down"
+                    className="text-primary-text/70 h-4 w-4 shrink-0 transition-transform duration-300 group-open/tools:rotate-180 motion-reduce:transition-none"
                   />
+                </summary>
+                <div className="space-y-0.5 pl-3">
+                  {canOverrideExperiments(userData) && (
+                    <Link
+                      href="/experiments"
+                      onClick={onClose}
+                      className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                        <Icon
+                          icon="mdi:flask-outline"
+                          className="text-primary-text h-5 w-5"
+                          inline={true}
+                        />
+                      </div>
+                      <span className="text-primary-text text-sm font-semibold">
+                        Experiments
+                      </span>
+                    </Link>
+                  )}
+                  {isOwner && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={onToggleWsConnection}
+                        disabled={wsTogglePending}
+                        aria-label={
+                          wsConnected
+                            ? "Disconnect realtime connection"
+                            : "Connect realtime connection"
+                        }
+                        title={
+                          wsConnected
+                            ? "Disconnect realtime connection"
+                            : "Connect realtime connection"
+                        }
+                        className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                          {wsTogglePending ? (
+                            <Spinner className="h-4 w-4" />
+                          ) : (
+                            <span
+                              className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
+                            />
+                          )}
+                        </div>
+                        <span className="text-primary-text min-w-0 flex-1 text-sm font-semibold">
+                          Realtime connection
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          setUtmModalOpen(true);
+                        }}
+                        className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                          <Icon
+                            icon="heroicons:link"
+                            className="text-primary-text h-5 w-5"
+                            inline={true}
+                          />
+                        </div>
+                        <span className="text-primary-text text-sm font-semibold">
+                          Generate UTM Link
+                        </span>
+                      </button>
+                    </>
+                  )}
                 </div>
-                <span className="text-primary-text text-sm font-semibold">
-                  Experiments
-                </span>
-              </Link>
-            )}
-            {userData?.flags?.some((f) => f.flag === "is_owner") && (
-              <>
-                <button
-                  type="button"
-                  onClick={onToggleWsConnection}
-                  disabled={wsTogglePending}
-                  aria-label={
-                    wsConnected
-                      ? "Disconnect realtime connection"
-                      : "Connect realtime connection"
-                  }
-                  title={
-                    wsConnected
-                      ? "Disconnect realtime connection"
-                      : "Connect realtime connection"
-                  }
-                  className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center">
-                    {wsTogglePending ? (
-                      <Spinner className="h-4 w-4" />
-                    ) : (
-                      <span
-                        className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
-                      />
-                    )}
-                  </div>
-                  <span className="text-primary-text min-w-0 flex-1 text-sm font-semibold">
-                    Realtime connection
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    setUtmModalOpen(true);
-                  }}
-                  className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                >
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center">
-                    <Icon
-                      icon="heroicons:link"
-                      className="text-primary-text h-5 w-5"
-                      inline={true}
-                    />
-                  </div>
-                  <span className="text-primary-text text-sm font-semibold">
-                    Generate UTM Link
-                  </span>
-                </button>
-              </>
+              </details>
             )}
             <Link
               href="/reports"
