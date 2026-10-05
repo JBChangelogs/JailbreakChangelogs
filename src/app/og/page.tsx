@@ -1,3 +1,5 @@
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import OGFinderClient from "@/components/OG/OGFinderClient";
 import OGFinderDescription from "@/components/OG/OGFinderDescription";
 import OGFinderFAQ from "@/components/OG/OGFinderFAQ";
@@ -46,6 +48,8 @@ export default async function OGFinderPage() {
         <ExperimentalFeatureBanner className="mb-6" />
 
         <OGFinderDescription />
+
+        <NitroRailFallbackAd adId="np-og-rail-fallback" />
 
         <PremiumAwareLayout>
           <OGFinderClient />

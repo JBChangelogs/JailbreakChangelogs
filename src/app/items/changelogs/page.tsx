@@ -1,5 +1,7 @@
 "use client";
 
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -137,6 +139,8 @@ export default function ValuesChangelogPage() {
           <h1 className="sr-only">
             Roblox Jailbreak Values Changelogs & History
           </h1>
+
+          <NitroRailFallbackAd adId="np-values-changelogs-rail-fallback" />
 
           {loading ? (
             <div className="flex flex-col gap-4">

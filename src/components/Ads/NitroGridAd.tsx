@@ -2,6 +2,7 @@
 
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { createLogger } from "@/services/logger";
 
@@ -17,6 +18,7 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const createdRef = useRef(false);
 
+  const tallViewport = useMediaQuery("(min-height: 600px)");
   const tier = user?.premiumtype ?? 0;
   const isSupporter = canHideAdsForPremiumType(tier);
 
@@ -47,7 +49,7 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
                     sizes: [
                       ["320", "50"],
                       ["320", "100"],
-                      ["300", "250"],
+                      ...(tallViewport ? [["300", "250"]] : []),
                     ],
                     report: {
                       enabled: true,
@@ -105,19 +107,19 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
       ads?.removeAd?.(adId);
       createdRef.current = false;
     };
-  }, [isLoading, isSupporter, adId]);
+  }, [isLoading, isSupporter, adId, tallViewport]);
 
   if (isLoading || isSupporter) {
     return null;
   }
 
-  // Hide on desktop since the ad is configured for mobile only (max-width: 767px)
-  // Apply min-height 250px to reserve space for the tallest ad unit (300x250)
+  // Reserve space for the largest eligible mobile creative.
   return (
     <div
       id={adId}
       ref={containerRef}
-      className={`flex min-h-62.5 justify-center ${className}`}
+      className={`flex justify-center ${className || ""}`}
+      style={{ minHeight: tallViewport ? 250 : 100 }}
     />
   );
 }

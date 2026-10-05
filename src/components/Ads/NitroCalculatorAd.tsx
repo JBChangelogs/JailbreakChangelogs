@@ -84,7 +84,7 @@ export default function NitroCalculatorAd({ className }: Props) {
 
   return (
     <div className={cn("mx-auto w-full max-w-sm", className)}>
-      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden rounded-lg">
+      <div className="bg-secondary-background relative mx-auto aspect-video w-full max-w-110 shrink-0 overflow-hidden rounded-lg [@media(max-height:599px)]:max-w-[min(100%,320px,45vh)]">
         <div id={SLOT_ID} ref={containerRef} className="h-full w-full" />
       </div>
     </div>

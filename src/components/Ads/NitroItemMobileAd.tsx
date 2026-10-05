@@ -2,6 +2,7 @@
 
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { createLogger } from "@/services/logger";
 
@@ -38,6 +39,7 @@ export default function NitroItemMobileAd({ className }: Props) {
   const { user, isLoading } = useAuthContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
+  const tallViewport = useMediaQuery("(min-height: 600px)");
   const tier = user?.premiumtype ?? 0;
   const isSupporter = canHideAdsForPremiumType(tier);
 
@@ -67,12 +69,17 @@ export default function NitroItemMobileAd({ className }: Props) {
     createdRef.current = true;
 
     try {
-      Promise.resolve(nitroAds.createAd(SLOT_ID, ITEMS_CONFIG)).catch(
-        (error) => {
-          log.warn("[Nitro Ad] Failed to create items video player ad:", error);
-          createdRef.current = false;
-        },
-      );
+      Promise.resolve(
+        nitroAds.createAd(SLOT_ID, {
+          ...ITEMS_CONFIG,
+          sizes: tallViewport
+            ? ITEMS_CONFIG.sizes
+            : ITEMS_CONFIG.sizes.filter((size) => Number(size[1]) <= 100),
+        }),
+      ).catch((error) => {
+        log.warn("[Nitro Ad] Failed to create items video player ad:", error);
+        createdRef.current = false;
+      });
     } catch (error) {
       log.warn("[Nitro Ad] Error initializing items video player ad:", error);
       createdRef.current = false;
@@ -83,7 +90,7 @@ export default function NitroItemMobileAd({ className }: Props) {
       clearContainer();
       createdRef.current = false;
     };
-  }, [isLoading, isSupporter]);
+  }, [isLoading, isSupporter, tallViewport]);
 
   if (isLoading || isSupporter) {
     return null;
@@ -95,7 +102,7 @@ export default function NitroItemMobileAd({ className }: Props) {
       id={SLOT_ID}
       ref={containerRef}
       className={className}
-      style={{ minHeight: "250px" }}
+      style={{ minHeight: tallViewport ? 250 : 100 }}
     />
   );
 }

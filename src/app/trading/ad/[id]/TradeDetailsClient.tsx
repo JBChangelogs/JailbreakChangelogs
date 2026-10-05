@@ -1,5 +1,7 @@
 "use client";
 
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import React, { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -1244,6 +1246,8 @@ export default function TradeDetailsClient({
               </p>
             </div>
           )}
+
+          <NitroRailFallbackAd adId="np-trading-rail-fallback" />
 
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <TradeSidePreview title="Offering" items={trade.offering} />

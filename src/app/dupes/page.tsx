@@ -1,3 +1,5 @@
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 import MostDuplicatedItemsServer from "@/components/Dupes/MostDuplicatedItemsServer";
@@ -62,6 +64,8 @@ export default async function DupeFinderPage() {
         <div className="mb-6">
           <RelatedInventoryPages current="dupes" />
         </div>
+
+        <NitroRailFallbackAd adId="np-rail-left-dupes-fallback" />
 
         <PremiumAwareLayout>
           <DupeFinderClient />

@@ -1,3 +1,5 @@
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import DupeComparisonLoader from "@/components/Dupes/DupeComparisonLoader";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { notFound } from "next/navigation";
@@ -37,6 +39,8 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
             Comparing item variants to verify duplicates.
           </p>
         </div>
+
+        <NitroRailFallbackAd adId="np-rail-left-dupe-compare-fallback" />
 
         <DupeComparisonLoader id={id} />
         <DupeFinderFAQ />

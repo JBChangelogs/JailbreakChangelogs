@@ -1,3 +1,5 @@
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import DupeFinderDataStreamer from "@/components/Dupes/DupeFinderDataStreamer";
@@ -83,6 +85,8 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
           &quot;Compare Variants,&quot; then use &quot;Report False Dupe&quot;
           on the comparison page.
         </div>
+
+        <NitroRailFallbackAd adId="np-rail-left-dupe-detail-fallback" />
 
         <PremiumAwareLayout>
           <Suspense

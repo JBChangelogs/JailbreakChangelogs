@@ -35,19 +35,7 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
         aria-label="Main"
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4"
       >
-        <Link
-          href="/"
-          aria-current={pathname === "/" ? "page" : undefined}
-          title={collapsed ? "Home" : undefined}
-          className={linkClassName(pathname === "/")}
-        >
-          <Icon
-            icon="material-symbols:home-rounded"
-            className="h-5 w-5 shrink-0"
-          />
-          <span className={labelClassName}>Home</span>
-        </Link>
-        <div className="mt-5 flex flex-col gap-5">
+        <div className="flex flex-col gap-5">
           {navigationSections.map((section) => (
             <section
               key={section.id}

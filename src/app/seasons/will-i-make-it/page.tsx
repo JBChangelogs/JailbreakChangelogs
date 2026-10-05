@@ -1,5 +1,7 @@
 "use client";
 
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import React from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -152,6 +154,8 @@ export default function WillIMakeItPage() {
               </div>
             </div>
           </div>
+
+          <NitroRailFallbackAd adId="np-seasons-calculator-rail-fallback" />
 
           <XpCalculator season={season} />
 

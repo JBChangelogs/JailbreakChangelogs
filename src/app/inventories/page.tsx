@@ -1,3 +1,5 @@
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { fetchUserScansLeaderboard, UserScan } from "@/utils/api/api";
@@ -64,6 +66,8 @@ export default async function InventoriesPage() {
         <div className="mb-6">
           <RelatedInventoryPages current="inventories" />
         </div>
+
+        <NitroRailFallbackAd adId="np-inventories-rail-fallback" />
 
         <PremiumAwareLayout>
           <InventoryCheckerClient key="inventories-root" />

@@ -1,5 +1,7 @@
 "use client";
 
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonLeaderboardClient from "@/components/Leaderboard/SeasonLeaderboardClient";
@@ -160,6 +162,8 @@ export default function SeasonLeaderboardPage() {
               </div>
             )}
           </div>
+
+          <NitroRailFallbackAd adId="np-seasons-leaderboard-rail-fallback" />
 
           <SeasonLeaderboardClient
             initialLeaderboard={leaderboard}

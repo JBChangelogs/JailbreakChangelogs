@@ -1,3 +1,5 @@
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import InventoryCheckerClient from "../InventoryCheckerClient";
@@ -68,6 +70,8 @@ export default async function InventoryCheckerPage({
         <div className="mb-6">
           <RelatedInventoryPages current="inventories" />
         </div>
+
+        <NitroRailFallbackAd adId="np-inventory-detail-rail-fallback" />
 
         <PremiumAwareLayout>
           <Suspense

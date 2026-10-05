@@ -504,19 +504,30 @@ export const NavbarModern = ({
           {/* Theme toggle */}
           <AnimatedThemeToggler className="focus-visible:ring-link data-[state=open]:bg-quaternary-bg border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none" />
 
-          {!isLoading && !userData && (
-            <Link
-              href="/settings"
-              aria-label="Settings"
-              title="Settings"
-              className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link flex size-10 items-center justify-center rounded-lg focus-visible:ring-2 focus-visible:outline-none"
-            >
-              <Icon
-                icon="material-symbols:settings-rounded"
-                className="size-5"
-              />
-            </Link>
-          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href="/settings?highlight=display#display"
+                aria-label="Change navigation layout"
+                className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link flex size-10 items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M9 4v16M13 9h4M13 13h4" />
+                </svg>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>Change navigation layout</TooltipContent>
+          </Tooltip>
 
           {/* User menu or login button */}
           {isLoading ? (
@@ -587,6 +598,7 @@ export const NavbarModern = ({
                     Connect Roblox
                   </DropdownMenuItem>
                 )}
+
                 <DropdownMenuItem
                   asChild
                   className="gap-3 rounded-md px-3 py-2.5"

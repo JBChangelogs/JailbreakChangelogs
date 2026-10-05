@@ -116,6 +116,7 @@ export default function NitroVideoPlayer() {
     Promise.resolve(
       nitroAds.createAd(VIDEO_PLAYER_ID, {
         format: "floating",
+        floating: { position: "right", reduceMobileSize: true },
         report: {
           enabled: true,
           icon: true,

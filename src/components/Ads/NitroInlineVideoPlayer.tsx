@@ -103,7 +103,7 @@ export default function NitroInlineVideoPlayer({
         )}
       >
         <div className="w-full max-w-[440px] lg:max-w-none">
-          <div className="bg-secondary-background relative aspect-video w-full overflow-hidden rounded-lg">
+          <div className="bg-secondary-background relative mx-auto aspect-video w-full max-w-110 overflow-hidden rounded-lg [@media(max-height:599px)]:max-w-[min(100%,320px,45vh)]">
             <div id={slotId} ref={containerRef} className="h-full w-full" />
           </div>
         </div>
@@ -113,7 +113,7 @@ export default function NitroInlineVideoPlayer({
 
   return (
     <div className={cn("mx-auto w-full max-w-sm", className)}>
-      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden rounded-lg">
+      <div className="bg-secondary-background relative mx-auto aspect-video w-full max-w-110 shrink-0 overflow-hidden rounded-lg [@media(max-height:599px)]:max-w-[min(100%,320px,45vh)]">
         <div id={slotId} ref={containerRef} className="h-full w-full" />
       </div>
     </div>

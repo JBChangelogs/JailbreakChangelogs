@@ -39,7 +39,7 @@ import SettingsLoading from "./loading";
 const APP_ONLY_SETTINGS = new Set(["hide_roblox_activity"]);
 
 export default function SettingsPage() {
-  const { user, isLoading, refreshUser } = useAuthContext();
+  const { user, isLoading, refreshUser, setLoginModal } = useAuthContext();
   const { twemojiEnabled, setTwemojiEnabled } = useTwemoji();
   const { modalState, closeModal, openModal } = useSupporterModal();
   const {
@@ -165,6 +165,17 @@ export default function SettingsPage() {
       <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
         <Breadcrumb />
         <div className="mt-4">{displaySettings}</div>
+        <p className="text-secondary-text mt-4 text-sm">
+          <button
+            type="button"
+            onClick={() => setLoginModal({ open: true })}
+            className="text-link hover:text-link-hover focus-visible:ring-link cursor-pointer rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          >
+            Sign in
+          </button>{" "}
+          to access account settings and sync your navigation preference across
+          devices.
+        </p>
       </div>
     );
   }

@@ -11,6 +11,8 @@ function mount(filename: string) {
   const calls: string[] = [];
   let pathname = "/";
   let viewport = "small";
+  let viewportHeight = 900;
+  let navigation = "sidebar";
   let props: Record<string, unknown> = { adId: "grid-test" };
   let cursor = 0;
   const hooks: { current?: unknown; deps?: unknown[]; cleanup?: () => void }[] =
@@ -20,6 +22,8 @@ function mount(filename: string) {
   const exports: { default?: (props: Record<string, unknown>) => void } = {};
   const imports: Record<string, unknown> = {
     react: {
+      useSyncExternalStore: (_subscribe: unknown, getSnapshot: () => unknown) =>
+        getSnapshot(),
       useRef: (current: unknown) => (hooks[cursor++] ??= { current }),
       useEffect: (effect: () => (() => void) | void, deps: unknown[]) => {
         const previous = hooks[cursor];
@@ -35,15 +39,34 @@ function mount(filename: string) {
         }
       },
     },
-    "react/jsx-runtime": { jsx: () => null, jsxs: () => null },
+    "react/jsx-runtime": {
+      jsx: (type: string) => {
+        if (type === "rail") calls.push("rail");
+        return null;
+      },
+      jsxs: () => null,
+    },
+    "@/components/Ads/NitroLeftGutterAd": { default: "rail" },
+    "@/utils/ui/desktopNavigation": {
+      getDesktopNavigation: () => navigation,
+      subscribeDesktopNavigation: () => () => {},
+    },
     "next/navigation": { usePathname: () => pathname },
     "@/hooks/useMediaQuery": {
       useMediaQuery: (query: string) =>
-        query.includes("max-width")
-          ? viewport === "small"
-          : viewport === "wide",
+        query.includes("min-height")
+          ? viewportHeight >= (query.includes("800px") ? 800 : 600) &&
+            (!query.includes("1280px") || viewport !== "mobile")
+          : query.includes("1536px")
+            ? viewport === "fallback"
+            : query.includes("max-width")
+              ? viewport === "small"
+              : viewport === "wide",
     },
-    "@/contexts/AuthContext": { useAuthContext: () => auth },
+    "@/contexts/AuthContext": {
+      useAuthContext: () => auth,
+      useSafeAuthContext: () => auth,
+    },
     "@/utils/auth/supporterAccess": {
       canHideAdsForPremiumType: (tier: number) => tier >= 2,
     },
@@ -90,6 +113,13 @@ function mount(filename: string) {
     browser,
     calls,
     intersect: () => intersect(),
+    documentEvent: (name: string) => events.get(name)?.(),
+    navigation: (mode: string) => {
+      navigation = mode;
+    },
+    height: (height: number) => {
+      viewportHeight = height;
+    },
     resize: (size: string) => {
       viewport = size;
     },
@@ -250,5 +280,146 @@ for (const size of ["small", "wide"]) {
     await Promise.resolve();
     await Promise.resolve();
     expect(app.createdFlags()).toEqual(expectedFlags);
+  });
+}
+
+test("fallback creates only while the sidebar fits, rails do not, and ads are allowed", () => {
+  const app = mount("./NitroRailFallbackAd.tsx");
+  app.browser.nitroAds = {
+    createAd: () => {
+      app.calls.push("create");
+    },
+    removeAd: () => app.calls.push("destroy"),
+  };
+  app.resize("fallback");
+  app.render({ adId: "page-fallback" });
+  expect(app.calls).toEqual([]);
+  app.auth.isLoading = false;
+  app.render();
+  expect(app.calls.splice(0)).toEqual(["create"]);
+  app.render();
+  expect(app.calls).toEqual([]);
+  app.navigation("top-bar");
+  app.render();
+  expect(app.calls.splice(0)).toEqual(["remove", "destroy"]);
+  app.documentEvent("nitroAds.loaded");
+  expect(app.calls).toEqual([]);
+  app.navigation("sidebar");
+  for (const viewport of ["small", "wide", "mobile"]) {
+    app.resize(viewport);
+    app.render();
+    expect(app.calls).toEqual([]);
+  }
+  app.resize("fallback");
+  app.auth.user.premiumtype = 2;
+  app.render();
+  expect(app.calls).toEqual([]);
+  app.auth.user.premiumtype = 0;
+  app.render();
+  expect(app.calls.splice(0)).toEqual(["create"]);
+  app.resize("wide");
+  app.render();
+  expect(app.calls.splice(0)).toEqual(["remove", "destroy"]);
+});
+
+test("fallback retries when Nitro loads and cleans up without late navigation registration", async () => {
+  const app = mount("./NitroRailFallbackAd.tsx");
+  app.auth.isLoading = false;
+  app.resize("fallback");
+  app.render({ adId: "page-fallback" });
+  let resolveAd!: (ad: { onNavigate: () => void }) => void;
+  app.browser.nitroAds = {
+    createAd: () => {
+      app.calls.push("create");
+      return new Promise((resolve) => {
+        resolveAd = resolve;
+      });
+    },
+    removeAd: () => app.calls.push("destroy"),
+  };
+  app.documentEvent("nitroAds.loaded");
+  app.documentEvent("nitroAds.loaded");
+  expect(app.calls).toEqual(["create"]);
+  app.unmount();
+  resolveAd({ onNavigate() {} });
+  await Promise.resolve();
+  app.documentEvent("nitroAds.loaded");
+  expect(app.calls).toEqual(["create", "remove", "destroy"]);
+});
+
+test("fallback registers successful placements for SPA navigation refresh", async () => {
+  const app = mount("./NitroRailFallbackAd.tsx");
+  app.auth.isLoading = false;
+  app.resize("fallback");
+  app.browser.nitroAds = {
+    createAd: () => Promise.resolve({ onNavigate() {} }),
+  };
+  app.render({ adId: "page-fallback" });
+  await Promise.resolve();
+  expect(app.calls).toEqual(["register"]);
+  app.unmount();
+  expect(app.calls).toEqual(["register", "remove"]);
+});
+
+test("homepage reselects billboard and mobile rectangle sizes as viewport dimensions change", () => {
+  const app = mount("./NitroHomepageAd.tsx");
+  app.auth.isLoading = false;
+  const placements = new Map<string, string[][]>();
+  app.browser.nitroAds = {
+    createAd: (id: string, config: { sizes: string[][] }) =>
+      placements.set(id, config.sizes),
+    removeAd() {},
+  };
+  app.render();
+  expect(placements.get("np-homepage-desktop")).toContainEqual(["970", "250"]);
+  expect(placements.get("np-homepage-mobile")).toContainEqual(["336", "280"]);
+  app.height(700);
+  app.render();
+  expect(placements.get("np-homepage-desktop")).not.toContainEqual([
+    "970",
+    "250",
+  ]);
+  app.height(500);
+  app.render();
+  expect(placements.get("np-homepage-mobile")).toEqual([
+    ["320", "50"],
+    ["320", "100"],
+  ]);
+  app.height(900);
+  app.resize("mobile");
+  app.render();
+  expect(placements.get("np-homepage-desktop")).not.toContainEqual([
+    "970",
+    "250",
+  ]);
+  app.resize("wide");
+  app.render();
+  expect(placements.get("np-homepage-desktop")).toContainEqual(["970", "250"]);
+});
+
+for (const filename of ["./NitroItemMobileAd.tsx", "./NitroGridAd.tsx"]) {
+  test(`${filename} replaces tall creatives with compact banners on short windows`, () => {
+    const app = mount(filename);
+    app.auth.isLoading = false;
+    const sizes: string[][][] = [];
+    app.browser.nitroAds = {
+      createAd: (_id: string, config: { sizes: string[][] }) => {
+        sizes.push(config.sizes);
+      },
+      removeAd() {},
+    };
+    app.render();
+    app.intersect();
+    expect(sizes.at(-1)).toContainEqual(["300", "250"]);
+    app.height(500);
+    app.render();
+    app.intersect();
+    expect(sizes.at(-1)).toHaveLength(2);
+    expect(sizes.at(-1)).toContainEqual(["320", "50"]);
+    expect(sizes.at(-1)).toContainEqual(["320", "100"]);
+    app.height(900);
+    app.render();
+    app.intersect();
+    expect(sizes.at(-1)).toContainEqual(["300", "250"]);
   });
 }

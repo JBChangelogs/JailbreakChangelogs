@@ -1,5 +1,7 @@
 "use client";
 
+import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
+
 import {
   memo,
   useState,
@@ -571,6 +573,8 @@ function BountyTrackerContent() {
           <p className="text-secondary-text mb-6">
             Real-time tracking of high bounty players across servers
           </p>
+
+          <NitroRailFallbackAd adId="np-rail-left-bounties-fallback" />
 
           {/* Search Row */}
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-4">

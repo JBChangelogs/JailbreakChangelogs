@@ -2,6 +2,7 @@
 
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { createLogger } from "@/services/logger";
 
@@ -59,7 +60,7 @@ const DESKTOP_CONFIG = {
     wording: "Report Ad",
     position: "top-right",
   },
-  mediaQuery: "(min-width: 1024px)",
+  mediaQuery: "(min-width: 768px)",
 };
 
 interface Props {
@@ -71,6 +72,10 @@ export default function NitroHomepageAd({ className }: Props) {
   const containerRefMobile = useRef<HTMLDivElement | null>(null);
   const containerRefDesktop = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
+  const tallMobile = useMediaQuery("(min-height: 600px)");
+  const largeDesktop = useMediaQuery(
+    "(min-width: 1280px) and (min-height: 800px)",
+  );
   const tier = user?.premiumtype ?? 0;
   const isSupporter = canHideAdsForPremiumType(tier);
 
@@ -105,16 +110,21 @@ export default function NitroHomepageAd({ className }: Props) {
 
     try {
       // Mobile config
-      Promise.resolve(nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG)).catch(
-        (error) => {
-          log.warn("[Nitro Ad] Failed to create homepage mobile ad:", error);
-        },
-      );
+      Promise.resolve(
+        nitroAds.createAd(SLOT_ID_MOBILE, {
+          ...MOBILE_CONFIG,
+          sizes: tallMobile
+            ? MOBILE_CONFIG.sizes
+            : MOBILE_CONFIG.sizes.filter((size) => Number(size[1]) <= 100),
+        }),
+      ).catch((error) => {
+        log.warn("[Nitro Ad] Failed to create homepage mobile ad:", error);
+      });
 
       // Desktop config
       let desktopConfig = DESKTOP_CONFIG;
-      // If the window height is less than 800px, remove the 970x250 ad size to prevent it from touching the bottom anchor ad
-      if (window.innerHeight < 800) {
+      // Reserve the billboard format for roomy desktop windows.
+      if (!largeDesktop) {
         desktopConfig = {
           ...DESKTOP_CONFIG,
           sizes: DESKTOP_CONFIG.sizes.filter(
@@ -138,7 +148,7 @@ export default function NitroHomepageAd({ className }: Props) {
       clearContainers();
       createdRef.current = false;
     };
-  }, [isLoading, isSupporter]);
+  }, [isLoading, isSupporter, tallMobile, largeDesktop]);
 
   if (isLoading || isSupporter) {
     return null;
@@ -150,14 +160,16 @@ export default function NitroHomepageAd({ className }: Props) {
       <div
         id={SLOT_ID_MOBILE}
         ref={containerRefMobile}
-        className={`block md:hidden ${!isSupporter ? "min-h-70" : ""}`}
+        className="block md:hidden"
+        style={{ minHeight: tallMobile ? 280 : 100 }}
       />
 
       {/* Desktop ad container with min-height to prevent CLS (only for non-supporters) */}
       <div
         id={SLOT_ID_DESKTOP}
         ref={containerRefDesktop}
-        className={`hidden lg:block ${!isSupporter ? "min-h-62.5" : ""}`}
+        className="hidden md:block"
+        style={{ minHeight: largeDesktop ? 250 : 100 }}
       />
     </div>
   );
