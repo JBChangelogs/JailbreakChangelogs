@@ -23,7 +23,11 @@ import {
 
 const categories = {
   new: { label: "New features", color: "text-link", icon: Sparkles },
-  fixes: { label: "Fixes", color: "text-status-warning", icon: Bug },
+  fixes: {
+    label: "Fixes",
+    color: "text-status-warning release-fix-count",
+    icon: Bug,
+  },
   performance: {
     label: "Performance",
     color: "text-form-success",

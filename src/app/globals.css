@@ -857,6 +857,14 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   color: var(--color-primary-text);
 }
 
+.light .release-fix-count {
+  color: color-mix(
+    in srgb,
+    var(--color-status-warning) 50%,
+    var(--color-primary-text)
+  );
+}
+
 .changelog-prose strong {
   color: var(--color-primary-text);
   font-weight: 600;
