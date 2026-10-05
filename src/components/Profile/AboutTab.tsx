@@ -57,20 +57,15 @@ export default function AboutTab({
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [newBio, setNewBio] = useState("");
   const [isSavingBio, setIsSavingBio] = useState(false);
-  const [localBioLastUpdated, setLocalBioLastUpdated] = useState<number | null>(
-    bioLastUpdated || null,
-  );
-
-  // Use real-time relative date
-  const realTimeRelativeDate = useRealTimeRelativeDate(localBioLastUpdated);
+  const realTimeRelativeDate = useRealTimeRelativeDate(bioLastUpdated);
   const { isAuthenticated } = useAuthContext();
 
   useEffect(() => {
-    // Initialize bio from props
-    setNewBio(sanitizeText(bio || ""));
-    setLocalBioLastUpdated(bioLastUpdated || null);
-    setBioExpanded(false);
-  }, [bio, bioLastUpdated]);
+    if (!isEditingBio) {
+      setNewBio(sanitizeText(bio || ""));
+      setBioExpanded(false);
+    }
+  }, [bio, isEditingBio]);
 
   const handleSaveBio = async () => {
     if (!isAuthenticated) {
@@ -114,9 +109,6 @@ export default function AboutTab({
       if (onBioUpdate) {
         onBioUpdate(cleanedBio);
       }
-
-      // Update local timestamp immediately for real-time display
-      setLocalBioLastUpdated(Date.now());
 
       toast.success("Bio updated successfully");
       setIsEditingBio(false);
@@ -242,7 +234,7 @@ export default function AboutTab({
             ) : (
               <p className="text-primary-text italic">No bio yet</p>
             )}
-            {localBioLastUpdated && (
+            {bioLastUpdated && (
               <p className="text-secondary-text mt-4 text-xs">
                 Last updated:{" "}
                 <Tooltip>
@@ -250,7 +242,7 @@ export default function AboutTab({
                     <span className="cursor-help">{realTimeRelativeDate}</span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {formatCustomDate(localBioLastUpdated)}
+                    {formatCustomDate(bioLastUpdated)}
                   </TooltipContent>
                 </Tooltip>
               </p>

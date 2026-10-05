@@ -17,7 +17,6 @@ import { UserSettingsV2 } from "@/types/auth";
 import type { UserFlag } from "@/types/auth";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { tabSlideVariants, tabSlideTransition } from "@/utils/ui/tabAnimations";
-import type { TradeAd } from "@/types/trading";
 
 interface User {
   id: string;
@@ -56,11 +55,7 @@ interface ProfileTabsProps {
   bio: string | null;
   bioLastUpdated: number | null;
   onBioUpdate?: (newBio: string) => void;
-  isLoadingAdditionalData?: boolean;
-  tradeAds?: TradeAd[];
 }
-
-// Reset to basic Tabs/Tab for debugging mobile scroll snapping
 
 const TabPanel = ({
   children,
@@ -89,8 +84,6 @@ export default function ProfileTabs({
   bio,
   bioLastUpdated,
   onBioUpdate,
-  isLoadingAdditionalData = false,
-  tradeAds = [],
 }: ProfileTabsProps) {
   "use memo";
   const [tabParam, setTabParam] = useQueryState("tab", {
@@ -227,8 +220,6 @@ export default function ProfileTabs({
                 <TabPanel value={value} index={4}>
                   <TradeAdsProfileTab
                     user={user}
-                    tradeAds={tradeAds}
-                    isLoadingAdditionalData={isLoadingAdditionalData}
                     isOwnProfile={currentUserId === user.id}
                     currentUserId={currentUserId}
                   />

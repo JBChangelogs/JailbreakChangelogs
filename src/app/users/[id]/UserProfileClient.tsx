@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import NextError from "next/error";
 import { notFound } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { UserAvatar } from "@/utils/ui/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Icon } from "../../../components/ui/IconWrapper";
 import { Banner } from "@/components/Profile/Banner";
@@ -51,11 +50,10 @@ import {
 } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileTabs from "@/components/Profile/ProfileTabs";
-import UserProfileLoading from "./loading";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import type { TradeAd } from "@/types/trading";
+import type { ProfileDataResult } from "@/services/profileDataService";
 const FollowersModal = dynamic(
   () => import("@/components/Users/FollowersModal"),
   {
@@ -212,57 +210,44 @@ interface User {
   } | null;
 }
 
-interface UserProfileData {
+export interface UserProfileData extends ProfileDataResult {
   user: User;
-  followerCount: number;
-  followingCount: number;
-  bio: string | null;
-  bioLastUpdated: number | null;
-  tradeAds: TradeAd[];
 }
 
 interface UserProfileClientProps {
   userId: string;
-  initialData?: UserProfileData;
+  profileData?: UserProfileData;
+  onProfileDataChange: (
+    update: (data: UserProfileData) => UserProfileData,
+  ) => void;
   error?: { message: string; code: number };
-  isLoadingAdditionalData?: boolean;
-  additionalDataError?: string;
 }
 
 export default function UserProfileClient({
   userId,
-  initialData,
+  profileData,
+  onProfileDataChange,
   error,
-  isLoadingAdditionalData = false,
-  additionalDataError: _additionalDataError,
 }: UserProfileClientProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { user: currentUser, isLoading: authLoading } = useAuthContext();
-  const [user, setUser] = useState<User | null>(initialData?.user || null);
-  const [loading] = useState(!initialData && !error);
-  const [errorState] = useState<string | null>(error?.message || null);
-  const [errorCode] = useState<number | null>(error?.code || null);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isLoadingFollow, setIsLoadingFollow] = useState(true);
-  const [followerCount, setFollowerCount] = useState(
-    initialData?.followerCount || 0,
-  );
-  const [followingCount, setFollowingCount] = useState(
-    initialData?.followingCount || 0,
-  );
-  const [isAuthenticatedUser, setIsAuthenticatedUser] = useState(false);
+  const user = profileData?.user ?? null;
+  const profileUserId = user?.id;
+  const errorState = error?.message ?? null;
+  const errorCode = error?.code ?? null;
+  const currentUserId = currentUser?.id ?? null;
+  const isAuthenticatedUser = Boolean(currentUser);
+  const followerCount = profileData?.followerCount ?? 0;
+  const followingCount = profileData?.followingCount ?? 0;
+  const bio = profileData?.bio ?? null;
+  const bioLastUpdated = profileData?.bioLastUpdated ?? null;
+  const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
   const [canMessageFromProfile, setCanMessageFromProfile] = useState(false);
   const [isBlockedByMe, setIsBlockedByMe] = useState(false);
   const [isBlockingAction, setIsBlockingAction] = useState(false);
-  const [bio, setBio] = useState<string | null>(initialData?.bio || null);
-  const [bioLastUpdated, setBioLastUpdated] = useState<number | null>(
-    initialData?.bioLastUpdated || null,
-  );
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
-  const [tradeAds] = useState<TradeAd[]>(initialData?.tradeAds || []);
   const [isReportDescriptionOpen, setIsReportDescriptionOpen] = useState(false);
   const [reportDescriptionReason, setReportDescriptionReason] = useState("");
   const [isSubmittingDescriptionReport, setIsSubmittingDescriptionReport] =
@@ -297,30 +282,33 @@ export default function UserProfileClient({
     `user-last-seen-${user?.id || "unknown"}`,
   );
 
-  const refreshBio = async (newBio: string) => {
-    setBio(newBio);
-    setBioLastUpdated(Date.now());
+  const refreshBio = (newBio: string) => {
+    onProfileDataChange((data) => ({
+      ...data,
+      bio: newBio,
+      bioLastUpdated: Date.now(),
+    }));
+  };
+
+  const updateUser = (update: (previousUser: User) => User) => {
+    onProfileDataChange((data) => ({ ...data, user: update(data.user) }));
   };
 
   const handleProfileAvatarUploaded = (
     newAvatarUrl: string,
     displayEnabled: boolean,
   ) => {
-    setUser((previousUser) =>
-      previousUser
+    updateUser((previousUser) => ({
+      ...previousUser,
+      avatar: displayEnabled ? newAvatarUrl : previousUser.avatar,
+      custom_avatar: newAvatarUrl,
+      settings_v2: previousUser.settings_v2
         ? {
-            ...previousUser,
-            avatar: displayEnabled ? newAvatarUrl : previousUser.avatar,
-            custom_avatar: newAvatarUrl,
-            settings_v2: previousUser.settings_v2
-              ? {
-                  ...previousUser.settings_v2,
-                  custom_avatar: displayEnabled,
-                }
-              : previousUser.settings_v2,
+            ...previousUser.settings_v2,
+            custom_avatar: displayEnabled,
           }
-        : previousUser,
-    );
+        : previousUser.settings_v2,
+    }));
 
     if (currentUser) {
       const updatedCurrentUser = {
@@ -343,21 +331,17 @@ export default function UserProfileClient({
     newBannerUrl: string,
     displayEnabled: boolean,
   ) => {
-    setUser((previousUser) =>
-      previousUser
+    updateUser((previousUser) => ({
+      ...previousUser,
+      banner: displayEnabled ? newBannerUrl : previousUser.banner,
+      custom_banner: newBannerUrl,
+      settings_v2: previousUser.settings_v2
         ? {
-            ...previousUser,
-            banner: displayEnabled ? newBannerUrl : previousUser.banner,
-            custom_banner: newBannerUrl,
-            settings_v2: previousUser.settings_v2
-              ? {
-                  ...previousUser.settings_v2,
-                  custom_banner: displayEnabled,
-                }
-              : previousUser.settings_v2,
+            ...previousUser.settings_v2,
+            custom_banner: displayEnabled,
           }
-        : previousUser,
-    );
+        : previousUser.settings_v2,
+    }));
 
     if (currentUser) {
       const updatedCurrentUser = {
@@ -376,92 +360,37 @@ export default function UserProfileClient({
     }
   };
 
-  useEffect(() => {
-    if (currentUser) {
-      setCurrentUserId(currentUser.id);
-      setIsAuthenticatedUser(true);
-    } else {
-      setCurrentUserId(null);
-      setIsAuthenticatedUser(false);
-    }
-  }, [currentUser]);
-
-  // Owner viewing their own private profile — resolve client-side instead of server-side
-  useEffect(() => {
-    if (
-      error?.message?.startsWith("PRIVATE_PROFILE:") &&
-      error?.code === 403 &&
-      currentUser?.id === userId
-    ) {
-      setUser({
-        ...currentUser,
-        banner: currentUser.banner ?? undefined,
-        custom_banner: currentUser.custom_banner ?? undefined,
-      });
-    }
-  }, [currentUser, error, userId]);
-
-  // Update following status when currentUserId changes
-  useEffect(() => {
-    let isCancelled = false;
-
-    const updateFollowingStatus = async () => {
-      if (currentUserId && user && userId) {
-        setIsLoadingFollow(true);
-        try {
-          const followingData = await queryClient.fetchQuery({
-            queryKey: ["following", currentUserId],
-            queryFn: async ({ signal }): Promise<FollowingData[]> => {
-              const response = await fetch(
-                `${PUBLIC_API_URL}/v2/users/${currentUserId}/following`,
-                {
-                  signal,
-                  headers: {
-                    "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
-                  },
-                },
-              );
-              if (!response.ok) return [];
-              const data = await response.json();
-              return Array.isArray(data) ? data : [];
-            },
-            staleTime: 0,
-            gcTime: 5 * 60_000,
-            retry: false,
-          });
-          if (isCancelled) return;
-
-          const isUserFollowing =
-            Array.isArray(followingData) &&
-            followingData.some(
-              (followedUser) =>
-                followedUser.user_id === currentUserId &&
-                followedUser.following_id === userId,
-            );
-          setIsFollowing(isUserFollowing);
-        } catch (error: unknown) {
-          log.error("Error fetching following status:", error);
-        } finally {
-          if (!isCancelled) {
-            setIsLoadingFollow(false);
-          }
-        }
-      }
-    };
-
-    updateFollowingStatus();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [currentUserId, userId, user, queryClient]);
+  const followingQuery = useQuery({
+    queryKey: ["following", currentUserId],
+    enabled: Boolean(currentUserId && user),
+    queryFn: async ({ signal }): Promise<FollowingData[]> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/${currentUserId}/following`,
+      );
+      const response = await fetch(url, { signal, headers });
+      if (!response.ok) throw new Error("Failed to load following status");
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    },
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+    retry: false,
+  });
+  const isFollowing =
+    followingQuery.data?.some(
+      (followedUser) =>
+        followedUser.user_id === currentUserId &&
+        followedUser.following_id === userId,
+    ) ?? false;
+  const isLoadingFollow = isUpdatingFollow || followingQuery.isLoading;
 
   useEffect(() => {
     if (
       !isAuthenticatedUser ||
       !currentUserId ||
-      !user ||
-      currentUserId === user.id
+      !profileUserId ||
+      currentUserId === profileUserId
     ) {
       setIsBlockedByMe(false);
       return;
@@ -514,7 +443,7 @@ export default function UserProfileClient({
           if (!entry || typeof entry !== "object") return false;
           const blockedUserId = (entry as Record<string, unknown>)
             .blocked_user_id;
-          return String(blockedUserId) === user.id;
+          return String(blockedUserId) === profileUserId;
         });
 
         if (!isCancelled) {
@@ -533,14 +462,14 @@ export default function UserProfileClient({
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, isAuthenticatedUser, user, queryClient]);
+  }, [currentUserId, isAuthenticatedUser, profileUserId, queryClient]);
 
   useEffect(() => {
     if (
       !isAuthenticatedUser ||
       !currentUserId ||
-      !user ||
-      currentUserId === user.id
+      !profileUserId ||
+      currentUserId === profileUserId
     ) {
       setCanMessageFromProfile(true);
       return;
@@ -556,11 +485,11 @@ export default function UserProfileClient({
         }
 
         const status = await queryClient.fetchQuery({
-          queryKey: ["message-eligibility", currentUserId, user.id],
+          queryKey: ["message-eligibility", currentUserId, profileUserId],
           queryFn: async ({ signal }) => {
             const { url, headers } = buildApiFetchRequest(
               PUBLIC_API_URL,
-              `/v2/conversations/${encodeURIComponent(user.id)}`,
+              `/v2/conversations/${encodeURIComponent(profileUserId)}`,
             );
             const response = await fetch(url, {
               method: "HEAD",
@@ -591,7 +520,13 @@ export default function UserProfileClient({
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, isAuthenticatedUser, isBlockedByMe, user, queryClient]);
+  }, [
+    currentUserId,
+    isAuthenticatedUser,
+    isBlockedByMe,
+    profileUserId,
+    queryClient,
+  ]);
 
   const handleBlockToggle = async () => {
     if (
@@ -869,11 +804,11 @@ export default function UserProfileClient({
   const handleFollow = async () => {
     if (isLoadingFollow) return;
 
-    setIsLoadingFollow(true);
+    setIsUpdatingFollow(true);
     try {
       if (!currentUserId) {
         toast.info("You need to be logged in to follow users");
-        setIsLoadingFollow(false);
+        setIsUpdatingFollow(false);
         return;
       }
 
@@ -897,21 +832,29 @@ export default function UserProfileClient({
         return;
       }
 
-      setIsFollowing(!isFollowing);
+      queryClient.setQueryData<FollowingData[]>(
+        ["following", currentUserId],
+        (data = []) =>
+          isFollowing
+            ? data.filter((entry) => entry.following_id !== userId)
+            : [
+                ...data,
+                {
+                  user_id: currentUserId,
+                  following_id: userId,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+      );
       void queryClient.invalidateQueries({
         queryKey: ["following", currentUserId],
       });
       void queryClient.invalidateQueries({ queryKey: ["followers", userId] });
 
-      if (isFollowing) {
-        setFollowerCount((prevCount) => Math.max(0, prevCount - 1));
-      } else {
-        setFollowerCount((prevCount) => prevCount + 1);
-      }
-
-      if (user) {
-        setUser({ ...user, is_following: !isFollowing });
-      }
+      onProfileDataChange((data) => ({
+        ...data,
+        followerCount: Math.max(0, data.followerCount + (isFollowing ? -1 : 1)),
+      }));
 
       toast.success(
         isFollowing
@@ -928,11 +871,9 @@ export default function UserProfileClient({
         isFollowing ? "Failed to unfollow user" : "Failed to follow user",
       );
     } finally {
-      setIsLoadingFollow(false);
+      setIsUpdatingFollow(false);
     }
   };
-
-  if (loading) return <UserProfileLoading />;
 
   if (errorCode && !user) {
     if (authLoading) return null;
@@ -1075,45 +1016,36 @@ export default function UserProfileClient({
 
   const profileConnections = (
     <>
-      {isLoadingAdditionalData ? (
-        <>
-          <Skeleton style={{ width: 100, height: 32 }} />
-          <Skeleton style={{ width: 100, height: 32 }} />
-        </>
-      ) : (
-        <>
-          <Tooltip delayDuration={500}>
-            <TooltipTrigger asChild>
-              <Link
-                href={`https://discord.com/users/${user.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
-              >
-                <DiscordIcon className="h-3.5 w-3.5" />
-                Discord
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Visit Discord Profile</TooltipContent>
-          </Tooltip>
+      <Tooltip delayDuration={500}>
+        <TooltipTrigger asChild>
+          <Link
+            href={`https://discord.com/users/${user.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+          >
+            <DiscordIcon className="h-3.5 w-3.5" />
+            Discord
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent>Visit Discord Profile</TooltipContent>
+      </Tooltip>
 
-          {user.roblox_id && (
-            <Tooltip delayDuration={500}>
-              <TooltipTrigger asChild>
-                <Link
-                  href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
-                >
-                  <RobloxIcon className="h-3.5 w-3.5" />
-                  Roblox
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Visit Roblox Profile</TooltipContent>
-            </Tooltip>
-          )}
-        </>
+      {user.roblox_id && (
+        <Tooltip delayDuration={500}>
+          <TooltipTrigger asChild>
+            <Link
+              href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+            >
+              <RobloxIcon className="h-3.5 w-3.5" />
+              Roblox
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>Visit Roblox Profile</TooltipContent>
+        </Tooltip>
       )}
     </>
   );
@@ -1192,123 +1124,102 @@ export default function UserProfileClient({
                       />
                     </div>
                     <div className="col-span-2 flex flex-wrap items-center gap-x-3 gap-y-1 md:mt-2">
-                      {isLoadingAdditionalData ? (
-                        <Skeleton className="w-3/5" style={{ height: 16 }} />
+                      {user.settings_v2?.hide_presence === true &&
+                      currentUserId !== user.id ? (
+                        <p className="text-secondary-text text-sm">
+                          Last seen: Hidden
+                        </p>
+                      ) : user.presence?.status === "Online" ? (
+                        <p
+                          className="text-sm"
+                          style={{
+                            color: "var(--color-status-success-vibrant)",
+                          }}
+                        >
+                          Online
+                        </p>
+                      ) : user.last_seen === null ? (
+                        <div className="bg-tertiary-bg mt-2 mb-2 rounded-lg p-4">
+                          <p className="text-secondary-text mb-1 text-sm font-medium">
+                            Are you the owner of this profile?
+                          </p>
+                          <p className="text-primary-text text-sm">
+                            Login to enable status indicators and last seen
+                            timestamps. Your Discord avatar, banner, and
+                            username changes will automatically sync with your
+                            profile.
+                          </p>
+                        </div>
                       ) : (
-                        <>
-                          {user.settings_v2?.hide_presence === true &&
-                          currentUserId !== user.id ? (
-                            <p className="text-secondary-text text-sm">
-                              Last seen: Hidden
-                            </p>
-                          ) : user.presence?.status === "Online" ? (
-                            <p
-                              className="text-sm"
-                              style={{
-                                color: "var(--color-status-success-vibrant)",
-                              }}
-                            >
-                              Online
-                            </p>
-                          ) : user.last_seen === null ? (
-                            <div className="bg-tertiary-bg mt-2 mb-2 rounded-lg p-4">
-                              <p className="text-secondary-text mb-1 text-sm font-medium">
-                                Are you the owner of this profile?
-                              </p>
-                              <p className="text-primary-text text-sm">
-                                Login to enable status indicators and last seen
-                                timestamps. Your Discord avatar, banner, and
-                                username changes will automatically sync with
-                                your profile.
-                              </p>
-                            </div>
-                          ) : (
-                            user.last_seen && (
-                              <p className="text-secondary-text text-sm">
-                                Last seen:{" "}
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span
-                                      className="cursor-help"
-                                      aria-label={`User was last seen ${lastSeenTime}`}
-                                    >
-                                      {lastSeenTime}
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    {formatCustomDate(user.last_seen)}
-                                  </TooltipContent>
-                                </Tooltip>
-                              </p>
-                            )
-                          )}
-                        </>
-                      )}
-
-                      {isLoadingAdditionalData ? (
-                        <Skeleton className="w-4/5" style={{ height: 20 }} />
-                      ) : (
-                        user.created_at && (
+                        user.last_seen && (
                           <p className="text-secondary-text text-sm">
-                            Member #{user.usernumber}
-                            <span aria-hidden="true" className="mx-2">
-                              ·
-                            </span>
-                            Joined{" "}
+                            Last seen:{" "}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="cursor-help">
-                                  {formatShortDate(user.created_at)}
+                                <span
+                                  className="cursor-help"
+                                  aria-label={`User was last seen ${lastSeenTime}`}
+                                >
+                                  {lastSeenTime}
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent>
-                                {formatDayMonthYearTime(user.created_at)}
+                                {formatCustomDate(user.last_seen)}
                               </TooltipContent>
                             </Tooltip>
                           </p>
                         )
                       )}
+
+                      {user.created_at && (
+                        <p className="text-secondary-text text-sm">
+                          Member #{user.usernumber}
+                          <span aria-hidden="true" className="mx-2">
+                            ·
+                          </span>
+                          Joined{" "}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help">
+                                {formatShortDate(user.created_at)}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {formatDayMonthYearTime(user.created_at)}
+                            </TooltipContent>
+                          </Tooltip>
+                        </p>
+                      )}
                     </div>
                     <div className="col-span-2 flex flex-col items-start gap-3 md:mt-4">
                       {/* Follower/Following Counts */}
                       <div className="flex flex-wrap items-center gap-6">
-                        {isLoadingAdditionalData ? (
-                          <>
-                            <Skeleton style={{ width: 80, height: 20 }} />
-                            <Skeleton style={{ width: 80, height: 20 }} />
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() =>
-                                followerCount > 0 &&
-                                setIsFollowersModalOpen(true)
-                              }
-                              className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followerCount > 0 ? "cursor-pointer" : "cursor-default"}`}
-                            >
-                              <span
-                                className={`text-primary-text text-xl font-semibold tabular-nums ${followerCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
-                              >
-                                {followerCount}
-                              </span>{" "}
-                              {followerCount === 1 ? "follower" : "followers"}
-                            </button>
-                            <button
-                              onClick={() =>
-                                followingCount > 0 &&
-                                setIsFollowingModalOpen(true)
-                              }
-                              className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followingCount > 0 ? "cursor-pointer" : "cursor-default"}`}
-                            >
-                              <span
-                                className={`text-primary-text text-xl font-semibold tabular-nums ${followingCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
-                              >
-                                {followingCount}
-                              </span>{" "}
-                              following
-                            </button>
-                          </>
-                        )}
+                        <button
+                          onClick={() =>
+                            followerCount > 0 && setIsFollowersModalOpen(true)
+                          }
+                          className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followerCount > 0 ? "cursor-pointer" : "cursor-default"}`}
+                        >
+                          <span
+                            className={`text-primary-text text-xl font-semibold tabular-nums ${followerCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                          >
+                            {followerCount}
+                          </span>{" "}
+                          {followerCount === 1 ? "follower" : "followers"}
+                        </button>
+                        <button
+                          onClick={() =>
+                            followingCount > 0 && setIsFollowingModalOpen(true)
+                          }
+                          className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followingCount > 0 ? "cursor-pointer" : "cursor-default"}`}
+                        >
+                          <span
+                            className={`text-primary-text text-xl font-semibold tabular-nums ${followingCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                          >
+                            {followingCount}
+                          </span>{" "}
+                          following
+                        </button>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 md:hidden">
                         {profileConnections}
@@ -1651,8 +1562,6 @@ export default function UserProfileClient({
             bio={bio}
             bioLastUpdated={bioLastUpdated}
             onBioUpdate={refreshBio}
-            isLoadingAdditionalData={isLoadingAdditionalData}
-            tradeAds={tradeAds}
           />
         </div>
       </div>
@@ -1663,12 +1572,16 @@ export default function UserProfileClient({
         isOwnProfile={user.id === currentUserId}
         currentUserId={currentUserId}
         onFollowChange={(type) => {
-          setFollowingCount((prev) =>
-            type === "add" ? prev + 1 : Math.max(0, prev - 1),
-          );
+          onProfileDataChange((data) => ({
+            ...data,
+            followingCount: Math.max(
+              0,
+              data.followingCount + (type === "add" ? 1 : -1),
+            ),
+          }));
         }}
         onCountUpdate={(count) => {
-          setFollowerCount(count);
+          onProfileDataChange((data) => ({ ...data, followerCount: count }));
         }}
         userData={user}
       />
@@ -1679,14 +1592,16 @@ export default function UserProfileClient({
         isOwnProfile={user.id === currentUserId}
         currentUserId={currentUserId}
         onFollowChange={(isFollowing) => {
-          if (isFollowing) {
-            setFollowingCount((prev) => prev + 1);
-          } else {
-            setFollowingCount((prev) => Math.max(0, prev - 1));
-          }
+          onProfileDataChange((data) => ({
+            ...data,
+            followingCount: Math.max(
+              0,
+              data.followingCount + (isFollowing ? 1 : -1),
+            ),
+          }));
         }}
         onCountUpdate={(count) => {
-          setFollowingCount(count);
+          onProfileDataChange((data) => ({ ...data, followingCount: count }));
         }}
         userData={user}
       />

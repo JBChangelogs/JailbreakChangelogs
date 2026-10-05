@@ -21,8 +21,6 @@ interface User {
 
 interface TradeAdsProfileTabProps {
   user: User;
-  tradeAds?: TradeAd[];
-  isLoadingAdditionalData?: boolean;
   isOwnProfile?: boolean;
   currentUserId?: string | null;
 }
@@ -67,8 +65,6 @@ function TradeAdsTabSkeleton() {
 
 export default function TradeAdsProfileTab({
   user,
-  tradeAds = [],
-  isLoadingAdditionalData = false,
   isOwnProfile = false,
   currentUserId = null,
 }: TradeAdsProfileTabProps) {
@@ -260,10 +256,6 @@ export default function TradeAdsProfileTab({
             : 1,
       };
     },
-    initialData:
-      page === 1 && tradeAds.length > 0
-        ? { items: tradeAds, totalPages: 1 }
-        : undefined,
     staleTime: 0,
     gcTime: 5 * 60_000,
     retry: false,
@@ -276,12 +268,9 @@ export default function TradeAdsProfileTab({
     }
   }, [page, apiTotalPages, adsQuery.data]);
 
-  const clientTradeAds = adsQuery.data?.items ?? (page === 1 ? tradeAds : []);
-  const hasVisibleAds = page === 1 && tradeAds.length > 0;
-  const isFetchingTradeAds =
-    Boolean(baseUrl && user.id) && adsQuery.isPending && !hasVisibleAds;
-  const tradeAdsError =
-    adsQuery.data || hasVisibleAds ? null : adsQuery.error?.message;
+  const clientTradeAds = adsQuery.data?.items ?? [];
+  const isFetchingTradeAds = Boolean(baseUrl && user.id) && adsQuery.isPending;
+  const tradeAdsError = adsQuery.data ? null : adsQuery.error?.message;
 
   const sortedTradeAds = [...clientTradeAds].sort(
     (a, b) => b.created_at - a.created_at,
@@ -290,8 +279,7 @@ export default function TradeAdsProfileTab({
 
   return (
     <div className="mt-6 mb-8">
-      {(isLoadingAdditionalData && !adsQuery.data && tradeAds.length === 0) ||
-      isFetchingTradeAds ? (
+      {isFetchingTradeAds ? (
         <TradeAdsTabSkeleton />
       ) : tradeAdsError ? (
         <div className="mx-auto max-w-lg p-8 text-center">
