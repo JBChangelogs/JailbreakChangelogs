@@ -5,8 +5,7 @@ export interface InventoryListEntry {
 }
 
 export const UNVERIFIABLE_COLLECTION_ITEM_IDS = new Set<number>([
-  903, 902, 142, 145, 534, 778, 293, 152, 467, 587, 713, 653, 171, 174, 176,
-  185, 187, 655, 204, 640, 634, 709,
+  903, 902, 145, 534, 778, 293, 467, 587, 713, 653, 171, 174, 655, 204, 709,
 ]);
 
 export const VALUES_TYPE_ORDER = [
