@@ -44,7 +44,8 @@ function frontend(testing: boolean) {
     healthcheck: "/api/healthcheck",
     healthcheckTimeout: 30,
     deploy: {
-      ...(!testing && { drainingSeconds: 20, overlapSeconds: 30 }),
+      drainingSeconds: 20,
+      overlapSeconds: 30,
       limitOverride: {
         containers: { cpu: 16, memoryBytes: 16_000_000_000 },
       },
