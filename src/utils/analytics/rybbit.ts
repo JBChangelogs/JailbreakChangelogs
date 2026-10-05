@@ -1,6 +1,11 @@
 "use client";
 
 import type { FilterSort, ValueSort } from "@/types";
+import {
+  getDesktopNavigation,
+  subscribeDesktopNavigation,
+  type DesktopNavigation,
+} from "@/utils/ui/desktopNavigation";
 
 export type FilterSortEventContext = "values" | "trading";
 export type FilterSortEventKind = "filter" | "sort";
@@ -34,6 +39,34 @@ export function trackEvent(
   )
     return;
   window.rybbit.event(name, properties);
+}
+
+export function trackDesktopNavigationUsage() {
+  const largeScreen = window.matchMedia("(min-width: 1536px)");
+  const recorded = new Set<DesktopNavigation>();
+  const track = () => {
+    if (!largeScreen.matches || typeof window.rybbit?.event !== "function")
+      return;
+    const layout = getDesktopNavigation();
+    if (recorded.has(layout)) return;
+    trackEvent(
+      layout === "sidebar"
+        ? "Sidebar Navigation Used"
+        : "Top Bar Navigation Used",
+    );
+    recorded.add(layout);
+  };
+
+  const unsubscribe = subscribeDesktopNavigation(track);
+  largeScreen.addEventListener("change", track);
+  // The analytics script may finish loading after the header mounts.
+  document.addEventListener("load", track, true);
+  track();
+  return () => {
+    unsubscribe();
+    largeScreen.removeEventListener("change", track);
+    document.removeEventListener("load", track, true);
+  };
 }
 
 export function trackIdentify(
