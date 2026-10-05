@@ -1026,20 +1026,20 @@ img.twemoji {
     display: none;
   }
 
-  .site-layout:has([data-desktop-sidebar]) {
-    --desktop-sidebar-width: 260px;
+  .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) {
+    --desktop-sidebar-width: 240px;
   }
 
   .site-layout:has([data-desktop-sidebar="collapsed"]) {
-    --desktop-sidebar-width: 80px;
+    --desktop-sidebar-width: 72px;
   }
 
   html[data-desktop-navigation="top-bar"] .site-layout {
     --desktop-sidebar-width: 0px;
   }
 
-  .site-layout:has([data-desktop-sidebar]) > main,
-  .site-layout:has([data-desktop-sidebar]) > footer {
+  .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > main,
+  .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > footer {
     margin-left: var(--desktop-sidebar-width);
     width: calc(100% - var(--desktop-sidebar-width));
     min-width: 0;
@@ -1052,8 +1052,8 @@ img.twemoji {
     transition: width 300ms ease-in-out;
   }
 
-  .site-layout:has([data-desktop-sidebar]) > main,
-  .site-layout:has([data-desktop-sidebar]) > footer {
+  .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > main,
+  .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > footer {
     transition:
       margin-left 300ms ease-in-out,
       width 300ms ease-in-out;

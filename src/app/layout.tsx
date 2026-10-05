@@ -109,6 +109,7 @@ export default async function RootLayout({
           {/* Apply saved theme class before React hydrates to prevent FOUC */}
           <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
           <script
+            data-cfasync="false"
             dangerouslySetInnerHTML={{ __html: DESKTOP_NAVIGATION_INIT_SCRIPT }}
           />
           {/* Rybbit Analytics */}
@@ -205,7 +206,10 @@ export default async function RootLayout({
                       >
                         <Suspense
                           fallback={
-                            <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
+                            <div
+                              data-desktop-sidebar-pending
+                              className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
+                            />
                           }
                         >
                           <HideOnAccessDenied>
@@ -249,6 +253,7 @@ export default async function RootLayout({
         {/* Apply saved theme class before React hydrates to prevent FOUC */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script
+          data-cfasync="false"
           dangerouslySetInnerHTML={{ __html: DESKTOP_NAVIGATION_INIT_SCRIPT }}
         />
         {/* Preconnect to external asset domains */}
@@ -342,7 +347,10 @@ export default async function RootLayout({
                   <div className="site-layout flex min-h-screen flex-col">
                     <Suspense
                       fallback={
-                        <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
+                        <div
+                          data-desktop-sidebar-pending
+                          className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
+                        />
                       }
                     >
                       <HideOnAccessDenied>
