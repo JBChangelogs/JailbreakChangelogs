@@ -17,10 +17,14 @@ export default function CalculatorPage() {
         adIdWide="np-rail-right-calculator-wide"
         side="right"
       />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <Breadcrumb />
-        <CalculatorDescription />
-        <CalculatorClient initialItems={[]} />
+      <main>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
+          <CalculatorDescription />
+        </div>
+        <div className="mx-auto w-full px-4 min-[1900px]:max-w-[96rem] sm:px-6 lg:px-8">
+          <CalculatorClient initialItems={[]} />
+        </div>
       </main>
     </>
   );

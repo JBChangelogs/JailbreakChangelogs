@@ -59,6 +59,28 @@ interface CustomTypeOption {
   label: string;
 }
 
+export interface SideButtonConfig {
+  label: string;
+  activeClass: string;
+  inactiveClass: string;
+  hintClass: string;
+}
+
+const DEFAULT_SIDE_BUTTONS: Record<TradeSide, SideButtonConfig> = {
+  offering: {
+    label: "Offer",
+    activeClass: "bg-status-success text-form-button-text",
+    inactiveClass: "bg-status-success text-form-button-text",
+    hintClass: "text-status-success font-medium",
+  },
+  requesting: {
+    label: "Request",
+    activeClass: "bg-status-error text-form-button-text",
+    inactiveClass: "bg-status-error text-form-button-text",
+    hintClass: "text-status-error font-medium",
+  },
+};
+
 interface TradeItemPickerV2Props {
   items: TradeItem[];
   customTypes: CustomTypeOption[];
@@ -71,6 +93,8 @@ interface TradeItemPickerV2Props {
   activeSide?: TradeSide;
   onActiveSideChange?: (side: TradeSide) => void;
   showOfferRequestButtons?: boolean;
+  sideButtons?: Record<TradeSide, SideButtonConfig>;
+  emphasizeActiveSide?: boolean;
   inventoryCopies?: Record<number, number>;
   favoriteIds?: number[];
   onToggleFavorite?: (itemId: number, isFavorited: boolean) => void;
@@ -153,6 +177,8 @@ export default function TradeItemPickerV2({
   activeSide: activeSideProp,
   onActiveSideChange,
   showOfferRequestButtons = false,
+  sideButtons = DEFAULT_SIDE_BUTTONS,
+  emphasizeActiveSide = false,
   inventoryCopies,
   favoriteIds,
   onToggleFavorite,
@@ -712,10 +738,12 @@ export default function TradeItemPickerV2({
           {showOfferRequestButtons ? (
             <p className="text-secondary-text text-sm">
               Use the{" "}
-              <span className="text-status-success font-medium">Offer</span>
+              <span className={sideButtons.offering.hintClass}>
+                {sideButtons.offering.label}
+              </span>
               {" / "}
-              <span className="text-status-error font-medium">
-                Request
+              <span className={sideButtons.requesting.hintClass}>
+                {sideButtons.requesting.label}
               </span>{" "}
               buttons on each card
             </p>
@@ -1099,16 +1127,34 @@ export default function TradeItemPickerV2({
                       <button
                         type="button"
                         onClick={addToOfferingSide}
-                        className="bg-status-success text-form-button-text cursor-pointer rounded-lg py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+                        aria-pressed={
+                          emphasizeActiveSide
+                            ? activeSide === "offering"
+                            : undefined
+                        }
+                        className={`cursor-pointer rounded-lg py-1.5 text-xs font-semibold transition-opacity hover:opacity-90 ${
+                          !emphasizeActiveSide || activeSide === "offering"
+                            ? sideButtons.offering.activeClass
+                            : sideButtons.offering.inactiveClass
+                        }`}
                       >
-                        Offer
+                        {sideButtons.offering.label}
                       </button>
                       <button
                         type="button"
                         onClick={addToRequestingSide}
-                        className="bg-status-error text-form-button-text cursor-pointer rounded-lg py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+                        aria-pressed={
+                          emphasizeActiveSide
+                            ? activeSide === "requesting"
+                            : undefined
+                        }
+                        className={`cursor-pointer rounded-lg py-1.5 text-xs font-semibold transition-opacity hover:opacity-90 ${
+                          !emphasizeActiveSide || activeSide === "requesting"
+                            ? sideButtons.requesting.activeClass
+                            : sideButtons.requesting.inactiveClass
+                        }`}
                       >
-                        Request
+                        {sideButtons.requesting.label}
                       </button>
                     </div>
                   )}

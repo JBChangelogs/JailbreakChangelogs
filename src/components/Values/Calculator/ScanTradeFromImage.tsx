@@ -86,10 +86,11 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [lastFileName, setLastFileName] = useState<string | null>(null);
   const [lastErrorMessage, setLastErrorMessage] = useState<string | null>(null);
+  const [isWindowDragging, setIsWindowDragging] = useState(false);
 
   const helpText = useMemo(
     () =>
-      "Drop a Jailbreak trading UI screenshot here. We'll detect Offering/Requesting items and prefill the calculator.",
+      "Drop a Jailbreak trading UI screenshot here. We'll detect You give/You receive items and prefill the calculator.",
     [],
   );
   const acceptedTypesText = useMemo(
@@ -259,77 +260,125 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
     return () => window.removeEventListener("paste", onPaste);
   }, [isScanning, scanFile]);
 
+  useEffect(() => {
+    let depth = 0;
+    const hasFiles = (event: DragEvent) =>
+      Array.from(event.dataTransfer?.types ?? []).includes("Files");
+    const onEnter = (event: DragEvent) => {
+      if (!hasFiles(event)) return;
+      depth += 1;
+      setIsWindowDragging(true);
+    };
+    const onLeave = (event: DragEvent) => {
+      if (!hasFiles(event)) return;
+      depth = Math.max(0, depth - 1);
+      if (depth === 0) setIsWindowDragging(false);
+    };
+    const reset = () => {
+      depth = 0;
+      setIsWindowDragging(false);
+    };
+    window.addEventListener("dragenter", onEnter);
+    window.addEventListener("dragleave", onLeave);
+    window.addEventListener("drop", reset);
+    window.addEventListener("dragend", reset);
+    return () => {
+      window.removeEventListener("dragenter", onEnter);
+      window.removeEventListener("dragleave", onLeave);
+      window.removeEventListener("drop", reset);
+      window.removeEventListener("dragend", reset);
+    };
+  }, []);
+
+  const expanded = (isWindowDragging || isDragActive) && !isScanning;
+
   return (
     <div data-component="scan-trade-from-image">
       <div
         className={[
-          "flex items-center gap-4 rounded-lg border-2 border-dashed p-5 text-left transition-all duration-150",
+          "rounded-lg border-dashed transition-all duration-150",
+          "focus-visible:ring-border-focus focus-visible:ring-2 focus-visible:outline-none",
+          expanded
+            ? "flex flex-col items-center justify-center gap-2 border-2 px-4 py-10 text-center"
+            : "flex items-center gap-2.5 border px-3 py-2 text-left pointer-coarse:py-3",
           isDragActive
             ? isDragReject
               ? "border-status-error bg-status-error/10 ring-2 ring-status-error/25"
               : "border-button-info bg-button-info/10 ring-2 ring-button-info/25"
-            : "border-border-card hover:border-border-focus bg-secondary-bg",
+            : expanded
+              ? "border-border-focus bg-tertiary-bg"
+              : "border-border-card hover:border-border-focus bg-secondary-bg",
           isScanning ? "cursor-progress opacity-80" : "cursor-pointer",
         ].join(" ")}
-        {...getRootProps({ role: "button", tabIndex: 0 })}
+        {...getRootProps({
+          role: "button",
+          tabIndex: 0,
+          "aria-label": "Scan a trade screenshot",
+        })}
       >
         <input {...getInputProps()} />
         {isScanning ? (
-          <Spinner className="text-secondary-text h-7 w-7 shrink-0" />
+          <Spinner className="text-secondary-text h-5 w-5 shrink-0" />
         ) : (
           <Icon
             icon="material-symbols:cloud-upload"
-            className={`h-7 w-7 shrink-0 transition-transform duration-150 ${
-              isDragActive
-                ? isDragReject
-                  ? "text-status-error scale-125"
-                  : "text-button-info scale-125"
-                : "text-secondary-text"
-            }`}
+            className={`text-secondary-text shrink-0 ${expanded ? "h-10 w-10" : "h-5 w-5"}`}
+            aria-hidden="true"
           />
         )}
-        <div className="min-w-0" aria-live="polite">
-          {isScanning ? (
-            <p className="text-primary-text text-base font-semibold">
-              Scanning{lastFileName ? ` ${lastFileName}` : ""}...
-              <span className="text-secondary-text ml-2 text-sm font-normal">
-                This can take a few seconds
-              </span>
-            </p>
-          ) : isDragActive ? (
+
+        {expanded ? (
+          <div>
             <p className="text-primary-text text-base font-semibold">
               {isDragReject
                 ? "Only PNG and JPG screenshots are supported"
-                : "Drop screenshot to scan"}
+                : "Drop your screenshot to scan it"}
             </p>
-          ) : (
-            <p className="text-primary-text text-base font-semibold">
-              Scan a trade screenshot
-              <span className="text-secondary-text ml-2 text-sm font-normal">
-                — {helpText}
-              </span>
-            </p>
-          )}
-          <p className="text-secondary-text mt-1 text-sm">
-            {isDragActive
-              ? isDragReject
+            <p className="text-secondary-text mt-1 text-xs">
+              {isDragReject
                 ? "Choose a PNG or JPG/JPEG image."
-                : "Release to upload your trade screenshot."
-              : `Click, drop, or paste (Ctrl+V / ⌘V) · ${acceptedTypesText}`}
-          </p>
-
-          {lastErrorMessage && (
-            <p className="mt-1 text-sm font-medium text-red-400">
-              {lastErrorMessage}
+                : `${helpText} · ${acceptedTypesText}`}
             </p>
-          )}
+          </div>
+        ) : (
+          <div className="min-w-0 flex-1">
+            {isScanning ? (
+              <p className="text-primary-text truncate text-sm font-semibold">
+                Scanning{lastFileName ? ` ${lastFileName}` : ""}...
+                <span className="text-secondary-text ml-2 hidden font-normal sm:inline">
+                  This can take a few seconds
+                </span>
+              </p>
+            ) : (
+              <p className="text-primary-text truncate text-sm font-semibold">
+                Scan a trade screenshot
+                <span className="text-secondary-text ml-2 hidden text-xs font-normal sm:inline">
+                  Click, drop, or paste (Ctrl+V / ⌘V) · {acceptedTypesText}
+                </span>
+              </p>
+            )}
 
-          {lastFileName && !isScanning && (
-            <p className="text-secondary-text mt-1 text-sm">
-              Last uploaded file: {lastFileName}
-            </p>
-          )}
-        </div>
+            {lastErrorMessage && (
+              <p
+                className="text-primary-text mt-0.5 flex items-center gap-1 text-xs"
+                role="alert"
+              >
+                <Icon
+                  icon="heroicons:exclamation-circle"
+                  className="text-status-error h-4 w-4 shrink-0"
+                  aria-hidden="true"
+                />
+                {lastErrorMessage}
+              </p>
+            )}
+
+            {lastFileName && !isScanning && !lastErrorMessage && (
+              <p className="text-secondary-text/70 mt-0.5 truncate text-xs">
+                Last scanned: {lastFileName}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

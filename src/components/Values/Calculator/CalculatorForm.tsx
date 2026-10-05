@@ -31,10 +31,20 @@ import {
   getCalculatorItemValue,
   updateCalculatorValueType,
   formatTotalValue,
+  getTradeVerdict,
 } from "./calculatorUtils";
+import { useNumberDisplayMode } from "./useNumberDisplayMode";
 import { ClearConfirmModal } from "./ClearConfirmModal";
 import { TradeSummaryBar } from "./TradeSummaryBar";
 import { TradeSidePanel } from "./TradeSidePanel";
+import { TradeConnector } from "./TradeConnector";
+import { SegmentedControl } from "./SegmentedControl";
+import {
+  SIDE_BUTTONS,
+  SIDE_STYLES,
+  TINT_FRAME_BY_VERDICT,
+  VERDICT_STYLES,
+} from "./calculatorStyles";
 import { ScanTradeFromImage } from "./ScanTradeFromImage";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
@@ -772,7 +782,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     setRequestingItems(newRequesting);
     saveItemsToLocalStorage(newOffering, newRequesting);
     toast.success(
-      `Filled ${newOffering.length} offering and ${newRequesting.length} requesting items.`,
+      `Filled ${newOffering.length} "You give" and ${newRequesting.length} "You receive" items.`,
     );
   };
 
@@ -783,6 +793,49 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     const setItems =
       side === "offering" ? setOfferingItems : setRequestingItems;
     setItems((prev) => prev.filter((item) => item.instanceId !== instanceId));
+  };
+
+  const handleRemoveGroup = (
+    instanceIds: string[],
+    side: "offering" | "requesting",
+  ) => {
+    if (instanceIds.length === 0) return;
+    const setItems =
+      side === "offering" ? setOfferingItems : setRequestingItems;
+    const currentItems =
+      side === "offering"
+        ? offeringItemsRef.current
+        : requestingItemsRef.current;
+    const idSet = new Set(instanceIds);
+    const removed = currentItems
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.instanceId && idSet.has(item.instanceId));
+    if (removed.length === 0) return;
+
+    setItems((prev) =>
+      prev.filter((item) => !(item.instanceId && idSet.has(item.instanceId))),
+    );
+
+    const name = removed[0].item.name;
+    toast(
+      removed.length > 1
+        ? `Removed ${removed.length}x ${name}`
+        : `Removed ${name}`,
+      {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            setItems((prev) => {
+              const next = [...prev];
+              removed.forEach(({ item, index }) => {
+                next.splice(Math.min(index, next.length), 0, item);
+              });
+              return next;
+            });
+          },
+        },
+      },
+    );
   };
 
   const handleSwapSides = () => {
@@ -838,6 +891,36 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const catalogItems =
     itemsInputMode === "picker" ? initialItems : inventoryItems;
 
+  const [numberMode, setNumberMode] = useNumberDisplayMode();
+  const offeringTotal = calculateTotals(offeringItems).total;
+  const requestingTotal = calculateTotals(requestingItems).total;
+  const verdict = getTradeVerdict(offeringTotal, requestingTotal);
+
+  const handleBrowse = (side: "offering" | "requesting") => {
+    setPickerActiveSide(side);
+    const target = document.getElementById("calculator-browse");
+    if (!target) return;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    target.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  };
+
+  const addingToOptions = (["offering", "requesting"] as const).map((side) => ({
+    value: side,
+    label: SIDE_BUTTONS[side].label,
+    icon: SIDE_STYLES[side].icon,
+    activeClassName: SIDE_STYLES[side].activeFill,
+  }));
+
+  const verdictStyle = VERDICT_STYLES[verdict.kind];
+  const frameClass = `${verdictStyle.frame} ${
+    TINT_FRAME_BY_VERDICT ? verdictStyle.frameTint : ""
+  }`;
+
   return (
     <div className="space-y-6">
       {/* Restore Modal */}
@@ -869,54 +952,82 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       <div className="space-y-4">
         <ScanTradeFromImage onScanSuccess={handleScanTradeSuccess} />
 
-        {/* Trade Panels */}
-        <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
-          <TradeSidePanel
-            side="offering"
-            items={offeringItems}
-            catalogItems={catalogItems}
-            useCatalogApi={itemsInputMode === "picker"}
-            onRemoveItem={(instanceId) =>
-              handleRemoveItem(instanceId, "offering")
-            }
-            onDuplicateItem={(item) => handleAddItem(item, "offering")}
-            onValueTypeChange={(id, valueType, instanceId) =>
-              updateItemValueType(id, valueType, "offering", instanceId)
-            }
-            getSelectedValueType={getSelectedValueType}
-            getSelectedValue={getSelectedValue}
-            onMirror={() => handleMirrorItems("offering")}
-          />
-          <TradeSidePanel
-            side="requesting"
-            items={requestingItems}
-            catalogItems={catalogItems}
-            useCatalogApi={itemsInputMode === "picker"}
-            onRemoveItem={(instanceId) =>
-              handleRemoveItem(instanceId, "requesting")
-            }
-            onDuplicateItem={(item) => handleAddItem(item, "requesting")}
-            onValueTypeChange={(id, valueType, instanceId) =>
-              updateItemValueType(id, valueType, "requesting", instanceId)
-            }
-            getSelectedValueType={getSelectedValueType}
-            getSelectedValue={getSelectedValue}
-            onMirror={() => handleMirrorItems("requesting")}
-          />
-        </div>
-
         <TradeSummaryBar
-          offeringTotal={calculateTotals(offeringItems).total}
-          requestingTotal={calculateTotals(requestingItems).total}
+          variant="verdict"
+          numberMode={numberMode}
+          onNumberModeChange={setNumberMode}
+          offeringTotal={offeringTotal}
+          requestingTotal={requestingTotal}
           offeringCount={offeringItems.length}
           requestingCount={requestingItems.length}
           onSwapSides={handleSwapSides}
           onClearSides={handleClearSides}
+          labels={{ offering: "You give", requesting: "You receive" }}
+          swapTooltip="Swap You give and You receive"
+          showSwap={false}
         />
+
+        <div
+          className={`rounded-2xl border-2 p-3 transition-colors duration-300 motion-reduce:transition-none sm:p-4 ${frameClass}`}
+          data-verdict={verdict.kind}
+        >
+          <div className="space-y-4">
+            <TradeSidePanel
+              side="offering"
+              items={offeringItems}
+              catalogItems={catalogItems}
+              useCatalogApi={itemsInputMode === "picker"}
+              onRemoveItem={(instanceId) =>
+                handleRemoveItem(instanceId, "offering")
+              }
+              onRemoveGroup={(instanceIds) =>
+                handleRemoveGroup(instanceIds, "offering")
+              }
+              onDuplicateItem={(item) => handleAddItem(item, "offering")}
+              onValueTypeChange={(id, valueType, instanceId) =>
+                updateItemValueType(id, valueType, "offering", instanceId)
+              }
+              getSelectedValueType={getSelectedValueType}
+              getSelectedValue={getSelectedValue}
+              onMirror={() => handleMirrorItems("offering")}
+              numberMode={numberMode}
+              total={offeringTotal}
+              onBrowse={() => handleBrowse("offering")}
+            />
+            <TradeConnector
+              verdict={verdict}
+              numberMode={numberMode}
+              onSwapSides={handleSwapSides}
+              hasItems={offeringItems.length > 0 || requestingItems.length > 0}
+            />
+            <TradeSidePanel
+              side="requesting"
+              items={requestingItems}
+              catalogItems={catalogItems}
+              useCatalogApi={itemsInputMode === "picker"}
+              onRemoveItem={(instanceId) =>
+                handleRemoveItem(instanceId, "requesting")
+              }
+              onRemoveGroup={(instanceIds) =>
+                handleRemoveGroup(instanceIds, "requesting")
+              }
+              onDuplicateItem={(item) => handleAddItem(item, "requesting")}
+              onValueTypeChange={(id, valueType, instanceId) =>
+                updateItemValueType(id, valueType, "requesting", instanceId)
+              }
+              getSelectedValueType={getSelectedValueType}
+              getSelectedValue={getSelectedValue}
+              onMirror={() => handleMirrorItems("requesting")}
+              numberMode={numberMode}
+              total={requestingTotal}
+              onBrowse={() => handleBrowse("requesting")}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Browse — full width below panels (matches /trading#create item picker placement) */}
-      <div className="w-full min-w-0">
+      <div id="calculator-browse" className="mt-6 w-full min-w-0 scroll-mt-40">
         {onItemsInputModeChange && (
           <div className="mb-6">
             <Tabs
@@ -936,11 +1047,24 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             </Tabs>
           </div>
         )}
-        <h2 className="text-primary-text mb-5 text-xl font-semibold md:mb-6">
+        <h2 className="text-primary-text mb-4 text-xl font-semibold">
           {itemsInputMode === "inventory"
             ? "Browse Inventory Items"
             : "Browse Items"}
         </h2>
+
+        <div className="mb-5 flex flex-wrap items-center gap-3">
+          <span className="text-secondary-text text-sm font-medium">
+            Adding to
+          </span>
+          <SegmentedControl
+            options={addingToOptions}
+            value={pickerActiveSide}
+            onChange={setPickerActiveSide}
+            ariaLabel="Side to add items to"
+            size="lg"
+          />
+        </div>
 
         <div
           className="mb-8 w-full min-w-0"
@@ -959,6 +1083,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               activeSide={pickerActiveSide}
               onActiveSideChange={setPickerActiveSide}
               showOfferRequestButtons
+              sideButtons={SIDE_BUTTONS}
+              emphasizeActiveSide
               favoriteIds={favoriteIds}
               onToggleFavorite={handleToggleFavorite}
               multiSelectFilters
@@ -1071,6 +1197,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                   activeSide={pickerActiveSide}
                   onActiveSideChange={setPickerActiveSide}
                   showOfferRequestButtons
+                  sideButtons={SIDE_BUTTONS}
+                  emphasizeActiveSide
                   inventoryCopies={inventoryCopies}
                   favoriteIds={favoriteIds}
                   onToggleFavorite={handleToggleFavorite}

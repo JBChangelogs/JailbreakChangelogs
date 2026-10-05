@@ -66,3 +66,84 @@ export const formatTotalValue = (total: number): string => {
 export const formatCurrencyValue = (value: number): string => {
   return value.toLocaleString();
 };
+
+const FAIR_TRADE_THRESHOLD_PERCENT = 3;
+
+export type TradeVerdictKind = "empty" | "win" | "loss" | "fair";
+
+export interface TradeVerdict {
+  kind: TradeVerdictKind;
+  difference: number;
+  percent: number | null;
+}
+
+export const getTradeVerdict = (
+  giveTotal: number,
+  receiveTotal: number,
+): TradeVerdict => {
+  const difference = receiveTotal - giveTotal;
+  if (giveTotal <= 0 || receiveTotal <= 0) {
+    return { kind: "empty", difference, percent: null };
+  }
+  const percent = (difference / giveTotal) * 100;
+  if (Math.abs(percent) <= FAIR_TRADE_THRESHOLD_PERCENT) {
+    return { kind: "fair", difference, percent };
+  }
+  return { kind: difference > 0 ? "win" : "loss", difference, percent };
+};
+
+const trimScaled = (value: number): string =>
+  value < 100
+    ? String(Number(value.toPrecision(3)))
+    : String(Number(value.toFixed(1)));
+
+const COMPACT_UNITS: ReadonlyArray<{ limit: number; suffix: string }> = [
+  { limit: 1_000_000_000_000, suffix: "T" },
+  { limit: 1_000_000_000, suffix: "B" },
+  { limit: 1_000_000, suffix: "M" },
+  { limit: 1_000, suffix: "K" },
+];
+
+const formatCompactValue = (value: number): string => {
+  if (!Number.isFinite(value)) return "0";
+  const sign = value < 0 ? "-" : "";
+  const abs = Math.abs(value);
+  if (abs < 1_000) return `${sign}${trimScaled(abs)}`;
+  for (let i = 0; i < COMPACT_UNITS.length; i += 1) {
+    const unit = COMPACT_UNITS[i];
+    if (abs < unit.limit) continue;
+    const scaled = trimScaled(abs / unit.limit);
+    if (Number(scaled) >= 1_000 && i > 0) {
+      return `${sign}${trimScaled(abs / COMPACT_UNITS[i - 1].limit)}${COMPACT_UNITS[i - 1].suffix}`;
+    }
+    return `${sign}${scaled}${unit.suffix}`;
+  }
+  return `${sign}${abs}`;
+};
+
+export type NumberDisplayMode = "short" | "full";
+
+export const NUMBER_DISPLAY_STORAGE_KEY = "calculatorNumberDisplay";
+export const DEFAULT_NUMBER_DISPLAY: NumberDisplayMode = "short";
+
+export const formatByMode = (value: number, mode: NumberDisplayMode): string =>
+  mode === "short" ? formatCompactValue(value) : formatCurrencyValue(value);
+
+export const formatSignedPercent = (percent: number): string => {
+  const abs = Math.abs(percent);
+  const text =
+    abs < 10 ? String(Number(abs.toFixed(1))) : String(Math.round(abs));
+  if (percent > 0) return `+${text}%`;
+  if (percent < 0) return `-${text}%`;
+  return `${text}%`;
+};
+
+export const formatSignedValue = (
+  value: number,
+  mode: NumberDisplayMode,
+): string => {
+  const text = formatByMode(Math.abs(value), mode);
+  if (value > 0) return `+${text}`;
+  if (value < 0) return `-${text}`;
+  return text;
+};
