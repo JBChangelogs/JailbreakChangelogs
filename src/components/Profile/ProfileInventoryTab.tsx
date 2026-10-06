@@ -259,7 +259,7 @@ export default function ProfileInventoryTab({
     typeFilter,
   ]);
 
-  const itemsPerPage = 16;
+  const itemsPerPage = 18;
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const displayedItems = filteredItems.slice(
     (page - 1) * itemsPerPage,
