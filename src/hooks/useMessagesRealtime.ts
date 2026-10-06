@@ -8,6 +8,7 @@ import type {
   RealtimeMessageEventDetail,
 } from "@/utils/messages/types";
 import { asId } from "@/utils/messages/parsing";
+import { findLocalMessageConfirmation } from "@/utils/messages/invites";
 import {
   getLatestMessage,
   sortConversationsByLatestMessage,
@@ -339,16 +340,25 @@ export function useMessagesRealtime({
         return;
       }
 
+      const isOwnSend = action === "message_sent" && senderId === currentUserId;
+      const localConfirmation = isOwnSend
+        ? findLocalMessageConfirmation(
+            localThreadMessagesByUserIdRef.current.get(counterpartId) ?? [],
+            { id: messageId, senderId, receiverId, parentId, content },
+          )
+        : undefined;
+      const realtimeMetadata =
+        payload.metadata && typeof payload.metadata === "object"
+          ? (payload.metadata as Record<string, unknown>)
+          : (localConfirmation?.metadata ?? null);
       const realtimeMessage: Message = {
         id: messageId,
         parentId,
         senderId,
         receiverId,
         content,
-        metadata:
-          payload.metadata && typeof payload.metadata === "object"
-            ? (payload.metadata as Record<string, unknown>)
-            : null,
+        metadata: realtimeMetadata,
+        type: realtimeMetadata ? "system" : "user",
         createdAt: Date.now(),
         status: "sent",
         ...(readMessageIdsRef.current.has(messageId)
@@ -356,63 +366,16 @@ export function useMessagesRealtime({
           : {}),
       };
 
-      const isOwnSend =
-        action === "message_sent" && asId(senderId) === asId(currentUserId);
-
-      if (isOwnSend) {
-        const metadata =
-          payload.metadata && typeof payload.metadata === "object"
-            ? (payload.metadata as Record<string, unknown>)
-            : null;
-        const clientIdFromMetadata =
-          metadata && typeof metadata.client_id === "string"
-            ? metadata.client_id
-            : null;
-
-        let matchedLocal = false;
-        if (clientIdFromMetadata) {
-          updateLocalThreadMessage(
-            counterpartId,
-            (m) => m.clientId === clientIdFromMetadata,
-            (m) => ({
-              ...m,
-              id: realtimeMessage.id,
-              parentId: m.parentId ?? realtimeMessage.parentId ?? null,
-              content: realtimeMessage.content,
-              status: "sent",
-            }),
-          );
-          matchedLocal = (
-            localThreadMessagesByUserIdRef.current.get(counterpartId) ?? []
-          ).some((m) => m.id === realtimeMessage.id);
-        }
-
-        if (!matchedLocal) {
-          const now = Date.now();
-          const maxAgeMs = 30_000;
-          updateLocalThreadMessage(
-            counterpartId,
-            (m) => {
-              if (m.status !== "pending") return false;
-              if (asId(m.senderId) !== asId(senderId)) return false;
-              if (asId(m.receiverId) !== asId(receiverId)) return false;
-              if ((m.parentId ?? null) !== (realtimeMessage.parentId ?? null))
-                return false;
-              if (m.content !== realtimeMessage.content) return false;
-              const createdAt = m.createdAt ?? 0;
-              if (!createdAt) return false;
-              return now - createdAt <= maxAgeMs;
-            },
-            (m) => ({ ...m, id: realtimeMessage.id, status: "sent" }),
-          );
-          matchedLocal = (
-            localThreadMessagesByUserIdRef.current.get(counterpartId) ?? []
-          ).some((m) => m.id === realtimeMessage.id);
-        }
-
-        if (!matchedLocal) {
-          upsertLocalThreadMessage(counterpartId, realtimeMessage);
-        }
+      if (localConfirmation) {
+        updateLocalThreadMessage(
+          counterpartId,
+          (message) => message.id === localConfirmation.id,
+          (message) => ({
+            ...message,
+            ...realtimeMessage,
+            clientId: message.clientId,
+          }),
+        );
       } else {
         upsertLocalThreadMessage(counterpartId, realtimeMessage);
       }
@@ -458,6 +421,10 @@ export function useMessagesRealtime({
                   ...item,
                   parentId: item.parentId ?? realtimeMessage.parentId ?? null,
                   content: realtimeMessage.content,
+                  metadata: realtimeMessage.metadata ?? item.metadata,
+                  type: realtimeMessage.metadata
+                    ? realtimeMessage.type
+                    : item.type,
                   status: "sent",
                 }
               : item,
@@ -465,64 +432,13 @@ export function useMessagesRealtime({
         }
 
         if (isOwnSend) {
-          const metadata =
-            payload.metadata && typeof payload.metadata === "object"
-              ? (payload.metadata as Record<string, unknown>)
-              : null;
-          const clientIdFromMetadata =
-            metadata && typeof metadata.client_id === "string"
-              ? metadata.client_id
-              : null;
-
-          if (clientIdFromMetadata) {
-            const idx = prev.findIndex(
-              (item) => item.clientId === clientIdFromMetadata,
+          const local = findLocalMessageConfirmation(prev, realtimeMessage);
+          if (local)
+            return prev.map((message) =>
+              message.id === local.id
+                ? { ...message, ...realtimeMessage, clientId: message.clientId }
+                : message,
             );
-            if (idx !== -1) {
-              return prev.map((item, i) =>
-                i === idx
-                  ? {
-                      ...item,
-                      id: realtimeMessage.id,
-                      status: "sent",
-                      ...(realtimeMessage.readAt
-                        ? { readAt: realtimeMessage.readAt }
-                        : {}),
-                    }
-                  : item,
-              );
-            }
-          }
-
-          const now = Date.now();
-          const maxAgeMs = 30_000;
-          const pendingIndex = [...prev].reverse().findIndex((item) => {
-            if (item.status !== "pending") return false;
-            if (asId(item.senderId) !== asId(senderId)) return false;
-            if (asId(item.receiverId) !== asId(receiverId)) return false;
-            if ((item.parentId ?? null) !== (realtimeMessage.parentId ?? null))
-              return false;
-            if (item.content !== realtimeMessage.content) return false;
-            const createdAt = item.createdAt ?? 0;
-            if (!createdAt) return false;
-            return now - createdAt <= maxAgeMs;
-          });
-
-          if (pendingIndex !== -1) {
-            const indexFromStart = prev.length - 1 - pendingIndex;
-            return prev.map((item, idx) =>
-              idx === indexFromStart
-                ? {
-                    ...item,
-                    id: realtimeMessage.id,
-                    status: "sent",
-                    ...(realtimeMessage.readAt
-                      ? { readAt: realtimeMessage.readAt }
-                      : {}),
-                  }
-                : item,
-            );
-          }
         }
 
         return [...prev, realtimeMessage].sort(

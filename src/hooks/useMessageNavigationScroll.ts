@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { Message } from "@/utils/messages/types";
 import { asId } from "@/utils/messages/parsing";
+import { isUserMessage } from "@/utils/messages/invites";
 
 interface UseMessageNavigationScrollOptions {
   pathname: string;
@@ -164,7 +165,7 @@ export function useMessageNavigationScroll({
     }
 
     const latestMessage = messages[messages.length - 1];
-    if (!latestMessage || latestMessage.type === "system" || !currentUserId) {
+    if (!latestMessage || !isUserMessage(latestMessage) || !currentUserId) {
       return;
     }
 
@@ -181,7 +182,8 @@ export function useMessageNavigationScroll({
     pendingOwnSendScrollRef.current = false;
   }, [messages, currentUserId, scrollMessagesToLatest]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (initialScrollConversationIdRef.current === selectedUserId) return;
     initialScrollConversationIdRef.current = null;
     latestRenderedMessageRef.current = null;
     isAtBottomRef.current = true;
@@ -221,9 +223,7 @@ export function useMessageNavigationScroll({
     if (!latestMessage) return;
 
     const previous = latestRenderedMessageRef.current;
-    const latestUserMessage = messages.findLast(
-      (message) => message.type !== "system",
-    );
+    const latestUserMessage = messages.findLast(isUserMessage);
     const seenBadgeMessageId =
       latestUserMessage &&
       asId(latestUserMessage.senderId) === currentUserId &&
@@ -256,7 +256,7 @@ export function useMessageNavigationScroll({
       scrollMessagesToLatest("auto");
     } else if (
       hasNewLatestMessage &&
-      latestMessage.type !== "system" &&
+      isUserMessage(latestMessage) &&
       asId(latestMessage.senderId) !== currentUserId
     ) {
       setHasNewMessagesBelow(true);
@@ -292,6 +292,19 @@ export function useMessageNavigationScroll({
     container.scrollTop = restore.prevScrollTop + delta;
     prependScrollRestoreRef.current = null;
   }, [messages, selectedUserId]);
+
+  useLayoutEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container || !selectedUserId || isLoadingMessages) return;
+    const observer = new ResizeObserver(() => {
+      if (isAtBottomRef.current && !prependScrollRestoreRef.current) {
+        container.scrollTop = container.scrollHeight;
+      }
+    });
+    observer.observe(container);
+    for (const child of container.children) observer.observe(child);
+    return () => observer.disconnect();
+  }, [isLoadingMessages, messages, selectedUserId]);
 
   return {
     routeConversationId,

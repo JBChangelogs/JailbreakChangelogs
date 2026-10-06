@@ -593,7 +593,7 @@ export default function MessagesInbox() {
     }
   };
 
-  const { handleSendMessage } = useSendMessage({
+  const { handleSendMessage, handleSendGift } = useSendMessage({
     selectedUserId,
     selectedUser,
     currentUser,
@@ -907,7 +907,8 @@ export default function MessagesInbox() {
                   isSending={isSending}
                   isUnmessageable={isUnmessageable}
                   isTyping={typingUserIds.has(selectedUser.id)}
-                  onSend={(message) => void handleSendMessage(message)}
+                  onSend={handleSendMessage}
+                  onSendGift={handleSendGift}
                   onTyping={handleTyping}
                 />
               </Chat>
@@ -1001,7 +1002,7 @@ export default function MessagesInbox() {
               onChange={(e) => setReportReason(e.target.value)}
             />
             <p
-              className={`mt-1 text-right text-xs ${reportReason.length >= 500 ? "text-red-500" : "text-secondary-text"}`}
+              className={`mt-1 text-right text-xs ${reportReason.length >= 500 ? "text-form-error" : "text-secondary-text"}`}
             >
               {reportReason.length}/500
             </p>

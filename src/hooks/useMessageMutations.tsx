@@ -9,12 +9,14 @@ import type {
   ApiSendResponse,
   ConversationSummary,
   Message,
+  OutgoingMessageMetadata,
 } from "@/utils/messages/types";
 import {
   asId,
   normalizeTimestamp,
   resolveMessageParticipants,
 } from "@/utils/messages/parsing";
+import { parseMessageEmbed } from "@/utils/messages/invites";
 import {
   getLatestMessage,
   sortConversationsByLatestMessage,
@@ -40,7 +42,10 @@ interface UseMessageMutationsOptions {
   localThreadMessagesByUserIdRef: RefObject<Map<string, Message[]>>;
   prepareMessageContentForApi: (text: string) => string;
   prepareMessageDisplayContent: (text: string) => string;
-  handleSendMessage: (message: string) => void | Promise<void>;
+  handleSendMessage: (
+    message: string,
+    metadata?: OutgoingMessageMetadata,
+  ) => void | Promise<void>;
   setIsSending: Setter<boolean>;
   setMessages: Setter<Message[]>;
   setConversations: Setter<ConversationSummary[]>;
@@ -340,8 +345,10 @@ export function useMessageMutations({
     if (failedMessage.status !== "failed") return;
     if (!failedMessage.content?.trim()) return;
 
+    const metadata = parseMessageEmbed(failedMessage.metadata);
+    if (metadata?.type === "gift_sent") return;
     await handleDeleteMessage(failedMessage.id, true);
-    await handleSendMessage(failedMessage.content);
+    await handleSendMessage(failedMessage.content, metadata ?? undefined);
   };
 
   const handleReportMessage = async () => {

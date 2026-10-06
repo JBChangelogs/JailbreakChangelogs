@@ -41,6 +41,10 @@ export type Message = {
   status?: "pending" | "sent" | "failed";
 };
 
+export type OutgoingMessageMetadata =
+  | { type: "game_invite"; place_id: string; job_id: string | null }
+  | { type: "vip_server_invite"; server_id: number };
+
 export type OfferAcceptedMetadata = {
   type: "offer_accepted";
   user?: string | number;

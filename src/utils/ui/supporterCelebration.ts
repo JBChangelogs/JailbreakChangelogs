@@ -1,4 +1,4 @@
-const SUPPORTER_CONFETTI_COLORS: Record<number, string[]> = {
+export const SUPPORTER_CONFETTI_COLORS: Record<number, string[]> = {
   1: ["#ffffff", "#cd7f32"],
   2: ["#ffffff", "#c0c0c0"],
   3: ["#ffffff", "#ffd700"],

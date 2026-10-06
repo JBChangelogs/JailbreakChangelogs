@@ -5,13 +5,15 @@ import { BanBanner } from "@/components/ui/BanBanner";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { MessageComposer } from "@/components/Users/MessageComposer";
+import { ComposerActionsMenu } from "./ComposerActionsMenu";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { cn } from "@/lib/utils";
-import type { UserData } from "@/types/auth";
+import type { SupporterGift, UserData } from "@/types/auth";
 import {
   MESSAGE_CHAR_LIMIT,
   type Message,
   type MessageUser,
+  type OutgoingMessageMetadata,
 } from "@/utils/messages/types";
 import { asId } from "@/utils/messages/parsing";
 import { getDisplayName } from "@/utils/messages/formatting";
@@ -30,8 +32,12 @@ interface ComposerFooterProps {
   isSending: boolean;
   isUnmessageable: boolean;
   isTyping: boolean;
-  onSend: (message: string) => void;
+  onSend: (
+    message: string,
+    metadata?: OutgoingMessageMetadata,
+  ) => void | Promise<void>;
   onTyping: () => void;
+  onSendGift: (gift: SupporterGift) => Promise<void>;
 }
 
 export function ComposerFooter({
@@ -49,6 +55,7 @@ export function ComposerFooter({
   isTyping,
   onSend,
   onTyping,
+  onSendGift,
 }: ComposerFooterProps) {
   return (
     <>
@@ -115,7 +122,7 @@ export function ComposerFooter({
         )}
         <div
           className={cn(
-            "border-border-card bg-tertiary-bg text-primary-text focus-within:border-border-focus flex w-full items-center gap-2 rounded-md border px-1 py-1 shadow-none",
+            "border-border-card bg-tertiary-bg text-primary-text focus-within:border-link focus-within:ring-link/20 flex w-full items-center gap-2 rounded-xl border px-2 py-2 shadow-none transition-colors focus-within:ring-2 sm:px-3 sm:py-3",
             replyingToMessage && "rounded-t-none border-t-0",
           )}
         >
@@ -125,6 +132,18 @@ export function ComposerFooter({
             maxChars={MESSAGE_CHAR_LIMIT}
             isSending={isSending}
             disabled={!!messageBan || isUnmessageable}
+            actions={
+              currentUser && selectedUserId ? (
+                <ComposerActionsMenu
+                  key={`${currentUser.id}:${selectedUserId}`}
+                  userId={asId(currentUser.id)}
+                  recipientLabel={getDisplayName(selectedUser)}
+                  disabled={isSending || !!messageBan || isUnmessageable}
+                  onSend={onSend}
+                  onSendGift={onSendGift}
+                />
+              ) : null
+            }
             onSend={onSend}
             onTyping={onTyping}
           />

@@ -29,6 +29,7 @@ export interface MessageComposerProps {
   maxChars: number;
   isSending: boolean;
   disabled?: boolean;
+  actions?: React.ReactNode;
   onSend: (message: string) => void | Promise<void>;
   onTyping?: () => void;
 }
@@ -39,6 +40,7 @@ export function MessageComposer({
   maxChars,
   isSending,
   disabled = false,
+  actions,
   onSend,
   onTyping,
 }: MessageComposerProps) {
@@ -89,98 +91,101 @@ export function MessageComposer({
   );
 
   return (
-    <ChatToolbarTextarea
-      value={draft}
-      onChange={(event) => {
-        setDraft(event.target.value);
-        cursorPosRef.current = event.target.selectionStart;
-        if (event.target.value.trim()) {
-          onTyping?.();
-        }
-      }}
-      onSubmit={submit}
-      placeholder={placeholder}
-      maxLength={1000}
-      disabled={disabled}
-      emojiMap={emojiStringMap}
-      autoCorrect="off"
-      autoComplete="off"
-      spellCheck="false"
-      autoCapitalize="off"
-      rightOverlay={
-        <div className="flex items-center gap-1">
-          {overLimit > 0 ? (
-            <span className="text-xs font-medium text-red-400/90 tabular-nums">
-              -{overLimit}
-            </span>
-          ) : null}
-          <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
-            <Tooltip delayDuration={500}>
-              <TooltipTrigger asChild>
-                <PopoverTrigger asChild>
-                  <ChatToolbarButton
-                    type="button"
-                    aria-label="Open emoji picker"
-                    disabled={disabled}
-                    className="transition-colors hover:bg-transparent! active:bg-transparent!"
-                  >
-                    <Icon icon="heroicons:face-smile" className="h-4 w-4" />
-                  </ChatToolbarButton>
-                </PopoverTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Add an emoji</TooltipContent>
-            </Tooltip>
-            <PopoverContent
-              align="end"
-              side="top"
-              sideOffset={8}
-              className="w-72 p-0"
-              onOpenAutoFocus={(e) => e.preventDefault()}
+    <>
+      {actions}
+      <ChatToolbarTextarea
+        value={draft}
+        onChange={(event) => {
+          setDraft(event.target.value);
+          cursorPosRef.current = event.target.selectionStart;
+          if (event.target.value.trim()) {
+            onTyping?.();
+          }
+        }}
+        onSubmit={submit}
+        placeholder={placeholder}
+        maxLength={1000}
+        disabled={disabled}
+        emojiMap={emojiStringMap}
+        autoCorrect="off"
+        autoComplete="off"
+        spellCheck="false"
+        autoCapitalize="off"
+        rightOverlay={
+          <div className="flex items-center gap-1">
+            {overLimit > 0 ? (
+              <span className="text-form-error text-xs font-medium tabular-nums">
+                -{overLimit}
+              </span>
+            ) : null}
+            <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+              <Tooltip delayDuration={500}>
+                <TooltipTrigger asChild>
+                  <PopoverTrigger asChild>
+                    <ChatToolbarButton
+                      type="button"
+                      aria-label="Open emoji picker"
+                      disabled={disabled}
+                      className="hover:bg-tertiary-bg! size-9! p-0! transition-colors [&_svg]:size-5!"
+                    >
+                      <Icon icon="heroicons:face-smile" className="h-4 w-4" />
+                    </ChatToolbarButton>
+                  </PopoverTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Add an emoji</TooltipContent>
+              </Tooltip>
+              <PopoverContent
+                align="end"
+                side="top"
+                sideOffset={8}
+                className="w-72 p-0"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
+                <div className="grid max-h-56 grid-cols-8 gap-px overflow-y-auto p-1.5">
+                  {emojiEntries.map(([name, emoji]) => (
+                    <Tooltip key={name} delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={(e) => insertEmoji(emoji, e.shiftKey)}
+                          className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-transparent text-lg transition-colors"
+                        >
+                          {twemojiEnabled ? (
+                            <Twemoji
+                              tag="span"
+                              options={{
+                                className: "twemoji pointer-events-none",
+                              }}
+                            >
+                              {emoji}
+                            </Twemoji>
+                          ) : (
+                            <span className="pointer-events-none">{emoji}</span>
+                          )}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>:{name}:</TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+            <ChatToolbarButton
+              onClick={submit}
+              aria-label="Send message"
+              className="hover:bg-tertiary-bg! size-9! p-0! transition-colors [&_svg]:size-5!"
+              disabled={!draft.trim() || isSending || disabled || overLimit > 0}
             >
-              <div className="grid max-h-56 grid-cols-8 gap-px overflow-y-auto p-1.5">
-                {emojiEntries.map(([name, emoji]) => (
-                  <Tooltip key={name} delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={(e) => insertEmoji(emoji, e.shiftKey)}
-                        className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-transparent text-lg transition-colors"
-                      >
-                        {twemojiEnabled ? (
-                          <Twemoji
-                            tag="span"
-                            options={{
-                              className: "twemoji pointer-events-none",
-                            }}
-                          >
-                            {emoji}
-                          </Twemoji>
-                        ) : (
-                          <span className="pointer-events-none">{emoji}</span>
-                        )}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>:{name}:</TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-          <ChatToolbarButton
-            onClick={submit}
-            aria-label="Send message"
-            className="hover:bg-secondary-bg/50 transition-colors"
-            disabled={!draft.trim() || isSending || disabled || overLimit > 0}
-          >
-            {isSending ? (
-              <Spinner className="h-4 w-4" />
-            ) : (
-              <Icon icon="heroicons:paper-airplane" className="h-4 w-4" />
-            )}
-          </ChatToolbarButton>
-        </div>
-      }
-      className="text-primary-text placeholder-secondary-text"
-    />
+              {isSending ? (
+                <Spinner className="h-4 w-4" />
+              ) : (
+                <Icon icon="heroicons:paper-airplane" className="h-4 w-4" />
+              )}
+            </ChatToolbarButton>
+          </div>
+        }
+        className="text-primary-text placeholder-secondary-text"
+      />
+    </>
   );
 }

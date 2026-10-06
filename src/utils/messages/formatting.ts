@@ -1,6 +1,7 @@
 import { decode as decodeHtmlEntities } from "he";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { asId } from "@/utils/messages/parsing";
+import { parseMessageEmbed } from "@/utils/messages/invites";
 import type { Message, MessageUser, OfferItem } from "@/utils/messages/types";
 
 export function getDisplayName(user: MessageUser): string {
@@ -51,6 +52,19 @@ export function compactRelativeLabel(value: string): string {
   return futureMatch ? `in ${compact}` : `${compact} ago`;
 }
 
+export function formatGiftMessageContent(
+  message: Message,
+  level: number,
+  isMine: boolean,
+  senderLabel: string,
+): string {
+  if (message.status === "failed") return "Gift was not sent.";
+  if (message.status === "pending") return `Sending a Supporter ${level} gift…`;
+  return isMine
+    ? `Sent a Supporter ${level} gift!`
+    : `${senderLabel} sent you a Supporter ${level} gift!`;
+}
+
 export function formatSystemMessageContent(
   message: Message,
   currentUserId: string | null,
@@ -61,6 +75,16 @@ export function formatSystemMessageContent(
 
   const type = metadata.type;
   if (typeof type !== "string") return message.content ?? "";
+
+  const embed = parseMessageEmbed(metadata);
+  if (embed?.type === "gift_sent") {
+    return formatGiftMessageContent(
+      message,
+      embed.level,
+      !!currentUserId && asId(message.senderId) === currentUserId,
+      selectedUser ? getDisplayName(selectedUser) : "They",
+    );
+  }
 
   if (type === "offer_accepted") {
     const acceptorId = metadata.trade_user;

@@ -51,6 +51,8 @@ import {
   getDisplayName,
 } from "@/utils/messages/formatting";
 import { getMessageDomId } from "@/utils/messages/sorting";
+import { isUserMessage, parseMessageEmbed } from "@/utils/messages/invites";
+import { MessageEmbedCard } from "./MessageEmbedCard";
 
 interface MessageRowProps {
   message: Message;
@@ -118,7 +120,8 @@ export function MessageRow({
   handleEditMessage,
   insertEditEmoji,
 }: MessageRowProps) {
-  if (message.type === "system") {
+  const embedMetadata = parseMessageEmbed(message.metadata);
+  if (message.type === "system" && !embedMetadata) {
     const systemContent = formatSystemMessageContent(
       message,
       currentUser ? asId(currentUser.id) : null,
@@ -173,6 +176,8 @@ export function MessageRow({
   const domId = getMessageDomId(message);
   const previousMessage = messages[index - 1];
   const isGroupedWithPrevious = (() => {
+    if (embedMetadata || parseMessageEmbed(previousMessage?.metadata))
+      return false;
     if (showDaySeparator) return false;
     if (!previousMessage) return false;
     if (message.parentId) return false;
@@ -195,7 +200,7 @@ export function MessageRow({
   const isLatestSeenOwnMessage =
     isOwnMessage &&
     typeof message.readAt === "number" &&
-    !messages.slice(index + 1).some((candidate) => candidate.type !== "system");
+    !messages.slice(index + 1).some(isUserMessage);
 
   const renderMenuItems = (
     Item: React.ComponentType<{
@@ -204,68 +209,78 @@ export function MessageRow({
       children?: React.ReactNode;
     }>,
     skipShiftKey = false,
-  ) => (
-    <>
-      {message.status !== "failed" && (
-        <Item onClick={() => setReplyingToMessage(message)}>
-          <Icon icon="heroicons-outline:reply" className="mr-2 h-4 w-4" />
-          Reply
-        </Item>
-      )}
-      {!isOwnMessage && message.status !== "failed" && (
-        <Item
-          onClick={() => {
-            setReportingMessage(message);
-            setReportReason("");
-          }}
-          className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
-        >
-          <Icon icon="heroicons-outline:flag" className="mr-2 h-4 w-4" />
-          Report Message
-        </Item>
-      )}
-      {isOwnMessage && message.status !== "failed" && (
-        <>
+  ) =>
+    embedMetadata?.type === "gift_sent" &&
+    message.id === message.clientId &&
+    message.status !== "failed" ? null : (
+      <>
+        {message.status !== "failed" && (
+          <Item onClick={() => setReplyingToMessage(message)}>
+            <Icon icon="heroicons-outline:reply" className="mr-2 h-4 w-4" />
+            Reply
+          </Item>
+        )}
+        {!isOwnMessage && message.status !== "failed" && (
           <Item
             onClick={() => {
-              setEditingMessageId(message.id);
-              setEditContent(message.content);
+              setReportingMessage(message);
+              setReportReason("");
             }}
-          >
-            <Icon icon="heroicons-outline:pencil" className="mr-2 h-4 w-4" />
-            Edit Message
-          </Item>
-          <Item
-            onClick={(e: React.MouseEvent) =>
-              void handleDeleteMessage(
-                message.id,
-                skipShiftKey ? false : e.shiftKey,
-              )
-            }
             className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
           >
-            <Icon icon="heroicons-outline:trash" className="mr-2 h-4 w-4" />
-            Delete Message
+            <Icon icon="heroicons-outline:flag" className="mr-2 h-4 w-4" />
+            Report Message
           </Item>
-        </>
-      )}
-      {isOwnMessage && message.status === "failed" && (
-        <>
-          <Item onClick={() => void handleRetryFailedMessage(message)}>
-            <Icon icon="lucide:rotate-cw" className="mr-2 h-4 w-4" />
-            Retry
-          </Item>
-          <Item
-            onClick={() => void handleDeleteMessage(message.id, true)}
-            className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
-          >
-            <Icon icon="heroicons-outline:trash" className="mr-2 h-4 w-4" />
-            Remove
-          </Item>
-        </>
-      )}
-    </>
-  );
+        )}
+        {isOwnMessage && message.status !== "failed" && (
+          <>
+            {embedMetadata?.type !== "gift_sent" && (
+              <Item
+                onClick={() => {
+                  setEditingMessageId(message.id);
+                  setEditContent(message.content);
+                }}
+              >
+                <Icon
+                  icon="heroicons-outline:pencil"
+                  className="mr-2 h-4 w-4"
+                />
+                Edit Message
+              </Item>
+            )}
+            <Item
+              onClick={(e: React.MouseEvent) =>
+                void handleDeleteMessage(
+                  message.id,
+                  skipShiftKey ? false : e.shiftKey,
+                )
+              }
+              className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+            >
+              <Icon icon="heroicons-outline:trash" className="mr-2 h-4 w-4" />
+              Delete Message
+            </Item>
+          </>
+        )}
+        {isOwnMessage && message.status === "failed" && (
+          <>
+            {embedMetadata?.type !== "gift_sent" && (
+              <Item onClick={() => void handleRetryFailedMessage(message)}>
+                <Icon icon="lucide:rotate-cw" className="mr-2 h-4 w-4" />
+                Retry
+              </Item>
+            )}
+            <Item
+              onClick={() => void handleDeleteMessage(message.id, true)}
+              className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+            >
+              <Icon icon="heroicons-outline:trash" className="mr-2 h-4 w-4" />
+              Remove
+            </Item>
+          </>
+        )}
+      </>
+    );
 
   const messageMenu = (
     <DropdownMenu>
@@ -280,7 +295,10 @@ export function MessageRow({
           disabled={
             isSending ||
             Boolean(deletingMessageId) ||
-            message.status === "pending"
+            message.status === "pending" ||
+            (embedMetadata?.type === "gift_sent" &&
+              message.id === message.clientId &&
+              message.status !== "failed")
           }
         >
           <Icon icon="heroicons:ellipsis-horizontal" className="!size-4" />
@@ -639,11 +657,18 @@ export function MessageRow({
                           message.status === "pending"
                             ? "text-secondary-text/70"
                             : message.status === "failed"
-                              ? "text-red-400/90"
+                              ? "text-form-error"
                               : "text-primary-text",
                         )}
                       >
-                        {twemojiEnabled ? (
+                        {embedMetadata ? (
+                          <MessageEmbedCard
+                            message={message}
+                            metadata={embedMetadata}
+                            isMine={isOwnMessage}
+                            senderLabel={getDisplayName(sender)}
+                          />
+                        ) : twemojiEnabled ? (
                           <Twemoji
                             tag="span"
                             options={{

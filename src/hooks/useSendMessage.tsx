@@ -4,7 +4,8 @@ import type { Dispatch, RefObject, SetStateAction } from "react";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
 import { useAuthContext } from "@/contexts/AuthContext";
-import type { UserData } from "@/types/auth";
+import type { SupporterGift, UserData } from "@/types/auth";
+import { giftSupporterGift } from "@/services/settingsService";
 import {
   MESSAGE_CHAR_LIMIT,
   type ApiErrorResponse,
@@ -12,6 +13,7 @@ import {
   type ConversationSummary,
   type Message,
   type MessageUser,
+  type OutgoingMessageMetadata,
 } from "@/utils/messages/types";
 import { asId, resolveMessageParticipants } from "@/utils/messages/parsing";
 import {
@@ -69,7 +71,10 @@ export function useSendMessage({
   upsertLocalThreadMessage,
   updateLocalThreadMessage,
 }: UseSendMessageOptions) {
-  const handleSendMessage = async (rawMessage: string) => {
+  const handleSendMessage = async (
+    rawMessage: string,
+    metadata?: OutgoingMessageMetadata,
+  ) => {
     if (!selectedUserId || !selectedUser) return;
     if (!currentUser) {
       toast.info("You need to be logged in to send messages");
@@ -78,7 +83,7 @@ export function useSendMessage({
 
     const targetUserId = selectedUserId;
     const targetUser = selectedUser;
-    const replyTarget = replyingToMessage;
+    const replyTarget = metadata ? null : replyingToMessage;
 
     const apiContent = prepareMessageContentForApi(rawMessage);
     const displayContent = prepareMessageDisplayContent(rawMessage);
@@ -96,6 +101,8 @@ export function useSendMessage({
       senderId: asId(currentUser.id),
       receiverId: asId(targetUserId),
       content: displayContent,
+      metadata,
+      type: metadata ? "system" : "user",
       createdAt: Date.now(),
       status: "pending",
     };
@@ -118,6 +125,7 @@ export function useSendMessage({
       setReplyingToMessage(null);
 
       const body: Record<string, unknown> = { content: apiContent };
+      if (metadata) body.metadata = metadata;
       if (replyTarget) {
         body.parent_id = replyTarget.id;
       }
@@ -388,5 +396,69 @@ export function useSendMessage({
     }
   };
 
-  return { handleSendMessage };
+  const handleSendGift = async (gift: SupporterGift) => {
+    if (!selectedUserId || !selectedUser || !currentUser || isSending) {
+      throw new Error("Unable to send a gift right now");
+    }
+    const targetUserId = selectedUserId;
+    const optimisticId = createClientMessageId();
+    const optimisticMessage: Message = {
+      id: optimisticId,
+      clientId: optimisticId,
+      senderId: asId(currentUser.id),
+      receiverId: asId(targetUserId),
+      content: `${currentUser.username} sent you a Supporter ${gift.level} gift!`,
+      metadata: { type: "gift_sent", level: gift.level },
+      type: "system",
+      createdAt: Date.now(),
+      status: "pending",
+    };
+    const updateStatus = (status: "sent" | "failed") => {
+      updateLocalThreadMessage(
+        targetUserId,
+        (message) => message.id === optimisticId,
+        (message) => ({ ...message, status }),
+      );
+      setConversations((previous) =>
+        previous.map((conversation) =>
+          conversation.user.id === targetUserId &&
+          conversation.lastMessage?.id === optimisticId
+            ? {
+                ...conversation,
+                lastMessage: { ...conversation.lastMessage, status },
+              }
+            : conversation,
+        ),
+      );
+      if (selectedUserIdRef.current === targetUserId)
+        setMessages((previous) =>
+          previous.map((message) =>
+            message.id === optimisticId ? { ...message, status } : message,
+          ),
+        );
+    };
+    setIsSending(true);
+    pendingOwnSendScrollRef.current = true;
+    upsertLocalThreadMessage(targetUserId, optimisticMessage);
+    setMessages((previous) =>
+      sortMessagesByCreatedAt([...previous, optimisticMessage]),
+    );
+    setConversations((previous) => [
+      { user: selectedUser, lastMessage: optimisticMessage },
+      ...previous.filter(
+        (conversation) => conversation.user.id !== targetUserId,
+      ),
+    ]);
+    try {
+      await giftSupporterGift(gift.share_id, targetUserId);
+      updateStatus("sent");
+    } catch (error) {
+      updateStatus("failed");
+      throw error;
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return { handleSendMessage, handleSendGift };
 }
