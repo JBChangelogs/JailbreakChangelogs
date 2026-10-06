@@ -437,7 +437,7 @@ export default function AppClient({ releases }: { releases: Releases }) {
               <TabsTrigger
                 key={feature.label}
                 value={feature.label}
-                className="data-[state=active]:bg-tertiary-bg relative isolate flex-1 overflow-hidden rounded-lg px-3 py-2 transition-colors duration-200 sm:px-4 sm:py-2.5"
+                className="data-[state=active]:bg-tertiary-bg relative isolate flex-auto overflow-hidden rounded-lg px-3 py-2 transition-colors duration-200 sm:px-4 sm:py-2.5 lg:flex-1"
               >
                 <span
                   aria-hidden="true"
