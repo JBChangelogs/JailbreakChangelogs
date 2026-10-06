@@ -192,7 +192,7 @@ export function CommentReactions({
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className={`flex ${compact ? "h-6 w-6" : "h-7 w-7"} bg-quaternary-bg text-primary-text items-center justify-center rounded-lg transition-colors ${
+                    className={`flex ${compact ? "h-6 w-6" : "h-7 w-7"} bg-quaternary-bg text-primary-text items-center justify-center rounded-md transition-colors ${
                       isReactionBlocked
                         ? "cursor-not-allowed"
                         : "cursor-pointer hover:brightness-110"

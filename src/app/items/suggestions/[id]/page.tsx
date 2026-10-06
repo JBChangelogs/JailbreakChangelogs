@@ -1045,8 +1045,8 @@ export default function ValueSuggestionDetailPage() {
                   <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
                     <div className="bg-quaternary-bg h-4 w-12 rounded" />
                     <div className="flex gap-2">
-                      <div className="bg-quaternary-bg h-7 w-16 rounded-lg" />
-                      <div className="bg-quaternary-bg h-7 w-16 rounded-lg" />
+                      <div className="bg-quaternary-bg h-7 w-16 rounded-md" />
+                      <div className="bg-quaternary-bg h-7 w-16 rounded-md" />
                     </div>
                   </div>
                 </div>
@@ -1080,8 +1080,8 @@ export default function ValueSuggestionDetailPage() {
                     <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
                       <div className="bg-quaternary-bg h-4 w-12 rounded" />
                       <div className="flex gap-2">
-                        <div className="bg-quaternary-bg h-7 w-16 rounded-lg" />
-                        <div className="bg-quaternary-bg h-7 w-16 rounded-lg" />
+                        <div className="bg-quaternary-bg h-7 w-16 rounded-md" />
+                        <div className="bg-quaternary-bg h-7 w-16 rounded-md" />
                       </div>
                     </div>
                   </div>

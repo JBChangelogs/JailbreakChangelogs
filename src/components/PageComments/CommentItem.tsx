@@ -1290,7 +1290,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200"
+                                        className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-md p-0 opacity-100 transition-all duration-200"
                                         onClick={() => {
                                           if (
                                             replyingToId === comment.id &&
@@ -1335,7 +1335,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                               <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited ? "cursor-not-allowed" : ""}`}
+                                                className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-md p-0 opacity-100 transition-all duration-200 ${isRateLimited ? "cursor-not-allowed" : ""}`}
                                               >
                                                 <Icon
                                                   icon="fluent:emoji-add-16-regular"
@@ -1391,7 +1391,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200"
+                                        className="text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-md p-0 opacity-100 transition-all duration-200"
                                       >
                                         <Icon
                                           icon="heroicons:ellipsis-horizontal"

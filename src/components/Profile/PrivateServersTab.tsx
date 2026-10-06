@@ -34,8 +34,8 @@ function PrivateServersTabSkeleton() {
             </div>
           </div>
           <div className="mb-4 flex flex-wrap gap-2">
-            <div className="bg-quaternary-bg h-7 w-44 rounded-lg" />
-            <div className="bg-quaternary-bg h-7 w-28 rounded-lg" />
+            <div className="bg-quaternary-bg h-7 w-44 rounded-md" />
+            <div className="bg-quaternary-bg h-7 w-28 rounded-md" />
           </div>
           <div className="bg-quaternary-bg h-20 w-full rounded-lg" />
         </div>

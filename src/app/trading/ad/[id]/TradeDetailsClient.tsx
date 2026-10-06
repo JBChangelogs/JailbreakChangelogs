@@ -307,11 +307,7 @@ const TradeSidePreview = ({
                                 {item.isDuped ? "Duped value" : "Cash value"}
                               </span>{" "}
                               <span
-                                className={`inline-flex h-5 shrink-0 items-center rounded-md px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs ${
-                                  hasKnownItemValue
-                                    ? "bg-button-info text-form-button-text"
-                                    : "bg-quaternary-bg text-secondary-text"
-                                }`}
+                                className={`bg-button-info text-form-button-text inline-flex h-5 shrink-0 items-center rounded-md px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs`}
                               >
                                 {itemValue}
                               </span>
@@ -411,11 +407,7 @@ const TradeSidePreview = ({
                             {item.isDuped ? "Duped value" : "Cash value"}
                           </span>
                           <span
-                            className={`inline-flex h-6 shrink-0 items-center rounded-md px-2.5 text-xs leading-none font-bold tabular-nums ${
-                              hasKnownItemValue
-                                ? "bg-button-info text-form-button-text"
-                                : "bg-quaternary-bg text-secondary-text"
-                            }`}
+                            className={`bg-button-info text-form-button-text inline-flex h-6 shrink-0 items-center rounded-md px-2.5 text-xs leading-none font-bold tabular-nums`}
                           >
                             {itemValue}
                           </span>
@@ -438,11 +430,11 @@ const TradeSidePreview = ({
                     {isCustomTradeItem(item) ? (
                       cardWithLink
                     ) : (
-                      <Tooltip delayDuration={0}>
+                      <Tooltip delayDuration={400}>
                         <TooltipTrigger asChild>
                           <div>{cardWithLink}</div>
                         </TooltipTrigger>
-                        <TradeItemHoverTooltip side="top" item={item} />
+                        <TradeItemHoverTooltip side="bottom" item={item} />
                       </Tooltip>
                     )}
                   </div>
@@ -1493,7 +1485,7 @@ export default function TradeDetailsClient({
                                     <div className="bg-tertiary-bg border-border-card flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
                                       <div className="flex min-w-0 flex-1 items-center gap-3">
                                         <div
-                                          className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
+                                          className={`border-border-card bg-quaternary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
                                             offerUser?.premiumtype === 3
                                               ? "rounded-[25%]"
                                               : "rounded-full"
@@ -1604,7 +1596,7 @@ export default function TradeDetailsClient({
                                               type="button"
                                               size="sm"
                                               variant="default"
-                                              className="h-6! px-2.5!"
+                                              className="h-6! rounded-md! px-2.5!"
                                               onClick={() => {
                                                 const targetId = isOwner
                                                   ? offerUser?.id
@@ -1628,7 +1620,7 @@ export default function TradeDetailsClient({
                                               type="button"
                                               size="sm"
                                               variant="success"
-                                              className="h-6! px-2.5!"
+                                              className="h-6! rounded-md! px-2.5!"
                                               disabled={!!offerResponseAction}
                                               onClick={() =>
                                                 void handleOfferResponse(
@@ -1652,7 +1644,7 @@ export default function TradeDetailsClient({
                                               type="button"
                                               size="sm"
                                               variant="destructive"
-                                              className="h-6! px-2.5!"
+                                              className="h-6! rounded-md! px-2.5!"
                                               disabled={!!offerResponseAction}
                                               onClick={() =>
                                                 void handleOfferResponse(
@@ -1678,7 +1670,7 @@ export default function TradeDetailsClient({
                                             type="button"
                                             size="sm"
                                             variant="destructive"
-                                            className="h-6! px-2.5!"
+                                            className="h-6! rounded-md! px-2.5!"
                                             disabled={isDeletingOffer}
                                             onClick={() =>
                                               setOfferDeleteConfirmId(offer.id)

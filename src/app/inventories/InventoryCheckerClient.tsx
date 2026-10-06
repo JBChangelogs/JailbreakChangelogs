@@ -665,8 +665,8 @@ export default function InventoryCheckerClient({
                   <div className="bg-button-secondary h-6 w-36 rounded" />
                   <div className="bg-button-secondary h-4 w-24 rounded" />
                   <div className="flex gap-2 pt-1">
-                    <div className="bg-button-secondary h-7 w-20 rounded-lg" />
-                    <div className="bg-button-secondary h-7 w-20 rounded-lg" />
+                    <div className="bg-button-secondary h-7 w-20 rounded-md" />
+                    <div className="bg-button-secondary h-7 w-20 rounded-md" />
                   </div>
                 </div>
               </div>

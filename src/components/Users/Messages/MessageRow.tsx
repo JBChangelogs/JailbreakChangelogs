@@ -308,7 +308,7 @@ export function MessageRow({
           variant="secondary"
           size="icon"
           className={cn(
-            "pointer-events-none !size-7 rounded-lg p-0 opacity-0 transition-all duration-200 data-[state=open]:pointer-events-auto data-[state=open]:opacity-100 sm:!size-8 lg:opacity-0 lg:group-hover:pointer-events-auto lg:group-hover:opacity-100 lg:disabled:opacity-0 lg:group-hover:disabled:opacity-100",
+            "pointer-events-none !size-7 rounded-md p-0 opacity-0 transition-all duration-200 data-[state=open]:pointer-events-auto data-[state=open]:opacity-100 sm:!size-8 lg:opacity-0 lg:group-hover:pointer-events-auto lg:group-hover:opacity-100 lg:disabled:opacity-0 lg:group-hover:disabled:opacity-100",
             isMessageMenuActive && "pointer-events-auto opacity-100",
           )}
           disabled={

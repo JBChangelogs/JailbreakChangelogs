@@ -1499,8 +1499,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                           ))}
                         </div>
                         <div className="mt-2 grid grid-cols-2 gap-1.5">
-                          <div className="bg-tertiary-bg h-7 rounded-lg" />
-                          <div className="bg-tertiary-bg h-7 rounded-lg" />
+                          <div className="bg-tertiary-bg h-7 rounded-md" />
+                          <div className="bg-tertiary-bg h-7 rounded-md" />
                         </div>
                       </div>
                     ))}
