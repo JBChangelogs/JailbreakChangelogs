@@ -20,6 +20,8 @@ interface User {
 }
 
 interface TradeAdsProfileTabProps {
+  preview?: boolean;
+  onViewAll?: () => void;
   user: User;
   isOwnProfile?: boolean;
   currentUserId?: string | null;
@@ -53,10 +55,10 @@ function TradeAdCardSkeleton() {
   );
 }
 
-function TradeAdsTabSkeleton() {
+function TradeAdsTabSkeleton({ preview = false }: { preview?: boolean }) {
   return (
     <div className="animate-pulse space-y-4">
-      {Array.from({ length: 3 }).map((_, i) => (
+      {Array.from({ length: preview ? 1 : 3 }).map((_, i) => (
         <TradeAdCardSkeleton key={i} />
       ))}
     </div>
@@ -67,6 +69,8 @@ export default function TradeAdsProfileTab({
   user,
   isOwnProfile = false,
   currentUserId = null,
+  preview = false,
+  onViewAll,
 }: TradeAdsProfileTabProps) {
   const [page, setPage] = useState(1);
 
@@ -275,12 +279,24 @@ export default function TradeAdsProfileTab({
   const sortedTradeAds = [...clientTradeAds].sort(
     (a, b) => b.created_at - a.created_at,
   );
-  const currentPageAds = sortedTradeAds;
+  const currentPageAds = preview ? sortedTradeAds.slice(0, 1) : sortedTradeAds;
+
+  if (preview && adsQuery.data && sortedTradeAds.length === 0) return null;
 
   return (
-    <div className="mt-6 mb-8">
+    <section className="border-border-card bg-secondary-bg min-w-0 rounded-2xl border p-5 sm:p-6">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-primary-text text-lg font-semibold">
+          {preview ? "Trading showcase" : "Trade ads"}
+        </h2>
+        {preview && (
+          <Button variant="link" size="sm" onClick={onViewAll}>
+            View all <Icon icon="heroicons:chevron-right" />
+          </Button>
+        )}
+      </div>
       {isFetchingTradeAds ? (
-        <TradeAdsTabSkeleton />
+        <TradeAdsTabSkeleton preview={preview} />
       ) : tradeAdsError ? (
         <div className="mx-auto max-w-lg p-8 text-center">
           <Icon
@@ -294,13 +310,15 @@ export default function TradeAdsProfileTab({
         </div>
       ) : sortedTradeAds.length === 0 ? (
         <div className="py-6 text-center">
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
-            alt="No trade ads"
-            width={160}
-            height={128}
-            className="mx-auto mb-4"
-          />
+          {!preview && (
+            <Image
+              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+              alt="No trade ads"
+              width={160}
+              height={128}
+              className="mx-auto mb-4"
+            />
+          )}
           <p className="text-primary-text mb-1 font-semibold">
             {isOwnProfile ? "No Active Trade Ads" : "No Trade Ads Yet"}
           </p>
@@ -328,7 +346,7 @@ export default function TradeAdsProfileTab({
             ))}
           </div>
 
-          {apiTotalPages > 1 && (
+          {!preview && apiTotalPages > 1 && (
             <div className="mt-8 flex justify-center">
               <Pagination
                 count={apiTotalPages}
@@ -339,6 +357,6 @@ export default function TradeAdsProfileTab({
           )}
         </>
       )}
-    </div>
+    </section>
   );
 }

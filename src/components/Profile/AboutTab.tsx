@@ -234,7 +234,7 @@ export default function AboutTab({
             ) : (
               <p className="text-primary-text italic">No bio yet</p>
             )}
-            {bioLastUpdated && (
+            {bio?.trim() && bioLastUpdated && (
               <p className="text-secondary-text mt-4 text-xs">
                 Last updated:{" "}
                 <Tooltip>

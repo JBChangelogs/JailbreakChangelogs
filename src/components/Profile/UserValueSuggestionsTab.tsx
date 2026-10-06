@@ -260,7 +260,7 @@ export default function UserValueSuggestionsTab({
 
   if (loading) {
     return (
-      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
         <div className="bg-quaternary-bg mb-4 h-6 w-40 animate-pulse rounded" />
         <div className="animate-pulse space-y-3">
           {[0, 1, 2].map((i) => (
@@ -320,7 +320,7 @@ export default function UserValueSuggestionsTab({
 
   if (error) {
     return (
-      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
         <h2 className="text-primary-text mb-3 text-lg font-semibold">
           Item Suggestions
         </h2>
@@ -334,9 +334,12 @@ export default function UserValueSuggestionsTab({
 
   if (suggestions.length === 0) {
     return (
-      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
         <h2 className="text-primary-text mb-3 text-lg font-semibold">
-          Item Suggestions [0]
+          Item Suggestions{" "}
+          <span className="text-secondary-text ml-1 text-sm font-normal">
+            0
+          </span>
         </h2>
         {userStats && (
           <div className="border-border-card bg-tertiary-bg mb-4 rounded-xl border">
@@ -415,7 +418,7 @@ export default function UserValueSuggestionsTab({
           <p className="text-primary-text mb-1 font-semibold">
             No Suggestions Yet
           </p>
-          <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
+          <p className="text-secondary-text mx-auto mb-6 max-w-sm text-sm leading-relaxed">
             {currentUserId === userId
               ? "You haven't submitted any item suggestions yet."
               : "This user hasn't submitted any item suggestions yet."}
@@ -430,11 +433,14 @@ export default function UserValueSuggestionsTab({
 
   return (
     <>
-      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
         {/* Header */}
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-primary-text text-lg font-semibold">
-            Item Suggestions [{total}]
+            Item Suggestions{" "}
+            <span className="text-secondary-text ml-1 text-sm font-normal">
+              {total}
+            </span>
           </h2>
           <Button asChild size="sm" variant="default">
             <Link href="/items/suggestions">All Suggestions</Link>

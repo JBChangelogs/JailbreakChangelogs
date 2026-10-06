@@ -43,7 +43,7 @@ function BanCardSkeleton() {
         <div className="space-y-2">
           <div className="flex gap-2">
             <div className="bg-quaternary-bg h-5 w-28 rounded-md" />
-            <div className="bg-quaternary-bg h-5 w-16 rounded-full" />
+            <div className="bg-quaternary-bg h-5 w-16 rounded-md" />
           </div>
           <div className="bg-quaternary-bg h-4 w-3/4 rounded" />
           <div className="bg-quaternary-bg h-3 w-1/2 rounded" />
@@ -53,14 +53,22 @@ function BanCardSkeleton() {
   );
 }
 
-export default function UserBansTab() {
+export default function UserBansTab({ userId }: { userId: string }) {
   const { user } = useAuthContext();
+  const isOwnProfile = user?.id === userId;
+  const canViewBans =
+    isOwnProfile ||
+    user?.flags?.some(
+      (flag) => flag.flag === "is_owner" && flag.enabled !== false,
+    );
   const bansQuery = useQuery({
-    queryKey: ["my-bans", user?.id],
+    queryKey: ["profile-bans", userId, user?.id],
     queryFn: async ({ signal }): Promise<BansResponse> => {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        "/v2/users/me/bans",
+        isOwnProfile
+          ? "/v2/users/me/bans"
+          : `/v2/users/${encodeURIComponent(userId)}/bans`,
       );
       const res = await fetch(url, { credentials: "include", headers, signal });
       if (!res.ok) {
@@ -68,7 +76,7 @@ export default function UserBansTab() {
       }
       return res.json() as Promise<BansResponse>;
     },
-    enabled: Boolean(user?.id),
+    enabled: Boolean(user?.id && canViewBans),
     staleTime: 0,
     gcTime: 0,
     retry: false,
@@ -78,8 +86,18 @@ export default function UserBansTab() {
   const loading = bansQuery.isPending;
   const error = bansQuery.data ? null : bansQuery.error?.message;
 
+  if (!canViewBans) return null;
+
   return (
-    <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+    <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-primary-text text-lg font-semibold">
+          Bans{" "}
+          <span className="text-secondary-text ml-1 text-sm font-normal">
+            {!loading && !error && (bansQuery.data?.total ?? bans.length)}
+          </span>
+        </h2>
+      </div>
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -108,16 +126,13 @@ export default function UserBansTab() {
           />
           <p className="text-primary-text font-medium">No bans on record</p>
           <p className="text-secondary-text text-sm">
-            Your account is in good standing.
+            {isOwnProfile
+              ? "Your account is in good standing."
+              : "This account is in good standing."}
           </p>
         </div>
       ) : (
         <>
-          <div className="mb-3 flex items-center gap-2">
-            <h2 className="text-primary-text text-lg font-semibold">
-              Bans [{bans.length}]
-            </h2>
-          </div>
           <div className="space-y-3">
             {bans.map((ban) => (
               <div
@@ -139,7 +154,7 @@ export default function UserBansTab() {
                         {ban.ban_type.replace(/_/g, " ")}
                       </span>
                       <span
-                        className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                        className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold"
                         style={{
                           backgroundColor: ban.active
                             ? "color-mix(in srgb, var(--color-status-success) 80%, transparent)"

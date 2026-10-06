@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import NextError from "next/error";
@@ -49,7 +49,8 @@ import {
   formatDayMonthYearTime,
 } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import ProfileTabs from "@/components/Profile/ProfileTabs";
+import ProfileOverview from "@/components/Profile/ProfileOverview";
+import ProfileIdentityBar from "@/components/Profile/ProfileIdentityBar";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
@@ -231,6 +232,7 @@ export default function UserProfileClient({
   error,
 }: UserProfileClientProps) {
   const queryClient = useQueryClient();
+  const profileIdentityRef = useRef<HTMLHeadingElement>(null);
   const router = useRouter();
   const { user: currentUser, isLoading: authLoading } = useAuthContext();
   const user = profileData?.user ?? null;
@@ -1049,6 +1051,7 @@ export default function UserProfileClient({
       <LinSuperIdol userId={userId} />
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
+        <ProfileIdentityBar user={user} identityRef={profileIdentityRef} />
         <div className="border-border-card bg-secondary-bg overflow-hidden rounded-2xl border">
           {/* Banner Section */}
           <Banner
@@ -1098,7 +1101,10 @@ export default function UserProfileClient({
                   <div className="contents md:block md:min-w-0 md:flex-1 md:text-left">
                     <div className="contents md:flex md:flex-wrap md:items-center md:gap-x-3 md:gap-y-1">
                       <div className="min-w-0 md:contents">
-                        <h1 className="text-primary-text max-w-full min-w-0 truncate text-3xl font-bold tracking-tight md:text-4xl">
+                        <h1
+                          ref={profileIdentityRef}
+                          className="text-primary-text max-w-full min-w-0 truncate text-3xl font-bold tracking-tight md:text-4xl"
+                        >
                           {user.global_name && user.global_name !== "None"
                             ? user.global_name
                             : user.username}
@@ -1132,18 +1138,6 @@ export default function UserProfileClient({
                         >
                           Online
                         </p>
-                      ) : user.last_seen === null ? (
-                        <div className="bg-tertiary-bg mt-2 mb-2 rounded-lg p-4">
-                          <p className="text-secondary-text mb-1 text-sm font-medium">
-                            Are you the owner of this profile?
-                          </p>
-                          <p className="text-primary-text text-sm">
-                            Login to enable status indicators and last seen
-                            timestamps. Your Discord avatar, banner, and
-                            username changes will automatically sync with your
-                            profile.
-                          </p>
-                        </div>
                       ) : (
                         user.last_seen && (
                           <p className="text-secondary-text text-sm">
@@ -1550,9 +1544,14 @@ export default function UserProfileClient({
           </div>
         </div>
         <div className="mt-5 md:mt-6">
-          <ProfileTabs
+          <ProfileOverview
             user={user}
             currentUserId={currentUserId}
+            isSiteOwner={
+              currentUser?.flags?.some(
+                (flag) => flag.flag === "is_owner" && flag.enabled !== false,
+              ) ?? false
+            }
             bio={bio}
             bioLastUpdated={bioLastUpdated}
             onBioUpdate={refreshBio}

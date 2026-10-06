@@ -5,6 +5,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const log = createLogger("UI");
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import Image from "next/image";
 import Comment from "../ProfileComments/Comments";
@@ -40,8 +42,11 @@ interface CommentData {
 }
 
 const EMPTY_COMMENTS: CommentData[] = [];
+const EMPTY_ITEM_DETAILS: Record<string, unknown> = {};
 
 interface CommentsTabProps {
+  preview?: boolean;
+  onViewAll?: () => void;
   currentUserId?: string | null;
   userId: string;
   settings?: {
@@ -69,11 +74,15 @@ function ProfileCommentCardSkeleton() {
   );
 }
 
-function ProfileCommentsSkeleton() {
+function ProfileCommentsSkeleton({ preview = false }: { preview?: boolean }) {
   return (
     <div className="animate-pulse">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {Array.from({ length: 6 }).map((_, i) => (
+      <div
+        className={
+          preview ? "space-y-3" : "grid grid-cols-1 gap-4 md:grid-cols-2"
+        }
+      >
+        {Array.from({ length: preview ? 3 : 6 }).map((_, i) => (
           <ProfileCommentCardSkeleton key={i} />
         ))}
       </div>
@@ -106,7 +115,9 @@ export default function CommentsTab({
   currentUserId,
   userId,
   settings,
-  sharedItemDetails = {},
+  sharedItemDetails = EMPTY_ITEM_DETAILS,
+  preview = false,
+  onViewAll,
 }: CommentsTabProps) {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
@@ -189,9 +200,12 @@ export default function CommentsTab({
     });
   }, [userId, currentPage]);
 
+  const shouldHideComments =
+    settings?.show_recent_comments === false && currentUserId !== userId;
+
   const commentsQuery = useQuery({
     queryKey: ["profile-comments", userId, currentPage, currentUserId],
-    enabled: Boolean(userId),
+    enabled: Boolean(userId) && !shouldHideComments,
     queryFn: async ({
       signal,
     }): Promise<{
@@ -257,15 +271,18 @@ export default function CommentsTab({
   const comments = commentsQuery.data?.comments ?? EMPTY_COMMENTS;
   const totalPages = commentsQuery.data?.totalPages ?? 1;
   const totalComments = commentsQuery.data?.totalComments ?? 0;
-  const loading = commentsQuery.isPending;
+  const loading = !shouldHideComments && commentsQuery.isPending;
   const error = commentsQuery.data ? null : commentsQuery.error?.message;
 
   useEffect(() => {
-    if (comments.length === 0) return;
+    if (shouldHideComments || comments.length === 0) return;
 
-    const profileComments = comments.filter(
+    const availableComments = comments.filter(
       (c) => c.item_type.toLowerCase() !== "tradev2",
     );
+    const profileComments = preview
+      ? availableComments.slice(0, 3)
+      : availableComments;
     if (profileComments.length === 0) return;
 
     const commentsNeedingDetails = profileComments.filter(
@@ -317,14 +334,22 @@ export default function CommentsTab({
     return () => {
       ignore = true;
     };
-  }, [comments, sharedItemDetails, queryClient, fetchChangelogDetailsClient]);
+  }, [
+    comments,
+    sharedItemDetails,
+    queryClient,
+    fetchChangelogDetailsClient,
+    preview,
+    shouldHideComments,
+  ]);
 
   const profileComments = comments.filter(
     (c) => c.item_type.toLowerCase() !== "tradev2",
   );
 
-  const shouldHideComments =
-    settings?.show_recent_comments === false && currentUserId !== userId;
+  const visibleComments = preview
+    ? profileComments.slice(0, 3)
+    : profileComments;
 
   const commentsById = new Map(profileComments.map((c) => [c.id, c]));
 
@@ -335,12 +360,18 @@ export default function CommentsTab({
     setCurrentPage(value);
   };
 
+  if (
+    preview &&
+    (shouldHideComments || (commentsQuery.data && profileComments.length === 0))
+  )
+    return null;
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+        <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
           <div className="bg-tertiary-bg mb-4 h-6 w-40 animate-pulse rounded" />
-          <ProfileCommentsSkeleton />
+          <ProfileCommentsSkeleton preview={preview} />
         </div>
       </div>
     );
@@ -349,10 +380,10 @@ export default function CommentsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+        <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
-              Recent Comments
+              {preview ? "Recent comments" : "Comments"}
             </h2>
           </div>
           <p className="text-status-error">Error: {error}</p>
@@ -364,10 +395,10 @@ export default function CommentsTab({
   if (shouldHideComments) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+        <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
-              Recent Comments
+              {preview ? "Recent comments" : "Comments"}
             </h2>
           </div>
           <div className="text-primary-text flex items-center gap-2">
@@ -393,22 +424,32 @@ export default function CommentsTab({
 
   return (
     <div className="space-y-6" id="comments-section">
-      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
-        <div className="mb-3 flex items-center gap-2">
+      <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-primary-text text-lg font-semibold">
-            Recent Comments [{totalComments}]
+            {preview ? "Recent comments" : "Comments"}{" "}
+            <span className="text-secondary-text ml-1 text-sm font-normal">
+              {totalComments}
+            </span>
           </h2>
+          {preview && totalComments > 0 && (
+            <Button variant="link" size="sm" onClick={onViewAll}>
+              View all <Icon icon="heroicons:chevron-right" />
+            </Button>
+          )}
         </div>
 
         {totalComments === 0 ? (
           <div className="py-6 text-center">
-            <Image
-              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
-              alt="No comments"
-              width={160}
-              height={128}
-              className="mx-auto mb-4"
-            />
+            {!preview && (
+              <Image
+                src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+                alt="No comments"
+                width={160}
+                height={128}
+                className="mx-auto mb-4"
+              />
+            )}
             <p className="text-primary-text mb-1 font-semibold">
               No Comments Yet
             </p>
@@ -424,8 +465,14 @@ export default function CommentsTab({
               {profileComments.length === 0 ? (
                 <p className="text-primary-text italic">No comments yet</p>
               ) : (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {profileComments.map((comment) => (
+                <div
+                  className={
+                    preview
+                      ? "space-y-3"
+                      : "grid grid-cols-1 gap-4 md:grid-cols-2"
+                  }
+                >
+                  {visibleComments.map((comment) => (
                     <Comment
                       key={comment.id}
                       {...comment}
@@ -459,7 +506,7 @@ export default function CommentsTab({
               )}
             </div>
 
-            {totalPages > 1 && (
+            {!preview && totalPages > 1 && (
               <div className="mt-6 flex justify-center">
                 <Pagination
                   count={totalPages}

@@ -18,13 +18,18 @@ async function fetchSeason(id: string) {
   }
 }
 
-export async function fetchFavoritesData(userId: string) {
+export async function fetchFavoritesData(userId: string, signal?: AbortSignal) {
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
       `/v2/users/${userId}/favorites`,
     );
-    const response = await fetch(url, { headers, credentials: "include" });
+    const timeoutSignal = AbortSignal.timeout(10_000);
+    const response = await fetch(url, {
+      headers,
+      credentials: "include",
+      signal: signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal,
+    });
 
     if (!response.ok) {
       if (response.status === 404) return [];
@@ -37,7 +42,7 @@ export async function fetchFavoritesData(userId: string) {
     return Array.isArray(data) ? data : [];
   } catch (error) {
     log.error("Failed to fetch favorites:", error);
-    return [];
+    throw error;
   }
 }
 

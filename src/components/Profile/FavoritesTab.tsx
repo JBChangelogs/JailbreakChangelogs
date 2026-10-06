@@ -27,11 +27,17 @@ import {
 import { FavoriteItem } from "@/types";
 import { fetchFavoritesData } from "@/app/users/[id]/actions";
 
-function FavoriteCardSkeleton() {
+function FavoriteCardSkeleton({ preview = false }: { preview?: boolean }) {
   return (
     <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm">
-      <div className="mb-2 flex items-center">
-        <div className="bg-quaternary-bg mr-3 h-16 w-16 shrink-0 rounded-md md:h-18 md:w-32" />
+      <div className={preview ? "space-y-3" : "mb-2 flex items-center"}>
+        <div
+          className={
+            preview
+              ? "bg-quaternary-bg aspect-video w-full rounded-lg"
+              : "bg-quaternary-bg mr-3 h-16 w-16 shrink-0 rounded-md md:h-18 md:w-32"
+          }
+        />
         <div className="min-w-0 flex-1">
           <div className="bg-quaternary-bg mb-2 h-4 w-3/4 rounded" />
           <div className="bg-quaternary-bg h-6 w-20 rounded-lg" />
@@ -42,12 +48,18 @@ function FavoriteCardSkeleton() {
   );
 }
 
-function FavoritesTabSkeleton() {
+function FavoritesTabSkeleton({ preview = false }: { preview?: boolean }) {
   return (
     <div className="animate-pulse">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <FavoriteCardSkeleton key={i} />
+      <div
+        className={
+          preview
+            ? "grid grid-cols-2 gap-3 sm:grid-cols-3"
+            : "grid grid-cols-1 gap-4 md:grid-cols-2"
+        }
+      >
+        {Array.from({ length: preview ? 3 : 9 }).map((_, i) => (
+          <FavoriteCardSkeleton key={i} preview={preview} />
         ))}
       </div>
     </div>
@@ -55,6 +67,8 @@ function FavoritesTabSkeleton() {
 }
 
 interface FavoritesTabProps {
+  preview?: boolean;
+  onViewAll?: () => void;
   userId: string;
   currentUserId?: string | null;
   settings?: {
@@ -66,17 +80,19 @@ export default function FavoritesTab({
   userId,
   currentUserId,
   settings,
+  preview = false,
+  onViewAll,
 }: FavoritesTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const favoritesPerPage = 9;
+  const favoritesPerPage = preview ? 6 : 9;
 
   const shouldHideFavorites =
     settings?.hide_favorites === true && currentUserId !== userId;
 
   const favoritesQuery = useQuery({
     queryKey: ["profile", userId, "favorites"],
-    queryFn: () => fetchFavoritesData(userId),
+    queryFn: ({ signal }) => fetchFavoritesData(userId, signal),
     enabled: !shouldHideFavorites,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
@@ -113,6 +129,12 @@ export default function FavoritesTab({
     indexOfLastFavorite,
   );
 
+  if (
+    preview &&
+    (shouldHideFavorites || (!loading && !error && favorites.length === 0))
+  )
+    return null;
+
   // Render a favorite item
   const renderFavorite = (favorite: FavoriteItem) => {
     const item = favorite.item;
@@ -131,8 +153,14 @@ export default function FavoritesTab({
         className="group block"
       >
         <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors">
-          <div className="mb-2 flex items-center">
-            <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
+          <div className={preview ? "space-y-3" : "mb-2 flex items-center"}>
+            <div
+              className={
+                preview
+                  ? "bg-quaternary-bg relative aspect-video w-full overflow-hidden rounded-lg"
+                  : "relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32"
+              }
+            >
               {isVideo ? (
                 <video
                   src={getVideoPath(itemType, imageName)}
@@ -147,14 +175,19 @@ export default function FavoritesTab({
                   src={getItemImagePath(itemType, imageName, true, false)}
                   alt={itemName}
                   fill
+                  sizes={
+                    preview
+                      ? "(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 260px"
+                      : "128px"
+                  }
                   className="object-cover"
                   onError={handleImageError}
                 />
               )}
             </div>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between">
-                <span className="text-primary-text group-hover:text-link font-medium transition-colors">
+                <span className="text-primary-text group-hover:text-link font-medium wrap-break-word transition-colors">
                   {itemName}
                 </span>
               </div>
@@ -195,9 +228,9 @@ export default function FavoritesTab({
 
   if (loading) {
     return (
-      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
         <div className="bg-quaternary-bg mb-4 h-6 w-36 animate-pulse rounded" />
-        <FavoritesTabSkeleton />
+        <FavoritesTabSkeleton preview={preview} />
       </div>
     );
   }
@@ -205,10 +238,13 @@ export default function FavoritesTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+        <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
-              Favorited Items [{favorites.length}]
+              {preview ? "Favorite items" : "Favorited Items"}{" "}
+              <span className="text-secondary-text ml-1 text-sm font-normal">
+                {favorites.length}
+              </span>
             </h2>
           </div>
           <p className="text-status-error">Error: {error}</p>
@@ -220,7 +256,7 @@ export default function FavoritesTab({
   if (shouldHideFavorites) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+        <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items
@@ -249,31 +285,43 @@ export default function FavoritesTab({
 
   return (
     <div className="space-y-6" id="favorites-section">
-      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
-              Favorited Items [{favorites.length}]
+              {preview ? "Favorite items" : "Favorited Items"}{" "}
+              <span className="text-secondary-text ml-1 text-sm font-normal">
+                {favorites.length}
+              </span>
             </h2>
           </div>
-          {favorites.length > 0 && (
-            <Button
-              onClick={() =>
-                setSortOrder((prev) =>
-                  prev === "newest" ? "oldest" : "newest",
-                )
-              }
-              variant="default"
-              size="sm"
-              className="flex items-center gap-1"
-            >
-              {sortOrder === "newest" ? (
-                <Icon icon="heroicons-outline:arrow-down" className="h-4 w-4" />
-              ) : (
-                <Icon icon="heroicons-outline:arrow-up" className="h-4 w-4" />
-              )}
-              {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+          {preview ? (
+            <Button variant="link" size="sm" onClick={onViewAll}>
+              View all <Icon icon="heroicons:chevron-right" />
             </Button>
+          ) : (
+            favorites.length > 0 && (
+              <Button
+                onClick={() =>
+                  setSortOrder((prev) =>
+                    prev === "newest" ? "oldest" : "newest",
+                  )
+                }
+                variant="default"
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                {sortOrder === "newest" ? (
+                  <Icon
+                    icon="heroicons-outline:arrow-down"
+                    className="h-4 w-4"
+                  />
+                ) : (
+                  <Icon icon="heroicons-outline:arrow-up" className="h-4 w-4" />
+                )}
+                {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+              </Button>
+            )
           )}
         </div>
 
@@ -297,12 +345,18 @@ export default function FavoritesTab({
           </div>
         ) : (
           <>
-            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div
+              className={
+                preview
+                  ? "grid grid-cols-2 gap-3 sm:grid-cols-3"
+                  : "mb-4 grid grid-cols-1 gap-4 md:grid-cols-2"
+              }
+            >
               {currentFavorites.map(renderFavorite)}
             </div>
 
             {/* Pagination controls */}
-            {favorites.length > favoritesPerPage && (
+            {!preview && favorites.length > favoritesPerPage && (
               <div className="mt-6 flex justify-center">
                 <Pagination
                   count={Math.ceil(favorites.length / favoritesPerPage)}

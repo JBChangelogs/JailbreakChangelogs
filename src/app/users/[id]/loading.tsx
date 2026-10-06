@@ -55,20 +55,43 @@ export default function UserProfileLoading() {
             </div>
           </div>
         </div>
-        <div className="mt-5 md:mt-6">
-          <div className="border-border-card flex gap-4 overflow-hidden border-b py-3">
-            <Skeleton className="h-5 w-16 shrink-0" />
-            <Skeleton className="h-5 w-24 shrink-0" />
-            <Skeleton className="h-5 w-24 shrink-0" />
-            <Skeleton className="h-5 w-32 shrink-0" />
-          </div>
-          <div className="border-border-card bg-secondary-bg mt-5 rounded-2xl border p-5 sm:p-6">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <Skeleton className="h-7 w-24" />
-              <Skeleton className="size-8" />
+        <div className="mx-3 mt-5 grid gap-5 sm:mx-0 md:mt-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6">
+          <div className="order-2 min-w-0 space-y-5 lg:order-none lg:col-start-1 lg:row-start-1 lg:space-y-6">
+            <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
+              <div className="mb-4 flex items-center justify-between gap-2">
+                <Skeleton className="h-7 w-24" />
+                <Skeleton className="size-8" />
+              </div>
+              <Skeleton className="h-6 w-96 max-w-full" />
+              <Skeleton className="mt-4 h-4 w-36" />
             </div>
-            <Skeleton className="h-6 w-96 max-w-full" />
-            <Skeleton className="mt-4 h-4 w-36" />
+            <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
+              <Skeleton className="mb-4 h-7 w-36" />
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {[0, 1, 2].map((index) => (
+                  <Skeleton key={index} className="aspect-video rounded-lg" />
+                ))}
+              </div>
+            </div>
+            <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
+              <Skeleton className="mb-4 h-7 w-40" />
+              <Skeleton className="h-24 w-full rounded-lg" />
+            </div>
+          </div>
+          <div className="order-1 space-y-5 lg:order-none lg:col-start-2 lg:row-start-1">
+            <div className="border-border-card bg-secondary-bg rounded-2xl border p-4">
+              <Skeleton className="h-10 w-32 lg:mb-4 lg:h-4" />
+              <div className="hidden gap-2 lg:grid lg:grid-cols-1">
+                {Array.from({ length: 6 }, (_, index) => (
+                  <Skeleton key={index} className="h-10 w-full" />
+                ))}
+              </div>
+            </div>
+            <div className="border-border-card bg-secondary-bg hidden space-y-4 rounded-2xl border p-5 lg:block">
+              <Skeleton className="h-5 w-44" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-40" />
+            </div>
           </div>
         </div>
       </div>
