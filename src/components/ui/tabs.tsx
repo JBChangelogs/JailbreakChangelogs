@@ -30,6 +30,8 @@ interface TabsListProps extends React.ComponentPropsWithoutRef<
 > {
   noBottomRadius?: boolean;
   fullWidth?: boolean;
+  /** Hide the base line and active underline, for lists that draw their own. */
+  hideIndicator?: boolean;
 }
 
 const TabsList = React.forwardRef<
@@ -41,6 +43,7 @@ const TabsList = React.forwardRef<
       className,
       noBottomRadius = false,
       fullWidth = false,
+      hideIndicator = false,
       children,
       ...props
     },
@@ -128,22 +131,26 @@ const TabsList = React.forwardRef<
         )}
         {...props}
       >
-        <div
-          aria-hidden="true"
-          className="bg-border-primary/60 pointer-events-none absolute inset-x-0 bottom-0 h-px"
-        />
+        {!hideIndicator && (
+          <div
+            aria-hidden="true"
+            className="bg-border-primary/60 pointer-events-none absolute inset-x-0 bottom-0 h-px"
+          />
+        )}
         {children}
-        <div
-          aria-hidden="true"
-          className={cn(
-            "bg-border-focus pointer-events-none absolute bottom-0 h-0.5 transition-[transform,width,opacity] duration-200 ease-out",
-            indicator.visible ? "opacity-100" : "opacity-0",
-          )}
-          style={{
-            width: `${Math.max(0, indicator.width - 8)}px`,
-            transform: `translateX(${indicator.left + 4}px)`,
-          }}
-        />
+        {!hideIndicator && (
+          <div
+            aria-hidden="true"
+            className={cn(
+              "bg-border-focus pointer-events-none absolute bottom-0 h-0.5 transition-[transform,width,opacity] duration-200 ease-out",
+              indicator.visible ? "opacity-100" : "opacity-0",
+            )}
+            style={{
+              width: `${Math.max(0, indicator.width - 8)}px`,
+              transform: `translateX(${indicator.left + 4}px)`,
+            }}
+          />
+        )}
       </TabsPrimitive.List>
     );
   },
@@ -159,11 +166,17 @@ interface TabsTriggerProps extends React.ComponentPropsWithoutRef<
 const TabsTrigger = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.Trigger>,
   TabsTriggerProps
->(({ className, fullWidth = false, ...props }, ref) => (
+>(({ className, fullWidth = false, onMouseDown, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
+    onMouseDown={(event) => {
+      // Radix focuses the trigger programmatically on mousedown, which can
+      // match :focus-visible and show the keyboard ring on a mouse click.
+      event.currentTarget.focus({ focusVisible: false });
+      onMouseDown?.(event);
+    }}
     className={cn(
-      "ring-offset-background focus-visible:ring-ring text-secondary-text hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+      "focus-visible:ring-border-focus text-secondary-text hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
       fullWidth && "flex-1 px-2",
       className,
     )}
@@ -179,7 +192,7 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      "ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+      "focus-visible:ring-border-focus mt-2 focus-visible:ring-2 focus-visible:outline-none",
       className,
     )}
     {...props}

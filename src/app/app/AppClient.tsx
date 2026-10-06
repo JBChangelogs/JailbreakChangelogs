@@ -1,13 +1,23 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Download } from "lucide-react";
+import Image from "next/image";
+import { Check, Download, FlaskConical, Info } from "lucide-react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 import { fetchAppAccess } from "./access";
+import type { Releases } from "./releases";
 import { getBrowserDownloadPlatform } from "./platform";
 
 const subscribePlatform = () => () => {};
@@ -23,7 +33,102 @@ const downloads = {
   },
 };
 
-export default function AppClient() {
+const previews = "https://assets.jailbreakchangelogs.com/app";
+const features = [
+  {
+    label: "Robberies",
+    title: "Find an open robbery and join in one click",
+    description:
+      "A live grid of open robberies across Jailbreak servers, with a Bounties tab next to it.",
+    points: [
+      "Each card shows the criminal and cop count, who's already joined, the server's location, and a Join button. Private servers show their code, and Cargo Planes show a departure countdown.",
+      "Filter by server size and country, sort by when a robbery was logged, and hide servers you've already joined.",
+      "Turn on the bell next to any robbery in the sidebar to get an alert when it opens. Alerts keep working while you're on other tabs.",
+    ],
+    image: `${previews}/preview-robberies.png`,
+    alt: "Robberies tab showing a grid of open robbery servers with filters and alert toggles",
+  },
+  {
+    label: "Values",
+    title: "Clean and duped values side by side",
+    description:
+      "Browse all 967 items, with clean and duped values on every card.",
+    points: [
+      "Each value shows whether it went up or down, plus a demand rating, a trend, and when it was last updated.",
+      "Narrow by type, from vehicles and HyperChromes to rims, horns, drifts and furniture, or by seasonal, limited and untradable items.",
+      "Filter by demand from Close to None up to Very High, or by trend such as Rising, Hoarded, Manipulated or Hyped.",
+    ],
+    image: `${previews}/preview-values.png`,
+    alt: "Values tab showing item cards with clean and duped values, demand and trend",
+  },
+  {
+    label: "Trades",
+    title: "Build a trade ad without leaving the list",
+    description:
+      "Add items from the values list or your own inventory, and keep a running total for each side.",
+    points: [
+      "Shift-click an item to add it to Offering, or Ctrl-click to add it to Requesting.",
+      "Mark each item as clean, duped or OG, or move it to the other side.",
+      "Tag what you're after, such as adds, overpays, upgrades or OG owners, and add a note.",
+    ],
+    image: `${previews}/preview-trades.png`,
+    alt: "Trade ad builder with offering and requesting panels next to a searchable item list",
+  },
+  {
+    label: "Messages",
+    title: "Agree on the trade, then meet in-game",
+    description:
+      "Direct messages with unread counts, online status and replies.",
+    points: [
+      "Accepted trade offers appear in the chat, showing the items and values on each side.",
+      "Send a game invite and the other person can join your server straight from the conversation. Detecting your Roblox session is Windows only.",
+    ],
+    image: `${previews}/preview-messages.png`,
+    alt: "Messages tab with a conversation showing an accepted trade offer and a game invite",
+  },
+  {
+    label: "Dupe Finder",
+    title: "Check a player's dupes before you trade",
+    description:
+      "Search a Roblox username to see how many duped items they have and what those items are worth in total.",
+    points: [
+      "See when each copy was logged and how many owners it has had.",
+      "Search within their dupes, filter by type, and sort to show duplicates first.",
+    ],
+    image: `${previews}/preview-dupes.png`,
+    alt: "Dupe Finder showing a player's duped items with value and ownership details",
+  },
+  {
+    label: "Rich Presence",
+    title: "Show friends what you're up to on Discord",
+    description:
+      "Your Discord status shows what you're doing in the app, such as “Checking the value list”, and Settings shows a live preview of it.",
+    points: [
+      "Choose which lines appear: the page you're viewing, the app tab you're on, and the Roblox activity badge.",
+      "Add a Join Server button so friends can join your exact Jailbreak server from your status, plus a Visit Website button.",
+      "Turn Rich Presence off to clear your status entirely. You can stop sharing your Roblox game and server separately, and that setting applies outside Discord too.",
+    ],
+    image: `${previews}/preview-richpresence.png`,
+    alt: "Rich Presence settings with a live Discord status preview and toggles for each detail",
+  },
+];
+
+export default function AppClient({ releases }: { releases: Releases }) {
+  const [active, setActive] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  // Picking a tab or opening a preview pauses autoplay; it resumes after a
+  // short delay. Bumping `hold` restarts the delay and the current segment.
+  const [hold, setHold] = useState(0);
+  const [held, setHeld] = useState(false);
+  useEffect(() => {
+    if (!held) return;
+    const timeout = setTimeout(() => setHeld(false), 5000);
+    return () => clearTimeout(timeout);
+  }, [held, hold]);
+  const pause = () => {
+    setHeld(true);
+    setHold((count) => count + 1);
+  };
   const platform = useSyncExternalStore(
     subscribePlatform,
     getBrowserDownloadPlatform,
@@ -33,6 +138,13 @@ export default function AppClient() {
     platform === "Linux"
       ? (["Linux", "Windows"] as const)
       : (["Windows", "Linux"] as const);
+  const latest = releases[platforms[0]];
+  const fileDetails = (option: keyof Releases) => {
+    const size = releases[option]?.size;
+    return size
+      ? `${downloads[option].format} · ${Math.round(size / 1024 ** 2)} MB`
+      : downloads[option].format;
+  };
   const { user, isAuthenticated, isLoading, setShowLoginModal } =
     useAuthContext();
   const signedIn = isAuthenticated && !!user;
@@ -54,44 +166,85 @@ export default function AppClient() {
   return (
     <main className="container mx-auto mb-16 px-4">
       <Breadcrumb currentLabel="Desktop App" containerClassName="py-4" />
-      <section className="relative isolate mx-auto max-w-6xl py-10 sm:py-16 lg:py-24">
+      <section className="relative isolate mx-auto max-w-6xl py-6 sm:py-10">
         <div
           aria-hidden="true"
           className="bg-button-info/10 pointer-events-none absolute top-0 right-0 -z-10 h-96 w-3/4 rounded-full blur-3xl"
         />
-        <div className="grid items-center gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-20">
+        <div className="grid items-center gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
           <div>
-            <h1 className="text-primary-text text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              Jailbreak Changelogs
+            <span className="bg-button-info/10 text-link inline-flex rounded-full px-3 py-1 text-xs font-semibold">
+              Early access · Windows and Linux
+            </span>
+            <h1 className="text-primary-text mt-4 text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl">
+              Jailbreak Changelogs,
               <br />
-              <span className="text-link">for desktop</span>
+              <span className="text-link">on your desktop</span>
             </h1>
-            <p className="text-secondary-text mt-6 max-w-lg text-lg leading-relaxed">
-              A desktop companion to the website, with configurable robbery and
-              bounty alerts and optional Discord Rich Presence.
+            <p className="text-secondary-text mt-4 max-w-lg text-lg leading-relaxed">
+              Robbery alerts, values, trades, messages and the Dupe Finder in
+              one window.
             </p>
-            <p className="text-secondary-text mt-8 text-sm">
-              Available for Windows and Linux.
+            <p className="text-secondary-text mt-4 flex max-w-lg gap-2 text-sm leading-relaxed">
+              <FlaskConical
+                aria-hidden="true"
+                className="text-status-warning mt-0.5 size-4 shrink-0"
+              />
+              <span>
+                <span className="text-primary-text font-medium">
+                  Experimental.
+                </span>{" "}
+                Not every account has access yet, and features are still being
+                added and brought over from the website.
+              </span>
             </p>
           </div>
           <section
             aria-labelledby="app-download-heading"
             className="border-border-card bg-secondary-bg rounded-2xl border p-6 shadow-xl sm:p-8"
           >
-            <span className="bg-button-info/10 text-link inline-flex rounded-full px-3 py-1 text-xs font-semibold">
-              Early access
-            </span>
             <h2
               id="app-download-heading"
-              className="text-primary-text mt-5 text-2xl font-semibold tracking-tight"
+              className="text-primary-text text-2xl font-semibold tracking-tight"
             >
               Get the desktop app
             </h2>
+            {latest && (
+              <p className="text-secondary-text mt-2 text-sm">
+                Version {latest.version}
+                {latest.releasedAt && (
+                  <>
+                    {" · Released "}
+                    <time
+                      dateTime={new Date(latest.releasedAt).toISOString()}
+                      suppressHydrationWarning
+                    >
+                      {formatMonthDayYear(latest.releasedAt)}
+                    </time>
+                  </>
+                )}
+              </p>
+            )}
             <div
               className="border-border-card mt-6 border-t pt-6"
               aria-live="polite"
               aria-busy={checking}
             >
+              {platform === "macOS" && (
+                <div className="border-border-card bg-tertiary-bg mb-6 rounded-xl border p-4">
+                  <h3 className="text-primary-text text-sm font-semibold">
+                    No Mac version yet
+                  </h3>
+                  <p className="text-secondary-text mt-1 text-sm leading-relaxed">
+                    Apple makes it harder to release apps for Mac. We&apos;d
+                    need to build it on a Mac and pay Apple each year to approve
+                    it. Without Apple&apos;s approval, Macs block the app from
+                    opening and it can&apos;t update itself. For now we&apos;re
+                    focused on Windows and Linux, but a Mac version is something
+                    we&apos;d like to add in the future.
+                  </p>
+                </div>
+              )}
               {platform === "Mobile" ? (
                 <>
                   <h3 className="text-primary-text font-semibold">
@@ -136,21 +289,59 @@ export default function AppClient() {
                             href={downloads[option].url}
                             className="text-link hover:text-link-hover focus-visible:ring-border-focus block rounded-sm text-center text-sm underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
                           >
-                            Download for {option} ({downloads[option].format})
+                            Download for {option} ({fileDetails(option)})
                           </a>
                         ) : (
-                          <Button
-                            asChild
-                            className="h-auto! min-h-12! w-full py-3! text-sm! whitespace-normal! sm:text-base!"
-                          >
-                            <a href={downloads[option].url}>
-                              <Download aria-hidden="true" />
-                              <span>
-                                Download for {option}
-                                {option === "Linux" ? " (AppImage)" : ""}
-                              </span>
-                            </a>
-                          </Button>
+                          <>
+                            <Button
+                              asChild
+                              className="h-auto! min-h-12! w-full py-3! text-sm! whitespace-normal! sm:text-base!"
+                            >
+                              <a href={downloads[option].url}>
+                                <Download aria-hidden="true" />
+                                <span>
+                                  Download for {option}
+                                  {option === "Linux" ? " (AppImage)" : ""}
+                                </span>
+                              </a>
+                            </Button>
+                            <p className="text-secondary-text mt-2 text-center text-xs">
+                              {fileDetails(option)}
+                            </p>
+                            {option === "Windows" && (
+                              <Popover>
+                                <PopoverTrigger className="text-secondary-text hover:text-primary-text focus-visible:ring-border-focus mx-auto mt-3 flex cursor-pointer items-center gap-1.5 rounded-sm text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none">
+                                  <Info
+                                    aria-hidden="true"
+                                    className="size-3.5"
+                                  />
+                                  Seeing &ldquo;Windows protected your
+                                  PC&rdquo;?
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  side="top"
+                                  className="w-80 p-4 text-sm"
+                                >
+                                  <p className="text-secondary-text leading-relaxed">
+                                    Windows shows this for apps that are newer
+                                    or less widely downloaded. It&apos;s a
+                                    general caution, not a sign that anything is
+                                    wrong with the app. To install, click{" "}
+                                    <strong className="text-primary-text font-medium">
+                                      More info
+                                    </strong>
+                                    , then{" "}
+                                    <strong className="text-primary-text font-medium">
+                                      Run anyway
+                                    </strong>
+                                    . We&apos;re working on getting the app
+                                    verified with Microsoft so this warning goes
+                                    away in the future.
+                                  </p>
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                          </>
                         )}
                       </div>
                     ))}
@@ -183,44 +374,113 @@ export default function AppClient() {
       </section>
       <section
         aria-labelledby="app-features-heading"
-        className="border-border-card mx-auto max-w-6xl border-t pt-10 sm:pt-12"
+        className="border-border-card mx-auto max-w-6xl border-t pt-8"
       >
-        <h2
-          id="app-features-heading"
-          className="text-primary-text text-2xl font-semibold tracking-tight"
-        >
-          Desktop features
+        <h2 id="app-features-heading" className="sr-only">
+          App features
         </h2>
-        <div className="mt-8 grid gap-8 md:grid-cols-3 md:gap-12">
-          <div>
-            <h3 className="text-primary-text font-semibold">
-              Robbery and bounty alerts
-            </h3>
-            <p className="text-secondary-text mt-3 text-sm leading-relaxed">
-              Watch selected robberies for openings, or set player and server
-              bounty ranges. Alerts stay active while you use other tabs in the
-              app.
-            </p>
+        <Tabs
+          value={features[active].label}
+          onValueChange={(value) => {
+            setActive(features.findIndex((f) => f.label === value));
+            pause();
+          }}
+          onPointerEnter={() => setHovered(true)}
+          onPointerLeave={() => setHovered(false)}
+        >
+          <TabsList
+            aria-label="App features"
+            hideIndicator
+            className="border-border-card bg-secondary-bg w-full min-w-0 gap-1 rounded-xl border p-1"
+          >
+            {features.map((feature, index) => (
+              <TabsTrigger
+                key={feature.label}
+                value={feature.label}
+                className="data-[state=active]:bg-tertiary-bg relative isolate flex-1 overflow-hidden rounded-lg px-4 py-2.5 transition-colors duration-200"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`bg-button-info/20 absolute inset-0 -z-10 origin-left transition-opacity duration-300 motion-reduce:hidden ${index === active ? "opacity-100" : "opacity-0"}`}
+                  style={
+                    index === active
+                      ? {
+                          // Alternating between two identical keyframes
+                          // restarts the fill when autoplay is paused.
+                          animationName: `app-preview-progress${hold % 2 ? "-restart" : ""}`,
+                          animationDuration: "6s",
+                          animationTimingFunction: "linear",
+                          animationPlayState:
+                            hovered || held ? "paused" : "running",
+                        }
+                      : undefined
+                  }
+                  onAnimationEnd={() =>
+                    setActive((current) => (current + 1) % features.length)
+                  }
+                />
+                {feature.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div onClickCapture={pause} className="mt-6">
+            <ImageLightbox
+              src={features[active].image}
+              alt={features[active].alt}
+              previewRadius="rounded-xl"
+              noReferrer
+              className="border-border-card w-full border shadow-2xl"
+            >
+              <div className="grid">
+                {features.map((feature, index) => (
+                  <Image
+                    key={feature.image}
+                    src={feature.image}
+                    alt={index === active ? feature.alt : ""}
+                    aria-hidden={index !== active}
+                    width={2560}
+                    height={1439}
+                    sizes="(min-width: 1152px) 1152px, 100vw"
+                    referrerPolicy="no-referrer"
+                    className={`h-auto w-full transition-opacity duration-700 ease-in-out [grid-area:1/1] motion-reduce:transition-none ${index === active ? "opacity-100" : "opacity-0"}`}
+                  />
+                ))}
+              </div>
+            </ImageLightbox>
           </div>
-          <div>
-            <h3 className="text-primary-text font-semibold">
-              Discord Rich Presence
-            </h3>
-            <p className="text-secondary-text mt-3 text-sm leading-relaxed">
-              Show your activity on your Discord profile, with controls for
-              which details and buttons appear. You can turn it off in Settings.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-primary-text font-semibold">
-              Roblox game invites
-            </h3>
-            <p className="text-secondary-text mt-3 text-sm leading-relaxed">
-              On Windows, the app detects your Roblox session so you can send an
-              invite to your current game directly from a conversation.
-            </p>
-          </div>
-        </div>
+          {features.map((feature) => (
+            <TabsContent
+              key={feature.label}
+              value={feature.label}
+              className="animate-in fade-in-0 slide-in-from-bottom-2 mt-8 duration-500 motion-reduce:animate-none"
+            >
+              <div className="grid gap-6 md:grid-cols-2 md:gap-12">
+                <div>
+                  <h3 className="text-primary-text text-2xl font-semibold tracking-tight">
+                    {feature.title}
+                  </h3>
+                  <p className="text-secondary-text mt-3 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+                <ul className="space-y-3">
+                  {feature.points.map((point) => (
+                    <li
+                      key={point}
+                      className="text-secondary-text flex gap-3 text-sm leading-relaxed"
+                    >
+                      <Check
+                        aria-hidden="true"
+                        className="text-link mt-0.5 size-4 shrink-0"
+                      />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       </section>
     </main>
   );

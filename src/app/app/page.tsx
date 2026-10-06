@@ -6,6 +6,7 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { parseExperimentsResponse } from "@/utils/api/experiments";
 import { getAuthToken } from "@/utils/api/routeAuth";
 import AppClient from "./AppClient";
+import { fetchReleases } from "./releases";
 
 const description =
   "Download the Jailbreak Changelogs desktop app for Windows and Linux. Available in early access to selected accounts.";
@@ -46,7 +47,7 @@ const hasAppAccess = cache(async () => {
     "/v2/users/me/experiments",
   );
   delete headers["X-Experiment"];
-  const token = (await getAuthToken()) ?? headers.Authorization;
+  const token = headers.Authorization ?? (await getAuthToken());
   if (!token) return false;
   try {
     const response = await fetch(url, {
@@ -69,5 +70,5 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AppPage() {
   if (!(await hasAppAccess())) notFound();
-  return <AppClient />;
+  return <AppClient releases={await fetchReleases()} />;
 }
