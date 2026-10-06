@@ -280,7 +280,7 @@ export function ChatToolbarTextarea({
             emojiMap={emojiMap!}
             className={cn(
               "h-fit max-h-60 min-h-10 w-full @md/chat:text-base",
-              "resize-none overflow-y-auto bg-transparent p-2 text-sm text-inherit shadow-none",
+              "resize-none overflow-y-auto bg-transparent p-2 text-base text-inherit shadow-none md:text-sm",
               "border-none placeholder:whitespace-nowrap focus:outline-none",
               "disabled:cursor-not-allowed disabled:opacity-50",
               rightOverlay ? "pr-20" : "",
@@ -306,7 +306,7 @@ export function ChatToolbarTextarea({
             ref={textareaRef}
             className={cn(
               "h-fit max-h-60 min-h-10 @md/chat:text-base",
-              "resize-none overflow-y-auto bg-transparent p-2 text-sm text-inherit shadow-none",
+              "resize-none overflow-y-auto bg-transparent p-2 text-base text-inherit shadow-none md:text-sm",
               "border-none placeholder:whitespace-nowrap focus-visible:border-none focus-visible:ring-0 focus-visible:outline-none",
               rightOverlay ? "pr-20" : "",
               className,
