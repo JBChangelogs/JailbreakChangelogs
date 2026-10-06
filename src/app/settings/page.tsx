@@ -26,7 +26,8 @@ import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { safeSetJSON } from "@/utils/storage/safeStorage";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { toast } from "sonner";
-import { NotificationPreferenceToggle } from "@/components/Settings/NotificationPreferenceToggle";
+import { NotificationTypeSettings } from "@/components/Settings/NotificationTypeSettings";
+import { SettingsSubsectionHeading } from "@/components/Settings/SettingsSubsectionHeading";
 import { DesktopNotificationToggle } from "@/components/Settings/DesktopNotificationToggle";
 import { EmailNotificationSettings } from "@/components/Settings/EmailNotificationSettings";
 import { useSectionHighlight } from "@/hooks/useSectionHighlight";
@@ -418,11 +419,16 @@ export default function SettingsPage() {
             }
             className="scroll-mt-24"
           >
+            <SettingsSubsectionHeading title="Delivery" />
             <DesktopNotificationToggle />
-            <div className="border-border-card mb-2 border-t opacity-50" />
-
             <EmailNotificationSettings userData={userData} />
-            <div className="border-border-card mb-2 border-t opacity-50" />
+            <div className="border-border-card mb-4 border-t opacity-50" />
+
+            <SettingsSubsectionHeading title="What to notify you about" />
+            <p className="text-secondary-text mb-3 text-sm">
+              Turn a whole group on or off, or open it to choose individual
+              notifications.
+            </p>
 
             {notificationPrefsError && (
               <p
@@ -433,65 +439,30 @@ export default function SettingsPage() {
                 }`}
               >
                 {notificationPrefsError === "Authentication required"
-                  ? "Try refresh the page"
+                  ? "Try refreshing the page."
                   : notificationPrefsError}
               </p>
             )}
 
             {notificationPrefsLoading ? (
-              <div className="flex flex-col gap-2">
+              <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <div className="bg-tertiary-bg h-6 w-10 animate-pulse rounded-md" />
-                    <div className="flex-1">
-                      <div className="bg-tertiary-bg mb-1 h-6 w-[60%] animate-pulse rounded-md" />
-                      <div className="bg-tertiary-bg h-5 w-[80%] animate-pulse rounded-md" />
-                    </div>
-                  </div>
+                  <div
+                    key={i}
+                    className="bg-tertiary-bg h-12 animate-pulse rounded-lg"
+                  />
                 ))}
               </div>
             ) : (
-              <div>
-                {(notificationPrefs ?? []).map((pref) => {
-                  const isHighlighted =
-                    highlightSetting === pref.title && showHighlight;
-                  return (
-                    <div
-                      key={pref.title}
-                      className="-mx-3 mb-1 rounded-lg px-3 py-2 transition-colors duration-500"
-                      style={
-                        isHighlighted
-                          ? {
-                              backgroundColor:
-                                "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                            }
-                          : undefined
-                      }
-                      ref={(el) => {
-                        if (isHighlighted && el) {
-                          setTimeout(() => {
-                            (el as HTMLElement).scrollIntoView({
-                              behavior: "smooth",
-                              block: "center",
-                            });
-                          }, 100);
-                        }
-                      }}
-                    >
-                      <NotificationPreferenceToggle
-                        title={pref.title}
-                        enabled={pref.enabled}
-                        disabled={!!notificationPrefsSaving[pref.title]}
-                        onChange={(nextEnabled) =>
-                          handleNotificationPrefToggle(pref.title, nextEnabled)
-                        }
-                        description="Toggle whether you receive this notification"
-                        userData={userData}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
+              notificationPrefs && (
+                <NotificationTypeSettings
+                  prefs={notificationPrefs}
+                  saving={notificationPrefsSaving}
+                  onToggle={handleNotificationPrefToggle}
+                  highlight={showHighlight ? highlightSetting : null}
+                  userData={userData}
+                />
+              )
             )}
           </SettingsCard>
 
