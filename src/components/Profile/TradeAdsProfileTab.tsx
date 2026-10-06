@@ -287,7 +287,7 @@ export default function TradeAdsProfileTab({
     <section className="border-border-card bg-secondary-bg min-w-0 rounded-2xl border p-5 sm:p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-primary-text text-lg font-semibold">
-          {preview ? "Trading showcase" : "Trade ads"}
+          {preview ? "Recent trades" : "Trade ads"}
         </h2>
         {preview && (
           <Button variant="link" size="sm" onClick={onViewAll}>
@@ -342,6 +342,7 @@ export default function TradeAdsProfileTab({
                 trade={trade}
                 currentUserId={currentUserId}
                 actionsVariant="details-only"
+                useQuaternaryAvatarBackground
               />
             ))}
           </div>
