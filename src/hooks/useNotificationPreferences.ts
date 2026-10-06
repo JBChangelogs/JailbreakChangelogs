@@ -70,13 +70,28 @@ export function useNotificationPreferences(userId: string | null) {
         .filter((preference) => changed.has(preference.title))
         .map((preference) => [preference.title, preference.enabled]),
     );
-    queryClient.setQueryData(["notification-preferences", userId], {
-      preferences: prefs.map((preference) =>
-        changed.has(preference.title)
-          ? { ...preference, enabled: nextEnabled }
-          : preference,
-      ),
-    });
+    // Update the latest cache, not this render's snapshot, so overlapping
+    // toggles don't overwrite each other.
+    queryClient.setQueryData(
+      ["notification-preferences", userId],
+      (current: typeof userPrefsQuery.data) => {
+        const preferences = current?.preferences ?? [];
+        const cached = new Set(preferences.map((p) => p.title));
+        return {
+          ...current,
+          preferences: [
+            ...preferences.map((preference) =>
+              changed.has(preference.title)
+                ? { ...preference, enabled: nextEnabled }
+                : preference,
+            ),
+            ...[...changed]
+              .filter((title) => !cached.has(title))
+              .map((title) => ({ title, enabled: nextEnabled })),
+          ],
+        };
+      },
+    );
     setUpdateError(null);
     changed.forEach((title) => setPreferenceSaving(title, true));
 
