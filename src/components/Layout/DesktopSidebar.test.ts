@@ -62,7 +62,7 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
   );
 
   exports.default({ collapsed: false });
-  expect(dependencies).toEqual(["/supporting", false]);
+  expect(dependencies).toEqual(["/supporting", false, false]);
   expect(navigation.scrollTop).toBe(410);
 
   pathname = "/changelogs/123";
@@ -70,7 +70,7 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
   cleanup?.();
   expect(disconnected).toBe(true);
   exports.default({ collapsed: true });
-  expect(dependencies).toEqual([pathname, true]);
+  expect(dependencies).toEqual([pathname, true, false]);
   expect(navigation.scrollTop).toBe(140);
 
   link = { top: 100, bottom: 140 };

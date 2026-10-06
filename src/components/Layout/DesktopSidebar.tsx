@@ -35,7 +35,7 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
     const observer = new ResizeObserver(revealActiveLink);
     observer.observe(navigation);
     return () => observer.disconnect();
-  }, [pathname, collapsed]);
+  }, [pathname, collapsed, hasAppAccess]);
 
   const linkClassName = (active: boolean) =>
     cn(

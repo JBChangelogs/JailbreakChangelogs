@@ -9,6 +9,7 @@ const sectionPaths = {
     "/dupes",
     "/seasons/will-i-make-it",
     "/hyperchrome-pity",
+    "/app",
   ],
   updates: ["/changelogs", "/dev/changelogs"],
   seasons: ["/seasons"],
