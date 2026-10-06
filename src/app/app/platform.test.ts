@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { detectDownloadPlatform } from "./platform";
 
-test("recommends supported desktop platforms using hints or user agent, excluding mobile and ChromeOS", () => {
+test("recommends supported desktop platforms using hints or user agent, excluding mobile and ChromeOS, and flags macOS", () => {
   for (const [userAgent, hint, expected] of [
     ["Mozilla/5.0 (Windows NT 10.0; Win64; x64)", undefined, "Windows"],
     ["Mozilla/5.0 (X11; Linux x86_64)", undefined, "Linux"],
@@ -20,9 +20,9 @@ test("recommends supported desktop platforms using hints or user agent, excludin
     ["Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X)", undefined, "Mobile"],
     ["", "Android", "Mobile"],
     ["", "iOS", "Mobile"],
-    ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", undefined, null],
+    ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", undefined, "macOS"],
     ["Linux", "Chrome OS", null],
-    ["Windows NT 10.0", "macOS", null],
+    ["Windows NT 10.0", "macOS", "macOS"],
     ["", undefined, null],
   ] as const) {
     expect(detectDownloadPlatform(userAgent, hint)).toBe(expected);

@@ -2,7 +2,7 @@ export function detectDownloadPlatform(
   userAgent: string,
   platform?: string,
   maxTouchPoints = 0,
-): "Windows" | "Linux" | "Mobile" | null {
+): "Windows" | "Linux" | "macOS" | "Mobile" | null {
   if (
     /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(userAgent) ||
     platform === "Android" ||
@@ -12,9 +12,14 @@ export function detectDownloadPlatform(
     return "Mobile";
   if (/CrOS/i.test(userAgent)) return null;
   if (platform)
-    return platform === "Windows" || platform === "Linux" ? platform : null;
+    return platform === "Windows" ||
+      platform === "Linux" ||
+      platform === "macOS"
+      ? platform
+      : null;
   if (/Windows NT|Win32|Win64/i.test(userAgent)) return "Windows";
   if (/Linux/i.test(userAgent)) return "Linux";
+  if (/Macintosh|Mac OS X/i.test(userAgent)) return "macOS";
   return null;
 }
 

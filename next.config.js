@@ -69,6 +69,11 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "assets.jailbreakchangelogs.com",
+        pathname: "/app/**",
+      },
+      {
+        protocol: "https",
         hostname: "tr.rbxcdn.com",
         pathname: "/**/AvatarHeadshot/**",
       },

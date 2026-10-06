@@ -1096,6 +1096,23 @@ img.twemoji {
   animation: comment-link-highlight 10s ease-out forwards;
 }
 
+@keyframes app-preview-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes app-preview-progress-restart {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @keyframes comment-link-highlight {
   0%,
   95% {

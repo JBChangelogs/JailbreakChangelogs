@@ -155,7 +155,7 @@ export const navigationSections: NavigationSection[] = [
         href: "/app",
         icon: "material-symbols:desktop-windows-rounded",
         title: "Desktop App",
-        description: "Download for Windows and Linux in early access",
+        description: "Download for Windows, macOS and Linux in early access",
         desktopApp: true,
       },
     ],

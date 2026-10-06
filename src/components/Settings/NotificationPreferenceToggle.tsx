@@ -42,9 +42,12 @@ export function NotificationPreferenceToggle({
 
   return (
     <div className="w-full">
-      <div className="mb-1 flex w-full items-center justify-between gap-4">
+      <div className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <label className="text-primary-text text-base font-medium">
+          <label
+            htmlFor={`notification-pref-${title}`}
+            className="text-primary-text text-sm font-medium"
+          >
             {humanizeTitle(title)}
           </label>
           {userData?.flags?.some((f) => f.flag === "is_owner") && (
@@ -68,14 +71,15 @@ export function NotificationPreferenceToggle({
           )}
         </div>
         <Switch
+          id={`notification-pref-${title}`}
           checked={enabled}
           onCheckedChange={onChange}
           disabled={disabled}
         />
       </div>
-      <p className="text-secondary-text text-sm">
-        {description ?? "Manage this notification type"}
-      </p>
+      {description && (
+        <p className="text-secondary-text mt-1 text-sm">{description}</p>
+      )}
     </div>
   );
 }

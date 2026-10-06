@@ -25,6 +25,7 @@ interface ImageLightboxProps {
   triggerAsChild?: boolean;
   stopPropagation?: boolean;
   noReferrer?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const ImageLightbox = ({
@@ -39,6 +40,7 @@ export const ImageLightbox = ({
   triggerAsChild = false,
   stopPropagation = false,
   noReferrer = false,
+  onOpenChange,
 }: ImageLightboxProps) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -65,6 +67,11 @@ export const ImageLightbox = ({
   }, [lightboxImages.length]);
 
   useEffect(() => setMounted(true), []);
+
+  const isOpen = activeIndex !== null;
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
 
   useEffect(() => {
     if (activeIndex === null) return;
