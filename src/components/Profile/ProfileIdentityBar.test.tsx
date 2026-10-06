@@ -7,7 +7,10 @@ test("identity bar appears only above the site header and cleans up its observer
   let visible = false;
   let effect: () => () => void;
   let observeEntry: (
-    entries: { boundingClientRect: { bottom: number } }[],
+    entries: {
+      isIntersecting: boolean;
+      boundingClientRect: { bottom: number };
+    }[],
   ) => void;
   let frame: () => void;
   let resize: (() => void) | undefined;
@@ -84,14 +87,15 @@ test("identity bar appears only above the site header and cleans up its observer
   expect(exports.default(props).props.children).toBe(false);
   const cleanup = effect!();
   frame!();
-  for (const [bottom, expected] of [
-    [1000, false],
-    [65, false],
-    [64, true],
-    [-100, true],
-    [100, false],
+  for (const [bottom, isIntersecting, expected] of [
+    [1000, true, false],
+    [65, true, false],
+    [64, false, true],
+    [-100, false, true],
+    [64, true, false],
+    [100, true, false],
   ] as const) {
-    observeEntry!([{ boundingClientRect: { bottom } }]);
+    observeEntry!([{ isIntersecting, boundingClientRect: { bottom } }]);
     expect(Boolean(exports.default(props).props.children)).toBe(expected);
   }
   resize!();

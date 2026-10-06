@@ -41,7 +41,10 @@ export default function ProfileIdentityBar({
         observer?.disconnect();
         observer = new IntersectionObserver(
           ([entry]) => {
-            setVisible(entry.boundingClientRect.bottom <= headerHeight);
+            setVisible(
+              !entry.isIntersecting &&
+                entry.boundingClientRect.bottom <= headerHeight,
+            );
           },
           { rootMargin: `-${headerHeight}px 0px 0px 0px` },
         );
