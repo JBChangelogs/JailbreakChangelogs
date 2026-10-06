@@ -24,6 +24,13 @@ test("received cards join valid games and VIP servers, handle missing servers, a
     link: "https://www.roblox.com/share?code=owned-server&type=Server",
   };
   let error: Error | null = null;
+  const slots: unknown[] = [];
+  let cursor = 0;
+  let cleanup = () => {};
+  let timeout = () => {};
+  let timeoutMs = 0;
+  let cleared = false;
+  const navigations: string[] = [];
   const exports = {} as { MessageEmbedCard: (props: unknown) => Node };
   const jsx = (type: unknown, props: Record<string, unknown>): Node =>
     typeof type === "function" ? type(props) : { type, props };
@@ -40,7 +47,39 @@ test("received cards join valid games and VIP servers, handle missing servers, a
     ).outputText,
     {
       exports,
+      window: {
+        location: { assign: (href: string) => navigations.push(href) },
+        setTimeout: (callback: () => void, delay: number) => {
+          timeout = callback;
+          timeoutMs = delay;
+          return 1;
+        },
+        clearTimeout: () => {
+          cleared = true;
+        },
+      },
       require: (name: string) => {
+        if (name === "react")
+          return {
+            useState: (initial: unknown) => {
+              const index = cursor++;
+              if (!(index in slots)) slots[index] = initial;
+              return [
+                slots[index],
+                (value: unknown) => {
+                  slots[index] = value;
+                },
+              ];
+            },
+            useRef: (initial: unknown) => {
+              const index = cursor++;
+              if (!(index in slots)) slots[index] = { current: initial };
+              return slots[index];
+            },
+            useEffect: (effect: () => () => void) => {
+              cleanup = effect();
+            },
+          };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name === "@tanstack/react-query")
           return {
@@ -72,8 +111,9 @@ test("received cards join valid games and VIP servers, handle missing servers, a
     isMine = false,
     status?: Message["status"],
     content = "Join me!",
-  ) =>
-    nodes(
+  ) => {
+    cursor = 0;
+    return nodes(
       exports.MessageEmbedCard({
         message: { content, createdAt: 1, status },
         metadata,
@@ -81,14 +121,15 @@ test("received cards join valid games and VIP servers, handle missing servers, a
         senderLabel: "Sender",
       }),
     );
+  };
   const game = {
     type: "game_invite" as const,
     place_id: "606849621",
     job_id: "12345678-1234-1234-1234-123456789abc",
   };
-  expect(render(game).find((node) => node.type === "a")?.props.href).toBe(
-    buildRobloxGameLink(game),
-  );
+  expect(
+    render(game).find((node) => node.type === "button")?.props.disabled,
+  ).toBe(false);
   const vip = { type: "vip_server_invite" as const, server_id: 7 };
   expect(
     render(vip, false, undefined, "Be kind").some(
@@ -161,4 +202,21 @@ test("received cards join valid games and VIP servers, handle missing servers, a
       ),
     ).toBe(false);
   }
+  const button = render(game).find((node) => node.type === "button")!;
+  const click = button.props.onClick as () => void;
+  click();
+  click();
+  expect(navigations).toEqual([buildRobloxGameLink(game)]);
+  const joining = render(game).find((node) => node.type === "button")!;
+  expect(joining.props.disabled).toBe(true);
+  expect(joining.props.children as unknown[]).toContain("Joining...");
+  expect(timeoutMs).toBe(5000);
+  timeout();
+  expect(
+    render(game).find((node) => node.type === "button")?.props.disabled,
+  ).toBe(false);
+  click();
+  expect(navigations).toHaveLength(2);
+  cleanup();
+  expect(cleared).toBe(true);
 });

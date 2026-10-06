@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,15 @@ export function MessageEmbedCard({
   isMine: boolean;
   senderLabel: string;
 }) {
+  const [isJoining, setIsJoining] = useState(false);
+  const joinTimeoutRef = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (joinTimeoutRef.current !== null)
+        window.clearTimeout(joinTimeoutRef.current);
+    },
+    [],
+  );
   const isGift = metadata.type === "gift_sent";
   const giftColor =
     metadata.type === "gift_sent"
@@ -131,14 +141,24 @@ export function MessageEmbedCard({
       </div>
       {metadata.type === "game_invite" && (
         <div className="mt-2">
-          <Button asChild size="sm">
-            <a href={buildRobloxGameLink(metadata)}>
-              <Icon
-                icon="heroicons:arrow-top-right-on-square"
-                className="h-4 w-4"
-              />
-              Join Game
-            </a>
+          <Button
+            size="sm"
+            disabled={isJoining}
+            onClick={() => {
+              if (joinTimeoutRef.current !== null) return;
+              setIsJoining(true);
+              joinTimeoutRef.current = window.setTimeout(() => {
+                joinTimeoutRef.current = null;
+                setIsJoining(false);
+              }, 5000);
+              window.location.assign(buildRobloxGameLink(metadata));
+            }}
+          >
+            <Icon
+              icon="heroicons:arrow-top-right-on-square"
+              className="h-4 w-4"
+            />
+            {isJoining ? "Joining..." : "Join Game"}
           </Button>
         </div>
       )}
