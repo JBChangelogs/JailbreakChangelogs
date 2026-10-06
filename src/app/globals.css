@@ -31,6 +31,12 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
 }
 
 @theme {
+  /* Radius scale shifted one step rounder than Tailwind defaults */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+
   /* DARK THEME - Default (current theme) */
   /* Background Colors - Comprehensive Gray Scale */
   --color-primary-bg: #121317; /* Main page background */
