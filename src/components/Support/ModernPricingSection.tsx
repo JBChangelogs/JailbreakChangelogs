@@ -87,7 +87,7 @@ const supporterTiers: SupporterTier[] = [
       "Post Comments up to 2,000 characters",
       "Monitor up to 15 OG Items",
       "Trade Ad Duration: +24 Hours (48 Hours total)",
-      "Square Avatar Border",
+      "Squircle Avatar Border",
       "On-Demand Inventory Refresh",
       "3 Extra entries in our Discord giveaways",
       "Bypass Discord Giveaway Requirements",
