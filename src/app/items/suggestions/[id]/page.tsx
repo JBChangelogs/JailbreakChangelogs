@@ -140,7 +140,7 @@ const statusColors: Record<string, string> = {
 };
 
 const badgeBase =
-  "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
+  "inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
 const voterListClassName =
   "max-h-96 space-y-2 overflow-y-auto scrollbar-thin pr-1";
@@ -998,9 +998,9 @@ export default function ValueSuggestionDetailPage() {
                   <div className="flex flex-1 flex-col justify-center gap-4 p-5">
                     <div className="bg-quaternary-bg h-7 w-48 rounded" />
                     <div className="flex flex-wrap gap-1.5">
-                      <div className="bg-quaternary-bg h-6 w-16 rounded-lg" />
-                      <div className="bg-quaternary-bg h-6 w-20 rounded-lg" />
-                      <div className="bg-quaternary-bg h-6 w-16 rounded-lg" />
+                      <div className="bg-quaternary-bg h-6 w-16 rounded-md" />
+                      <div className="bg-quaternary-bg h-6 w-20 rounded-md" />
+                      <div className="bg-quaternary-bg h-6 w-16 rounded-md" />
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="bg-quaternary-bg h-5 w-5 rounded-full" />

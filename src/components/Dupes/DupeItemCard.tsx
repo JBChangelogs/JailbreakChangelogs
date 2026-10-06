@@ -130,7 +130,7 @@ export default function DupeItemCard({
         </h2>
         <div className="flex items-center gap-2">
           <span
-            className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+            className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
             style={{
               borderColor: getCategoryColor(item.categoryTitle),
               backgroundColor: `${getCategoryColor(item.categoryTitle)}22`,
@@ -179,12 +179,12 @@ export default function DupeItemCard({
             <TooltipTrigger asChild>
               <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
                 {typeof displayedSeason === "number" && (
-                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                     S{displayedSeason}
                   </span>
                 )}
                 {hasDisplayedLevel && (
-                  <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                  <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                     {formatUnlockLevelBadge(displayedLevel)}
                   </span>
                 )}

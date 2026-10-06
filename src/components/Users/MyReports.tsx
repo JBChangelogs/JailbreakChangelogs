@@ -271,7 +271,7 @@ function ItemTypeBadge({ type }: { type: string }) {
 
   return (
     <span
-      className="text-primary-text bg-tertiary-bg/40 inline-flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
+      className="text-primary-text bg-tertiary-bg/40 inline-flex h-5 items-center rounded-md border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
       style={{
         borderColor: categoryColor,
         backgroundColor: `${categoryColor}22`,
@@ -1161,7 +1161,7 @@ export default function MyReports() {
                           </p>
                         </div>
                         <span
-                          className={`inline-flex h-5 items-center rounded-lg px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs ${statusStyle.className}`}
+                          className={`inline-flex h-5 items-center rounded-md px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs ${statusStyle.className}`}
                         >
                           {statusStyle.label}
                         </span>

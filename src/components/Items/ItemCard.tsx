@@ -313,12 +313,12 @@ function ItemCard({
               <TooltipTrigger asChild>
                 <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
                   {item.season != null && (
-                    <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                    <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                       S{item.season}
                     </span>
                   )}
                   {hasMetadataLevel && (
-                    <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                    <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                       {formatUnlockLevelBadge(metadataLevel)}
                     </span>
                   )}
@@ -482,7 +482,7 @@ function ItemCard({
 
             <div className="flex flex-wrap gap-1 sm:gap-2">
               <span
-                className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
+                className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center rounded-md border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
                 style={{
                   borderColor: getCategoryColor(item.type),
                   backgroundColor: `${getCategoryColor(item.type)}22`,
@@ -491,7 +491,7 @@ function ItemCard({
                 {item.type}
               </span>
               {currentItemData.tradable === 0 && (
-                <span className="text-primary-text border-border-card bg-tertiary-bg/40 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex">
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 hidden h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex">
                   {currentItemData.id === 713
                     ? "Reference Only"
                     : "Non-Tradable"}
@@ -554,7 +554,7 @@ function ItemCard({
                       Value
                     </span>
                     <div className="flex items-center gap-1">
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                         {isMobile
                           ? currentItemData.cash_value
                           : formatFullValue(currentItemData.cash_value)}
@@ -591,7 +591,7 @@ function ItemCard({
                       Value
                     </span>
                     <div className="flex items-center gap-1">
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                         {isMobile
                           ? currentItemData.duped_value
                           : formatFullValue(currentItemData.duped_value)}
@@ -626,7 +626,7 @@ function ItemCard({
                   <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                     Cash Value
                   </span>
-                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
+                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold min-[480px]:px-3">
                     {isMobile
                       ? currentItemData.cash_value
                       : formatFullValue(currentItemData.cash_value)}
@@ -637,7 +637,7 @@ function ItemCard({
                   <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                     Duped Value
                   </span>
-                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
+                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold min-[480px]:px-3">
                     {isMobile
                       ? currentItemData.duped_value
                       : formatFullValue(currentItemData.duped_value)}
@@ -677,7 +677,7 @@ function ItemCard({
                   </span>
                 </div>
                 <span
-                  className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
+                  className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
                 >
                   {trendLabel}
                 </span>
@@ -692,7 +692,7 @@ function ItemCard({
                       <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                         Placement Limit
                       </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold min-[480px]:px-3">
                         {placementLimit}
                       </span>
                     </div>

@@ -367,7 +367,7 @@ export default function MyIssues() {
                         </p>
                       </div>
                       <span
-                        className={`inline-flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs ${getStatusStyle(issue.status)}`}
+                        className={`inline-flex h-5 items-center rounded-md border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs ${getStatusStyle(issue.status)}`}
                       >
                         {getStatusLabel(issue.status)}
                       </span>

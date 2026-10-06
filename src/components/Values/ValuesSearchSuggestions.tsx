@@ -95,7 +95,7 @@ export default function ValuesSearchSuggestions({
                   {item.name}
                 </p>
                 <span
-                  className="text-primary-text mt-1 inline-flex h-5 max-w-full items-center gap-1 rounded-lg border px-2 text-[10px] leading-none font-medium"
+                  className="text-primary-text mt-1 inline-flex h-5 max-w-full items-center gap-1 rounded-md border px-2 text-[10px] leading-none font-medium"
                   style={{
                     borderColor: categoryColor,
                     backgroundColor: `${categoryColor}22`,

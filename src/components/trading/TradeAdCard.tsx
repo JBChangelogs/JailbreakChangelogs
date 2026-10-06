@@ -198,7 +198,7 @@ const TradeSidePreview = ({
                           </span>
                         )}
                         <span
-                          className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                          className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                           style={{
                             borderColor: getCategoryColor(item.type),
                             backgroundColor: `${getCategoryColor(item.type)}22`,
@@ -224,7 +224,7 @@ const TradeSidePreview = ({
                             {item.isDuped ? "Duped value" : "Cash value"}
                           </span>
                           <span
-                            className={`inline-flex h-5 items-center rounded-lg px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs ${
+                            className={`inline-flex h-5 items-center rounded-md px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs ${
                               hasKnownItemValue
                                 ? "bg-button-info text-form-button-text"
                                 : "bg-quaternary-bg text-secondary-text"
@@ -263,13 +263,13 @@ const TradeSidePreview = ({
       </div>
       {hasStandardItems && (
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-          <span className="border-border-card bg-quaternary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
+          <span className="border-border-card bg-quaternary-bg text-primary-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
             Total: {formatTradeValue(cashTotal + dupedTotal)}
           </span>
-          <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
+          <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
             Cash: {formatTradeValue(cashTotal)}
           </span>
-          <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
+          <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
             Duped: {formatTradeValue(dupedTotal)}
           </span>
         </div>

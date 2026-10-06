@@ -60,7 +60,7 @@ function ItemValues({
             </h4>
             {cashChange && cashChange.difference !== 0 && (
               <span
-                className={`inline-flex h-6 items-center gap-1 rounded-lg px-2 text-xs leading-none font-semibold ${
+                className={`inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs leading-none font-semibold ${
                   cashChange.difference > 0
                     ? "bg-status-success text-white"
                     : "bg-status-error text-white"
@@ -84,7 +84,7 @@ function ItemValues({
             </h4>
             {dupedChange && dupedChange.difference !== 0 && (
               <span
-                className={`inline-flex h-6 items-center gap-1 rounded-lg px-2 text-xs leading-none font-semibold ${
+                className={`inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs leading-none font-semibold ${
                   dupedChange.difference > 0
                     ? "bg-status-success text-white"
                     : "bg-status-error text-white"

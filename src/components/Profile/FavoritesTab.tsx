@@ -40,7 +40,7 @@ function FavoriteCardSkeleton({ preview = false }: { preview?: boolean }) {
         />
         <div className="min-w-0 flex-1">
           <div className="bg-quaternary-bg mb-2 h-4 w-3/4 rounded" />
-          <div className="bg-quaternary-bg h-6 w-20 rounded-lg" />
+          <div className="bg-quaternary-bg h-6 w-20 rounded-md" />
         </div>
       </div>
       <div className="bg-quaternary-bg mt-2 h-3 w-32 rounded" />
@@ -195,7 +195,7 @@ export default function FavoritesTab({
                 {itemType && (
                   <div className="mb-1">
                     <span
-                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                       style={{
                         borderColor: getCategoryColor(itemType),
                         backgroundColor: `${getCategoryColor(itemType)}22`,

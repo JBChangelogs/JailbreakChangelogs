@@ -85,8 +85,8 @@ function SuggestionCardSkeleton() {
         <div className="space-y-2">
           <div className="bg-quaternary-bg h-5 w-32 rounded" />
           <div className="flex gap-1.5">
-            <div className="bg-quaternary-bg h-6 w-20 rounded-lg" />
-            <div className="bg-quaternary-bg h-6 w-16 rounded-lg" />
+            <div className="bg-quaternary-bg h-6 w-20 rounded-md" />
+            <div className="bg-quaternary-bg h-6 w-16 rounded-md" />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -188,7 +188,7 @@ const statusColors: Record<string, string> = {
 };
 
 const badgeBase =
-  "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
+  "inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
 // RE-ADD: voting — VoteRateLimitBanner (shown below vote buttons when rate limited)
 // function VoteRateLimitBanner({ until }: { until: number }) {

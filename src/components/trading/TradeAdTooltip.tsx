@@ -43,7 +43,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
         <div className="space-y-2 text-sm">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+              className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
               style={{
                 borderColor: getCategoryColor(item.type),
                 backgroundColor: `${getCategoryColor(item.type)}22`,
@@ -61,7 +61,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               {item.type}
             </span>
             {item.is_limited === 1 && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="mdi:clock"
                   className="h-3 w-3"
@@ -71,7 +71,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               </span>
             )}
             {item.season != null && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="noto-v1:snowflake"
                   className="h-3 w-3"
@@ -87,7 +87,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
             <span className="text-secondary-text text-xs tracking-wider uppercase">
               Cash:
             </span>
-            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap">
+            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-semibold whitespace-nowrap">
               {item.cash_value === null || item.cash_value === "N/A"
                 ? "N/A"
                 : formatFullValue(item.cash_value)}
@@ -97,7 +97,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
             <span className="text-secondary-text text-xs tracking-wider uppercase">
               Duped:
             </span>
-            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap">
+            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-semibold whitespace-nowrap">
               {item.duped_value === null || item.duped_value === "N/A"
                 ? "N/A"
                 : formatFullValue(item.duped_value)}
@@ -108,7 +108,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               Demand:
             </span>
             <span
-              className={`${getDemandColor(demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap`}
+              className={`${getDemandColor(demand)} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-semibold whitespace-nowrap`}
             >
               {demand === "N/A" ? "Unknown" : demand}
             </span>
@@ -118,7 +118,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               Duped Demand:
             </span>
             <span
-              className={`${getDemandColor(!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap`}
+              className={`${getDemandColor(!dupedDemand || dupedDemand === "N/A" ? "Unknown" : dupedDemand)} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-semibold whitespace-nowrap`}
             >
               {!dupedDemand || dupedDemand === "N/A" ? "N/A" : dupedDemand}
             </span>
@@ -128,7 +128,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               Trend:
             </span>
             <span
-              className={`${getTrendColor(trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap`}
+              className={`${getTrendColor(trend || "N/A")} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-semibold whitespace-nowrap`}
             >
               {!trend || trend === "N/A" ? "Unknown" : trend}
             </span>

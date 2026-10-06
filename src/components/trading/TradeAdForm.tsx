@@ -1494,7 +1494,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                               className="bg-tertiary-bg flex items-center justify-between rounded-lg p-1.5"
                             >
                               <div className="bg-quaternary-bg h-3 w-10 rounded" />
-                              <div className="bg-quaternary-bg h-5 w-14 rounded-lg" />
+                              <div className="bg-quaternary-bg h-5 w-14 rounded-md" />
                             </div>
                           ))}
                         </div>

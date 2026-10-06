@@ -122,7 +122,7 @@ function RobberyCard({
   const statusBadge = useMemo(() => {
     if (isTrainNearClose) {
       return (
-        <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+        <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
           <span>Ends Soon</span>
         </div>
       );
@@ -133,13 +133,13 @@ function RobberyCard({
       switch (robbery.status) {
         case 1:
           return (
-            <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+            <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
               <span>Open</span>
             </div>
           );
         case 2:
           return (
-            <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+            <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
               <span>Ready to Open</span>
             </div>
           );
@@ -161,7 +161,7 @@ function RobberyCard({
           robbery.metadata?.plane_time
         ) {
           return (
-            <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+            <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
               <span>
                 <RobberyCountdown
                   deadline={robbery.metadata.plane_time}
@@ -173,13 +173,13 @@ function RobberyCard({
           );
         }
         return (
-          <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+          <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
             <span>Open</span>
           </div>
         );
       case 2:
         return (
-          <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+          <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
             <span>Active</span>
           </div>
         );
@@ -272,7 +272,7 @@ function RobberyCard({
                         onClick={() =>
                           handleCopyCasinoCode(robbery.metadata!.casino_code!)
                         }
-                        className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 font-mono text-xs leading-none font-medium backdrop-blur-xl transition-colors"
+                        className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 font-mono text-xs leading-none font-medium backdrop-blur-xl transition-colors"
                       >
                         Code: {robbery.metadata.casino_code}
                         <Icon
@@ -286,7 +286,7 @@ function RobberyCard({
                 ) : (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="text-primary-text border-border-card bg-tertiary-bg inline-flex h-6 cursor-help items-center gap-1.5 rounded-lg border px-2.5 font-mono text-xs leading-none font-medium">
+                      <div className="text-primary-text border-border-card bg-tertiary-bg inline-flex h-6 cursor-help items-center gap-1.5 rounded-md border px-2.5 font-mono text-xs leading-none font-medium">
                         Code: ???
                       </div>
                     </TooltipTrigger>

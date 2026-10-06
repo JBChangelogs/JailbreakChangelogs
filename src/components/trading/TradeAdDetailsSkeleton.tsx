@@ -27,7 +27,7 @@ const TradeSideSkeleton = ({ titleWidth }: { titleWidth: string }) => (
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <SkeletonBlock className="h-4 w-28" />
-                <SkeletonBlock className="h-6 w-20 rounded-lg" />
+                <SkeletonBlock className="h-6 w-20 rounded-md" />
               </div>
               <div className="mt-2">
                 <SkeletonBlock className="h-3 w-32" />
@@ -39,8 +39,8 @@ const TradeSideSkeleton = ({ titleWidth }: { titleWidth: string }) => (
       ))}
     </div>
     <div className="mt-3 flex flex-wrap items-center gap-2">
-      <SkeletonBlock className="h-6 w-24 rounded-lg" />
-      <SkeletonBlock className="h-6 w-24 rounded-lg" />
+      <SkeletonBlock className="h-6 w-24 rounded-md" />
+      <SkeletonBlock className="h-6 w-24 rounded-md" />
     </div>
   </section>
 );

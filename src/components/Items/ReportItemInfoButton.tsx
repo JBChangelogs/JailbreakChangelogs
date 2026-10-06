@@ -129,7 +129,7 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
               {item.name}
             </p>
             <span
-              className="text-primary-text mt-1.5 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium"
+              className="text-primary-text mt-1.5 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium"
               style={{
                 borderColor: categoryColor,
                 backgroundColor: `${categoryColor}22`,

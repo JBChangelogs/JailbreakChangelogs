@@ -675,7 +675,7 @@ export default function ChangelogDetailsClient({
                             change.changes.old,
                           ).find((k) => k !== "last_updated");
                           return primaryFieldKey ? (
-                            <span className="text-primary-text border-border-card bg-tertiary-bg inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                            <span className="text-primary-text border-border-card bg-tertiary-bg inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                               {formatSuggestionTypeLabel(
                                 change.suggestion?.metadata?.suggestion_type,
                                 primaryFieldKey,
@@ -721,7 +721,7 @@ export default function ChangelogDetailsClient({
                           {change.item.name}
                         </Link>
                         <span
-                          className="text-primary-text bg-tertiary-bg/40 mt-1 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                          className="text-primary-text bg-tertiary-bg/40 mt-1 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                           style={{
                             borderColor: getCategoryColor(change.item.type),
                             backgroundColor: `${getCategoryColor(change.item.type)}22`,

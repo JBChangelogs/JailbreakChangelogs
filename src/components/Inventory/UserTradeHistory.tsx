@@ -282,7 +282,7 @@ function TradeItem({
         </p>
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
           <span
-            className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center gap-1 rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
+            className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center gap-1 rounded-md border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
             style={{
               borderColor: getCategoryColor(item.category_title),
               backgroundColor: `${getCategoryColor(item.category_title)}22`,
@@ -316,7 +316,7 @@ function TradeItem({
           <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
             Value
           </span>
-          <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded-lg px-2 text-[10px] leading-none font-bold sm:h-6 sm:px-2.5 sm:text-xs">
+          <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded-md px-2 text-[10px] leading-none font-bold sm:h-6 sm:px-2.5 sm:text-xs">
             {valueState === "loading" ? (
               <>
                 <Spinner className="mr-1 h-3 w-3" /> Loading

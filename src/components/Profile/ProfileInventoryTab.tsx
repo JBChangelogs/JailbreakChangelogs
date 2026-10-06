@@ -285,7 +285,7 @@ export default function ProfileInventoryTab({
                 className="border-border-card bg-tertiary-bg flex min-h-100 flex-col rounded-lg border p-3"
               >
                 <div className="bg-quaternary-bg mb-4 h-7 w-3/4 rounded" />
-                <div className="bg-quaternary-bg mb-3 h-5 w-20 rounded-lg" />
+                <div className="bg-quaternary-bg mb-3 h-5 w-20 rounded-md" />
                 <div className="bg-quaternary-bg flex-1 rounded-lg" />
               </div>
             ))}
@@ -487,7 +487,7 @@ export default function ProfileInventoryTab({
                     </h2>
                     <div className="flex items-center gap-2">
                       <span
-                        className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                        className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                         style={{
                           borderColor: categoryColor,
                           backgroundColor: `${categoryColor}22`,

@@ -244,7 +244,7 @@ export function ReleaseTimelineEntry({
                 {entry.title || `v${entry.version}`}
               </h2>
               {latest && (
-                <span className="bg-button-info/20 border-button-info text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                <span className="bg-button-info/20 border-button-info text-primary-text inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                   Latest
                 </span>
               )}

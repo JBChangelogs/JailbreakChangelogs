@@ -79,7 +79,7 @@ function CategoryIcons({
             <button
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
-              className={`order-(--mobile-order) flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-all hover:bg-(--hover-bg) sm:order-0 ${
+              className={`order-(--mobile-order) flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-all hover:bg-(--hover-bg) sm:order-0 ${
                 isSelected
                   ? "bg-tertiary-bg ring-border-focus ring-2"
                   : "bg-tertiary-bg"

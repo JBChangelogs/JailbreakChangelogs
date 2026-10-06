@@ -576,7 +576,7 @@ export function SuggestionForm({
                       const hex = getTrendHexColor(val);
                       return (
                         <span
-                          className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border-2 px-2.5 text-xs leading-none font-semibold"
+                          className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-md border-2 px-2.5 text-xs leading-none font-semibold"
                           style={{ borderColor: hex }}
                         >
                           {val}
@@ -590,7 +590,7 @@ export function SuggestionForm({
                       const hex = getDemandHexColor(val);
                       return (
                         <span
-                          className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border-2 px-2.5 text-xs leading-none font-semibold"
+                          className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-md border-2 px-2.5 text-xs leading-none font-semibold"
                           style={{ borderColor: hex }}
                         >
                           {val}
@@ -1024,11 +1024,11 @@ export function SuggestionForm({
                           </span>
                         );
                       })()}
-                    <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium">
+                    <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-md border px-2.5 text-xs font-medium">
                       {fieldLabel(field)}
                     </span>
                     {isVtEligible && isVt && (
-                      <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium">
+                      <span className="border-border-card bg-tertiary-bg text-primary-text inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium">
                         <Image
                           src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
                           alt="VT"

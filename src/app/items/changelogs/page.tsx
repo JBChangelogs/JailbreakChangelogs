@@ -26,7 +26,7 @@ import NitroRailAd from "@/components/Ads/NitroRailAd";
 const log = createLogger("UI");
 
 const badgeBase =
-  "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
+  "inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
 const fieldLabel = (field: string) =>
   field
@@ -186,7 +186,7 @@ export default function ValuesChangelogPage() {
                     )
                   }
                   size="sm"
-                  className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                  className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                 >
                   <Icon
                     icon={

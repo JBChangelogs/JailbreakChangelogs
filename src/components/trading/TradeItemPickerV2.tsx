@@ -1039,7 +1039,7 @@ export default function TradeItemPickerV2({
                           <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                             Cash
                           </span>
-                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                             {formatValue(item.cash_value, isMobile)}
                           </span>
                         </div>
@@ -1048,7 +1048,7 @@ export default function TradeItemPickerV2({
                           <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                             Duped
                           </span>
-                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                             {formatValue(item.duped_value, isMobile)}
                           </span>
                         </div>
@@ -1065,7 +1065,7 @@ export default function TradeItemPickerV2({
                           const dStr = demand || "N/A";
                           return (
                             <span
-                              className={`${getDemandColor(dStr)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
+                              className={`${getDemandColor(dStr)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-md px-2 text-xs leading-none font-bold`}
                             >
                               {dStr === "N/A"
                                 ? condition === "duped"
@@ -1085,7 +1085,7 @@ export default function TradeItemPickerV2({
                             getTradeItemMarketDetails(item).trend ?? "N/A";
                           return (
                             <span
-                              className={`${getTrendColor(t)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
+                              className={`${getTrendColor(t)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-md px-2 text-xs leading-none font-bold`}
                             >
                               {t === "N/A" ? "Unknown" : t}
                             </span>

@@ -56,12 +56,12 @@ function SeasonLevelBadges({ item }: { item: ItemDetails }) {
       <TooltipTrigger asChild>
         <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
           {item.season != null && (
-            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
               S{item.season}
             </span>
           )}
           {hasLevel && (
-            <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+            <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
               {formatUnlockLevelBadge(level)}
             </span>
           )}
@@ -229,7 +229,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
 
                   <div className="flex flex-wrap gap-1">
                     <span
-                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                       style={{
                         borderColor: getCategoryColor(item.type),
                         backgroundColor: `${getCategoryColor(item.type)}22`,
@@ -247,7 +247,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                       {item.type}
                     </span>
                     {(item.tradable === 0 || item.tradable === false) && (
-                      <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                      <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                         {item.id === 713 ? "Reference Only" : "Non-Tradable"}
                       </span>
                     )}
@@ -258,7 +258,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                       <span className="text-secondary-text text-[10px] font-medium">
                         Cash
                       </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                         {formatFullValue(item.cash_value)}
                       </span>
                     </div>
@@ -267,7 +267,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                       <span className="text-secondary-text text-[10px] font-medium">
                         Duped
                       </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                         {formatFullValue(item.duped_value)}
                       </span>
                     </div>
@@ -277,7 +277,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                         Demand
                       </span>
                       <span
-                        className={`${getDemandColor(item.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap`}
+                        className={`${getDemandColor(item.demand)} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold whitespace-nowrap`}
                       >
                         {hasItemValue(item.demand) ? item.demand : "Unknown"}
                       </span>
@@ -288,7 +288,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                         Trend
                       </span>
                       <span
-                        className={`${getTrendColor(item.trend)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap`}
+                        className={`${getTrendColor(item.trend)} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold whitespace-nowrap`}
                       >
                         {hasItemValue(item.trend) ? item.trend : "Unknown"}
                       </span>

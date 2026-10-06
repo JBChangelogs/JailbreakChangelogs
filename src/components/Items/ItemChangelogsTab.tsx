@@ -83,7 +83,7 @@ function ChangelogCardSkeleton() {
         <div className="space-y-2">
           <div className="bg-quaternary-bg h-5 w-28 rounded" />
           <div className="flex gap-1.5">
-            <div className="bg-quaternary-bg h-6 w-20 rounded-lg" />
+            <div className="bg-quaternary-bg h-6 w-20 rounded-md" />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -177,7 +177,7 @@ const fieldLabel = (field: string) =>
     .join(" ");
 
 const badgeBase =
-  "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
+  "inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
 interface ItemChangelogsTabProps {
   itemId: number;

@@ -72,7 +72,7 @@ export default function InventoryItemsGrid({
             {/* Title + category badge */}
             <div className="mb-4">
               <div className="bg-button-secondary mb-2 h-7 w-3/4 rounded"></div>
-              <div className="bg-button-secondary h-6 w-24 rounded-lg"></div>
+              <div className="bg-button-secondary h-6 w-24 rounded-md"></div>
             </div>
 
             {/* Image */}

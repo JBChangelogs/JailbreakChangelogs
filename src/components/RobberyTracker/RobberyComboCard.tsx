@@ -146,7 +146,7 @@ function RobberyComboCard({
             </h3>
             {(isAllOpen || isAllInProgress) && (
               <span
-                className={`${comboHeaderStatusClass} inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium`}
+                className={`${comboHeaderStatusClass} inline-flex h-6 items-center rounded-md border px-2.5 text-xs font-medium`}
               >
                 {comboHeaderStatusText}
               </span>
