@@ -525,7 +525,7 @@ export default function ProfileInventoryTab({
                     </div>
                   </div>
 
-                  <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg">
+                  <div className="relative mb-3 aspect-video w-full overflow-hidden rounded-lg">
                     {(typeof season === "number" || hasLevel) && (
                       <Tooltip>
                         <TooltipTrigger asChild>
