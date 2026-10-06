@@ -654,15 +654,13 @@ export default function ProfileInventoryTab({
                     </div>
                   </div>
 
-                  <div className="border-secondary-text mt-3 min-h-10 border-t pt-3">
-                    {item.isDuped ? (
-                      <div className="flex flex-col items-center gap-1 text-center text-xs">
-                        <span className="text-secondary-text">
-                          This item may be duped.
-                        </span>
-                      </div>
-                    ) : null}
-                  </div>
+                  {item.isDuped && (
+                    <div className="mt-3 flex flex-col items-center gap-1 text-center text-xs">
+                      <span className="text-secondary-text">
+                        This item may be duped.
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })}
