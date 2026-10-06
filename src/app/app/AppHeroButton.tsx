@@ -19,7 +19,7 @@ export default function AppHeroButton() {
           icon="material-symbols:desktop-windows-rounded"
           className="h-5 w-5"
         />
-        Desktop App
+        Get the Desktop App
       </Link>
     </Button>
   );
