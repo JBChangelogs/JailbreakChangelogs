@@ -29,8 +29,8 @@ import {
   getVideoPath,
   IMAGE_PATHS,
 } from "@/utils/ui/images";
-import { getCategoryColor } from "@/utils/items/categoryIcons";
 import { ItemDetails } from "@/types";
+import { getCategoryColor } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -215,13 +215,14 @@ function ProfileReactionsDialog({
 }
 
 export default function Comment({
+  id,
   content,
   date,
   item_type,
   item_id,
   edited_at,
   parent_id,
-  reply_to_id: _reply_to_id,
+  reply_to_id,
   reactions,
   replyToComment,
   changelogDetails: propChangelogDetails,
@@ -240,10 +241,16 @@ export default function Comment({
   const seasonDetails = (propSeasonDetails as SeasonDetails) || null;
   const isLoading = propIsLoading || false;
 
-  const formattedDate = formatRelativeDate(parseInt(date));
-  const contentType =
-    item_type.toLowerCase() === "vsuggestion"
-      ? "Item Suggestion"
+  const timestamp = edited_at || parseInt(date);
+  const formattedDate = formatRelativeDate(timestamp);
+  const isReply =
+    typeof parent_id === "number" || typeof reply_to_id === "number";
+  const contentType = ["vsuggestion", "value_suggestion"].includes(
+    item_type.toLowerCase(),
+  )
+    ? "Item Suggestion"
+    : item_type.toLowerCase() === "tradev2"
+      ? "Trade Ad"
       : item_type.charAt(0).toUpperCase() + item_type.slice(1);
 
   const hasReactions = reactions && reactions.length > 0;
@@ -304,11 +311,12 @@ export default function Comment({
   const renderThumbnail = () => {
     if (item_type.toLowerCase() === "changelog") {
       return (
-        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
             src={`https://assets.jailbreakchangelogs.com/assets/images/changelogs/${item_id}.webp`}
             alt={`Changelog ${item_id}`}
             fill
+            sizes="(min-width: 640px) 144px, 112px"
             className="object-cover"
             onError={handleImageError}
           />
@@ -318,11 +326,12 @@ export default function Comment({
 
     if (item_type.toLowerCase() === "season") {
       return (
-        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
             src={`https://assets.jailbreakchangelogs.com/assets/images/seasons/${item_id}/10.webp`}
             alt={`Season ${item_id}`}
             fill
+            sizes="(min-width: 640px) 144px, 112px"
             className="object-cover"
             onError={handleImageError}
           />
@@ -332,11 +341,12 @@ export default function Comment({
 
     if (item_type.toLowerCase() === "tradev2") {
       return (
-        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
             src="https://assets.jailbreakchangelogs.com/assets/logos/collab/JBCL_X_TC_Logo_Long_Light_Background.webp"
             alt="Trade Ad"
             fill
+            sizes="(min-width: 640px) 144px, 112px"
             className="object-cover"
             onError={handleImageError}
           />
@@ -346,11 +356,12 @@ export default function Comment({
 
     if (item_type.toLowerCase() === "inventory") {
       return (
-        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
             src={`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${item_id}&size=150x150&format=Png&isCircular=false`}
             alt={`User ${item_id}'s inventory`}
             fill
+            sizes="(min-width: 640px) 144px, 112px"
             className="object-cover"
             onError={handleImageError}
           />
@@ -358,13 +369,14 @@ export default function Comment({
       );
     }
 
-    if (item_type.toLowerCase() === "vsuggestion") {
+    if (["vsuggestion", "value_suggestion"].includes(item_type.toLowerCase())) {
       return (
-        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
             src={IMAGE_PATHS.PLACEHOLDER}
             alt="Item Suggestion"
             fill
+            sizes="(min-width: 640px) 144px, 112px"
             className="object-cover"
             onError={handleImageError}
           />
@@ -397,7 +409,7 @@ export default function Comment({
 
       if (isVideoItem(itemDetails.name)) {
         return (
-          <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
+          <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
             <video
               src={getVideoPath(itemDetails.type, itemDetails.name)}
               autoPlay
@@ -424,11 +436,12 @@ export default function Comment({
       }
 
       return (
-        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
             src={imagePath}
             alt={`${item_type} ${itemDetails.name}`}
             fill
+            sizes="(min-width: 640px) 144px, 112px"
             className="object-cover"
             onError={handleImageError}
           />
@@ -438,7 +451,7 @@ export default function Comment({
 
     if (isLoading) {
       return (
-        <div className="relative mr-3 h-16 w-16 shrink-0 animate-pulse overflow-hidden rounded-md md:h-18 md:w-32"></div>
+        <div className="relative aspect-video w-28 shrink-0 animate-pulse overflow-hidden rounded-lg sm:w-36"></div>
       );
     }
 
@@ -465,7 +478,7 @@ export default function Comment({
       return `Inventory #${item_id}`;
     }
 
-    if (item_type.toLowerCase() === "vsuggestion") {
+    if (["vsuggestion", "value_suggestion"].includes(item_type.toLowerCase())) {
       return `Item Suggestion #${item_id}`;
     }
 
@@ -498,84 +511,116 @@ export default function Comment({
     return `${contentType} #${item_id}`;
   };
 
+  const contextHref =
+    item_type.toLowerCase() === "changelog"
+      ? `/changelogs/${item_id}`
+      : item_type.toLowerCase() === "season"
+        ? `/seasons/${item_id}`
+        : item_type.toLowerCase() === "tradev2"
+          ? `/trading/ad/${item_id}?tab=comments`
+          : item_type.toLowerCase() === "inventory"
+            ? `/inventories/${item_id}?tab=comments`
+            : ["vsuggestion", "value_suggestion"].includes(
+                  item_type.toLowerCase(),
+                )
+              ? `/items/suggestions/${item_id}?tab=discussion`
+              : itemDetails?.name
+                ? `/item/${encodeURIComponent(item_type)}/${encodeURIComponent(itemDetails.name)}?tab=comments`
+                : null;
+  const threadHref = contextHref ? `${contextHref}#comment-${id}` : null;
+  const context = (
+    <>
+      {renderThumbnail()}
+      <div className="min-w-0 flex-1">
+        {getItemName() ? (
+          <p className="text-primary-text group-hover:text-link line-clamp-2 text-base font-medium transition-colors">
+            {getItemName()}
+          </p>
+        ) : (
+          <Skeleton className="h-4 w-4/5" />
+        )}
+        <span
+          className="text-primary-text mt-1.5 inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium"
+          style={{
+            borderColor: getCategoryColor(item_type),
+            backgroundColor: `${getCategoryColor(item_type)}22`,
+          }}
+        >
+          {contentType}
+        </span>
+      </div>
+    </>
+  );
+
   return (
     <>
-      <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm">
-        <Link
-          href={
-            item_type.toLowerCase() === "changelog"
-              ? `/changelogs/${item_id}`
-              : item_type.toLowerCase() === "season"
-                ? `/seasons/${item_id}`
-                : item_type.toLowerCase() === "tradev2"
-                  ? `/trading/ad/${item_id}`
-                  : item_type.toLowerCase() === "inventory"
-                    ? `/inventories/${item_id}`
-                    : item_type.toLowerCase() === "vsuggestion"
-                      ? `/items/suggestions/${item_id}`
-                      : `/item/${encodeURIComponent(item_type)}/${encodeURIComponent(itemDetails?.name || "")}`
-          }
-          prefetch={false}
-          className="group block"
-        >
-          <div className="mb-2 flex">
-            {renderThumbnail()}
-            <div className="min-w-0 flex-1">
-              {getItemName() ? (
-                <p className="text-primary-text group-hover:text-link mb-1 line-clamp-2 max-w-full overflow-hidden font-medium text-ellipsis transition-colors">
-                  {getItemName()}
-                </p>
-              ) : (
-                <Skeleton className="mb-1 w-4/5" style={{ height: 20 }} />
-              )}
-
-              <div className="mb-2 flex flex-wrap items-center gap-1">
-                <span
-                  className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-                  style={{
-                    borderColor: getCategoryColor(item_type),
-                    backgroundColor: `${getCategoryColor(item_type)}22`,
-                  }}
-                >
-                  {contentType}
-                </span>
-                {typeof parent_id === "number" && (
-                  <span className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center gap-1 rounded-lg px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                    <svg
-                      className="h-3 w-3 shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                      />
-                    </svg>
-                    {replyToComment
-                      ? `Reply to ${replyToComment.author}`
-                      : "Reply"}
-                  </span>
-                )}
-              </div>
-
-              {twemojiEnabled ? (
-                <Twemoji options={{ className: "twemoji" }}>
-                  <p className="text-primary-text line-clamp-4 max-w-full overflow-hidden break-words wrap-break-word text-ellipsis whitespace-pre-wrap">
-                    {convertUrlsToLinks(content, true)}
-                  </p>
-                </Twemoji>
-              ) : (
-                <p className="text-primary-text line-clamp-4 max-w-full overflow-hidden break-words wrap-break-word text-ellipsis whitespace-pre-wrap">
-                  {convertUrlsToLinks(content, true)}
-                </p>
-              )}
-            </div>
-          </div>
-        </Link>
-
+      <article className="border-border-card bg-tertiary-bg min-w-0 rounded-xl border p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <p className="text-secondary-text flex items-center gap-1.5 text-xs font-medium">
+            <Icon
+              icon={
+                isReply
+                  ? "heroicons:arrow-uturn-left"
+                  : "heroicons:chat-bubble-left"
+              }
+              className="size-3.5"
+            />
+            {isReply ? "Replied on" : "Commented on"}
+          </p>
+          <Tooltip delayDuration={500}>
+            <TooltipTrigger asChild>
+              <time
+                dateTime={
+                  Number.isFinite(timestamp)
+                    ? new Date(timestamp * 1000).toISOString()
+                    : undefined
+                }
+                className="text-secondary-text cursor-help text-xs"
+              >
+                {edited_at ? "Edited " : ""}
+                {formattedDate}
+              </time>
+            </TooltipTrigger>
+            <TooltipContent>{formatCustomDate(timestamp)}</TooltipContent>
+          </Tooltip>
+        </div>
+        {threadHref ? (
+          <Link
+            href={threadHref}
+            scroll={false}
+            prefetch={false}
+            className="group flex items-center gap-3"
+          >
+            {context}
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3">{context}</div>
+        )}
+        {isReply && replyToComment && (
+          <blockquote className="border-border-card text-secondary-text mt-3 border-l-2 pl-3 text-xs">
+            {replyToComment.author && (
+              <p className="mb-1 font-medium">
+                Replying to @{replyToComment.author}
+              </p>
+            )}
+            <p className="line-clamp-2 wrap-break-word">
+              {replyToComment.content}
+            </p>
+          </blockquote>
+        )}
+        <div className="mt-3">
+          {twemojiEnabled ? (
+            <Twemoji options={{ className: "twemoji" }}>
+              <p className="text-primary-text line-clamp-4 text-base leading-relaxed wrap-break-word whitespace-pre-wrap">
+                {convertUrlsToLinks(content, true)}
+              </p>
+            </Twemoji>
+          ) : (
+            <p className="text-primary-text line-clamp-4 text-base leading-relaxed wrap-break-word whitespace-pre-wrap">
+              {convertUrlsToLinks(content, true)}
+            </p>
+          )}
+        </div>
         {hasReactions && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {top5.map((r) => (
@@ -617,31 +662,20 @@ export default function Comment({
           </div>
         )}
 
-        <div className="mt-2 flex items-center justify-start text-xs">
-          <div className="flex items-center gap-1">
-            <Tooltip delayDuration={500}>
-              <TooltipTrigger asChild>
-                <span className="text-secondary-text cursor-help text-xs">
-                  Posted {formattedDate}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-primary-bg text-secondary-text border-none shadow-(--color-card-shadow)"
-              >
-                <p>
-                  {edited_at
-                    ? formatCustomDate(edited_at)
-                    : formatCustomDate(parseInt(date))}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-            {edited_at && (
-              <span className="text-secondary-text text-xs">(edited)</span>
-            )}
+        {threadHref && (
+          <div className="mt-3 flex justify-end">
+            <Link
+              href={threadHref}
+              scroll={false}
+              prefetch={false}
+              className="text-link hover:text-link-hover flex items-center gap-1.5 text-xs font-medium hover:underline"
+            >
+              View thread{" "}
+              <Icon icon="heroicons:arrow-up-right" className="size-3.5" />
+            </Link>
           </div>
-        </div>
-      </div>
+        )}
+      </article>
 
       {hasReactions && (
         <ProfileReactionsDialog

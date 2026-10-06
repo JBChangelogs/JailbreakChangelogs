@@ -1,5 +1,7 @@
 declare global {
   interface Window {
+    __uspapi?: (command: string, version: number) => void;
+
     nitroAds?: {
       loaded?: boolean;
       queue?: unknown[];

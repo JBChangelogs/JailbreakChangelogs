@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQueryState } from "nuqs";
 import { useQueryClient } from "@tanstack/react-query";
 import { notFound, useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -935,7 +936,16 @@ export default function ValueSuggestionDetailPage() {
     };
   }, [item?.id, isValueSuggestion, queryClient]);
 
-  const [activeSuggestionTab, setActiveSuggestionTab] = useState("details");
+  const [suggestionTabParam, setActiveSuggestionTab] = useQueryState("tab", {
+    defaultValue: "details",
+    history: "push",
+    shallow: true,
+  });
+  const activeSuggestionTab =
+    suggestionTabParam === "discussion" ||
+    (suggestionTabParam === "history" && isValueSuggestion)
+      ? suggestionTabParam
+      : "details";
   const [suggestionTabDirection, setSuggestionTabDirection] = useState(0);
   const handleSuggestionTabChange = (newValue: string) => {
     const order = isValueSuggestion
@@ -944,7 +954,7 @@ export default function ValueSuggestionDetailPage() {
     const newIdx = order.indexOf(newValue);
     const oldIdx = order.indexOf(activeSuggestionTab);
     setSuggestionTabDirection(newIdx > oldIdx ? 1 : -1);
-    setActiveSuggestionTab(newValue);
+    void setActiveSuggestionTab(newValue);
   };
 
   const categoryIcon = item ? getCategoryIcon(item.type) : null;

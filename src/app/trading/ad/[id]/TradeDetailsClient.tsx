@@ -3,6 +3,7 @@
 import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useQueryState } from "nuqs";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
@@ -528,15 +529,18 @@ export default function TradeDetailsClient({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showOfferDialog, setShowOfferDialog] = useState(false);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
-  const [activeTradeTab, setActiveTradeTab] = useState<"offers" | "comments">(
-    "offers",
-  );
+  const [tradeTabParam, setActiveTradeTab] = useQueryState("tab", {
+    defaultValue: "offers",
+    history: "push",
+    shallow: true,
+  });
+  const activeTradeTab = tradeTabParam === "comments" ? "comments" : "offers";
   const [tradeTabDirection, setTradeTabDirection] = useState(0);
   const handleTradeTabChange = (newValue: string) => {
     setTradeTabDirection(
       newValue === "comments" && activeTradeTab === "offers" ? 1 : -1,
     );
-    setActiveTradeTab(newValue as "offers" | "comments");
+    void setActiveTradeTab(newValue);
   };
   const autoOfferHandledRef = useRef(false);
   const [offerState, setOfferState] = useState<{

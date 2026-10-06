@@ -425,7 +425,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     >
       <ContextMenu>
         <ContextMenuTrigger asChild>
-          <div className="flex gap-2 sm:gap-3">
+          <div className="comment-link-surface -mx-3 flex gap-2 rounded-lg px-3 py-2 sm:gap-3">
             <div className="flex w-10 shrink-0 items-start pt-1.5">
               {hideRecent ? (
                 <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
@@ -1109,7 +1109,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                       <ContextMenuTrigger asChild>
                         <div
                           id={`comment-${reply.id}`}
-                          className="flex gap-2 sm:gap-3"
+                          className="comment-link-surface -mx-3 flex gap-2 rounded-lg px-3 py-2 sm:gap-3"
                         >
                           {/* Reply avatar */}
                           <div className="flex w-8 shrink-0 items-start pt-1">

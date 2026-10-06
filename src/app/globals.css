@@ -1085,3 +1085,21 @@ img.twemoji {
 .site-layout > main:has([data-rail-side="right"]) {
   padding-right: var(--rail-gutter-width);
 }
+
+.comment-link-highlight {
+  animation: comment-link-highlight 10s ease-out forwards;
+}
+
+@keyframes comment-link-highlight {
+  0%,
+  95% {
+    background-color: color-mix(
+      in srgb,
+      var(--color-button-info),
+      transparent 80%
+    );
+  }
+  100% {
+    background-color: transparent;
+  }
+}

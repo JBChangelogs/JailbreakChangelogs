@@ -1,20 +1,27 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
-import { ModuleKind, transpileModule } from "typescript";
-import type { fetchFavoritesData } from "./actions";
+import { ModuleKind, ScriptTarget, transpileModule } from "typescript";
+import type { fetchFavoritesData, fetchCommentDetails } from "./actions";
 
-test("favorites settle as data, empty, or errors and bound stalled requests", async () => {
+test("favorites bound stalled requests and comment details skip unnecessary item lookups", async () => {
+  let itemRequests = 0;
   let fetchImpl: (
     input: string,
     init: RequestInit,
   ) => Promise<Response> = async () => Response.json([{ id: 1 }]);
-  const exports = {} as { fetchFavoritesData: typeof fetchFavoritesData };
+  const exports = {} as {
+    fetchFavoritesData: typeof fetchFavoritesData;
+    fetchCommentDetails: typeof fetchCommentDetails;
+  };
   runInNewContext(
     transpileModule(
       readFileSync(new URL("./actions.ts", import.meta.url), "utf8"),
       {
-        compilerOptions: { module: ModuleKind.CommonJS },
+        compilerOptions: {
+          module: ModuleKind.CommonJS,
+          target: ScriptTarget.ESNext,
+        },
       },
     ).outputText,
     {
@@ -29,7 +36,16 @@ test("favorites settle as data, empty, or errors and bound stalled requests", as
       },
       require: (name: string) => {
         if (name === "@/utils/api/api")
-          return { PUBLIC_API_URL: "https://public-api.example.com" };
+          return {
+            PUBLIC_API_URL: "https://public-api.example.com",
+            fetchPartialItems: async () => {
+              itemRequests++;
+              return [
+                { id: 1, name: "Torpedo", type: "Vehicle" },
+                { id: 2, name: "Brulee", type: "Vehicle" },
+              ];
+            },
+          };
         if (name === "@/utils/api/apiDevToken")
           return {
             buildApiFetchRequest: (base: string, path: string) => ({
@@ -43,6 +59,24 @@ test("favorites settle as data, empty, or errors and bound stalled requests", as
       },
     },
   );
+  const suggestionComments = [
+    { item_id: 2, item_type: "vsuggestion" },
+    { item_id: 2, item_type: "VALUE_SUGGESTION" },
+    { item_id: 2, item_type: "tradev2" },
+  ];
+  expect((await exports.fetchCommentDetails(suggestionComments)).items).toEqual(
+    {},
+  );
+  expect(itemRequests).toBe(0);
+  expect(
+    (
+      await exports.fetchCommentDetails([
+        ...suggestionComments,
+        { item_id: 1, item_type: "Vehicle" },
+      ])
+    ).items,
+  ).toEqual({ 1: { id: 1, name: "Torpedo", type: "Vehicle" } });
+  expect(itemRequests).toBe(1);
   expect(await exports.fetchFavoritesData("123")).toEqual([{ id: 1 }]);
   fetchImpl = async () => Response.json({}, { status: 404 });
   expect(await exports.fetchFavoritesData("123")).toEqual([]);

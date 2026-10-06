@@ -707,20 +707,116 @@ export function useCommentState(props: ChangelogCommentsProps) {
     [changelogId, type, itemType, sortOrder, currentUserId, queryClient],
   );
 
-  // Refresh comments when changelogId changes with simple debouncing
+  const scrolledCommentHash = useRef("");
+
+  // A profile activity link may point to any page or reply in this discussion.
   useEffect(() => {
     if (!changelogId) return;
+    let ignore = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const loadComments = () => {
+      clearTimeout(timeoutId);
+      scrolledCommentHash.current = "";
+      setComments([]);
+      setIsRefreshingComments(true);
+      setPage(1);
+      timeoutId = setTimeout(async () => {
+        const targetId = /^#comment-([1-9][0-9]*)$/.exec(
+          window.location.hash,
+        )?.[1];
+        if (targetId) {
+          try {
+            const target = await queryClient.fetchQuery({
+              queryKey: ["comment-page", targetId, currentUserId],
+              queryFn: async ({ signal }) => {
+                const { url, headers } = buildApiFetchRequest(
+                  PUBLIC_API_URL!,
+                  `/v2/comments/${targetId}/page`,
+                );
+                const response = await fetch(url, {
+                  headers,
+                  signal,
+                  credentials: "include",
+                });
+                if (!response.ok) throw new Error("Comment not found");
+                return response.json();
+              },
+              staleTime: 60_000,
+              gcTime: 5 * 60_000,
+              retry: false,
+            });
+            if (ignore || window.location.hash !== `#comment-${targetId}`)
+              return;
+            const commentType = type === "item" ? itemType || type : type;
+            if (
+              String(target.item_id) === String(changelogId) &&
+              target.item_type?.toLowerCase() === commentType.toLowerCase() &&
+              Number.isInteger(target.page) &&
+              target.page > 0 &&
+              Number.isInteger(target.comment_id)
+            ) {
+              setSortOrder("newest");
+              setExpandedReplies((previous) =>
+                new Set(previous).add(target.comment_id),
+              );
+              await refreshCommentsFromServer(false, target.page, "newest");
+              return;
+            }
+          } catch (error) {
+            if (ignore) return;
+            log.error("Error locating linked comment", error);
+          }
+        }
+        if (!ignore) await refreshCommentsFromServer(false, 1);
+      }, 300);
+    };
+    loadComments();
+    window.addEventListener("hashchange", loadComments);
+    return () => {
+      ignore = true;
+      clearTimeout(timeoutId);
+      window.removeEventListener("hashchange", loadComments);
+    };
+  }, [
+    changelogId,
+    type,
+    itemType,
+    currentUserId,
+    queryClient,
+    refreshCommentsFromServer,
+  ]);
 
-    setComments([]);
-    setIsRefreshingComments(true);
-    setPage(1);
-
-    const timeoutId = setTimeout(() => {
-      refreshCommentsFromServer(false, 1);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [changelogId, refreshCommentsFromServer]);
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (
+      !/^#comment-[1-9][0-9]*$/.test(hash) ||
+      scrolledCommentHash.current === hash
+    )
+      return;
+    const target = Array.from(
+      document.querySelectorAll<HTMLElement>(hash),
+    ).find((element) => element.getClientRects().length > 0);
+    if (!target) return;
+    const frame = requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      const surface = target.querySelector(".comment-link-surface") ?? target;
+      surface.classList.add("comment-link-highlight");
+      const path = window.location.pathname;
+      const search = window.location.search;
+      setTimeout(() => {
+        surface.classList.remove("comment-link-highlight");
+        if (
+          window.location.pathname === path &&
+          window.location.search === search &&
+          window.location.hash === hash
+        ) {
+          window.history.replaceState(null, "", path + search);
+        }
+      }, 10_000);
+      scrolledCommentHash.current = hash;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [comments]);
 
   // Silent refresh when the server broadcasts a comment change (page 1 only,
   // skipped if the user is actively typing in any comment/reply/edit field)
@@ -1078,6 +1174,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
   }, [replyingToId]);
 
   const handleSortChange = (order: string) => {
+    if (/^#comment-[1-9][0-9]*$/.test(window.location.hash)) {
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+    }
     localStorage.setItem(sortPrefKey, order);
     setSortOrder(order);
     setPage(1);

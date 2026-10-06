@@ -59,6 +59,9 @@ export async function fetchCommentDetails(
               type !== "changelog" &&
               type !== "season" &&
               type !== "trade" &&
+              type !== "tradev2" &&
+              type !== "vsuggestion" &&
+              type !== "value_suggestion" &&
               type !== "inventory"
             );
           })

@@ -57,19 +57,22 @@ interface CommentsTabProps {
 
 function ProfileCommentCardSkeleton() {
   return (
-    <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm">
-      <div className="mb-2 flex">
-        <div className="bg-quaternary-bg mr-3 h-16 w-16 shrink-0 rounded-md md:h-[4.5rem] md:w-32" />
-        <div className="min-w-0 flex-1">
-          <div className="bg-quaternary-bg mb-2 h-4 w-3/4 rounded" />
-          <div className="bg-quaternary-bg mb-2 h-5 w-16 rounded-lg" />
-          <div className="bg-quaternary-bg h-3.5 w-full rounded" />
-          <div className="bg-quaternary-bg mt-1.5 h-3.5 w-4/5 rounded" />
-          <div className="bg-quaternary-bg mt-1.5 h-3.5 w-2/3 rounded" />
+    <div className="border-border-card bg-tertiary-bg rounded-xl border p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="bg-quaternary-bg h-3 w-24 rounded" />
+        <div className="bg-quaternary-bg h-3 w-20 rounded" />
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="bg-quaternary-bg aspect-video w-28 shrink-0 rounded-lg sm:w-36" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="bg-quaternary-bg h-4 w-3/4 rounded" />
+          <div className="bg-quaternary-bg h-6 w-20 rounded-md" />
         </div>
       </div>
-      <div className="my-2" />
-      <div className="bg-quaternary-bg h-3 w-28 rounded" />
+      <div className="bg-quaternary-bg mt-3 h-4 w-4/5 rounded" />
+      <div className="mt-3 flex justify-end">
+        <div className="bg-quaternary-bg h-3 w-20 rounded" />
+      </div>
     </div>
   );
 }
@@ -77,11 +80,7 @@ function ProfileCommentCardSkeleton() {
 function ProfileCommentsSkeleton({ preview = false }: { preview?: boolean }) {
   return (
     <div className="animate-pulse">
-      <div
-        className={
-          preview ? "space-y-3" : "grid grid-cols-1 gap-4 md:grid-cols-2"
-        }
-      >
+      <div className={preview ? "space-y-3" : "space-y-4"}>
         {Array.from({ length: preview ? 3 : 6 }).map((_, i) => (
           <ProfileCommentCardSkeleton key={i} />
         ))}
@@ -465,19 +464,14 @@ export default function CommentsTab({
               {profileComments.length === 0 ? (
                 <p className="text-primary-text italic">No comments yet</p>
               ) : (
-                <div
-                  className={
-                    preview
-                      ? "space-y-3"
-                      : "grid grid-cols-1 gap-4 md:grid-cols-2"
-                  }
-                >
+                <div className={preview ? "space-y-3" : "space-y-4"}>
                   {visibleComments.map((comment) => (
                     <Comment
                       key={comment.id}
                       {...comment}
                       replyToComment={(() => {
-                        const targetId = comment.reply_to_id;
+                        const targetId =
+                          comment.reply_to_id ?? comment.parent_id;
                         if (typeof targetId !== "number") return null;
                         const target = commentsById.get(targetId);
                         if (!target) return null;
