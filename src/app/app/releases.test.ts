@@ -42,6 +42,14 @@ test("reads the newest full version from releases.win.json", () => {
       ],
     }),
   ).toBe("0.10.0");
+  expect(
+    parseWindowsVersion({
+      Assets: [
+        { Type: "Full", Version: "1.2.4+build.1" },
+        { Type: "Full", Version: "1.2.3" },
+      ],
+    }),
+  ).toBe("1.2.4+build.1");
   expect(parseWindowsVersion({ Assets: [] })).toBeNull();
   expect(parseWindowsVersion(null)).toBeNull();
 });
@@ -51,4 +59,6 @@ test("orders versions numerically, with prereleases before their release", () =>
   expect(compareVersions("1.0.0", "1.0.0-beta.2")).toBeGreaterThan(0);
   expect(compareVersions("1.0.0-beta.10", "1.0.0-beta.2")).toBeGreaterThan(0);
   expect(compareVersions("1.2", "1.2.0")).toBe(0);
+  expect(compareVersions("1.2.4+build.1", "1.2.3")).toBeGreaterThan(0);
+  expect(compareVersions("1.2.3+build.9", "1.2.3")).toBe(0);
 });

@@ -29,8 +29,9 @@ export function parseYmlRelease(yml: string): Release | null {
 
 /** Compares semver-style versions; a prerelease sorts before its release. */
 export function compareVersions(a: string, b: string): number {
-  const [mainA, preA] = a.split(/-(.*)/);
-  const [mainB, preB] = b.split(/-(.*)/);
+  // Build metadata (+...) doesn't affect precedence.
+  const [mainA, preA] = a.replace(/\+.*$/, "").split(/-(.*)/);
+  const [mainB, preB] = b.replace(/\+.*$/, "").split(/-(.*)/);
   const partsA = mainA.split(".").map(Number);
   const partsB = mainB.split(".").map(Number);
   for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
@@ -55,16 +56,17 @@ export function parseWindowsVersion(data: unknown): string | null {
 }
 
 const options = { next: { revalidate: 300 } };
+// A stalled request shouldn't hold up the page; the timer starts per call.
+const withTimeout = () => ({ ...options, signal: AbortSignal.timeout(3000) });
 
 async function fetchWindowsRelease(): Promise<Release | null> {
   const [manifest, installer] = await Promise.all([
-    fetch(`${UPDATES_URL}/releases.win.json`, options),
+    fetch(`${UPDATES_URL}/releases.win.json`, withTimeout()),
     // Size and date are optional, so a slow or failed HEAD never blocks the
     // version from the manifest.
     fetch(`${UPDATES_URL}/JBCLSetup.exe`, {
-      ...options,
+      ...withTimeout(),
       method: "HEAD",
-      signal: AbortSignal.timeout(3000),
     }).catch(() => null),
   ]);
   if (!manifest.ok) return null;
@@ -79,7 +81,7 @@ async function fetchWindowsRelease(): Promise<Release | null> {
 }
 
 async function fetchYmlRelease(file: string): Promise<Release | null> {
-  const response = await fetch(`${UPDATES_URL}/${file}`, options);
+  const response = await fetch(`${UPDATES_URL}/${file}`, withTimeout());
   return response.ok ? parseYmlRelease(await response.text()) : null;
 }
 
