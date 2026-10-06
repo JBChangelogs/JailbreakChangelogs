@@ -69,14 +69,7 @@ export function NotificationTypeSettings({
     }))
     .filter((group) => group.prefs.length);
 
-  const [open, setOpen] = useState(
-    () =>
-      new Set(
-        groups
-          .filter((g) => g.prefs.some((p) => p.title === highlight))
-          .map((g) => g.label),
-      ),
-  );
+  const [open, setOpen] = useState(() => new Set<string>());
   const [query, setQuery] = useState("");
   const search = query.trim().toLowerCase();
   const visible = groups
@@ -123,7 +116,12 @@ export function NotificationTypeSettings({
           {visible.map((group) => {
             const all = groups.find((g) => g.label === group.label)!.prefs;
             const enabledCount = all.filter((p) => p.enabled).length;
-            const expanded = !!search || open.has(group.label);
+            // The highlighted preference's group stays open while the
+            // highlight is active, even if it arrives after mount.
+            const expanded =
+              !!search ||
+              open.has(group.label) ||
+              all.some((p) => p.title === highlight);
             const panelId = `notification-group-${group.label.replace(/\W+/g, "-").toLowerCase()}`;
             return (
               <div
