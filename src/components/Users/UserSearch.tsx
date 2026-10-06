@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
@@ -19,6 +19,7 @@ import { UserDetailsTooltip } from "../ui/UserDetailsTooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 import { Spinner } from "@/components/ui/Spinner";
+import { useDebounce } from "@/hooks/useDebounce";
 
 function InlineSpinner() {
   return (
@@ -43,6 +44,8 @@ export default function UserSearch() {
   });
 
   const [searchQuery, setSearchQuery] = useState(queryFromUrl);
+  const debouncedQuery = useDebounce(searchQuery.trim(), 400);
+  const pushedQueryRef = useRef(queryFromUrl);
   const usersPerPage = 30;
 
   const currentUserId = user?.id ?? null;
@@ -88,13 +91,21 @@ export default function UserSearch() {
   const paginationSeed = seedFromUrl ?? usersQuery.data?.seed ?? null;
   const isLoading = usersQuery.isPending;
 
-  // Sync local state with URL params
   useEffect(() => {
+    if (debouncedQuery === pushedQueryRef.current) return;
+    pushedQueryRef.current = debouncedQuery;
+    void setParams({ query: debouncedQuery || null, page: null, seed: null });
+  }, [debouncedQuery, setParams]);
+
+  useEffect(() => {
+    if (queryFromUrl === pushedQueryRef.current) return;
+    pushedQueryRef.current = queryFromUrl;
     setSearchQuery(queryFromUrl);
-  }, [queryFromUrl, pageFromUrl, seedFromUrl]);
+  }, [queryFromUrl]);
 
   const handleClearSearch = () => {
     setSearchQuery("");
+    pushedQueryRef.current = "";
     void setParams({ query: null, page: null, seed: null });
   };
 
@@ -112,6 +123,7 @@ export default function UserSearch() {
     const value = e.target.value;
     setSearchQuery(value);
     if (value.trim() === "" && queryFromUrl) {
+      pushedQueryRef.current = "";
       void setParams({ query: null, page: null, seed: null });
     }
   };
@@ -128,13 +140,10 @@ export default function UserSearch() {
             onChange={handleInputChange}
             placeholder="Search by ID or username..."
             className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
-            disabled={isLoading}
             required
           />
 
-          {/* Right side controls container */}
           <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
-            {/* Clear button - only show when there's text */}
             {searchQuery && (
               <button
                 type="button"
@@ -146,12 +155,10 @@ export default function UserSearch() {
               </button>
             )}
 
-            {/* Vertical divider - only show when there's text to clear */}
             {searchQuery && (
               <div className="border-primary-text h-6 border-l opacity-30"></div>
             )}
 
-            {/* Search button */}
             <button
               type="submit"
               disabled={isLoading || !searchQuery.trim()}
