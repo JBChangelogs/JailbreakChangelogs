@@ -43,7 +43,8 @@ import { cn } from "@/lib/utils";
 import type { UserData } from "@/types/auth";
 import type { EmojiStringMap } from "@/utils/comments/emojiShortcodes";
 import type { Message, MessageUser } from "@/utils/messages/types";
-import { asId } from "@/utils/messages/parsing";
+import { asId, parseOfferAcceptedMetadata } from "@/utils/messages/parsing";
+import type { useOfferDetailsBatch } from "@/hooks/useOfferDetailsBatch";
 import {
   formatMessageText,
   formatSystemMessageContent,
@@ -53,9 +54,11 @@ import {
 import { getMessageDomId } from "@/utils/messages/sorting";
 import { isUserMessage, parseMessageEmbed } from "@/utils/messages/invites";
 import { MessageEmbedCard } from "./MessageEmbedCard";
+import { OfferAcceptedCard } from "./OfferAcceptedCard";
 
 interface MessageRowProps {
   message: Message;
+  offerDetails: ReturnType<typeof useOfferDetailsBatch>;
   index: number;
   messages: Message[];
   currentUser: UserData | null;
@@ -91,6 +94,7 @@ interface MessageRowProps {
 
 export function MessageRow({
   message,
+  offerDetails,
   index,
   messages,
   currentUser,
@@ -120,8 +124,9 @@ export function MessageRow({
   handleEditMessage,
   insertEditEmoji,
 }: MessageRowProps) {
+  const acceptedOffer = parseOfferAcceptedMetadata(message.metadata);
   const embedMetadata = parseMessageEmbed(message.metadata);
-  if (message.type === "system" && !embedMetadata) {
+  if (acceptedOffer || (message.type === "system" && !embedMetadata)) {
     const systemContent = formatSystemMessageContent(
       message,
       currentUser ? asId(currentUser.id) : null,
@@ -130,7 +135,13 @@ export function MessageRow({
     return (
       <ChatEvent
         key={message.id}
-        className="border-link bg-button-info/10 my-0.5 items-start rounded-l-none rounded-r-md border-l-2 py-0.5 pl-2"
+        id={`message-${getMessageDomId(message)}`}
+        data-message-row
+        className={
+          acceptedOffer
+            ? "group items-start py-1.5"
+            : "border-link bg-button-info/10 my-0.5 items-start rounded-l-none rounded-r-md border-l-2 py-0.5 pl-2"
+        }
       >
         <ChatEventAddon>
           <div className="bg-tertiary-bg border-border-card text-link inline-flex h-7 w-7 items-center justify-center rounded-md border">
@@ -150,9 +161,17 @@ export function MessageRow({
               />
             )}
           </ChatEventTitle>
-          <ChatEventContent className="text-primary-text wrap-break-word whitespace-pre-wrap">
-            {formatMessageText(systemContent)}
-          </ChatEventContent>
+          {acceptedOffer ? (
+            <OfferAcceptedCard
+              metadata={acceptedOffer}
+              currentUserId={currentUser ? asId(currentUser.id) : null}
+              offerDetails={offerDetails}
+            />
+          ) : (
+            <ChatEventContent className="text-primary-text wrap-break-word whitespace-pre-wrap">
+              {formatMessageText(systemContent)}
+            </ChatEventContent>
+          )}
         </ChatEventBody>
       </ChatEvent>
     );

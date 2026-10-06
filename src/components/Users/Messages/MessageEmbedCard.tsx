@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import { ChatEventTime } from "@/components/chat/chat-event";
 import { fetchMessageServer } from "@/services/messageInvitesService";
 import { validatePrivateServerLink } from "@/utils/api/serverValidation";
 import {
@@ -166,13 +165,6 @@ export function MessageEmbedCard({
         <div className="mt-2">
           <VipServerJoinAction serverId={metadata.server_id} />
         </div>
-      )}
-      {typeof message.createdAt === "number" && (
-        <ChatEventTime
-          timestamp={message.createdAt}
-          format="discord"
-          className="text-secondary-text mt-2 block text-[10px]"
-        />
       )}
     </div>
   );

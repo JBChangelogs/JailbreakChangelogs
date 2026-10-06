@@ -48,8 +48,8 @@ export type OutgoingMessageMetadata =
 export type OfferAcceptedMetadata = {
   type: "offer_accepted";
   user?: string | number;
-  offer?: number;
-  trade?: number;
+  offer: number;
+  trade: number;
   trade_user?: string | number;
 };
 

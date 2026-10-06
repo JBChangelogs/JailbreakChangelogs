@@ -31,7 +31,15 @@ export function parseOfferAcceptedMetadata(
   if (metadata.type !== "offer_accepted") return null;
   const trade = asNumber(metadata.trade);
   const offer = asNumber(metadata.offer);
-  if (!trade || !offer) return null;
+  if (
+    trade === null ||
+    offer === null ||
+    !Number.isSafeInteger(trade) ||
+    !Number.isSafeInteger(offer) ||
+    trade <= 0 ||
+    offer <= 0
+  )
+    return null;
   return {
     type: "offer_accepted",
     user: metadata.user as OfferAcceptedMetadata["user"],
@@ -155,15 +163,23 @@ export function normalizeOfferItems(
   items: TradeOfferDetails["offering"] | TradeOfferDetails["requesting"],
 ): OfferItem[] {
   if (!items || !Array.isArray(items) || items.length === 0) return [];
-  return items
-    .map((item) => {
-      const name = typeof item?.name === "string" ? item.name.trim() : "";
-      const amount = typeof item?.amount === "number" ? item.amount : 1;
-      if (!name) return null;
-      const type = typeof item?.type === "string" ? item.type : undefined;
-      return { name, amount: amount > 0 ? amount : 1, type };
-    })
-    .filter(Boolean) as OfferItem[];
+  const normalized = new Map<string, OfferItem>();
+  for (const item of items) {
+    const name = typeof item?.name === "string" ? item.name.trim() : "";
+    if (!name) continue;
+    const amount =
+      typeof item.amount === "number" &&
+      Number.isFinite(item.amount) &&
+      item.amount > 0
+        ? item.amount
+        : 1;
+    const type = typeof item.type === "string" ? item.type : undefined;
+    const key = JSON.stringify([name, type]);
+    const existing = normalized.get(key);
+    if (existing) existing.amount += amount;
+    else normalized.set(key, { name, amount, type });
+  }
+  return [...normalized.values()];
 }
 
 export function toMessageUser(raw: unknown): MessageUser | null {

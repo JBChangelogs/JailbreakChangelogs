@@ -16,14 +16,12 @@ import {
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
-import { cn } from "@/lib/utils";
 import type { MessageUser } from "@/utils/messages/types";
 import { getDisplayName } from "@/utils/messages/formatting";
 
 interface ChatHeaderPanelProps {
   selectedUser: MessageUser;
   currentUserId: string | null;
-  showOfferAcceptedBanner: boolean;
   isTargetOnline: boolean;
   shouldHidePresence: boolean;
   lastSeenTime: string;
@@ -37,7 +35,6 @@ interface ChatHeaderPanelProps {
 export function ChatHeaderPanel({
   selectedUser,
   currentUserId,
-  showOfferAcceptedBanner,
   isTargetOnline,
   shouldHidePresence,
   lastSeenTime,
@@ -48,12 +45,7 @@ export function ChatHeaderPanel({
   onToggleBlock,
 }: ChatHeaderPanelProps) {
   return (
-    <ChatHeader
-      className={cn(
-        "border-border-card px-4 py-3",
-        showOfferAcceptedBanner ? "" : "border-b",
-      )}
-    >
+    <ChatHeader className="border-border-card border-b px-4 py-3">
       <ChatHeaderAddon>
         <Button
           variant="ghost"

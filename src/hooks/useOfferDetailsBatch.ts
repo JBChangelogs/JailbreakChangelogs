@@ -1,10 +1,9 @@
+import { useCallback, useMemo } from "react";
 import {
-  useCallback,
-  useMemo,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+  useQuery,
+  useQueryClient,
+  type QueryFilters,
+} from "@tanstack/react-query";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 
@@ -78,7 +77,7 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
         const record = item as TradeOfferDetails & { trade?: number };
         if (record.trade == null || record.id == null) continue;
         result[`${record.trade}:${record.id}`] =
-          record.status === 1 ? record : null;
+          record.status === 1 || record.status === 3 ? record : null;
       }
       for (const entry of entries) {
         const key = `${entry.trade}:${entry.offer}`;
@@ -91,17 +90,27 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
     retry: false,
     refetchOnWindowFocus: false,
   });
-  const setMap: Dispatch<
-    SetStateAction<Record<string, TradeOfferDetails | null>>
-  > = useCallback(
-    (value) => {
-      queryClient.setQueryData<Record<string, TradeOfferDetails | null>>(
-        ["offer-details-batch", payloadJson],
-        (previous) =>
-          typeof value === "function" ? value(previous ?? {}) : value,
+  const markCompleted = useCallback(
+    async (offer: TradeOfferDetails) => {
+      const key = `${offer.trade}:${offer.id}`;
+      const pair = JSON.stringify([offer.trade, offer.id]);
+      const filters: QueryFilters = {
+        queryKey: ["offer-details-batch"],
+        predicate: (query) =>
+          typeof query.queryKey[1] === "string" &&
+          query.queryKey[1].includes(pair),
+      };
+      await queryClient.cancelQueries(filters);
+      queryClient.setQueriesData<Record<string, TradeOfferDetails | null>>(
+        filters,
+        (previous) => ({
+          ...previous,
+          [key]: { ...(previous?.[key] ?? offer), status: 3 },
+        }),
       );
+      await queryClient.invalidateQueries(filters);
     },
-    [queryClient, payloadJson],
+    [queryClient],
   );
   const status =
     events.length === 0 || !baseUrl
@@ -112,5 +121,5 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
           ? "error"
           : "loading";
 
-  return { map: detailsQuery.data ?? EMPTY_DETAILS, setMap, status };
+  return { map: detailsQuery.data ?? EMPTY_DETAILS, markCompleted, status };
 }

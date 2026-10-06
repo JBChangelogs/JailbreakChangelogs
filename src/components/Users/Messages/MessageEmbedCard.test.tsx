@@ -127,6 +127,7 @@ test("received cards join valid games and VIP servers, handle missing servers, a
     place_id: "606849621",
     job_id: "12345678-1234-1234-1234-123456789abc",
   };
+  expect(render(game).some((node) => node.type === "time")).toBe(false);
   expect(
     render(game).find((node) => node.type === "button")?.props.disabled,
   ).toBe(false);

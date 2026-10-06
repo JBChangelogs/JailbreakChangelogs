@@ -32,17 +32,17 @@ import {
 } from "@/utils/comments/emojiShortcodes";
 import { useTwemoji } from "@/contexts/TwemojiContext";
 import { MessageRow } from "@/components/Users/Messages/MessageRow";
+import { ActiveOfferReminder } from "@/components/Users/Messages/ActiveOfferReminder";
 import { ChatHeaderPanel } from "@/components/Users/Messages/ChatHeaderPanel";
 import { ComposerFooter } from "@/components/Users/Messages/ComposerFooter";
 import { ConversationSidebar } from "@/components/Users/Messages/ConversationSidebar";
 import { NewConversationModal } from "@/components/Users/Messages/NewConversationModal";
-import { OfferAcceptedBanner } from "@/components/Users/Messages/OfferAcceptedBanner";
 import { useMessagesRealtime } from "@/hooks/useMessagesRealtime";
 import { useConversationList } from "@/hooks/useConversationList";
 import { useMessageThread } from "@/hooks/useMessageThread";
 import { useSendMessage } from "@/hooks/useSendMessage";
 import { useMessageMutations } from "@/hooks/useMessageMutations";
-import { useMessageOffers } from "@/hooks/useMessageOffers";
+import { useOfferDetailsBatch } from "@/hooks/useOfferDetailsBatch";
 import { useMessageBlocking } from "@/hooks/useMessageBlocking";
 import { useLocalMessageOverlay } from "@/hooks/useLocalMessageOverlay";
 import { useMessageNavigationScroll } from "@/hooks/useMessageNavigationScroll";
@@ -53,11 +53,14 @@ import type {
   MessageUser,
   RealtimeMessageEventDetail,
 } from "@/utils/messages/types";
-import { asId } from "@/utils/messages/parsing";
+import { asId, parseOfferAcceptedMetadata } from "@/utils/messages/parsing";
 import { formatMessageText, getDisplayName } from "@/utils/messages/formatting";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { sortConversationsByLatestMessage } from "@/utils/messages/sorting";
+import {
+  getMessageDomId,
+  sortConversationsByLatestMessage,
+} from "@/utils/messages/sorting";
 
 const HIDDEN_CONVERSATION_UNDO_MS = 8000;
 
@@ -337,27 +340,14 @@ export default function MessagesInbox() {
     };
   }, [conversations, currentUserId, isAuthenticated]);
 
-  const {
-    offerAcceptedEvents,
-    visibleOfferAcceptedEvents,
-    activeOfferAcceptedIndex,
-    setActiveOfferAcceptedIndex,
-    isOfferBannerMinimized,
-    setIsOfferBannerMinimized,
-    activeOfferDetailsStatus,
-    activeOfferItems,
-    canMarkOfferComplete,
-    showOfferAcceptedBanner,
-    isMarkingOfferComplete,
-    setIsMarkingOfferComplete,
-    getOfferDetailsKey,
-    setOfferDetailsMap,
-  } = useMessageOffers({
-    messages,
-    selectedUser,
-    selectedUserId,
-    currentUserId,
-  });
+  const acceptedOffers = useMemo(
+    () =>
+      messages
+        .map((message) => parseOfferAcceptedMetadata(message.metadata))
+        .filter((metadata) => metadata !== null),
+    [messages],
+  );
+  const offerDetails = useOfferDetailsBatch(acceptedOffers);
   const lastSeenTime = useOptimizedRealTimeRelativeDate(
     selectedUser?.last_seen,
     `messages-last-seen-${selectedUser?.id ?? "none"}`,
@@ -747,7 +737,6 @@ export default function MessagesInbox() {
                 <ChatHeaderPanel
                   selectedUser={selectedUser}
                   currentUserId={currentUserId}
-                  showOfferAcceptedBanner={showOfferAcceptedBanner}
                   isTargetOnline={isTargetOnline}
                   shouldHidePresence={shouldHidePresence}
                   lastSeenTime={lastSeenTime}
@@ -765,23 +754,27 @@ export default function MessagesInbox() {
                   }
                 />
 
-                <OfferAcceptedBanner
-                  showOfferAcceptedBanner={showOfferAcceptedBanner}
-                  selectedUser={selectedUser}
-                  currentUserEnriched={currentUserEnriched}
-                  visibleOfferAcceptedEvents={visibleOfferAcceptedEvents}
-                  offerAcceptedEvents={offerAcceptedEvents}
-                  activeOfferAcceptedIndex={activeOfferAcceptedIndex}
-                  setActiveOfferAcceptedIndex={setActiveOfferAcceptedIndex}
-                  activeOfferDetailsStatus={activeOfferDetailsStatus}
-                  activeOfferItems={activeOfferItems}
-                  isOfferBannerMinimized={isOfferBannerMinimized}
-                  setIsOfferBannerMinimized={setIsOfferBannerMinimized}
-                  canMarkOfferComplete={canMarkOfferComplete}
-                  isMarkingOfferComplete={isMarkingOfferComplete}
-                  setIsMarkingOfferComplete={setIsMarkingOfferComplete}
-                  getOfferDetailsKey={getOfferDetailsKey}
-                  setOfferDetailsMap={setOfferDetailsMap}
+                <ActiveOfferReminder
+                  messages={messages}
+                  offerDetails={offerDetails}
+                  onViewOffer={(message) => {
+                    const container = messagesContainerRef.current;
+                    const target = document.getElementById(
+                      `message-${getMessageDomId(message)}`,
+                    );
+                    if (!container || !target || !container.contains(target))
+                      return;
+                    container.scrollTo({
+                      top: Math.max(
+                        0,
+                        target.getBoundingClientRect().top -
+                          container.getBoundingClientRect().top +
+                          container.scrollTop -
+                          16,
+                      ),
+                      behavior: "smooth",
+                    });
+                  }}
                 />
 
                 <ChatMessages
@@ -846,6 +839,7 @@ export default function MessagesInbox() {
                         )}
                         <MessageRow
                           message={message}
+                          offerDetails={offerDetails}
                           index={index}
                           messages={messages}
                           currentUser={currentUser}

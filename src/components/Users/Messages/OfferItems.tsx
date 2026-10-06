@@ -1,7 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import {
+  CategoryIconBadge,
+  getCategoryColor,
+  getCategoryIcon,
+} from "@/utils/items/categoryIcons";
 import type { OfferItem } from "@/utils/messages/types";
 
 export function OfferItems({
@@ -26,30 +30,38 @@ export function OfferItems({
 
   return (
     <div className="min-w-0">
-      <p className="text-secondary-text text-xs">
+      <p className="text-secondary-text text-sm">
         <span className="text-primary-text font-medium">{label}:</span>
       </p>
       {display === "text" ? (
         <div className="mt-1 min-w-0">
           {visible.length === 0 ? (
-            <p className="text-secondary-text text-xs">—</p>
+            <p className="text-secondary-text text-sm">—</p>
           ) : (
             <ul className="space-y-0.5">
               {visible.map((item, idx) => (
                 <li
                   key={`${item.name}-${idx}`}
-                  className="text-primary-text/80 text-xs leading-snug wrap-break-word"
+                  className="text-primary-text/80 flex items-start gap-1.5 text-sm leading-snug"
                 >
-                  {item.amount > 1 ? (
-                    <>
-                      {item.name}{" "}
+                  {item.type && (
+                    <CategoryIconBadge
+                      type={item.type}
+                      isLimited={false}
+                      isSeasonal={false}
+                      withContainer={false}
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                    />
+                  )}
+                  <span className="min-w-0 wrap-break-word">
+                    {item.name}
+                    {item.amount > 1 && (
                       <span className="text-secondary-text/90 tabular-nums">
+                        {" "}
                         x{item.amount}
                       </span>
-                    </>
-                  ) : (
-                    item.name
-                  )}
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>
