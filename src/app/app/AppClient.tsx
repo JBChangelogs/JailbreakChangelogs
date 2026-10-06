@@ -49,14 +49,6 @@ const downloads = {
 const allPlatforms = ["Windows", "macOS", "Linux"] as const;
 
 const previews = "https://assets.jailbreakchangelogs.com/app";
-const appRepoUrl = "https://github.com/JBChangelogs/JailbreakChangelogsApp";
-// Folder layout from the app repo's README.
-const appRepoLayout = [
-  ["src/main", "Windows, auto-update, Discord RPC, notifications"],
-  ["src/preload", "Bridge exposing window.api to the app"],
-  ["src/renderer", "The React app"],
-  ["src/shared", "Types and data shared by both sides"],
-];
 const features = [
   {
     label: "Robberies",
@@ -133,18 +125,6 @@ const features = [
     ],
     image: `${previews}/preview-richpresence.png`,
     alt: "Rich Presence settings with a live Discord status preview and toggles for each detail",
-  },
-  {
-    label: "Open Source",
-    title: "Read the code, or run it yourself",
-    description:
-      "The desktop app is open source on GitHub, built with Electron, React and TypeScript.",
-    points: [
-      "See exactly what runs on your computer, from auto-updates and Discord Rich Presence to notifications.",
-      "The app uses the same public Jailbreak Changelogs API as the website.",
-      "Clone it and run it locally with npm install and npm run dev.",
-    ],
-    link: appRepoUrl,
   },
 ];
 
@@ -227,6 +207,16 @@ export default function AppClient({ releases }: { releases: Releases }) {
               Robbery alerts, values, trades, messages and the Dupe Finder in
               one window.
             </p>
+            <a
+              href="https://github.com/JBChangelogs/JailbreakChangelogsApp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-link hover:text-link-hover focus-visible:ring-border-focus mt-3 inline-flex items-center gap-1.5 rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <Icon icon="mdi:github" aria-hidden="true" className="size-4" />
+              Open source on GitHub
+              <ExternalLink aria-hidden="true" className="size-3.5" />
+            </a>
             <p className="text-secondary-text mt-4 flex max-w-lg gap-2 text-sm leading-relaxed">
               <FlaskConical
                 aria-hidden="true"
@@ -475,98 +465,35 @@ export default function AppClient({ releases }: { releases: Releases }) {
               </TabsTrigger>
             ))}
           </TabsList>
-          <div onClickCapture={pause} className="mt-6 grid">
-            <div
-              inert={!!features[active].link}
-              className={`transition-opacity duration-700 ease-in-out [grid-area:1/1] motion-reduce:transition-none ${features[active].link ? "opacity-0" : "opacity-100"}`}
+          <div onClickCapture={pause} className="mt-6">
+            <ImageLightbox
+              src={features[previewIndex ?? active].image}
+              alt={features[previewIndex ?? active].alt}
+              previewRadius="rounded-xl"
+              noReferrer
+              onOpenChange={(open) =>
+                setPreviewIndex((current) =>
+                  open ? (current ?? active) : null,
+                )
+              }
+              className="border-border-card w-full border shadow-2xl"
             >
-              <ImageLightbox
-                src={features[previewIndex ?? active].image}
-                alt={features[previewIndex ?? active].alt}
-                previewRadius="rounded-xl"
-                noReferrer
-                onOpenChange={(open) =>
-                  setPreviewIndex((current) =>
-                    open ? (current ?? active) : null,
-                  )
-                }
-                className="border-border-card w-full border shadow-2xl"
-              >
-                <div className="grid">
-                  {features.map(
-                    (feature, index) =>
-                      feature.image && (
-                        <Image
-                          key={feature.image}
-                          src={feature.image}
-                          alt={index === active ? feature.alt : ""}
-                          aria-hidden={index !== active}
-                          width={2560}
-                          height={1439}
-                          sizes="(min-width: 1152px) 1152px, 100vw"
-                          referrerPolicy="no-referrer"
-                          className={`h-auto w-full transition-opacity duration-700 ease-in-out [grid-area:1/1] motion-reduce:transition-none ${index === active ? "opacity-100" : "opacity-0"}`}
-                        />
-                      ),
-                  )}
-                </div>
-              </ImageLightbox>
-            </div>
-            <div
-              inert={!features[active].link}
-              className={`border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border shadow-2xl transition-opacity duration-700 ease-in-out [grid-area:1/1] motion-reduce:transition-none ${features[active].link ? "opacity-100" : "opacity-0"}`}
-            >
-              <div className="border-border-card flex items-center gap-2 border-b px-4 py-2.5">
-                <span aria-hidden="true" className="flex gap-1.5">
-                  <span className="bg-secondary-text/30 size-2.5 rounded-full" />
-                  <span className="bg-secondary-text/30 size-2.5 rounded-full" />
-                  <span className="bg-secondary-text/30 size-2.5 rounded-full" />
-                </span>
-                <span className="text-secondary-text ml-2 truncate font-mono text-xs">
-                  github.com/JBChangelogs/JailbreakChangelogsApp
-                </span>
+              <div className="grid">
+                {features.map((feature, index) => (
+                  <Image
+                    key={feature.image}
+                    src={feature.image}
+                    alt={index === active ? feature.alt : ""}
+                    aria-hidden={index !== active}
+                    width={2560}
+                    height={1439}
+                    sizes="(min-width: 1152px) 1152px, 100vw"
+                    referrerPolicy="no-referrer"
+                    className={`h-auto w-full transition-opacity duration-700 ease-in-out [grid-area:1/1] motion-reduce:transition-none ${index === active ? "opacity-100" : "opacity-0"}`}
+                  />
+                ))}
               </div>
-              <div className="flex flex-1 flex-col items-center justify-center gap-3 p-4 text-center sm:gap-5 sm:p-8">
-                <Icon
-                  icon="mdi:github"
-                  aria-hidden="true"
-                  className="text-primary-text size-10 sm:size-16"
-                />
-                <div>
-                  <p className="text-primary-text font-semibold sm:text-xl">
-                    JailbreakChangelogsApp
-                  </p>
-                  <p className="text-secondary-text mt-1 text-xs sm:text-sm">
-                    Electron · React · TypeScript
-                  </p>
-                </div>
-                <ul className="border-border-card divide-border-card hidden w-full max-w-lg divide-y rounded-lg border text-left font-mono text-xs md:block">
-                  {appRepoLayout.map(([path, about]) => (
-                    <li key={path} className="flex gap-4 px-3 py-2">
-                      <span className="text-link w-28 shrink-0">{path}</span>
-                      <span className="text-secondary-text truncate">
-                        {about}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <Button asChild size="sm">
-                  <a
-                    href={appRepoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Icon
-                      icon="mdi:github"
-                      aria-hidden="true"
-                      className="size-4"
-                    />
-                    View on GitHub
-                    <ExternalLink aria-hidden="true" className="size-3.5" />
-                  </a>
-                </Button>
-              </div>
-            </div>
+            </ImageLightbox>
           </div>
           {features.map((feature) => (
             <TabsContent
