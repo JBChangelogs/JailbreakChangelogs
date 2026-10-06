@@ -242,7 +242,7 @@ export default async function Home() {
                 game update tracking, values, trading, inventory lookups, OG
                 item tracking, dupe detection, and more.
               </p>
-              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Button asChild size="lg">
                   <a
                     href="roblox://experiences/start?placeId=606849621"
@@ -263,8 +263,8 @@ export default async function Home() {
                     Join the Discord
                   </a>
                 </Button>
-                <AppHeroButton />
               </div>
+              <AppHeroButton />
             </div>
 
             <div className="order-3 md:order-2">
