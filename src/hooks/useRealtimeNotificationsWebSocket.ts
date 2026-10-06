@@ -1029,6 +1029,17 @@ export function useRealtimeNotificationsWebSocket(
               notificationTitle.trim().toLowerCase() === "login detected";
 
             const urlInfo = link ? parseNotificationUrl(link) : null;
+            window.dispatchEvent(
+              new CustomEvent("realtimeNotification", {
+                detail: {
+                  type,
+                  path:
+                    urlInfo?.isWhitelisted && urlInfo.isJailbreakChangelogs
+                      ? urlInfo.relativePath
+                      : undefined,
+                },
+              }),
+            );
             const action = shouldHideViewAction
               ? undefined
               : link && urlInfo?.isWhitelisted

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQueryState } from "nuqs";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
@@ -208,6 +209,19 @@ export default function InventoryCheckerClient({
   useEffect(() => {
     setSearchId(originalSearchTerm || robloxId || "");
   }, [originalSearchTerm, robloxId]);
+
+  // Backend notifies once a scan is saved; reload in place if we're looking at that inventory.
+  const router = useRouter();
+  useEffect(() => {
+    if (!isOwnInventory || !robloxId) return;
+    const onNotification = (e: Event) => {
+      const { path } = (e as CustomEvent<{ path?: string }>).detail;
+      if (path === `/inventories/${robloxId}`) router.refresh();
+    };
+    window.addEventListener("realtimeNotification", onNotification);
+    return () =>
+      window.removeEventListener("realtimeNotification", onNotification);
+  }, [isOwnInventory, robloxId, router]);
 
   // Extract all user IDs from inventory data for batch fetching
   const allUserIds = useMemo(() => {
