@@ -219,12 +219,12 @@ const TradeSidePreview = ({
                         {item.isOG && <OgBadge />}
                       </div>
                       {!isCustomTradeItem(item) && (
-                        <div className="mt-2 flex items-center justify-between gap-2">
-                          <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-secondary-text shrink-0 text-[10px] font-medium sm:text-xs">
                             {item.isDuped ? "Duped value" : "Cash value"}
                           </span>
                           <span
-                            className={`inline-flex h-5 items-center rounded-md px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs ${
+                            className={`inline-flex h-5 shrink-0 items-center rounded-md px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs ${
                               hasKnownItemValue
                                 ? "bg-button-info text-form-button-text"
                                 : "bg-quaternary-bg text-secondary-text"

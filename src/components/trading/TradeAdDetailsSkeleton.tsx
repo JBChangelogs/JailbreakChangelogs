@@ -47,7 +47,7 @@ const TradeSideSkeleton = ({ titleWidth }: { titleWidth: string }) => (
 
 export const TradeAdDetailsSkeleton: React.FC = () => {
   return (
-    <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border p-6">
       <div className="bg-tertiary-bg border-border-card -mx-6 -mt-6 mb-4 flex flex-col gap-3 border-b px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full items-start justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-3">

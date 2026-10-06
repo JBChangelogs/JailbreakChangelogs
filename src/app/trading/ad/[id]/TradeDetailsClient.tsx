@@ -302,12 +302,12 @@ const TradeSidePreview = ({
                             {item.isOG && <OgBadge />}
                           </div>
                           {!isCustomTradeItem(item) && (
-                            <div className="mt-2 flex items-center justify-between gap-2">
-                              <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-secondary-text shrink-0 text-[10px] font-medium sm:text-xs">
                                 {item.isDuped ? "Duped value" : "Cash value"}
                               </span>{" "}
                               <span
-                                className={`inline-flex h-5 items-center rounded-md px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs ${
+                                className={`inline-flex h-5 shrink-0 items-center rounded-md px-2 text-[10px] leading-none font-bold tabular-nums sm:h-6 sm:px-2.5 sm:text-xs ${
                                   hasKnownItemValue
                                     ? "bg-button-info text-form-button-text"
                                     : "bg-quaternary-bg text-secondary-text"
@@ -406,8 +406,8 @@ const TradeSidePreview = ({
                         {item.isOG && <OgBadge />}
                       </div>
                       {!isCustomTradeItem(item) && (
-                        <div className="mt-2.5 flex items-center justify-between gap-2">
-                          <span className="text-secondary-text truncate text-xs font-medium">
+                        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-secondary-text shrink-0 text-xs font-medium">
                             {item.isDuped ? "Duped value" : "Cash value"}
                           </span>
                           <span
@@ -1019,7 +1019,7 @@ export default function TradeDetailsClient({
       <div className="container mx-auto mb-16 px-4 sm:px-6 lg:px-8">
         <Breadcrumb />
         {/* Trade Card */}
-        <div className="border-border-card bg-secondary-bg w-full rounded-lg border p-6">
+        <div className="border-border-card bg-secondary-bg w-full overflow-hidden rounded-xl border p-6">
           <div className="bg-tertiary-bg border-border-card -mx-6 -mt-6 mb-4 flex flex-col gap-3 border-b px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex w-full items-start justify-between gap-3">
               <div className="flex min-w-0 flex-1 items-center gap-3">
