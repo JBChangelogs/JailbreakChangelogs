@@ -31,6 +31,18 @@ import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { bangers } from "@/app/fonts";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { useQuery } from "@tanstack/react-query";
+import { useCatalogValues } from "@/hooks/usePartialItems";
+import { unlockLevel } from "@/utils/items/season";
+import {
+  formatUnlockLevelBadge,
+  formatUnlockRequirementsTooltip,
+  hasUnlockLevel,
+} from "@/utils/items/itemUnlockPresentation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface InventoryApiItem {
   id: number | string;
@@ -260,6 +272,11 @@ export default function ProfileInventoryTab({
   ]);
 
   const itemsPerPage = 18;
+  const catalogQuery = useCatalogValues();
+  const catalogValuesById = useMemo(
+    () => new Map(catalogQuery.data?.map((item) => [String(item.id), item])),
+    [catalogQuery.data],
+  );
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const displayedItems = filteredItems.slice(
     (page - 1) * itemsPerPage,
@@ -453,6 +470,10 @@ export default function ProfileInventoryTab({
               const isDrift = isDriftItem(item.type);
               const ownerId = item.isOG ? trimmedId : item.originalOwner;
               const ownerAvatarSrc = getProxyRobloxHeadshotUrl(ownerId);
+              const catalogItem = catalogValuesById.get(item.id);
+              const season = catalogItem?.season ?? undefined;
+              const level = unlockLevel(catalogItem?.level);
+              const hasLevel = hasUnlockLevel(level);
               const ownerLabel =
                 (ownerId && ownerUsers[ownerId]?.displayName) ||
                 (ownerId && ownerUsers[ownerId]?.name) ||
@@ -505,6 +526,27 @@ export default function ProfileInventoryTab({
                   </div>
 
                   <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg">
+                    {(typeof season === "number" || hasLevel) && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
+                            {typeof season === "number" && (
+                              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+                                S{season}
+                              </span>
+                            )}
+                            {hasLevel && (
+                              <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+                                {formatUnlockLevelBadge(level)}
+                              </span>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {formatUnlockRequirementsTooltip(season, level)}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                     {isVideo ? (
                       <video
                         src={getVideoPath(item.type, item.name)}
