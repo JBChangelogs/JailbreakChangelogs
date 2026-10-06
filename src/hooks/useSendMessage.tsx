@@ -7,7 +7,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import type { UserData } from "@/types/auth";
 import {
   MESSAGE_CHAR_LIMIT,
-  WS_SEND_FALLBACK_MS,
   type ApiErrorResponse,
   type ApiSendResponse,
   type ConversationSummary,
@@ -33,10 +32,8 @@ interface UseSendMessageOptions {
   currentUser: UserData | null;
   replyingToMessage: Message | null;
   isSending: boolean;
-  isRealtimeConnected: boolean;
   selectedUserIdRef: RefObject<string | null>;
   pendingOwnSendScrollRef: RefObject<boolean>;
-  wsSendFallbackTimeoutsRef: RefObject<Set<number>>;
   readMessageIdsRef: RefObject<Set<string>>;
   prepareMessageContentForApi: (text: string) => string;
   prepareMessageDisplayContent: (text: string) => string;
@@ -59,10 +56,8 @@ export function useSendMessage({
   currentUser,
   replyingToMessage,
   isSending,
-  isRealtimeConnected,
   selectedUserIdRef,
   pendingOwnSendScrollRef,
-  wsSendFallbackTimeoutsRef,
   readMessageIdsRef,
   prepareMessageContentForApi,
   prepareMessageDisplayContent,
@@ -101,7 +96,6 @@ export function useSendMessage({
       senderId: asId(currentUser.id),
       receiverId: asId(targetUserId),
       content: displayContent,
-      metadata: { client_id: optimisticId },
       createdAt: Date.now(),
       status: "pending",
     };
@@ -127,7 +121,6 @@ export function useSendMessage({
       if (replyTarget) {
         body.parent_id = replyTarget.id;
       }
-      body.metadata = { client_id: optimisticId };
 
       const { url: sendUrl, headers: sendHeaders } = buildApiFetchRequest(
         PUBLIC_API_URL,
@@ -304,7 +297,6 @@ export function useSendMessage({
         fallbackSenderId: optimisticMessage.senderId,
         fallbackReceiverId: optimisticMessage.receiverId,
       });
-      const shouldStayPending = isRealtimeConnected;
       const updatedLastMessage: Message = {
         ...optimisticMessage,
         id: serverMessageId,
@@ -313,7 +305,7 @@ export function useSendMessage({
         receiverId:
           resolvedParticipants?.receiverId ?? optimisticMessage.receiverId,
         content: parsedBody.message.content,
-        status: shouldStayPending ? "pending" : "sent",
+        status: "sent",
         ...(readMessageIdsRef.current.has(serverMessageId)
           ? { readAt: Date.now() }
           : {}),
@@ -351,7 +343,7 @@ export function useSendMessage({
                     resolvedParticipants?.receiverId ??
                     optimisticMessage.receiverId,
                   content: parsedBody.message.content,
-                  status: shouldStayPending ? "pending" : "sent",
+                  status: "sent",
                   ...(readMessageIdsRef.current.has(serverMessageId)
                     ? { readAt: Date.now() }
                     : {}),
@@ -359,28 +351,6 @@ export function useSendMessage({
               : item,
           );
         });
-      }
-
-      if (shouldStayPending) {
-        const timeoutId = window.setTimeout(() => {
-          wsSendFallbackTimeoutsRef.current.delete(timeoutId);
-          updateLocalThreadMessage(
-            targetUserId,
-            (m) => m.id === serverMessageId,
-            (m) => (m.status === "pending" ? { ...m, status: "sent" } : m),
-          );
-          if (selectedUserIdRef.current !== targetUserId) {
-            return;
-          }
-          setMessages((prev) =>
-            prev.map((item) =>
-              item.id === serverMessageId && item.status === "pending"
-                ? { ...item, status: "sent" }
-                : item,
-            ),
-          );
-        }, WS_SEND_FALLBACK_MS);
-        wsSendFallbackTimeoutsRef.current.add(timeoutId);
       }
     } catch (error) {
       pendingOwnSendScrollRef.current = false;

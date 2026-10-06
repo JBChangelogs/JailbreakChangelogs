@@ -22,7 +22,6 @@ interface UseMessagesRealtimeOptions {
   currentUserId: string | null;
   isAuthenticated: boolean;
   selectedUserIdRef: RefObject<string | null>;
-  wsSendFallbackTimeoutsRef: RefObject<Set<number>>;
   readMessageIdsRef: RefObject<Set<string>>;
   isAtBottomRef: RefObject<boolean>;
   pendingRealtimeReadUserIdsRef: RefObject<Set<string>>;
@@ -46,7 +45,6 @@ export function useMessagesRealtime({
   currentUserId,
   isAuthenticated,
   selectedUserIdRef,
-  wsSendFallbackTimeoutsRef,
   readMessageIdsRef,
   isAtBottomRef,
   pendingRealtimeReadUserIdsRef,
@@ -79,17 +77,6 @@ export function useMessagesRealtime({
       typingTimeouts.clear();
     };
   }, []);
-
-  useEffect(() => {
-    const fallbackTimeouts = wsSendFallbackTimeoutsRef.current;
-
-    return () => {
-      fallbackTimeouts.forEach((timeoutId) => {
-        window.clearTimeout(timeoutId);
-      });
-      fallbackTimeouts.clear();
-    };
-  }, [wsSendFallbackTimeoutsRef]);
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) {

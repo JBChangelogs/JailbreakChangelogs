@@ -208,7 +208,6 @@ export default function MessagesInbox() {
       document.removeEventListener("pointerdown", handlePointerDown, true);
     };
   }, []);
-  const wsSendFallbackTimeoutsRef = useRef<Set<number>>(new Set());
   const readMessageIdsRef = useRef<Set<string>>(new Set());
   const typingSentAtByUserIdRef = useRef<Map<string, number>>(new Map());
 
@@ -240,11 +239,10 @@ export default function MessagesInbox() {
     removeLocalThreadMessage,
   } = useLocalMessageOverlay();
 
-  const { isRealtimeConnected, typingUserIds } = useMessagesRealtime({
+  const { typingUserIds } = useMessagesRealtime({
     currentUserId: currentUser ? asId(currentUser.id) : null,
     isAuthenticated,
     selectedUserIdRef,
-    wsSendFallbackTimeoutsRef,
     readMessageIdsRef,
     isAtBottomRef,
     pendingRealtimeReadUserIdsRef,
@@ -601,10 +599,8 @@ export default function MessagesInbox() {
     currentUser,
     replyingToMessage,
     isSending,
-    isRealtimeConnected,
     selectedUserIdRef,
     pendingOwnSendScrollRef,
-    wsSendFallbackTimeoutsRef,
     readMessageIdsRef,
     prepareMessageContentForApi,
     prepareMessageDisplayContent,

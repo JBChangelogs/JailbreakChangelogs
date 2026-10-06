@@ -99,6 +99,5 @@ export type RealtimeMessageEventDetail = {
     message_ids?: string[];
   };
 };
-export const WS_SEND_FALLBACK_MS = 1200;
 
 export type OfferItem = { name: string; amount: number; type?: string };
