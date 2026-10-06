@@ -211,7 +211,7 @@ function TradingGuides({
                   <button
                     key={demand}
                     onClick={() => handleDemandClick(demand)}
-                    className={`bg-tertiary-bg flex cursor-pointer items-center rounded-md border px-2.5 py-1.5 transition-all hover:bg-(--hover-bg) focus:outline-none ${
+                    className={`bg-tertiary-bg flex cursor-pointer items-center rounded-lg border px-2.5 py-1.5 transition-all hover:bg-(--hover-bg) focus:outline-none ${
                       selectedFilterSorts.includes(
                         getDemandValue(demand) as FilterSort,
                       )
