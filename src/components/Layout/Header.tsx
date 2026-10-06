@@ -423,24 +423,26 @@ const MobileDrawer = memo(function MobileDrawer({
             open={openNavSection === section.id}
             onToggle={() => toggleNavSection(section.id)}
           >
-            {section.items.map((item) => (
-              <MobileNavItem
-                key={item.href}
-                href={item.href}
-                icon={item.icon}
-                label={item.title}
-                badge={item.badge === "live" ? "Live" : undefined}
-                prefetch={item.prefetch}
-                current={
-                  activeHref === item.href
-                    ? pathname === item.href
-                      ? "page"
-                      : "location"
-                    : undefined
-                }
-                onClick={onClose}
-              />
-            ))}
+            {section.items
+              .filter((item) => !item.desktopApp)
+              .map((item) => (
+                <MobileNavItem
+                  key={item.href}
+                  href={item.href}
+                  icon={item.icon}
+                  label={item.title}
+                  badge={item.badge === "live" ? "Live" : undefined}
+                  prefetch={item.prefetch}
+                  current={
+                    activeHref === item.href
+                      ? pathname === item.href
+                        ? "page"
+                        : "location"
+                      : undefined
+                  }
+                  onClick={onClose}
+                />
+              ))}
           </MobileNavSection>
         ))}
       </div>

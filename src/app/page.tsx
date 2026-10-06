@@ -13,6 +13,7 @@ import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
 import CountUpNumber from "@/components/Home/CountUpNumber";
 import { Button } from "@/components/ui/button";
+import AppHeroButton from "@/app/app/AppHeroButton";
 import { getHomepageTestimonials } from "@/components/Testimonials/homepageTestimonials";
 import { highlightBrandName } from "@/components/Testimonials/testimonialText";
 import { UserAvatar } from "@/utils/ui/avatar";
@@ -241,7 +242,7 @@ export default async function Home() {
                 game update tracking, values, trading, inventory lookups, OG
                 item tracking, dupe detection, and more.
               </p>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <Button asChild size="lg">
                   <a
                     href="roblox://experiences/start?placeId=606849621"
@@ -262,6 +263,7 @@ export default async function Home() {
                     Join the Discord
                   </a>
                 </Button>
+                <AppHeroButton />
               </div>
             </div>
 

@@ -6,6 +6,7 @@ const log = createLogger("UI");
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navigationSections } from "@/utils/ui/navigation-menu";
+import { useAppAccess } from "@/app/app/access";
 import NavigationLayoutShortcut from "@/components/Layout/NavigationLayoutShortcut";
 import { getNavigationSection } from "@/utils/ui/navigation";
 import Image from "next/image";
@@ -254,6 +255,7 @@ export const NavbarModern = ({
     logout,
     wsConnected,
   } = useAuthContext();
+  const hasAppAccess = useAppAccess();
   const { isPending: wsTogglePending, toggleConnection: toggleWsConnection } =
     useWsConnectionPending(wsConnected);
 
@@ -373,9 +375,11 @@ export const NavbarModern = ({
                     className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
                   >
                     <div className="grid w-[540px] grid-cols-2 gap-1 p-2">
-                      {section.items.map((item) => (
-                        <NavDropdownItem key={item.href} {...item} />
-                      ))}
+                      {section.items
+                        .filter((item) => !item.desktopApp || hasAppAccess)
+                        .map((item) => (
+                          <NavDropdownItem key={item.href} {...item} />
+                        ))}
                     </div>
                   </NavigationMenu.Content>
                 </NavigationMenu.Item>

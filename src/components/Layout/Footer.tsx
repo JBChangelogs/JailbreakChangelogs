@@ -3,6 +3,7 @@
 import { useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useAppAccess } from "@/app/app/access";
 import { Icon } from "../ui/IconWrapper";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
 import {
@@ -24,6 +25,7 @@ interface FooterProps {
 }
 
 export default function Footer({ githubUrl, versionInfo }: FooterProps) {
+  const hasAppAccess = useAppAccess();
   useEffect(() => {
     // Show GDPR consent button only for EU users (nitro pay requires consent)
     const showGDPRButton = () => {
@@ -196,12 +198,14 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               Resources
             </h3>
             <div className="space-y-2 text-sm">
-              <Link
-                href="/app"
-                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
-              >
-                Desktop App
-              </Link>
+              {hasAppAccess && (
+                <Link
+                  href="/app"
+                  className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
+                >
+                  Desktop App
+                </Link>
+              )}
               <a
                 href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home"
                 target="_blank"

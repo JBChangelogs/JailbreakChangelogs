@@ -6,6 +6,7 @@ export interface NavigationItem {
   badge?: "coming-soon" | "new" | "live";
   className?: string;
   prefetch?: boolean;
+  desktopApp?: boolean;
 }
 
 export interface NavigationSection {
@@ -149,7 +150,13 @@ export const navigationSections: NavigationSection[] = [
         icon: "material-symbols:percent-rounded",
         title: "Hyperchrome Pity",
         description: "Estimate robberies until your next Hyperchrome level",
-        className: "col-span-2",
+      },
+      {
+        href: "/app",
+        icon: "material-symbols:desktop-windows-rounded",
+        title: "Desktop App",
+        description: "Download for Windows and Linux in early access",
+        desktopApp: true,
       },
     ],
   },

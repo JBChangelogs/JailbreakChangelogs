@@ -7,11 +7,13 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { cn } from "@/lib/utils";
 import { getNavigationHref } from "@/utils/ui/navigation";
 import { navigationSections } from "@/utils/ui/navigation-menu";
+import { useAppAccess } from "@/app/app/access";
 
 export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
   const activeHref = getNavigationHref(pathname);
   const navigationRef = useRef<HTMLElement>(null);
+  const hasAppAccess = useAppAccess();
 
   useLayoutEffect(() => {
     const navigation = navigationRef.current;
@@ -84,39 +86,41 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
                 )}
               </h2>
               <ul className="space-y-0.5">
-                {section.items.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      prefetch={item.prefetch}
-                      title={collapsed ? item.title : undefined}
-                      aria-current={
-                        activeHref === item.href
-                          ? pathname === item.href
-                            ? "page"
-                            : "location"
-                          : undefined
-                      }
-                      className={linkClassName(activeHref === item.href)}
-                    >
-                      <Icon
-                        icon={item.icon}
-                        className={cn(
-                          "h-5 w-5 shrink-0",
+                {section.items
+                  .filter((item) => !item.desktopApp || hasAppAccess)
+                  .map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        prefetch={item.prefetch}
+                        title={collapsed ? item.title : undefined}
+                        aria-current={
                           activeHref === item.href
-                            ? "text-primary-text"
-                            : "text-secondary-text",
+                            ? pathname === item.href
+                              ? "page"
+                              : "location"
+                            : undefined
+                        }
+                        className={linkClassName(activeHref === item.href)}
+                      >
+                        <Icon
+                          icon={item.icon}
+                          className={cn(
+                            "h-5 w-5 shrink-0",
+                            activeHref === item.href
+                              ? "text-primary-text"
+                              : "text-secondary-text",
+                          )}
+                        />
+                        <span className={labelClassName}>{item.title}</span>
+                        {!collapsed && item.badge === "live" && (
+                          <span className="bg-button-info/20 text-link shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase">
+                            Live
+                          </span>
                         )}
-                      />
-                      <span className={labelClassName}>{item.title}</span>
-                      {!collapsed && item.badge === "live" && (
-                        <span className="bg-button-info/20 text-link shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase">
-                          Live
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                ))}
+                      </Link>
+                    </li>
+                  ))}
               </ul>
             </section>
           ))}

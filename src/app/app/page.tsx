@@ -1,4 +1,10 @@
+import { cache } from "react";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { BASE_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { parseExperimentsResponse } from "@/utils/api/experiments";
+import { getAuthToken } from "@/utils/api/routeAuth";
 import AppClient from "./AppClient";
 
 const description =
@@ -6,7 +12,7 @@ const description =
 const embedImage =
   "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png";
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: "Desktop App",
   description,
   alternates: { canonical: "/app" },
@@ -34,6 +40,34 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AppPage() {
+const hasAppAccess = cache(async () => {
+  const { url, headers } = buildApiFetchRequest(
+    BASE_API_URL,
+    "/v2/users/me/experiments",
+  );
+  delete headers["X-Experiment"];
+  const token = (await getAuthToken()) ?? headers.Authorization;
+  if (!token) return false;
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: { ...headers, Authorization: token },
+    });
+    return (
+      response.ok &&
+      parseExperimentsResponse(await response.json()).experiments
+        .app_available === "treatment"
+    );
+  } catch {
+    return false;
+  }
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  return (await hasAppAccess()) ? metadata : {};
+}
+
+export default async function AppPage() {
+  if (!(await hasAppAccess())) notFound();
   return <AppClient />;
 }

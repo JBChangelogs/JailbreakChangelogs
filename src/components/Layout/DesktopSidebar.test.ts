@@ -38,6 +38,7 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
     "@/lib/utils": { cn: () => "" },
     "@/utils/ui/navigation": navigationUtils,
     "@/utils/ui/navigation-menu": { navigationSections: [] },
+    "@/app/app/access": { useAppAccess: () => false },
   };
   const exports = {} as { default: (props: { collapsed: boolean }) => void };
   runInNewContext(
