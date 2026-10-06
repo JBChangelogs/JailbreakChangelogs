@@ -1110,13 +1110,13 @@ img.twemoji {
   }
 }
 
-#main-layout:has([data-messages-shell]) {
+.site-layout:has([data-messages-shell]) {
   height: 100dvh;
   min-height: 0;
 }
-#main-layout:has([data-messages-shell]) > main {
+.site-layout:has([data-messages-shell]) > main {
   min-height: 0;
 }
-#main-layout:has([data-messages-shell]) > footer {
+.site-layout:has([data-messages-shell]) > footer {
   display: none;
 }
