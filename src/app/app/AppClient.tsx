@@ -51,6 +51,31 @@ const allPlatforms = ["Windows", "macOS", "Linux"] as const;
 const previews = "https://assets.jailbreakchangelogs.com/app";
 const features = [
   {
+    label: "Messages",
+    title: "Agree on the trade, then meet in-game",
+    description:
+      "Direct messages with unread counts, online status and replies.",
+    points: [
+      "Accepted trade offers appear in the chat, showing the items and values on each side.",
+      "Send a game invite and the other person can join your server straight from the conversation. Detecting your Roblox session is Windows only.",
+    ],
+    image: `${previews}/preview-messages.png`,
+    alt: "Messages tab with a conversation showing an accepted trade offer and a game invite",
+  },
+  {
+    label: "Trades",
+    title: "Build a trade ad without leaving the list",
+    description:
+      "Add items from the values list or your own inventory, and keep a running total for each side.",
+    points: [
+      "Shift-click an item to add it to Offering, or Ctrl-click to add it to Requesting.",
+      "Mark each item as clean, duped or OG, or move it to the other side.",
+      "Tag what you're after, such as adds, overpays, upgrades or OG owners, and add a note.",
+    ],
+    image: `${previews}/preview-trades.png`,
+    alt: "Trade ad builder with offering and requesting panels next to a searchable item list",
+  },
+  {
     label: "Robberies",
     title: "Find an open robbery and join in one click",
     description:
@@ -75,31 +100,6 @@ const features = [
     ],
     image: `${previews}/preview-values.png`,
     alt: "Values tab showing item cards with clean and duped values, demand and trend",
-  },
-  {
-    label: "Trades",
-    title: "Build a trade ad without leaving the list",
-    description:
-      "Add items from the values list or your own inventory, and keep a running total for each side.",
-    points: [
-      "Shift-click an item to add it to Offering, or Ctrl-click to add it to Requesting.",
-      "Mark each item as clean, duped or OG, or move it to the other side.",
-      "Tag what you're after, such as adds, overpays, upgrades or OG owners, and add a note.",
-    ],
-    image: `${previews}/preview-trades.png`,
-    alt: "Trade ad builder with offering and requesting panels next to a searchable item list",
-  },
-  {
-    label: "Messages",
-    title: "Agree on the trade, then meet in-game",
-    description:
-      "Direct messages with unread counts, online status and replies.",
-    points: [
-      "Accepted trade offers appear in the chat, showing the items and values on each side.",
-      "Send a game invite and the other person can join your server straight from the conversation. Detecting your Roblox session is Windows only.",
-    ],
-    image: `${previews}/preview-messages.png`,
-    alt: "Messages tab with a conversation showing an accepted trade offer and a game invite",
   },
   {
     label: "Dupe Finder",
