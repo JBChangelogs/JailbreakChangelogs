@@ -196,6 +196,12 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               Resources
             </h3>
             <div className="space-y-2 text-sm">
+              <Link
+                href="/app"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
+              >
+                Desktop App
+              </Link>
               <a
                 href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home"
                 target="_blank"
