@@ -467,6 +467,8 @@ export default function TradeAds({
             tradable: 1,
             trend: typeof info?.trend === "string" ? info.trend : "N/A",
             demand: typeof info?.demand === "string" ? info.demand : "N/A",
+            duped_demand:
+              typeof info?.duped_demand === "string" ? info.duped_demand : null,
             isDuped: !!item.duped,
             isOG: !!item.og,
           };

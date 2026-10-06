@@ -113,13 +113,13 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               {demand === "N/A" ? "Unknown" : demand}
             </span>
           </div>
-          {dupedDemand && dupedDemand !== "N/A" && (
+          {item.isDuped && (
             <div className="flex items-center gap-2">
               <span className="text-secondary-text text-xs tracking-wider uppercase">
                 Duped Demand:
               </span>
               <span
-                className={`${getDemandColor(dupedDemand)} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-semibold whitespace-nowrap`}
+                className={`${getDemandColor(dupedDemand === "N/A" ? "Unknown" : dupedDemand)} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-semibold whitespace-nowrap`}
               >
                 {dupedDemand}
               </span>

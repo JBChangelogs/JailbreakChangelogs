@@ -488,6 +488,7 @@ const normalizeOfferItems = (items: TradeOfferV2["offering"]): TradeItem[] => {
       tradable: 1,
       trend: item?.info?.trend || "N/A",
       demand: item?.info?.demand || "N/A",
+      duped_demand: item?.info?.duped_demand ?? null,
       isDuped: item?.duped ?? false,
       isOG: item?.og ?? false,
     };

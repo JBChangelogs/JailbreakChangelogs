@@ -123,6 +123,7 @@ export interface TradeOfferV2ItemInfo {
   duped_value?: string | null;
   trend?: string | null;
   demand?: string | null;
+  duped_demand?: string | null;
   notes?: string | null;
 }
 
