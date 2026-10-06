@@ -89,7 +89,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
 
   const helpText = useMemo(
     () =>
-      "Drop a Jailbreak trading UI screenshot here. We'll detect Offering/Requesting items and prefill the calculator.",
+      "Upload a Jailbreak trading UI screenshot. We'll detect Offering/Requesting items and prefill the calculator.",
     [],
   );
   const acceptedTypesText = useMemo(
@@ -311,11 +311,23 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
             </p>
           )}
           <p className="text-secondary-text mt-1 text-sm">
-            {isDragActive
-              ? isDragReject
-                ? "Choose a PNG or JPG/JPEG image."
-                : "Release to upload your trade screenshot."
-              : `Click, drop, or paste (Ctrl+V / ⌘V) · ${acceptedTypesText}`}
+            {isDragActive ? (
+              isDragReject ? (
+                "Choose a PNG or JPG/JPEG image."
+              ) : (
+                "Release to upload your trade screenshot."
+              )
+            ) : (
+              <>
+                <span className="[@media(min-width:768px)_and_(hover:hover)_and_(pointer:fine)]:hidden">
+                  Tap to choose a screenshot
+                </span>
+                <span className="hidden [@media(min-width:768px)_and_(hover:hover)_and_(pointer:fine)]:inline">
+                  Click, drop, or paste (Ctrl+V / ⌘V)
+                </span>
+                {` · ${acceptedTypesText}`}
+              </>
+            )}
           </p>
 
           {lastErrorMessage && (

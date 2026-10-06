@@ -43,11 +43,7 @@ import {
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
-import {
-  formatShortDate,
-  formatCustomDate,
-  formatDayMonthYearTime,
-} from "@/utils/helpers/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileOverview from "@/components/Profile/ProfileOverview";
 import ProfileIdentityBar from "@/components/Profile/ProfileIdentityBar";
@@ -244,7 +240,6 @@ export default function UserProfileClient({
   const followerCount = profileData?.followerCount ?? 0;
   const followingCount = profileData?.followingCount ?? 0;
   const bio = profileData?.bio ?? null;
-  const bioLastUpdated = profileData?.bioLastUpdated ?? null;
   const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
   const [canMessageFromProfile, setCanMessageFromProfile] = useState(false);
   const [isBlockedByMe, setIsBlockedByMe] = useState(false);
@@ -1018,10 +1013,10 @@ export default function UserProfileClient({
             href={`https://discord.com/users/${user.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+            className="text-primary-text bg-tertiary-bg border-border-card hover:text-link-hover focus-visible:ring-border-focus inline-flex size-8 items-center justify-center rounded-lg border shadow-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <DiscordIcon className="h-3.5 w-3.5" />
-            Discord
+            <span className="sr-only">Visit Discord profile</span>
           </Link>
         </TooltipTrigger>
         <TooltipContent>Visit Discord Profile</TooltipContent>
@@ -1034,10 +1029,10 @@ export default function UserProfileClient({
               href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+              className="text-primary-text bg-tertiary-bg border-border-card hover:text-link-hover focus-visible:ring-border-focus inline-flex size-8 items-center justify-center rounded-lg border shadow-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <RobloxIcon className="h-3.5 w-3.5" />
-              Roblox
+              <span className="sr-only">Visit Roblox profile</span>
             </Link>
           </TooltipTrigger>
           <TooltipContent>Visit Roblox Profile</TooltipContent>
@@ -1071,7 +1066,7 @@ export default function UserProfileClient({
                 <div
                   className={cn(
                     "bg-secondary-bg p-1",
-                    user.premiumtype === 3 ? "rounded-[27%]" : "rounded-full",
+                    user.premiumtype === 3 ? "rounded-[20px]" : "rounded-full",
                   )}
                 >
                   <UserAvatar
@@ -1086,7 +1081,10 @@ export default function UserProfileClient({
                         : user.presence?.status === "Online"
                     }
                     showBadge={true}
-                    className="[&>div]:size-24! [&>div]:min-h-24! [&>div]:min-w-24! md:[&>div]:size-38! md:[&>div]:min-h-38! md:[&>div]:min-w-38!"
+                    className={cn(
+                      "[&>div]:size-24! [&>div]:min-h-24! [&>div]:min-w-24! md:[&>div]:size-38! md:[&>div]:min-h-38! md:[&>div]:min-w-38!",
+                      user.premiumtype === 3 && "[&>div]:rounded-2xl!",
+                    )}
                     presenceBadgeClassName="size-6! md:size-8!"
                     settings={user.settings_v2}
                     premiumType={user.premiumtype}
@@ -1158,28 +1156,8 @@ export default function UserProfileClient({
                           </p>
                         )
                       )}
-
-                      {user.created_at && (
-                        <p className="text-secondary-text text-sm">
-                          Member #{user.usernumber}
-                          <span aria-hidden="true" className="mx-2">
-                            ·
-                          </span>
-                          Joined{" "}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help">
-                                {formatShortDate(user.created_at)}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {formatDayMonthYearTime(user.created_at)}
-                            </TooltipContent>
-                          </Tooltip>
-                        </p>
-                      )}
                     </div>
-                    <div className="col-span-2 flex flex-col items-start gap-3 md:mt-4">
+                    <div className="col-span-2 flex flex-col items-start gap-3 md:mt-2">
                       {/* Follower/Following Counts */}
                       <div className="flex flex-wrap items-center gap-6">
                         <button
@@ -1189,7 +1167,7 @@ export default function UserProfileClient({
                           className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followerCount > 0 ? "cursor-pointer" : "cursor-default"}`}
                         >
                           <span
-                            className={`text-primary-text text-xl font-semibold tabular-nums ${followerCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                            className={`text-primary-text text-sm font-semibold tabular-nums ${followerCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
                           >
                             {followerCount}
                           </span>{" "}
@@ -1202,7 +1180,7 @@ export default function UserProfileClient({
                           className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followingCount > 0 ? "cursor-pointer" : "cursor-default"}`}
                         >
                           <span
-                            className={`text-primary-text text-xl font-semibold tabular-nums ${followingCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                            className={`text-primary-text text-sm font-semibold tabular-nums ${followingCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
                           >
                             {followingCount}
                           </span>{" "}
@@ -1553,7 +1531,6 @@ export default function UserProfileClient({
               ) ?? false
             }
             bio={bio}
-            bioLastUpdated={bioLastUpdated}
             onBioUpdate={refreshBio}
           />
         </div>

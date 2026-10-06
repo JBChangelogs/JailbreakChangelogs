@@ -44,13 +44,13 @@ test("profile refreshes preserve an active bio draft and sync it after editing e
         if (name === "@/utils/ui/urlConverter")
           return { convertUrlsToLinks: (text: string) => text };
         if (name === "@/utils/helpers/timestamp")
-          return { formatCustomDate: () => "Today" };
+          return { formatProfileDate: () => "Today" };
         return {};
       },
     },
   );
   const props = {
-    user: { id: "1", username: "owner" },
+    user: { id: "1", username: "owner", usernumber: 7 },
     currentUserId: "1",
     bio: "Refreshed bio",
     bioLastUpdated: 1,

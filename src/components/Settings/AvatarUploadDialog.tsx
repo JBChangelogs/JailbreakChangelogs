@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import { toast } from "sonner";
 
@@ -128,25 +129,15 @@ const ImageUploadDialog = ({
       : checkBannerAccess(userData.premiumtype ?? 0);
     if (!hasAccess) return;
 
-    const needsUploadPrompt =
-      window.matchMedia("(max-width: 767px)").matches ||
-      window.matchMedia("(hover: none), (pointer: coarse)").matches;
-    if (needsUploadPrompt) {
-      setIsUploadPromptOpen(true);
-      return;
-    }
-
-    fileInputRef.current?.click();
+    setIsUploadPromptOpen(true);
   }, [checkAvatarAccess, checkBannerAccess, isAvatar, userData.premiumtype]);
 
   const chooseImage = () => {
-    setIsUploadPromptOpen(false);
     fileInputRef.current?.click();
   };
 
-  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const selectImage = (file?: File) => {
+    if (!file || isUploading) return;
 
     const validation = validateFile(
       file,
@@ -157,7 +148,7 @@ const ImageUploadDialog = ({
     );
     if (!validation.isValid) {
       toast.error(`Invalid ${label}`, { description: validation.error });
-      event.target.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
@@ -172,8 +163,18 @@ const ImageUploadDialog = ({
     setZoom(1);
     setRotation(0);
     setCroppedAreaPercentages(null);
+    setIsUploadPromptOpen(false);
     setIsCropOpen(true);
   };
+
+  const { getRootProps, isDragActive } = useDropzone({
+    onDrop: (files) => selectImage(files[0]),
+    onDropRejected: () => toast.error("Choose one image at a time"),
+    multiple: false,
+    noClick: true,
+    noKeyboard: true,
+    disabled: isUploading,
+  });
 
   const handleCropComplete = useCallback((area: Area, pixels: Area) => {
     setCroppedAreaPercentages(area);
@@ -272,20 +273,48 @@ const ImageUploadDialog = ({
         ref={fileInputRef}
         type="file"
         accept={ALLOWED_IMAGE_TYPES.join(",")}
-        onChange={handleFileSelection}
+        onChange={(event) => {
+          selectImage(event.target.files?.[0]);
+          event.target.value = "";
+        }}
         className="hidden"
         disabled={isUploading}
       />
       {children(openFilePicker, isUploading)}
 
       <Dialog open={isUploadPromptOpen} onOpenChange={setIsUploadPromptOpen}>
-        <DialogContent className="max-w-[480px] rounded-lg p-0" showClose>
+        <DialogContent
+          className="flex max-w-[480px] flex-col rounded-lg p-0"
+          showClose
+        >
           <DialogHeader className="px-6 pt-6 pb-2">
             <DialogTitle>Upload a custom {label}</DialogTitle>
             <DialogDescription>
               {getImageUploadRequirements(imageType)}
             </DialogDescription>
           </DialogHeader>
+          <button
+            {...getRootProps({
+              type: "button",
+              role: "button",
+              onClick: chooseImage,
+              "aria-label": `Choose or drop a ${label} image`,
+              className: `focus-visible:ring-border-focus mx-6 mt-4 hidden min-h-40 cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-6 text-center transition-colors focus-visible:ring-2 focus-visible:outline-none [@media(min-width:768px)_and_(hover:hover)_and_(pointer:fine)]:flex ${isDragActive ? "border-link bg-button-info/10" : "border-border-card bg-tertiary-bg hover:border-link"}`,
+            })}
+          >
+            <Icon
+              icon="material-symbols:cloud-upload"
+              className="text-secondary-text size-8"
+            />
+            <span className="text-primary-text text-sm font-medium">
+              {isDragActive
+                ? "Drop your image here"
+                : "Drag and drop an image here"}
+            </span>
+            <span className="text-secondary-text text-xs">
+              or click to choose a file
+            </span>
+          </button>
           <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
             <DialogClose asChild>
               <Button variant="ghost" size="sm">

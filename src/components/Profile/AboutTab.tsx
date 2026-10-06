@@ -12,8 +12,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Icon } from "../ui/IconWrapper";
-import { formatCustomDate } from "@/utils/helpers/timestamp";
-import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
+import { formatProfileDate } from "@/utils/helpers/timestamp";
+import { DiscordIcon } from "@/components/Icons/DiscordIcon";
+import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
@@ -26,11 +27,13 @@ interface AboutTabProps {
     id: string;
     username: string;
     bio?: string;
-    bio_last_updated?: number;
+    usernumber: number;
+    created_at?: string;
+    roblox_id?: string | null;
+    roblox_username?: string;
   };
   currentUserId: string | null;
   bio?: string | null;
-  bioLastUpdated?: number | null;
   onBioUpdate?: (newBio: string) => void;
 }
 
@@ -48,7 +51,6 @@ export default function AboutTab({
   user,
   currentUserId,
   bio,
-  bioLastUpdated,
   onBioUpdate,
 }: AboutTabProps) {
   // Read more functionality
@@ -57,7 +59,6 @@ export default function AboutTab({
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [newBio, setNewBio] = useState("");
   const [isSavingBio, setIsSavingBio] = useState(false);
-  const realTimeRelativeDate = useRealTimeRelativeDate(bioLastUpdated);
   const { isAuthenticated } = useAuthContext();
 
   useEffect(() => {
@@ -234,21 +235,54 @@ export default function AboutTab({
             ) : (
               <p className="text-primary-text italic">No bio yet</p>
             )}
-            {bio?.trim() && bioLastUpdated && (
-              <p className="text-secondary-text mt-4 text-xs">
-                Last updated:{" "}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help">{realTimeRelativeDate}</span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {formatCustomDate(bioLastUpdated)}
-                  </TooltipContent>
-                </Tooltip>
-              </p>
-            )}
           </div>
         )}
+        <div className="border-border-card mt-5 space-y-4 border-t pt-5">
+          <dl className="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+            <div>
+              <dt className="text-secondary-text">Member number</dt>
+              <dd className="text-primary-text mt-1 font-medium">
+                #{user.usernumber.toLocaleString()}
+              </dd>
+            </div>
+            {user.created_at && (
+              <div>
+                <dt className="text-secondary-text">Member since</dt>
+                <dd className="text-primary-text mt-1 font-medium">
+                  {formatProfileDate(user.created_at)}
+                </dd>
+              </div>
+            )}
+          </dl>
+          <div className="flex min-w-0 gap-2">
+            <a
+              href={`https://discord.com/users/${user.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group border-border-card bg-tertiary-bg text-primary-text hover:text-link-hover focus-visible:ring-border-focus inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none sm:gap-2 sm:px-3 sm:text-sm"
+            >
+              <DiscordIcon className="size-4 shrink-0" /> Discord
+              <span className="text-secondary-text group-hover:text-link-hover min-w-0 truncate transition-colors">
+                @{user.username}
+              </span>
+            </a>
+            {user.roblox_id && (
+              <a
+                href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group border-border-card bg-tertiary-bg text-primary-text hover:text-link-hover focus-visible:ring-border-focus inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none sm:gap-2 sm:px-3 sm:text-sm"
+              >
+                <RobloxIcon className="size-4 shrink-0" /> Roblox
+                {user.roblox_username && (
+                  <span className="text-secondary-text group-hover:text-link-hover min-w-0 truncate transition-colors">
+                    @{user.roblox_username}
+                  </span>
+                )}
+              </a>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

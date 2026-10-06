@@ -1,9 +1,5 @@
 import { Icon } from "../ui/IconWrapper";
 
 export const RobloxIcon = ({ className }: { className?: string }) => (
-  <Icon
-    icon="simple-icons:roblox"
-    className={`text-primary-text ${className || ""}`}
-    inline={true}
-  />
+  <Icon icon="simple-icons:roblox" className={className} inline={true} />
 );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import { useQueryState } from "nuqs";
 import AboutTab from "./AboutTab";
 import CommentsTab from "./CommentsTab";
@@ -14,7 +13,6 @@ import UserBansTab from "./UserBansTab";
 import type { UserSettingsV2, UserFlag } from "@/types/auth";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
-import { formatProfileDate } from "@/utils/helpers/timestamp";
 
 interface User {
   id: string;
@@ -52,7 +50,6 @@ interface ProfileOverviewProps {
   currentUserId: string | null;
   isSiteOwner?: boolean;
   bio: string | null;
-  bioLastUpdated: number | null;
   onBioUpdate?: (newBio: string) => void;
 }
 
@@ -61,7 +58,6 @@ export default function ProfileOverview({
   currentUserId,
   isSiteOwner = false,
   bio,
-  bioLastUpdated,
   onBioUpdate,
 }: ProfileOverviewProps) {
   const [sectionParam, setSectionParam] = useQueryState("tab", {
@@ -187,62 +183,6 @@ export default function ProfileOverview({
             ))}
           </div>
         </nav>
-        <div className="border-border-card bg-secondary-bg hidden rounded-2xl border p-5 lg:block">
-          <h2 className="text-primary-text/70 mb-4 flex h-4 items-center text-[11px] font-semibold tracking-wider uppercase">
-            Profile details
-          </h2>
-          <dl className="space-y-4 text-sm">
-            <div className="flex items-center justify-between gap-3">
-              <dt className="text-secondary-text">Member number</dt>
-              <dd className="text-primary-text font-medium">
-                #{user.usernumber.toLocaleString()}
-              </dd>
-            </div>
-            {user.created_at && (
-              <div className="flex items-start justify-between gap-3">
-                <dt className="text-secondary-text shrink-0">Member since</dt>
-                <dd className="text-primary-text text-right">
-                  {formatProfileDate(user.created_at)}
-                </dd>
-              </div>
-            )}
-            {hasRobloxConnection && user.roblox_username && (
-              <div>
-                <dt className="text-secondary-text mb-2">Roblox account</dt>
-                <dd>
-                  <a
-                    href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border-border-card bg-tertiary-bg hover:border-link focus-visible:ring-border-focus flex items-center gap-3 rounded-lg border p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    {user.roblox_avatar && (
-                      <Image
-                        src={user.roblox_avatar}
-                        alt={user.roblox_username}
-                        width={48}
-                        height={48}
-                        className={`bg-quaternary-bg shrink-0 ${user.premiumtype === 3 ? "rounded-[25%]" : "rounded-full"}`}
-                      />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-primary-text truncate font-semibold">
-                        {user.roblox_display_name || user.roblox_username}
-                      </p>
-                      <p className="text-secondary-text truncate text-xs">
-                        @{user.roblox_username}
-                      </p>
-                    </div>
-                    <Icon
-                      icon="akar-icons:link-out"
-                      className="text-link size-4 shrink-0"
-                    />
-                  </a>
-                </dd>
-              </div>
-            )}
-          </dl>
-        </div>
       </aside>
 
       <div className="order-2 min-w-0 space-y-3 sm:space-y-5 lg:order-none lg:col-start-1 lg:row-start-1 lg:space-y-6">
@@ -263,7 +203,6 @@ export default function ProfileOverview({
             user={user}
             currentUserId={currentUserId}
             bio={bio}
-            bioLastUpdated={bioLastUpdated}
             onBioUpdate={onBioUpdate}
           />
         )}
