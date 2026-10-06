@@ -27,11 +27,16 @@ const downloads = {
     url: "https://updates.jailbreakchangelogs.com/JBCLSetup.exe",
     format: ".exe",
   },
+  macOS: {
+    url: "https://updates.jailbreakchangelogs.com/JBCLSetup.dmg",
+    format: ".dmg",
+  },
   Linux: {
     url: "https://updates.jailbreakchangelogs.com/JBCLSetup.AppImage",
     format: ".AppImage",
   },
 };
+const allPlatforms = ["Windows", "macOS", "Linux"] as const;
 
 const previews = "https://assets.jailbreakchangelogs.com/app";
 const features = [
@@ -134,10 +139,11 @@ export default function AppClient({ releases }: { releases: Releases }) {
     getBrowserDownloadPlatform,
     getServerPlatform,
   );
-  const platforms =
-    platform === "Linux"
-      ? (["Linux", "Windows"] as const)
-      : (["Windows", "Linux"] as const);
+  // The visitor's own platform first, then the rest in a fixed order.
+  const platforms = [
+    ...allPlatforms.filter((option) => option === platform),
+    ...allPlatforms.filter((option) => option !== platform),
+  ];
   const latest = releases[platforms[0]];
   const fileDetails = (option: keyof Releases) => {
     const size = releases[option]?.size;
@@ -174,7 +180,7 @@ export default function AppClient({ releases }: { releases: Releases }) {
         <div className="grid items-center gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
           <div>
             <span className="bg-button-info/10 text-link inline-flex rounded-full px-3 py-1 text-xs font-semibold">
-              Early access · Windows and Linux
+              Early access · Windows, macOS and Linux
             </span>
             <h1 className="text-primary-text mt-4 text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl">
               Jailbreak Changelogs,
@@ -230,29 +236,14 @@ export default function AppClient({ releases }: { releases: Releases }) {
               aria-live="polite"
               aria-busy={checking}
             >
-              {platform === "macOS" && (
-                <div className="border-border-card bg-tertiary-bg mb-6 rounded-xl border p-4">
-                  <h3 className="text-primary-text text-sm font-semibold">
-                    No Mac version yet
-                  </h3>
-                  <p className="text-secondary-text mt-1 text-sm leading-relaxed">
-                    Apple makes it harder to release apps for Mac. We&apos;d
-                    need to build it on a Mac and pay Apple each year to approve
-                    it. Without Apple&apos;s approval, Macs block the app from
-                    opening and it can&apos;t update itself. For now we&apos;re
-                    focused on Windows and Linux, but a Mac version is something
-                    we&apos;d like to add in the future.
-                  </p>
-                </div>
-              )}
               {platform === "Mobile" ? (
                 <>
                   <h3 className="text-primary-text font-semibold">
                     Only available on desktop
                   </h3>
                   <p className="text-secondary-text mt-2 text-sm leading-relaxed">
-                    Open this page on a Windows or Linux computer to download
-                    the app.
+                    Open this page on a Windows, Mac or Linux computer to
+                    download the app.
                   </p>
                 </>
               ) : checking ? (

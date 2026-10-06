@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { parseLinuxRelease, parseWindowsVersion } from "./releases";
+import { parseYmlRelease, parseWindowsVersion } from "./releases";
 
-test("reads version, date and size from latest-linux.yml", () => {
+test("reads version, date and size from latest-linux.yml and latest-mac.yml", () => {
   const yml = `version: 0.5.12
 files:
   - url: JBCLSetup.AppImage
@@ -11,12 +11,12 @@ files:
 path: JBCLSetup.AppImage
 releaseDate: '2026-10-06T18:56:49.770Z'
 `;
-  expect(parseLinuxRelease(yml)).toEqual({
+  expect(parseYmlRelease(yml)).toEqual({
     version: "0.5.12",
     releasedAt: Date.parse("2026-10-06T18:56:49.770Z"),
     size: 126552380,
   });
-  expect(parseLinuxRelease("path: JBCLSetup.AppImage")).toBeNull();
+  expect(parseYmlRelease("path: JBCLSetup.AppImage")).toBeNull();
 });
 
 test("reads the newest full version from releases.win.json", () => {

@@ -9,7 +9,7 @@ import AppClient from "./AppClient";
 import { fetchReleases } from "./releases";
 
 const description =
-  "Download the Jailbreak Changelogs desktop app for Windows and Linux. Available in early access to selected accounts.";
+  "Download the Jailbreak Changelogs desktop app for Windows, macOS and Linux. Available in early access to selected accounts.";
 const embedImage =
   "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png";
 

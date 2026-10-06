@@ -6,7 +6,7 @@ export interface Release {
   size: number | null;
 }
 
-export type Releases = Record<"Windows" | "Linux", Release | null>;
+export type Releases = Record<"Windows" | "macOS" | "Linux", Release | null>;
 
 const toNumber = (value: string | null | undefined) =>
   value && Number.isFinite(Number(value)) ? Number(value) : null;
@@ -16,8 +16,8 @@ const toTime = (value: string | null | undefined) => {
   return Number.isNaN(time) ? null : time;
 };
 
-/** Reads electron-builder's latest-linux.yml without a YAML parser. */
-export function parseLinuxRelease(yml: string): Release | null {
+/** Reads electron-builder's latest-linux.yml / latest-mac.yml without a YAML parser. */
+export function parseYmlRelease(yml: string): Release | null {
   const version = yml.match(/^version:\s*['"]?([^'"\s]+)/m)?.[1];
   if (!version) return null;
   return {
@@ -59,15 +59,16 @@ async function fetchWindowsRelease(): Promise<Release | null> {
   };
 }
 
-async function fetchLinuxRelease(): Promise<Release | null> {
-  const response = await fetch(`${UPDATES_URL}/latest-linux.yml`, options);
-  return response.ok ? parseLinuxRelease(await response.text()) : null;
+async function fetchYmlRelease(file: string): Promise<Release | null> {
+  const response = await fetch(`${UPDATES_URL}/${file}`, options);
+  return response.ok ? parseYmlRelease(await response.text()) : null;
 }
 
 export async function fetchReleases(): Promise<Releases> {
-  const [Windows, Linux] = await Promise.all([
+  const [Windows, macOS, Linux] = await Promise.all([
     fetchWindowsRelease().catch(() => null),
-    fetchLinuxRelease().catch(() => null),
+    fetchYmlRelease("latest-mac.yml").catch(() => null),
+    fetchYmlRelease("latest-linux.yml").catch(() => null),
   ]);
-  return { Windows, Linux };
+  return { Windows, macOS, Linux };
 }
