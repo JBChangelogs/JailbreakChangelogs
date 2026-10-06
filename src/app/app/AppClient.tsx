@@ -61,7 +61,7 @@ const features = [
     label: "Values",
     title: "Clean and duped values side by side",
     description:
-      "Browse all 967 items, with clean and duped values on every card.",
+      "Browse every item, with clean and duped values on every card.",
     points: [
       "Each value shows whether it went up or down, plus a demand rating, a trend, and when it was last updated.",
       "Narrow by type, from vehicles and HyperChromes to rims, horns, drifts and furniture, or by seasonal, limited and untradable items.",
