@@ -1,5 +1,9 @@
 import { expect, test } from "bun:test";
-import { parseYmlRelease, parseWindowsVersion } from "./releases";
+import {
+  compareVersions,
+  parseWindowsVersion,
+  parseYmlRelease,
+} from "./releases";
 
 test("reads version, date and size from latest-linux.yml and latest-mac.yml", () => {
   const yml = `version: 0.5.12
@@ -29,6 +33,22 @@ test("reads the newest full version from releases.win.json", () => {
       ],
     }),
   ).toBe("0.5.12");
+  expect(
+    parseWindowsVersion({
+      Assets: [
+        { Type: "Full", Version: "0.5.12" },
+        { Type: "Full", Version: "0.10.0" },
+        { Type: "Full", Version: "0.9.3" },
+      ],
+    }),
+  ).toBe("0.10.0");
   expect(parseWindowsVersion({ Assets: [] })).toBeNull();
   expect(parseWindowsVersion(null)).toBeNull();
+});
+
+test("orders versions numerically, with prereleases before their release", () => {
+  expect(compareVersions("0.10.0", "0.9.9")).toBeGreaterThan(0);
+  expect(compareVersions("1.0.0", "1.0.0-beta.2")).toBeGreaterThan(0);
+  expect(compareVersions("1.0.0-beta.10", "1.0.0-beta.2")).toBeGreaterThan(0);
+  expect(compareVersions("1.2", "1.2.0")).toBe(0);
 });

@@ -27,15 +27,31 @@ export function parseYmlRelease(yml: string): Release | null {
   };
 }
 
+/** Compares semver-style versions; a prerelease sorts before its release. */
+export function compareVersions(a: string, b: string): number {
+  const [mainA, preA] = a.split(/-(.*)/);
+  const [mainB, preB] = b.split(/-(.*)/);
+  const partsA = mainA.split(".").map(Number);
+  const partsB = mainB.split(".").map(Number);
+  for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+    const diff = (partsA[i] || 0) - (partsB[i] || 0);
+    if (diff) return diff;
+  }
+  if (!preA || !preB) return preA ? -1 : preB ? 1 : 0;
+  return preA.localeCompare(preB, undefined, { numeric: true });
+}
+
 /** Reads the newest full package version from Velopack's releases.win.json. */
 export function parseWindowsVersion(data: unknown): string | null {
   const assets = (data as { Assets?: unknown })?.Assets;
   if (!Array.isArray(assets)) return null;
-  const full = assets.filter(
-    (asset): asset is { Version: string } =>
-      asset?.Type === "Full" && typeof asset.Version === "string",
-  );
-  return full.at(-1)?.Version ?? null;
+  const versions = assets
+    .filter(
+      (asset): asset is { Version: string } =>
+        asset?.Type === "Full" && typeof asset.Version === "string",
+    )
+    .map((asset) => asset.Version);
+  return versions.sort(compareVersions).at(-1) ?? null;
 }
 
 const options = { next: { revalidate: 300 } };
@@ -43,19 +59,22 @@ const options = { next: { revalidate: 300 } };
 async function fetchWindowsRelease(): Promise<Release | null> {
   const [manifest, installer] = await Promise.all([
     fetch(`${UPDATES_URL}/releases.win.json`, options),
-    fetch(`${UPDATES_URL}/JBCLSetup.exe`, { ...options, method: "HEAD" }),
+    // Size and date are optional, so a slow or failed HEAD never blocks the
+    // version from the manifest.
+    fetch(`${UPDATES_URL}/JBCLSetup.exe`, {
+      ...options,
+      method: "HEAD",
+      signal: AbortSignal.timeout(3000),
+    }).catch(() => null),
   ]);
   if (!manifest.ok) return null;
   const version = parseWindowsVersion(await manifest.json());
   if (!version) return null;
+  const headers = installer?.ok ? installer.headers : null;
   return {
     version,
-    releasedAt: installer.ok
-      ? toTime(installer.headers.get("last-modified"))
-      : null,
-    size: installer.ok
-      ? toNumber(installer.headers.get("content-length"))
-      : null,
+    releasedAt: toTime(headers?.get("last-modified")),
+    size: toNumber(headers?.get("content-length")),
   };
 }
 

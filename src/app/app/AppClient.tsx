@@ -125,6 +125,8 @@ const features = [
 export default function AppClient({ releases }: { releases: Releases }) {
   const [active, setActive] = useState(0);
   const [hovered, setHovered] = useState(false);
+  // The screenshot shown in the open lightbox; autoplay waits until it closes.
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   // Picking a tab or opening a preview pauses autoplay; it resumes after a
   // short delay. Bumping `hold` restarts the delay and the current segment.
   const [hold, setHold] = useState(0);
@@ -433,7 +435,9 @@ export default function AppClient({ releases }: { releases: Releases }) {
                           animationDuration: "6s",
                           animationTimingFunction: "linear",
                           animationPlayState:
-                            hovered || held ? "paused" : "running",
+                            hovered || held || previewIndex !== null
+                              ? "paused"
+                              : "running",
                         }
                       : undefined
                   }
@@ -447,10 +451,15 @@ export default function AppClient({ releases }: { releases: Releases }) {
           </TabsList>
           <div onClickCapture={pause} className="mt-6">
             <ImageLightbox
-              src={features[active].image}
-              alt={features[active].alt}
+              src={features[previewIndex ?? active].image}
+              alt={features[previewIndex ?? active].alt}
               previewRadius="rounded-xl"
               noReferrer
+              onOpenChange={(open) =>
+                setPreviewIndex((current) =>
+                  open ? (current ?? active) : null,
+                )
+              }
               className="border-border-card w-full border shadow-2xl"
             >
               <div className="grid">
