@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Check, Download, FlaskConical, Info } from "lucide-react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import {
   Popover,
@@ -26,14 +27,17 @@ const downloads = {
   Windows: {
     url: "https://updates.jailbreakchangelogs.com/JBCLSetup.exe",
     format: ".exe",
+    icon: "mdi:microsoft-windows",
   },
   macOS: {
     url: "https://updates.jailbreakchangelogs.com/JBCLSetup.dmg",
     format: ".dmg",
+    icon: "mdi:apple",
   },
   Linux: {
     url: "https://updates.jailbreakchangelogs.com/JBCLSetup.AppImage",
     format: ".AppImage",
+    icon: "mdi:linux",
   },
 };
 const allPlatforms = ["Windows", "macOS", "Linux"] as const;
@@ -139,11 +143,15 @@ export default function AppClient({ releases }: { releases: Releases }) {
     getBrowserDownloadPlatform,
     getServerPlatform,
   );
-  // The visitor's own platform first, then the rest in a fixed order.
+  // The visitor's own platform first, then the rest in a fixed order. An
+  // unknown platform gets a full button for every build.
   const platforms = [
     ...allPlatforms.filter((option) => option === platform),
     ...allPlatforms.filter((option) => option !== platform),
   ];
+  const detected = allPlatforms.find((option) => option === platform);
+  const primaryPlatforms = detected ? [detected] : platforms;
+  const otherPlatforms = platforms.slice(primaryPlatforms.length);
   const latest = releases[platforms[0]];
   const fileDetails = (option: keyof Releases) => {
     const size = releases[option]?.size;
@@ -273,70 +281,93 @@ export default function AppClient({ releases }: { releases: Releases }) {
               ) : granted ? (
                 <>
                   <div className="space-y-4">
-                    {platforms.map((option) => (
+                    {primaryPlatforms.map((option) => (
                       <div key={option}>
-                        {platform && option !== platform ? (
-                          <a
-                            href={downloads[option].url}
-                            className="text-link hover:text-link-hover focus-visible:ring-border-focus block rounded-sm text-center text-sm underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
-                          >
-                            Download for {option} ({fileDetails(option)})
+                        <Button
+                          asChild
+                          className="h-auto! min-h-12! w-full py-3! text-sm! whitespace-normal! sm:text-base!"
+                        >
+                          <a href={downloads[option].url}>
+                            <Icon
+                              icon={downloads[option].icon}
+                              aria-hidden="true"
+                              className="size-5"
+                            />
+                            <span>
+                              Download for {option}
+                              {option === "Linux" ? " (AppImage)" : ""}
+                            </span>
                           </a>
-                        ) : (
-                          <>
-                            <Button
-                              asChild
-                              className="h-auto! min-h-12! w-full py-3! text-sm! whitespace-normal! sm:text-base!"
+                        </Button>
+                        <p className="text-secondary-text mt-2 text-center text-xs">
+                          {fileDetails(option)}
+                        </p>
+                        {option === "Windows" && (
+                          <Popover>
+                            <PopoverTrigger className="text-secondary-text hover:text-primary-text focus-visible:ring-border-focus mx-auto mt-3 flex cursor-pointer items-center gap-1.5 rounded-sm text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none">
+                              <Info aria-hidden="true" className="size-3.5" />
+                              Seeing &ldquo;Windows protected your PC&rdquo;?
+                            </PopoverTrigger>
+                            <PopoverContent
+                              side="top"
+                              className="w-80 p-4 text-sm"
                             >
-                              <a href={downloads[option].url}>
-                                <Download aria-hidden="true" />
-                                <span>
-                                  Download for {option}
-                                  {option === "Linux" ? " (AppImage)" : ""}
-                                </span>
-                              </a>
-                            </Button>
-                            <p className="text-secondary-text mt-2 text-center text-xs">
-                              {fileDetails(option)}
-                            </p>
-                            {option === "Windows" && (
-                              <Popover>
-                                <PopoverTrigger className="text-secondary-text hover:text-primary-text focus-visible:ring-border-focus mx-auto mt-3 flex cursor-pointer items-center gap-1.5 rounded-sm text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none">
-                                  <Info
-                                    aria-hidden="true"
-                                    className="size-3.5"
-                                  />
-                                  Seeing &ldquo;Windows protected your
-                                  PC&rdquo;?
-                                </PopoverTrigger>
-                                <PopoverContent
-                                  side="top"
-                                  className="w-80 p-4 text-sm"
-                                >
-                                  <p className="text-secondary-text leading-relaxed">
-                                    Windows shows this for apps that are newer
-                                    or less widely downloaded. It&apos;s a
-                                    general caution, not a sign that anything is
-                                    wrong with the app. To install, click{" "}
-                                    <strong className="text-primary-text font-medium">
-                                      More info
-                                    </strong>
-                                    , then{" "}
-                                    <strong className="text-primary-text font-medium">
-                                      Run anyway
-                                    </strong>
-                                    . We&apos;re working on getting the app
-                                    verified with Microsoft so this warning goes
-                                    away in the future.
-                                  </p>
-                                </PopoverContent>
-                              </Popover>
-                            )}
-                          </>
+                              <p className="text-secondary-text leading-relaxed">
+                                Windows shows this for apps that are newer or
+                                less widely downloaded. It&apos;s a general
+                                caution, not a sign that anything is wrong with
+                                the app. To install, click{" "}
+                                <strong className="text-primary-text font-medium">
+                                  More info
+                                </strong>
+                                , then{" "}
+                                <strong className="text-primary-text font-medium">
+                                  Run anyway
+                                </strong>
+                                . We&apos;re working on getting the app verified
+                                with Microsoft so this warning goes away in the
+                                future.
+                              </p>
+                            </PopoverContent>
+                          </Popover>
                         )}
                       </div>
                     ))}
                   </div>
+                  {otherPlatforms.length > 0 && (
+                    <div className="mt-6">
+                      <p className="text-secondary-text mb-2 text-xs font-medium">
+                        Other platforms
+                      </p>
+                      <ul className="border-border-card divide-border-card divide-y overflow-hidden rounded-lg border">
+                        {otherPlatforms.map((option) => (
+                          <li key={option}>
+                            <a
+                              href={downloads[option].url}
+                              className="hover:bg-tertiary-bg focus-visible:ring-border-focus group flex items-center gap-3 px-3 py-2.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+                            >
+                              <Icon
+                                icon={downloads[option].icon}
+                                aria-hidden="true"
+                                className="text-secondary-text group-hover:text-primary-text size-5 shrink-0 transition-colors"
+                              />
+                              <span className="text-primary-text font-medium">
+                                <span className="sr-only">Download for </span>
+                                {option}
+                              </span>
+                              <span className="text-secondary-text ml-auto text-xs">
+                                {fileDetails(option)}
+                              </span>
+                              <Download
+                                aria-hidden="true"
+                                className="text-secondary-text group-hover:text-link size-4 shrink-0 transition-colors"
+                              />
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
