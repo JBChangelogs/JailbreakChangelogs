@@ -42,47 +42,61 @@ export function useAccentColor(userId: string | undefined) {
   const [draft, setDraft] = useState<string | null>(null);
   const debouncedDraft = useDebounce(draft, 600);
 
-  // Saves run one at a time so an older one can't land after a newer one.
+  // Saves and resets run one at a time so an older one can't land after a
+  // newer one. Tasks handle their own errors so the queue keeps going.
   const saveQueue = useRef(Promise.resolve());
+  const pending = useRef(0);
+  const enqueue = (task: () => Promise<void>) => {
+    pending.current++;
+    saveQueue.current = saveQueue.current.then(task).finally(() => {
+      pending.current--;
+    });
+    return saveQueue.current;
+  };
+
   useEffect(() => {
     const value = debouncedDraft;
-    if (!value || value === customAccent) return;
-    saveQueue.current = saveQueue.current
-      .then(() => saveAccentColor(value))
-      .then(() => {
-        queryClient.setQueryData(accentKey, value);
-        queryClient.setQueryData<Record<string, unknown>>(
-          profileKey,
-          (current) =>
-            current ? { ...current, accent_color: value } : current,
-        );
-      })
-      .catch((error: unknown) => {
-        toast.error("Couldn't save accent color", {
-          description: error instanceof Error ? error.message : undefined,
-        });
-      })
-      // Keep a newer pick that is still waiting to save.
-      .finally(() =>
-        setDraft((current) => (current === value ? null : current)),
-      );
+    // While a save is pending, the saved color may still change, so a pick
+    // matching it needs its own write.
+    if (!value || (pending.current === 0 && value === customAccent)) return;
+    void enqueue(() =>
+      saveAccentColor(value)
+        .then(() => {
+          queryClient.setQueryData(accentKey, value);
+          queryClient.setQueryData<Record<string, unknown>>(
+            profileKey,
+            (current) =>
+              current ? { ...current, accent_color: value } : current,
+          );
+        })
+        .catch((error: unknown) => {
+          toast.error("Couldn't save accent color", {
+            description: error instanceof Error ? error.message : undefined,
+          });
+        })
+        // Keep a newer pick that is still waiting to save.
+        .finally(() =>
+          setDraft((current) => (current === value ? null : current)),
+        ),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedDraft]);
 
-  const reset = async () => {
-    try {
-      await saveAccentColor(null);
-      setDraft(null);
-      queryClient.setQueryData(accentKey, null);
-      // The effective color falls back to Discord's; reload it.
-      await queryClient.invalidateQueries({ queryKey: profileKey });
-      toast.success("Accent color reset to your Discord color");
-    } catch (error) {
-      toast.error("Couldn't reset accent color", {
-        description: error instanceof Error ? error.message : undefined,
-      });
-    }
-  };
+  const reset = () =>
+    enqueue(async () => {
+      try {
+        await saveAccentColor(null);
+        setDraft(null);
+        queryClient.setQueryData(accentKey, null);
+        // The effective color falls back to Discord's; reload it.
+        await queryClient.invalidateQueries({ queryKey: profileKey });
+        toast.success("Accent color reset to your Discord color");
+      } catch (error) {
+        toast.error("Couldn't reset accent color", {
+          description: error instanceof Error ? error.message : undefined,
+        });
+      }
+    });
 
   return {
     accent: draft ?? customAccent ?? accentColorToHex(profile?.accent_color),
