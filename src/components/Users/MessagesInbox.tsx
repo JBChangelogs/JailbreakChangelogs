@@ -8,6 +8,13 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  useQuery,
+  useInfiniteQuery,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
+import type { Dispatch, SetStateAction } from "react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
@@ -38,8 +45,14 @@ import { ComposerFooter } from "@/components/Users/Messages/ComposerFooter";
 import { ConversationSidebar } from "@/components/Users/Messages/ConversationSidebar";
 import { NewConversationModal } from "@/components/Users/Messages/NewConversationModal";
 import { useMessagesRealtime } from "@/hooks/useMessagesRealtime";
-import { useConversationList } from "@/hooks/useConversationList";
-import { useMessageThread } from "@/hooks/useMessageThread";
+import {
+  useConversationList,
+  type ConversationListData,
+} from "@/hooks/useConversationList";
+import {
+  useMessageThread,
+  type MessageThreadPage,
+} from "@/hooks/useMessageThread";
 import { useSendMessage } from "@/hooks/useSendMessage";
 import { useMessageMutations } from "@/hooks/useMessageMutations";
 import { useOfferDetailsBatch } from "@/hooks/useOfferDetailsBatch";
@@ -63,6 +76,23 @@ import {
 } from "@/utils/messages/sorting";
 
 const HIDDEN_CONVERSATION_UNDO_MS = 8000;
+
+function blockedUserMap(data: unknown): Record<string, boolean> {
+  const entries =
+    data && typeof data === "object" && "blocked_users" in data
+      ? data.blocked_users
+      : null;
+  return Object.fromEntries(
+    (Array.isArray(entries) ? entries : []).flatMap((entry: unknown) => {
+      if (!entry || typeof entry !== "object" || !("blocked_user_id" in entry))
+        return [];
+      const id = entry.blocked_user_id;
+      return typeof id === "string" || typeof id === "number"
+        ? [[String(id), true]]
+        : [];
+    }),
+  );
+}
 
 export default function MessagesInbox() {
   const pathname = usePathname();
@@ -95,14 +125,140 @@ export default function MessagesInbox() {
     [emojiStringMap],
   );
 
-  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const queryClient = useQueryClient();
+  const currentUserId = currentUser ? asId(currentUser.id) : null;
+  const conversationKey = useMemo(
+    () => ["conversation-list", currentUserId],
+    [currentUserId],
+  );
+  const conversationQuery = useQuery<ConversationListData>({
+    queryKey: conversationKey,
+    enabled: false,
+    gcTime: 0,
+    retry: false,
+  });
+  const conversations = useMemo(
+    () => conversationQuery.data?.items ?? [],
+    [conversationQuery.data?.items],
+  );
+  const totalConversations = conversationQuery.data?.total ?? null;
+  const isLoadingConversations =
+    isAuthenticated && conversationQuery.isFetching;
+  const setConversations = useCallback<
+    Dispatch<SetStateAction<ConversationSummary[]>>
+  >(
+    (update) => {
+      queryClient.setQueryData<ConversationListData>(
+        conversationKey,
+        (previous) => {
+          const current = previous ?? { items: [], total: null };
+          return {
+            ...current,
+            items:
+              typeof update === "function" ? update(current.items) : update,
+          };
+        },
+      );
+    },
+    [queryClient, conversationKey],
+  );
+  const setTotalConversations = useCallback<
+    Dispatch<SetStateAction<number | null>>
+  >(
+    (update) => {
+      queryClient.setQueryData<ConversationListData>(
+        conversationKey,
+        (previous) => {
+          const current = previous ?? { items: [], total: null };
+          return {
+            ...current,
+            total:
+              typeof update === "function" ? update(current.total) : update,
+          };
+        },
+      );
+    },
+    [queryClient, conversationKey],
+  );
   const [recentlyHiddenConversations, setRecentlyHiddenConversations] =
     useState<ConversationSummary[]>([]);
-  const [totalConversations, setTotalConversations] = useState<number | null>(
-    null,
-  );
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const threadKey = useMemo(
+    () => ["message-thread", currentUserId, selectedUserId],
+    [currentUserId, selectedUserId],
+  );
+  const threadQuery = useInfiniteQuery<MessageThreadPage>({
+    queryKey: threadKey,
+    enabled: false,
+    initialPageParam: 1,
+    getNextPageParam: (last, _pages, lastPageParam) => {
+      const page = last.pagination.page ?? Number(lastPageParam);
+      return last.pagination.totalPages != null &&
+        page < last.pagination.totalPages
+        ? page + 1
+        : undefined;
+    },
+    gcTime: 0,
+    retry: false,
+  });
+  const messages = useMemo(() => {
+    const byId = new Map<string, Message>();
+    for (const page of threadQuery.data?.pages ?? [])
+      for (const message of page.messages)
+        if (!byId.has(message.id)) byId.set(message.id, message);
+    return [...byId.values()].sort(
+      (a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0),
+    );
+  }, [threadQuery.data]);
+  const setMessages = useCallback<Dispatch<SetStateAction<Message[]>>>(
+    (update) => {
+      if (!currentUserId || !selectedUserId) return;
+      queryClient.setQueryData<InfiniteData<MessageThreadPage>>(
+        threadKey,
+        (previous) => {
+          const current = previous ?? {
+            pages: [
+              { messages: [], pagination: { page: 1, totalPages: null } },
+            ],
+            pageParams: [1],
+          };
+          const existing = new Map<string, Message>();
+          for (const page of current.pages)
+            for (const message of page.messages)
+              if (!existing.has(message.id)) existing.set(message.id, message);
+          const ordered = [...existing.values()].sort(
+            (a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0),
+          );
+          const next = typeof update === "function" ? update(ordered) : update;
+          const byId = new Map(next.map((message) => [message.id, message]));
+          const added = next.filter((message) => !existing.has(message.id));
+          return {
+            ...current,
+            pages: current.pages.map((page, index) => ({
+              ...page,
+              messages: [
+                ...page.messages.flatMap((message) => {
+                  const updated = byId.get(message.id);
+                  return updated ? [updated] : [];
+                }),
+                ...(index === 0 ? added : []),
+              ],
+            })),
+          };
+        },
+      );
+    },
+    [queryClient, threadKey, currentUserId, selectedUserId],
+  );
+  const isLoadingMessages = Boolean(
+    isAuthenticated && selectedUserId && threadQuery.isLoading,
+  );
+  const isLoadingOlderMessages = threadQuery.isFetchingNextPage;
+  const messagesPage =
+    threadQuery.data?.pages.at(-1)?.pagination.page ??
+    Number(threadQuery.data?.pageParams.at(-1) ?? 1);
+  const messagesTotalPages =
+    threadQuery.data?.pages.at(-1)?.pagination.totalPages ?? null;
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editEmojiOpen, setEditEmojiOpen] = useState(false);
@@ -120,25 +276,50 @@ export default function MessagesInbox() {
   const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(
     null,
   );
-  const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [conversationListRefreshKey, setConversationListRefreshKey] =
     useState(0);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isUnmessageable, setIsUnmessageable] = useState(false);
-  const [blockedByMeByUserId, setBlockedByMeByUserId] = useState<
-    Record<string, boolean>
-  >({});
-  const [currentUserEnriched, setCurrentUserEnriched] =
-    useState<MessageUser | null>(null);
+  const blockedKey = useMemo(
+    () => ["blocked-users", currentUserId],
+    [currentUserId],
+  );
+  const blockedQuery = useQuery<{
+    blocked_users?: Array<{ blocked_user_id: string | number }>;
+  } | null>({ queryKey: blockedKey, enabled: false, gcTime: 0, retry: false });
+  const blockedByMeByUserId = useMemo(
+    () => blockedUserMap(blockedQuery.data),
+    [blockedQuery.data],
+  );
+  const setBlockedByMeByUserId = useCallback<
+    Dispatch<SetStateAction<Record<string, boolean>>>
+  >(
+    (update) => {
+      queryClient.setQueryData<{
+        blocked_users?: Array<{ blocked_user_id: string | number }>;
+      }>(blockedKey, (previous) => {
+        const current = blockedUserMap(previous);
+        const next = typeof update === "function" ? update(current) : update;
+        return {
+          ...previous,
+          blocked_users: Object.entries(next)
+            .filter(([, blocked]) => blocked)
+            .map(([id]) => ({ blocked_user_id: id })),
+        };
+      });
+    },
+    [queryClient, blockedKey],
+  );
+  const currentUserQuery = useQuery<MessageUser | null>({
+    queryKey: ["message-current-user", currentUserId],
+    enabled: false,
+    gcTime: 0,
+    retry: false,
+  });
+  const currentUserEnriched = currentUserQuery.data ?? null;
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [newConversationOpen, setNewConversationOpen] = useState(false);
   const userSearchInputRef = useRef<HTMLInputElement | null>(null);
-  const [messagesPage, setMessagesPage] = useState(1);
-  const [messagesTotalPages, setMessagesTotalPages] = useState<number | null>(
-    null,
-  );
-  const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false);
   const messagesPageRef = useRef(1);
   const messagesTotalPagesRef = useRef<number | null>(null);
   const isLoadingOlderMessagesRef = useRef(false);
@@ -301,8 +482,6 @@ export default function MessagesInbox() {
   }, [currentUser]);
 
   const selectedUser = selectedConversation?.user ?? null;
-  const currentUserId = currentUser ? asId(currentUser.id) : null;
-
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) return;
 
@@ -372,11 +551,7 @@ export default function MessagesInbox() {
     routeConversationIdRef,
     conversations,
     setConversations,
-    setTotalConversations,
     setSelectedUserId,
-    setIsLoadingConversations,
-    setBlockedByMeByUserId,
-    setCurrentUserEnriched,
     refreshKey: conversationListRefreshKey,
   });
   const { results: userSearchResults, isLoading: isUserSearchLoading } =
@@ -394,10 +569,6 @@ export default function MessagesInbox() {
     localThreadMessagesByUserIdRef,
     setMessages,
     setConversations,
-    setMessagesPage,
-    setMessagesTotalPages,
-    setIsLoadingMessages,
-    setIsLoadingOlderMessages,
     setIsUnmessageable,
     upsertLocalThreadMessage,
   });

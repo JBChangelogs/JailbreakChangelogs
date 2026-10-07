@@ -19,7 +19,19 @@ test("comment links locate the correct page, expand the thread, and fall back wh
   let lookupStatus = 200;
   let scrolls = 0;
   const initialComments: unknown[] = [];
+  const cache = new Map<string, unknown>();
+  const cancelled: unknown[] = [];
   const queryClient = {
+    cancelQueries: async (filter: unknown) => {
+      cancelled.push(filter);
+    },
+    setQueryData: (key: unknown, updater: unknown) => {
+      const cacheKey = JSON.stringify(key);
+      cache.set(
+        cacheKey,
+        typeof updater === "function" ? updater(cache.get(cacheKey)) : updater,
+      );
+    },
     fetchQuery: async (options: {
       queryFn: (context: { signal: AbortSignal }) => Promise<unknown>;
     }) => options.queryFn({ signal: new AbortController().signal }),
@@ -29,7 +41,15 @@ test("comment links locate the correct page, expand the thread, and fall back wh
     pathname: "/changelogs/5",
     search: "?tab=comments",
   };
-  const exports = {} as { useCommentState: (props: unknown) => unknown };
+  const exports = {} as {
+    useCommentState: (props: unknown) => {
+      comments: { id: number }[];
+      totalComments: number;
+      setComments: (
+        updater: (comments: { id: number }[]) => { id: number }[],
+      ) => void;
+    };
+  };
   runInNewContext(
     transpileModule(
       readFileSync(new URL("./useCommentState.ts", import.meta.url), "utf8"),
@@ -109,7 +129,12 @@ test("comment links locate the correct page, expand the thread, and fall back wh
             useMemo: (callback: () => unknown) => callback(),
           };
         if (name === "@tanstack/react-query")
-          return { useQueryClient: () => queryClient, useQuery: () => ({}) };
+          return {
+            useQueryClient: () => queryClient,
+            useQuery: (options: { queryKey: unknown }) => ({
+              data: cache.get(JSON.stringify(options.queryKey)),
+            }),
+          };
         if (name === "@/contexts/AuthContext")
           return { useAuthContext: () => ({ user: null, bans: {} }) };
         if (name === "@/hooks/useSupporterModal")
@@ -134,12 +159,13 @@ test("comment links locate the correct page, expand the thread, and fall back wh
       },
     },
   );
-  exports.useCommentState({
+  const props = {
     changelogId: 5,
     type: "changelog",
     changelogTitle: "Update",
     initialComments,
-  });
+  };
+  const state = exports.useCommentState(props);
   const effect = effects.find(
     (entry) => entry.deps[0] === 5 && entry.deps.includes(queryClient),
   );
@@ -156,7 +182,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
     updates.some((update) => update instanceof Set && update.has(10)),
   ).toBe(true);
   const scrollEffect = effects.find(
-    (entry) => entry.deps.length === 1 && entry.deps[0] === initialComments,
+    (entry) => entry.deps[0] === initialComments && entry.deps.length === 2,
   );
   expect(scrollEffect).toBeDefined();
   scrollEffect!.callback();
@@ -175,4 +201,18 @@ test("comment links locate the correct page, expand the thread, and fall back wh
   effect!.callback();
   await timer!();
   expect(new URL(requests.at(-1)!).searchParams.get("page")).toBe("1");
+
+  const key = ["comments", "changelog", 5, 1, null, null];
+  queryClient.setQueryData(key, {
+    comments: [{ id: 7 }],
+    userMap: {},
+    totalPages: 3,
+    totalComments: 25,
+    page: 1,
+  });
+  state.setComments((comments) => [...comments, { id: 99 }]);
+  const next = exports.useCommentState(props);
+  expect(next.comments.map((comment) => comment.id)).toEqual([7, 99]);
+  expect(next.totalComments).toBe(25);
+  expect(cancelled).toContainEqual({ queryKey: key, exact: true });
 });

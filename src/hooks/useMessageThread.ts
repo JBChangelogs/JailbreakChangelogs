@@ -1,8 +1,13 @@
 "use client";
 
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import { useCallback, useEffect, useLayoutEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  useInfiniteQuery,
+  useQuery,
+  replaceEqualDeep,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
 import type { ConversationSummary, Message } from "@/utils/messages/types";
@@ -17,6 +22,15 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 const log = createLogger("UI");
 type Setter<T> = Dispatch<SetStateAction<T>>;
+
+export interface MessageThreadPage {
+  messages: Message[];
+  pagination: Pick<
+    ReturnType<typeof extractPagination>,
+    "page" | "totalPages"
+  > &
+    Partial<Pick<ReturnType<typeof extractPagination>, "total" | "size">>;
+}
 
 interface UseMessageThreadOptions {
   selectedUserId: string | null;
@@ -35,10 +49,6 @@ interface UseMessageThreadOptions {
   localThreadMessagesByUserIdRef: RefObject<Map<string, Message[]>>;
   setMessages: Setter<Message[]>;
   setConversations: Setter<ConversationSummary[]>;
-  setMessagesPage: Setter<number>;
-  setMessagesTotalPages: Setter<number | null>;
-  setIsLoadingMessages: Setter<boolean>;
-  setIsLoadingOlderMessages: Setter<boolean>;
   setIsUnmessageable: Setter<boolean>;
   upsertLocalThreadMessage: (userId: string, message: Message) => void;
 }
@@ -56,122 +66,127 @@ export function useMessageThread({
   localThreadMessagesByUserIdRef,
   setMessages,
   setConversations,
-  setMessagesPage,
-  setMessagesTotalPages,
-  setIsLoadingMessages,
-  setIsLoadingOlderMessages,
   setIsUnmessageable,
   upsertLocalThreadMessage,
 }: UseMessageThreadOptions) {
-  const queryClient = useQueryClient();
-  const fetchMessagesPage = useCallback(
-    async (userId: string, page: number) => {
-      return queryClient.fetchQuery({
-        queryKey: ["message-thread-page", currentUserId, userId, page],
-        queryFn: async ({ signal }) => {
-          if (!PUBLIC_API_URL) {
-            throw new Error("Public API URL is not configured");
-          }
-          const pageParam = page > 1 ? `?page=${page}` : "";
-          const { url, headers } = buildApiFetchRequest(
-            PUBLIC_API_URL,
-            `/v2/conversations/${encodeURIComponent(userId)}/messages${pageParam}`,
-          );
-          const response = await fetch(url, {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-            headers,
-            signal,
-          });
-          if (!response.ok) {
-            throw new Error(
-              await getResponseErrorMessage(
-                response,
-                "Failed to load messages",
-              ),
-            );
-          }
-          const rawBody = await response.text();
-          const parsed = rawBody ? (JSON.parse(rawBody) as unknown) : null;
-          const items = extractItems(parsed);
-          const pagination = extractPagination(parsed);
-          const parsedMessages = items
-            .map((item) => parseMessageRecord(item))
-            .filter((item): item is Message => Boolean(item))
-            .reverse();
-          return { messages: parsedMessages, pagination };
-        },
-        staleTime: 0,
-        gcTime: 0,
-        retry: false,
+  const pendingPrependPositionRef =
+    useRef<typeof prependScrollRestoreRef.current>(null);
+  const messagesQuery = useInfiniteQuery({
+    queryKey: ["message-thread", currentUserId, selectedUserId],
+    enabled: isAuthenticated && !!currentUserId && !!selectedUserId,
+    initialPageParam: 1,
+    queryFn: async ({ signal, pageParam }): Promise<MessageThreadPage> => {
+      if (!PUBLIC_API_URL) throw new Error("Public API URL is not configured");
+      const pageParamSuffix = pageParam > 1 ? `?page=${pageParam}` : "";
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/conversations/${encodeURIComponent(selectedUserId!)}/messages${pageParamSuffix}`,
+      );
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+        headers,
+        signal,
       });
+      if (!response.ok)
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to load messages"),
+        );
+      const rawBody = await response.text();
+      const parsed = rawBody ? (JSON.parse(rawBody) as unknown) : null;
+      const pagination = extractPagination(parsed);
+      const messages = extractItems(parsed)
+        .map(parseMessageRecord)
+        .filter((message): message is Message => !!message)
+        .reverse();
+      if (pageParam === 1 && selectedUserId) {
+        const local =
+          localThreadMessagesByUserIdRef.current.get(selectedUserId) ?? [];
+        const ids = new Set(messages.map((message) => message.id));
+        messages.push(...local.filter((message) => !ids.has(message.id)));
+        messages.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+      }
+      if (
+        pageParam > 1 &&
+        !signal.aborted &&
+        pendingPrependPositionRef.current?.conversationId === selectedUserId
+      ) {
+        prependScrollRestoreRef.current = pendingPrependPositionRef.current;
+        pendingPrependPositionRef.current = null;
+      }
+      return { messages, pagination };
     },
-    [queryClient, currentUserId],
-  );
-
+    getNextPageParam: (lastPage, _pages, lastPageParam) => {
+      const page = lastPage.pagination.page ?? lastPageParam;
+      const totalPages = lastPage.pagination.totalPages;
+      return totalPages !== null && page < totalPages ? page + 1 : undefined;
+    },
+    structuralSharing: (previousData, nextData) => {
+      const previous = previousData as
+        | InfiniteData<MessageThreadPage>
+        | undefined;
+      const next = nextData as InfiniteData<MessageThreadPage>;
+      // Keep realtime edits made while an older-page request was in flight.
+      return replaceEqualDeep(
+        previous,
+        previous && next.pages.length > previous.pages.length
+          ? {
+              ...next,
+              pages: [
+                ...previous.pages,
+                ...next.pages.slice(previous.pages.length),
+              ],
+            }
+          : next,
+      );
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const lastPage = messagesQuery.data?.pages.at(-1);
+  const lastPageParam = messagesQuery.data?.pageParams.at(-1);
+  messagesPageRef.current =
+    lastPage?.pagination.page ??
+    (typeof lastPageParam === "number" ? lastPageParam : 1);
+  messagesTotalPagesRef.current = lastPage?.pagination.totalPages ?? null;
+  isLoadingOlderMessagesRef.current = messagesQuery.isFetchingNextPage;
+  const selectedUserIdRef = useRef(selectedUserId);
+  selectedUserIdRef.current = selectedUserId;
+  const { fetchNextPage, hasNextPage } = messagesQuery;
   const loadOlderMessages = useCallback(async () => {
-    if (!selectedUserId) return;
-    if (isLoadingMessages || isLoadingOlderMessagesRef.current) return;
-    const totalPages = messagesTotalPagesRef.current;
-    const currentPage = messagesPageRef.current;
-    if (totalPages === null) return;
-    if (currentPage >= totalPages) return;
-
+    if (
+      !selectedUserId ||
+      isLoadingMessages ||
+      isLoadingOlderMessagesRef.current ||
+      !hasNextPage
+    )
+      return;
     const container = messagesContainerRef.current;
     if (!container) return;
-    setIsLoadingOlderMessages(true);
-    try {
-      const nextPage = currentPage + 1;
-      // Prevent duplicate loads firing before state updates flush.
-      messagesPageRef.current = nextPage;
-      const { messages: serverMessages, pagination } = await fetchMessagesPage(
-        selectedUserId,
-        nextPage,
-      );
-
-      const resolvedPage = pagination.page ?? nextPage;
-      const resolvedTotalPages = pagination.totalPages ?? totalPages;
-      messagesPageRef.current = resolvedPage;
-      messagesTotalPagesRef.current = resolvedTotalPages;
-      setMessagesPage(resolvedPage);
-      setMessagesTotalPages(resolvedTotalPages);
-
-      // Discord-style: keep current viewport anchored while older messages prepend.
-      prependScrollRestoreRef.current = {
-        conversationId: selectedUserId,
-        prevScrollTop: container.scrollTop,
-        prevScrollHeight: container.scrollHeight,
-      };
-      setMessages((prev) => {
-        const prevIds = new Set(prev.map((m) => m.id));
-        const unique = serverMessages.filter((m) => !prevIds.has(m.id));
-        return unique.length > 0 ? [...unique, ...prev] : prev;
-      });
-    } catch (error) {
-      messagesPageRef.current = currentPage;
-      log.error("Error loading older messages:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to load older messages",
-      );
-    } finally {
-      setIsLoadingOlderMessages(false);
+    const previousPosition = {
+      conversationId: selectedUserId,
+      prevScrollTop: container.scrollTop,
+      prevScrollHeight: container.scrollHeight,
+    };
+    isLoadingOlderMessagesRef.current = true;
+    pendingPrependPositionRef.current = previousPosition;
+    const result = await fetchNextPage({ cancelRefetch: false });
+    if (selectedUserIdRef.current !== selectedUserId) return;
+    if (result.isError) {
+      pendingPrependPositionRef.current = null;
+      log.error("Error loading older messages:", result.error);
+      toast.error(result.error?.message ?? "Failed to load older messages");
     }
   }, [
-    fetchMessagesPage,
     isLoadingMessages,
     isLoadingOlderMessagesRef,
     messagesContainerRef,
-    messagesPageRef,
-    messagesTotalPagesRef,
-    prependScrollRestoreRef,
+    hasNextPage,
+    fetchNextPage,
     selectedUserId,
-    setIsLoadingOlderMessages,
-    setMessages,
-    setMessagesPage,
-    setMessagesTotalPages,
   ]);
 
   useEffect(() => {
@@ -207,161 +222,97 @@ export function useMessageThread({
 
   useLayoutEffect(() => {
     setIsUnmessageable(false);
-    if (!selectedUserId || !isAuthenticated || !currentUserId) {
-      setMessages([]);
-      setIsLoadingMessages(false);
-      setMessagesPage(1);
-      setMessagesTotalPages(null);
-      setIsLoadingOlderMessages(false);
-      messagesPageRef.current = 1;
-      messagesTotalPagesRef.current = null;
-      return;
-    }
-
-    let isCancelled = false;
-
-    const fetchMessages = async () => {
-      try {
-        setIsLoadingMessages(true);
-        setMessages([]);
-        setMessagesPage(1);
-        setMessagesTotalPages(null);
-        setIsLoadingOlderMessages(false);
-
-        const { messages: parsedMessages, pagination } =
-          await fetchMessagesPage(selectedUserId, 1);
-
-        if (!isCancelled) {
-          const resolvedPage = pagination.page ?? 1;
-          const resolvedTotalPages = pagination.totalPages ?? null;
-          messagesPageRef.current = resolvedPage;
-          messagesTotalPagesRef.current = resolvedTotalPages;
-          setMessagesPage(resolvedPage);
-          setMessagesTotalPages(resolvedTotalPages);
-          const local =
-            localThreadMessagesByUserIdRef.current.get(selectedUserId) ?? [];
-          const serverIds = new Set(parsedMessages.map((m) => m.id));
-          const merged = [
-            ...parsedMessages,
-            ...local.filter((m) => !serverIds.has(m.id)),
-          ].sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
-          setMessages(merged);
-          setConversations((prev) =>
-            prev.map((conversation) =>
-              conversation.user.id === selectedUserId
-                ? { ...conversation, unreadCount: 0 }
-                : conversation,
-            ),
-          );
-          window.dispatchEvent(new CustomEvent("messageThreadRead"));
-        }
-      } catch (error) {
-        if (!isCancelled) {
-          log.error("Error fetching messages:", error);
-          setMessages([]);
-          toast.error(
-            error instanceof Error ? error.message : "Failed to load messages",
-          );
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoadingMessages(false);
-        }
-      }
-    };
-
-    void fetchMessages();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [
-    currentUserId,
-    fetchMessagesPage,
-    isAuthenticated,
-    localThreadMessagesByUserIdRef,
-    messagesPageRef,
-    messagesTotalPagesRef,
-    selectedUserId,
-    setIsLoadingMessages,
-    setIsLoadingOlderMessages,
-    setIsUnmessageable,
-    setConversations,
-    setMessages,
-    setMessagesPage,
-    setMessagesTotalPages,
-  ]);
-
+  }, [selectedUserId, currentUserId, isAuthenticated, setIsUnmessageable]);
+  const initialPage = messagesQuery.data?.pages[0];
   useEffect(() => {
     if (
       !selectedUserId ||
-      !isAuthenticated ||
-      !currentUserId ||
-      !PUBLIC_API_URL
+      !initialPage ||
+      !messagesQuery.isSuccess ||
+      messagesQuery.isFetching
     )
       return;
-
-    let isCancelled = false;
-
-    const checkEligibility = async () => {
-      try {
-        const status = await queryClient.fetchQuery({
-          queryKey: ["message-eligibility", currentUserId, selectedUserId],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              `/v2/conversations/${encodeURIComponent(selectedUserId)}`,
-            );
-            const response = await fetch(url, {
-              method: "HEAD",
-              credentials: "include",
-              headers,
-              signal,
-            });
-            return response.status;
-          },
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
-        });
-
-        if (isCancelled) return;
-
-        if (status === 403) {
-          setIsUnmessageable(true);
-          const systemContent = "You are not allowed to message this user.";
-          toast.error(systemContent);
-          const systemMessage: Message = {
-            id: `system-unmessageable-${selectedUserId}`,
-            senderId: "system",
-            receiverId: selectedUserId,
-            content: systemContent,
-            createdAt: Date.now(),
-            type: "system",
-          };
-          upsertLocalThreadMessage(selectedUserId, systemMessage);
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === systemMessage.id)) return prev;
-            return sortMessagesByCreatedAt([...prev, systemMessage]);
-          });
-        }
-      } catch (error) {
-        log.error("Error checking messaging eligibility:", error);
-      }
-    };
-
-    void checkEligibility();
-
-    return () => {
-      isCancelled = true;
-    };
+    setConversations((previous) =>
+      previous.map((conversation) =>
+        conversation.user.id === selectedUserId
+          ? { ...conversation, unreadCount: 0 }
+          : conversation,
+      ),
+    );
+    window.dispatchEvent(new CustomEvent("messageThreadRead"));
   }, [
-    currentUserId,
-    isAuthenticated,
-    queryClient,
+    initialPage,
+    messagesQuery.isSuccess,
+    messagesQuery.isFetching,
+    selectedUserId,
+    setConversations,
+  ]);
+  useEffect(() => {
+    if (!messagesQuery.error || messagesQuery.isFetchNextPageError) return;
+    log.error("Error fetching messages:", messagesQuery.error);
+    toast.error(messagesQuery.error.message);
+  }, [
+    messagesQuery.error,
+    messagesQuery.errorUpdatedAt,
+    messagesQuery.isFetchNextPageError,
+  ]);
+
+  const eligibilityQuery = useQuery({
+    queryKey: ["message-eligibility", currentUserId, selectedUserId],
+    enabled:
+      isAuthenticated &&
+      !!currentUserId &&
+      !!selectedUserId &&
+      !!PUBLIC_API_URL,
+    queryFn: async ({ signal }) => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/conversations/${encodeURIComponent(selectedUserId!)}`,
+      );
+      const response = await fetch(url, {
+        method: "HEAD",
+        credentials: "include",
+        headers,
+        signal,
+      });
+      return response.status;
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  useEffect(() => {
+    if (eligibilityQuery.data !== 403 || !selectedUserId) return;
+    setIsUnmessageable(true);
+    const systemContent = "You are not allowed to message this user.";
+    toast.error(systemContent);
+    const systemMessage: Message = {
+      id: `system-unmessageable-${selectedUserId}`,
+      senderId: "system",
+      receiverId: selectedUserId,
+      content: systemContent,
+      createdAt: Date.now(),
+      type: "system",
+    };
+    upsertLocalThreadMessage(selectedUserId, systemMessage);
+    setMessages((previous) =>
+      previous.some((message) => message.id === systemMessage.id)
+        ? previous
+        : sortMessagesByCreatedAt([...previous, systemMessage]),
+    );
+  }, [
+    eligibilityQuery.data,
     selectedUserId,
     setIsUnmessageable,
     setMessages,
     upsertLocalThreadMessage,
   ]);
+  useEffect(() => {
+    if (eligibilityQuery.error)
+      log.error(
+        "Error checking messaging eligibility:",
+        eligibilityQuery.error,
+      );
+  }, [eligibilityQuery.error]);
 }

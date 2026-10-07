@@ -73,7 +73,11 @@ interface TradeItemPickerV2Props {
   showOfferRequestButtons?: boolean;
   inventoryCopies?: Record<number, number>;
   favoriteIds?: number[];
-  onToggleFavorite?: (itemId: number, isFavorited: boolean) => void;
+  onToggleFavorite?: (
+    itemId: number,
+    isFavorited: boolean,
+    item?: Pick<TradeItem, "id" | "name" | "type">,
+  ) => void;
   /**
    * Opt-in multi-select category filtering (+ Clear Filters), matching
    * /values. Off by default so /trading's ad-creation flow and the Make
@@ -992,7 +996,11 @@ export default function TradeItemPickerV2({
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  onToggleFavorite(item.id, isFav);
+                                  onToggleFavorite(item.id, isFav, {
+                                    id: item.id,
+                                    name: item.name,
+                                    type: item.type,
+                                  });
                                 }}
                                 className="absolute top-1 left-1 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/50 transition-colors hover:bg-black/70"
                                 aria-label={

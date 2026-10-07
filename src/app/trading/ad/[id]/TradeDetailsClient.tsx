@@ -4,7 +4,7 @@ import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
 
 import React, { useEffect, useRef, useState } from "react";
 import { useQueryState } from "nuqs";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
@@ -536,10 +536,6 @@ export default function TradeDetailsClient({
     void setActiveTradeTab(newValue);
   };
   const autoOfferHandledRef = useRef(false);
-  const [offerState, setOfferState] = useState<{
-    status: "idle" | "checking" | "can_offer" | "already_offered" | "error";
-    error: string | null;
-  }>({ status: "idle", error: null });
   const [offerResponseState, setOfferResponseState] = useState<
     Record<number, OfferResponseAction | undefined>
   >({});
@@ -552,12 +548,34 @@ export default function TradeDetailsClient({
   const [offerDeleteConfirmId, setOfferDeleteConfirmId] = useState<
     number | null
   >(null);
-  const [tradeOffers, setTradeOffers] = useState<{
-    status: "idle" | "loading" | "loaded" | "error";
-    offers: TradeOfferV2[];
-    error: string | null;
-  }>({ status: "idle", offers: [], error: null });
-  const [offersRefreshToken, setOffersRefreshToken] = useState(0);
+  const tradeOffersQuery = useQuery({
+    queryKey: ["trade-offers", trade.id, currentUserId],
+    queryFn: async () => {
+      const offers = await fetchTradeOffers(trade.id);
+      return [...offers].sort(
+        (a, b) => Number(b.created_at ?? 0) - Number(a.created_at ?? 0),
+      );
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const tradeOffers = {
+    status: tradeOffersQuery.isPending
+      ? "loading"
+      : tradeOffersQuery.isError
+        ? "error"
+        : "loaded",
+    offers: tradeOffersQuery.data ?? [],
+    error: tradeOffersQuery.error?.message ?? null,
+  };
+  const refreshTradeOffers = () => {
+    void queryClient.invalidateQueries({
+      queryKey: ["trade-offers", trade.id],
+    });
+  };
   const [offersSearchQuery, setOffersSearchQuery] = useState("");
   const [offersSearchScope, setOffersSearchScope] = useState<
     "all" | "offering" | "requesting"
@@ -625,114 +643,69 @@ export default function TradeDetailsClient({
         })
       : [];
 
-  useEffect(() => {
-    let isCancelled = false;
-
-    const run = async () => {
-      if (!isAuthenticated || !currentUserId || isOwner) {
-        setOfferState({ status: "idle", error: null });
-        return;
-      }
-
+  const canCheckOffer = isAuthenticated && Boolean(currentUserId) && !isOwner;
+  const offerEligibilityQuery = useQuery({
+    queryKey: ["trade-offer-eligibility", trade.id, currentUserId],
+    enabled: canCheckOffer,
+    queryFn: async ({ signal }) => {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!baseUrl) {
-        setOfferState({
-          status: "error",
-          error: "Trade API is not configured",
-        });
-        return;
+      if (!baseUrl) throw new Error("Trade API is not configured");
+      const headers: Record<string, string> = {
+        "User-Agent": "JailbreakChangelogs-Trading/2.0",
+      };
+      if (typeof document !== "undefined") {
+        const tokenCookie = document.cookie
+          ?.split(";")
+          .map((cookie) => cookie.trim())
+          .find((cookie) => cookie.startsWith("jbcl_token="));
+        const jbclToken = tokenCookie?.split("=").slice(1).join("=");
+        if (jbclToken)
+          headers.Authorization = `token ${decodeURIComponent(jbclToken)}`;
       }
-
-      setOfferState({ status: "checking", error: null });
-
-      try {
-        const headers: Record<string, string> = {
-          "User-Agent": "JailbreakChangelogs-Trading/2.0",
-        };
-
-        if (typeof document !== "undefined") {
-          const tokenCookie = document.cookie
-            ?.split(";")
-            .map((c) => c.trim())
-            .find((c) => c.startsWith("jbcl_token="));
-          const jbclToken = tokenCookie?.split("=").slice(1).join("=");
-
-          if (jbclToken) {
-            headers.Authorization = `token ${decodeURIComponent(jbclToken)}`;
-          }
-        }
-
-        const { status, ok, errorMessage } = await queryClient.fetchQuery({
-          queryKey: ["trade-offer-eligibility", trade.id, currentUserId],
-          queryFn: async ({ signal }) => {
-            const { url, headers: devTokenHeaders } = buildApiFetchRequest(
-              baseUrl,
-              `/v2/trades/${encodeURIComponent(String(trade.id))}/offers`,
-            );
-            const response = await fetch(url, {
-              method: "HEAD",
-              cache: "no-store",
-              credentials: "include",
-              signal,
-              headers: { ...devTokenHeaders, ...headers },
-            });
-            return {
-              status: response.status,
-              ok: response.ok,
-              errorMessage:
-                response.ok || response.status === 409
-                  ? null
-                  : await getResponseErrorMessage(
-                      response,
-                      "Failed to check offer status",
-                    ),
-            };
-          },
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
-        });
-
-        if (isCancelled) return;
-
-        if (status === 409) {
-          setOfferState({ status: "already_offered", error: null });
-          return;
-        }
-
-        if (ok) {
-          setOfferState({ status: "can_offer", error: null });
-          return;
-        }
-
-        setOfferState({
-          status: "error",
-          error: errorMessage,
-        });
-      } catch (err) {
-        log.error("Error checking offer status:", err);
-        if (!isCancelled) {
-          setOfferState({
-            status: "error",
-            error: "Failed to check offer status",
-          });
-        }
-      }
-    };
-
-    void run();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [
-    currentUserId,
-    isAuthenticated,
-    isOwner,
-    trade.author,
-    trade.id,
-    queryClient,
-  ]);
+      const { url, headers: devTokenHeaders } = buildApiFetchRequest(
+        baseUrl,
+        `/v2/trades/${encodeURIComponent(String(trade.id))}/offers`,
+      );
+      const response = await fetch(url, {
+        method: "HEAD",
+        cache: "no-store",
+        credentials: "include",
+        signal,
+        headers: { ...devTokenHeaders, ...headers },
+      });
+      return {
+        status: response.status,
+        ok: response.ok,
+        errorMessage:
+          response.ok || response.status === 409
+            ? null
+            : await getResponseErrorMessage(
+                response,
+                "Failed to check offer status",
+              ),
+      };
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const offerState = {
+    status: !canCheckOffer
+      ? "idle"
+      : offerEligibilityQuery.isPending
+        ? "checking"
+        : offerEligibilityQuery.data?.status === 409
+          ? "already_offered"
+          : offerEligibilityQuery.data?.ok
+            ? "can_offer"
+            : "error",
+    error:
+      offerEligibilityQuery.error?.message ??
+      offerEligibilityQuery.data?.errorMessage ??
+      null,
+  };
 
   const pendingMakeOfferToastIdRef = useRef<string | number | null>(null);
 
@@ -876,40 +849,6 @@ export default function TradeDetailsClient({
     trade.status,
   ]);
 
-  useEffect(() => {
-    let isCancelled = false;
-
-    const run = async () => {
-      setTradeOffers((prev) => ({
-        ...prev,
-        status: "loading",
-        error: null,
-      }));
-
-      try {
-        const offers = await fetchTradeOffers(trade.id);
-        if (isCancelled) return;
-        const sorted = [...offers].sort(
-          (a, b) => Number(b.created_at ?? 0) - Number(a.created_at ?? 0),
-        );
-        setTradeOffers({ status: "loaded", offers: sorted, error: null });
-      } catch (err) {
-        if (isCancelled) return;
-        setTradeOffers({
-          status: "error",
-          offers: [],
-          error: err instanceof Error ? err.message : "Failed to load offers",
-        });
-      }
-    };
-
-    void run();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [offersRefreshToken, trade.id]);
-
   const handleOfferResponse = async (
     offerId: number,
     action: OfferResponseAction,
@@ -941,7 +880,7 @@ export default function TradeDetailsClient({
       } else {
         toast.success("Offer declined", { id: toastId });
       }
-      setOffersRefreshToken((prev) => prev + 1);
+      refreshTradeOffers();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to update offer status";
@@ -964,7 +903,7 @@ export default function TradeDetailsClient({
     try {
       await deleteTradeOfferV2(trade.id, offerId);
       toast.success("Offer deleted", { id: toastId });
-      setOffersRefreshToken((prev) => prev + 1);
+      refreshTradeOffers();
     } catch (err) {
       if (err instanceof RateLimitError) {
         toast.dismiss(toastId);
@@ -1401,9 +1340,7 @@ export default function TradeDetailsClient({
                               size="sm"
                               variant="secondary"
                               className="mt-4"
-                              onClick={() =>
-                                setOffersRefreshToken((prev) => prev + 1)
-                              }
+                              onClick={() => refreshTradeOffers()}
                             >
                               <Icon icon="heroicons-outline:arrow-path" />
                               Refresh
@@ -1801,11 +1738,18 @@ export default function TradeDetailsClient({
           trade={trade}
           items={items}
           onOfferSent={() => {
-            setOfferState({ status: "already_offered", error: null });
+            queryClient.setQueryData(
+              ["trade-offer-eligibility", trade.id, currentUserId],
+              {
+                status: 409,
+                ok: false,
+                errorMessage: null,
+              },
+            );
             void queryClient.invalidateQueries({
               queryKey: ["trade-offer-eligibility", trade.id, currentUserId],
             });
-            setOffersRefreshToken((prev) => prev + 1);
+            refreshTradeOffers();
           }}
         />
       </div>

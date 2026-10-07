@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryState } from "nuqs";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { notFound, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -17,9 +17,6 @@ import { parseBan, showBanToast } from "@/utils/api/ban";
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
-import { createLogger } from "@/services/logger";
-
-const log = createLogger("UI");
 import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { formatFullValue } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
@@ -387,17 +384,56 @@ export default function ValueSuggestionDetailPage() {
     setBan,
   });
 
-  const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
-  const [item, setItem] = useState<Item | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [suggesterStats, setSuggesterStats] = useState<SuggesterStats | null>(
-    null,
+  const suggestionKey = ["value-suggestion-detail", id, user?.id];
+  const suggestionQuery = useQuery({
+    queryKey: suggestionKey,
+    queryFn: async ({ signal }): Promise<Suggestion> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/value-suggestions/${id}`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok) {
+        throw Object.assign(new Error("Failed to load suggestion."), {
+          status: response.status,
+        });
+      }
+      return response.json();
+    },
+    enabled: !!id,
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const suggestion = suggestionQuery.data ?? null;
+  const item = suggestion?.item ?? null;
+  const loading = suggestionQuery.isPending;
+  const error = suggestionQuery.error?.message ?? null;
+  const setSuggestion = useCallback(
+    (update: (previous: Suggestion | null) => Suggestion | null) => {
+      queryClient.setQueryData<Suggestion>(
+        ["value-suggestion-detail", id, user?.id],
+        (previous) => update(previous ?? null) ?? undefined,
+      );
+    },
+    [queryClient, id, user?.id],
   );
-  const [shouldShowNotFound, setShouldShowNotFound] = useState(false);
-  const [routeError, setRouteError] = useState<Error | null>(null);
-  const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
-  const [voteCounts, setVoteCounts] = useState({ up: 0, down: 0 });
+  const userVote = suggestion?.votes.upvotes.some(
+    (vote) => vote.user.id === user?.id,
+  )
+    ? "upvote"
+    : suggestion?.votes.downvotes.some((vote) => vote.user.id === user?.id)
+      ? "downvote"
+      : null;
+  const voteCounts = {
+    up: suggestion?.upvotes ?? 0,
+    down: suggestion?.downvotes ?? 0,
+  };
   const [voteLoading, setVoteLoading] = useState(false);
   const [votingType, setVotingType] = useState<"upvote" | "downvote" | null>(
     null,
@@ -425,9 +461,6 @@ export default function ValueSuggestionDetailPage() {
   const [editCommonTradesError, setEditCommonTradesError] = useState<
     string | null
   >(null);
-  const [tradeItems, setTradeItems] = useState<Item[]>([]);
-  const [tradeItemsLoading, setTradeItemsLoading] = useState(false);
-  const [tradeItemsError, setTradeItemsError] = useState<string | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [editRateLimitUntil, setEditRateLimitUntil] = useState<number | null>(
     null,
@@ -447,191 +480,53 @@ export default function ValueSuggestionDetailPage() {
   const [reasonOverflows, setReasonOverflows] = useState<boolean | null>(null);
   const reasonRef = useRef<HTMLDivElement | null>(null);
   const [refreshType, setRefreshType] = useState<string | null>(null);
-  const [itemHistory, setItemHistory] = useState<ValueHistory[] | null>(null);
-  const [historyLoading, setHistoryLoading] = useState(false);
-
+  const isValueSuggestion =
+    suggestion?.field === "cash_value" || suggestion?.field === "duped_value";
+  const tradeItemsQuery = useQuery({
+    queryKey: ["tradable-items-page", 1],
+    queryFn: () => fetchItemsClientPage(1),
+    enabled: isEditingCommonTrades && isValueSuggestion,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const tradeItems = tradeItemsQuery.data?.items ?? [];
+  const tradeItemsLoading = tradeItemsQuery.isLoading;
+  const tradeItemsError = tradeItemsQuery.isError
+    ? "Failed to load tradable items."
+    : null;
   useEffect(() => {
-    if (!isEditingCommonTrades || tradeItems.length > 0) return;
-    if (
-      suggestion?.field !== "cash_value" &&
-      suggestion?.field !== "duped_value"
-    ) {
-      return;
-    }
-
-    let ignore = false;
-    const fetchTradeItems = async () => {
-      setTradeItemsLoading(true);
-      setTradeItemsError(null);
-      try {
-        const data = await queryClient.fetchQuery({
-          queryKey: ["tradable-items-page", 1],
-          queryFn: () => fetchItemsClientPage(1),
-          staleTime: 30_000,
-          gcTime: 5 * 60_000,
-          retry: false,
-        });
-        if (ignore) return;
-        setTradeItems(data.items);
-        setEditCommonTrades((current) =>
-          toCommonTradeDrafts(current, data.items),
-        );
-      } catch {
-        if (!ignore) setTradeItemsError("Failed to load tradable items.");
-      } finally {
-        if (!ignore) setTradeItemsLoading(false);
-      }
-    };
-    void fetchTradeItems();
-
-    return () => {
-      ignore = true;
-    };
-  }, [
-    isEditingCommonTrades,
-    suggestion?.field,
-    tradeItems.length,
-    queryClient,
-  ]);
-
-  useEffect(() => {
-    if (!id) return;
-    let ignore = false;
-    const run = async () => {
-      setLoading(true);
-      setError(null);
-      setShouldShowNotFound(false);
-      setRouteError(null);
-      try {
-        const { status, ok, data } = await queryClient.fetchQuery({
-          queryKey: ["value-suggestion-detail", id],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL!,
-              `/v2/value-suggestions/${id}`,
-            );
-            const response = await fetch(url, {
-              credentials: "include",
-              headers,
-              signal,
-            });
-            return {
-              status: response.status,
-              ok: response.ok,
-              data: (await response.json().catch(() => null)) as unknown,
-            };
-          },
-          staleTime: 0,
-          gcTime: 5 * 60_000,
-          retry: false,
-        });
-        if (ignore) return;
-        if (!ok) {
-          if (status === 404) {
-            setShouldShowNotFound(true);
-          } else if (status >= 500) {
-            setRouteError(new Error("Failed to load suggestion details."));
-          } else {
-            log.error("fetch suggestion failed", {
-              status,
-              body: data,
-            });
-            if (!ignore) setError("Failed to load suggestion.");
-          }
-          return;
-        }
-        if (ignore) return;
-        const suggestionData = data as Suggestion;
-        setSuggestion(suggestionData);
-        setVoteCounts({
-          up: suggestionData.upvotes,
-          down: suggestionData.downvotes,
-        });
-        if (suggestionData.item) {
-          setItem(suggestionData.item);
-        }
-      } catch {
-        if (!ignore) setError("Failed to load suggestion.");
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
-    };
-    run();
-
-    return () => {
-      ignore = true;
-    };
-  }, [id, queryClient]);
+    if (!isEditingCommonTrades || !tradeItemsQuery.data) return;
+    setEditCommonTrades((current) =>
+      toCommonTradeDrafts(current, tradeItemsQuery.data.items),
+    );
+  }, [isEditingCommonTrades, tradeItemsQuery.data]);
 
   const suggesterId = suggestion?.user.id;
-  useEffect(() => {
-    if (!suggesterId) return;
-    let ignore = false;
-    const run = async () => {
-      try {
-        const data = await queryClient.fetchQuery({
-          queryKey: ["profile-value-suggestion-stats", suggesterId],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL!,
-              `/v2/users/${suggesterId}/value-suggestion-stats`,
-            );
-            const response = await fetch(url, {
-              credentials: "include",
-              headers,
-              signal,
-            });
-            if (!response.ok) return null;
-            const body = await response.json();
-            return body.stats ?? null;
-          },
-          staleTime: 60_000,
-          gcTime: 5 * 60_000,
-          retry: false,
-        });
-        if (ignore) return;
-        setSuggesterStats(data ?? null);
-      } catch {
-        // stats are non-critical
-      }
-    };
-    run();
-
-    return () => {
-      ignore = true;
-    };
-  }, [suggesterId, queryClient]);
-
-  if (shouldShowNotFound) {
-    notFound();
-  }
-
-  if (routeError) {
-    throw routeError;
-  }
-
-  useEffect(() => {
-    if (!suggestion || isAuthLoading) return;
-    if (suggestion.is_vt !== 1) return;
-    const canSee =
-      user?.flags?.some(
-        (f) =>
-          (f.flag === "is_owner" || f.flag === "is_vt") && f.enabled !== false,
-      ) ?? false;
-    if (!canSee) setShouldShowNotFound(true);
-  }, [suggestion, isAuthLoading, user]);
-
-  useEffect(() => {
-    if (!suggestion || !user) return;
-    const hasUp = suggestion.votes.upvotes.some((v) => v.user.id === user.id);
-    const hasDown = suggestion.votes.downvotes.some(
-      (v) => v.user.id === user.id,
-    );
-    setUserVote(hasUp ? "upvote" : hasDown ? "downvote" : null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [suggestion?.id, user?.id]);
+  const statsQuery = useQuery({
+    queryKey: ["profile-value-suggestion-stats", suggesterId],
+    queryFn: async ({ signal }): Promise<SuggesterStats | null> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/users/${suggesterId}/value-suggestion-stats`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok) throw new Error("Failed to load suggester stats.");
+      const body = await response.json();
+      return body.stats ?? null;
+    },
+    enabled: !!suggesterId,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const suggesterStats = statsQuery.data ?? null;
 
   useEffect(() => {
     setReasonExpanded(false);
@@ -656,44 +551,41 @@ export default function ValueSuggestionDetailPage() {
     return () => observer.disconnect();
   }, [suggestion?.reason, suggestion?.id, loading]);
 
+  const { refetch: refetchVotes } = useQuery({
+    queryKey: ["value-suggestion-votes", id],
+    queryFn: async ({ signal }): Promise<Suggestion["votes"]> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/value-suggestions/${id}/votes`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok) throw new Error("Failed to refresh votes");
+      return response.json();
+    },
+    enabled: false,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
   const silentRefreshVotes = useCallback(async () => {
     if (!id) return;
-    try {
-      const fresh = await queryClient.fetchQuery({
-        queryKey: ["value-suggestion-votes", id],
-        queryFn: async ({ signal }): Promise<Suggestion["votes"]> => {
-          const { url, headers } = buildApiFetchRequest(
-            PUBLIC_API_URL!,
-            `/v2/value-suggestions/${id}/votes`,
-          );
-          const response = await fetch(url, {
-            credentials: "include",
-            headers,
-            signal,
-          });
-          if (!response.ok) throw new Error("Failed to refresh votes");
-          return response.json();
-        },
-        staleTime: 0,
-        gcTime: 0,
-        retry: false,
-      });
-      if (!fresh) return;
-      setVoteCounts({ up: fresh.upvotes.length, down: fresh.downvotes.length });
-      setSuggestion((prev) =>
-        prev
-          ? {
-              ...prev,
-              upvotes: fresh.upvotes.length,
-              downvotes: fresh.downvotes.length,
-              votes: fresh,
-            }
-          : prev,
-      );
-    } catch {
-      // silently fail — stale counts are acceptable
-    }
-  }, [id, queryClient]);
+    const { data: fresh, isError } = await refetchVotes();
+    if (!fresh || isError) return;
+    setSuggestion((previous) =>
+      previous
+        ? {
+            ...previous,
+            upvotes: fresh.upvotes.length,
+            downvotes: fresh.downvotes.length,
+            votes: fresh,
+          }
+        : previous,
+    );
+  }, [id, refetchVotes, setSuggestion]);
 
   const handleVote = async (type: "upvote" | "downvote") => {
     if (!isAuthenticated) {
@@ -701,26 +593,53 @@ export default function ValueSuggestionDetailPage() {
       setLoginModal({ open: true });
       return;
     }
-    if (voteLoading) return;
+    if (voteLoading || !suggestion || !user) return;
 
     const removing = userVote === type;
-    const prevVote = userVote;
-    const prevCounts = { ...voteCounts };
-
-    // Optimistic update
-    setUserVote(removing ? null : type);
-    setVoteCounts((prev) => {
-      const next = { ...prev };
-      if (removing) {
-        next[type === "upvote" ? "up" : "down"] -= 1;
-      } else {
-        if (prevVote) next[prevVote === "upvote" ? "up" : "down"] -= 1;
-        next[type === "upvote" ? "up" : "down"] += 1;
+    const previousSuggestion = suggestion;
+    setVoteLoading(true);
+    await queryClient.cancelQueries({ queryKey: suggestionKey });
+    await queryClient.cancelQueries({
+      queryKey: ["value-suggestion-votes", id],
+    });
+    setSuggestion((previous) => {
+      if (!previous) return previous;
+      const upvotes = previous.votes.upvotes.filter(
+        (vote) => vote.user.id !== user.id,
+      );
+      const downvotes = previous.votes.downvotes.filter(
+        (vote) => vote.user.id !== user.id,
+      );
+      if (!removing) {
+        const vote = {
+          created_at: Math.floor(Date.now() / 1000),
+          user: {
+            id: user.id,
+            roblox_username: user.roblox_username,
+            roblox_display_name: user.roblox_display_name,
+            roblox_avatar: user.roblox_avatar,
+          },
+        };
+        (type === "upvote" ? upvotes : downvotes).push(vote);
       }
-      return { up: Math.max(0, next.up), down: Math.max(0, next.down) };
+      return {
+        ...previous,
+        upvotes: Math.max(
+          0,
+          previous.upvotes -
+            (userVote === "upvote" ? 1 : 0) +
+            (!removing && type === "upvote" ? 1 : 0),
+        ),
+        downvotes: Math.max(
+          0,
+          previous.downvotes -
+            (userVote === "downvote" ? 1 : 0) +
+            (!removing && type === "downvote" ? 1 : 0),
+        ),
+        votes: { upvotes, downvotes },
+      };
     });
 
-    setVoteLoading(true);
     setVotingType(type);
     try {
       const { url, headers } = buildApiFetchRequest(
@@ -738,8 +657,16 @@ export default function ValueSuggestionDetailPage() {
             }),
       });
       if (!res.ok) {
-        setUserVote(prevVote);
-        setVoteCounts(prevCounts);
+        setSuggestion((previous) =>
+          previous
+            ? {
+                ...previous,
+                upvotes: previousSuggestion.upvotes,
+                downvotes: previousSuggestion.downvotes,
+                votes: previousSuggestion.votes,
+              }
+            : previous,
+        );
         const banInfo = parseBan(res);
         if (banInfo) {
           setBan(banInfo);
@@ -772,8 +699,16 @@ export default function ValueSuggestionDetailPage() {
         }
       }
     } catch {
-      setUserVote(prevVote);
-      setVoteCounts(prevCounts);
+      setSuggestion((previous) =>
+        previous
+          ? {
+              ...previous,
+              upvotes: previousSuggestion.upvotes,
+              downvotes: previousSuggestion.downvotes,
+              votes: previousSuggestion.votes,
+            }
+          : previous,
+      );
       toast.error("Failed to register vote.");
     } finally {
       setVoteLoading(false);
@@ -892,49 +827,30 @@ export default function ValueSuggestionDetailPage() {
     return () => window.removeEventListener("realtimeSuggestion", handler);
   }, [silentRefreshVotes]);
 
-  const isValueSuggestion =
-    suggestion?.field === "cash_value" || suggestion?.field === "duped_value";
-
-  useEffect(() => {
-    if (!item?.id || !isValueSuggestion) return;
-    let ignore = false;
-    const run = async () => {
-      setHistoryLoading(true);
-      try {
-        const data = await queryClient.fetchQuery({
-          queryKey: ["item-history", item.id],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL!,
-              `/v2/items/${item.id}/history`,
-            );
-            const response = await fetch(url, {
-              credentials: "include",
-              headers,
-              signal,
-            });
-            return response.ok ? response.json() : null;
-          },
-          staleTime: 60_000,
-          gcTime: 5 * 60_000,
-          retry: false,
-        });
-        if (ignore) return;
-        setItemHistory(Array.isArray(data) ? data : null);
-      } catch {
-        // non-critical
-      } finally {
-        if (!ignore) {
-          setHistoryLoading(false);
-        }
-      }
-    };
-    run();
-
-    return () => {
-      ignore = true;
-    };
-  }, [item?.id, isValueSuggestion, queryClient]);
+  const historyQuery = useQuery({
+    queryKey: ["item-history", item?.id],
+    queryFn: async ({ signal }): Promise<ValueHistory[] | null> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/items/${item!.id}/history`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok) throw new Error("Failed to load item history.");
+      const data = await response.json();
+      return Array.isArray(data) ? data : null;
+    },
+    enabled: !!item?.id && isValueSuggestion,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const itemHistory = historyQuery.data ?? null;
+  const historyLoading = historyQuery.isLoading;
 
   const [suggestionTabParam, setActiveSuggestionTab] = useQueryState("tab", {
     defaultValue: "details",
@@ -956,6 +872,24 @@ export default function ValueSuggestionDetailPage() {
     setSuggestionTabDirection(newIdx > oldIdx ? 1 : -1);
     void setActiveSuggestionTab(newValue);
   };
+
+  const status = (suggestionQuery.error as (Error & { status?: number }) | null)
+    ?.status;
+  const canSeeValueTeam =
+    user?.flags?.some(
+      (flag) =>
+        (flag.flag === "is_owner" || flag.flag === "is_vt") &&
+        flag.enabled !== false,
+    ) ?? false;
+  if (
+    status === 404 ||
+    (suggestion?.is_vt === 1 && !isAuthLoading && !canSeeValueTeam)
+  ) {
+    notFound();
+  }
+  if (status !== undefined && status >= 500) {
+    throw new Error("Failed to load suggestion details.");
+  }
 
   const categoryIcon = item ? getCategoryIcon(item.type) : null;
 

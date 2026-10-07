@@ -40,6 +40,13 @@ import type {
 
 const log = createLogger("UI");
 const EMPTY_SORT_GROUPS: SortGroup[] = [];
+type CommentsPage = {
+  comments: CommentData[];
+  userMap: Record<string, UserData>;
+  totalPages: number;
+  totalComments: number;
+  page: number;
+};
 
 export function useCommentState(props: ChangelogCommentsProps) {
   const queryClient = useQueryClient();
@@ -56,9 +63,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
   } = props;
 
   // --- Core State ---
-  const [comments, setComments] = useState<CommentData[]>(initialComments);
-  const [userData, setUserData] =
-    useState<Record<string, UserData>>(initialUserMap);
   const [isClient, setIsClient] = useState(false);
 
   // --- Auth & User State ---
@@ -124,9 +128,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
     null,
   );
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [isRefreshingComments, setIsRefreshingComments] = useState(
-    initialComments.length === 0,
-  );
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
   const [rateLimitLabel, setRateLimitLabel] = useState(
     "You're posting too fast.",
@@ -149,8 +150,103 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
   // --- Pagination ---
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalComments, setTotalComments] = useState(0);
+  const [commentsReady, setCommentsReady] = useState(false);
+  const commentType = type === "item" ? itemType || type : type;
+  const commentQueryOptions = useCallback(
+    (targetPage: number, effectiveSort: string | null) => ({
+      queryKey: [
+        "comments",
+        commentType,
+        changelogId,
+        targetPage,
+        effectiveSort,
+        currentUserId,
+      ],
+      queryFn: async ({ signal }: { signal: AbortSignal }) => {
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL!,
+          "/v2/comments",
+        );
+        const requestUrl = new URL(url);
+        requestUrl.searchParams.set("item_type", commentType);
+        requestUrl.searchParams.set("item_id", String(changelogId));
+        requestUrl.searchParams.set("page", String(targetPage));
+        if (effectiveSort !== null)
+          requestUrl.searchParams.set("sort", effectiveSort);
+        const response = await fetch(requestUrl.toString(), {
+          credentials: "include",
+          headers,
+          signal,
+        });
+        if (!response.ok) throw new Error("Failed to fetch comments");
+        const data = await response.json();
+        return {
+          ...flattenComments(data, currentUserId),
+          totalPages: data.total_pages ?? 1,
+          totalComments: data.total ?? 0,
+          page: data.page ?? targetPage,
+        };
+      },
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      retry: false as const,
+      refetchOnWindowFocus: false as const,
+    }),
+    [commentType, changelogId, currentUserId],
+  );
+  const commentsQuery = useQuery({
+    ...commentQueryOptions(page, sortOrder),
+    enabled: commentsReady && Boolean(changelogId && PUBLIC_API_URL),
+  });
+  useEffect(() => {
+    if (commentsQuery.data?.page && commentsQuery.data.page !== page)
+      setPage(commentsQuery.data.page);
+  }, [commentsQuery.data?.page, page]);
+  const comments = commentsQuery.data?.comments ?? initialComments;
+  const totalPages = commentsQuery.data?.totalPages ?? 1;
+  const totalComments = commentsQuery.data?.totalComments ?? 0;
+  const isRefreshingComments =
+    (!commentsReady && initialComments.length === 0) || commentsQuery.isLoading;
+  const userData = useMemo(
+    () => ({
+      ...initialUserMap,
+      ...commentsQuery.data?.userMap,
+      ...(user
+        ? {
+            [user.id]: {
+              ...initialUserMap[user.id],
+              ...commentsQuery.data?.userMap[user.id],
+              ...user,
+            } as UserData,
+          }
+        : {}),
+    }),
+    [initialUserMap, commentsQuery.data?.userMap, user],
+  );
+  const setComments = useCallback(
+    (update: React.SetStateAction<CommentData[]>) => {
+      const queryKey = commentQueryOptions(page, sortOrder).queryKey;
+      void queryClient.cancelQueries({ queryKey, exact: true });
+      queryClient.setQueryData<CommentsPage>(queryKey, (previous) => ({
+        comments:
+          typeof update === "function"
+            ? update(previous?.comments ?? initialComments)
+            : update,
+        userMap: previous?.userMap ?? initialUserMap,
+        totalPages: previous?.totalPages ?? 1,
+        totalComments: previous?.totalComments ?? 0,
+        page: previous?.page ?? page,
+      }));
+    },
+    [
+      queryClient,
+      commentQueryOptions,
+      page,
+      sortOrder,
+      initialComments,
+      initialUserMap,
+    ],
+  );
 
   // Controls whether the new comment form is expanded
   const [isCommentFormExpanded, setIsCommentFormExpanded] = useState(false);
@@ -424,6 +520,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
           if (response.ok) {
             void queryClient.invalidateQueries({
+              refetchType: "none",
               queryKey: [
                 "comments",
                 type === "item" ? itemType || type : type,
@@ -479,6 +576,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     },
     [
       comments,
+      setComments,
       isLoggedIn,
       reactionBan,
       reactionRateLimitUntil,
@@ -621,14 +719,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
       handleAuthChange as EventListener,
     );
 
-    // Always merge auth user data so optimistic comments have Roblox fields
-    if (user) {
-      setUserData((prev) => ({
-        ...prev,
-        [user.id]: { ...prev[user.id], ...user } as UserData,
-      }));
-    }
-
     return () => {
       window.removeEventListener(
         "authStateChanged",
@@ -637,74 +727,26 @@ export function useCommentState(props: ChangelogCommentsProps) {
     };
   }, [isAuthenticated, user]);
 
-  /**
-   * Refreshes the comment list from the server.
-   * User data is embedded in each comment by the API, so no separate fetch needed.
-   * @param silent If true, suppresses loading indicators for a seamless update.
-   * @param force If true, fetch even when the cached result is still fresh.
-   */
   const refreshCommentsFromServer = useCallback(
-    async (silent = false, targetPage = 1, sort?: string, force = false) => {
-      if (!silent) setIsRefreshingComments(true);
+    async (_silent = false, targetPage = 1, sort?: string, force = false) => {
+      const effectiveSort = sort ?? sortOrder;
+      setPage(targetPage);
+      setCommentsReady(true);
       try {
-        const commentType = type === "item" ? itemType || type : type;
-        const { url: commentsBaseUrl, headers: commentsHeaders } =
-          buildApiFetchRequest(PUBLIC_API_URL!, "/v2/comments");
-        const urlWithPage = new URL(commentsBaseUrl);
-        urlWithPage.searchParams.set("item_type", commentType);
-        urlWithPage.searchParams.set("item_id", String(changelogId));
-        urlWithPage.searchParams.set("page", String(targetPage));
-        const effectiveSort = sort ?? sortOrder;
-        if (effectiveSort !== null) {
-          urlWithPage.searchParams.set("sort", effectiveSort);
-        }
-
         if (force) {
           await queryClient.invalidateQueries({
             queryKey: ["comments", commentType, changelogId],
+            refetchType: "none",
           });
         }
-
-        const data = await queryClient.fetchQuery({
-          queryKey: [
-            "comments",
-            commentType,
-            changelogId,
-            targetPage,
-            effectiveSort,
-            currentUserId,
-          ],
-          queryFn: async ({ signal }) => {
-            const response = await fetch(urlWithPage.toString(), {
-              credentials: "include",
-              headers: commentsHeaders,
-              signal,
-            });
-            if (!response.ok) throw new Error("Failed to fetch comments");
-            return response.json();
-          },
-          staleTime: 60_000,
-          gcTime: 5 * 60_000,
-          retry: false,
-        });
-        const { comments: commentsArray, userMap } = flattenComments(
-          data,
-          currentUserId,
+        await queryClient.fetchQuery(
+          commentQueryOptions(targetPage, effectiveSort),
         );
-
-        setComments(commentsArray);
-        setTotalPages(data.total_pages ?? 1);
-        setTotalComments(data.total ?? 0);
-        setPage(data.page ?? targetPage);
-
-        setUserData((prev) => ({ ...prev, ...userMap }));
       } catch (err) {
         log.error("Error refreshing comments:", err);
-      } finally {
-        if (!silent) setIsRefreshingComments(false);
       }
     },
-    [changelogId, type, itemType, sortOrder, currentUserId, queryClient],
+    [changelogId, commentType, sortOrder, queryClient, commentQueryOptions],
   );
 
   const scrolledCommentHash = useRef("");
@@ -717,8 +759,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     const loadComments = () => {
       clearTimeout(timeoutId);
       scrolledCommentHash.current = "";
-      setComments([]);
-      setIsRefreshingComments(true);
+      setCommentsReady(false);
       setPage(1);
       timeoutId = setTimeout(async () => {
         const targetId = /^#comment-([1-9][0-9]*)$/.exec(
@@ -816,7 +857,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       scrolledCommentHash.current = hash;
     });
     return () => cancelAnimationFrame(frame);
-  }, [comments]);
+  }, [comments, commentsReady]);
 
   // Silent refresh when the server broadcasts a comment change (page 1 only,
   // skipped if the user is actively typing in any comment/reply/edit field)

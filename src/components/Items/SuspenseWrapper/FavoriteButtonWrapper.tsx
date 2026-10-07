@@ -1,6 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { FavoriteItem } from "@/types";
 import FavoriteButton from "@/components/Items/FavoriteButton";
 import { fetchItemFavorites } from "@/utils/api/api";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -12,10 +13,15 @@ interface Props {
 
 export default function FavoriteButtonWrapper({ itemId }: Props) {
   const { user, isLoading: authLoading } = useAuthContext();
+  const queryClient = useQueryClient();
   const favoritesQuery = useUserFavorites(user?.id);
   const countQuery = useQuery({
     queryKey: ["item-favorites", itemId],
-    queryFn: () => fetchItemFavorites(String(itemId)),
+    queryFn: async () => {
+      const count = await fetchItemFavorites(String(itemId));
+      if (count === null) throw new Error("Failed to fetch item favorites");
+      return count;
+    },
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     retry: false,
@@ -46,6 +52,11 @@ export default function FavoriteButtonWrapper({ itemId }: Props) {
       isAuthenticated={!!user}
       initialIsFavorited={isFavorited}
       initialCount={initialFavoriteCount}
+      item={queryClient.getQueryData<FavoriteItem["item"]>([
+        "item",
+        "id",
+        itemId,
+      ])}
     />
   );
 }

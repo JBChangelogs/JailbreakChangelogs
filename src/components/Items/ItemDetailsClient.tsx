@@ -425,7 +425,7 @@ export default function ItemDetailsClient({
 }: ItemDetailsClientProps) {
   "use memo";
   const { resolvedTheme } = useTheme();
-  const [item, setItem] = useState(initialItem);
+
   const [visibleLength, setVisibleLength] = useState(500);
   const [tabParam, setTabParam] = useQueryState("tab", {
     defaultValue: "",
@@ -439,6 +439,22 @@ export default function ItemDetailsClient({
   const [tabDirection, setTabDirection] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
   const queryClient = useQueryClient();
+  const itemQuery = useQuery({
+    queryKey: ["item", "id", initialItem.id],
+    queryFn: async () => {
+      const updatedItem = await fetchItemByIdClient(String(initialItem.id));
+      if (!updatedItem) throw new Error("Failed to refresh item");
+      return updatedItem;
+    },
+    initialData: initialItem,
+    staleTime: Infinity,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const item = itemQuery.data;
+
   const { data: scanCount } = useQuery({
     queryKey: ["item-scan-count", item.id],
     queryFn: () => fetchItemScanCount(item.id),
@@ -458,33 +474,18 @@ export default function ItemDetailsClient({
   const placementLimit = placementLimitsMap?.get(item.id) ?? null;
 
   useEffect(() => {
-    setItem(initialItem);
-  }, [initialItem]);
+    queryClient.setQueryData(["item", "id", initialItem.id], initialItem);
+  }, [initialItem, queryClient]);
 
   useEffect(() => {
-    let cancelled = false;
-
     const handleRealtimeItem = () => {
-      void queryClient
-        .fetchQuery({
-          queryKey: ["item", "id", initialItem.id],
-          queryFn: () => fetchItemByIdClient(String(initialItem.id)),
-          staleTime: 0,
-          gcTime: 5 * 60_000,
-          retry: false,
-        })
-        .then((updatedItem) => {
-          if (!cancelled && updatedItem) {
-            setItem(updatedItem);
-          }
-        });
+      void queryClient.invalidateQueries({
+        queryKey: ["item", "id", initialItem.id],
+        exact: true,
+      });
     };
-
     window.addEventListener("realtimeItem", handleRealtimeItem);
-    return () => {
-      cancelled = true;
-      window.removeEventListener("realtimeItem", handleRealtimeItem);
-    };
+    return () => window.removeEventListener("realtimeItem", handleRealtimeItem);
   }, [initialItem.id, queryClient]);
 
   // Use optimized real-time relative date for last updated timestamp

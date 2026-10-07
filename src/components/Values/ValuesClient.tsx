@@ -9,8 +9,8 @@ const EMPTY_ITEMS: Item[] = [];
 const FILTER_SORT_STORAGE_KEY = "valuesFilterSort";
 const FILTER_SORT_PREFERENCE_KEY = "values_filter_sorts";
 const VALUE_SORT_PREFERENCE_KEY = "values_value_sort";
-import { useQuery } from "@tanstack/react-query";
-import { Item, FilterSort, ValueSort } from "@/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
 import { useUserFavorites } from "@/hooks/useUserFavorites";
 import { filterByTypes } from "@/utils/trading/values";
 import CategoryIcons from "@/components/Items/CategoryIcons";
@@ -267,8 +267,10 @@ export default function ValuesClient() {
     [persistFilterSorts, publishFilterSorts],
   );
 
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const queryClient = useQueryClient();
   const favoritesQuery = useUserFavorites(user?.id);
+  const favorites =
+    favoritesQuery.data?.map((favorite) => favorite.item.id) ?? EMPTY_FAVORITES;
   const searchSectionRef = useRef<HTMLDivElement>(null);
   const {
     rangeValue,
@@ -352,13 +354,28 @@ export default function ValuesClient() {
     }
   };
 
-  useEffect(() => {
-    if (!user?.id) {
-      setFavorites([]);
-    } else if (favoritesQuery.data) {
-      setFavorites(favoritesQuery.data.map((fav) => fav.item.id));
-    }
-  }, [user?.id, favoritesQuery.data]);
+  const handleFavoriteChange = useCallback(
+    (itemId: number, isFavorited: boolean) => {
+      const item = items.find((entry) => entry.id === itemId);
+      const queryKey = ["user-favorites", user?.id];
+      void queryClient.cancelQueries({ queryKey });
+      queryClient.setQueryData<FavoriteItem[]>(queryKey, (previous = []) => {
+        const remaining = previous.filter(
+          (favorite) => favorite.item.id !== itemId,
+        );
+        return isFavorited && item
+          ? [
+              ...remaining,
+              {
+                created_at: Date.now(),
+                item: { id: item.id, name: item.name, type: item.type },
+              },
+            ]
+          : remaining;
+      });
+    },
+    [items, queryClient, user?.id],
+  );
 
   const effectiveFavorites = selectedFilterSorts.includes("favorites")
     ? favorites
@@ -475,13 +492,7 @@ export default function ValuesClient() {
                   : null
             }
             favorites={favorites}
-            onFavoriteChange={(itemId, isFavorited) => {
-              setFavorites((prev) =>
-                isFavorited
-                  ? [...prev, itemId]
-                  : prev.filter((id) => id !== itemId),
-              );
-            }}
+            onFavoriteChange={handleFavoriteChange}
             appliedMinValue={appliedMinValue}
             appliedMaxValue={appliedMaxValue}
             MAX_VALUE_RANGE={MAX_VALUE_RANGE}

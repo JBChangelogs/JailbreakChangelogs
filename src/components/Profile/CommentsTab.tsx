@@ -120,15 +120,6 @@ export default function CommentsTab({
 }: CommentsTabProps) {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
-  const [commentDetails, setCommentDetails] = useState<{
-    changelogs: Record<string, unknown>;
-    items: Record<string, unknown>;
-    seasons: Record<string, unknown>;
-    trades: Record<string, unknown>;
-    inventories: Record<string, unknown>;
-  }>({ changelogs: {}, items: {}, seasons: {}, trades: {}, inventories: {} });
-  const [detailsLoading, setDetailsLoading] = useState(false);
-
   const fetchChangelogDetailsClient = useCallback(
     async (
       commentsForLookup: CommentData[],
@@ -188,16 +179,6 @@ export default function CommentsTab({
     },
     [queryClient],
   );
-
-  useEffect(() => {
-    setCommentDetails({
-      changelogs: {},
-      items: {},
-      seasons: {},
-      trades: {},
-      inventories: {},
-    });
-  }, [userId, currentPage]);
 
   const shouldHideComments =
     settings?.show_recent_comments === false && currentUserId !== userId;
@@ -273,82 +254,50 @@ export default function CommentsTab({
   const loading = !shouldHideComments && commentsQuery.isPending;
   const error = commentsQuery.data ? null : commentsQuery.error?.message;
 
-  useEffect(() => {
-    if (shouldHideComments || comments.length === 0) return;
-
-    const availableComments = comments.filter(
-      (c) => c.item_type.toLowerCase() !== "tradev2",
-    );
-    const profileComments = preview
-      ? availableComments.slice(0, 3)
-      : availableComments;
-    if (profileComments.length === 0) return;
-
-    const commentsNeedingDetails = profileComments.filter(
-      (c) => !sharedItemDetails[c.item_id.toString()],
-    );
-    if (commentsNeedingDetails.length === 0) return;
-
-    let ignore = false;
-
-    const fetchDetails = async () => {
-      setDetailsLoading(true);
-      try {
-        const [details, changelogDetails] = await Promise.all([
-          queryClient.fetchQuery({
-            queryKey: [
-              "profile-comment-details",
-              commentsNeedingDetails.map((comment) => [
-                comment.item_type,
-                comment.item_id,
-              ]),
-            ],
-            queryFn: () => fetchCommentDetails(commentsNeedingDetails),
-            staleTime: 60_000,
-            gcTime: 5 * 60_000,
-            retry: false,
-          }),
-          fetchChangelogDetailsClient(commentsNeedingDetails),
-        ]);
-        if (ignore) return;
-        setCommentDetails({
-          changelogs: { ...sharedItemDetails, ...changelogDetails },
-          items: { ...sharedItemDetails, ...details.items },
-          seasons: { ...sharedItemDetails, ...details.seasons },
-          trades: { ...sharedItemDetails, ...details.trades },
-          inventories: { ...sharedItemDetails, ...details.inventories },
-        });
-      } catch (err) {
-        if (ignore) return;
-        log.error("Error fetching comment details", err);
-      } finally {
-        if (!ignore) {
-          setDetailsLoading(false);
-        }
-      }
-    };
-
-    void fetchDetails();
-
-    return () => {
-      ignore = true;
-    };
-  }, [
-    comments,
-    sharedItemDetails,
-    queryClient,
-    fetchChangelogDetailsClient,
-    preview,
-    shouldHideComments,
-  ]);
-
   const profileComments = comments.filter(
     (c) => c.item_type.toLowerCase() !== "tradev2",
   );
-
   const visibleComments = preview
     ? profileComments.slice(0, 3)
     : profileComments;
+  const commentsNeedingDetails = visibleComments.filter(
+    (comment) => !sharedItemDetails[comment.item_id.toString()],
+  );
+  const detailsQuery = useQuery({
+    queryKey: [
+      "profile-comment-details",
+      userId,
+      currentUserId,
+      commentsNeedingDetails.map((comment) => [
+        comment.item_type,
+        comment.item_id,
+      ]),
+    ],
+    enabled: !shouldHideComments && commentsNeedingDetails.length > 0,
+    queryFn: async () => {
+      const [details, changelogs] = await Promise.all([
+        fetchCommentDetails(commentsNeedingDetails),
+        fetchChangelogDetailsClient(commentsNeedingDetails),
+      ]);
+      return { ...details, changelogs };
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const commentDetails: Record<string, Record<string, unknown>> = {
+    changelogs: { ...sharedItemDetails, ...detailsQuery.data?.changelogs },
+    items: { ...sharedItemDetails, ...detailsQuery.data?.items },
+    seasons: { ...sharedItemDetails, ...detailsQuery.data?.seasons },
+    trades: { ...sharedItemDetails, ...detailsQuery.data?.trades },
+    inventories: { ...sharedItemDetails, ...detailsQuery.data?.inventories },
+  };
+  const detailsLoading = detailsQuery.isLoading;
+  useEffect(() => {
+    if (detailsQuery.error)
+      log.error("Error fetching comment details", detailsQuery.error);
+  }, [detailsQuery.error]);
 
   const commentsById = new Map(profileComments.map((c) => [c.id, c]));
 

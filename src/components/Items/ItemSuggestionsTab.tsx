@@ -240,12 +240,9 @@ export default function ItemSuggestionsTab({
 
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
-  const [activeVoters, setActiveVoters] = useState<{
-    up: { created_at: number; user: SuggestionUser }[];
-    down: { created_at: number; user: SuggestionUser }[];
-    upCount: number;
-    downCount: number;
-  } | null>(null);
+  const [activeSuggestionId, setActiveSuggestionId] = useState<number | null>(
+    null,
+  );
 
   const suggestionsQuery = useQuery({
     queryKey: ["item-value-suggestions", itemId, page],
@@ -278,6 +275,9 @@ export default function ItemSuggestionsTab({
     refetchOnWindowFocus: false,
   });
   const suggestions = suggestionsQuery.data?.items ?? EMPTY_SUGGESTIONS;
+  const activeSuggestion = suggestions.find(
+    (entry) => entry.id === activeSuggestionId,
+  );
   const totalPages = suggestionsQuery.data?.total_pages ?? 1;
   const total = suggestionsQuery.data?.total ?? 0;
   const loading = suggestionsQuery.isPending;
@@ -317,12 +317,7 @@ export default function ItemSuggestionsTab({
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setActiveVoters({
-      up: suggestion.votes.upvotes,
-      down: suggestion.votes.downvotes,
-      upCount: suggestion.upvotes,
-      downCount: suggestion.downvotes,
-    });
+    setActiveSuggestionId(suggestion.id);
     setVotersTab(tab);
     setVotersOpen(true);
   };
@@ -664,7 +659,7 @@ export default function ItemSuggestionsTab({
                   <div className="flex flex-col items-center gap-1 py-1">
                     <span className="text-base font-bold">Upvotes</span>
                     <span className="text-xs font-semibold opacity-80">
-                      ({activeVoters?.upCount ?? 0})
+                      ({activeSuggestion?.upvotes ?? 0})
                     </span>
                   </div>
                 </TabsTrigger>
@@ -672,7 +667,7 @@ export default function ItemSuggestionsTab({
                   <div className="flex flex-col items-center gap-1 py-1">
                     <span className="text-base font-bold">Downvotes</span>
                     <span className="text-xs font-semibold opacity-80">
-                      ({activeVoters?.downCount ?? 0})
+                      ({activeSuggestion?.downvotes ?? 0})
                     </span>
                   </div>
                 </TabsTrigger>
@@ -680,12 +675,12 @@ export default function ItemSuggestionsTab({
               {(["up", "down"] as const).map((tab) => {
                 const voters =
                   tab === "up"
-                    ? (activeVoters?.up ?? [])
-                    : (activeVoters?.down ?? []);
+                    ? (activeSuggestion?.votes.upvotes ?? [])
+                    : (activeSuggestion?.votes.downvotes ?? []);
                 const count =
                   tab === "up"
-                    ? activeVoters?.upCount
-                    : activeVoters?.downCount;
+                    ? activeSuggestion?.upvotes
+                    : activeSuggestion?.downvotes;
                 return (
                   <TabsContent key={tab} value={tab}>
                     <div className="max-h-96 space-y-3 overflow-y-auto">

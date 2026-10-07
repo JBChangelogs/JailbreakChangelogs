@@ -198,12 +198,9 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
 
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
-  const [activeVoters, setActiveVoters] = useState<{
-    up: { created_at: number; user: ChangelogUser }[];
-    down: { created_at: number; user: ChangelogUser }[];
-    upCount: number;
-    downCount: number;
-  } | null>(null);
+  const [activeChangelogId, setActiveChangelogId] = useState<number | null>(
+    null,
+  );
 
   const changelogQuery = useQuery({
     queryKey: ["item-value-changelogs", itemId, page],
@@ -236,6 +233,9 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
     refetchOnWindowFocus: false,
   });
   const changelogs = changelogQuery.data?.items ?? EMPTY_CHANGELOGS;
+  const activeChangelog = changelogs.find(
+    (entry) => entry.id === activeChangelogId,
+  );
   const totalPages = changelogQuery.data?.total_pages ?? 1;
   const total = changelogQuery.data?.total ?? 0;
   const loading = changelogQuery.isPending;
@@ -288,12 +288,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setActiveVoters({
-      up: changelog.votes.upvotes,
-      down: changelog.votes.downvotes,
-      upCount: changelog.upvotes,
-      downCount: changelog.downvotes,
-    });
+    setActiveChangelogId(changelog.id);
     setVotersTab(tab);
     setVotersOpen(true);
   };
@@ -605,7 +600,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                   <div className="flex flex-col items-center gap-1 py-1">
                     <span className="text-base font-bold">Upvotes</span>
                     <span className="text-xs font-semibold opacity-80">
-                      ({activeVoters?.upCount ?? 0})
+                      ({activeChangelog?.upvotes ?? 0})
                     </span>
                   </div>
                 </TabsTrigger>
@@ -613,7 +608,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                   <div className="flex flex-col items-center gap-1 py-1">
                     <span className="text-base font-bold">Downvotes</span>
                     <span className="text-xs font-semibold opacity-80">
-                      ({activeVoters?.downCount ?? 0})
+                      ({activeChangelog?.downvotes ?? 0})
                     </span>
                   </div>
                 </TabsTrigger>
@@ -621,12 +616,12 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
               {(["up", "down"] as const).map((tab) => {
                 const voters =
                   tab === "up"
-                    ? (activeVoters?.up ?? [])
-                    : (activeVoters?.down ?? []);
+                    ? (activeChangelog?.votes.upvotes ?? [])
+                    : (activeChangelog?.votes.downvotes ?? []);
                 const count =
                   tab === "up"
-                    ? activeVoters?.upCount
-                    : activeVoters?.downCount;
+                    ? activeChangelog?.upvotes
+                    : activeChangelog?.downvotes;
                 return (
                   <TabsContent key={tab} value={tab}>
                     <div className="max-h-96 space-y-3 overflow-y-auto">

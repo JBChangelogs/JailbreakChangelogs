@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -222,7 +222,6 @@ export function MakeOfferDialog({
   items,
   onOfferSent,
 }: MakeOfferDialogProps) {
-  const queryClient = useQueryClient();
   const {
     user,
     isAuthenticated,
@@ -250,14 +249,6 @@ export function MakeOfferDialog({
   const [itemsInputMode, setItemsInputMode] = useState<"values" | "inventory">(
     "values",
   );
-  const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
-  const [inventoryStatus, setInventoryStatus] = useState<
-    "idle" | "loading" | "loaded" | "error"
-  >("idle");
-  const [inventoryError, setInventoryError] = useState<string | null>(null);
-  const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
-  const inventoryFetchControllerRef = useRef<AbortController | null>(null);
-
   const customTradeTypeSet = useMemo(
     () => new Set<string>(CUSTOM_TRADE_TYPES.map((t) => t.id)),
     [],
@@ -396,112 +387,89 @@ export function MakeOfferDialog({
   const canLoadInventory = Boolean(isAuthenticated && hasValidRobloxId);
   const shouldUseInventoryItems = showCustom && itemsInputMode === "inventory";
 
-  React.useEffect(() => {
-    if (!shouldUseInventoryItems) return;
+  const inventoryEnabled =
+    isOpen &&
+    shouldUseInventoryItems &&
+    canLoadInventory &&
+    !!INVENTORY_API_URL;
+  const rawInventoryQuery = useQuery({
+    ...userInventoryQueryOptions(robloxId),
+    enabled: inventoryEnabled,
+    refetchOnWindowFocus: false,
+  });
+  const inventoryItemsQuery = useQuery({
+    queryKey: [
+      "trade-offer-inventory-items",
+      robloxId,
+      rawInventoryQuery.dataUpdatedAt,
+      items,
+    ],
+    queryFn: async ({ signal }) => {
+      const data = rawInventoryQuery.data;
+      const record =
+        data && typeof data === "object" && !Array.isArray(data)
+          ? (data as Record<string, unknown>)
+          : null;
+      const rawItems = Array.isArray(record?.data) ? record?.data : [];
+      const rawDuplicates = Array.isArray(record?.duplicates)
+        ? record?.duplicates
+        : [];
 
-    if (!canLoadInventory) {
-      setInventoryItems([]);
-      setInventoryStatus("idle");
-      setInventoryError(null);
-      lastFetchedInventoryUserIdRef.current = null;
-      return;
-    }
+      const inventoryIds: number[] = [];
+      const isDupedById = new Map<number, boolean>();
+      const isOgById = new Map<number, boolean>();
 
-    if (!INVENTORY_API_URL) {
-      setInventoryItems([]);
-      setInventoryStatus("error");
-      setInventoryError(
-        "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing).",
-      );
-      lastFetchedInventoryUserIdRef.current = null;
-      return;
-    }
+      const pushEntry = (entry: unknown, isDuped: boolean) => {
+        const normalized = normalizeInventoryEntry(entry);
+        const id = normalized.id;
+        if (id === null) return;
+        if (!isDupedById.has(id)) inventoryIds.push(id);
+        // If an item appears in both arrays, treat it as duped.
+        isDupedById.set(id, isDupedById.get(id) || isDuped);
+        isOgById.set(id, isOgById.get(id) || normalized.isOriginalOwner);
+      };
 
-    if (lastFetchedInventoryUserIdRef.current === robloxId) return;
-    lastFetchedInventoryUserIdRef.current = robloxId;
+      rawItems.forEach((entry) => pushEntry(entry, false));
+      rawDuplicates.forEach((entry) => pushEntry(entry, true));
 
-    inventoryFetchControllerRef.current?.abort();
-    const controller = new AbortController();
-    inventoryFetchControllerRef.current = controller;
-    let didFinish = false;
+      const resolvedItems = await fetchTradeItemsByIds(inventoryIds, items);
+      signal.throwIfAborted();
+      const itemById = new Map<number, TradeItem>();
+      resolvedItems.forEach((it) => itemById.set(it.id, it));
 
-    const fetchInventory = async () => {
-      setInventoryStatus("loading");
-      setInventoryError(null);
+      const inventoryTradeItems = inventoryIds
+        .map((id) => itemById.get(id))
+        .filter((it): it is TradeItem => Boolean(it))
+        .map((it) => ({
+          ...it,
+          side: undefined,
+          isDuped: isDupedById.get(it.id) || false,
+          isOG: isOgById.get(it.id) || false,
+        }));
 
-      try {
-        const data = await queryClient.fetchQuery(
-          userInventoryQueryOptions(robloxId),
-        );
-        if (controller.signal.aborted) return;
-
-        const record =
-          data && typeof data === "object" && !Array.isArray(data)
-            ? (data as Record<string, unknown>)
-            : null;
-        const rawItems = Array.isArray(record?.data) ? record?.data : [];
-        const rawDuplicates = Array.isArray(record?.duplicates)
-          ? record?.duplicates
-          : [];
-
-        const inventoryIds: number[] = [];
-        const isDupedById = new Map<number, boolean>();
-        const isOgById = new Map<number, boolean>();
-
-        const pushEntry = (entry: unknown, isDuped: boolean) => {
-          const normalized = normalizeInventoryEntry(entry);
-          const id = normalized.id;
-          if (id === null) return;
-          if (!isDupedById.has(id)) inventoryIds.push(id);
-          // If an item appears in both arrays, treat it as duped.
-          isDupedById.set(id, isDupedById.get(id) || isDuped);
-          isOgById.set(id, isOgById.get(id) || normalized.isOriginalOwner);
-        };
-
-        rawItems.forEach((entry) => pushEntry(entry, false));
-        rawDuplicates.forEach((entry) => pushEntry(entry, true));
-
-        const resolvedItems = await fetchTradeItemsByIds(inventoryIds, items);
-        if (controller.signal.aborted) return;
-        const itemById = new Map<number, TradeItem>();
-        resolvedItems.forEach((it) => itemById.set(it.id, it));
-
-        const inventoryTradeItems = inventoryIds
-          .map((id) => itemById.get(id))
-          .filter((it): it is TradeItem => Boolean(it))
-          .map((it) => ({
-            ...it,
-            side: undefined,
-            isDuped: isDupedById.get(it.id) || false,
-            isOG: isOgById.get(it.id) || false,
-          }));
-
-        setInventoryItems(inventoryTradeItems);
-        setInventoryStatus("loaded");
-        didFinish = true;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          setInventoryStatus("idle");
-          lastFetchedInventoryUserIdRef.current = null;
-          return;
-        }
-        const message =
-          error instanceof Error ? error.message : "Failed to load inventory";
-        setInventoryItems([]);
-        setInventoryStatus("error");
-        setInventoryError(message);
-        lastFetchedInventoryUserIdRef.current = null;
-        didFinish = true;
-      }
-    };
-
-    void fetchInventory();
-
-    return () => {
-      controller.abort();
-      if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
-    };
-  }, [shouldUseInventoryItems, canLoadInventory, robloxId, items, queryClient]);
+      return inventoryTradeItems;
+    },
+    enabled: inventoryEnabled && rawInventoryQuery.isSuccess,
+    staleTime: Infinity,
+    gcTime: 30_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const inventoryItems = canLoadInventory
+    ? (inventoryItemsQuery.data ?? [])
+    : [];
+  const inventoryError = !INVENTORY_API_URL
+    ? "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing)."
+    : (rawInventoryQuery.error?.message ??
+      inventoryItemsQuery.error?.message ??
+      null);
+  const inventoryStatus = !canLoadInventory
+    ? "idle"
+    : inventoryError
+      ? "error"
+      : rawInventoryQuery.isPending || inventoryItemsQuery.isPending
+        ? "loading"
+        : "loaded";
 
   const sendExactOffer = async () => {
     try {

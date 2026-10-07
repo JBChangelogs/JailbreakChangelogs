@@ -8,8 +8,11 @@ export function userFavoritesQueryOptions(userId: string) {
   return queryOptions({
     queryKey: ["user-favorites", userId],
     queryFn: async (): Promise<FavoriteItem[]> => {
-      const data = await fetchUserFavorites(userId);
-      return Array.isArray(data) ? (data as FavoriteItem[]) : [];
+      const data = await fetchUserFavorites(userId, true);
+      if (data === null) return [];
+      if (!Array.isArray(data))
+        throw new Error("Invalid user favorites response");
+      return data as FavoriteItem[];
     },
     staleTime: 0,
     gcTime: 5 * 60_000,

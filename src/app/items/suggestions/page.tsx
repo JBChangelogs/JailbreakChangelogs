@@ -86,8 +86,8 @@ export default function ValueSuggestionsPage() {
     openVotersModal,
     setVotersOpen,
     setVotersTab,
-    openVotersSuggestionIdRef,
   } = useSuggestionVoting({
+    suggestions,
     setSuggestions,
     user,
     isAuthenticated,
@@ -632,10 +632,7 @@ export default function ValueSuggestionsPage() {
 
         <VotersModal
           open={votersOpen}
-          onOpenChange={(open) => {
-            setVotersOpen(open);
-            if (!open) openVotersSuggestionIdRef.current = null;
-          }}
+          onOpenChange={setVotersOpen}
           tab={votersTab}
           onTabChange={setVotersTab}
           voters={activeVoters}

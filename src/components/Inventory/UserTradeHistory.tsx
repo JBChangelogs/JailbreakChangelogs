@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo, useState } from "react";
+import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -56,8 +56,6 @@ import { getTradeItemDetailHref } from "@/utils/trading/tradeItems";
 const log = createLogger("INVENTORY");
 const PAGE_SIZE = 25;
 const REQUEST_TIMEOUT_MS = 15_000;
-
-type RequestState = "idle" | "loading" | "error";
 
 type TradeCatalogRow = Pick<
   Item,
@@ -410,20 +408,132 @@ export default function UserTradeHistory({
   isActive,
   itemsData,
 }: UserTradeHistoryProps) {
-  const queryClient = useQueryClient();
-  const [trades, setTrades] = useState<UserTradeSummary[]>([]);
-  const [listState, setListState] = useState<RequestState>("idle");
-  const [listError, setListError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [nextBefore, setNextBefore] = useState<number | null>(null);
   const [expandedTradeId, setExpandedTradeId] = useState<string | null>(null);
-  const [details, setDetails] = useState<Record<string, TradeDetail>>({});
-  const [detailStates, setDetailStates] = useState<
-    Record<string, { state: RequestState; error?: string }>
-  >({});
-  const hasLoadedRef = useRef(false);
-  const listAbortRef = useRef<AbortController | null>(null);
-  const detailAbortRefs = useRef(new Map<string, AbortController>());
+  const tradesQuery = useInfiniteQuery({
+    queryKey: ["user-trade-history", userId, PAGE_SIZE],
+    enabled: isActive && !!INVENTORY_API_URL,
+    initialPageParam: null as number | null,
+    queryFn: async ({
+      signal,
+      pageParam,
+    }): Promise<TradeList<UserTradeSummary>> => {
+      const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+      const params = new URLSearchParams({
+        limit: String(PAGE_SIZE),
+        nocache: "false",
+      });
+      if (pageParam !== null) params.set("before", String(pageParam));
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          INVENTORY_API_URL,
+          `/trades/user/${encodeURIComponent(userId)}?${params}`,
+        );
+        const response = await fetch(url, {
+          headers,
+          signal: AbortSignal.any([signal, timeout]),
+          cache: "no-store",
+        });
+        if (!response.ok)
+          throw new Error(
+            await getErrorMessage(
+              response,
+              `Failed to load trade history (${response.status})`,
+            ),
+          );
+        const data = (await response.json()) as TradeList<UserTradeSummary>;
+        if (!Array.isArray(data.completed) || !Array.isArray(data.pending))
+          throw new Error("Invalid trade history response");
+        return data;
+      } catch (error) {
+        if (timeout.aborted)
+          throw new Error(
+            "The trade history request timed out. Please try again.",
+          );
+        if (!signal.aborted)
+          log.error("fetch user trade history failed", error);
+        throw error;
+      }
+    },
+    getNextPageParam: (page) => {
+      const fullLists = [page.completed, page.pending].filter(
+        (list) => list.length === PAGE_SIZE,
+      );
+      return fullLists.length > 0
+        ? Math.max(
+            ...fullLists.map((list) =>
+              Math.min(...list.map((trade) => trade.first_time)),
+            ),
+          )
+        : undefined;
+    },
+    staleTime: Infinity,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const trades = useMemo(() => {
+    const byId = new Map<string, UserTradeSummary>();
+    for (const page of tradesQuery.data?.pages ?? []) {
+      for (const trade of [...page.completed, ...page.pending])
+        byId.set(trade.trade_id, trade);
+    }
+    return [...byId.values()].sort((a, b) => b.last_time - a.last_time);
+  }, [tradesQuery.data]);
+  const listState = tradesQuery.isFetching
+    ? "loading"
+    : tradesQuery.isError
+      ? "error"
+      : "idle";
+  const listError = tradesQuery.error?.message ?? null;
+  const hasMore = tradesQuery.hasNextPage;
+  const detailQueries = useQueries({
+    queries: trades.map((trade) => ({
+      queryKey: ["user-trade-detail", userId, trade.trade_id],
+      enabled:
+        isActive && expandedTradeId === trade.trade_id && !!INVENTORY_API_URL,
+      queryFn: async ({
+        signal,
+      }: {
+        signal: AbortSignal;
+      }): Promise<TradeDetail> => {
+        const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+        try {
+          const { url, headers } = buildApiFetchRequest(
+            INVENTORY_API_URL,
+            `/trades/${encodeURIComponent(trade.trade_id)}?nocache=false`,
+          );
+          const response = await fetch(url, {
+            headers,
+            signal: AbortSignal.any([signal, timeout]),
+            cache: "no-store",
+          });
+          if (!response.ok)
+            throw new Error(
+              await getErrorMessage(
+                response,
+                `Failed to load trade details (${response.status})`,
+              ),
+            );
+          return response.json();
+        } catch (error) {
+          if (timeout.aborted)
+            throw new Error(
+              "The trade detail request timed out. Please try again.",
+            );
+          if (!signal.aborted)
+            log.error("fetch trade detail failed", {
+              tradeId: trade.trade_id,
+              error,
+            });
+          throw error;
+        }
+      },
+      staleTime: Infinity,
+      gcTime: 0,
+      retry: false,
+      refetchOnWindowFocus: false,
+    })),
+  });
 
   const counterpartyIds = useMemo(
     () =>
@@ -496,186 +606,8 @@ export default function UserTradeHistory({
     [robloxUsers],
   );
 
-  const loadTrades = useCallback(
-    async (before?: number) => {
-      if (!INVENTORY_API_URL || listState === "loading") return;
-
-      const controller = new AbortController();
-      listAbortRef.current?.abort();
-      listAbortRef.current = controller;
-      setListState("loading");
-      setListError(null);
-      let didTimeout = false;
-      const timeoutId = window.setTimeout(() => {
-        didTimeout = true;
-        controller.abort();
-      }, REQUEST_TIMEOUT_MS);
-
-      try {
-        const params = new URLSearchParams({
-          limit: String(PAGE_SIZE),
-          nocache: "false",
-        });
-        if (before !== undefined) params.set("before", String(before));
-        const page = await queryClient.fetchQuery({
-          queryKey: ["user-trade-history", userId, before ?? null, PAGE_SIZE],
-          queryFn: async (): Promise<TradeList<UserTradeSummary>> => {
-            const { url, headers } = buildApiFetchRequest(
-              INVENTORY_API_URL,
-              `/trades/user/${encodeURIComponent(userId)}?${params}`,
-            );
-            const response = await fetch(url, {
-              headers,
-              signal: controller.signal,
-              cache: "no-store",
-            });
-            if (!response.ok) {
-              throw new Error(
-                await getErrorMessage(
-                  response,
-                  `Failed to load trade history (${response.status})`,
-                ),
-              );
-            }
-            const data = (await response.json()) as TradeList<UserTradeSummary>;
-            if (
-              !Array.isArray(data.completed) ||
-              !Array.isArray(data.pending)
-            ) {
-              throw new Error("Invalid trade history response");
-            }
-            return data;
-          },
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
-        });
-
-        const pageTrades = [...page.completed, ...page.pending];
-
-        setTrades((current) => {
-          const byId = new Map(current.map((trade) => [trade.trade_id, trade]));
-          pageTrades.forEach((trade) => byId.set(trade.trade_id, trade));
-          return Array.from(byId.values()).sort(
-            (a, b) => b.last_time - a.last_time,
-          );
-        });
-        const fullLists = [page.completed, page.pending].filter(
-          (list) => list.length === PAGE_SIZE,
-        );
-        setHasMore(fullLists.length > 0);
-        setNextBefore(
-          fullLists.length > 0
-            ? Math.max(
-                ...fullLists.map((list) =>
-                  Math.min(...list.map((trade) => trade.first_time)),
-                ),
-              )
-            : null,
-        );
-        setListState("idle");
-      } catch (error) {
-        if (controller.signal.aborted && !didTimeout) return;
-        log.error("fetch user trade history failed", error);
-        setListError(
-          didTimeout
-            ? "The trade history request timed out. Please try again."
-            : error instanceof Error
-              ? error.message
-              : "Failed to load trade history",
-        );
-        setListState("error");
-      } finally {
-        window.clearTimeout(timeoutId);
-      }
-    },
-    [listState, userId, queryClient],
-  );
-
-  useEffect(() => {
-    if (!isActive || hasLoadedRef.current) return;
-    hasLoadedRef.current = true;
-    void loadTrades();
-  }, [isActive, loadTrades]);
-
-  const loadDetail = async (tradeId: string) => {
-    if (!INVENTORY_API_URL) return;
-    const controller = new AbortController();
-    detailAbortRefs.current.get(tradeId)?.abort();
-    detailAbortRefs.current.set(tradeId, controller);
-    let didTimeout = false;
-    const timeoutId = window.setTimeout(() => {
-      didTimeout = true;
-      controller.abort();
-    }, REQUEST_TIMEOUT_MS);
-    setDetailStates((current) => ({
-      ...current,
-      [tradeId]: { state: "loading" },
-    }));
-
-    try {
-      const detail = await queryClient.fetchQuery({
-        queryKey: ["user-trade-detail", userId, tradeId],
-        queryFn: async (): Promise<TradeDetail> => {
-          const { url, headers } = buildApiFetchRequest(
-            INVENTORY_API_URL,
-            `/trades/${encodeURIComponent(tradeId)}?nocache=false`,
-          );
-          const response = await fetch(url, {
-            headers,
-            signal: controller.signal,
-            cache: "no-store",
-          });
-          if (!response.ok) {
-            throw new Error(
-              await getErrorMessage(
-                response,
-                `Failed to load trade details (${response.status})`,
-              ),
-            );
-          }
-          return response.json();
-        },
-        staleTime: 0,
-        gcTime: 0,
-        retry: false,
-      });
-      setDetails((current) => ({ ...current, [tradeId]: detail }));
-      setDetailStates((current) => ({
-        ...current,
-        [tradeId]: { state: "idle" },
-      }));
-    } catch (error) {
-      if (controller.signal.aborted && !didTimeout) return;
-      log.error("fetch trade detail failed", { tradeId, error });
-      setDetailStates((current) => ({
-        ...current,
-        [tradeId]: {
-          state: "error",
-          error: didTimeout
-            ? "The trade detail request timed out. Please try again."
-            : error instanceof Error
-              ? error.message
-              : "Failed to load trade details",
-        },
-      }));
-    } finally {
-      window.clearTimeout(timeoutId);
-      if (detailAbortRefs.current.get(tradeId) === controller) {
-        detailAbortRefs.current.delete(tradeId);
-      }
-    }
-  };
-
   const toggleTrade = (tradeId: string) => {
-    if (expandedTradeId === tradeId) {
-      setExpandedTradeId(null);
-      return;
-    }
-    setExpandedTradeId(tradeId);
-    if (!details[tradeId] && detailStates[tradeId]?.state !== "loading") {
-      void loadDetail(tradeId);
-    }
+    setExpandedTradeId((current) => (current === tradeId ? null : tradeId));
   };
 
   if (listState === "loading" && trades.length === 0) {
@@ -699,7 +631,11 @@ export default function UserTradeHistory({
           Couldn&apos;t load trades
         </p>
         <p className="text-secondary-text mt-1 text-sm">{listError}</p>
-        <Button className="mt-4" size="sm" onClick={() => void loadTrades()}>
+        <Button
+          className="mt-4"
+          size="sm"
+          onClick={() => void tradesQuery.refetch()}
+        >
           Try again
         </Button>
       </div>
@@ -728,11 +664,19 @@ export default function UserTradeHistory({
         <p className="text-secondary-text text-sm">Newest trades first</p>
       </div>
 
-      {trades.map((trade) => {
+      {trades.map((trade, index) => {
         const isExpanded = expandedTradeId === trade.trade_id;
-        const detail = details[trade.trade_id];
+        const detailQuery = detailQueries[index];
+        const detail = detailQuery.data;
         const status = detail?.status ?? trade.status;
-        const detailState = detailStates[trade.trade_id];
+        const detailState = {
+          state: detailQuery.isFetching
+            ? "loading"
+            : detailQuery.isError
+              ? "error"
+              : "idle",
+          error: detailQuery.error?.message,
+        };
         const ownerGave =
           detail?.user_a === userId
             ? detail.items_a_to_b
@@ -898,7 +842,7 @@ export default function UserTradeHistory({
                       variant="secondary"
                       size="sm"
                       className="mt-3"
-                      onClick={() => void loadDetail(trade.trade_id)}
+                      onClick={() => void detailQuery.refetch()}
                     >
                       Try again
                     </Button>
@@ -1055,7 +999,7 @@ export default function UserTradeHistory({
             size="sm"
             disabled={listState === "loading"}
             onClick={() => {
-              if (nextBefore !== null) void loadTrades(nextBefore);
+              void tradesQuery.fetchNextPage({ cancelRefetch: false });
             }}
           >
             {listState === "loading" && <Spinner className="h-4 w-4" />}

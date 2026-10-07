@@ -1,8 +1,8 @@
 "use client";
 
 import { parseSortGroups } from "@/utils/api/sortGroups";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
@@ -654,7 +654,6 @@ export function ReportContext({ report }: { report: Report }) {
 }
 
 export default function MyReports() {
-  const queryClient = useQueryClient();
   const { user } = useAuthContext();
   const router = useRouter();
   const [pageParam, setPageParam] = useQueryState("page", {
@@ -669,21 +668,143 @@ export default function MyReports() {
     shallow: true,
   });
 
-  const [reports, setReports] = useState<Report[]>([]);
-  const [sortTypes, setSortTypes] = useState<string[]>([]);
-  const [sortLabels, setSortLabels] = useState<Record<string, string>>({});
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [reportedUsers, setReportedUsers] = useState<Record<string, UserData>>(
-    {},
-  );
-
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [reportTypes, setReportTypes] = useState<string[]>([]);
   const debouncedSearch = useDebounce(searchTerm, 300);
+
+  const reportsQuery = useQuery({
+    queryKey: ["my-reports", user?.id, page, typeFilter, sort],
+    queryFn: async ({ signal }): Promise<ReportsResponse> => {
+      const typeQuery =
+        typeFilter === "all"
+          ? ""
+          : `&report_type=${encodeURIComponent(typeFilter)}`;
+      const sortQuery = sort ? `&sort=${encodeURIComponent(sort)}` : "";
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/me/reports?page=${page}${typeQuery}${sortQuery}`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        cache: "no-store",
+        headers,
+        signal,
+      });
+      const data = await response.json().catch(() => null);
+      if (response.status === 404)
+        return { items: [], page, total_pages: 1, total: 0, size: 0 };
+      if (!response.ok) {
+        log.error("Failed to fetch reports", {
+          status: response.status,
+          body: data,
+        });
+        throw new Error(data?.message ?? "Failed to load reports");
+      }
+      if (!data) throw new Error("Failed to load reports");
+      return data;
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const reports = useMemo(
+    () => reportsQuery.data?.items ?? [],
+    [reportsQuery.data],
+  );
+  const totalPages = reportsQuery.data?.total_pages ?? 1;
+  const total = reportsQuery.data?.total ?? 0;
+  const error = reportsQuery.error?.message ?? null;
+  const reportedIds = [
+    ...new Set(
+      reports.map(getReportedUserId).filter((id): id is string => !!id),
+    ),
+  ].sort();
+  const reportedUsersQuery = useQuery({
+    queryKey: ["report-users", reportedIds],
+    enabled: reportedIds.length > 0,
+    queryFn: async ({ signal }): Promise<UserData[]> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/batch?ids=${reportedIds.map(encodeURIComponent).join(",")}`,
+      );
+      const response = await fetch(url, { cache: "no-store", headers, signal });
+      if (!response.ok) return [];
+      return response.json();
+    },
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const loading = reportsQuery.isLoading || reportedUsersQuery.isLoading;
+  const reportedUsers = useMemo(
+    () =>
+      Object.fromEntries(
+        (reportedUsersQuery.data ?? []).map((reportedUser) => [
+          reportedUser.id,
+          reportedUser,
+        ]),
+      ),
+    [reportedUsersQuery.data],
+  );
+  const reportTypesQuery = useQuery({
+    queryKey: ["report-types"],
+    queryFn: async ({ signal }): Promise<{ types?: string[] }> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/reports/types",
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        cache: "no-store",
+        headers,
+        signal,
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    },
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const reportTypes = useMemo(
+    () =>
+      [...(reportTypesQuery.data?.types ?? [])].sort((a, b) =>
+        getTypeLabel(a).localeCompare(getTypeLabel(b)),
+      ),
+    [reportTypesQuery.data],
+  );
+  const reportSortsQuery = useQuery({
+    queryKey: ["report-sorts"],
+    queryFn: async ({ signal }): Promise<unknown> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/reports/sorts",
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        cache: "no-store",
+        headers,
+        signal,
+      });
+      return response.ok ? response.json() : null;
+    },
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const sortOptions = useMemo(
+    () =>
+      parseSortGroups(reportSortsQuery.data).flatMap((group) => group.options),
+    [reportSortsQuery.data],
+  );
+  const sortTypes = sortOptions.map((option) => option.value);
+  const sortLabels = Object.fromEntries(
+    sortOptions.map((option) => [option.value, option.label]),
+  );
 
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
@@ -704,201 +825,6 @@ export default function MyReports() {
       return true;
     });
   }, [reports, debouncedSearch, reportedUsers]);
-
-  const fetchReports = useCallback(
-    async (
-      currentPage: number,
-      reportType: string,
-      currentSort: string | null,
-    ) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const typeQuery =
-          reportType === "all"
-            ? ""
-            : `&report_type=${encodeURIComponent(reportType)}`;
-        const sortQuery = currentSort
-          ? `&sort=${encodeURIComponent(currentSort)}`
-          : "";
-        const { status, ok, data } = await queryClient.fetchQuery({
-          queryKey: [
-            "my-reports",
-            user?.id,
-            currentPage,
-            reportType,
-            currentSort,
-          ],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              `/v2/users/me/reports?page=${currentPage}${typeQuery}${sortQuery}`,
-            );
-            const response = await fetch(url, {
-              credentials: "include",
-              cache: "no-store",
-              headers,
-              signal,
-            });
-            return {
-              status: response.status,
-              ok: response.ok,
-              data: (await response.json().catch(() => null)) as unknown,
-            };
-          },
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
-        });
-
-        if (!ok) {
-          if (status === 404) {
-            setReports([]);
-            setTotalPages(1);
-            setTotal(0);
-            return;
-          }
-          log.error("Failed to fetch reports", {
-            status,
-            body: data,
-          });
-          throw new Error(
-            (data as { message?: string })?.message ?? "Failed to load reports",
-          );
-        }
-
-        const reportData = data as ReportsResponse;
-        const items = reportData.items ?? [];
-        setReports(items);
-        setTotalPages(reportData.total_pages ?? 1);
-        setTotal(reportData.total ?? 0);
-
-        const ids = [
-          ...new Set(
-            items.map(getReportedUserId).filter((id): id is string => !!id),
-          ),
-        ];
-        if (ids.length > 0) {
-          try {
-            const usersArr = await queryClient.fetchQuery({
-              queryKey: ["report-users", [...ids].sort()],
-              queryFn: async ({ signal }): Promise<UserData[]> => {
-                const { url, headers } = buildApiFetchRequest(
-                  PUBLIC_API_URL,
-                  `/v2/users/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
-                );
-                const response = await fetch(url, {
-                  cache: "no-store",
-                  headers,
-                  signal,
-                });
-                if (!response.ok) return [];
-                return response.json();
-              },
-              staleTime: 5 * 60_000,
-              gcTime: 30 * 60_000,
-              retry: false,
-            });
-            if (usersArr.length > 0) {
-              setReportedUsers(
-                usersArr.reduce<Record<string, UserData>>((acc, u) => {
-                  acc[u.id] = u;
-                  return acc;
-                }, {}),
-              );
-            }
-          } catch {
-            // non-critical
-          }
-        }
-      } catch (err) {
-        log.error("Error fetching reports:", err);
-        setError(err instanceof Error ? err.message : "Failed to load reports");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [queryClient, user?.id],
-  );
-
-  useEffect(() => {
-    void fetchReports(page, typeFilter, sort);
-  }, [page, typeFilter, sort, fetchReports]);
-
-  useEffect(() => {
-    queryClient
-      .fetchQuery({
-        queryKey: ["report-types"],
-        queryFn: async ({ signal }): Promise<{ types?: string[] }> => {
-          const { url, headers } = buildApiFetchRequest(
-            PUBLIC_API_URL,
-            "/v2/reports/types",
-          );
-          const response = await fetch(url, {
-            credentials: "include",
-            cache: "no-store",
-            headers,
-            signal,
-          });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.json();
-        },
-        staleTime: 10 * 60_000,
-        gcTime: 30 * 60_000,
-        retry: false,
-      })
-      .then((data) => {
-        setReportTypes(
-          [...(data.types ?? [])].sort((a, b) =>
-            getTypeLabel(a).localeCompare(getTypeLabel(b)),
-          ),
-        );
-      })
-      .catch((error) => {
-        log.error("Failed to fetch report types:", error);
-      });
-  }, [queryClient]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    queryClient
-      .fetchQuery({
-        queryKey: ["report-sorts"],
-        queryFn: async (): Promise<unknown> => {
-          const { url, headers } = buildApiFetchRequest(
-            PUBLIC_API_URL,
-            "/v2/reports/sorts",
-          );
-          const response = await fetch(url, {
-            credentials: "include",
-            cache: "no-store",
-            headers,
-            signal: controller.signal,
-          });
-          return response.ok ? response.json() : null;
-        },
-        staleTime: 10 * 60_000,
-        gcTime: 30 * 60_000,
-        retry: false,
-      })
-      .then((data) => {
-        const options = parseSortGroups(data).flatMap((group) => group.options);
-        if (options.length > 0) {
-          setSortTypes(options.map((option) => option.value));
-          setSortLabels(
-            Object.fromEntries(
-              options.map((option) => [option.value, option.label]),
-            ),
-          );
-        }
-      })
-      .catch((sortError) => {
-        if (!controller.signal.aborted) {
-          log.error("Failed to fetch report sort types:", sortError);
-        }
-      });
-    return () => controller.abort();
-  }, [queryClient]);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     void setPageParam(String(value));
@@ -1076,7 +1002,7 @@ export default function MyReports() {
             </p>
             <p className="text-secondary-text mt-1 text-sm">{error}</p>
             <button
-              onClick={() => void fetchReports(page, typeFilter, sort)}
+              onClick={() => void reportsQuery.refetch()}
               className="text-link hover:text-link-hover mt-3 cursor-pointer text-sm transition-colors"
             >
               Try again

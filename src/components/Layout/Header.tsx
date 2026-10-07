@@ -3,7 +3,11 @@
 import { createLogger } from "@/services/logger";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 const log = createLogger("UI");
 import Image from "next/image";
@@ -468,14 +472,10 @@ export default function Header() {
   );
   const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const hasWsUnreadSeedRef = useRef(false);
   const seenRealtimeMessageIdsRef = useRef(new Set<string>());
   const notificationCountRefreshTimeoutRef = useRef<number | null>(null);
-  const notificationCountRequestRef = useRef(0);
   const messageCountRefreshTimeoutRef = useRef<number | null>(null);
-  const messageCountRequestRef = useRef(0);
 
   const {
     user: authUser,
@@ -493,11 +493,6 @@ export default function Header() {
   useEscapeLogin();
 
   const pathname = usePathname();
-  const [tickerFlags, setTickerFlags] = useState<{
-    newsAnnouncement: NewsTickerAnnouncement | null;
-    serviceAlert: ServiceAlert | null;
-  }>({ newsAnnouncement: null, serviceAlert: null });
-
   // Include the path so a SPA navigation checks for updated ticker flags.
   const tickerFlagsQuery = useQuery({
     queryKey: ["ticker-flags", pathname],
@@ -509,32 +504,64 @@ export default function Header() {
         serviceAlert: ServiceAlert | null;
       }>;
     },
+    placeholderData: keepPreviousData,
     gcTime: 0,
     retry: false,
     refetchOnWindowFocus: false,
   });
-  useEffect(() => {
-    if (tickerFlagsQuery.data) setTickerFlags(tickerFlagsQuery.data);
-  }, [tickerFlagsQuery.data]);
+  const tickerFlags = tickerFlagsQuery.data ?? {
+    newsAnnouncement: null,
+    serviceAlert: null,
+  };
 
-  const refreshUnreadNotificationCount = useCallback(async () => {
-    const requestId = ++notificationCountRequestRef.current;
-    const count = await queryClient.fetchQuery({
-      queryKey: ["notifications", "unread-count", authUser?.id],
-      queryFn: fetchUnreadNotificationCount,
+  const notificationCountKey = ["notifications", "unread-count", authUser?.id];
+  const messageCountKey = ["messages", "unread-count", authUser?.id];
+  const { data: notificationCount, refetch: refreshUnreadNotificationCount } =
+    useQuery({
+      queryKey: notificationCountKey,
+      queryFn: async () => {
+        const count = await fetchUnreadNotificationCount();
+        if (count === null)
+          throw new Error("Failed to fetch unread notification count");
+        return count;
+      },
+      enabled: isAuthenticated && !!authUser?.id,
       staleTime: 0,
       gcTime: 0,
       retry: false,
+      refetchOnWindowFocus: false,
     });
-    if (requestId === notificationCountRequestRef.current && count !== null) {
-      setUnreadCount(count);
-    }
-  }, [queryClient, authUser?.id]);
+  const { data: messageCount, refetch: refreshUnreadMessageCount } = useQuery({
+    queryKey: messageCountKey,
+    queryFn: async () => {
+      const count = await fetchUnreadMessageCount();
+      if (count === null)
+        throw new Error("Failed to fetch unread message count");
+      return count;
+    },
+    enabled: isAuthenticated && !!authUser?.id,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const unreadCount = isAuthenticated ? (notificationCount ?? 0) : 0;
+  const unreadMessageCount = isAuthenticated ? (messageCount ?? 0) : 0;
+  const setUnreadCount = useCallback<
+    React.Dispatch<React.SetStateAction<number>>
+  >(
+    (update) => {
+      const queryKey = ["notifications", "unread-count", authUser?.id];
+      void queryClient.cancelQueries({ queryKey });
+      queryClient.setQueryData<number>(queryKey, (previous = 0) =>
+        typeof update === "function" ? update(previous) : update,
+      );
+    },
+    [queryClient, authUser?.id],
+  );
 
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    void refreshUnreadNotificationCount();
 
     const scheduleRefresh = () => {
       if (notificationCountRefreshTimeoutRef.current !== null) {
@@ -556,24 +583,8 @@ export default function Header() {
     };
   }, [isAuthenticated, refreshUnreadNotificationCount]);
 
-  const refreshUnreadMessageCount = useCallback(async () => {
-    const requestId = ++messageCountRequestRef.current;
-    const count = await queryClient.fetchQuery({
-      queryKey: ["messages", "unread-count", authUser?.id],
-      queryFn: fetchUnreadMessageCount,
-      staleTime: 0,
-      gcTime: 0,
-      retry: false,
-    });
-    if (requestId === messageCountRequestRef.current && count !== null) {
-      setUnreadMessageCount(count);
-    }
-  }, [queryClient, authUser?.id]);
-
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    void refreshUnreadMessageCount();
 
     const scheduleRefresh = () => {
       if (messageCountRefreshTimeoutRef.current !== null) {
@@ -594,7 +605,6 @@ export default function Header() {
       ).detail;
 
       if (detail?.action === "message_received") {
-        messageCountRequestRef.current += 1;
         const messageId = detail.data?.id;
         if (
           typeof messageId === "string" &&
@@ -608,7 +618,9 @@ export default function Header() {
           }
           seenRealtimeMessageIdsRef.current.add(messageId);
         }
-        setUnreadMessageCount((count) => count + 1);
+        const queryKey = ["messages", "unread-count", authUser?.id];
+        void queryClient.cancelQueries({ queryKey });
+        queryClient.setQueryData<number>(queryKey, (count = 0) => count + 1);
         return;
       }
 
@@ -629,14 +641,20 @@ export default function Header() {
         messageCountRefreshTimeoutRef.current = null;
       }
     };
-  }, [isAuthenticated, refreshUnreadMessageCount]);
+  }, [isAuthenticated, refreshUnreadMessageCount, queryClient, authUser?.id]);
 
   useEffect(() => {
-    if (isAuthenticated) return;
-    messageCountRequestRef.current += 1;
     seenRealtimeMessageIdsRef.current.clear();
-    setUnreadMessageCount(0);
-  }, [isAuthenticated]);
+    hasWsUnreadSeedRef.current = false;
+    return () => {
+      void queryClient.cancelQueries({
+        queryKey: ["messages", "unread-count", authUser?.id],
+      });
+      void queryClient.cancelQueries({
+        queryKey: ["notifications", "unread-count", authUser?.id],
+      });
+    };
+  }, [isAuthenticated, authUser?.id, queryClient]);
 
   useToastRuntimeRightOffset({
     enabled: !isXlUp,
@@ -663,11 +681,8 @@ export default function Header() {
         typeof rawType === "string" &&
         rawType.trim().toLowerCase() === "broadcast";
 
-      if (!isBroadcast) {
-        notificationCountRequestRef.current += 1;
-      }
+      if (isBroadcast) return;
       setUnreadCount((prev) => {
-        if (isBroadcast) return prev;
         if (totalNotifications !== null && !hasWsUnreadSeedRef.current) {
           hasWsUnreadSeedRef.current = true;
           return Math.max(0, totalNotifications);
@@ -683,17 +698,7 @@ export default function Header() {
         handleNotificationReceived,
       );
     };
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    if (isAuthenticated) return;
-    notificationCountRequestRef.current += 1;
-    const timeoutId = setTimeout(() => {
-      hasWsUnreadSeedRef.current = false;
-      setUnreadCount(0);
-    }, 0);
-    return () => clearTimeout(timeoutId);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, setUnreadCount]);
 
   // Reset unread seed when WS drops so the next connection re-seeds the count.
   useEffect(() => {

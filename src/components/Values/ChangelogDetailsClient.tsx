@@ -186,7 +186,26 @@ export default function ChangelogDetailsClient({
     useState<string>("all");
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
-  const [activeVoters, setActiveVoters] = useState<VoteLists | null>(null);
+  const [selectedChangeId, setSelectedChangeId] = useState<number | null>(null);
+  const selectedVotes = votersOpen
+    ? changelog.change_data.find(
+        (change) => change.change_id === selectedChangeId,
+      )?.suggestion?.vote_data
+    : undefined;
+  const activeVoters: VoteLists | null = selectedVotes
+    ? {
+        up:
+          selectedVotes.voters?.filter(
+            (voter) => voter.vote_type === "upvote",
+          ) ?? [],
+        down:
+          selectedVotes.voters?.filter(
+            (voter) => voter.vote_type === "downvote",
+          ) ?? [],
+        upCount: selectedVotes.upvotes,
+        downCount: selectedVotes.downvotes,
+      }
+    : null;
   const [expandedChanges, setExpandedChanges] = useState<Set<string>>(
     new Set(),
   );
@@ -783,25 +802,12 @@ export default function ChangelogDetailsClient({
                             <button
                               type="button"
                               onClick={() => {
-                                const voters =
-                                  change.suggestion?.vote_data.voters || [];
-                                const up = voters.filter(
-                                  (v) => v.vote_type === "upvote",
-                                );
-                                const down = voters.filter(
-                                  (v) => v.vote_type === "downvote",
-                                );
                                 const upCount =
                                   change.suggestion?.vote_data.upvotes || 0;
                                 const downCount =
                                   change.suggestion?.vote_data.downvotes || 0;
                                 if (upCount === 0 && downCount === 0) return;
-                                setActiveVoters({
-                                  up,
-                                  down,
-                                  upCount,
-                                  downCount,
-                                });
+                                setSelectedChangeId(change.change_id);
                                 setVotersTab("up");
                                 setVotersOpen(true);
                               }}
@@ -820,25 +826,12 @@ export default function ChangelogDetailsClient({
                             <button
                               type="button"
                               onClick={() => {
-                                const voters =
-                                  change.suggestion?.vote_data.voters || [];
-                                const up = voters.filter(
-                                  (v) => v.vote_type === "upvote",
-                                );
-                                const down = voters.filter(
-                                  (v) => v.vote_type === "downvote",
-                                );
                                 const upCount =
                                   change.suggestion?.vote_data.upvotes || 0;
                                 const downCount =
                                   change.suggestion?.vote_data.downvotes || 0;
                                 if (upCount === 0 && downCount === 0) return;
-                                setActiveVoters({
-                                  up,
-                                  down,
-                                  upCount,
-                                  downCount,
-                                });
+                                setSelectedChangeId(change.change_id);
                                 setVotersTab("down");
                                 setVotersOpen(true);
                               }}

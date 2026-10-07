@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import React, { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
@@ -161,23 +161,11 @@ export default function UserStatsSection({
   totalItemsCount,
   duplicatesCount,
 }: UserStatsSectionProps) {
-  const queryClient = useQueryClient();
   const { user, isAuthenticated } = useAuthContext();
   const isOwnInventory =
     isAuthenticated && Boolean(user?.roblox_id) && user?.roblox_id === userId;
   const [isScanHistoryModalOpen, setIsScanHistoryModalOpen] = useState(false);
   const [isMetadataExpanded, setIsMetadataExpanded] = useState(true);
-  const [scanHistory, setScanHistory] = useState<
-    Array<{ scan_id: string; created_at: number }>
-  >([]);
-  const [isLoadingScanHistory, setIsLoadingScanHistory] = useState(false);
-  const [queuePosition, setQueuePosition] = useState<{
-    position: number;
-    delay: number;
-  } | null>(null);
-  const [isLoadingQueuePosition, setIsLoadingQueuePosition] = useState(false);
-  const [queueError, setQueueError] = useState<string | null>(null);
-  const [hasCheckedQueuePosition, setHasCheckedQueuePosition] = useState(false);
   const createdRelativeTime = useRealTimeRelativeDate(
     currentData?.created_at || 0,
   );
@@ -186,103 +174,78 @@ export default function UserStatsSection({
   );
   const tradeNote = (currentData?.trade_note?.note || "").trim();
 
-  const fetchScanHistory = async () => {
-    setIsLoadingScanHistory(true);
-    try {
-      const data = await queryClient.fetchQuery({
-        queryKey: ["inventory-scan-history", userId],
-        queryFn: async ({ signal }) => {
-          const response = await fetch(
-            `/api/inventories/scan-history?id=${encodeURIComponent(userId)}`,
-            { signal },
-          );
-          if (!response.ok) {
-            const body = await response.json().catch(() => ({}));
-            log.error("fetch scan history failed", {
-              status: response.status,
-              body,
-            });
-            throw new Error("Failed to fetch scan history");
-          }
-          return response.json();
-        },
-        staleTime: 0,
-        gcTime: 0,
-        retry: false,
-      });
-      setScanHistory(Array.isArray(data) ? data : []);
-    } catch (error) {
-      log.error("Error fetching scan history:", error);
-      setScanHistory([]);
-    } finally {
-      setIsLoadingScanHistory(false);
-    }
-  };
-
+  const scanHistoryQuery = useQuery({
+    queryKey: ["inventory-scan-history", userId],
+    enabled: isScanHistoryModalOpen,
+    queryFn: async ({
+      signal,
+    }): Promise<Array<{ scan_id: string; created_at: number }>> => {
+      const response = await fetch(
+        `/api/inventories/scan-history?id=${encodeURIComponent(userId)}`,
+        { signal },
+      );
+      if (!response.ok) throw new Error("Failed to fetch scan history");
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    },
+    staleTime: Infinity,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const scanHistory = scanHistoryQuery.data ?? [];
+  const isLoadingScanHistory = scanHistoryQuery.isLoading;
   const handleOpenScanHistory = () => {
     setIsScanHistoryModalOpen(true);
-    if (scanHistory.length === 0) {
-      fetchScanHistory();
-    }
+    if (scanHistoryQuery.isError || scanHistoryQuery.data?.length === 0)
+      void scanHistoryQuery.refetch();
   };
-
+  const queueQuery = useQuery({
+    queryKey: ["inventory-queue-position", userId],
+    enabled: false,
+    queryFn: async ({ signal }) => {
+      const response = await fetch(
+        `/api/inventories/queue/position?id=${encodeURIComponent(userId)}`,
+        { cache: "no-store", signal },
+      );
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok && response.status !== 404)
+        throw new Error("Failed to fetch queue position");
+      return { status: response.status, data };
+    },
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const queueData = queueQuery.data?.data;
+  const queuePosition =
+    !queueQuery.isError &&
+    queueQuery.data?.status !== 404 &&
+    typeof queueData?.position === "number" &&
+    Number.isFinite(queueData.position) &&
+    typeof queueData?.delay === "number" &&
+    Number.isFinite(queueData.delay)
+      ? { position: queueData.position, delay: queueData.delay }
+      : null;
+  const isLoadingQueuePosition = queueQuery.isFetching;
+  const hasCheckedQueuePosition = queueQuery.isFetched || queueQuery.isFetching;
+  const queueError = queueQuery.isError
+    ? "Failed to fetch queue position"
+    : queueQuery.data && !queuePosition
+      ? queueData?.error || "User not found in queue"
+      : null;
+  const refetchQueue = queueQuery.refetch;
   const fetchQueuePosition = useCallback(async () => {
-    if (!INVENTORY_API_URL || !userId) return;
-
-    setHasCheckedQueuePosition(true);
-    setIsLoadingQueuePosition(true);
-    setQueueError(null);
-    try {
-      const { status, data } = await queryClient.fetchQuery({
-        queryKey: ["inventory-queue-position", userId],
-        queryFn: async ({ signal }) => {
-          const response = await fetch(
-            `/api/inventories/queue/position?id=${encodeURIComponent(userId)}`,
-            { cache: "no-store", signal },
-          );
-          return {
-            status: response.status,
-            data: await response.json().catch(() => ({})),
-          };
-        },
-        staleTime: 0,
-        gcTime: 0,
-        retry: false,
-      });
-      if (status === 404) {
-        setQueueError(data.error || "User not found in queue");
-        setQueuePosition(null);
-      } else if (status >= 200 && status < 300) {
-        if (
-          typeof data.position === "number" &&
-          Number.isFinite(data.position) &&
-          typeof data.delay === "number" &&
-          Number.isFinite(data.delay)
-        ) {
-          setQueuePosition({
-            position: data.position,
-            delay: data.delay,
-          });
-          setQueueError(null);
-        } else {
-          setQueueError(data.error || "User not found in queue");
-          setQueuePosition(null);
-        }
-      } else {
-        log.error("fetch queue position failed", {
-          status,
-          body: data,
-        });
-        throw new Error(`Failed to fetch queue position: ${status}`);
-      }
-    } catch (error) {
-      log.error("Error fetching queue position:", error);
-      setQueueError("Failed to fetch queue position");
-      setQueuePosition(null);
-    } finally {
-      setIsLoadingQueuePosition(false);
-    }
-  }, [userId, queryClient]);
+    if (INVENTORY_API_URL && userId) await refetchQueue();
+  }, [userId, refetchQueue]);
+  useEffect(() => {
+    if (scanHistoryQuery.error)
+      log.error("Error fetching scan history:", scanHistoryQuery.error);
+    if (queueQuery.error)
+      log.error("Error fetching queue position:", queueQuery.error);
+  }, [scanHistoryQuery.error, queueQuery.error]);
 
   const handleCopyTradeNote = async () => {
     try {

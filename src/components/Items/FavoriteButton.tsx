@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { useAuthContext } from "@/contexts/AuthContext";
+import type { FavoriteItem } from "@/types";
 
 const log = createLogger("UI");
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ interface FavoriteButtonProps {
   isAuthenticated: boolean;
   initialIsFavorited: boolean;
   initialCount: number;
+  item?: FavoriteItem["item"];
 }
 
 export default function FavoriteButton({
@@ -28,11 +30,12 @@ export default function FavoriteButton({
   isAuthenticated,
   initialIsFavorited,
   initialCount,
+  item,
 }: FavoriteButtonProps) {
   const { setLoginModal, user } = useAuthContext();
   const queryClient = useQueryClient();
-  const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
-  const [favoriteCount, setFavoriteCount] = useState(initialCount);
+  const isFavorited = initialIsFavorited;
+  const favoriteCount = initialCount;
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFavoriteClick = async () => {
@@ -60,19 +63,59 @@ export default function FavoriteButton({
       });
 
       if (response.ok) {
-        setIsFavorited(!isFavorited);
-        setFavoriteCount((prev) => (isFavorited ? prev - 1 : prev + 1));
+        const favoritesKey = ["user-favorites", user?.id];
+        const countKey = ["item-favorites", itemId];
+        await Promise.all([
+          queryClient.cancelQueries({ queryKey: favoritesKey }),
+          queryClient.cancelQueries({ queryKey: countKey }),
+        ]);
+        const favoriteItem =
+          item ??
+          queryClient.getQueryData<FavoriteItem["item"]>([
+            "item",
+            "id",
+            itemId,
+          ]);
+        queryClient.setQueryData<FavoriteItem[]>(
+          favoritesKey,
+          (previous = []) => {
+            const remaining = previous.filter(
+              (favorite) => favorite.item.id !== itemId,
+            );
+            return !isFavorited && favoriteItem
+              ? [
+                  ...remaining,
+                  {
+                    created_at: Date.now(),
+                    item: {
+                      id: itemId,
+                      name: favoriteItem.name,
+                      type: favoriteItem.type,
+                    },
+                  },
+                ]
+              : remaining;
+          },
+        );
+        queryClient.setQueryData<
+          number | { count: number; [key: string]: unknown }
+        >(countKey, (previous) => {
+          const current =
+            typeof previous === "number"
+              ? previous
+              : (previous?.count ?? favoriteCount);
+          const next = Math.max(0, current + (isFavorited ? -1 : 1));
+          return previous && typeof previous === "object"
+            ? { ...previous, count: next }
+            : next;
+        });
         if (user?.id) {
-          void queryClient.invalidateQueries({
-            queryKey: ["user-favorites", user.id],
-          });
+          void queryClient.invalidateQueries({ queryKey: favoritesKey });
           void queryClient.invalidateQueries({
             queryKey: ["profile", user.id, "favorites"],
           });
         }
-        void queryClient.invalidateQueries({
-          queryKey: ["item-favorites", itemId],
-        });
+        void queryClient.invalidateQueries({ queryKey: countKey });
         toast.success(
           isFavorited ? "Removed from favorites" : "Added to favorites",
         );

@@ -8,7 +8,11 @@ import React, {
   useMemo,
 } from "react";
 import { useQueryState } from "nuqs";
-import { useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { TradeAd } from "@/types/trading";
@@ -34,7 +38,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api/api";
 import type { FavoriteItem } from "@/types";
-import { userFavoritesQueryOptions } from "@/hooks/useUserFavorites";
+import { useUserFavorites } from "@/hooks/useUserFavorites";
 import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 import {
   DropdownMenu,
@@ -48,9 +52,18 @@ import { createLogger } from "@/services/logger";
 const log = createLogger("UI");
 
 interface TradeAdsProps {
-  initialTradeAds?: TradeAd[];
   initialItems?: TradeItem[];
 }
+
+type PaginatedTradeAdsResponse = {
+  items: TradeAd[];
+  total: number;
+  page: number;
+  total_pages: number;
+  size: number;
+};
+
+const TRADE_ADS_QUERY_KEY = "recent-trade-ads";
 
 class HttpStatusError extends Error {
   status: number;
@@ -109,10 +122,7 @@ const CUSTOM_TYPE_OPTIONS = [
   { id: "og owners", label: "OG Owners" },
 ] as const;
 
-export default function TradeAds({
-  initialTradeAds = [],
-  initialItems = [],
-}: TradeAdsProps) {
+export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
   const queryClient = useQueryClient();
   const pathname = usePathname();
   const router = useRouter();
@@ -123,28 +133,11 @@ export default function TradeAds({
     isLoading: isAuthLoading,
     setLoginModal,
   } = useAuthContext();
-  const lastIsAuthenticatedRef = useRef(isAuthenticated);
-  const [tradeAds, setTradeAds] = useState<TradeAd[]>(initialTradeAds);
-  const [isTradeAdsLoading, setIsTradeAdsLoading] = useState(
-    initialTradeAds.length === 0,
-  );
-  const [userTradeAds, setUserTradeAds] = useState<TradeAd[]>([]);
-  const [isUserTradeAdsLoading, setIsUserTradeAdsLoading] = useState(false);
-  const [userTradeAdsError, setUserTradeAdsError] = useState<string | null>(
-    null,
-  );
   const [userTradeAdsPage, setUserTradeAdsPage] = useState(1);
-  const [userTradeAdsTotalPages, setUserTradeAdsTotalPages] = useState(1);
-  const [userTradeAdsTotalCount, setUserTradeAdsTotalCount] = useState(0);
   const [items] = useState<TradeItem[]>(initialItems);
-  const [error, setError] = useState<string | null>(null);
-  const [isListRateLimited, setIsListRateLimited] = useState(false);
-  const [listRetryAfter, setListRetryAfter] = useState<number | null>(null);
   const [deleteRateLimits, setDeleteRateLimits] = useState<Map<number, number>>(
     new Map(),
   );
-  const [isRecentTradesUnauthorized, setIsRecentTradesUnauthorized] =
-    useState(false);
   const [tabParam, setTabParam] = useQueryState("tab", {
     defaultValue: "",
     history: "push",
@@ -163,28 +156,11 @@ export default function TradeAds({
   const [itemsInputMode, setItemsInputMode] = useState<"values" | "inventory">(
     "values",
   );
-  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
-  const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
-  const [inventoryCopies, setInventoryCopies] = useState<
-    Record<number, number>
-  >({});
-  const [inventoryStatus, setInventoryStatus] = useState<
-    "idle" | "loading" | "loaded" | "error"
-  >("idle");
-  const [inventoryError, setInventoryError] = useState<string | null>(null);
-  const [inventoryTradeNote, setInventoryTradeNote] = useState<string | null>(
-    null,
-  );
-  const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
-  const inventoryFetchControllerRef = useRef<AbortController | null>(null);
   const pageFromUrl = (() => {
     const rawPage = Number.parseInt(searchParams.get("page") || "1", 10);
     return Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
   })();
   const [page, setPage] = useState(pageFromUrl);
-  const [apiTotalPages, setApiTotalPages] = useState(1);
-  const [apiTotalCount, setApiTotalCount] = useState<number | null>(null);
-  const [isPageTransitionLoading, setIsPageTransitionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchScope, setSearchScope] = useState<
     "all" | "offering" | "requesting"
@@ -196,8 +172,6 @@ export default function TradeAds({
     "contains" | "only"
   >("contains");
   const currentUserId = user?.id || null;
-  const lastFetchedTradeAdsPageRef = useRef<number | null>(null);
-  const lastFetchedUserTradeAdsUserIdRef = useRef<string | null>(null);
   const lastRealtimeRefreshAtRef = useRef<number>(0);
   const isSyncingPageWithUrlRef = useRef(false);
 
@@ -223,136 +197,114 @@ export default function TradeAds({
     [pathname, searchParams],
   );
 
-  useEffect(() => {
-    if (!shouldUseInventoryItems) return;
+  const rawInventoryQuery = useQuery({
+    ...userInventoryQueryOptions(robloxId),
+    enabled:
+      shouldUseInventoryItems && canLoadInventory && Boolean(INVENTORY_API_URL),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const inventoryQuery = useQuery({
+    queryKey: [
+      "trade-picker-inventory",
+      robloxId,
+      rawInventoryQuery.dataUpdatedAt,
+      items,
+    ],
+    enabled:
+      shouldUseInventoryItems &&
+      canLoadInventory &&
+      rawInventoryQuery.isSuccess,
+    queryFn: async () => {
+      const data = rawInventoryQuery.data;
+      const record =
+        data && typeof data === "object" && !Array.isArray(data)
+          ? (data as Record<string, unknown>)
+          : null;
+      const rawItems = Array.isArray(record?.data) ? record?.data : [];
+      const rawDuplicates = Array.isArray(record?.duplicates)
+        ? record?.duplicates
+        : [];
 
-    if (!canLoadInventory) {
-      setInventoryItems([]);
-      setInventoryStatus("idle");
-      setInventoryError(null);
-      setInventoryTradeNote(null);
-      lastFetchedInventoryUserIdRef.current = null;
-      return;
-    }
+      const inventoryIds: number[] = [];
+      const isDupedById = new Map<number, boolean>();
+      const isOgById = new Map<number, boolean>();
+      const countById = new Map<number, number>();
+      const pushEntry = (entry: unknown, isDuped: boolean) => {
+        const normalized = normalizeInventoryEntry(entry);
+        const id = normalized.id;
+        if (id === null) return;
+        countById.set(id, (countById.get(id) ?? 0) + 1);
+        if (!isDupedById.has(id)) inventoryIds.push(id);
+        isDupedById.set(id, isDupedById.get(id) || isDuped);
+        isOgById.set(id, isOgById.get(id) || normalized.isOriginalOwner);
+      };
 
-    if (!INVENTORY_API_URL) {
-      setInventoryItems([]);
-      setInventoryStatus("error");
-      setInventoryError(
-        "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing).",
-      );
-      setInventoryTradeNote(null);
-      lastFetchedInventoryUserIdRef.current = null;
-      return;
-    }
+      rawItems.forEach((entry) => pushEntry(entry, false));
+      rawDuplicates.forEach((entry) => pushEntry(entry, true));
 
-    if (lastFetchedInventoryUserIdRef.current === robloxId) return;
-    lastFetchedInventoryUserIdRef.current = robloxId;
+      const resolvedItems = await fetchTradeItemsByIds(inventoryIds, items);
+      const itemById = new Map<number, TradeItem>();
+      resolvedItems.forEach((it) => itemById.set(it.id, it));
 
-    inventoryFetchControllerRef.current?.abort();
-    const controller = new AbortController();
-    inventoryFetchControllerRef.current = controller;
-    let didFinish = false;
+      const inventoryTradeItems = inventoryIds
+        .map((id) => itemById.get(id))
+        .filter((it): it is TradeItem => Boolean(it))
+        .map((it) => ({
+          ...it,
+          side: undefined,
+          isDuped: isDupedById.get(it.id) || false,
+          isOG: isOgById.get(it.id) || false,
+        }));
 
-    const fetchInventory = async () => {
-      setInventoryStatus("loading");
-      setInventoryError(null);
+      const tradeNoteCandidate =
+        record?.trade_note &&
+        typeof record.trade_note === "object" &&
+        !Array.isArray(record.trade_note) &&
+        "note" in record.trade_note &&
+        typeof (record.trade_note as { note?: unknown }).note === "string"
+          ? ((record.trade_note as { note: string }).note ?? "").trim()
+          : "";
+      return {
+        items: inventoryTradeItems,
+        copies: Object.fromEntries(countById),
+        tradeNote: tradeNoteCandidate || null,
+      };
+    },
+    staleTime: Infinity,
+    gcTime: 30_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const inventoryItems = canLoadInventory
+    ? (inventoryQuery.data?.items ?? [])
+    : [];
+  const inventoryCopies = inventoryQuery.data?.copies ?? {};
+  const inventoryTradeNote = canLoadInventory
+    ? (inventoryQuery.data?.tradeNote ?? null)
+    : null;
+  const inventoryRequestError = rawInventoryQuery.error ?? inventoryQuery.error;
+  const inventoryError = !INVENTORY_API_URL
+    ? "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing)."
+    : (inventoryRequestError?.message ?? null);
+  const inventoryStatus =
+    !canLoadInventory || !shouldUseInventoryItems
+      ? "idle"
+      : inventoryError
+        ? "error"
+        : inventoryQuery.isPending
+          ? "loading"
+          : "loaded";
+  const favoritesQuery = useUserFavorites(user?.id);
+  const favoriteIds =
+    favoritesQuery.data?.map((favorite) => favorite.item.id) ?? [];
 
-      try {
-        const data = await queryClient.fetchQuery(
-          userInventoryQueryOptions(robloxId),
-        );
-        if (controller.signal.aborted) return;
-
-        const record =
-          data && typeof data === "object" && !Array.isArray(data)
-            ? (data as Record<string, unknown>)
-            : null;
-        const rawItems = Array.isArray(record?.data) ? record?.data : [];
-        const rawDuplicates = Array.isArray(record?.duplicates)
-          ? record?.duplicates
-          : [];
-
-        const inventoryIds: number[] = [];
-        const isDupedById = new Map<number, boolean>();
-        const isOgById = new Map<number, boolean>();
-        const countById = new Map<number, number>();
-        const pushEntry = (entry: unknown, isDuped: boolean) => {
-          const normalized = normalizeInventoryEntry(entry);
-          const id = normalized.id;
-          if (id === null) return;
-          countById.set(id, (countById.get(id) ?? 0) + 1);
-          if (!isDupedById.has(id)) inventoryIds.push(id);
-          isDupedById.set(id, isDupedById.get(id) || isDuped);
-          isOgById.set(id, isOgById.get(id) || normalized.isOriginalOwner);
-        };
-
-        rawItems.forEach((entry) => pushEntry(entry, false));
-        rawDuplicates.forEach((entry) => pushEntry(entry, true));
-
-        const resolvedItems = await fetchTradeItemsByIds(inventoryIds, items);
-        if (controller.signal.aborted) return;
-        const itemById = new Map<number, TradeItem>();
-        resolvedItems.forEach((it) => itemById.set(it.id, it));
-
-        const inventoryTradeItems = inventoryIds
-          .map((id) => itemById.get(id))
-          .filter((it): it is TradeItem => Boolean(it))
-          .map((it) => ({
-            ...it,
-            side: undefined,
-            isDuped: isDupedById.get(it.id) || false,
-            isOG: isOgById.get(it.id) || false,
-          }));
-
-        const tradeNoteCandidate =
-          record?.trade_note &&
-          typeof record.trade_note === "object" &&
-          !Array.isArray(record.trade_note) &&
-          "note" in record.trade_note &&
-          typeof (record.trade_note as { note?: unknown }).note === "string"
-            ? ((record.trade_note as { note: string }).note ?? "").trim()
-            : "";
-        setInventoryTradeNote(tradeNoteCandidate || null);
-        setInventoryItems(inventoryTradeItems);
-        setInventoryCopies(Object.fromEntries(countById));
-        setInventoryStatus("loaded");
-        didFinish = true;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          setInventoryStatus("idle");
-          lastFetchedInventoryUserIdRef.current = null;
-          return;
-        }
-        const message =
-          error instanceof Error ? error.message : "Failed to load inventory";
-        setInventoryItems([]);
-        setInventoryStatus("error");
-        setInventoryError(message);
-        setInventoryTradeNote(null);
-        lastFetchedInventoryUserIdRef.current = null;
-        didFinish = true;
-      }
-    };
-
-    void fetchInventory();
-
-    return () => {
-      controller.abort();
-      if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
-    };
-  }, [shouldUseInventoryItems, canLoadInventory, robloxId, items, queryClient]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    queryClient.fetchQuery(userFavoritesQueryOptions(user.id)).then((data) => {
-      if (Array.isArray(data)) {
-        setFavoriteIds((data as FavoriteItem[]).map((fav) => fav.item.id));
-      }
-    });
-  }, [user?.id, queryClient]);
-
-  const handleToggleFavorite = async (itemId: number, isFavorited: boolean) => {
+  const handleToggleFavorite = async (
+    itemId: number,
+    isFavorited: boolean,
+    favoriteItem?: FavoriteItem["item"],
+  ) => {
     if (!isAuthenticated) {
       toast.error(
         "You must be logged in to favorite items. Please log in and try again.",
@@ -360,9 +312,37 @@ export default function TradeAds({
       setLoginModal({ open: true });
       return;
     }
-    setFavoriteIds((prev) =>
-      isFavorited ? prev.filter((id) => id !== itemId) : [...prev, itemId],
+    const favoritesKey = ["user-favorites", user?.id];
+    await queryClient.cancelQueries({ queryKey: favoritesKey });
+    const previousFavorite = favoritesQuery.data?.find(
+      (favorite) => favorite.item.id === itemId,
     );
+    const item =
+      favoriteItem ??
+      items.find((entry) => entry.id === itemId) ??
+      inventoryItems.find((entry) => entry.id === itemId);
+    queryClient.setQueryData<FavoriteItem[]>(favoritesKey, (previous = []) =>
+      isFavorited
+        ? previous.filter((favorite) => favorite.item.id !== itemId)
+        : item
+          ? [
+              ...previous.filter((favorite) => favorite.item.id !== itemId),
+              {
+                created_at: Date.now(),
+                item: { id: item.id, name: item.name, type: item.type },
+              },
+            ]
+          : previous,
+    );
+    const rollback = () =>
+      queryClient.setQueryData<FavoriteItem[]>(favoritesKey, (previous = []) =>
+        previousFavorite
+          ? [
+              ...previous.filter((favorite) => favorite.item.id !== itemId),
+              previousFavorite,
+            ]
+          : previous.filter((favorite) => favorite.item.id !== itemId),
+      );
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
@@ -374,9 +354,7 @@ export default function TradeAds({
         credentials: "include",
       });
       if (!response.ok) {
-        setFavoriteIds((prev) =>
-          isFavorited ? [...prev, itemId] : prev.filter((id) => id !== itemId),
-        );
+        rollback();
         toast.error("Failed to update favorite status");
       } else {
         if (user?.id) {
@@ -389,9 +367,7 @@ export default function TradeAds({
         );
       }
     } catch {
-      setFavoriteIds((prev) =>
-        isFavorited ? [...prev, itemId] : prev.filter((id) => id !== itemId),
-      );
+      rollback();
       toast.error("Failed to update favorite status");
     }
   };
@@ -595,31 +571,19 @@ export default function TradeAds({
     [currentUserId, user],
   );
 
-  const handleCreateSuccess = (createdTradeRaw?: unknown) => {
-    lastFetchedUserTradeAdsUserIdRef.current = null;
-    setUserTradeAds([]);
+  const handleCreateSuccess = () => {
     setUserTradeAdsPage(1);
-    setUserTradeAdsTotalPages(1);
-    setUserTradeAdsTotalCount(0);
-
-    void (async () => {
-      try {
-        isSyncingPageWithUrlRef.current = true;
-        setPage(1);
-        lastFetchedTradeAdsPageRef.current = 1;
-        await refreshTradeAds(1);
-      } catch {
-        const normalized = normalizeCreatedTrade(createdTradeRaw, true);
-        if (normalized) {
-          setTradeAds((prev) => {
-            const withoutDuplicate = prev.filter(
-              (ad) => ad.id !== normalized.id,
-            );
-            return [normalized, ...withoutDuplicate];
-          });
-        }
-      }
-    })();
+    isSyncingPageWithUrlRef.current = true;
+    setPage(1);
+    void queryClient.invalidateQueries({
+      queryKey: [TRADE_ADS_QUERY_KEY],
+      refetchType: "none",
+    });
+    void queryClient.refetchQueries({
+      queryKey: [TRADE_ADS_QUERY_KEY, currentUserId, null, 1],
+      exact: true,
+      type: "active",
+    });
 
     router.replace(getTradingUrl(1));
     void setCreateParam(null);
@@ -640,117 +604,61 @@ export default function TradeAds({
     return match.trend ?? undefined;
   };
 
-  type PaginatedTradeAdsResponse = {
-    items: TradeAd[];
-    total: number;
-    page: number;
-    total_pages: number;
-    size: number;
-  };
-
   const fetchRecentTradeAdsPage = useCallback(
     async (
       targetPage: number,
-      userId?: string,
+      userId: string | null,
+      signal: AbortSignal,
     ): Promise<PaginatedTradeAdsResponse> => {
-      return queryClient.fetchQuery({
-        queryKey: ["recent-trade-ads", user?.id, userId ?? null, targetPage],
-        queryFn: async ({ signal }): Promise<PaginatedTradeAdsResponse> => {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-          if (!baseUrl) {
-            throw new Error("NEXT_PUBLIC_API_URL is not configured");
-          }
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!baseUrl) {
+        throw new Error("NEXT_PUBLIC_API_URL is not configured");
+      }
 
-          const query = new URLSearchParams({ page: String(targetPage) });
-          if (userId) query.set("user", userId);
-          const { url: recentTradesUrl, headers: recentTradesHeaders } =
-            buildApiFetchRequest(baseUrl, `/v2/trades?${query.toString()}`);
-          const response = await fetch(recentTradesUrl, {
-            cache: "no-store",
-            credentials: "include",
-            signal,
-            headers: {
-              ...recentTradesHeaders,
-              "User-Agent": "JailbreakChangelogs-Trading/2.0",
-            },
-          });
+      const query = new URLSearchParams({ page: String(targetPage) });
+      if (userId) query.set("user", userId);
+      const { url: recentTradesUrl, headers: recentTradesHeaders } =
+        buildApiFetchRequest(baseUrl, `/v2/trades?${query.toString()}`);
+      const response = await fetch(recentTradesUrl, {
+        cache: "no-store",
+        credentials: "include",
+        signal,
+        headers: {
+          ...recentTradesHeaders,
+          "User-Agent": "JailbreakChangelogs-Trading/2.0",
+        },
+      });
 
-          if (response.status === 429) {
-            const retryAfter = parseInt(
-              response.headers.get("retry-after") ?? "60",
-              10,
-            );
-            throw new RateLimitError(retryAfter);
-          }
+      if (response.status === 429) {
+        const retryAfter = parseInt(
+          response.headers.get("retry-after") ?? "60",
+          10,
+        );
+        throw new RateLimitError(retryAfter);
+      }
 
-          if (response.status === 401 || response.status === 403) {
-            let body: unknown = null;
-            try {
-              body = (await response.json()) as unknown;
-            } catch {
-              body = null;
-            }
-            throw new HttpStatusError(
-              response.status === 403 ? "Forbidden" : "Unauthorized",
-              response.status,
-              body,
-            );
-          }
+      if (response.status === 401 || response.status === 403) {
+        let body: unknown = null;
+        try {
+          body = (await response.json()) as unknown;
+        } catch {
+          body = null;
+        }
+        throw new HttpStatusError(
+          response.status === 403 ? "Forbidden" : "Unauthorized",
+          response.status,
+          body,
+        );
+      }
 
-          if (response.status === 404) {
-            try {
-              const body = (await response.json()) as unknown;
-              if (
-                body &&
-                typeof body === "object" &&
-                (body as Record<string, unknown>).error === "no_trades_found"
-              ) {
-                return {
-                  items: [],
-                  total: 0,
-                  page: targetPage,
-                  total_pages: 1,
-                  size: 0,
-                };
-              }
-            } catch {
-              // Ignore parse errors and treat as a real 404 below.
-            }
-            throw new Error("Failed to fetch recent trades (404)");
-          }
-
-          if (!response.ok) {
-            let body: unknown = null;
-            try {
-              body = (await response.json()) as unknown;
-            } catch {
-              body = null;
-            }
-            throw new HttpStatusError(
-              "Failed to fetch recent trades",
-              response.status,
-              body,
-            );
-          }
-
-          const data = (await response.json()) as unknown;
-
-          // Backwards compatibility: older API returned a plain list.
-          if (Array.isArray(data)) {
-            const normalized = data
-              .map((entry) => normalizeCreatedTrade(entry))
-              .filter((entry): entry is TradeAd => entry !== null);
-
-            return {
-              items: normalized,
-              total: normalized.length,
-              page: 1,
-              total_pages: 1,
-              size: normalized.length,
-            };
-          }
-
-          if (!data || typeof data !== "object") {
+      if (response.status === 404) {
+        try {
+          const body = (await response.json()) as unknown;
+          if (
+            body &&
+            typeof body === "object" &&
+            (body as Record<string, unknown>).error === "no_trades_found"
+          ) {
             return {
               items: [],
               total: 0,
@@ -759,130 +667,174 @@ export default function TradeAds({
               size: 0,
             };
           }
-
-          const record = data as Record<string, unknown>;
-          const rawItems = record.items;
-          const items = Array.isArray(rawItems)
-            ? rawItems
-                .map((entry) => normalizeCreatedTrade(entry))
-                .filter((entry): entry is TradeAd => entry !== null)
-            : [];
-
-          const total =
-            typeof record.total === "number" ? record.total : items.length;
-          const pageValue =
-            typeof record.page === "number" ? record.page : targetPage;
-          const totalPagesValue =
-            typeof record.total_pages === "number" ? record.total_pages : 1;
-          const sizeValue = typeof record.size === "number" ? record.size : 0;
-
-          return {
-            items,
-            total,
-            page: pageValue,
-            total_pages: totalPagesValue,
-            size: sizeValue,
-          };
-        },
-        staleTime: 0,
-        gcTime: 0,
-        retry: false,
-      });
-    },
-    [normalizeCreatedTrade, queryClient, user?.id],
-  );
-
-  const refreshTradeAds = useCallback(
-    async (targetPage?: number): Promise<boolean> => {
-      let didSucceed = false;
-      const pageToFetch = targetPage ?? page;
-      const showSkeleton = tradeAds.length === 0;
-      try {
-        if (showSkeleton) setIsTradeAdsLoading(true);
-        setError(null);
-        setIsRecentTradesUnauthorized(false);
-        const response = await fetchRecentTradeAdsPage(pageToFetch);
-        if (response.total_pages > 0 && pageToFetch > response.total_pages) {
-          // Clamp to last page if the current page is no longer valid.
-          isSyncingPageWithUrlRef.current = true;
-          setPage(response.total_pages);
-          router.replace(getTradingUrl(response.total_pages));
-          return false;
+        } catch {
+          // Ignore parse errors and treat as a real 404 below.
         }
-        setApiTotalPages(response.total_pages || 1);
-        setApiTotalCount(
-          typeof response.total === "number" ? response.total : 0,
+        throw new Error("Failed to fetch recent trades (404)");
+      }
+
+      if (!response.ok) {
+        let body: unknown = null;
+        try {
+          body = (await response.json()) as unknown;
+        } catch {
+          body = null;
+        }
+        throw new HttpStatusError(
+          "Failed to fetch recent trades",
+          response.status,
+          body,
         );
-        setTradeAds(response.items);
-        didSucceed = true;
-      } catch (err) {
-        if (err instanceof RateLimitError) {
-          setIsListRateLimited(true);
-          setListRetryAfter(err.retryAfter);
-          return false;
-        }
-
-        if (
-          err instanceof HttpStatusError &&
-          (err.status === 401 || err.status === 403)
-        ) {
-          log.warn("Recent trade ads request unauthorized:", err.body);
-          setTradeAds([]);
-          setIsRecentTradesUnauthorized(true);
-          setError(null);
-          return false;
-        }
-
-        log.error("Error refreshing trade ads:", err);
-        setError("Failed to refresh trade ads");
-        return false;
-      } finally {
-        setIsTradeAdsLoading(false);
-        setIsPageTransitionLoading(false);
       }
-      return didSucceed;
+
+      const data = (await response.json()) as unknown;
+
+      // Backwards compatibility: older API returned a plain list.
+      if (Array.isArray(data)) {
+        const normalized = data
+          .map((entry) => normalizeCreatedTrade(entry))
+          .filter((entry): entry is TradeAd => entry !== null);
+
+        return {
+          items: normalized,
+          total: normalized.length,
+          page: 1,
+          total_pages: 1,
+          size: normalized.length,
+        };
+      }
+
+      if (!data || typeof data !== "object") {
+        return {
+          items: [],
+          total: 0,
+          page: targetPage,
+          total_pages: 1,
+          size: 0,
+        };
+      }
+
+      const record = data as Record<string, unknown>;
+      const rawItems = record.items;
+      const items = Array.isArray(rawItems)
+        ? rawItems
+            .map((entry) => normalizeCreatedTrade(entry))
+            .filter((entry): entry is TradeAd => entry !== null)
+        : [];
+
+      const total =
+        typeof record.total === "number" ? record.total : items.length;
+      const pageValue =
+        typeof record.page === "number" ? record.page : targetPage;
+      const totalPagesValue =
+        typeof record.total_pages === "number" ? record.total_pages : 1;
+      const sizeValue = typeof record.size === "number" ? record.size : 0;
+
+      return {
+        items,
+        total,
+        page: pageValue,
+        total_pages: totalPagesValue,
+        size: sizeValue,
+      };
     },
-    [fetchRecentTradeAdsPage, getTradingUrl, page, router, tradeAds.length],
+    [normalizeCreatedTrade],
   );
 
-  const refreshUserTradeAds = useCallback(
-    async (targetPage: number, userId: string): Promise<void> => {
-      try {
-        setIsUserTradeAdsLoading(true);
-        setUserTradeAdsError(null);
-        const response = await fetchRecentTradeAdsPage(targetPage, userId);
-        setUserTradeAds(response.items);
-        setUserTradeAdsTotalCount(response.total);
-        setUserTradeAdsTotalPages(response.total_pages || 1);
-        setUserTradeAdsPage(response.page || targetPage);
-        lastFetchedUserTradeAdsUserIdRef.current = userId;
-      } catch (err) {
-        log.error("Error refreshing user trade ads:", err);
-        lastFetchedUserTradeAdsUserIdRef.current = null;
-        setUserTradeAdsError("Failed to load your trade ads");
-      } finally {
-        setIsUserTradeAdsLoading(false);
-      }
-    },
-    [fetchRecentTradeAdsPage],
-  );
+  const tradeAdsQuery = useQuery({
+    queryKey: [TRADE_ADS_QUERY_KEY, currentUserId, null, page],
+    queryFn: ({ signal }) => fetchRecentTradeAdsPage(page, null, signal),
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[1] === currentUserId
+        ? keepPreviousData(previous)
+        : undefined,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
+  });
+  const userTradeAdsQuery = useQuery({
+    queryKey: [
+      TRADE_ADS_QUERY_KEY,
+      currentUserId,
+      currentUserId,
+      userTradeAdsPage,
+    ],
+    queryFn: ({ signal }) =>
+      fetchRecentTradeAdsPage(userTradeAdsPage, currentUserId, signal),
+    enabled: activeTab === "myads" && Boolean(currentUserId),
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[1] === currentUserId
+        ? keepPreviousData(previous)
+        : undefined,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
+  });
+
+  const tradeAds = tradeAdsQuery.data?.items ?? [];
+  const apiTotalPages = tradeAdsQuery.data?.total_pages || 1;
+  const apiTotalCount = tradeAdsQuery.data?.total ?? null;
+  const isTradeAdsLoading = tradeAdsQuery.isPending;
+  const isPageTransitionLoading = tradeAdsQuery.isPlaceholderData;
+  const tradeAdsError = tradeAdsQuery.error;
+  const isListRateLimited = tradeAdsError instanceof RateLimitError;
+  const isRecentTradesUnauthorized =
+    tradeAdsError instanceof HttpStatusError &&
+    (tradeAdsError.status === 401 || tradeAdsError.status === 403);
+  const error =
+    tradeAdsError && !isListRateLimited && !isRecentTradesUnauthorized
+      ? "Failed to refresh trade ads"
+      : null;
+
+  const userTradeAds = userTradeAdsQuery.data?.items ?? [];
+  const userTradeAdsTotalPages = userTradeAdsQuery.data?.total_pages || 1;
+  const userTradeAdsTotalCount = userTradeAdsQuery.data?.total ?? 0;
+  const isUserTradeAdsLoading =
+    userTradeAdsQuery.isLoading || userTradeAdsQuery.isPlaceholderData;
+  const userTradeAdsError = userTradeAdsQuery.isError
+    ? "Failed to load your trade ads"
+    : null;
 
   useEffect(() => {
-    lastFetchedUserTradeAdsUserIdRef.current = null;
-    setUserTradeAds([]);
-    setUserTradeAdsError(null);
+    if (tradeAdsError) log.error("Error fetching trade ads:", tradeAdsError);
+  }, [tradeAdsError]);
+
+  useEffect(() => {
     setUserTradeAdsPage(1);
-    setUserTradeAdsTotalPages(1);
-    setUserTradeAdsTotalCount(0);
   }, [currentUserId]);
 
   useEffect(() => {
-    if (activeTab !== "myads" || !currentUserId) return;
-    if (lastFetchedUserTradeAdsUserIdRef.current === currentUserId) return;
+    const data = userTradeAdsQuery.data;
+    if (!data || userTradeAdsQuery.isPlaceholderData || !currentUserId) return;
+    const nextPage = Math.min(
+      data.page || userTradeAdsPage,
+      data.total_pages || 1,
+    );
+    if (nextPage !== userTradeAdsPage) setUserTradeAdsPage(nextPage);
+  }, [
+    currentUserId,
+    userTradeAdsPage,
+    userTradeAdsQuery.data,
+    userTradeAdsQuery.isPlaceholderData,
+  ]);
 
-    lastFetchedUserTradeAdsUserIdRef.current = currentUserId;
-    void refreshUserTradeAds(1, currentUserId);
-  }, [activeTab, currentUserId, refreshUserTradeAds]);
+  useEffect(() => {
+    // Clamp to last page if the current page is no longer valid.
+    const totalPages = tradeAdsQuery.data?.total_pages ?? 0;
+    if (tradeAdsQuery.isPlaceholderData || totalPages === 0) return;
+    if (page <= totalPages) return;
+    isSyncingPageWithUrlRef.current = true;
+    setPage(totalPages);
+    router.replace(getTradingUrl(totalPages));
+  }, [
+    getTradingUrl,
+    page,
+    router,
+    tradeAdsQuery.data,
+    tradeAdsQuery.isPlaceholderData,
+  ]);
 
   useEffect(() => {
     if (page === pageFromUrl) {
@@ -894,13 +846,6 @@ export default function TradeAds({
   }, [page, pageFromUrl]);
 
   useEffect(() => {
-    if (initialTradeAds.length > 0) return;
-    if (lastFetchedTradeAdsPageRef.current === page) return;
-    lastFetchedTradeAdsPageRef.current = page;
-    void refreshTradeAds(page);
-  }, [initialTradeAds.length, page, refreshTradeAds]);
-
-  useEffect(() => {
     const handler = (event: Event) => {
       const customEvent = event as CustomEvent<{ action?: string }>;
       if (customEvent.detail?.action !== "refresh_trades") return;
@@ -910,33 +855,25 @@ export default function TradeAds({
       if (now - lastRealtimeRefreshAtRef.current < 4000) return;
       lastRealtimeRefreshAtRef.current = now;
 
-      void (async () => {
-        isSyncingPageWithUrlRef.current = true;
-        setPage(1);
-        lastFetchedTradeAdsPageRef.current = 1;
-        router.replace(getTradingUrl(1));
-        await refreshTradeAds(1);
-      })();
+      isSyncingPageWithUrlRef.current = true;
+      setPage(1);
+      router.replace(getTradingUrl(1));
+      void queryClient.invalidateQueries({
+        queryKey: [TRADE_ADS_QUERY_KEY],
+        refetchType: "none",
+      });
+      void queryClient.refetchQueries({
+        queryKey: [TRADE_ADS_QUERY_KEY, currentUserId, null, 1],
+        exact: true,
+        type: "active",
+      });
     };
 
     window.addEventListener("realtimeTrades", handler);
     return () => window.removeEventListener("realtimeTrades", handler);
-  }, [activeTab, getTradingUrl, refreshTradeAds, router]);
-
-  useEffect(() => {
-    const wasAuthenticated = lastIsAuthenticatedRef.current;
-    lastIsAuthenticatedRef.current = isAuthenticated;
-
-    if (!isRecentTradesUnauthorized) return;
-    if (!isAuthenticated) return;
-    // Prevent retry loops when the API keeps returning 401 while I'm already authenticated.
-    // Only auto-retry after an auth transition (false -> true).
-    if (wasAuthenticated) return;
-    void refreshTradeAds(page);
-  }, [isRecentTradesUnauthorized, isAuthenticated, page, refreshTradeAds]);
+  }, [activeTab, currentUserId, getTradingUrl, queryClient, router]);
 
   const handleTabChange = (tab: "view" | "create" | "myads") => {
-    setIsPageTransitionLoading(false);
     void setCreateParam(tab === "create" ? "true" : null);
     void setTabParam(tab === "myads" ? "myads" : null);
   };
@@ -944,11 +881,18 @@ export default function TradeAds({
   const handleDeleteTrade = async (tradeId: number) => {
     const toastId = toast.loading("Deleting trade ad...");
     try {
-      // Remove the trade from the list immediately to prevent UI flicker
-      setTradeAds((prevAds) => prevAds.filter((ad) => ad.id !== tradeId));
-      setUserTradeAds((prevAds) => prevAds.filter((ad) => ad.id !== tradeId));
-      setUserTradeAdsTotalCount((count) => Math.max(0, count - 1));
+      await queryClient.cancelQueries({ queryKey: [TRADE_ADS_QUERY_KEY] });
+      queryClient.setQueriesData<PaginatedTradeAdsResponse>(
+        { queryKey: [TRADE_ADS_QUERY_KEY] },
+        (old) => {
+          if (!old) return old;
+          const items = old.items.filter((ad) => ad.id !== tradeId);
+          if (items.length === old.items.length) return old;
+          return { ...old, items, total: Math.max(0, old.total - 1) };
+        },
+      );
       await deleteTradeAd(tradeId);
+      void queryClient.invalidateQueries({ queryKey: [TRADE_ADS_QUERY_KEY] });
       toast.success("Trade ad deleted successfully", { id: toastId });
     } catch (error) {
       log.error("Error deleting trade ad:", error);
@@ -960,11 +904,7 @@ export default function TradeAds({
       } else {
         toast.error("Failed to delete trade ad", { id: toastId });
       }
-      // Refresh the trade ads list to ensure consistency
-      refreshTradeAds();
-      if (currentUserId) {
-        void refreshUserTradeAds(userTradeAdsPage, currentUserId);
-      }
+      void queryClient.invalidateQueries({ queryKey: [TRADE_ADS_QUERY_KEY] });
     }
   };
 
@@ -974,7 +914,6 @@ export default function TradeAds({
   ) => {
     if (value === page || isPageTransitionLoading) return;
     isSyncingPageWithUrlRef.current = true;
-    setIsPageTransitionLoading(true);
     setPage(value);
     router.push(getTradingUrl(value));
   };
@@ -987,13 +926,12 @@ export default function TradeAds({
       return;
     }
     setUserTradeAdsPage(value);
-    void refreshUserTradeAds(value, currentUserId);
   };
 
   if (isListRateLimited) {
     return (
       <RateLimitView
-        retryAfter={listRetryAfter ?? undefined}
+        retryAfter={tradeAdsError.retryAfter}
         homeHref="/trading"
         homeLabel="Back to Trading"
       />
@@ -1051,7 +989,10 @@ export default function TradeAds({
           <Button onClick={openLogin}>
             {isAuthenticated ? "Connect Roblox" : "Sign in"}
           </Button>
-          <Button variant="secondary" onClick={() => void refreshTradeAds()}>
+          <Button
+            variant="secondary"
+            onClick={() => void tradeAdsQuery.refetch()}
+          >
             Try again
           </Button>
         </div>
@@ -1118,7 +1059,7 @@ export default function TradeAds({
                 There are no active trade ads right now.
               </p>
               <div className="flex justify-center gap-4">
-                <Button onClick={() => void refreshTradeAds()}>
+                <Button onClick={() => void tradeAdsQuery.refetch()}>
                   Refresh List
                 </Button>
                 <Button onClick={() => handleTabChange("create")}>
@@ -1753,7 +1694,7 @@ export default function TradeAds({
                 <Button
                   onClick={() => {
                     if (currentUserId) {
-                      void refreshUserTradeAds(userTradeAdsPage, currentUserId);
+                      void userTradeAdsQuery.refetch();
                     }
                   }}
                 >

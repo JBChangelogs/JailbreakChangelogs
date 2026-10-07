@@ -1,8 +1,8 @@
 "use client";
 
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
 import type {
@@ -11,7 +11,6 @@ import type {
   MessageUser,
 } from "@/utils/messages/types";
 import {
-  asId,
   asNumber,
   extractItems,
   parseMessageRecord,
@@ -24,6 +23,11 @@ import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 
 const log = createLogger("UI");
 type Setter<T> = Dispatch<SetStateAction<T>>;
+
+export interface ConversationListData {
+  items: ConversationSummary[];
+  total: number | null;
+}
 
 function mergeUserWithLatestPresence(
   current: MessageUser,
@@ -73,11 +77,7 @@ interface UseConversationListOptions {
   routeConversationIdRef: RefObject<string | null>;
   conversations: ConversationSummary[];
   setConversations: Setter<ConversationSummary[]>;
-  setTotalConversations: Setter<number | null>;
   setSelectedUserId: Setter<string | null>;
-  setIsLoadingConversations: Setter<boolean>;
-  setBlockedByMeByUserId: Setter<Record<string, boolean>>;
-  setCurrentUserEnriched: Setter<MessageUser | null>;
   refreshKey: number;
 }
 
@@ -90,79 +90,46 @@ export function useConversationList({
   routeConversationIdRef,
   conversations,
   setConversations,
-  setTotalConversations,
   setSelectedUserId,
-  setIsLoadingConversations,
-  setBlockedByMeByUserId,
-  setCurrentUserEnriched,
   refreshKey,
 }: UseConversationListOptions) {
   const queryClient = useQueryClient();
-  const userLookupCacheRef = useRef<Map<string, MessageUser | null>>(new Map());
-  const userLookupPendingRef = useRef<Map<string, Promise<MessageUser | null>>>(
-    new Map(),
-  );
-  const conversationListRequestKey = `${currentUserId ?? "anonymous"}:${refreshKey}`;
-  const [loadedConversationListKey, setLoadedConversationListKey] = useState<
-    string | null
-  >(null);
-
   const loadUserById = useCallback(
     async (
       id: string,
       options?: { forceRefresh?: boolean },
     ): Promise<MessageUser | null> => {
-      const forceRefresh = options?.forceRefresh === true;
-      if (!forceRefresh && userLookupCacheRef.current.has(id)) {
-        const cached = userLookupCacheRef.current.get(id) ?? null;
-        if (hasAvatarSettingsData(cached)) {
-          return cached;
-        }
+      if (!PUBLIC_API_URL) return null;
+      const queryKey = ["message-user-lookup", id, USER_LOOKUP_FIELDS];
+      const cached = queryClient.getQueryData<MessageUser | null>(queryKey);
+      try {
+        return await queryClient.fetchQuery({
+          queryKey,
+          queryFn: async ({ signal }): Promise<MessageUser | null> => {
+            const { url, headers } = buildApiFetchRequest(
+              PUBLIC_API_URL,
+              `/v2/users/${encodeURIComponent(id)}?fields=${USER_LOOKUP_FIELDS}`,
+            );
+            const response = await fetch(url, {
+              method: "GET",
+              cache: "no-store",
+              headers,
+              signal,
+            });
+            if (!response.ok) return null;
+            return toMessageUser(await response.json());
+          },
+          staleTime:
+            options?.forceRefresh || !hasAvatarSettingsData(cached)
+              ? 0
+              : 5 * 60_000,
+          gcTime: 30 * 60_000,
+          retry: false,
+        });
+      } catch (error) {
+        log.error("Error loading user by id:", error);
+        return null;
       }
-
-      const pending = userLookupPendingRef.current.get(id);
-      if (pending) {
-        return pending;
-      }
-
-      const request = (async () => {
-        try {
-          if (!PUBLIC_API_URL) {
-            return null;
-          }
-
-          return await queryClient.fetchQuery({
-            queryKey: ["message-user-lookup", id, USER_LOOKUP_FIELDS],
-            queryFn: async ({ signal }): Promise<MessageUser | null> => {
-              const { url, headers } = buildApiFetchRequest(
-                PUBLIC_API_URL,
-                `/v2/users/${encodeURIComponent(id)}?fields=${USER_LOOKUP_FIELDS}`,
-              );
-              const response = await fetch(url, {
-                method: "GET",
-                cache: "no-store",
-                headers,
-                signal,
-              });
-              if (!response.ok) return null;
-              return toMessageUser(await response.json());
-            },
-            staleTime: forceRefresh ? 0 : 5 * 60_000,
-            gcTime: 30 * 60_000,
-            retry: false,
-          });
-        } catch (error) {
-          log.error("Error loading user by id:", error);
-          return null;
-        } finally {
-          userLookupPendingRef.current.delete(id);
-        }
-      })();
-
-      userLookupPendingRef.current.set(id, request);
-      const result = await request;
-      userLookupCacheRef.current.set(id, result);
-      return result;
     },
     [queryClient],
   );
@@ -202,7 +169,10 @@ export function useConversationList({
         for (const raw of data) {
           const user = toMessageUser(raw);
           if (user) {
-            userLookupCacheRef.current.set(user.id, user);
+            queryClient.setQueryData(
+              ["message-user-lookup", user.id, USER_LOOKUP_FIELDS],
+              user,
+            );
             result.set(user.id, user);
           }
         }
@@ -215,338 +185,238 @@ export function useConversationList({
     [queryClient],
   );
 
-  useEffect(() => {
-    if (!isAuthenticated || !currentUserMessageUser) {
-      setCurrentUserEnriched(null);
-      return;
-    }
-
-    let isCancelled = false;
-    setCurrentUserEnriched(currentUserMessageUser);
-
-    const prefetchCurrentUser = async () => {
+  useQuery({
+    queryKey: ["message-current-user", currentUserId],
+    enabled: isAuthenticated && !!currentUserMessageUser,
+    queryFn: async () => {
+      if (!currentUserMessageUser) return null;
       const loaded = await loadUserById(currentUserMessageUser.id, {
         forceRefresh: true,
       });
+      return { ...currentUserMessageUser, ...loaded };
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
-      if (!loaded || isCancelled) return;
-
-      setCurrentUserEnriched((prev) => {
-        if (prev && prev.id === currentUserMessageUser.id) {
-          return { ...prev, ...loaded };
-        }
-        return { ...currentUserMessageUser, ...loaded };
+  const conversationListQuery = useQuery({
+    queryKey: ["conversation-list", currentUserId],
+    enabled: isAuthenticated && !!currentUserId,
+    queryFn: async ({ signal }): Promise<ConversationListData> => {
+      if (!PUBLIC_API_URL) throw new Error("Public API URL is not configured");
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/conversations",
+      );
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+        headers,
+        signal,
       });
-    };
+      if (!response.ok)
+        throw new Error(
+          await getResponseErrorMessage(
+            response,
+            "Failed to load conversations",
+          ),
+        );
+      const rawBody = await response.text();
+      const parsed = rawBody ? parseJsonWithLargeIds(rawBody) : null;
+      const items = extractItems(parsed);
+      const parsedTotalConversations =
+        parsed && typeof parsed === "object"
+          ? (parsed as { total_conversations?: unknown }).total_conversations
+          : null;
+      const totalConversationsValue =
+        typeof parsedTotalConversations === "number"
+          ? parsedTotalConversations
+          : null;
 
-    void prefetchCurrentUser();
+      const groupedConversations = new Map<string, Message>();
+      const messageCountByUserId = new Map<string, number>();
+      const unreadCountByUserId = new Map<string, number>();
+      const userHints = new Map<string, MessageUser>();
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [
-    currentUserMessageUser,
-    isAuthenticated,
-    loadUserById,
-    setCurrentUserEnriched,
-  ]);
+      for (const item of items) {
+        const record = item as Record<string, unknown>;
+        const message = parseMessageRecord(item);
+
+        const directUser =
+          toMessageUser(record.user) ||
+          toMessageUser(record.target_user) ||
+          toMessageUser(record.recipient) ||
+          toMessageUser(record.other_user);
+
+        if (directUser && directUser.id !== currentUserId) {
+          userHints.set(directUser.id, directUser);
+        }
+
+        if (!message) continue;
+
+        const otherId =
+          message.senderId === currentUserId
+            ? message.receiverId
+            : message.senderId;
+
+        const recordMessageCount = record.message_count;
+        if (typeof recordMessageCount === "number") {
+          messageCountByUserId.set(otherId, recordMessageCount);
+        }
+
+        const recordUnreadCount = asNumber(record.unread_count);
+        if (recordUnreadCount !== null) {
+          unreadCountByUserId.set(otherId, Math.max(0, recordUnreadCount));
+        }
+
+        const existing = groupedConversations.get(otherId);
+        if (!existing || (message.createdAt ?? 0) > (existing.createdAt ?? 0)) {
+          groupedConversations.set(otherId, message);
+        }
+      }
+
+      const allUserIds = Array.from(groupedConversations.keys());
+      const missingUserIds = allUserIds.filter((id) => {
+        const hinted = userHints.get(id);
+        return !hinted || !hasAvatarSettingsData(hinted);
+      });
+      const loadedUsers = await loadUsersBatch(missingUserIds);
+
+      missingUserIds.forEach((id) => {
+        const loaded = loadedUsers.get(id);
+        if (loaded) {
+          const previous = userHints.get(id);
+          userHints.set(id, {
+            ...(previous ?? {}),
+            ...loaded,
+          });
+        }
+      });
+
+      const summaries: ConversationSummary[] = [];
+      for (const id of allUserIds) {
+        const user = userHints.get(id);
+        if (!user) continue;
+        summaries.push({
+          user,
+          lastMessage: groupedConversations.get(id),
+          messageCount: messageCountByUserId.get(id),
+          unreadCount: unreadCountByUserId.get(id),
+        });
+      }
+      summaries.sort(
+        (a, b) =>
+          (b.lastMessage?.createdAt ?? 0) - (a.lastMessage?.createdAt ?? 0),
+      );
+
+      const previous = queryClient.getQueryData<ConversationListData>([
+        "conversation-list",
+        currentUserId,
+      ]);
+      return {
+        items: summaries.map((summary) => {
+          const current = previous?.items.find(
+            (conversation) => conversation.user.id === summary.user.id,
+          );
+          return current
+            ? {
+                ...summary,
+                user: mergeUserWithLatestPresence(current.user, summary.user),
+              }
+            : summary;
+        }),
+        total: totalConversationsValue,
+      };
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const previousRefreshKeyRef = useRef(refreshKey);
+  useEffect(() => {
+    if (previousRefreshKeyRef.current === refreshKey) return;
+    previousRefreshKeyRef.current = refreshKey;
+    void queryClient.invalidateQueries({
+      queryKey: ["conversation-list", currentUserId],
+    });
+  }, [refreshKey, currentUserId, queryClient]);
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) {
-      setConversations([]);
-      setTotalConversations(null);
       setSelectedUserId(null);
-      setLoadedConversationListKey(null);
       return;
     }
-
-    let isCancelled = false;
-
-    const fetchConversations = async () => {
-      try {
-        setIsLoadingConversations(true);
-        if (!PUBLIC_API_URL) {
-          throw new Error("Public API URL is not configured");
-        }
-
-        const parsed = await queryClient.fetchQuery({
-          queryKey: ["conversations", currentUserId, refreshKey],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              "/v2/conversations",
-            );
-            const response = await fetch(url, {
-              method: "GET",
-              credentials: "include",
-              cache: "no-store",
-              headers,
-              signal,
-            });
-            if (!response.ok) {
-              throw new Error(
-                await getResponseErrorMessage(
-                  response,
-                  "Failed to load conversations",
-                ),
-              );
-            }
-            const rawBody = await response.text();
-            return rawBody ? parseJsonWithLargeIds(rawBody) : null;
-          },
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
-        });
-        const items = extractItems(parsed);
-        const parsedTotalConversations =
-          parsed && typeof parsed === "object"
-            ? (parsed as { total_conversations?: unknown }).total_conversations
-            : null;
-        const totalConversationsValue =
-          typeof parsedTotalConversations === "number"
-            ? parsedTotalConversations
-            : null;
-
-        const groupedConversations = new Map<string, Message>();
-        const messageCountByUserId = new Map<string, number>();
-        const unreadCountByUserId = new Map<string, number>();
-        const userHints = new Map<string, MessageUser>();
-
-        for (const item of items) {
-          const record = item as Record<string, unknown>;
-          const message = parseMessageRecord(item);
-
-          const directUser =
-            toMessageUser(record.user) ||
-            toMessageUser(record.target_user) ||
-            toMessageUser(record.recipient) ||
-            toMessageUser(record.other_user);
-
-          if (directUser && directUser.id !== currentUserId) {
-            userHints.set(directUser.id, directUser);
-          }
-
-          if (!message) continue;
-
-          const otherId =
-            message.senderId === currentUserId
-              ? message.receiverId
-              : message.senderId;
-
-          const recordMessageCount = record.message_count;
-          if (typeof recordMessageCount === "number") {
-            messageCountByUserId.set(otherId, recordMessageCount);
-          }
-
-          const recordUnreadCount = asNumber(record.unread_count);
-          if (recordUnreadCount !== null) {
-            unreadCountByUserId.set(otherId, Math.max(0, recordUnreadCount));
-          }
-
-          const existing = groupedConversations.get(otherId);
-          if (
-            !existing ||
-            (message.createdAt ?? 0) > (existing.createdAt ?? 0)
-          ) {
-            groupedConversations.set(otherId, message);
-          }
-        }
-
-        const allUserIds = Array.from(groupedConversations.keys());
-        const missingUserIds = allUserIds.filter((id) => {
-          const hinted = userHints.get(id);
-          return !hinted || !hasAvatarSettingsData(hinted);
-        });
-        const loadedUsers = await loadUsersBatch(missingUserIds);
-
-        missingUserIds.forEach((id) => {
-          const loaded = loadedUsers.get(id);
-          if (loaded) {
-            const previous = userHints.get(id);
-            userHints.set(id, {
-              ...(previous ?? {}),
-              ...loaded,
-            });
-          }
-        });
-
-        const summaries: ConversationSummary[] = [];
-        for (const id of allUserIds) {
-          const user = userHints.get(id);
-          if (!user) continue;
-          summaries.push({
-            user,
-            lastMessage: groupedConversations.get(id),
-            messageCount: messageCountByUserId.get(id),
-            unreadCount: unreadCountByUserId.get(id),
-          });
-        }
-        summaries.sort(
-          (a, b) =>
-            (b.lastMessage?.createdAt ?? 0) - (a.lastMessage?.createdAt ?? 0),
-        );
-
-        if (isCancelled) return;
-
-        setConversations((prev) =>
-          summaries.map((summary) => {
-            const current = prev.find(
-              (conversation) => conversation.user.id === summary.user.id,
-            );
-            return current
-              ? {
-                  ...summary,
-                  user: mergeUserWithLatestPresence(current.user, summary.user),
-                }
-              : summary;
-          }),
-        );
-        setTotalConversations(totalConversationsValue);
-
-        setSelectedUserId((prev) => {
-          if (prev && summaries.some((summary) => summary.user.id === prev)) {
-            return prev;
-          }
-          // Keep the selection if it matches the current route — ensureRouteConversationUser
-          // will add the user to conversations. Nulling it out here causes a null→restore
-          // cycle that makes every selectedUserId-dependent effect fire twice.
-          if (prev && prev === routeConversationIdRef.current) {
-            return prev;
-          }
-          return null;
-        });
-      } catch (error) {
-        if (isCancelled) return;
-        log.error("Error fetching conversations:", error);
-        setConversations([]);
-        setTotalConversations(null);
-        setSelectedUserId(null);
-
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "Failed to load conversations",
-        );
-      } finally {
-        if (!isCancelled) {
-          setIsLoadingConversations(false);
-          setLoadedConversationListKey(conversationListRequestKey);
-        }
-      }
-    };
-
-    void fetchConversations();
-
-    return () => {
-      isCancelled = true;
-    };
+    if (!conversationListQuery.isSuccess) return;
+    setSelectedUserId((previous) =>
+      previous &&
+      (conversationListQuery.data.items.some(
+        (summary) => summary.user.id === previous,
+      ) ||
+        previous === routeConversationIdRef.current)
+        ? previous
+        : null,
+    );
   }, [
-    conversationListRequestKey,
-    currentUserId,
     isAuthenticated,
-    loadUsersBatch,
-    queryClient,
-    refreshKey,
+    currentUserId,
+    conversationListQuery.isSuccess,
+    conversationListQuery.data,
     routeConversationIdRef,
-    setConversations,
-    setIsLoadingConversations,
     setSelectedUserId,
-    setTotalConversations,
   ]);
-
   useEffect(() => {
-    if (!isAuthenticated || !currentUserId || !selectedUserId) {
-      setBlockedByMeByUserId({});
-      return;
-    }
+    if (!conversationListQuery.error) return;
+    log.error("Error fetching conversations:", conversationListQuery.error);
+    toast.error(conversationListQuery.error.message);
+  }, [conversationListQuery.error, conversationListQuery.errorUpdatedAt]);
 
-    let isCancelled = false;
-
-    const fetchBlockedUsers = async () => {
-      try {
-        if (!PUBLIC_API_URL) {
-          throw new Error("Public API URL is not configured");
-        }
-
-        const parsed = await queryClient.fetchQuery({
-          queryKey: ["blocked-users", currentUserId],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              "/v2/users/me/blocked-users",
-            );
-            const response = await fetch(url, {
-              method: "GET",
-              credentials: "include",
-              cache: "no-store",
-              headers,
-              signal,
-            });
-            if (!response.ok) {
-              const body = await response.json().catch(() => ({}));
-              log.error("fetch blocked users failed", {
-                status: response.status,
-                body,
-              });
-              throw new Error("Failed to fetch blocked users");
-            }
-            const rawBody = await response.text();
-            return rawBody ? parseJsonWithLargeIds(rawBody) : null;
-          },
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
+  const blockedUsersQuery = useQuery({
+    queryKey: ["blocked-users", currentUserId],
+    enabled: isAuthenticated && !!currentUserId && !!selectedUserId,
+    queryFn: async ({ signal }): Promise<unknown> => {
+      if (!PUBLIC_API_URL) throw new Error("Public API URL is not configured");
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/users/me/blocked-users",
+      );
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+        headers,
+        signal,
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch blocked users failed", {
+          status: response.status,
+          body,
         });
-        const blockedUsers = Array.isArray(
-          (parsed as { blocked_users?: unknown[] } | null)?.blocked_users,
-        )
-          ? ((parsed as { blocked_users: unknown[] }).blocked_users ?? [])
-          : [];
-
-        const nextMap: Record<string, boolean> = {};
-        for (const item of blockedUsers) {
-          if (!item || typeof item !== "object") continue;
-          const record = item as Record<string, unknown>;
-          const blockedUserId = record.blocked_user_id;
-          if (
-            typeof blockedUserId === "string" ||
-            typeof blockedUserId === "number"
-          ) {
-            nextMap[asId(blockedUserId)] = true;
-          }
-        }
-
-        if (!isCancelled) {
-          setBlockedByMeByUserId(nextMap);
-        }
-      } catch (error) {
-        if (!isCancelled) {
-          log.error("Error fetching blocked users:", error);
-          setBlockedByMeByUserId({});
-        }
+        throw new Error("Failed to fetch blocked users");
       }
-    };
-
-    void fetchBlockedUsers();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [
-    currentUserId,
-    isAuthenticated,
-    queryClient,
-    selectedUserId,
-    setBlockedByMeByUserId,
-  ]);
+      const rawBody = await response.text();
+      return rawBody ? parseJsonWithLargeIds(rawBody) : null;
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  useEffect(() => {
+    if (blockedUsersQuery.error)
+      log.error("Error fetching blocked users:", blockedUsersQuery.error);
+  }, [blockedUsersQuery.error]);
 
   useEffect(() => {
     if (
       !isAuthenticated ||
       !currentUserId ||
       !routeConversationId ||
-      loadedConversationListKey !== conversationListRequestKey
+      !conversationListQuery.isFetched
     ) {
       return;
     }
@@ -593,11 +463,10 @@ export function useConversationList({
     };
   }, [
     conversations,
-    conversationListRequestKey,
     currentUserId,
     isAuthenticated,
     loadUserById,
-    loadedConversationListKey,
+    conversationListQuery.isFetched,
     routeConversationId,
     setConversations,
     setSelectedUserId,

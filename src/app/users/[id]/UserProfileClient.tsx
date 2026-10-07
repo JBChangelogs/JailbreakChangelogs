@@ -241,8 +241,6 @@ export default function UserProfileClient({
   const followingCount = profileData?.followingCount ?? 0;
   const bio = profileData?.bio ?? null;
   const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
-  const [canMessageFromProfile, setCanMessageFromProfile] = useState(false);
-  const [isBlockedByMe, setIsBlockedByMe] = useState(false);
   const [isBlockingAction, setIsBlockingAction] = useState(false);
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
@@ -374,148 +372,96 @@ export default function UserProfileClient({
     ) ?? false;
   const isLoadingFollow = isUpdatingFollow || followingQuery.isLoading;
 
-  useEffect(() => {
-    if (
-      !isAuthenticatedUser ||
-      !currentUserId ||
-      !profileUserId ||
-      currentUserId === profileUserId
-    ) {
-      setIsBlockedByMe(false);
-      return;
-    }
-
-    let isCancelled = false;
-
-    const fetchBlockedStatus = async () => {
-      try {
-        if (!PUBLIC_API_URL) {
-          throw new Error("Public API URL is not configured");
-        }
-
-        const parsed = await queryClient.fetchQuery({
-          queryKey: ["blocked-users", currentUserId],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              "/v2/users/me/blocked-users",
-            );
-            const response = await fetch(url, {
-              method: "GET",
-              credentials: "include",
-              cache: "no-store",
-              headers,
-              signal,
-            });
-            if (!response.ok) {
-              const body = await response.json().catch(() => ({}));
-              log.error("fetch blocked users failed", {
-                status: response.status,
-                body,
-              });
-              throw new Error("Failed to fetch blocked users");
-            }
-            const rawBody = await response.text();
-            return rawBody ? parseJsonWithLargeIds(rawBody) : null;
-          },
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
+  const canCheckProfilePermissions = Boolean(
+    isAuthenticatedUser &&
+    currentUserId &&
+    profileUserId &&
+    currentUserId !== profileUserId,
+  );
+  const blockedUsersQuery = useQuery({
+    queryKey: ["blocked-users", currentUserId],
+    enabled: canCheckProfilePermissions,
+    queryFn: async ({ signal }): Promise<unknown> => {
+      if (!PUBLIC_API_URL) throw new Error("Public API URL is not configured");
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/users/me/blocked-users",
+      );
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+        headers,
+        signal,
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch blocked users failed", {
+          status: response.status,
+          body,
         });
-        const blockedUsers = Array.isArray(
-          (parsed as { blocked_users?: unknown[] } | null)?.blocked_users,
-        )
-          ? ((parsed as { blocked_users: unknown[] }).blocked_users ?? [])
-          : [];
-
-        const isBlocked = blockedUsers.some((entry) => {
-          if (!entry || typeof entry !== "object") return false;
-          const blockedUserId = (entry as Record<string, unknown>)
-            .blocked_user_id;
-          return String(blockedUserId) === profileUserId;
-        });
-
-        if (!isCancelled) {
-          setIsBlockedByMe(isBlocked);
-        }
-      } catch (error) {
-        if (!isCancelled) {
-          log.error("Error fetching blocked status:", error);
-          setIsBlockedByMe(false);
-        }
+        throw new Error("Failed to fetch blocked users");
       }
-    };
-
-    void fetchBlockedStatus();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [currentUserId, isAuthenticatedUser, profileUserId, queryClient]);
+      const rawBody = await response.text();
+      return rawBody ? parseJsonWithLargeIds(rawBody) : null;
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const blockedUsers = (
+    blockedUsersQuery.data as { blocked_users?: unknown[] } | null
+  )?.blocked_users;
+  const isBlockedByMe =
+    canCheckProfilePermissions &&
+    Array.isArray(blockedUsers) &&
+    blockedUsers.some(
+      (entry) =>
+        entry &&
+        typeof entry === "object" &&
+        String((entry as Record<string, unknown>).blocked_user_id) ===
+          profileUserId,
+    );
+  const messageEligibilityQuery = useQuery({
+    queryKey: ["message-eligibility", currentUserId, profileUserId],
+    enabled: canCheckProfilePermissions,
+    queryFn: async ({ signal }) => {
+      if (!PUBLIC_API_URL) throw new Error("Public API URL is not configured");
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/conversations/${encodeURIComponent(profileUserId!)}`,
+      );
+      const response = await fetch(url, {
+        method: "HEAD",
+        credentials: "include",
+        cache: "no-store",
+        headers,
+        signal,
+      });
+      return response.status;
+    },
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const canMessageFromProfile =
+    !canCheckProfilePermissions ||
+    messageEligibilityQuery.isError ||
+    messageEligibilityQuery.data === 200;
 
   useEffect(() => {
-    if (
-      !isAuthenticatedUser ||
-      !currentUserId ||
-      !profileUserId ||
-      currentUserId === profileUserId
-    ) {
-      setCanMessageFromProfile(true);
-      return;
-    }
-
-    let isCancelled = false;
-    setCanMessageFromProfile(false);
-
-    const checkCanMessage = async () => {
-      try {
-        if (!PUBLIC_API_URL) {
-          throw new Error("Public API URL is not configured");
-        }
-
-        const status = await queryClient.fetchQuery({
-          queryKey: ["message-eligibility", currentUserId, profileUserId],
-          queryFn: async ({ signal }) => {
-            const { url, headers } = buildApiFetchRequest(
-              PUBLIC_API_URL,
-              `/v2/conversations/${encodeURIComponent(profileUserId)}`,
-            );
-            const response = await fetch(url, {
-              method: "HEAD",
-              credentials: "include",
-              cache: "no-store",
-              headers,
-              signal,
-            });
-            return response.status;
-          },
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
-        });
-
-        if (isCancelled) return;
-        setCanMessageFromProfile(status === 200);
-      } catch (error) {
-        if (isCancelled) return;
-        log.error("Error checking profile messaging permission:", error);
-        // Fallback: keep message button visible unless backend explicitly forbids.
-        setCanMessageFromProfile(true);
-      }
-    };
-
-    void checkCanMessage();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [
-    currentUserId,
-    isAuthenticatedUser,
-    isBlockedByMe,
-    profileUserId,
-    queryClient,
-  ]);
+    if (blockedUsersQuery.error)
+      log.error("Error fetching blocked status:", blockedUsersQuery.error);
+  }, [blockedUsersQuery.error]);
+  useEffect(() => {
+    if (messageEligibilityQuery.error)
+      log.error(
+        "Error checking profile messaging permission:",
+        messageEligibilityQuery.error,
+      );
+  }, [messageEligibilityQuery.error]);
 
   const handleBlockToggle = async () => {
     if (
@@ -564,7 +510,29 @@ export default function UserProfileClient({
         throw new Error(fallbackErrorMessage);
       }
 
-      setIsBlockedByMe((prev) => !prev);
+      const blockedQueryKey = ["blocked-users", currentUserId];
+      await queryClient.cancelQueries({ queryKey: blockedQueryKey });
+      queryClient.setQueryData<{ blocked_users?: unknown[] }>(
+        blockedQueryKey,
+        (previous) => {
+          const entries = Array.isArray(previous?.blocked_users)
+            ? previous.blocked_users
+            : [];
+          const remaining = entries.filter(
+            (entry) =>
+              !entry ||
+              typeof entry !== "object" ||
+              String((entry as Record<string, unknown>).blocked_user_id) !==
+                user.id,
+          );
+          return {
+            ...previous,
+            blocked_users: shouldBlock
+              ? [...remaining, { blocked_user_id: user.id }]
+              : remaining,
+          };
+        },
+      );
       void queryClient.invalidateQueries({
         queryKey: ["blocked-users", currentUserId],
       });

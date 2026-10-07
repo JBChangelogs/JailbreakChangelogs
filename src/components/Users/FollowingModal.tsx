@@ -1,6 +1,6 @@
 import { createLogger } from "@/services/logger";
 import React, { useState, useEffect, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const log = createLogger("UI");
 import {
@@ -22,7 +22,6 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   profileSocialQueryOptions,
   type ProfileSocialUser as User,
-  type ProfileFollowing as Following,
 } from "@/utils/api/profileSocialQueries";
 
 interface FollowingModalProps {
@@ -47,136 +46,60 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
   userData,
 }) => {
   const queryClient = useQueryClient();
-  const [following, setFollowing] = useState<Following[]>([]);
-  const [followingDetails, setFollowingDetails] = useState<{
-    [key: string]: User;
-  }>({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isPrivate, setIsPrivate] = useState(false);
-  const [followingStatus, setFollowingStatus] = useState<{
-    [key: string]: boolean;
-  }>({});
-  const [loadingFollow, setLoadingFollow] = useState<{
-    [key: string]: boolean;
-  }>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [loadingFollow, setLoadingFollow] = useState<Record<string, boolean>>(
+    {},
+  );
+  const isPrivate =
+    userData.settings_v2?.hide_following === true && !isOwnProfile;
+  const listQuery = useQuery({
+    ...profileSocialQueryOptions("following", userId, currentUserId),
+    enabled: isOpen && !isPrivate,
+  });
+  const viewerFollowingOptions = profileSocialQueryOptions(
+    "following",
+    currentUserId ?? "",
+    currentUserId,
+  );
+  const viewerFollowingQuery = useQuery({
+    ...viewerFollowingOptions,
+    enabled: isOpen && Boolean(currentUserId),
+  });
+  const following = isPrivate ? [] : (listQuery.data ?? []);
+  const followingStatus = Object.fromEntries(
+    (viewerFollowingQuery.data ?? []).map((entry) => [
+      entry.following_id,
+      true,
+    ]),
+  );
+  const loading = !isPrivate && listQuery.isLoading;
+  const error = listQuery.isError ? "Failed to load following" : null;
 
-  // Store callbacks and values in refs to avoid unnecessary re-renders
+  // Inline parent callbacks change on render; notify only when query data changes.
   const onCountUpdateRef = useRef(onCountUpdate);
   const onCloseRef = useRef(onClose);
-  const isOwnProfileRef = useRef(isOwnProfile);
-  const userDataRef = useRef(userData);
-
   useEffect(() => {
     onCountUpdateRef.current = onCountUpdate;
     onCloseRef.current = onClose;
-    isOwnProfileRef.current = isOwnProfile;
-    userDataRef.current = userData;
-  }, [onCountUpdate, onClose, isOwnProfile, userData]);
+  }, [onCountUpdate, onClose]);
 
   useEffect(() => {
-    let ignore = false;
+    if (!isOpen || isPrivate || !listQuery.isSuccess || listQuery.isFetching)
+      return;
+    onCountUpdateRef.current?.(listQuery.data.length);
+    if (listQuery.data.length === 0) onCloseRef.current();
+  }, [
+    isOpen,
+    isPrivate,
+    listQuery.data,
+    listQuery.isSuccess,
+    listQuery.isFetching,
+  ]);
 
-    const fetchFollowing = async () => {
-      if (!isOpen) return;
-
-      setLoading(true);
-      setError(null);
-      setIsPrivate(false);
-
-      try {
-        // Check privacy settings using the passed userData
-        if (
-          userDataRef.current.settings_v2?.hide_following === true &&
-          !isOwnProfileRef.current
-        ) {
-          setIsPrivate(true);
-          setLoading(false);
-          return;
-        }
-
-        const data = await queryClient.fetchQuery(
-          profileSocialQueryOptions("following", userId, currentUserId),
-        );
-        if (ignore) return;
-
-        onCountUpdateRef.current?.(data.length);
-
-        if (data.length === 0) {
-          setFollowing([]);
-          setFollowingDetails({});
-          onCloseRef.current();
-          return;
-        }
-
-        setFollowing(data);
-
-        // Initialize following status for all users in the list
-        const viewerFollowing = !currentUserId
-          ? []
-          : currentUserId === userId
-            ? data
-            : await queryClient
-                .fetchQuery(
-                  profileSocialQueryOptions(
-                    "following",
-                    currentUserId,
-                    currentUserId,
-                  ),
-                )
-                .catch(() => []);
-        if (ignore) return;
-        const initialFollowingStatus = viewerFollowing.reduce(
-          (acc, followingItem) => {
-            if (followingItem.following_id) {
-              acc[followingItem.following_id] = true;
-            }
-            return acc;
-          },
-          {} as { [key: string]: boolean },
-        );
-        setFollowingStatus(initialFollowingStatus);
-
-        // User data is now included in the API response, so we can use it directly
-        const detailsMap: Record<string, User> = {};
-        data.forEach((followingItem: Following) => {
-          if (followingItem.user && followingItem.user.id) {
-            detailsMap[followingItem.following_id] = {
-              id: followingItem.user.id,
-              username: followingItem.user.username,
-              avatar: followingItem.user.avatar,
-              global_name: followingItem.user.global_name,
-              usernumber: followingItem.user.usernumber || 0,
-              accent_color: followingItem.user.accent_color || "None",
-              custom_avatar: followingItem.user.custom_avatar,
-              settings_v2: followingItem.user.settings_v2,
-              premiumtype: followingItem.user.premiumtype,
-            };
-          }
-        });
-
-        setFollowingDetails(detailsMap);
-      } catch (err) {
-        if (ignore) return;
-        log.error("Error fetching following", err);
-        setError("Failed to load following");
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
-    };
-
-    // Reuse fresh list data when the modal opens.
-    if (isOpen) {
-      fetchFollowing();
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, [isOpen, userId, currentUserId, queryClient]);
+  useEffect(() => {
+    if (listQuery.error)
+      log.error("Error fetching following:", listQuery.error);
+  }, [listQuery.error]);
 
   const handleFollowToggle = async (followingId: string) => {
     if (!currentUserId || loadingFollow[followingId]) return;
@@ -212,10 +135,25 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
         );
       }
 
-      setFollowingStatus((prev) => ({
-        ...prev,
-        [followingId]: !isCurrentlyFollowing,
-      }));
+      await queryClient.cancelQueries({
+        queryKey: viewerFollowingOptions.queryKey,
+        exact: true,
+      });
+      queryClient.setQueryData(viewerFollowingOptions.queryKey, (data = []) =>
+        isCurrentlyFollowing
+          ? data.filter((entry) => entry.following_id !== followingId)
+          : [
+              ...data,
+              {
+                user_id: currentUserId,
+                following_id: followingId,
+                created_at: new Date().toISOString(),
+                user: following.find(
+                  (entry) => entry.following_id === followingId,
+                )?.user,
+              },
+            ],
+      );
       void queryClient.invalidateQueries({
         queryKey: ["following", currentUserId],
       });
@@ -235,9 +173,6 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
           location: "Following Modal",
         },
       );
-
-      // Refresh following list after successful follow/unfollow
-      // The useEffect will handle the refetch when isOpen changes
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -250,7 +185,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
   };
 
   const filteredFollowing = following.filter((following) => {
-    const user = followingDetails[following.following_id];
+    const user = following.user;
     if (!user) return false;
     const searchLower = searchQuery.toLowerCase();
     return (
@@ -320,7 +255,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
               ) : (
                 <div className="space-y-1 sm:space-y-4">
                   {filteredFollowing.map((followingItem) => {
-                    const user = followingDetails[followingItem.following_id];
+                    const user = followingItem.user;
                     if (!user) return null;
 
                     return (
@@ -367,7 +302,10 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                             }
                             size="sm"
                             onClick={() => handleFollowToggle(user.id)}
-                            disabled={loadingFollow[user.id]}
+                            disabled={
+                              loadingFollow[user.id] ||
+                              viewerFollowingQuery.isLoading
+                            }
                             className="ml-2"
                           >
                             {loadingFollow[user.id]

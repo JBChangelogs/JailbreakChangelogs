@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import Image from "next/image";
@@ -78,16 +78,10 @@ export default function OGNotificationSheet({
 
   // State management
   const queryClient = useQueryClient();
-  const [items, setItems] = useState<PartialItem[]>([]);
-  const [notifiedItemIds, setNotifiedItemIds] = useState<string[]>([]);
-  const [isLoadingItems, setIsLoadingItems] = useState(false);
-  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const [processingItemId, setProcessingItemId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [avatarError, setAvatarError] = useState(false);
-  const [emailLinked, setEmailLinked] = useState(false);
-  const [emailNotifEnabled, setEmailNotifEnabled] = useState(false);
   const [activeTab, setActiveTab] = useState<"watching" | "all">("watching");
   const [page, setPage] = useState(1);
   const limitMap: Record<number, number> = { 0: 3, 1: 5, 2: 10, 3: 15 };
@@ -96,124 +90,92 @@ export default function OGNotificationSheet({
   const { modalState, openModal, closeModal } = useSupporterModal();
   const sheetContentRef = useRef<HTMLDivElement | null>(null);
 
-  /**
-   * Fetches the partial items list from the API
-   */
-  const fetchItems = useCallback(async () => {
-    setIsLoadingItems(true);
-    try {
-      const data = await queryClient.fetchQuery({
-        queryKey: ["items-partial", "name,type"],
-        queryFn: ({ signal }) =>
-          fetchPartialItems<PartialItem>(["name", "type"], signal),
-        staleTime: 5 * 60_000,
-        gcTime: 30 * 60_000,
-        retry: false,
-      });
-      setItems(data);
-    } catch (error) {
-      log.error("Error fetching items:", error);
+  const enabled = isOpen && !!user?.roblox_id;
+  const itemsQuery = useQuery({
+    queryKey: ["items-partial", "name,type"],
+    queryFn: ({ signal }) =>
+      fetchPartialItems<PartialItem>(["name", "type"], signal),
+    enabled,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const notificationsQuery = useQuery({
+    queryKey: ["og-notifications", user?.roblox_id],
+    queryFn: async ({ signal }): Promise<string[]> => {
+      const response = await fetch(
+        `/api/og/notify?user_id=${user?.roblox_id}`,
+        { cache: "no-store", signal },
+      );
+      const data = await response.json().catch(() => null);
+      if (!response.ok) {
+        if (response.status === 429) log.info("OG Notify limit reached (GET)");
+        else
+          log.error("fetch notifications failed", {
+            status: response.status,
+            body: data,
+          });
+        throw new Error("Failed to fetch notifications");
+      }
+      return Array.isArray(data) ? data.map(String) : [];
+    },
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const emailLinkedQuery = useQuery({
+    queryKey: ["email-linked-status", user?.id],
+    queryFn: fetchEmailLinkedStatus,
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const emailNotificationQuery = useQuery({
+    queryKey: ["email-notification-status", user?.id],
+    queryFn: fetchEmailNotificationStatus,
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const items = useMemo(() => itemsQuery.data ?? [], [itemsQuery.data]);
+  const notifiedItemIds = useMemo(
+    () => notificationsQuery.data ?? [],
+    [notificationsQuery.data],
+  );
+  const isLoadingItems = itemsQuery.isLoading;
+  const isLoadingNotifications = notificationsQuery.isLoading;
+  const emailLinked = emailLinkedQuery.data?.linked === true;
+  const emailNotifEnabled = emailNotificationQuery.data?.enabled === true;
+
+  useEffect(() => {
+    if (isOpen) setAvatarError(false);
+  }, [isOpen, user?.roblox_id]);
+
+  useEffect(() => {
+    if (itemsQuery.error) {
+      log.error("Error fetching items:", itemsQuery.error);
       toast.error("Failed to load items", {
         description: "Please check your connection and try again.",
       });
-    } finally {
-      setIsLoadingItems(false);
     }
-  }, [queryClient]);
+  }, [itemsQuery.error, itemsQuery.errorUpdatedAt]);
 
-  /**
-   * Fetches the user's current notification preferences
-   */
-  const fetchNotifications = useCallback(async () => {
-    if (!user?.roblox_id) return;
-
-    setIsLoadingNotifications(true);
-    try {
-      const { status, ok, data } = await queryClient.fetchQuery({
-        queryKey: ["og-notifications", user.roblox_id],
-        queryFn: async ({ signal }) => {
-          const response = await fetch(
-            `/api/og/notify?user_id=${user.roblox_id}`,
-            {
-              cache: "no-store",
-              signal,
-            },
-          );
-          return {
-            status: response.status,
-            ok: response.ok,
-            data: await response.json().catch(() => null),
-          };
-        },
-        staleTime: 0,
-        gcTime: 0,
-        retry: false,
-      });
-      if (!ok) {
-        if (status === 429) {
-          log.info("OG Notify limit reached (GET)");
-        } else {
-          log.error("fetch notifications failed", {
-            status,
-            body: data,
-          });
-        }
-        throw new Error("Failed to fetch notifications");
-      }
-      // Ensure we have an array of strings
-      const ids = Array.isArray(data) ? data.map((id) => String(id)) : [];
-      setNotifiedItemIds(ids);
-    } catch (error) {
-      log.error("Error fetching notifications:", error);
-    } finally {
-      setIsLoadingNotifications(false);
-    }
-  }, [user?.roblox_id, queryClient]);
-
-  /**
-   * Fetches whether the user has an email linked and email notifications enabled
-   */
-  const fetchEmailStatus = useCallback(async () => {
-    try {
-      const [linkedData, enabledData] = await Promise.all([
-        queryClient.fetchQuery({
-          queryKey: ["email-linked-status", user?.id],
-          queryFn: fetchEmailLinkedStatus,
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
-        }),
-        queryClient.fetchQuery({
-          queryKey: ["email-notification-status", user?.id],
-          queryFn: fetchEmailNotificationStatus,
-          staleTime: 0,
-          gcTime: 0,
-          retry: false,
-        }),
-      ]);
-      setEmailLinked(linkedData.linked === true);
-      setEmailNotifEnabled(enabledData.enabled === true);
-    } catch (error) {
-      log.error("Error fetching email status:", error);
-    }
-  }, [queryClient, user?.id]);
-
-  // Fetch items when sheet opens
   useEffect(() => {
-    if (isOpen && user?.roblox_id) {
-      // Clear previous states to avoid flashes of old data
-      setAvatarError(false);
-      fetchItems();
-      fetchNotifications();
-      fetchEmailStatus();
-    }
-  }, [
-    isOpen,
-    user?.roblox_id,
-    fetchItems,
-    fetchNotifications,
-    fetchEmailStatus,
-  ]);
+    if (notificationsQuery.error)
+      log.error("Error fetching notifications:", notificationsQuery.error);
+  }, [notificationsQuery.error, notificationsQuery.errorUpdatedAt]);
+
+  useEffect(() => {
+    const error = emailLinkedQuery.error ?? emailNotificationQuery.error;
+    if (error) log.error("Error fetching email status:", error);
+  }, [emailLinkedQuery.error, emailNotificationQuery.error]);
 
   /**
    * Toggles notification for a specific item
@@ -315,13 +277,16 @@ export default function OGNotificationSheet({
       }
 
       await response.json();
-      void queryClient.invalidateQueries({
-        queryKey: ["og-notifications", user.roblox_id],
-      });
+      const queryKey = ["og-notifications", user.roblox_id];
+      await queryClient.cancelQueries({ queryKey });
+      queryClient.setQueryData<string[]>(queryKey, (previous = []) =>
+        isCurrentlyNotified
+          ? previous.filter((id) => id !== itemIdStr)
+          : [...new Set([...previous, itemIdStr])],
+      );
+      void queryClient.invalidateQueries({ queryKey });
 
-      // Update local state
       if (isCurrentlyNotified) {
-        setNotifiedItemIds((prev) => prev.filter((id) => id !== itemIdStr));
         toast.success("Notification Removed", {
           id: toastId,
           description: `You will no longer be notified when your ${item.name} (${item.type}) is found.`,
@@ -333,7 +298,6 @@ export default function OGNotificationSheet({
           itemType: item.type,
         });
       } else {
-        setNotifiedItemIds((prev) => [...prev, itemIdStr]);
         toast.success("Notification Added", {
           id: toastId,
           description: `You will now be notified when your ${item.name} (${item.type}) is found!`,

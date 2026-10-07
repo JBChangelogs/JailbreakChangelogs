@@ -1418,7 +1418,7 @@ export async function fetchItemFavorites(id: string) {
   }
 }
 
-export async function fetchUserFavorites(userId: string) {
+export async function fetchUserFavorites(userId: string, throwOnError = false) {
   try {
     const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL,
@@ -1440,6 +1440,7 @@ export async function fetchUserFavorites(userId: string) {
     return data;
   } catch (err) {
     log.error("Error fetching user favorites", err);
+    if (throwOnError) throw err;
     return null;
   }
 }

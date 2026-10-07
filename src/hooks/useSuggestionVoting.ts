@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
@@ -12,7 +12,6 @@ import { parseBan, showBanToast } from "@/utils/api/ban";
 import type {
   Suggestion,
   SuggestionsResponse,
-  SuggestionUser,
 } from "@/components/Items/Suggestions/types";
 
 const log = createLogger("API");
@@ -20,6 +19,7 @@ const log = createLogger("API");
 type AuthContextValue = ReturnType<typeof useAuthContext>;
 
 interface UseSuggestionVotingOptions {
+  suggestions: Suggestion[];
   setSuggestions: Dispatch<SetStateAction<Suggestion[]>>;
   user: AuthContextValue["user"];
   isAuthenticated: boolean;
@@ -30,6 +30,7 @@ interface UseSuggestionVotingOptions {
 }
 
 export function useSuggestionVoting({
+  suggestions,
   setSuggestions,
   user,
   isAuthenticated,
@@ -205,13 +206,20 @@ export function useSuggestionVoting({
   // Voters modal state
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
-  const openVotersSuggestionIdRef = useRef<number | null>(null);
-  const [activeVoters, setActiveVoters] = useState<{
-    up: { created_at: number; user: SuggestionUser }[];
-    down: { created_at: number; user: SuggestionUser }[];
-    upCount: number;
-    downCount: number;
-  } | null>(null);
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<
+    number | null
+  >(null);
+  const selectedSuggestion = votersOpen
+    ? suggestions.find((suggestion) => suggestion.id === selectedSuggestionId)
+    : undefined;
+  const activeVoters = selectedSuggestion
+    ? {
+        up: selectedSuggestion.votes.upvotes,
+        down: selectedSuggestion.votes.downvotes,
+        upCount: selectedSuggestion.upvotes,
+        downCount: selectedSuggestion.downvotes,
+      }
+    : null;
 
   const openVotersModal = (
     suggestion: Suggestion,
@@ -220,29 +228,10 @@ export function useSuggestionVoting({
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    openVotersSuggestionIdRef.current = suggestion.id;
-    setActiveVoters({
-      up: suggestion.votes.upvotes,
-      down: suggestion.votes.downvotes,
-      upCount: suggestion.upvotes,
-      downCount: suggestion.downvotes,
-    });
+    setSelectedSuggestionId(suggestion.id);
     setVotersTab(tab);
     setVotersOpen(true);
   };
-
-  const syncActiveVoters = useCallback(
-    (id: number, votes: Suggestion["votes"]) => {
-      if (openVotersSuggestionIdRef.current !== id) return;
-      setActiveVoters({
-        up: votes.upvotes,
-        down: votes.downvotes,
-        upCount: votes.upvotes.length,
-        downCount: votes.downvotes.length,
-      });
-    },
-    [],
-  );
 
   const silentRefreshVotes = useCallback(
     async (id?: number | null) => {
@@ -278,7 +267,6 @@ export function useSuggestionVoting({
                 : suggestion,
             ),
           );
-          syncActiveVoters(id, fresh);
           return;
         }
 
@@ -322,7 +310,7 @@ export function useSuggestionVoting({
         // Stale vote counts are acceptable until the next refresh.
       }
     },
-    [page, queryClient, setSuggestions, sort, syncActiveVoters],
+    [page, queryClient, setSuggestions, sort],
   );
 
   useEffect(() => {
@@ -353,6 +341,5 @@ export function useSuggestionVoting({
     openVotersModal,
     setVotersOpen,
     setVotersTab,
-    openVotersSuggestionIdRef,
   };
 }

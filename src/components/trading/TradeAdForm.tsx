@@ -69,7 +69,11 @@ interface TradeAdFormProps {
   inventoryError?: string | null;
   inventoryCopies?: Record<number, number>;
   favoriteIds?: number[];
-  onToggleFavorite?: (itemId: number, isFavorited: boolean) => void;
+  onToggleFavorite?: (
+    itemId: number,
+    isFavorited: boolean,
+    item?: Pick<TradeItem, "id" | "name" | "type">,
+  ) => void;
 }
 
 interface UserPremiumTier {

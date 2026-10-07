@@ -210,12 +210,20 @@ export default function UserValueSuggestionsTab({
 
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
-  const [activeVoters, setActiveVoters] = useState<{
-    up: { created_at: number; user: SuggestionUser }[];
-    down: { created_at: number; user: SuggestionUser }[];
-    upCount: number;
-    downCount: number;
-  } | null>(null);
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<
+    number | null
+  >(null);
+  const selectedSuggestion = votersOpen
+    ? suggestions.find((suggestion) => suggestion.id === selectedSuggestionId)
+    : undefined;
+  const activeVoters = selectedSuggestion
+    ? {
+        up: selectedSuggestion.votes.upvotes,
+        down: selectedSuggestion.votes.downvotes,
+        upCount: selectedSuggestion.upvotes,
+        downCount: selectedSuggestion.downvotes,
+      }
+    : null;
 
   useEffect(() => {
     if (loading) return;
@@ -248,12 +256,7 @@ export default function UserValueSuggestionsTab({
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setActiveVoters({
-      up: suggestion.votes.upvotes,
-      down: suggestion.votes.downvotes,
-      upCount: suggestion.upvotes,
-      downCount: suggestion.downvotes,
-    });
+    setSelectedSuggestionId(suggestion.id);
     setVotersTab(tab);
     setVotersOpen(true);
   };

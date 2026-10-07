@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useInfiniteQuery,
+  useQueryClient,
+  replaceEqualDeep,
+  type InfiniteData,
+} from "@tanstack/react-query";
+import { useAuthContext } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -13,6 +19,12 @@ import { parseUtcTimestamp } from "@/utils/helpers/timestamp";
 import { robberyMarkerToImageName } from "./utils";
 
 const log = createLogger("UI");
+
+class JoinHistoryError extends Error {
+  constructor(public status: number) {
+    super(`Join history request failed: ${status}`);
+  }
+}
 const robberyImages = new Set([
   "Bank",
   "CargoPlane",
@@ -79,19 +91,72 @@ export default function RecentJoins({
 }) {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [items, setItems] = useState<JoinItem[]>([]);
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loaded, setLoaded] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [unauthorized, setUnauthorized] = useState(false);
+  const { user, isAuthenticated } = useAuthContext();
   const [now, setNow] = useState(() => Date.now());
-  const loadingRef = useRef(false);
   const lastJoinIdRef = useRef<string | null>(null);
-  const requestRef = useRef<AbortController | null>(null);
-
-  useEffect(() => () => requestRef.current?.abort(), []);
+  const queryKey = useMemo(
+    () => ["recent-joins", trackerType, user?.id],
+    [trackerType, user?.id],
+  );
+  const joinsQuery = useInfiniteQuery({
+    queryKey,
+    initialPageParam: 1,
+    enabled: isOpen && isAuthenticated,
+    queryFn: async ({ pageParam, signal }): Promise<JoinHistoryPage> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/me/join-history?page=${pageParam}&tracker_type=${trackerType}`,
+      );
+      const response = await fetch(url, {
+        headers,
+        credentials: "include",
+        cache: "no-store",
+        signal,
+      });
+      const data = await response.json().catch(() => null);
+      if (
+        response.status === 404 &&
+        pageParam === 1 &&
+        data?.error === "no_history_found"
+      ) {
+        return { items: [], page: 1, total_pages: 0, total: 0, size: 0 };
+      }
+      if (!response.ok) throw new JoinHistoryError(response.status);
+      return data as JoinHistoryPage;
+    },
+    getNextPageParam: (last) =>
+      last.page < last.total_pages ? last.page + 1 : undefined,
+    structuralSharing: (previous, incoming) => {
+      const old = previous as InfiniteData<JoinHistoryPage> | undefined;
+      const next = incoming as InfiniteData<JoinHistoryPage>;
+      return old && next.pages.length > old.pages.length
+        ? {
+            ...next,
+            pages: [...old.pages, ...next.pages.slice(old.pages.length)],
+          }
+        : replaceEqualDeep(previous, incoming);
+    },
+    staleTime: Infinity,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const seen = new Set<string>();
+  const items = (
+    joinsQuery.data?.pages.flatMap((page) => page.items) ?? []
+  ).filter((item) => {
+    const key = itemKey(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  const loaded = Boolean(joinsQuery.data);
+  const loading = joinsQuery.isFetching;
+  const error = joinsQuery.isError;
+  const unauthorized =
+    joinsQuery.error instanceof JoinHistoryError &&
+    [401, 403].includes(joinsQuery.error.status);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -103,85 +168,27 @@ export default function RecentJoins({
     if (!recentJoin || lastJoinIdRef.current === recentJoin.id) return;
     lastJoinIdRef.current = recentJoin.id;
     if (!loaded) return;
-    setItems((current) => [recentJoin.item, ...current]);
-    setNow(Date.now());
-  }, [loaded, recentJoin]);
-
-  async function loadPage(nextPage: number) {
-    if (loadingRef.current) return;
-    loadingRef.current = true;
-    setLoading(true);
-    setError(false);
-    const controller = new AbortController();
-    requestRef.current = controller;
-
-    try {
-      const { status, data } = await queryClient.fetchQuery({
-        queryKey: ["recent-joins", trackerType, nextPage],
-        queryFn: async () => {
-          const { url, headers } = buildApiFetchRequest(
-            PUBLIC_API_URL,
-            `/v2/users/me/join-history?page=${nextPage}&tracker_type=${trackerType}`,
-          );
-          const response = await fetch(url, {
-            headers,
-            credentials: "include",
-            cache: "no-store",
-            signal: controller.signal,
-          });
-          return {
-            status: response.status,
-            data: (await response.json().catch(() => null)) as unknown,
-          };
-        },
-        staleTime: 0,
-        gcTime: 0,
-        retry: false,
-      });
-
-      if (controller.signal.aborted) return;
-      if (status === 401 || status === 403) {
-        setUnauthorized(true);
-        return;
-      }
-      if (status === 404 && nextPage === 1) {
-        const body = data as {
-          error?: string;
-        } | null;
-        if (body?.error === "no_history_found") {
-          setItems([]);
-          setPage(1);
-          setTotalPages(0);
-          setLoaded(true);
-          return;
-        }
-      }
-      if (status < 200 || status >= 300)
-        throw new Error(`Join history request failed: ${status}`);
-
-      const pageData = data as JoinHistoryPage;
-      if (controller.signal.aborted) return;
-      setItems((current) => {
-        if (nextPage === 1) return pageData.items;
-        const seen = new Set(current.map(itemKey));
-        return [
+    queryClient.setQueryData<InfiniteData<JoinHistoryPage>>(
+      queryKey,
+      (current) => {
+        if (!current) return current;
+        return {
           ...current,
-          ...pageData.items.filter((item) => !seen.has(itemKey(item))),
-        ];
-      });
-      setPage(pageData.page);
-      setTotalPages(pageData.total_pages);
-      setLoaded(true);
-    } catch (cause) {
-      if (!controller.signal.aborted) {
-        log.error("Error loading recent tracker joins:", cause);
-        setError(true);
-      }
-    } finally {
-      loadingRef.current = false;
-      setLoading(false);
-    }
-  }
+          pages: current.pages.map((page, index) =>
+            index === 0
+              ? { ...page, items: [recentJoin.item, ...page.items] }
+              : page,
+          ),
+        };
+      },
+    );
+    setNow(Date.now());
+  }, [loaded, recentJoin, queryClient, queryKey]);
+
+  useEffect(() => {
+    if (joinsQuery.error)
+      log.error("Error loading recent tracker joins:", joinsQuery.error);
+  }, [joinsQuery.error]);
 
   if (unauthorized) return null;
 
@@ -193,7 +200,6 @@ export default function RecentJoins({
         className="text-primary-text flex h-auto w-full items-center justify-between rounded-none px-4 py-3 text-left"
         aria-expanded={isOpen}
         onClick={() => {
-          if (!isOpen && !loaded && !loadingRef.current) void loadPage(1);
           setIsOpen((open) => !open);
         }}
       >
@@ -291,19 +297,23 @@ export default function RecentJoins({
               size="sm"
               variant="secondary"
               className="mt-2"
-              onClick={() => void loadPage(loaded ? page + 1 : 1)}
+              onClick={() =>
+                void (loaded
+                  ? joinsQuery.fetchNextPage()
+                  : joinsQuery.refetch())
+              }
             >
               Retry
             </Button>
           )}
-          {loaded && !error && page < totalPages && (
+          {loaded && !error && joinsQuery.hasNextPage && (
             <Button
               type="button"
               size="sm"
               variant="secondary"
               className="mt-3 w-full"
               disabled={loading}
-              onClick={() => void loadPage(page + 1)}
+              onClick={() => void joinsQuery.fetchNextPage()}
             >
               {loading ? "Loading..." : "Load more"}
             </Button>

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useCallback, useState, useEffect, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TradeItem } from "@/types/trading";
+import type { FavoriteItem } from "@/types";
 import TradeItemPickerV2 from "../../trading/TradeItemPickerV2";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
@@ -68,18 +69,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
 
-  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const favoritesQuery = useUserFavorites(user?.id);
-  const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
-  const [inventoryCopies, setInventoryCopies] = useState<
-    Record<number, number>
-  >({});
-  const [inventoryStatus, setInventoryStatus] = useState<
-    "idle" | "loading" | "loaded" | "error"
-  >("idle");
-  const [inventoryError, setInventoryError] = useState<string | null>(null);
-  const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
-  const inventoryFetchControllerRef = useRef<AbortController | null>(null);
+  const favoriteIds =
+    favoritesQuery.data?.map((favorite) => favorite.item.id) ?? [];
   const calcSyncDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const localSyncPendingRef = useRef(false);
   const localEditRevisionRef = useRef(0);
@@ -146,14 +138,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     requestingItemsRef.current = requestingItems;
   }, [requestingItems]);
 
-  useEffect(() => {
-    if (!user?.id) setFavoriteIds([]);
-    else if (favoritesQuery.data) {
-      setFavoriteIds(favoritesQuery.data.map((fav) => fav.item.id));
-    }
-  }, [user?.id, favoritesQuery.data]);
-
-  const handleToggleFavorite = async (itemId: number, isFavorited: boolean) => {
+  const handleToggleFavorite = async (
+    itemId: number,
+    isFavorited: boolean,
+    selectedItem?: FavoriteItem["item"],
+  ) => {
     if (!isAuthenticated) {
       toast.error(
         "You must be logged in to favorite items. Please log in and try again.",
@@ -161,9 +150,37 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       setLoginModal({ open: true });
       return;
     }
-    setFavoriteIds((prev) =>
-      isFavorited ? prev.filter((id) => id !== itemId) : [...prev, itemId],
+    const favoritesKey = ["user-favorites", user?.id];
+    await queryClient.cancelQueries({ queryKey: favoritesKey });
+    const previousFavorite = favoritesQuery.data?.find(
+      (favorite) => favorite.item.id === itemId,
     );
+    const item =
+      selectedItem ??
+      initialItems.find((entry) => entry.id === itemId) ??
+      inventoryItems.find((entry) => entry.id === itemId);
+    queryClient.setQueryData<FavoriteItem[]>(favoritesKey, (previous = []) =>
+      isFavorited
+        ? previous.filter((favorite) => favorite.item.id !== itemId)
+        : item
+          ? [
+              ...previous.filter((favorite) => favorite.item.id !== itemId),
+              {
+                created_at: Date.now(),
+                item: { id: item.id, name: item.name, type: item.type },
+              },
+            ]
+          : previous,
+    );
+    const rollback = () =>
+      queryClient.setQueryData<FavoriteItem[]>(favoritesKey, (previous = []) =>
+        previousFavorite
+          ? [
+              ...previous.filter((favorite) => favorite.item.id !== itemId),
+              previousFavorite,
+            ]
+          : previous.filter((favorite) => favorite.item.id !== itemId),
+      );
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
@@ -175,9 +192,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         credentials: "include",
       });
       if (!response.ok) {
-        setFavoriteIds((prev) =>
-          isFavorited ? [...prev, itemId] : prev.filter((id) => id !== itemId),
-        );
+        rollback();
         toast.error("Failed to update favorite status");
       } else {
         if (user?.id) {
@@ -190,128 +205,104 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         );
       }
     } catch {
-      setFavoriteIds((prev) =>
-        isFavorited ? [...prev, itemId] : prev.filter((id) => id !== itemId),
-      );
+      rollback();
       toast.error("Failed to update favorite status");
     }
   };
 
-  useEffect(() => {
-    if (itemsInputMode !== "inventory") return;
+  const inventoryEnabled =
+    itemsInputMode === "inventory" && canLoadInventory && !!INVENTORY_API_URL;
+  const rawInventoryQuery = useQuery({
+    ...userInventoryQueryOptions(robloxId),
+    enabled: inventoryEnabled,
+    refetchOnWindowFocus: false,
+  });
+  const inventoryItemsQuery = useQuery({
+    queryKey: [
+      "calculator-inventory-items",
+      robloxId,
+      rawInventoryQuery.dataUpdatedAt,
+      initialItems,
+    ],
+    queryFn: async ({ signal }) => {
+      const data = rawInventoryQuery.data;
+      const record =
+        data && typeof data === "object" && !Array.isArray(data)
+          ? (data as Record<string, unknown>)
+          : null;
+      const rawItems = Array.isArray(record?.data) ? record?.data : [];
+      const rawDuplicates = Array.isArray(record?.duplicates)
+        ? record?.duplicates
+        : [];
 
-    if (!canLoadInventory) {
-      setInventoryItems([]);
-      setInventoryStatus("idle");
-      setInventoryError(null);
-      return;
-    }
+      const inventoryIds: number[] = [];
+      const isDupedById = new Map<number, boolean>();
+      const isOGById = new Map<number, boolean>();
+      const countById = new Map<number, number>();
 
-    if (!INVENTORY_API_URL) {
-      setInventoryItems([]);
-      setInventoryStatus("error");
-      setInventoryError(
-        "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing).",
+      const pushId = (entry: unknown, isDuped: boolean) => {
+        if (!entry || typeof entry !== "object") return;
+        const e = entry as Record<string, unknown>;
+        const id =
+          "id" in e && typeof e.id === "number" ? (e.id as number) : null;
+        if (id === null) return;
+        countById.set(id, (countById.get(id) ?? 0) + 1);
+        if (!isDupedById.has(id)) inventoryIds.push(id);
+        // If an item appears in both arrays, treat it as duped.
+        isDupedById.set(id, isDupedById.get(id) || isDuped);
+        // Preserve OG status — only set true, never unset it.
+        if (e.is_original_owner === true) isOGById.set(id, true);
+        else if (!isOGById.has(id)) isOGById.set(id, false);
+      };
+
+      rawItems.forEach((entry) => pushId(entry, false));
+      rawDuplicates.forEach((entry) => pushId(entry, true));
+
+      const resolvedItems = await fetchTradeItemsByIds(
+        inventoryIds,
+        initialItems,
       );
-      return;
-    }
+      signal.throwIfAborted();
+      const itemById = new Map<number, TradeItem>();
+      resolvedItems.forEach((it) => itemById.set(it.id, it));
 
-    if (lastFetchedInventoryUserIdRef.current === robloxId) {
-      return;
-    }
+      const inventoryTradeItems = inventoryIds
+        .map((id) => itemById.get(id))
+        .filter((it): it is TradeItem => Boolean(it))
+        .map((it) => ({
+          ...it,
+          side: undefined,
+          isDuped: isDupedById.get(it.id) || false,
+          isOG: isOGById.get(it.id) || false,
+        }));
 
-    inventoryFetchControllerRef.current?.abort();
-    const controller = new AbortController();
-    inventoryFetchControllerRef.current = controller;
-    let didFinish = false;
-
-    const fetchInventory = async () => {
-      setInventoryStatus("loading");
-      setInventoryError(null);
-
-      try {
-        const data = await queryClient.fetchQuery(
-          userInventoryQueryOptions(robloxId),
-        );
-        if (controller.signal.aborted) return;
-
-        const record =
-          data && typeof data === "object" && !Array.isArray(data)
-            ? (data as Record<string, unknown>)
-            : null;
-        const rawItems = Array.isArray(record?.data) ? record?.data : [];
-        const rawDuplicates = Array.isArray(record?.duplicates)
-          ? record?.duplicates
-          : [];
-
-        const inventoryIds: number[] = [];
-        const isDupedById = new Map<number, boolean>();
-        const isOGById = new Map<number, boolean>();
-        const countById = new Map<number, number>();
-
-        const pushId = (entry: unknown, isDuped: boolean) => {
-          if (!entry || typeof entry !== "object") return;
-          const e = entry as Record<string, unknown>;
-          const id =
-            "id" in e && typeof e.id === "number" ? (e.id as number) : null;
-          if (id === null) return;
-          countById.set(id, (countById.get(id) ?? 0) + 1);
-          if (!isDupedById.has(id)) inventoryIds.push(id);
-          // If an item appears in both arrays, treat it as duped.
-          isDupedById.set(id, isDupedById.get(id) || isDuped);
-          // Preserve OG status — only set true, never unset it.
-          if (e.is_original_owner === true) isOGById.set(id, true);
-          else if (!isOGById.has(id)) isOGById.set(id, false);
-        };
-
-        rawItems.forEach((entry) => pushId(entry, false));
-        rawDuplicates.forEach((entry) => pushId(entry, true));
-
-        const resolvedItems = await fetchTradeItemsByIds(
-          inventoryIds,
-          initialItems,
-        );
-        if (controller.signal.aborted) return;
-        const itemById = new Map<number, TradeItem>();
-        resolvedItems.forEach((it) => itemById.set(it.id, it));
-
-        const inventoryTradeItems = inventoryIds
-          .map((id) => itemById.get(id))
-          .filter((it): it is TradeItem => Boolean(it))
-          .map((it) => ({
-            ...it,
-            side: undefined,
-            isDuped: isDupedById.get(it.id) || false,
-            isOG: isOGById.get(it.id) || false,
-          }));
-
-        setInventoryItems(inventoryTradeItems);
-        setInventoryCopies(Object.fromEntries(countById));
-        setInventoryStatus("loaded");
-        lastFetchedInventoryUserIdRef.current = robloxId;
-        didFinish = true;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          setInventoryStatus("idle");
-          return;
-        }
-        const message =
-          error instanceof Error ? error.message : "Failed to load inventory";
-        setInventoryItems([]);
-        setInventoryStatus("error");
-        setInventoryError(message);
-        lastFetchedInventoryUserIdRef.current = null;
-        didFinish = true;
-      }
-    };
-
-    void fetchInventory();
-
-    return () => {
-      controller.abort();
-      if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
-    };
-  }, [itemsInputMode, canLoadInventory, robloxId, initialItems, queryClient]);
+      return {
+        items: inventoryTradeItems,
+        copies: Object.fromEntries(countById),
+      };
+    },
+    enabled: inventoryEnabled && rawInventoryQuery.isSuccess,
+    staleTime: Infinity,
+    gcTime: 30_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const inventoryItems = canLoadInventory
+    ? (inventoryItemsQuery.data?.items ?? [])
+    : [];
+  const inventoryCopies = inventoryItemsQuery.data?.copies ?? {};
+  const inventoryError = !INVENTORY_API_URL
+    ? "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing)."
+    : (rawInventoryQuery.error?.message ??
+      inventoryItemsQuery.error?.message ??
+      null);
+  const inventoryStatus = !canLoadInventory
+    ? "idle"
+    : inventoryError
+      ? "error"
+      : rawInventoryQuery.isPending || inventoryItemsQuery.isPending
+        ? "loading"
+        : "loaded";
 
   useLockBodyScroll(showClearConfirmModal);
 

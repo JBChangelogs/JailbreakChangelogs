@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQueryState } from "nuqs";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -113,7 +113,6 @@ export default function InventoryCheckerClient({
   initialNetworthData = [],
   initialMoneyHistoryData = [],
 }: InventoryCheckerClientProps) {
-  const queryClient = useQueryClient();
   const [searchId, setSearchId] = useState(
     originalSearchTerm || robloxId || "",
   );
@@ -137,13 +136,6 @@ export default function InventoryCheckerClient({
   const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
   const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
-  const [queuePosition, setQueuePosition] = useState<{
-    position: number;
-    delay: number;
-  } | null>(null);
-  const [isLoadingQueuePosition, setIsLoadingQueuePosition] = useState(false);
-  const [queueStatusMessage, setQueueStatusMessage] =
-    useState<string>("Not in scan queue");
   const hasAutoFetchedQueueRef = useRef(false);
   const [scanErrorBanner, setScanErrorBanner] = useState<{
     title: string;
@@ -370,62 +362,51 @@ export default function InventoryCheckerClient({
     resetForceShowError: scanResetForceShowError,
   } = scanWebSocket;
 
+  const queueQuery = useQuery({
+    queryKey: ["inventory-queue-position", robloxId],
+    enabled: false,
+    queryFn: async ({ signal }) => {
+      const response = await fetch(
+        `/api/inventories/queue/position?id=${encodeURIComponent(robloxId ?? "")}`,
+        { cache: "no-store", signal },
+      );
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok && response.status !== 404)
+        throw new Error("Failed to fetch queue position");
+      return { status: response.status, data };
+    },
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  useEffect(() => {
+    if (queueQuery.error)
+      log.error("Error fetching queue position:", queueQuery.error);
+  }, [queueQuery.error]);
+  const queueData = queueQuery.data?.data;
+  const queuePosition =
+    !queueQuery.isError &&
+    queueQuery.data?.status !== 404 &&
+    typeof queueData?.position === "number" &&
+    Number.isFinite(queueData.position) &&
+    typeof queueData?.delay === "number" &&
+    Number.isFinite(queueData.delay)
+      ? { position: queueData.position, delay: queueData.delay }
+      : null;
+  const isLoadingQueuePosition = queueQuery.isFetching;
+  const queueStatusMessage = queueQuery.isError
+    ? "Failed to fetch queue position"
+    : queueQuery.data && !queuePosition
+      ? queueData?.in_queue === false ||
+        /not found in queue/i.test(queueData?.error || "")
+        ? "Not in scan queue"
+        : queueData?.error || "Not in scan queue"
+      : "";
+  const refetchQueue = queueQuery.refetch;
   const fetchQueuePosition = useCallback(async () => {
-    if (!INVENTORY_API_URL || !robloxId) return;
-
-    setIsLoadingQueuePosition(true);
-    try {
-      const { status, data } = await queryClient.fetchQuery({
-        queryKey: ["inventory-queue-position", robloxId],
-        queryFn: async ({ signal }) => {
-          const response = await fetch(
-            `/api/inventories/queue/position?id=${encodeURIComponent(robloxId)}`,
-            { cache: "no-store", signal },
-          );
-          return {
-            status: response.status,
-            data: await response.json().catch(() => ({})),
-          };
-        },
-        staleTime: 0,
-        gcTime: 0,
-        retry: false,
-      });
-      if (status < 200 || status >= 300) {
-        log.error("queue position request failed", {
-          status,
-          body: data,
-        });
-        throw new Error(`Queue request failed: ${status}`);
-      }
-      if (
-        typeof data.position === "number" &&
-        Number.isFinite(data.position) &&
-        typeof data.delay === "number" &&
-        Number.isFinite(data.delay)
-      ) {
-        setQueuePosition({
-          position: data.position,
-          delay: data.delay,
-        });
-        setQueueStatusMessage("");
-      } else {
-        setQueuePosition(null);
-        setQueueStatusMessage(
-          data.in_queue === false ||
-            /not found in queue/i.test(data.error || "")
-            ? "Not in scan queue"
-            : data.error || "Not in scan queue",
-        );
-      }
-    } catch (queueError) {
-      log.error("Error fetching queue position:", queueError);
-      setQueuePosition(null);
-      setQueueStatusMessage("Failed to fetch queue position");
-    } finally {
-      setIsLoadingQueuePosition(false);
-    }
-  }, [robloxId, queryClient]);
+    if (INVENTORY_API_URL && robloxId) await refetchQueue();
+  }, [robloxId, refetchQueue]);
 
   useEffect(() => {
     const shouldFetchOnLoad =
