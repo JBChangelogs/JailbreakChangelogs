@@ -238,6 +238,23 @@ export const cropAvatarImage = (
     "avatar",
   );
 
+export const cropBackgroundImage = (
+  file: File,
+  source: string,
+  crop: Area,
+  rotation = 0,
+) =>
+  cropImage(
+    file,
+    source,
+    crop,
+    rotation,
+    1920,
+    1080,
+    10 * 1024 * 1024,
+    "background",
+  );
+
 export const cropBannerImage = (
   file: File,
   source: string,

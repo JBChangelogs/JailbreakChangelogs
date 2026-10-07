@@ -20,11 +20,16 @@ import { createLogger } from "@/services/logger";
 import {
   updateUserSettings,
   uploadCustomAvatar,
+  uploadCustomBackground,
   uploadCustomBanner,
 } from "@/services/settingsService";
 import type { UserSettingsV2 } from "@/types/auth";
 import { trackEvent } from "@/utils/analytics/rybbit";
-import { cropAvatarImage, cropBannerImage } from "@/utils/images/cropImage";
+import {
+  cropAvatarImage,
+  cropBackgroundImage,
+  cropBannerImage,
+} from "@/utils/images/cropImage";
 import { validateFile } from "@/utils/storage/fileValidation";
 import SupporterModal from "../Modals/SupporterModal";
 
@@ -43,9 +48,36 @@ export const IMAGE_UPLOAD_FORMATS = "PNG, JPG, WebP, or animated GIF";
 export const IMAGE_UPLOAD_MAX_SIZE_MB = {
   avatar: 8,
   banner: 10,
+  background: 10,
 } as const;
 
-export const getImageUploadRequirements = (imageType: "avatar" | "banner") =>
+type ImageType = keyof typeof IMAGE_UPLOAD_MAX_SIZE_MB;
+
+const IMAGE_TYPE_CONFIG = {
+  avatar: {
+    title: "Avatar",
+    aspect: 1,
+    crop: cropAvatarImage,
+    upload: uploadCustomAvatar,
+    setting: "custom_avatar",
+  },
+  banner: {
+    title: "Banner",
+    aspect: 3,
+    crop: cropBannerImage,
+    upload: uploadCustomBanner,
+    setting: "custom_banner",
+  },
+  background: {
+    title: "Background",
+    aspect: 16 / 9,
+    crop: cropBackgroundImage,
+    upload: uploadCustomBackground,
+    setting: "custom_background",
+  },
+} as const;
+
+export const getImageUploadRequirements = (imageType: ImageType) =>
   `${IMAGE_UPLOAD_FORMATS} up to ${IMAGE_UPLOAD_MAX_SIZE_MB[imageType]} MB.`;
 
 interface ImageUploadDialogProps {
@@ -60,7 +92,7 @@ interface ImageUploadDialogProps {
     openFilePicker: () => void,
     isUploading: boolean,
   ) => React.ReactNode;
-  imageType: "avatar" | "banner";
+  imageType: ImageType;
 }
 
 const ImageUploadDialog = ({
@@ -84,12 +116,19 @@ const ImageUploadDialog = ({
   const [croppedAreaPercentages, setCroppedAreaPercentages] =
     useState<Area | null>(null);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const { modalState, closeModal, checkAvatarAccess, checkBannerAccess } =
-    useSupporterModal();
+  const {
+    modalState,
+    closeModal,
+    checkAvatarAccess,
+    checkBannerAccess,
+    checkBackgroundAccess,
+  } = useSupporterModal();
   const isAvatar = imageType === "avatar";
-  const label = isAvatar ? "avatar" : "banner";
+  const label = imageType;
+  const config = IMAGE_TYPE_CONFIG[imageType];
+  const title = config.title;
   const maxFileSizeMb = IMAGE_UPLOAD_MAX_SIZE_MB[imageType];
-  const settingName = isAvatar ? "custom_avatar" : "custom_banner";
+  const settingName = config.setting;
   const isUploading = uploadPhase !== null;
   const hasCropEdits =
     crop.x !== 0 || crop.y !== 0 || zoom !== 1 || rotation !== 0;
@@ -124,13 +163,21 @@ const ImageUploadDialog = ({
   }, []);
 
   const openFilePicker = useCallback(() => {
-    const hasAccess = isAvatar
-      ? checkAvatarAccess(userData.premiumtype ?? 0)
-      : checkBannerAccess(userData.premiumtype ?? 0);
-    if (!hasAccess) return;
+    const checkAccess = {
+      avatar: checkAvatarAccess,
+      banner: checkBannerAccess,
+      background: checkBackgroundAccess,
+    }[imageType];
+    if (!checkAccess(userData.premiumtype ?? 0)) return;
 
     setIsUploadPromptOpen(true);
-  }, [checkAvatarAccess, checkBannerAccess, isAvatar, userData.premiumtype]);
+  }, [
+    checkAvatarAccess,
+    checkBannerAccess,
+    checkBackgroundAccess,
+    imageType,
+    userData.premiumtype,
+  ]);
 
   const chooseImage = () => {
     fileInputRef.current?.click();
@@ -205,19 +252,12 @@ const ImageUploadDialog = ({
     try {
       const croppedFile = canUploadGifDirectly
         ? selectedFile
-        : isAvatar
-          ? await cropAvatarImage(
-              selectedFile,
-              selectedSource,
-              croppedAreaPixels,
-              rotation,
-            )
-          : await cropBannerImage(
-              selectedFile,
-              selectedSource,
-              croppedAreaPixels,
-              rotation,
-            );
+        : await config.crop(
+            selectedFile,
+            selectedSource,
+            croppedAreaPixels,
+            rotation,
+          );
       if (croppedFile.size > maxFileSizeMb * 1024 * 1024) {
         throw new Error(
           `The cropped ${label} is larger than ${maxFileSizeMb}MB. Try a shorter or smaller GIF.`,
@@ -225,9 +265,7 @@ const ImageUploadDialog = ({
       }
       setUploadPhase("uploading");
       uploadStarted = true;
-      const newImageUrl = isAvatar
-        ? await uploadCustomAvatar(croppedFile)
-        : await uploadCustomBanner(croppedFile);
+      const newImageUrl = await config.upload(croppedFile);
       let displayEnabled = userData.settings_v2?.[settingName] === true;
 
       if (activateAfterUpload && !displayEnabled) {
@@ -240,21 +278,18 @@ const ImageUploadDialog = ({
       toast.success(`Custom ${label} uploaded`, {
         description: displayEnabled
           ? `Your new ${label} is now visible.`
-          : `Turn on Custom ${isAvatar ? "Avatar" : "Banner"} when you are ready to display it.`,
+          : `Turn on Custom ${title} when you are ready to display it.`,
       });
-      trackEvent(
-        isAvatar ? "Custom Avatar Uploaded" : "Custom Banner Uploaded",
-        {
-          url: newImageUrl,
-        },
-      );
+      trackEvent(`Custom ${title} Uploaded`, {
+        url: newImageUrl,
+      });
     } catch (error) {
       log.error(
-        `${isAvatar ? "Avatar" : "Banner"} ${uploadStarted ? "upload" : "processing"} error:`,
+        `${title} ${uploadStarted ? "upload" : "processing"} error:`,
         error,
       );
       toast.error(
-        `${isAvatar ? "Avatar" : "Banner"} ${uploadStarted ? "upload" : "processing"} failed`,
+        `${title} ${uploadStarted ? "upload" : "processing"} failed`,
         {
           description:
             error instanceof Error
@@ -356,7 +391,7 @@ const ImageUploadDialog = ({
                 crop={crop}
                 zoom={zoom}
                 rotation={rotation}
-                aspect={isAvatar ? 1 : 3}
+                aspect={config.aspect}
                 cropShape={
                   isAvatar && userData.premiumtype !== 3 ? "round" : "rect"
                 }
@@ -378,7 +413,7 @@ const ImageUploadDialog = ({
               className="text-secondary-text size-5"
             />
             <Slider
-              aria-label={`${isAvatar ? "Avatar" : "Banner"} zoom`}
+              aria-label={`${title} zoom`}
               min={1}
               max={3}
               step={0.01}
@@ -398,7 +433,7 @@ const ImageUploadDialog = ({
               className="text-secondary-text size-5"
             />
             <Slider
-              aria-label={`${isAvatar ? "Avatar" : "Banner"} rotation`}
+              aria-label={`${title} rotation`}
               min={-180}
               max={180}
               step={1}
@@ -448,7 +483,7 @@ const ImageUploadDialog = ({
                   : "Processing image..."
                 : uploadPhase === "uploading"
                   ? "Uploading..."
-                  : `Upload ${isAvatar ? "Avatar" : "Banner"}`}
+                  : `Upload ${title}`}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -475,4 +510,8 @@ export const AvatarUploadDialog = (props: SharedUploadDialogProps) => (
 
 export const BannerUploadDialog = (props: SharedUploadDialogProps) => (
   <ImageUploadDialog {...props} imageType="banner" />
+);
+
+export const BackgroundUploadDialog = (props: SharedUploadDialogProps) => (
+  <ImageUploadDialog {...props} imageType="background" />
 );

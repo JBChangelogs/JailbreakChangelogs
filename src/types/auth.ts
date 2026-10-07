@@ -7,6 +7,7 @@ export interface UserSettings {
   hide_favorites: boolean;
   custom_banner: boolean;
   custom_avatar: boolean;
+  custom_background?: boolean;
   hide_presence: boolean;
   dms_allowed: boolean;
   global_dms_allowed?: boolean;

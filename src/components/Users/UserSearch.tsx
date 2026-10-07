@@ -253,15 +253,14 @@ export default function UserSearch() {
                   <Link
                     href={`/users/${user.id}`}
                     prefetch={false}
-                    className="border-border-card group bg-secondary-bg relative block rounded-lg border p-4 shadow-md transition-colors"
+                    className="border-border-card group bg-secondary-bg hover:border-border-focus/60 relative block h-full overflow-hidden rounded-xl border shadow-md transition-[border-color,box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                   >
-                    <div className="flex items-center space-x-3">
-                      <DiscordUserCard
-                        user={user}
-                        disableBadgeTooltips={true}
-                        badgeLimit={1}
-                      />
-                    </div>
+                    <DiscordUserCard
+                      user={user}
+                      disableBadgeTooltips={true}
+                      badgeLimit={3}
+                      currentUserId={currentUserId}
+                    />
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-sm min-w-75 p-0">
