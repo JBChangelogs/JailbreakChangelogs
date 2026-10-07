@@ -1,4 +1,5 @@
 import type { Item } from "@/types/index";
+import type { TradeItem } from "@/types/trading";
 
 export interface CommonTradeSubmissionItem {
   id: string;
@@ -12,7 +13,12 @@ export interface CommonTradeSubmission {
   offering: CommonTradeSubmissionItem[];
 }
 
-export interface CommonTradeItem {
+export interface CommonTradeItem extends Partial<
+  Pick<
+    TradeItem,
+    "cash_value" | "duped_value" | "demand" | "duped_demand" | "trend"
+  >
+> {
   id: string | number;
   name?: string;
   type?: string;

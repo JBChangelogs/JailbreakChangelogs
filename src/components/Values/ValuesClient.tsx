@@ -12,7 +12,7 @@ const VALUE_SORT_PREFERENCE_KEY = "values_value_sort";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
 import { useUserFavorites } from "@/hooks/useUserFavorites";
-import { filterByTypes } from "@/utils/trading/values";
+import { filterFavoriteItems } from "@/utils/items/favorites";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import {
   fetchItemsClientPage,
@@ -288,7 +288,8 @@ export default function ValuesClient() {
   const serverMinValue = appliedMinValue > 0 ? appliedMinValue : undefined;
   const serverMaxValue =
     appliedMaxValue < MAX_VALUE_RANGE ? appliedMaxValue : undefined;
-  const { data, isLoading, error, refetch } = useQuery({
+  const favoritesSelected = selectedFilterSorts.includes("favorites");
+  const catalogQuery = useQuery({
     queryKey: [
       "values-items",
       page,
@@ -309,12 +310,68 @@ export default function ValuesClient() {
         ? searchItemsClientPage(searchQuery, Math.max(1, page), signal, options)
         : fetchItemsClientPage(Math.max(1, page), signal, options);
     },
+    enabled: !favoritesSelected,
     staleTime: 0,
     gcTime: 5 * 60_000,
     retry: false,
   });
+  const matchingFavorites = useMemo(
+    () =>
+      filterFavoriteItems(
+        favoritesQuery.data ?? [],
+        searchQuery,
+        selectedFilterSorts,
+        valueSort,
+        serverMinValue,
+        serverMaxValue,
+      ),
+    [
+      favoritesQuery.data,
+      searchQuery,
+      selectedFilterSorts,
+      valueSort,
+      serverMinValue,
+      serverMaxValue,
+    ],
+  );
+  const favoritePageSize = 50;
+  const favoritePages = Math.ceil(matchingFavorites.length / favoritePageSize);
+  const favoritePage = Math.min(Math.max(1, page), Math.max(1, favoritePages));
+  const data = useMemo(
+    () =>
+      favoritesSelected
+        ? {
+            items: matchingFavorites.slice(
+              (favoritePage - 1) * favoritePageSize,
+              favoritePage * favoritePageSize,
+            ),
+            total: matchingFavorites.length,
+            total_pages: favoritePages,
+            size: favoritePageSize,
+          }
+        : catalogQuery.data,
+    [
+      favoritesSelected,
+      matchingFavorites,
+      favoritePage,
+      favoritePages,
+      catalogQuery.data,
+    ],
+  );
   const items = data?.items ?? EMPTY_ITEMS;
-  const visibleError = data ? null : error;
+  const isLoading = favoritesSelected
+    ? Boolean(user?.id) && favoritesQuery.isPending
+    : catalogQuery.isLoading;
+  const visibleError = favoritesSelected
+    ? favoritesQuery.data
+      ? null
+      : favoritesQuery.error
+    : data
+      ? null
+      : catalogQuery.error;
+  const refetch = favoritesSelected
+    ? favoritesQuery.refetch
+    : catalogQuery.refetch;
 
   useEffect(() => {
     const handleRealtimeValues = () => {
@@ -368,7 +425,7 @@ export default function ValuesClient() {
               ...remaining,
               {
                 created_at: Date.now(),
-                item: { id: item.id, name: item.name, type: item.type },
+                item,
               },
             ]
           : remaining;
@@ -376,19 +433,6 @@ export default function ValuesClient() {
     },
     [items, queryClient, user?.id],
   );
-
-  const effectiveFavorites = selectedFilterSorts.includes("favorites")
-    ? favorites
-    : EMPTY_FAVORITES;
-
-  const sortedItems = useMemo(() => {
-    if (!data) return EMPTY_ITEMS;
-    if (!selectedFilterSorts.includes("favorites")) return items;
-    const favoritesData = effectiveFavorites.map((id) => ({
-      item_id: String(id),
-    }));
-    return filterByTypes(items, ["favorites"], favoritesData);
-  }, [data, items, selectedFilterSorts, effectiveFavorites]);
 
   return (
     <ValuesErrorBoundary>
@@ -482,7 +526,7 @@ export default function ValuesClient() {
       <div className="grid grid-cols-1 gap-8">
         <div className="space-y-6">
           <ValuesItemsGrid
-            items={isLoading ? EMPTY_ITEMS : sortedItems}
+            items={isLoading ? EMPTY_ITEMS : items}
             isLoading={isLoading}
             searchErrorMessage={
               visibleError instanceof ItemSearchQueryTooShortError

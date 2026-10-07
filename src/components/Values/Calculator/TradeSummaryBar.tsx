@@ -1,7 +1,5 @@
 import React from "react";
 import { Icon } from "../../ui/IconWrapper";
-import { Button } from "../../ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import { formatCurrencyValue } from "./calculatorUtils";
 
 interface TradeSummaryBarProps {
@@ -9,8 +7,8 @@ interface TradeSummaryBarProps {
   requestingTotal: number;
   offeringCount: number;
   requestingCount: number;
-  onSwapSides: () => void;
-  onClearSides: (event?: React.MouseEvent) => void;
+  offeringLabel?: string;
+  requestingLabel?: string;
 }
 
 export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
@@ -18,8 +16,8 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
   requestingTotal,
   offeringCount,
   requestingCount,
-  onSwapSides,
-  onClearSides,
+  offeringLabel = "Offering",
+  requestingLabel = "Requesting",
 }) => {
   const hasItems = offeringCount > 0 || requestingCount > 0;
   const difference = offeringTotal - requestingTotal;
@@ -57,7 +55,7 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-status-success text-xs font-medium tracking-wide uppercase">
-            Offering{" "}
+            {offeringLabel}{" "}
             <span className="text-secondary-text normal-case">
               ({offeringCount})
             </span>
@@ -77,8 +75,8 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
         </div>
 
         <div className="min-w-0 flex-1 text-right">
-          <p className="text-status-error text-xs font-medium tracking-wide uppercase">
-            Requesting{" "}
+          <p className="text-button-danger text-xs font-medium tracking-wide uppercase">
+            {requestingLabel}{" "}
             <span className="text-secondary-text normal-case">
               ({requestingCount})
             </span>
@@ -97,7 +95,7 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
         {hasItems ? (
           <>
             <div
-              className="bg-status-error h-full transition-all duration-300"
+              className="bg-button-danger h-full transition-all duration-300"
               style={{ width: `${offeringShare}%` }}
             />
             <div
@@ -106,51 +104,6 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
             />
           </>
         ) : null}
-      </div>
-
-      <div className="mt-3 flex items-center justify-center gap-3">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              onClick={hasItems ? onSwapSides : undefined}
-              aria-disabled={!hasItems}
-              tabIndex={hasItems ? undefined : -1}
-              className={
-                !hasItems ? "pointer-events-none opacity-50" : undefined
-              }
-            >
-              <Icon icon="heroicons:arrows-right-left" />
-              Swap
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            <p>Swap offering and requesting sides</p>
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={hasItems ? onClearSides : undefined}
-              aria-disabled={!hasItems}
-              tabIndex={hasItems ? undefined : -1}
-              className={
-                !hasItems ? "pointer-events-none opacity-50" : undefined
-              }
-            >
-              <Icon icon="heroicons-outline:trash" />
-              Clear
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            <p>Clear items (hold Shift to clear both sides instantly)</p>
-          </TooltipContent>
-        </Tooltip>
       </div>
     </div>
   );

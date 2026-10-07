@@ -1,3 +1,4 @@
+import { isSeasonalItem } from "@/utils/items/season";
 import React from "react";
 import Link from "next/link";
 import { TradeItem } from "@/types/trading";
@@ -70,7 +71,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
                 Limited
               </span>
             )}
-            {item.season != null && (
+            {isSeasonalItem(item) && (
               <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="noto-v1:snowflake"

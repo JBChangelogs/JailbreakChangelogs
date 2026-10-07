@@ -7,8 +7,8 @@ type MarketFields = {
 };
 
 export function getTradeItemMarketDetails(
-  item: MarketFields & { isDuped?: boolean },
-  isDuped = item.isDuped ?? false,
+  item: MarketFields & { isDuped?: boolean; duped?: boolean },
+  isDuped = item.duped ?? item.isDuped ?? false,
 ) {
   const demand = isDuped ? item.duped_demand : item.demand;
 

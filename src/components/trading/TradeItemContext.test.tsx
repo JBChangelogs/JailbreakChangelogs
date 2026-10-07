@@ -26,10 +26,21 @@ describe("market badges shared by calculator and trading forms", () => {
     );
 
     expect(clean).toContain('title="High"');
+    expect(clean).not.toContain("Duped Demand");
+    expect(duped).toContain("Duped Demand");
     expect(duped).toContain('title="Low"');
     expect(duped).not.toContain('title="High"');
     expect(clean).toContain('title="Rising"');
     expect(duped).toContain('title="Rising"');
+  });
+
+  test("API duped flag selects and labels duped demand", () => {
+    const markup = renderToStaticMarkup(
+      <TradeItemMarketDetails item={{ ...item, duped: true }} />,
+    );
+    expect(markup).toContain("Duped Demand");
+    expect(markup).toContain('title="Low"');
+    expect(markup).not.toContain('title="High"');
   });
 
   test("missing duped demand stays unknown instead of showing clean demand", () => {

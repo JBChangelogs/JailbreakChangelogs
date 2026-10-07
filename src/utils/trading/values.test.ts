@@ -29,6 +29,20 @@ function item(id: number, type: string, demand: string): Item {
 }
 
 describe("combined value page filters", () => {
+  test("seasonal filtering uses season or level instead of the legacy flag", () => {
+    const base = item(1, "Vehicle", "High");
+    const filtered = filterByTypes(
+      [
+        { ...base, id: 1, is_seasonal: 1 },
+        { ...base, id: 2, season: 1 },
+        { ...base, id: 3, level: "10" },
+        { ...base, id: 4, season: 0, level: null },
+      ],
+      ["name-seasonal-items"],
+    );
+    expect(filtered.map((entry) => entry.id)).toEqual([2, 3, 4]);
+  });
+
   test("favorites still respect category and demand filters", () => {
     const items = [
       item(1, "Vehicle", "High"),

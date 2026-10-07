@@ -329,7 +329,7 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
               ...previous.filter((favorite) => favorite.item.id !== itemId),
               {
                 created_at: Date.now(),
-                item: { id: item.id, name: item.name, type: item.type },
+                item,
               },
             ]
           : previous,

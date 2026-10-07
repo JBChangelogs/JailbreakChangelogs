@@ -1,5 +1,6 @@
 "use client";
 
+import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -34,7 +35,7 @@ export default function SearchForm({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+      if (isItemSearchShortcut(event) && searchInputRef.current) {
         event.preventDefault();
         if (searchInputRef.current) {
           searchInputRef.current.scrollIntoView({
@@ -94,6 +95,7 @@ export default function SearchForm({
         <div className="relative flex items-center">
           <input
             ref={searchInputRef}
+            aria-keyshortcuts="/"
             type="search"
             id="inventory-search"
             name="inventory-search"

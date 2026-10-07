@@ -1,3 +1,4 @@
+import { isSeasonalItem } from "@/utils/items/season";
 import React from "react";
 import { TradeItem } from "@/types/trading";
 import Image from "next/image";
@@ -53,7 +54,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
   const isOffering = side === "offering";
   const borderColor = isOffering
     ? "border-status-success/30 hover:border-status-success/60"
-    : "border-status-error/30 hover:border-status-error/60";
+    : "border-button-danger/30 hover:border-button-danger/60";
 
   // Same item + same clean/duped condition merges into a single card with a
   // qty stepper, instead of one card per instance cluttering the grid.
@@ -98,7 +99,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
               ? formatCurrencyValue(getSelectedValue(item))
               : formatCurrencyValue(parseValueString(item.cash_value));
             const isLimited = item.is_limited === 1;
-            const isSeasonal = item.season != null;
+            const isSeasonal = isSeasonalItem(item);
             const lastInstanceId =
               group.instanceIds[group.instanceIds.length - 1];
 
@@ -110,29 +111,13 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             };
 
             const stepperButtonClass =
-              "flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+              "text-primary-text hover:bg-quaternary-bg focus-visible:outline-border-focus flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2";
 
             return (
               <div
                 key={group.key}
                 className="group border-border-card bg-tertiary-bg/50 relative rounded-xl border p-2.5"
               >
-                <button
-                  type="button"
-                  onClick={handleDecrement}
-                  aria-label={
-                    qty > 1
-                      ? `Remove one ${displayName}`
-                      : `Remove ${displayName}`
-                  }
-                  className="group/remove focus-visible:outline-status-error absolute inset-0 z-10 cursor-pointer rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2"
-                >
-                  <span className="pointer-events-none absolute inset-x-2.5 top-2.5 flex aspect-video items-center justify-center rounded-lg bg-black/50 opacity-0 transition-opacity group-hover/remove:opacity-100 group-focus-visible/remove:opacity-100">
-                    <span className="bg-status-error/90 flex h-11 w-11 items-center justify-center rounded-full text-white">
-                      <Icon icon="heroicons:x-mark" className="h-6 w-6" />
-                    </span>
-                  </span>
-                </button>
                 <div className="relative">
                   <div className="relative aspect-video overflow-hidden rounded-lg">
                     {isVideoItem(item.name) ? (
@@ -160,41 +145,14 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       </div>
                     )}
                   </div>
-                  <div className="pointer-events-none absolute top-1 right-1 z-10">
+                  <div className="pointer-events-none absolute top-1.5 right-1.5 z-10">
                     <CategoryIconBadge
                       type={item.type}
                       isLimited={isLimited}
                       isSeasonal={isSeasonal}
-                      className="h-3.5 w-3.5"
+                      withContainer={false}
+                      className="h-4 w-4 sm:h-5 sm:w-5"
                     />
-                  </div>
-                  {/* Hover/focus reveal on devices with real hover; always shown on touch
-                      (hover:none), since there's no hover gesture to reveal it there. */}
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-2 rounded-b-lg bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-1.5 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-has-[:focus-visible]:pointer-events-auto group-has-[:focus-visible]:opacity-100 [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:opacity-100">
-                    <button
-                      type="button"
-                      onClick={handleDecrement}
-                      className={`${stepperButtonClass} border border-white/20 bg-black/70 text-white hover:bg-black/90`}
-                      aria-label={
-                        qty > 1
-                          ? `Remove one ${displayName}`
-                          : `Remove ${displayName}`
-                      }
-                    >
-                      <Icon icon="heroicons:minus" className="h-3.5 w-3.5" />
-                    </button>
-                    <span className="min-w-6 rounded-full bg-black/70 px-1.5 py-0.5 text-center text-xs font-bold text-white">
-                      {qty}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleIncrement}
-                      disabled={!onDuplicate}
-                      className={`${stepperButtonClass} border border-white/20 bg-black/70 text-white hover:bg-black/90`}
-                      aria-label={`Add another ${displayName}`}
-                    >
-                      <Icon icon="heroicons:plus" className="h-3.5 w-3.5" />
-                    </button>
                   </div>
                 </div>
 
@@ -211,7 +169,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-1">
-                    <p className="text-primary-text text-sm font-bold">
+                    <p className="text-primary-text text-sm font-bold tabular-nums">
                       {displayValue}
                       {qty > 1 && (
                         <span className="text-secondary-text ml-1 text-[10px] font-semibold">
@@ -222,6 +180,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                     <button
                       type="button"
                       disabled={!hasDupedValue || !onValueTypeChange}
+                      aria-label={`${displayName} is ${selectedType === "duped" ? "Duped" : item.isOG ? "OG" : "Clean"}${hasDupedValue && onValueTypeChange ? `. Switch to ${selectedType === "duped" ? "Clean" : "Duped"}` : ""}`}
                       onClick={() => {
                         const nextType =
                           selectedType === "duped" ? "cash" : "duped";
@@ -229,7 +188,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                           onValueTypeChange?.(item.id, nextType, id);
                         });
                       }}
-                      className={`relative z-20 inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold transition-colors ${
+                      className={`focus-visible:outline-border-focus relative z-20 inline-flex h-5 items-center justify-center rounded-md px-2 text-[10px] leading-none font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
                         selectedType === "duped"
                           ? "bg-status-error text-form-button-text"
                           : item.isOG
@@ -246,6 +205,49 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                         : item.isOG
                           ? "OG"
                           : "Clean"}
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="border-border-card inline-flex items-center rounded-full border">
+                      <button
+                        type="button"
+                        onClick={handleDecrement}
+                        disabled={!onRemove}
+                        className={stepperButtonClass}
+                        aria-label={
+                          qty > 1
+                            ? `Remove one ${displayName}`
+                            : `Remove ${displayName}`
+                        }
+                      >
+                        <Icon icon="heroicons:minus" className="h-4 w-4" />
+                      </button>
+                      <span className="text-primary-text min-w-5 text-center text-xs font-bold tabular-nums">
+                        {qty}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleIncrement}
+                        disabled={!onDuplicate}
+                        className={stepperButtonClass}
+                        aria-label={`Add another ${displayName}`}
+                      >
+                        <Icon icon="heroicons:plus" className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={!onRemove}
+                      onClick={() =>
+                        group.instanceIds.forEach((id) => onRemove?.(id))
+                      }
+                      className="text-button-danger hover:bg-button-danger/10 focus-visible:outline-border-focus inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label={`Remove all ${qty} ${displayName}`}
+                    >
+                      <Icon
+                        icon="heroicons-outline:trash"
+                        className="h-4 w-4"
+                      />
                     </button>
                   </div>
                   <TradeItemMarketDetails
@@ -270,13 +272,13 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             >
               <Icon
                 icon="heroicons:plus"
-                className="text-secondary-text/60 h-5 w-5"
+                className="text-primary-text h-5 w-5"
               />
-              <span className="text-secondary-text/70 text-xs font-medium">
+              <span className="text-primary-text text-xs font-medium">
                 {items.length === 0 ? "No items selected" : "Add item"}
               </span>
               {items.length === 0 && (
-                <span className="text-secondary-text/70 text-xs">
+                <span className="text-secondary-text text-xs">
                   Search for an item to add it
                 </span>
               )}

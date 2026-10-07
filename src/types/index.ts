@@ -212,11 +212,11 @@ export interface DupeResult {
 
 export interface FavoriteItem {
   created_at: number;
-  item: {
-    id: number;
-    name: string;
-    type: string;
-  };
+  item: Pick<Item, "id" | "name" | "type"> &
+    Partial<Omit<Item, "is_limited" | "is_seasonal">> & {
+      is_limited?: number | null;
+      is_seasonal?: number | null;
+    };
 }
 
 export interface DupeFinderHistoryEntry {

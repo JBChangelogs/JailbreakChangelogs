@@ -5,7 +5,7 @@ export interface TradeItem {
   cash_value: string | null;
   duped_value: string | null;
   is_limited: number | null;
-  is_seasonal: number | null;
+  is_seasonal?: number | null;
   season?: number | null;
   level?: number | string | null;
   tradable: number;

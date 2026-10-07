@@ -325,7 +325,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
                             : `Use ${option} value for ${item.name}`
                         }
                         aria-pressed={condition === option}
-                        className={`shrink-0 cursor-pointer rounded border px-1.5 py-1 text-[10px] font-medium capitalize transition-colors ${
+                        className={`shrink-0 cursor-pointer rounded-md border px-1.5 py-1 text-[10px] font-medium capitalize transition-colors ${
                           condition === option
                             ? option === "clean"
                               ? "border-status-success bg-status-success text-form-button-text"

@@ -91,7 +91,16 @@ test("calculator favorites use picker metadata without initial items and roll ba
       favorited: boolean,
       item: FavoriteItem["item"],
     ) => Promise<void>;
-  const firstItem = { id: 1, name: "Torpedo", type: "Vehicle" };
+  const firstItem = {
+    id: 1,
+    name: "Torpedo",
+    type: "Vehicle",
+    cash_value: "30m",
+    duped_value: "20m",
+    duped_demand: "Low",
+    tradable: 1,
+    is_limited: 1,
+  };
   const secondItem = { id: 2, name: "Brulee", type: "Vehicle" };
   const first = renderHandler()(1, false, firstItem);
   await new Promise<void>((resolve) => setImmediate(resolve));

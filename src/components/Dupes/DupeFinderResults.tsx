@@ -266,11 +266,7 @@ export default function DupeFinderResults({
         <Icon icon="emojione:light-bulb" className="text-sm text-yellow-500" />
         Helpful tip: Press{" "}
         <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-          Ctrl
-        </kbd>
-        {" + "}
-        <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-          F
+          /
         </kbd>{" "}
         to quickly focus the search.
       </div>

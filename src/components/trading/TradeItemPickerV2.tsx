@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { isSeasonalItem } from "@/utils/items/season";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { TradeItem } from "@/types/trading";
@@ -13,7 +14,12 @@ import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
 import { formatCurrencyValue as formatCompactCurrencyValue } from "@/utils/trading/currency";
 import { Pagination } from "@/components/ui/Pagination";
 import { FilterSort, ValueSort } from "@/types";
-import { filterByValueSort, sortByValueSort } from "@/utils/trading/values";
+import {
+  filterByTypes,
+  filterByValueSort,
+  parseCashValue,
+  sortByValueSort,
+} from "@/utils/trading/values";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import {
   DropdownMenu,
@@ -37,8 +43,6 @@ import {
   getTradeItemImagePath,
   isCustomTradeItem,
   getTradeItemIdentifier,
-  matchesAnyCategoryFilterSort,
-  matchesCategoryFilterSort,
 } from "@/utils/trading/tradeItems";
 import { handleImageError } from "@/utils/ui/images";
 import {
@@ -49,6 +53,11 @@ import {
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { CustomTypeDialog } from "@/components/trading/CustomTypeDialog";
 import { useRouter } from "nextjs-toploader/app";
+import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
+import { BrowseItemFilters } from "./BrowseItemFilters";
+import { useUserFavorites } from "@/hooks/useUserFavorites";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { favoriteCatalogItems } from "@/utils/items/favorites";
 import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 
 type TradeSide = "offering" | "requesting";
@@ -76,7 +85,7 @@ interface TradeItemPickerV2Props {
   onToggleFavorite?: (
     itemId: number,
     isFavorited: boolean,
-    item?: Pick<TradeItem, "id" | "name" | "type">,
+    item?: TradeItem,
   ) => void;
   /**
    * Opt-in multi-select category filtering (+ Clear Filters), matching
@@ -175,6 +184,36 @@ export default function TradeItemPickerV2({
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const focusSearch = (event: KeyboardEvent) => {
+      if (!isItemSearchShortcut(event)) return;
+      const input = searchRef.current;
+      if (!input?.getClientRects().length) return;
+      const dialog = document.querySelector(
+        '[role="dialog"][data-state="open"]',
+      );
+      if (dialog && !dialog.contains(input)) return;
+      event.preventDefault();
+      input.focus();
+    };
+    window.addEventListener("keydown", focusSearch);
+    return () => window.removeEventListener("keydown", focusSearch);
+  }, []);
+  const [extraFilters, setExtraFilters] = useState<FilterSort[]>([]);
+  const [minValue, setMinValue] = useState<number>();
+  const [maxValue, setMaxValue] = useState<number>();
+  const favoritesSelected = extraFilters.includes("favorites");
+  const useRemoteCatalog = useCatalogApi && !favoritesSelected;
+  const { user } = useAuthContext();
+  const favoritesQuery = useUserFavorites(user?.id);
+  const favoriteItems = useMemo(
+    () => favoriteCatalogItems(favoritesQuery.data ?? []),
+    [favoritesQuery.data],
+  );
+  const favoritesLoading = Boolean(user?.id) && favoritesQuery.isPending;
+  const favoritesError = favoritesQuery.isError && !favoritesQuery.data;
+
   const [internalActiveSide, setInternalActiveSide] =
     useState<TradeSide>("offering");
   const activeSide = activeSideProp ?? internalActiveSide;
@@ -215,13 +254,31 @@ export default function TradeItemPickerV2({
     () => valueSortGroups.flatMap((group) => group.options),
     [valueSortGroups],
   );
-  const catalog = useItemCatalogPage(searchQuery, page, useCatalogApi, {
+  const activeFilters = [
+    ...(multiSelectFilters ? filterSorts : [filterSort]),
+    ...extraFilters,
+  ].filter((filter) => filter !== "name-all-items");
+  const catalog = useItemCatalogPage(searchQuery, page, useRemoteCatalog, {
     sort: valueSort,
-    filters: getServerFilters(multiSelectFilters ? filterSorts : [filterSort]),
+    filters: getServerFilters(activeFilters),
+    minValue,
+    maxValue,
   });
   const visibleItems: TradeItem[] = useMemo(
-    () => (useCatalogApi ? (catalog.data?.items ?? []) : items),
-    [useCatalogApi, catalog.data?.items, items],
+    () =>
+      useRemoteCatalog
+        ? (catalog.data?.items ?? [])
+        : useCatalogApi && favoritesSelected
+          ? favoriteItems
+          : items,
+    [
+      useRemoteCatalog,
+      useCatalogApi,
+      favoritesSelected,
+      favoriteItems,
+      catalog.data?.items,
+      items,
+    ],
   );
 
   const supportedFilterSorts = useMemo(
@@ -303,17 +360,27 @@ export default function TradeItemPickerV2({
     const tradeableItems = visibleItems.filter((item) => item.tradable === 1);
     const base = tradeableItems.filter((item) => {
       if (
-        !useCatalogApi &&
+        !useRemoteCatalog &&
         !matchesTextSearch([item.name, item.type], searchQuery)
       )
         return false;
 
-      return multiSelectFilters
-        ? matchesAnyCategoryFilterSort(item, filterSorts)
-        : matchesCategoryFilterSort(item, filterSort);
+      const cash = parseCashValue(item.cash_value);
+      return (
+        (minValue === undefined || cash >= minValue) &&
+        (maxValue === undefined || (cash >= 0 && cash <= maxValue))
+      );
     });
 
-    const filteredByValue = filterByValueSort(base, valueSort, {
+    const matchingFilters = filterByTypes(
+      base,
+      [
+        ...(multiSelectFilters ? filterSorts : [filterSort]),
+        ...extraFilters,
+      ].filter((filter) => filter !== "name-all-items"),
+      favoriteIds?.map((id) => ({ item_id: String(id) })),
+    );
+    const filteredByValue = filterByValueSort(matchingFilters, valueSort, {
       getDemand: (item) => item.demand,
       getTrend: (item) => item.trend,
     });
@@ -322,7 +389,7 @@ export default function TradeItemPickerV2({
       ? valueSort
       : "cash-desc";
 
-    const sorted = useCatalogApi
+    const sorted = useRemoteCatalog
       ? filteredByValue
       : sortByValueSort(filteredByValue, selectedSort, {
           getCashValue: (item) => item.cash_value ?? "N/A",
@@ -341,7 +408,10 @@ export default function TradeItemPickerV2({
   }, [
     visibleItems,
     searchQuery,
-    useCatalogApi,
+    useRemoteCatalog,
+    minValue,
+    maxValue,
+    extraFilters,
     filterSort,
     filterSorts,
     multiSelectFilters,
@@ -350,7 +420,7 @@ export default function TradeItemPickerV2({
     favoriteIds,
   ]);
 
-  const totalPages = useCatalogApi
+  const totalPages = useRemoteCatalog
     ? Math.max(1, catalog.data?.total_pages ?? 1)
     : Math.max(
         1,
@@ -364,7 +434,7 @@ export default function TradeItemPickerV2({
   const currentPage = Math.min(page, totalPages);
   const itemsPerPage =
     variant === "compact" ? ITEMS_PER_PAGE_COMPACT : ITEMS_PER_PAGE_DEFAULT;
-  const pagedItems = useCatalogApi
+  const pagedItems = useRemoteCatalog
     ? filteredItems
     : filteredItems.slice(
         (currentPage - 1) * itemsPerPage,
@@ -374,7 +444,7 @@ export default function TradeItemPickerV2({
   const gridClassName =
     variant === "compact"
       ? "mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3"
-      : "mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7";
+      : "mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
 
   const itemCardBackgroundClassName =
     cardBackground === "tertiary" ? "bg-tertiary-bg" : "bg-secondary-bg";
@@ -533,12 +603,15 @@ export default function TradeItemPickerV2({
             <div className="relative">
               <input
                 type="text"
+                ref={searchRef}
+                aria-label="Search items"
+                aria-keyshortcuts="/"
                 value={searchQuery}
                 onChange={(event) => {
                   setSearchQuery(event.target.value);
                   setPage(1);
                 }}
-                placeholder="Search items by name or type..."
+                placeholder="Search items by name or type... (/)"
                 className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 min-h-14 w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
               />
               <Icon
@@ -711,14 +784,16 @@ export default function TradeItemPickerV2({
         <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-secondary-text text-sm">
             Total Tradable Items:{" "}
-            {useCatalogApi ? (catalog.data?.total ?? 0) : filteredItems.length}
+            {useRemoteCatalog
+              ? (catalog.data?.total ?? 0)
+              : filteredItems.length}
           </p>
           {showOfferRequestButtons ? (
             <p className="text-secondary-text text-sm">
               Use the{" "}
               <span className="text-status-success font-medium">Offer</span>
               {" / "}
-              <span className="text-status-error font-medium">
+              <span className="text-button-danger font-medium">
                 Request
               </span>{" "}
               buttons on each card
@@ -733,6 +808,31 @@ export default function TradeItemPickerV2({
           )}
         </div>
 
+        <BrowseItemFilters
+          filters={extraFilters}
+          onToggle={(filter) => {
+            setExtraFilters((current) =>
+              current.includes(filter)
+                ? current.filter((entry) => entry !== filter)
+                : [...current, filter],
+            );
+            setPage(1);
+          }}
+          onClear={() => {
+            setExtraFilters([]);
+            setMinValue(undefined);
+            setMaxValue(undefined);
+            setPage(1);
+          }}
+          minValue={minValue}
+          maxValue={maxValue}
+          onRangeChange={(min, max) => {
+            setMinValue(min);
+            setMaxValue(max);
+            setPage(1);
+          }}
+        />
+
         {totalPages > 1 && (
           <div className="mb-4 flex justify-center">
             <Pagination
@@ -743,13 +843,17 @@ export default function TradeItemPickerV2({
           </div>
         )}
 
-        {useCatalogApi && catalog.loading ? (
+        {(useRemoteCatalog && catalog.loading) ||
+        (useCatalogApi && favoritesSelected && favoritesLoading) ? (
           <div className="border-border-card bg-secondary-bg text-secondary-text mb-8 rounded-lg border p-6 text-center text-sm">
             Loading items...
           </div>
-        ) : useCatalogApi && catalog.error ? (
+        ) : (useRemoteCatalog && catalog.error) ||
+          (useCatalogApi && favoritesSelected && favoritesError) ? (
           <div className="border-border-card bg-secondary-bg text-secondary-text mb-8 rounded-lg border p-6 text-center text-sm">
-            {catalog.errorMessage ?? "Could not load items."}
+            {favoritesSelected
+              ? "Could not load favorites."
+              : (catalog.errorMessage ?? "Could not load items.")}
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
@@ -890,90 +994,57 @@ export default function TradeItemPickerV2({
                               </span>
                             )}
                         </div>
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              if (showOfferRequestButtons) {
-                                setUnifiedItemConditions((prev) => ({
-                                  ...prev,
-                                  [itemKey]: "clean",
-                                }));
-                              } else {
-                                setItemConditionsBySide((prev) => ({
-                                  ...prev,
-                                  [activeSide]: {
-                                    ...prev[activeSide],
-                                    [itemKey]: "clean",
-                                  },
-                                }));
-                              }
-                            }}
-                            className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
-                              condition === "clean"
-                                ? "bg-status-success border-status-success text-form-button-text"
-                                : "bg-tertiary-bg border-border-card text-secondary-text"
-                            }`}
-                          >
-                            Clean
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              if (showOfferRequestButtons) {
-                                setUnifiedItemConditions((prev) => ({
-                                  ...prev,
-                                  [itemKey]: "duped",
-                                }));
-                              } else {
-                                setItemConditionsBySide((prev) => ({
-                                  ...prev,
-                                  [activeSide]: {
-                                    ...prev[activeSide],
-                                    [itemKey]: "duped",
-                                  },
-                                }));
-                              }
-                            }}
-                            className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
-                              condition === "duped"
-                                ? "bg-status-error border-status-error text-form-button-text"
-                                : "bg-tertiary-bg border-border-card text-secondary-text"
-                            }`}
-                          >
-                            Duped
-                          </button>
-                          {allowOg && (
+                        <div
+                          role="group"
+                          aria-label={`Condition for ${item.name}`}
+                          onKeyDown={(event) => event.stopPropagation()}
+                          className="border-border-card bg-tertiary-bg inline-flex max-w-full items-center gap-0.5 rounded-lg border p-0.5"
+                        >
+                          {(
+                            [
+                              "clean",
+                              "duped",
+                              ...(allowOg ? ["og"] : []),
+                            ] as ItemCondition[]
+                          ).map((option) => (
                             <button
+                              key={option}
                               type="button"
+                              aria-pressed={condition === option}
                               onClick={(event) => {
                                 event.stopPropagation();
                                 if (showOfferRequestButtons) {
                                   setUnifiedItemConditions((prev) => ({
                                     ...prev,
-                                    [itemKey]: "og",
+                                    [itemKey]: option,
                                   }));
                                 } else {
                                   setItemConditionsBySide((prev) => ({
                                     ...prev,
                                     [activeSide]: {
                                       ...prev[activeSide],
-                                      [itemKey]: "og",
+                                      [itemKey]: option,
                                     },
                                   }));
                                 }
                               }}
-                              className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
-                                condition === "og"
-                                  ? "text-primary-text border-[#FFD700]/50 bg-[#FFD700]/10"
-                                  : "bg-tertiary-bg border-border-card text-secondary-text"
+                              className={`focus-visible:outline-border-focus cursor-pointer rounded-md px-2 py-1 text-[10px] leading-none font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                                condition === option
+                                  ? option === "clean"
+                                    ? "bg-status-success text-form-button-text"
+                                    : option === "duped"
+                                      ? "bg-status-error text-form-button-text"
+                                      : "bg-[#FFD700] text-black"
+                                  : "text-primary-text hover:bg-quaternary-bg"
                               }`}
                             >
-                              OG
+                              {option === "og"
+                                ? "OG"
+                                : option === "duped"
+                                  ? "Duped"
+                                  : "Clean"}
                             </button>
-                          )}
+                          ))}
                         </div>
                       </div>
                     );
@@ -996,11 +1067,7 @@ export default function TradeItemPickerV2({
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  onToggleFavorite(item.id, isFav, {
-                                    id: item.id,
-                                    name: item.name,
-                                    type: item.type,
-                                  });
+                                  onToggleFavorite(item.id, isFav, item);
                                 }}
                                 className="absolute top-1 left-1 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/50 transition-colors hover:bg-black/70"
                                 aria-label={
@@ -1034,7 +1101,7 @@ export default function TradeItemPickerV2({
                       <CategoryIconBadge
                         type={item.type}
                         isLimited={item.is_limited === 1}
-                        isSeasonal={item.season != null}
+                        isSeasonal={isSeasonalItem(item)}
                         withContainer={false}
                         className="h-4 w-4 sm:h-5 sm:w-5"
                       />
@@ -1044,26 +1111,26 @@ export default function TradeItemPickerV2({
                     <div className="text-secondary-text space-y-1 text-xs">
                       {condition !== "duped" ? (
                         <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                          <span className="text-primary-text text-xs font-medium whitespace-nowrap">
                             Cash
                           </span>
-                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold tabular-nums">
                             {formatValue(item.cash_value, isMobile)}
                           </span>
                         </div>
                       ) : (
                         <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                          <span className="text-primary-text text-xs font-medium whitespace-nowrap">
                             Duped
                           </span>
-                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold tabular-nums">
                             {formatValue(item.duped_value, isMobile)}
                           </span>
                         </div>
                       )}
-                      <div className="bg-secondary-bg flex items-center justify-between gap-2 rounded-lg p-1.5">
-                        <span className="text-secondary-text shrink-0 text-xs font-medium whitespace-nowrap">
-                          Demand
+                      <div className="bg-secondary-bg flex flex-wrap items-center justify-between gap-2 rounded-lg p-1.5">
+                        <span className="text-primary-text shrink-0 text-xs font-medium whitespace-nowrap">
+                          {condition === "duped" ? "Duped Demand" : "Demand"}
                         </span>
                         {(() => {
                           const { demand } = getTradeItemMarketDetails(
@@ -1073,7 +1140,7 @@ export default function TradeItemPickerV2({
                           const dStr = demand || "N/A";
                           return (
                             <span
-                              className={`${getDemandColor(dStr)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-md px-2 text-xs leading-none font-bold`}
+                              className={`${getDemandColor(dStr)} inline-flex min-h-6 max-w-full items-center rounded-md px-2 py-1 text-center text-xs leading-tight font-bold whitespace-normal`}
                             >
                               {dStr === "N/A"
                                 ? condition === "duped"
@@ -1084,8 +1151,8 @@ export default function TradeItemPickerV2({
                           );
                         })()}
                       </div>
-                      <div className="bg-secondary-bg flex items-center justify-between gap-2 rounded-lg p-1.5">
-                        <span className="text-secondary-text shrink-0 text-xs font-medium whitespace-nowrap">
+                      <div className="bg-secondary-bg flex flex-wrap items-center justify-between gap-2 rounded-lg p-1.5">
+                        <span className="text-primary-text shrink-0 text-xs font-medium whitespace-nowrap">
                           Trend
                         </span>
                         {(() => {
@@ -1093,7 +1160,7 @@ export default function TradeItemPickerV2({
                             getTradeItemMarketDetails(item).trend ?? "N/A";
                           return (
                             <span
-                              className={`${getTrendColor(t)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-md px-2 text-xs leading-none font-bold`}
+                              className={`${getTrendColor(t)} inline-flex min-h-6 max-w-full items-center rounded-md px-2 py-1 text-center text-xs leading-tight font-bold whitespace-normal`}
                             >
                               {t === "N/A" ? "Unknown" : t}
                             </span>
@@ -1107,14 +1174,14 @@ export default function TradeItemPickerV2({
                       <button
                         type="button"
                         onClick={addToOfferingSide}
-                        className="bg-status-success text-form-button-text cursor-pointer rounded-lg py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+                        className="bg-status-success text-form-button-text cursor-pointer rounded-md py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
                       >
                         Offer
                       </button>
                       <button
                         type="button"
                         onClick={addToRequestingSide}
-                        className="bg-status-error text-form-button-text cursor-pointer rounded-lg py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+                        className="bg-status-error text-form-button-text cursor-pointer rounded-md py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
                       >
                         Request
                       </button>

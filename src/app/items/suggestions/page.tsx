@@ -1,5 +1,6 @@
 "use client";
 
+import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
@@ -270,7 +271,7 @@ export default function ValueSuggestionsPage() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+      if (isItemSearchShortcut(event) && searchInputRef.current) {
         event.preventDefault();
         if (searchInputRef.current) {
           searchInputRef.current.focus();

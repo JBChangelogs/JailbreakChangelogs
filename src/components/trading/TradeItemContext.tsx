@@ -67,7 +67,7 @@ export const TradeItemNote = ({
 
 export const TradeItemMarketDetails = ({
   item,
-  isDuped = item.isDuped ?? false,
+  isDuped = item.duped ?? item.isDuped ?? false,
 }: {
   item: TradeItem;
   isDuped?: boolean;
@@ -76,19 +76,27 @@ export const TradeItemMarketDetails = ({
 
   return (
     <div className="border-border-card space-y-1 border-t pt-2 text-[11px]">
-      <div className="flex min-w-0 items-center gap-1">
-        <span className="text-secondary-text w-11 shrink-0">Demand</span>
+      <div className="flex min-w-0 flex-wrap items-center gap-1">
         <span
-          className={`${getDemandColor(demand)} min-w-0 truncate rounded px-1.5 py-0.5 font-semibold whitespace-nowrap`}
+          className={`text-primary-text shrink-0 ${isDuped ? "w-20" : "w-11"}`}
+        >
+          {isDuped ? "Duped Demand" : "Demand"}
+        </span>
+        <span
+          className={`${getDemandColor(demand)} min-w-0 truncate rounded-md px-1.5 py-0.5 font-semibold whitespace-nowrap`}
           title={hasItemValue(demand) ? demand : "Unknown"}
         >
           {hasItemValue(demand) ? demand : "Unknown"}
         </span>
       </div>
-      <div className="flex min-w-0 items-center gap-1">
-        <span className="text-secondary-text w-11 shrink-0">Trend</span>
+      <div className="flex min-w-0 flex-wrap items-center gap-1">
         <span
-          className={`${getTrendColor(trend)} min-w-0 truncate rounded px-1.5 py-0.5 font-semibold whitespace-nowrap`}
+          className={`text-primary-text shrink-0 ${isDuped ? "w-20" : "w-11"}`}
+        >
+          Trend
+        </span>
+        <span
+          className={`${getTrendColor(trend)} min-w-0 truncate rounded-md px-1.5 py-0.5 font-semibold whitespace-nowrap`}
           title={hasItemValue(trend) ? trend : "Unknown"}
         >
           {hasItemValue(trend) ? trend : "Unknown"}

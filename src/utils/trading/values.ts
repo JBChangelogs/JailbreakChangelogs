@@ -1,6 +1,7 @@
 import { Item, FilterSort, ValueSort } from "@/types";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { hasItemValue } from "@/utils/items/itemValue";
+import { isSeasonalItem } from "@/utils/items/season";
 
 export const demandOrder = [
   "Close To None",
@@ -403,14 +404,29 @@ export const getEffectiveTrend = (item: Item): string | null => {
   return item.trend;
 };
 
-const matchesFilterSort = (item: Item, filterSort: FilterSort): boolean => {
+type FilterableItem = {
+  id: number;
+  type: string;
+  is_limited?: number | null;
+  is_seasonal?: number | null;
+  season?: number | null;
+  level?: number | string | null;
+  tradable?: number;
+  demand?: string | null;
+  trend?: string | null;
+};
+
+const matchesFilterSort = (
+  item: FilterableItem,
+  filterSort: FilterSort,
+): boolean => {
   switch (filterSort) {
     case "name-limited-items":
       return item.is_limited === 1;
     case "name-untradeable-items":
       return item.tradable === 0;
     case "name-seasonal-items":
-      return item.is_seasonal === 1;
+      return isSeasonalItem(item);
     case "name-vehicles":
       return item.type.toLowerCase() === "vehicle";
     case "name-spoilers":
@@ -500,11 +516,11 @@ const FILTER_DIMENSIONS: FilterSort[][] = [
   TREND_FILTER_SORTS,
 ];
 
-export const filterByTypes = (
-  items: Item[],
+export const filterByTypes = <T extends FilterableItem>(
+  items: T[],
   filterSorts: FilterSort[],
   userFavorites?: Array<{ item_id: string }>,
-): Item[] => {
+): T[] => {
   if (!filterSorts || filterSorts.length === 0) return items;
 
   const hasFavorites = filterSorts.includes("favorites");

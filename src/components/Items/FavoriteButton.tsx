@@ -87,11 +87,7 @@ export default function FavoriteButton({
                   ...remaining,
                   {
                     created_at: Date.now(),
-                    item: {
-                      id: itemId,
-                      name: favoriteItem.name,
-                      type: favoriteItem.type,
-                    },
+                    item: { ...favoriteItem, id: itemId },
                   },
                 ]
               : remaining;

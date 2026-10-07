@@ -3,6 +3,7 @@ import { TradeItem } from "@/types/trading";
 import { Icon } from "../../ui/IconWrapper";
 import { CalculatorItemGrid } from "./CalculatorItemGrid";
 import { Button } from "../../ui/button";
+import { TradeSideHeading } from "./TradeSideHeading";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 
@@ -36,22 +37,18 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
   onMirror,
 }) => {
   const isOffering = side === "offering";
-  const sideColor = isOffering ? "status-success" : "status-error";
-  const sideLabel = isOffering ? "Offering" : "Requesting";
+  const sideColor = isOffering ? "status-success" : "button-danger";
 
   return (
     <div
       className={`border-${sideColor} bg-secondary-bg flex-1 rounded-lg border p-4 transition-colors`}
     >
       <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-baseline gap-2">
-          <h3
-            className={`text-${sideColor} text-xs font-medium tracking-wide uppercase`}
-          >
-            {sideLabel}
-          </h3>
-          <span className="text-secondary-text text-sm">({items.length})</span>
-        </div>
+        <TradeSideHeading
+          side={side}
+          count={items.length}
+          total={items.reduce((sum, item) => sum + getSelectedValue(item), 0)}
+        />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="default" onClick={onMirror} size="sm">
@@ -60,7 +57,7 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
             </Button>
           </TooltipTrigger>
           <TooltipContent side="top">
-            <p>Mirror to {isOffering ? "requesting" : "offering"}</p>
+            <p>Mirror to {isOffering ? "You receive" : "You give"}</p>
           </TooltipContent>
         </Tooltip>
       </div>

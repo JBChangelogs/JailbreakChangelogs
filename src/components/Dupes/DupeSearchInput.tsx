@@ -1,5 +1,6 @@
 "use client";
 
+import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "nextjs-toploader/app";
@@ -192,7 +193,7 @@ export default function DupeSearchInput({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+      if (isItemSearchShortcut(event) && searchInputRef.current) {
         event.preventDefault();
         if (searchInputRef.current) {
           searchInputRef.current.scrollIntoView({
@@ -241,6 +242,7 @@ export default function DupeSearchInput({
         <div className="relative flex items-center">
           <input
             ref={searchInputRef}
+            aria-keyshortcuts="/"
             type="search"
             id="dupe-owner-search"
             name="dupe-owner-search"

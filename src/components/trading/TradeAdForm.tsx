@@ -10,6 +10,8 @@ import { trackEvent } from "@/utils/analytics/rybbit";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
+import { TradeSideHeading } from "@/components/Values/Calculator/TradeSideHeading";
+import { TradeSideActions } from "@/components/Values/Calculator/TradeSideActions";
 import { TradeSummaryBar } from "@/components/Values/Calculator/TradeSummaryBar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -666,6 +668,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const handleRemoveItem = (
     itemToRemove: TradeItem,
     side: "offering" | "requesting",
+    removeAll = false,
   ) => {
     const removePredicate = (item: TradeItem) =>
       tradeItemIdsEqual(item.id, itemToRemove.id) &&
@@ -679,10 +682,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       // count is decremented.
       const index = offeringItems.findLastIndex(removePredicate);
       if (index !== -1) {
-        const newOfferingItems = [
-          ...offeringItems.slice(0, index),
-          ...offeringItems.slice(index + 1),
-        ];
+        const newOfferingItems = removeAll
+          ? offeringItems.filter((item) => !removePredicate(item))
+          : [
+              ...offeringItems.slice(0, index),
+              ...offeringItems.slice(index + 1),
+            ];
         setOfferingItems(newOfferingItems);
         saveItemsToLocalStorage(newOfferingItems, requestingItems, tradeNote);
         syncItemsToPreference(newOfferingItems, requestingItems);
@@ -690,10 +695,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     } else {
       const index = requestingItems.findLastIndex(removePredicate);
       if (index !== -1) {
-        const newRequestingItems = [
-          ...requestingItems.slice(0, index),
-          ...requestingItems.slice(index + 1),
-        ];
+        const newRequestingItems = removeAll
+          ? requestingItems.filter((item) => !removePredicate(item))
+          : [
+              ...requestingItems.slice(0, index),
+              ...requestingItems.slice(index + 1),
+            ];
         setRequestingItems(newRequestingItems);
         saveItemsToLocalStorage(offeringItems, newRequestingItems, tradeNote);
         syncItemsToPreference(offeringItems, newRequestingItems);
@@ -957,7 +964,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         </div>
 
         {/* Offering and Requesting Items Skeleton */}
-        <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <div className="border-border-card flex-1 rounded-lg border p-4">
             <Skeleton style={{ width: 100, height: 24 }} className="mb-4" />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
@@ -1083,7 +1090,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     variant="outline"
                     className="border-button-success! text-button-success! bg-button-success/10! hover:bg-button-success/20! active:bg-button-success/20!"
                   >
-                    Clear Offering
+                    Clear You Give
                   </UiButton>
                   <UiButton
                     onClick={() => {
@@ -1099,7 +1106,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     variant="outline"
                     className="border-button-danger! text-button-danger! bg-button-danger/10! hover:bg-button-danger/20! active:bg-button-danger/20!"
                   >
-                    Clear Requesting
+                    Clear You Receive
                   </UiButton>
                   <UiButton
                     onClick={() => handleStartNewTradeAd()}
@@ -1255,22 +1262,25 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             />
           </div>
 
+          <TradeSideActions
+            hasItems={offeringItems.length > 0 || requestingItems.length > 0}
+            onSwapSides={handleSwapSides}
+            onClearSides={handleClearSides}
+          />
+
           {/* Offering Items */}
-          <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <DroppableZone
               id="offering-drop-zone"
               className="border-status-success bg-secondary-bg flex-1 rounded-lg border p-4 transition-colors"
               activeClassName="border-status-success/80 bg-status-success/5 ring-2 ring-status-success/50"
             >
               <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-status-success text-xs font-medium tracking-wide uppercase">
-                    Offering
-                  </h3>
-                  <span className="text-secondary-text/70 text-sm">
-                    ({offeringItems.length})
-                  </span>
-                </div>
+                <TradeSideHeading
+                  side="offering"
+                  count={offeringItems.length}
+                  total={offeringTotal}
+                />
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <UiButton
@@ -1293,6 +1303,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 title="Offering"
                 showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "offering")}
+                onRemoveAll={(item) => handleRemoveItem(item, "offering", true)}
                 onAdd={(item) => handleAddItem(item, "offering")}
                 clickToRemove
                 quickAddItems={items}
@@ -1312,24 +1323,21 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             {/* Requesting Items */}
             <DroppableZone
               id="requesting-drop-zone"
-              className="border-status-error bg-secondary-bg flex-1 rounded-lg border p-4 transition-colors"
-              activeClassName="border-status-error/80 bg-status-error/5 ring-2 ring-status-error/50"
+              className="border-button-danger bg-secondary-bg flex-1 rounded-lg border p-4 transition-colors"
+              activeClassName="border-button-danger/80 bg-button-danger/5 ring-2 ring-button-danger/50"
             >
               <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-status-error text-xs font-medium tracking-wide uppercase">
-                    Requesting
-                  </h3>
-                  <span className="text-secondary-text/70 text-sm">
-                    ({requestingItems.length})
-                  </span>
-                </div>
+                <TradeSideHeading
+                  side="requesting"
+                  count={requestingItems.length}
+                  total={requestingTotal}
+                />
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <UiButton
                       onClick={() => handleMirrorItems("requesting")}
                       size="sm"
-                      className="bg-status-error/15 text-primary-text hover:bg-status-error/25"
+                      className="bg-button-danger/15 text-primary-text hover:bg-button-danger/25"
                     >
                       <Icon
                         icon="heroicons:arrows-right-left"
@@ -1346,6 +1354,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 title="Requesting"
                 showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "requesting")}
+                onRemoveAll={(item) =>
+                  handleRemoveItem(item, "requesting", true)
+                }
                 onAdd={(item) => handleAddItem(item, "requesting")}
                 clickToRemove
                 quickAddItems={items}
@@ -1364,12 +1375,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           </div>
 
           <TradeSummaryBar
+            offeringLabel="You give"
+            requestingLabel="You receive"
             offeringTotal={offeringTotal}
             requestingTotal={requestingTotal}
             offeringCount={offeringItems.length}
             requestingCount={requestingItems.length}
-            onSwapSides={handleSwapSides}
-            onClearSides={handleClearSides}
           />
 
           {/* Helpful tip about Shift+Clear */}
@@ -1477,7 +1488,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               !inventoryModeGate &&
               inventoryStatus === "loading" && (
                 <div className="mt-6 animate-pulse">
-                  <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+                  <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {Array.from({ length: 14 }).map((_, i) => (
                       <div
                         key={i}

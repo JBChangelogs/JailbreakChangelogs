@@ -1,12 +1,13 @@
 "use client";
 
+import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { FilterSort, ValueSort } from "@/types";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Slider } from "@/components/ui/slider";
+import { ValueRangeFilter } from "./ValueRangeFilter";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
@@ -111,68 +112,9 @@ export default function ValuesSearchControls({
     if (clearTrigger > 0) setSearchTerm("");
   }, [clearTrigger]);
 
-  // Local state for the slider visual position to ensure 60fps movement
-  const [localRange, setLocalRange] = useState(rangeValue);
-  // Local state for numerical inputs to allow typing
-  const [minInput, setMinInput] = useState(rangeValue[0].toLocaleString());
-  const [maxInput, setMaxInput] = useState(rangeValue[1].toLocaleString());
-
-  // Helper to strip commas
-  const stripCommas = (str: string) => str.replace(/,/g, "");
-
-  // Sync internal states when rangeValue changes (e.g. from parent reset or clear)
-  useEffect(() => {
-    setLocalRange(rangeValue);
-    setMinInput(rangeValue[0].toLocaleString());
-    setMaxInput(rangeValue[1].toLocaleString());
-  }, [rangeValue]);
-
-  // Also sync inputs when localRange changes from slider movement
-  useEffect(() => {
-    setMinInput(localRange[0].toLocaleString());
-    setMaxInput(localRange[1].toLocaleString());
-  }, [localRange]);
-
   // Derive isItemIdSearch from searchTerm instead of using useEffect
   const isItemIdSearch =
     /^id:\s*\d*$/i.test(searchTerm.trim()) && searchTerm.trim() !== "";
-
-  const sliderMarks = useMemo(() => {
-    const marks = [];
-    if (maxValueRange >= 10_000_000)
-      marks.push({ value: 10_000_000, label: "10M" });
-    if (maxValueRange >= 25_000_000)
-      marks.push({ value: 25_000_000, label: "25M" });
-
-    // Add marks every 50M if max is large
-    if (maxValueRange > 50_000_000) {
-      for (let i = 50_000_000; i <= maxValueRange; i += 50_000_000) {
-        marks.push({ value: i, label: `${i / 1_000_000}M` });
-      }
-    } else if (maxValueRange >= 50_000_000) {
-      marks.push({ value: 50_000_000, label: "50M" });
-    }
-
-    return marks;
-  }, [maxValueRange]);
-
-  const snapPoints = useMemo(() => {
-    return [0, maxValueRange, ...sliderMarks.map((mark) => mark.value)];
-  }, [maxValueRange, sliderMarks]);
-
-  const snapDistance = useMemo(() => {
-    return Math.max(100_000, Math.floor(maxValueRange * 0.01));
-  }, [maxValueRange]);
-
-  const maybeSnapToPoint = (value: number): number => {
-    const nearest = snapPoints.reduce((closest, point) => {
-      return Math.abs(point - value) < Math.abs(closest - value)
-        ? point
-        : closest;
-    }, snapPoints[0] ?? value);
-
-    return Math.abs(nearest - value) <= snapDistance ? nearest : value;
-  };
 
   const typeFilterValues = useMemo(
     () => filterGroups.flatMap((group) => group.options.map((o) => o.value)),
@@ -246,10 +188,10 @@ export default function ValuesSearchControls({
     }
   };
 
-  // Handle Ctrl+F to focus search input
+  // Handle / to focus search without overriding browser Find
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+      if (isItemSearchShortcut(event) && searchInputRef.current) {
         event.preventDefault();
         if (searchInputRef.current) {
           searchInputRef.current.focus();
@@ -284,6 +226,7 @@ export default function ValuesSearchControls({
               <div className="relative">
                 <input
                   ref={searchInputRef}
+                  aria-keyshortcuts="/"
                   type="text"
                   placeholder={`Search ${getFilterSortsDisplayNames(selectedFilterSorts) || "All Items"}...`}
                   value={searchTerm}
@@ -647,127 +590,15 @@ export default function ValuesSearchControls({
             </div>
           )}
 
-          <div className="w-full">
-            <div className="border-border-card bg-secondary-bg rounded-lg border px-3 py-2">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-secondary-text text-xs">
-                    Value Range
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={minInput}
-                      onFocus={(e) => {
-                        setMinInput(stripCommas(e.target.value));
-                      }}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, "");
-                        setMinInput(val);
-                      }}
-                      onBlur={() => {
-                        let val = parseInt(stripCommas(minInput)) || 0;
-                        val = Math.max(0, Math.min(val, localRange[1]));
-                        const newRange = [val, localRange[1]];
-                        setLocalRange(newRange);
-                        setRangeValue(newRange);
-                        setAppliedMinValue(val);
-                        setAppliedMaxValue(localRange[1]);
-                        setMinInput(val.toLocaleString());
-                      }}
-                      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
-                      placeholder="Min"
-                    />
-                    <span className="text-secondary-text text-xs">-</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={maxInput}
-                      onFocus={(e) => {
-                        setMaxInput(stripCommas(e.target.value));
-                      }}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, "");
-                        setMaxInput(val);
-                      }}
-                      onBlur={() => {
-                        let val = parseInt(stripCommas(maxInput)) || 0;
-                        val = Math.max(
-                          localRange[0],
-                          Math.min(val, maxValueRange),
-                        );
-                        const newRange = [localRange[0], val];
-                        setLocalRange(newRange);
-                        setRangeValue(newRange);
-                        setAppliedMinValue(localRange[0]);
-                        setAppliedMaxValue(val);
-                        setMaxInput(val.toLocaleString());
-                      }}
-                      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
-                      placeholder="Max"
-                    />
-                  </div>
-                  <span className="text-secondary-text text-[11px] whitespace-nowrap">
-                    {localRange[0].toLocaleString()} -{" "}
-                    {localRange[1] >= maxValueRange
-                      ? `${maxValueRange.toLocaleString()}+`
-                      : localRange[1].toLocaleString()}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-2 px-1 py-1">
-                <Slider
-                  key="value-range-slider"
-                  value={localRange}
-                  onValueChange={(newValue) => {
-                    const snappedRange = [
-                      maybeSnapToPoint(newValue[0]),
-                      maybeSnapToPoint(newValue[1]),
-                    ];
-                    setLocalRange([
-                      Math.min(snappedRange[0], snappedRange[1]),
-                      Math.max(snappedRange[0], snappedRange[1]),
-                    ]);
-                  }}
-                  onValueCommit={(newValue) => {
-                    const snappedRange = [
-                      maybeSnapToPoint(newValue[0]),
-                      maybeSnapToPoint(newValue[1]),
-                    ];
-                    const normalizedRange = [
-                      Math.min(snappedRange[0], snappedRange[1]),
-                      Math.max(snappedRange[0], snappedRange[1]),
-                    ];
-                    setRangeValue(normalizedRange);
-                    setAppliedMinValue(normalizedRange[0]);
-                    setAppliedMaxValue(normalizedRange[1]);
-                  }}
-                  min={0}
-                  max={maxValueRange}
-                  step={50_000}
-                />
-                <div className="relative mt-2 h-4 w-full">
-                  {sliderMarks.map((mark: { value: number; label: string }) => (
-                    <div
-                      key={mark.value}
-                      className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
-                      style={{
-                        left: `${(mark.value / maxValueRange) * 100}%`,
-                      }}
-                    >
-                      <div className="bg-secondary-text mb-1 h-1 w-0.5" />
-                      <span className="text-secondary-text text-[10px] leading-none font-medium">
-                        {mark.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ValueRangeFilter
+            rangeValue={rangeValue}
+            maxValueRange={maxValueRange}
+            onCommit={(range) => {
+              setRangeValue(range);
+              setAppliedMinValue(range[0]);
+              setAppliedMaxValue(range[1]);
+            }}
+          />
 
           {/* Helpful tips about shortcuts */}
           <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
@@ -777,11 +608,7 @@ export default function ValuesSearchControls({
             />
             Helpful tip: Press{" "}
             <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-              Ctrl
-            </kbd>
-            {" + "}
-            <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-              F
+              /
             </kbd>{" "}
             to quickly focus the search.
           </div>

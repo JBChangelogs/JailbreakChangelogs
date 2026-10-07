@@ -7,7 +7,6 @@ export const TRADE_ITEM_FIELDS = [
   "cash_value",
   "duped_value",
   "is_limited",
-  "is_seasonal",
   "season",
   "level",
   "tradable",

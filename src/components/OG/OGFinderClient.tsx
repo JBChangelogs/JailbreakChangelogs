@@ -1,5 +1,6 @@
 "use client";
 
+import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { trackEvent } from "@/utils/analytics/rybbit";
@@ -74,7 +75,7 @@ export default function OGFinderClient({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+      if (isItemSearchShortcut(event) && searchInputRef.current) {
         event.preventDefault();
         if (searchInputRef.current) {
           searchInputRef.current.scrollIntoView({
@@ -102,6 +103,7 @@ export default function OGFinderClient({
             <div className="relative flex items-center">
               <input
                 ref={searchInputRef}
+                aria-keyshortcuts="/"
                 type="search"
                 id="og-finder-search"
                 name="og-finder-search"
@@ -184,11 +186,7 @@ export default function OGFinderClient({
         <Icon icon="emojione:light-bulb" className="text-sm text-yellow-500" />
         Helpful tip: Press{" "}
         <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-          Ctrl
-        </kbd>
-        {" + "}
-        <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-          F
+          /
         </kbd>{" "}
         to quickly focus the search.
       </div>

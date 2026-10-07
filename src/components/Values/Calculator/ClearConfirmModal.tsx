@@ -66,7 +66,7 @@ export const ClearConfirmModal: React.FC<ClearConfirmModalProps> = ({
               variant="outline"
               className="border-button-success! text-button-success! bg-button-success/10! hover:bg-button-success/20! active:bg-button-success/20!"
             >
-              Clear Offering
+              Clear You Give
             </Button>
             <Button
               onClick={() => {
@@ -81,7 +81,7 @@ export const ClearConfirmModal: React.FC<ClearConfirmModalProps> = ({
               variant="outline"
               className="border-button-danger! text-button-danger! bg-button-danger/10! hover:bg-button-danger/20! active:bg-button-danger/20!"
             >
-              Clear Requesting
+              Clear You Receive
             </Button>
             <Button
               onClick={() => {

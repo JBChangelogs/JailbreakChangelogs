@@ -1,3 +1,4 @@
+import { isSeasonalItem } from "@/utils/items/season";
 import React from "react";
 import { Item } from "@/types";
 import Image from "next/image";
@@ -312,7 +313,7 @@ function ItemCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
-                  {item.season != null && (
+                  {isSeasonalItem(item) && (
                     <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                       S{item.season}
                     </span>

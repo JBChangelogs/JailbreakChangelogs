@@ -34,6 +34,7 @@ import {
   formatTotalValue,
 } from "./calculatorUtils";
 import { ClearConfirmModal } from "./ClearConfirmModal";
+import { TradeSideActions } from "./TradeSideActions";
 import { TradeSummaryBar } from "./TradeSummaryBar";
 import { TradeSidePanel } from "./TradeSidePanel";
 import { ScanTradeFromImage } from "./ScanTradeFromImage";
@@ -167,7 +168,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               ...previous.filter((favorite) => favorite.item.id !== itemId),
               {
                 created_at: Date.now(),
-                item: { id: item.id, name: item.name, type: item.type },
+                item,
               },
             ]
           : previous,
@@ -860,8 +861,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       <div className="space-y-4">
         <ScanTradeFromImage onScanSuccess={handleScanTradeSuccess} />
 
+        <TradeSideActions
+          hasItems={offeringItems.length > 0 || requestingItems.length > 0}
+          onSwapSides={handleSwapSides}
+          onClearSides={handleClearSides}
+        />
+
         {/* Trade Panels */}
-        <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <TradeSidePanel
             side="offering"
             items={offeringItems}
@@ -897,12 +904,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         </div>
 
         <TradeSummaryBar
+          offeringLabel="You give"
+          requestingLabel="You receive"
           offeringTotal={calculateTotals(offeringItems).total}
           requestingTotal={calculateTotals(requestingItems).total}
           offeringCount={offeringItems.length}
           requestingCount={requestingItems.length}
-          onSwapSides={handleSwapSides}
-          onClearSides={handleClearSides}
         />
       </div>
 
@@ -1001,7 +1008,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 </div>
               ) : inventoryStatus === "loading" ? (
                 <div className="animate-pulse">
-                  <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+                  <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {Array.from({ length: 14 }).map((_, i) => (
                       <div
                         key={i}

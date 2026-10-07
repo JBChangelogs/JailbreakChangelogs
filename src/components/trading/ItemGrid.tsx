@@ -1,3 +1,4 @@
+import { isSeasonalItem } from "@/utils/items/season";
 import React from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -11,12 +12,14 @@ import { TradeItemMarketDetails, TradeItemNote } from "./TradeItemContext";
 import { QuickAddPopover } from "./QuickAddPopover";
 import { DupedBadge } from "./DupedBadge";
 import { OgBadge } from "./OgBadge";
+import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 
 interface ItemGridProps {
   items: TradeItem[];
   title: string;
   showTitle?: boolean;
   onRemove?: (item: TradeItem) => void;
+  onRemoveAll?: (item: TradeItem) => void;
   onAdd?: (item: TradeItem) => void;
   clickToRemove?: boolean;
   disableInteraction?: boolean;
@@ -76,6 +79,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
   title,
   showTitle = true,
   onRemove,
+  onRemoveAll,
   onAdd,
   clickToRemove = false,
   disableInteraction = false,
@@ -193,7 +197,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
               : "N/A";
 
             const stepperButtonClass =
-              "flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/70 text-white transition-colors hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-40";
+              "text-primary-text hover:bg-quaternary-bg focus-visible:outline-border-focus flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2";
 
             const content = (
               <div className="block w-full text-left">
@@ -224,41 +228,17 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                       />
                     )}
                   </div>
-                  {/* Hover/focus reveal on devices with real hover; always shown on touch
-                      (hover:none), since there's no hover gesture to reveal it there. */}
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-2 rounded-b-lg bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-1.5 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-has-[:focus-visible]:pointer-events-auto group-has-[:focus-visible]:opacity-100 [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:opacity-100">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (disableInteraction || !onRemove) return;
-                        onRemove(item);
-                      }}
-                      disabled={disableInteraction || !onRemove}
-                      className={stepperButtonClass}
-                      aria-label={
-                        item.count > 1
-                          ? `Remove one ${displayName}`
-                          : `Remove ${displayName}`
-                      }
-                    >
-                      <Icon icon="heroicons:minus" className="h-3.5 w-3.5" />
-                    </button>
-                    <span className="min-w-6 rounded-full bg-black/70 px-1.5 py-0.5 text-center text-xs font-bold text-white">
-                      {item.count}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (disableInteraction || !onAdd) return;
-                        onAdd(item);
-                      }}
-                      disabled={disableInteraction || !onAdd}
-                      className={stepperButtonClass}
-                      aria-label={`Add another ${displayName}`}
-                    >
-                      <Icon icon="heroicons:plus" className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                  {!isCustom && (
+                    <div className="pointer-events-none absolute top-1.5 right-1.5 z-10">
+                      <CategoryIconBadge
+                        type={item.type}
+                        isLimited={item.is_limited === 1}
+                        isSeasonal={isSeasonalItem(item)}
+                        withContainer={false}
+                        className="h-4 w-4 sm:h-5 sm:w-5"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-2 space-y-2">
@@ -278,7 +258,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
 
                   {!isCustom && (
                     <div className="flex flex-wrap items-center justify-between gap-1">
-                      <p className="text-primary-text text-sm font-bold">
+                      <p className="text-primary-text text-sm font-bold tabular-nums">
                         {displayValue}
                         {item.count > 1 && (
                           <span className="text-secondary-text ml-1 text-[10px] font-semibold">
@@ -291,12 +271,61 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                       ) : item.isOG ? (
                         <OgBadge compact />
                       ) : (
-                        <span className="bg-status-success text-form-button-text inline-flex h-5 items-center justify-center rounded px-2 text-[10px] leading-none font-semibold">
+                        <span className="bg-status-success text-form-button-text inline-flex h-5 items-center justify-center rounded-md px-2 text-[10px] leading-none font-semibold">
                           Clean
                         </span>
                       )}
                     </div>
                   )}
+                  <div className="relative z-20 flex items-center justify-between gap-2">
+                    <div className="border-border-card inline-flex items-center rounded-full border">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (disableInteraction || !onRemove) return;
+                          onRemove(item);
+                        }}
+                        disabled={disableInteraction || !onRemove}
+                        className={stepperButtonClass}
+                        aria-label={
+                          item.count > 1
+                            ? `Remove one ${displayName}`
+                            : `Remove ${displayName}`
+                        }
+                      >
+                        <Icon icon="heroicons:minus" className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="text-primary-text min-w-5 text-center text-xs font-bold tabular-nums">
+                        {item.count}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (disableInteraction || !onAdd) return;
+                          onAdd(item);
+                        }}
+                        disabled={disableInteraction || !onAdd}
+                        className={stepperButtonClass}
+                        aria-label={`Add another ${displayName}`}
+                      >
+                        <Icon icon="heroicons:plus" className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    {onRemoveAll && (
+                      <button
+                        type="button"
+                        disabled={disableInteraction}
+                        onClick={() => onRemoveAll(item)}
+                        aria-label={`Remove all ${item.count} ${displayName}`}
+                        className="text-button-danger hover:bg-button-danger/10 focus-visible:outline-border-focus relative z-20 inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Icon
+                          icon="heroicons-outline:trash"
+                          className="h-4 w-4"
+                        />
+                      </button>
+                    )}
+                  </div>
                   {!isCustom && (
                     <TradeItemMarketDetails
                       item={item}
@@ -314,7 +343,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                   disableInteraction ? "cursor-not-allowed opacity-60" : ""
                 }`}
               >
-                {clickToRemove && onRemove && (
+                {clickToRemove && onRemove && !onRemoveAll && (
                   <button
                     type="button"
                     onClick={() => onRemove(item)}
@@ -351,7 +380,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
               aria-label="Add another item"
             >
               <svg
-                className="text-secondary-text/50 h-5 w-5"
+                className="text-primary-text h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -363,7 +392,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
-              <span className="text-secondary-text/70 text-xs font-medium">
+              <span className="text-primary-text text-xs font-medium">
                 Add item
               </span>
             </button>,

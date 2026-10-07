@@ -261,7 +261,9 @@ export default function UserSearch() {
                     prefetch={false}
                     className="border-border-card group bg-secondary-bg hover:border-border-focus/60 relative block h-full overflow-hidden rounded-xl border shadow-md transition-[border-color,box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                     data-accent-cards={accentColor ? "" : undefined}
-                    style={accentColor ? accentCardTheme(accentColor) : undefined}
+                    style={
+                      accentColor ? accentCardTheme(accentColor) : undefined
+                    }
                   >
                     <DiscordUserCard
                       user={user}

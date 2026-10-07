@@ -186,7 +186,7 @@ export default function ValuesItemsGrid({
               : "";
 
             if (hasLocalFilters) {
-              return `Showing ${displayedItems.length} favorited items on this page (${totalItemsCount} before favorites filter)`;
+              return `${totalItemsCount} favorited ${totalItemsCount === 1 ? "item" : "items"}${rangeText}`;
             }
 
             if (debouncedSearchTerm) {

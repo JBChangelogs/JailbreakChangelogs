@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -11,6 +11,11 @@ import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { badgeBase } from "@/components/Items/Suggestions/shared";
 import { DupedBadge } from "@/components/trading/DupedBadge";
 import { OgBadge } from "@/components/trading/OgBadge";
+import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
+import { formatFullValue, parseCashValue } from "@/utils/trading/values";
+import { formatCurrencyValue } from "@/utils/trading/currency";
+import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
+import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import type { Item } from "@/types/index";
 import type { TradeItem } from "@/types/trading";
 import type {
@@ -110,18 +115,129 @@ const itemImage = (item: DisplayTradeItem) =>
     ? getItemImagePath(item.type, item.name, true)
     : "/placeholder.png";
 
+const commonTradeCount = (items: DisplayTradeItem[]) =>
+  items.reduce(
+    (count, item) => count + Math.max(1, Number(item.amount) || 1),
+    0,
+  );
+
+function commonTradeTotal(items: DisplayTradeItem[]): number | null {
+  if (!items.length) return null;
+  let total = 0;
+  for (const item of items) {
+    const value = parseCashValue(
+      (item.duped ?? item.isDuped) ? item.duped_value : item.cash_value,
+    );
+    if (!Number.isFinite(value) || value < 0) return null;
+    total += value * Math.max(1, Number(item.amount) || 1);
+  }
+  return Number.isFinite(total) ? total : null;
+}
+
+function CommonTradeComparison({
+  offering,
+  requesting,
+}: {
+  offering: DisplayTradeItem[];
+  requesting: DisplayTradeItem[];
+}) {
+  const offeringTotal = commonTradeTotal(offering);
+  const requestingTotal = commonTradeTotal(requesting);
+  const difference =
+    offeringTotal !== null && requestingTotal !== null
+      ? offeringTotal - requestingTotal
+      : null;
+  const combined = (offeringTotal ?? 0) + (requestingTotal ?? 0);
+  const offeringShare =
+    combined > 0 ? ((offeringTotal ?? 0) / combined) * 100 : 50;
+  const label =
+    difference === null
+      ? "Comparison unavailable"
+      : difference === 0
+        ? "Equal listed value"
+        : `${difference > 0 ? "Offering" : "Requesting"} is ${formatCurrencyValue(Math.abs(difference))} higher`;
+  const comparisonColor =
+    difference === null || difference === 0
+      ? "border-border-card bg-tertiary-bg text-primary-text"
+      : difference > 0
+        ? "border-status-error bg-status-error text-form-button-text"
+        : "border-status-success bg-status-success text-form-button-text";
+
+  return (
+    <div className="border-border-card mt-3 border-t pt-3">
+      <div className="grid grid-cols-2 items-center gap-3 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+        <div className="min-w-0">
+          <p className="text-status-success text-xs font-medium tracking-wide uppercase">
+            Offering{" "}
+            <span className="text-secondary-text normal-case">
+              ({commonTradeCount(offering)})
+            </span>
+          </p>
+          <p className="text-primary-text text-xl font-bold break-words sm:text-2xl">
+            {offeringTotal === null
+              ? "Unavailable"
+              : formatCurrencyValue(offeringTotal)}
+          </p>
+        </div>
+        <span
+          className={`${comparisonColor} col-span-2 row-start-1 rounded-lg border px-3 py-1.5 text-center text-sm leading-tight font-bold tabular-nums lg:col-span-1 lg:col-start-2 lg:row-start-1`}
+        >
+          {label}
+        </span>
+        <div className="min-w-0 text-right">
+          <p className="text-button-danger text-xs font-medium tracking-wide uppercase">
+            Requesting{" "}
+            <span className="text-secondary-text normal-case">
+              ({commonTradeCount(requesting)})
+            </span>
+          </p>
+          <p className="text-primary-text text-xl font-bold break-words sm:text-2xl">
+            {requestingTotal === null
+              ? "Unavailable"
+              : formatCurrencyValue(requestingTotal)}
+          </p>
+        </div>
+      </div>
+      {difference !== null && (
+        <div
+          className="bg-tertiary-bg mt-3 flex h-1.5 overflow-hidden rounded-full"
+          aria-hidden="true"
+        >
+          <div
+            className="bg-button-danger h-full"
+            style={{ width: `${offeringShare}%` }}
+          />
+          <div
+            className="bg-status-success h-full"
+            style={{ width: `${100 - offeringShare}%` }}
+          />
+        </div>
+      )}
+      <p className="text-secondary-text mt-3 text-center text-xs">
+        Based on current listed values
+      </p>
+    </div>
+  );
+}
+
 function TradeItemSummary({
   item,
   showImage,
   showItemType,
+  showValues,
+  valuesStatus,
 }: {
   item: DisplayTradeItem;
   showImage: boolean;
   showItemType: boolean;
+  showValues: boolean;
+  valuesStatus: "loading" | "ready" | "error";
 }) {
   const amount = Math.max(1, Number(item.amount) || 1);
   const isOg = item.og ?? item.isOG ?? false;
   const isDuped = item.duped ?? item.isDuped ?? false;
+  const { demand, trend } = getTradeItemMarketDetails(item, isDuped);
+  const status = item.cash_value !== undefined ? "ready" : valuesStatus;
   const categoryIcon = item.type ? getCategoryIcon(item.type) : null;
   const categoryColor = item.type ? getCategoryColor(item.type) : null;
   const itemHref =
@@ -132,7 +248,9 @@ function TradeItemSummary({
   const content = (
     <>
       {showImage && (
-        <div className="bg-quaternary-bg relative h-14 w-20 shrink-0 overflow-hidden rounded-md sm:h-16 sm:w-24 lg:h-20 lg:w-32">
+        <div
+          className={`bg-quaternary-bg relative h-14 w-20 shrink-0 overflow-hidden rounded-md sm:h-16 sm:w-24 lg:h-20 lg:w-32 ${showValues ? "sm:row-span-2 sm:self-center" : ""}`}
+        >
           <Image
             src={itemImage(item)}
             alt={item.name ?? `Item ${item.id ?? ""}`}
@@ -156,7 +274,7 @@ function TradeItemSummary({
           <div className="mt-1 flex flex-wrap gap-1">
             {showItemType && item.type && categoryColor && (
               <span
-                className={`${badgeBase} text-primary-text h-5 px-1.5 text-[10px]`}
+                className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center rounded-md border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
                 style={{
                   borderColor: categoryColor,
                   backgroundColor: `${categoryColor}22`,
@@ -164,7 +282,7 @@ function TradeItemSummary({
               >
                 {categoryIcon && (
                   <categoryIcon.Icon
-                    className="mr-1 h-2.5 w-2.5"
+                    className="mr-1 h-3 w-3 shrink-0"
                     style={{ color: categoryColor }}
                   />
                 )}
@@ -176,6 +294,52 @@ function TradeItemSummary({
           </div>
         )}
       </div>
+      {showValues && (
+        <dl
+          className={`col-span-2 grid grid-cols-2 gap-x-3 gap-y-2 text-xs ${showImage ? "sm:col-span-1 sm:col-start-2" : ""}`}
+        >
+          {[
+            [
+              "Cash Value",
+              formatFullValue(item.cash_value),
+              "bg-button-info text-form-button-text",
+            ],
+            [
+              "Duped Value",
+              formatFullValue(item.duped_value),
+              "bg-button-info text-form-button-text",
+            ],
+            [
+              isDuped ? "Duped Demand" : "Demand",
+              demand ?? "Unknown",
+              getDemandColor(status === "ready" ? demand : undefined),
+            ],
+            [
+              "Trend",
+              trend ?? "Unknown",
+              getTrendColor(status === "ready" ? trend : undefined),
+            ],
+          ].map(([label, value, badgeColor]) => (
+            <div
+              key={label}
+              className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1"
+            >
+              <dt className="text-secondary-text font-medium whitespace-nowrap">
+                {label}
+              </dt>
+              <dd
+                className={`${badgeColor} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold whitespace-nowrap tabular-nums`}
+              >
+                {status === "loading"
+                  ? "Loading…"
+                  : status === "error"
+                    ? "Unavailable"
+                    : value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </>
   );
 
@@ -183,7 +347,7 @@ function TradeItemSummary({
     return (
       <Link
         href={itemHref}
-        className="border-border-card bg-secondary-bg hover:border-button-info/50 flex min-w-0 items-center gap-2.5 rounded-lg border p-2 transition-colors"
+        className={`border-border-card bg-secondary-bg hover:border-button-info/50 min-w-0 items-center gap-2.5 rounded-lg border p-2 transition-colors ${showValues ? "grid grid-cols-[auto_minmax(0,1fr)]" : "flex"}`}
       >
         {content}
       </Link>
@@ -191,7 +355,9 @@ function TradeItemSummary({
   }
 
   return (
-    <div className="border-border-card bg-secondary-bg flex min-w-0 items-center gap-2.5 rounded-lg border p-2">
+    <div
+      className={`border-border-card bg-secondary-bg min-w-0 items-center gap-2.5 rounded-lg border p-2 ${showValues ? "grid grid-cols-[auto_minmax(0,1fr)]" : "flex"}`}
+    >
       {content}
     </div>
   );
@@ -216,6 +382,33 @@ export function CommonTradesDisplay({
   headingIcon?: string;
   headingClassName?: string;
 }) {
+  const [catalogItems, setCatalogItems] = useState<Map<number, TradeItem>>(
+    new Map(),
+  );
+  const [valuesStatus, setValuesStatus] = useState<
+    "loading" | "ready" | "error"
+  >("loading");
+  useEffect(() => {
+    if (appearance !== "detail" || !trades?.length) return;
+    let cancelled = false;
+    setValuesStatus("loading");
+    const ids = trades.flatMap((trade) =>
+      [...trade.offering, ...trade.requesting].map((item) => Number(item.id)),
+    );
+    fetchTradeItemsByIds(ids)
+      .then((items) => {
+        if (cancelled) return;
+        setCatalogItems(new Map(items.map((item) => [item.id, item])));
+        setValuesStatus("ready");
+      })
+      .catch(() => {
+        if (!cancelled) setValuesStatus("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [appearance, trades]);
+
   if (!trades?.length) return null;
 
   return (
@@ -230,67 +423,97 @@ export function CommonTradesDisplay({
         )}
         Common Trades ({trades.length})
       </p>
-      <div className="space-y-2">
-        {trades.map((trade, index) => (
-          <div
-            key={index}
-            className={`border-border-card border ${
-              appearance === "detail"
-                ? "bg-tertiary-bg rounded-xl p-3 sm:p-4"
-                : "bg-tertiary-bg rounded-lg p-2"
-            }`}
-          >
-            {showTradeLabels && (
-              <div className="mb-3 flex items-center gap-2">
-                <span className="bg-button-info/10 text-link flex h-5 min-w-5 items-center justify-center rounded-md px-1.5 text-[0.6875rem] font-bold">
-                  {index + 1}
-                </span>
-                <p className="text-primary-text text-xs font-semibold">
-                  Trade example
-                </p>
-              </div>
-            )}
-            <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-              <div className="min-w-0 space-y-1.5">
-                <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
-                  Offering
-                </p>
-                {trade.offering.map((item, itemIndex) => (
-                  <TradeItemSummary
-                    key={`${String(item.id)}-${itemIndex}`}
-                    item={item}
-                    showImage={showItemImages}
-                    showItemType={showItemTypes}
+      <div
+        className={
+          appearance === "detail" ? "divide-border-card divide-y" : "space-y-2"
+        }
+      >
+        {trades.map((trade, index) => {
+          const offering = trade.offering.map((item) => ({
+            ...item,
+            ...catalogItems.get(Number(item.id)),
+          }));
+          const requesting = trade.requesting.map((item) => ({
+            ...item,
+            ...catalogItems.get(Number(item.id)),
+          }));
+          return (
+            <div
+              key={index}
+              className={
+                appearance === "detail"
+                  ? "py-3 first:pt-0 last:pb-0 sm:py-4"
+                  : "border-border-card bg-tertiary-bg rounded-lg border p-2"
+              }
+            >
+              {showTradeLabels && (
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="bg-button-info/10 text-link flex h-5 min-w-5 items-center justify-center rounded-md px-1.5 text-[0.6875rem] font-bold">
+                    {index + 1}
+                  </span>
+                  <p className="text-primary-text text-xs font-semibold">
+                    Trade example
+                  </p>
+                </div>
+              )}
+              <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+                <div className="min-w-0 space-y-1.5">
+                  <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
+                    Offering{" "}
+                    <span className="text-secondary-text normal-case">
+                      ({commonTradeCount(offering)})
+                    </span>
+                  </p>
+                  {offering.map((item, itemIndex) => (
+                    <TradeItemSummary
+                      key={`${String(item.id)}-${itemIndex}`}
+                      item={item}
+                      showImage={showItemImages}
+                      showItemType={showItemTypes}
+                      showValues={appearance === "detail"}
+                      valuesStatus={valuesStatus}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center justify-center sm:h-full sm:self-stretch">
+                  <Icon
+                    icon="material-symbols:arrow-forward-rounded"
+                    className={`${
+                      appearance === "detail"
+                        ? "text-primary-text"
+                        : "text-tertiary-text"
+                    } h-5 w-5 rotate-90 sm:rotate-0`}
+                    inline
                   />
-                ))}
+                </div>
+                <div className="min-w-0 space-y-1.5">
+                  <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
+                    Requesting{" "}
+                    <span className="text-secondary-text normal-case">
+                      ({commonTradeCount(requesting)})
+                    </span>
+                  </p>
+                  {requesting.map((item, itemIndex) => (
+                    <TradeItemSummary
+                      key={`${String(item.id)}-${itemIndex}`}
+                      item={item}
+                      showImage={showItemImages}
+                      showItemType={showItemTypes}
+                      showValues={appearance === "detail"}
+                      valuesStatus={valuesStatus}
+                    />
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center justify-center sm:h-full sm:self-stretch">
-                <Icon
-                  icon="material-symbols:arrow-forward-rounded"
-                  className={`${
-                    appearance === "detail"
-                      ? "text-primary-text"
-                      : "text-tertiary-text"
-                  } h-5 w-5 rotate-90 sm:rotate-0`}
-                  inline
+              {appearance === "detail" && (
+                <CommonTradeComparison
+                  offering={offering}
+                  requesting={requesting}
                 />
-              </div>
-              <div className="min-w-0 space-y-1.5">
-                <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
-                  Requesting
-                </p>
-                {trade.requesting.map((item, itemIndex) => (
-                  <TradeItemSummary
-                    key={`${String(item.id)}-${itemIndex}`}
-                    item={item}
-                    showImage={showItemImages}
-                    showItemType={showItemTypes}
-                  />
-                ))}
-              </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
