@@ -118,7 +118,8 @@ export default function DesktopNavigationSettings() {
   const canSwitchNavigation = useMediaQuery("(min-width: 1536px)");
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
-  // Where switching isn't available, cycle the preview as an example.
+  // Where switching isn't available, cycle the preview as an example, or
+  // show both layouts side by side when motion is reduced.
   const [demo, setDemo] = useState<DesktopNavigation>("sidebar");
   useEffect(() => {
     if (canSwitchNavigation || reducedMotion) return;
@@ -190,7 +191,14 @@ export default function DesktopNavigationSettings() {
             </label>
           ))}
         </div>
-        <LayoutPreview layout={previewLayout} />
+        {!canSwitchNavigation && reducedMotion ? (
+          <div className="grid gap-3">
+            <LayoutPreview layout="sidebar" />
+            <LayoutPreview layout="top-bar" />
+          </div>
+        ) : (
+          <LayoutPreview layout={previewLayout} />
+        )}
       </div>
 
       <div className="border-border-card flex items-center justify-between gap-4 border-t pt-5">

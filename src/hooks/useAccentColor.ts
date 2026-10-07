@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -42,15 +42,19 @@ export function useAccentColor(userId: string | undefined) {
   const [draft, setDraft] = useState<string | null>(null);
   const debouncedDraft = useDebounce(draft, 600);
 
+  // Saves run one at a time so an older one can't land after a newer one.
+  const saveQueue = useRef(Promise.resolve());
   useEffect(() => {
-    if (!debouncedDraft || debouncedDraft === customAccent) return;
-    saveAccentColor(debouncedDraft)
+    const value = debouncedDraft;
+    if (!value || value === customAccent) return;
+    saveQueue.current = saveQueue.current
+      .then(() => saveAccentColor(value))
       .then(() => {
-        queryClient.setQueryData(accentKey, debouncedDraft);
+        queryClient.setQueryData(accentKey, value);
         queryClient.setQueryData<Record<string, unknown>>(
           profileKey,
           (current) =>
-            current ? { ...current, accent_color: debouncedDraft } : current,
+            current ? { ...current, accent_color: value } : current,
         );
       })
       .catch((error: unknown) => {
@@ -58,7 +62,10 @@ export function useAccentColor(userId: string | undefined) {
           description: error instanceof Error ? error.message : undefined,
         });
       })
-      .finally(() => setDraft(null));
+      // Keep a newer pick that is still waiting to save.
+      .finally(() =>
+        setDraft((current) => (current === value ? null : current)),
+      );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedDraft]);
 

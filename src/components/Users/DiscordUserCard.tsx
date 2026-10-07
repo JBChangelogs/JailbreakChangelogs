@@ -56,7 +56,8 @@ export default function DiscordUserCard({
   // Match the hover tooltip: private profiles only show name and avatar.
   const isPrivate =
     user.settings_v2?.profile_public === false && currentUserId !== user.id;
-  const presence = user.settings_v2?.hide_presence ? undefined : user.presence;
+  const presence =
+    isPrivate || user.settings_v2?.hide_presence ? undefined : user.presence;
   const joined = Number(user.created_at);
   const [bannerFailed, setBannerFailed] = useState(false);
   const { primary, fallback } = getProfileBanner({
@@ -67,7 +68,7 @@ export default function DiscordUserCard({
     premiumType: user.premiumtype,
     size: 1024,
   });
-  const bannerSrc = primary && !bannerFailed ? primary : fallback;
+  const bannerSrc = primary && !bannerFailed && !isPrivate ? primary : fallback;
 
   return (
     <div className="flex h-full flex-col">
