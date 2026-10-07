@@ -127,8 +127,10 @@ export const useSettings = (
     }
 
     const needsPremium =
-      (name === "custom_avatar" && value === true) ||
-      (name === "custom_banner" && value === true);
+      value === true &&
+      (name === "custom_avatar" ||
+        name === "custom_banner" ||
+        name === "custom_background");
 
     if (needsPremium) {
       if (
@@ -138,8 +140,7 @@ export const useSettings = (
       ) {
         if (openModal) {
           openModal({
-            feature:
-              name === "custom_avatar" ? "custom_avatar" : "custom_banner",
+            feature: name,
             currentTier: userData.premiumtype || 0,
             requiredTier: 2,
             currentLimit: userData.premiumtype || 0,
@@ -213,5 +214,10 @@ export const useSettings = (
     setSupporterHistory,
     loading,
     handleSettingChange,
+    /** Updates a toggle locally after the server already changed it. */
+    setSettingValue: (name: string, value: boolean) =>
+      queryClient.setQueryData<ApiSettingsResponse>(settingsKey, (current) =>
+        current ? withSettingValue(current, name, value) : current,
+      ),
   };
 };

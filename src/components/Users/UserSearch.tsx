@@ -20,6 +20,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
+import { accentCardTheme, accentColorToHex } from "@/utils/ui/accentColor";
 
 function InlineSpinner() {
   return (
@@ -247,21 +248,27 @@ export default function UserSearch() {
           </div>
         ) : (
           users.map((user) => {
+            const accentColor =
+              user.settings_v2?.colored_profile_cards === true
+                ? (accentColorToHex(user.custom_accent_color) ??
+                  accentColorToHex(user.accent_color))
+                : null;
             return (
               <Tooltip key={user.id} delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Link
                     href={`/users/${user.id}`}
                     prefetch={false}
-                    className="border-border-card group bg-secondary-bg relative block rounded-lg border p-4 shadow-md transition-colors"
+                    className="border-border-card group bg-secondary-bg hover:border-border-focus/60 relative block h-full overflow-hidden rounded-xl border shadow-md transition-[border-color,box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                    data-accent-cards={accentColor ? "" : undefined}
+                    style={accentColor ? accentCardTheme(accentColor) : undefined}
                   >
-                    <div className="flex items-center space-x-3">
-                      <DiscordUserCard
-                        user={user}
-                        disableBadgeTooltips={true}
-                        badgeLimit={1}
-                      />
-                    </div>
+                    <DiscordUserCard
+                      user={user}
+                      disableBadgeTooltips={true}
+                      badgeLimit={3}
+                      currentUserId={currentUserId}
+                    />
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-sm min-w-75 p-0">

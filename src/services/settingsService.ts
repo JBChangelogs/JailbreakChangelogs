@@ -270,6 +270,136 @@ interface CustomAvatarResponse {
   custom_avatar: string | null;
 }
 
+/** Error text for background requests, per the API's documented codes. */
+const getBackgroundErrorMessage = async (
+  response: Response,
+  fallback: string,
+): Promise<string> => {
+  if (response.status === 403) {
+    return "Custom backgrounds need Supporter Tier 2 or higher.";
+  }
+  if (response.status === 429) {
+    return "You can change your background 5 times every 5 minutes. Try again shortly.";
+  }
+  // 400 messages are written for users, so show them as-is.
+  return getResponseErrorMessage(response, fallback);
+};
+
+export const fetchCustomBackground = async (): Promise<string | null> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/v2/users/me/background",
+  );
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+  if (!response.ok) {
+    throw new Error(
+      await getResponseErrorMessage(
+        response,
+        "Failed to load custom background",
+      ),
+    );
+  }
+  const data = (await response.json()) as { custom_background?: unknown };
+  return typeof data.custom_background === "string"
+    ? data.custom_background
+    : null;
+};
+
+export const uploadCustomBackground = async (file: File): Promise<string> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/v2/users/me/background",
+  );
+  const formData = new FormData();
+  formData.append("background", file, file.name);
+  const response = await fetch(url, {
+    method: "PUT",
+    credentials: "include",
+    headers,
+    body: formData,
+  });
+  if (!response.ok) {
+    log.error("upload custom background failed", { status: response.status });
+    throw new Error(
+      await getBackgroundErrorMessage(response, "Failed to upload background"),
+    );
+  }
+  const data = (await response.json()) as { custom_background?: unknown };
+  if (typeof data.custom_background !== "string") {
+    throw new Error("The background upload did not return an image URL");
+  }
+  return data.custom_background;
+};
+
+export const removeCustomBackground = async (): Promise<void> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/v2/users/me/background",
+  );
+  const response = await fetch(url, {
+    method: "DELETE",
+    credentials: "include",
+    headers,
+  });
+  if (!response.ok) {
+    throw new Error(
+      await getBackgroundErrorMessage(response, "Failed to remove background"),
+    );
+  }
+};
+
+/** The user's custom accent color ("#rrggbb"), or null when using Discord's. */
+export const fetchAccentColor = async (): Promise<string | null> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/v2/users/me/accent-color",
+  );
+  const response = await fetch(url, {
+    credentials: "include",
+    cache: "no-store",
+    headers,
+  });
+  if (!response.ok) {
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to load accent color"),
+    );
+  }
+  const data = (await response.json()) as { color?: unknown };
+  return typeof data.color === "string" ? data.color : null;
+};
+
+/** Sets a custom accent color, or resets to Discord's when `color` is null. */
+export const saveAccentColor = async (color: string | null): Promise<void> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/v2/users/me/accent-color",
+  );
+  const response = await fetch(url, {
+    method: color ? "PUT" : "DELETE",
+    credentials: "include",
+    headers: color
+      ? { ...headers, "Content-Type": "application/json" }
+      : headers,
+    body: color ? JSON.stringify({ color }) : undefined,
+  });
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error("Custom accent colors need a supporter tier.");
+    }
+    if (response.status === 429) {
+      throw new Error("Too many color changes. Try again in a minute.");
+    }
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to save accent color"),
+    );
+  }
+};
+
 export const fetchCustomAvatar = async (): Promise<string | null> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,

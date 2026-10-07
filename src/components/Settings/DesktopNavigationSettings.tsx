@@ -3,24 +3,104 @@
 import { useEffect, useId, useState, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { Icon } from "@/components/ui/IconWrapper";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 import {
   getDesktopNavigation,
+  getLayoutShortcutHidden,
   setDesktopNavigation,
+  setLayoutShortcutHidden,
   subscribeDesktopNavigation,
+  type DesktopNavigation,
 } from "@/utils/ui/desktopNavigation";
+
+const LAYOUTS: {
+  value: DesktopNavigation;
+  title: string;
+  description: string;
+}[] = [
+  {
+    value: "sidebar",
+    title: "Sidebar",
+    description: "Navigation beside the page content.",
+  },
+  {
+    value: "top-bar",
+    title: "Top bar",
+    description: "Navigation above the page content.",
+  },
+];
+
+const MOTION =
+  "transition-all duration-700 ease-in-out motion-reduce:transition-none";
+
+/** Animates between layouts by moving the same shapes. */
+function LayoutPreview({ layout }: { layout: DesktopNavigation }) {
+  const sidebar = layout === "sidebar";
+  return (
+    <svg
+      viewBox="0 0 240 140"
+      role="img"
+      aria-label={
+        sidebar
+          ? "Sidebar navigation beside the page content"
+          : "Top bar navigation above the page content"
+      }
+      className="border-border-card bg-primary-bg w-full rounded-lg border"
+    >
+      <rect width="240" height="20" className="fill-quaternary-bg" />
+      <rect
+        x="10"
+        y="8"
+        width="26"
+        height="4"
+        rx="2"
+        className="fill-secondary-text"
+      />
+      <g className="fill-link">
+        <rect
+          style={{
+            x: 0,
+            y: sidebar ? 20 : 0,
+            width: sidebar ? 56 : 240,
+            height: sidebar ? 120 : 20,
+          }}
+          className={MOTION}
+          opacity="0.12"
+        />
+        {[0, 1, 2, 3].map((index) => (
+          <rect
+            key={index}
+            style={{
+              x: sidebar ? 10 : 60 + index * 42,
+              y: sidebar ? 34 + index * 18 : 8,
+              width: sidebar ? 34 : 28,
+            }}
+            height="4"
+            rx="2"
+            className={MOTION}
+          />
+        ))}
+      </g>
+      <g
+        style={{
+          transform: sidebar ? "translate(68px,32px)" : "translate(12px,32px)",
+        }}
+        className={`fill-secondary-text ${MOTION}`}
+      >
+        <rect width="76" height="6" rx="3" opacity="0.6" />
+        <rect y="14" width="112" height="4" rx="2" opacity="0.25" />
+        <rect
+          y="32"
+          style={{ width: sidebar ? 160 : 216 }}
+          className={MOTION}
+          height="62"
+          rx="5"
+          opacity="0.08"
+        />
+      </g>
+    </svg>
+  );
+}
 
 export default function DesktopNavigationSettings() {
   const id = useId();
@@ -28,228 +108,117 @@ export default function DesktopNavigationSettings() {
   const mode = useSyncExternalStore(
     subscribeDesktopNavigation,
     getDesktopNavigation,
-    () => "sidebar",
+    () => "sidebar" as const,
   );
-
-  const [previewMode, setPreviewMode] = useState<"sidebar" | "top-bar">(
-    "sidebar",
+  const shortcutHidden = useSyncExternalStore(
+    subscribeDesktopNavigation,
+    getLayoutShortcutHidden,
+    () => false,
   );
-  const [manualPreview, setManualPreview] = useState(false);
-  const [navigationMenuOpen, setNavigationMenuOpen] = useState(false);
   const canSwitchNavigation = useMediaQuery("(min-width: 1536px)");
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
+  // Where switching isn't available, cycle the preview as an example, or
+  // show both layouts side by side when motion is reduced.
+  const [demo, setDemo] = useState<DesktopNavigation>("sidebar");
   useEffect(() => {
-    if (reducedMotion || manualPreview) return;
-    const showTopBar = window.setTimeout(() => setPreviewMode("top-bar"), 1800);
-    const showSidebar = window.setTimeout(
-      () => setPreviewMode("sidebar"),
-      3600,
+    if (canSwitchNavigation || reducedMotion) return;
+    const interval = window.setInterval(
+      () =>
+        setDemo((current) => (current === "sidebar" ? "top-bar" : "sidebar")),
+      1800,
     );
-    return () => {
-      window.clearTimeout(showTopBar);
-      window.clearTimeout(showSidebar);
-    };
-  }, [reducedMotion, manualPreview]);
+    return () => window.clearInterval(interval);
+  }, [canSwitchNavigation, reducedMotion]);
+  const previewLayout = canSwitchNavigation ? mode : demo;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-        <div>
-          <p
-            id={`${id}-label`}
-            className="text-primary-text text-base font-medium"
-          >
-            Desktop navigation
-          </p>
-          <p
-            id={`${id}-description`}
-            className="text-secondary-text mt-1 text-sm"
-          >
-            Choose your navigation on large screens.
-            {isAuthenticated
-              ? " Syncs with your account."
-              : " Saved on this browser."}
-          </p>
-        </div>
-        <DropdownMenu
-          open={canSwitchNavigation && navigationMenuOpen}
-          onOpenChange={(open) =>
-            setNavigationMenuOpen(canSwitchNavigation && open)
-          }
+    <div className="space-y-5">
+      <div>
+        <h3 id={`${id}-label`} className="text-primary-text font-medium">
+          Desktop navigation
+        </h3>
+        <p className="text-secondary-text mt-1 text-sm">
+          Choose how navigation appears on large screens.
+          {isAuthenticated
+            ? " Syncs with your account."
+            : " Saved on this browser."}
+        </p>
+      </div>
+
+      {/* CSS, not useMediaQuery, so wide screens never flash the notice. */}
+      <p className="border-button-info bg-button-info/10 text-secondary-text rounded-lg border p-3 text-sm 2xl:hidden">
+        <span className="text-primary-text font-medium">
+          Larger screen required.
+        </span>{" "}
+        You can change this on screens 1536px wide or larger. The preview shows
+        both layouts.
+      </p>
+
+      <div className="grid items-center gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <div
+          role="radiogroup"
+          aria-labelledby={`${id}-label`}
+          className="flex flex-col gap-3"
         >
-          <DropdownMenuTrigger asChild disabled={!canSwitchNavigation}>
-            <button
-              type="button"
-              disabled={!canSwitchNavigation}
-              aria-labelledby={`${id}-label ${id}-value`}
-              aria-describedby={
-                canSwitchNavigation
-                  ? `${id}-description`
-                  : `${id}-description ${id}-availability`
-              }
-              className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus focus-visible:ring-link flex min-h-11 w-full items-center justify-between gap-4 rounded-lg border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 sm:w-48 sm:shrink-0"
+          {LAYOUTS.map((layout) => (
+            <label
+              key={layout.value}
+              className="group border-border-card bg-tertiary-bg has-checked:border-button-info has-checked:bg-button-info/5 has-focus-visible:ring-link hover:border-border-focus/60 has-disabled:hover:border-border-card flex cursor-pointer items-start justify-between gap-3 rounded-xl border p-4 transition-colors has-focus-visible:ring-2 has-disabled:cursor-not-allowed has-disabled:opacity-70"
             >
-              <span id={`${id}-value`}>
-                {!canSwitchNavigation
-                  ? "Available on larger screens"
-                  : mode === "sidebar"
-                    ? "Sidebar"
-                    : "Top bar"}
-              </span>
-              <Icon
-                icon="heroicons:chevron-down"
-                className="text-secondary-text h-4 w-4"
+              <input
+                type="radio"
+                name={`${id}-layout`}
+                value={layout.value}
+                checked={mode === layout.value}
+                disabled={!canSwitchNavigation}
+                onChange={() => setDesktopNavigation(layout.value)}
+                className="sr-only"
               />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-(--radix-dropdown-menu-trigger-width)"
-          >
-            <DropdownMenuRadioGroup
-              value={mode}
-              onValueChange={(value) => {
-                if (
-                  canSwitchNavigation &&
-                  (value === "sidebar" || value === "top-bar")
-                )
-                  setDesktopNavigation(value);
-              }}
-            >
-              <DropdownMenuRadioItem value="sidebar">
-                Sidebar
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="top-bar">
-                Top bar
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <span>
+                <span className="text-primary-text block font-medium">
+                  {layout.title}
+                </span>
+                <span className="text-secondary-text block text-sm">
+                  {layout.description}
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info mt-1 size-4 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-tertiary-bg)]"
+              />
+            </label>
+          ))}
+        </div>
+        {!canSwitchNavigation && reducedMotion ? (
+          <div className="grid gap-3">
+            <LayoutPreview layout="sidebar" />
+            <LayoutPreview layout="top-bar" />
+          </div>
+        ) : (
+          <LayoutPreview layout={previewLayout} />
+        )}
       </div>
-      <div
-        id={`${id}-availability`}
-        className="bg-button-info/10 border-button-info flex items-start gap-4 rounded-lg border p-4 shadow-sm 2xl:hidden"
-      >
+
+      <div className="border-border-card flex items-center justify-between gap-4 border-t pt-5">
         <div>
-          <p className="text-primary-text text-base font-bold">
-            Larger screen required
-          </p>
+          <label
+            htmlFor={`${id}-shortcut`}
+            className="text-primary-text font-medium"
+          >
+            Layout button in header
+          </label>
           <p className="text-secondary-text mt-1 text-sm">
-            Navigation layout options are available on larger screens. You can
-            view the examples below.
+            Show the &ldquo;Change navigation layout&rdquo; button next to your
+            notifications. Saved on this browser.
           </p>
         </div>
+        <Switch
+          id={`${id}-shortcut`}
+          checked={!shortcutHidden}
+          onCheckedChange={(show) => setLayoutShortcutHidden(!show)}
+        />
       </div>
-      <figure className="sm:ml-auto sm:w-48">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              tabIndex={0}
-              className="focus-visible:ring-link rounded-lg focus-visible:ring-2 focus-visible:outline-none"
-            >
-              <svg
-                viewBox="0 0 240 140"
-                role="img"
-                aria-label={
-                  previewMode === "sidebar"
-                    ? "Sidebar navigation beside the page content"
-                    : "Top bar navigation above the page content"
-                }
-                className="border-border-card bg-tertiary-bg w-full max-w-xs overflow-hidden rounded-lg border"
-              >
-                <rect width="240" height="20" className="fill-quaternary-bg" />
-                <rect
-                  x="10"
-                  y="8"
-                  width="26"
-                  height="4"
-                  rx="2"
-                  className="fill-secondary-text"
-                />
-                <g className="fill-link">
-                  <rect
-                    style={{
-                      x: 0,
-                      y: previewMode === "sidebar" ? 20 : 0,
-                      width: previewMode === "sidebar" ? 56 : 240,
-                      height: previewMode === "sidebar" ? 120 : 20,
-                    }}
-                    className="transition-all duration-700 ease-in-out motion-reduce:transition-none"
-                    opacity="0.12"
-                  />
-                  {[0, 1, 2, 3].map((index) => (
-                    <rect
-                      key={index}
-                      style={{
-                        x: previewMode === "sidebar" ? 10 : 60 + index * 42,
-                        y: previewMode === "sidebar" ? 34 + index * 18 : 8,
-                        width: previewMode === "sidebar" ? 34 : 28,
-                      }}
-                      height="4"
-                      rx="2"
-                      className="transition-all duration-700 ease-in-out motion-reduce:transition-none"
-                    />
-                  ))}
-                </g>
-                <g
-                  style={{
-                    transform:
-                      previewMode === "sidebar"
-                        ? "translate(68px,32px)"
-                        : "translate(12px,32px)",
-                  }}
-                  className="fill-secondary-text transition-transform duration-700 ease-in-out motion-reduce:transition-none"
-                >
-                  <rect width="76" height="6" rx="3" opacity="0.6" />
-                  <rect y="14" width="112" height="4" rx="2" opacity="0.25" />
-                  <rect
-                    y="32"
-                    style={{ width: previewMode === "sidebar" ? 160 : 216 }}
-                    className="transition-all duration-700 ease-in-out motion-reduce:transition-none"
-                    height="62"
-                    rx="5"
-                    opacity="0.08"
-                  />
-                </g>
-              </svg>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            side="left"
-            align="center"
-            sideOffset={8}
-            className="max-w-64"
-          >
-            {previewMode === "sidebar"
-              ? "Sidebar navigation beside the page content"
-              : "Top bar navigation above the page content"}
-          </TooltipContent>
-        </Tooltip>
-        <figcaption className="text-secondary-text mt-2 text-xs">
-          <p className="text-primary-text font-medium">
-            {previewMode === "sidebar" ? "Sidebar example" : "Top bar example"}
-          </p>
-          <p className="mt-1">
-            {previewMode === "sidebar"
-              ? "Navigation beside the content."
-              : "Navigation above the content."}
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setManualPreview(true);
-              setPreviewMode((current) =>
-                current === "sidebar" ? "top-bar" : "sidebar",
-              );
-            }}
-            className="border-border-card bg-tertiary-bg text-primary-text hover:bg-quaternary-bg hover:border-border-focus focus-visible:ring-link mt-3 flex min-h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-md border px-2 font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <Icon icon="heroicons:arrow-path" className="h-3.5 w-3.5" />
-            Show {previewMode === "sidebar" ? "top bar" : "sidebar"} example
-          </button>
-        </figcaption>
-      </figure>
     </div>
   );
 }

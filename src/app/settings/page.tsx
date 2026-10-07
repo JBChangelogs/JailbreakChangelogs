@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import Link from "next/link";
 import { UserData } from "@/types/auth";
 import { formatSettingName } from "@/config/settings";
+import { useAccentColor } from "@/hooks/useAccentColor";
 import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
-import { BannerSettings } from "@/components/Settings/BannerSettings";
-import { AvatarSettings } from "@/components/Settings/AvatarSettings";
+import { AccentColorSetting } from "@/components/Settings/AccentColorSetting";
+import { AppearancePreview } from "@/components/Settings/AppearancePreview";
+import { BackgroundSettings } from "@/components/Settings/BackgroundSettings";
 import DesktopNavigationSettings from "@/components/Settings/DesktopNavigationSettings";
 import SettingsCard from "@/components/Settings/SettingsCard";
 import SupporterHistorySection from "@/components/Settings/SupporterHistorySection";
@@ -38,6 +40,7 @@ import { usePurchaseGiftModal } from "@/hooks/usePurchaseGiftModal";
 import SettingsLoading from "./loading";
 
 const APP_ONLY_SETTINGS = new Set(["hide_roblox_activity"]);
+const PREVIEW_SETTINGS = new Set(["custom_avatar", "custom_banner"]);
 
 export default function SettingsPage() {
   const { user, isLoading, refreshUser, setLoginModal } = useAuthContext();
@@ -57,8 +60,9 @@ export default function SettingsPage() {
     error: notificationPrefsError,
     handleToggle: handleNotificationPrefToggle,
   } = useNotificationPreferences(!isLoading && user ? user.id : null);
-  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-  const [isBannerUploading, setIsBannerUploading] = useState(false);
+  // Banner and avatar uploads both run from the appearance preview.
+  const [isPreviewUploading, setIsPreviewUploading] = useState(false);
+  const [isBackgroundUploading, setIsBackgroundUploading] = useState(false);
 
   // Derive state from props instead of setting in useEffect
   const userData = user;
@@ -74,7 +78,9 @@ export default function SettingsPage() {
     setSupporterHistory,
     loading: settingsLoading,
     handleSettingChange,
+    setSettingValue,
   } = useSettings(userData, openModal, refreshUser);
+  const accentColor = useAccentColor(userData?.id);
   const {
     revertingSupporterLevel,
     handleSupporterLevelUpdate,
@@ -154,6 +160,21 @@ export default function SettingsPage() {
       onCopyLink={() => copySectionLink("display", "Display")}
     >
       <DesktopNavigationSettings />
+      <div className="border-border-card mt-5 border-t pt-5">
+        <SettingToggle
+          name="twemoji_enabled"
+          value={twemojiEnabled}
+          description="Use Twemoji for emojis instead of your browser's native emoji set"
+          displayName="Twemoji Emojis"
+          onChange={(_name, value) => {
+            setTwemojiEnabled(value);
+            toast.success("Setting Updated", {
+              description: `"${formatSettingName("twemoji_enabled")}" has been ${value ? "enabled" : "disabled"}.`,
+            });
+          }}
+          userData={userData}
+        />
+      </div>
     </SettingsCard>
   );
 
@@ -187,9 +208,20 @@ export default function SettingsPage() {
 
   if (!settings) return null;
 
+  // Appearance leads, then Display, then the other categories.
   const sortedCategories = Object.values(settings).sort(
-    (a, b) => a.index - b.index,
+    (a, b) =>
+      Number(b.name === "appearance") - Number(a.name === "appearance") ||
+      a.index - b.index,
   );
+  const hasAppearance = sortedCategories.some(
+    (cat) => cat.name === "appearance",
+  );
+  const displayNavItem = {
+    id: "display",
+    title: "Display",
+    icon: "material-symbols:settings-rounded",
+  };
 
   const sortedSupporterGifts = [...supporterGifts].sort((a, b) => {
     if (a.level !== b.level) return b.level - a.level;
@@ -214,19 +246,18 @@ export default function SettingsPage() {
               Navigation
             </p>
             {[
-              {
-                id: "display",
-                title: "Display",
-                icon: "material-symbols:settings-rounded",
-              },
-              ...sortedCategories.map((cat) => ({
-                id: cat.name,
-                title: cat.name.charAt(0).toUpperCase() + cat.name.slice(1),
-                icon:
-                  cat.name === "privacy"
-                    ? "heroicons:lock-closed"
-                    : "heroicons:sparkles",
-              })),
+              ...(hasAppearance ? [] : [displayNavItem]),
+              ...sortedCategories.flatMap((cat) => [
+                {
+                  id: cat.name,
+                  title: cat.name.charAt(0).toUpperCase() + cat.name.slice(1),
+                  icon:
+                    cat.name === "privacy"
+                      ? "heroicons:lock-closed"
+                      : "heroicons:sparkles",
+                },
+                ...(cat.name === "appearance" ? [displayNavItem] : []),
+              ]),
               {
                 id: "notifications",
                 title: "Notification Preferences",
@@ -285,7 +316,7 @@ export default function SettingsPage() {
 
         {/* Settings Content */}
         <div className="settings-content">
-          {displaySettings}
+          {!hasAppearance && displaySettings}
           {sortedCategories.map((cat) => {
             const categoryDisplayName =
               cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
@@ -293,113 +324,130 @@ export default function SettingsPage() {
               .filter((entry) => !APP_ONLY_SETTINGS.has(entry.name))
               .sort((a, b) => a.index - b.index);
             const isAppearanceCat = cat.name === "appearance";
+            // Custom banner and avatar toggles live inside the preview.
+            const listedSettings = isAppearanceCat
+              ? sortedSettings.filter(
+                  (entry) => !PREVIEW_SETTINGS.has(entry.name),
+                )
+              : sortedSettings;
             return (
-              <SettingsCard
-                key={cat.name}
-                id={cat.name}
-                title={categoryDisplayName}
-                icon={
-                  cat.name === "privacy"
-                    ? "heroicons:lock-closed"
-                    : "heroicons:sparkles"
-                }
-                isOwner={
-                  userData.flags?.some((f) => f.flag === "is_owner") ?? false
-                }
-                highlightStyle={getSectionHighlightStyle(cat.name)}
-                scrollRef={(el) =>
-                  scrollHighlightedSectionIntoView(cat.name, el)
-                }
-                onCopyLink={() =>
-                  copySectionLink(cat.name, categoryDisplayName)
-                }
-                copyAriaLabel="Copy category link"
-                headerAccessory={
-                  <p className="text-secondary-text mb-2 text-sm">
-                    {cat.description}
-                  </p>
-                }
-              >
-                <div>
-                  {sortedSettings.map((entry) => {
-                    const isHighlighted =
-                      highlightSetting === entry.name && showHighlight;
-                    const isAppearanceUploadBusy =
-                      isAvatarUploading || isBannerUploading;
-                    return (
-                      <div
-                        key={entry.name}
-                        className="-mx-3 mb-1 rounded-lg px-3 py-2 transition-colors duration-500"
-                        style={
-                          isHighlighted
-                            ? {
-                                backgroundColor:
-                                  "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                              }
-                            : undefined
-                        }
-                        ref={(el) => {
-                          if (isHighlighted && el) {
-                            setTimeout(() => {
-                              (el as HTMLElement).scrollIntoView({
-                                behavior: "smooth",
-                                block: "center",
-                              });
-                            }, 100);
-                          }
-                        }}
-                      >
-                        <SettingToggle
-                          name={entry.name}
-                          value={entry.value}
-                          description={entry.description}
-                          displayName={formatSettingName(entry.name)}
-                          onChange={handleSettingChange}
-                          disabled={isAppearanceCat && isAppearanceUploadBusy}
-                          userData={userData}
-                        />
-                        {isAppearanceCat &&
-                          entry.name === "custom_banner" &&
-                          entry.value && (
-                            <BannerSettings
-                              userData={userData}
-                              onBannerUpdate={handleBannerUpdate}
-                              onUploadStateChange={setIsBannerUploading}
-                            />
-                          )}
-                        {isAppearanceCat &&
-                          entry.name === "custom_avatar" &&
-                          entry.value && (
-                            <AvatarSettings
-                              userData={userData}
-                              onAvatarUpdate={handleAvatarUpdate}
-                              onUploadStateChange={setIsAvatarUploading}
-                            />
-                          )}
-                      </div>
-                    );
-                  })}
-                  {isAppearanceCat && (
-                    <div className="-mx-3 mb-1 rounded-lg px-3 py-2 transition-colors duration-500">
-                      <SettingToggle
-                        name="twemoji_enabled"
-                        value={twemojiEnabled}
-                        description="Use Twemoji for emojis instead of your browser's native emoji set"
-                        displayName="Twemoji Emojis"
-                        onChange={(_name, value) => {
-                          setTwemojiEnabled(value);
-                          const displayName =
-                            formatSettingName("twemoji_enabled");
-                          toast.success("Setting Updated", {
-                            description: `"${displayName}" has been ${value ? "enabled" : "disabled"}.`,
-                          });
-                        }}
+              <Fragment key={cat.name}>
+                <SettingsCard
+                  id={cat.name}
+                  title={categoryDisplayName}
+                  icon={
+                    cat.name === "privacy"
+                      ? "heroicons:lock-closed"
+                      : "heroicons:sparkles"
+                  }
+                  isOwner={
+                    userData.flags?.some((f) => f.flag === "is_owner") ?? false
+                  }
+                  highlightStyle={getSectionHighlightStyle(cat.name)}
+                  scrollRef={(el) =>
+                    scrollHighlightedSectionIntoView(cat.name, el)
+                  }
+                  onCopyLink={() =>
+                    copySectionLink(cat.name, categoryDisplayName)
+                  }
+                  copyAriaLabel="Copy category link"
+                  headerAccessory={
+                    <p className="text-secondary-text mb-2 text-sm">
+                      {cat.description}
+                    </p>
+                  }
+                >
+                  <div>
+                    {isAppearanceCat && (
+                      <AppearancePreview
                         userData={userData}
+                        customAvatarOn={
+                          sortedSettings.find((e) => e.name === "custom_avatar")
+                            ?.value === true
+                        }
+                        customBannerOn={
+                          sortedSettings.find((e) => e.name === "custom_banner")
+                            ?.value === true
+                        }
+                        onAvatarUploaded={(url, enabled) => {
+                          handleAvatarUpdate(url);
+                          if (enabled) setSettingValue("custom_avatar", true);
+                        }}
+                        onBannerUploaded={(url, enabled) => {
+                          handleBannerUpdate(url);
+                          if (enabled) setSettingValue("custom_banner", true);
+                        }}
+                        onUploadStateChange={setIsPreviewUploading}
+                        onToggle={handleSettingChange}
+                        togglesDisabled={isPreviewUploading}
+                        accent={
+                          userData.settings_v2?.colored_profile_cards === true
+                            ? accentColor.accent
+                            : null
+                        }
                       />
-                    </div>
-                  )}
-                </div>
-              </SettingsCard>
+                    )}
+                    {listedSettings.map((entry) => {
+                      const isHighlighted =
+                        highlightSetting === entry.name && showHighlight;
+                      const isAppearanceUploadBusy =
+                        isPreviewUploading || isBackgroundUploading;
+                      return (
+                        <div
+                          key={entry.name}
+                          className="-mx-3 mb-1 rounded-lg px-3 py-2 transition-colors duration-500"
+                          style={
+                            isHighlighted
+                              ? {
+                                  backgroundColor:
+                                    "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                                }
+                              : undefined
+                          }
+                          ref={(el) => {
+                            if (isHighlighted && el) {
+                              setTimeout(() => {
+                                (el as HTMLElement).scrollIntoView({
+                                  behavior: "smooth",
+                                  block: "center",
+                                });
+                              }, 100);
+                            }
+                          }}
+                        >
+                          <SettingToggle
+                            name={entry.name}
+                            value={entry.value}
+                            description={entry.description}
+                            displayName={formatSettingName(entry.name)}
+                            onChange={handleSettingChange}
+                            disabled={isAppearanceCat && isAppearanceUploadBusy}
+                            userData={userData}
+                          />
+                          {isAppearanceCat &&
+                            entry.name === "custom_background" &&
+                            entry.value && (
+                              <BackgroundSettings
+                                userData={userData}
+                                onUploadStateChange={setIsBackgroundUploading}
+                              />
+                            )}
+                        </div>
+                      );
+                    })}
+                    {isAppearanceCat && (
+                      <AccentColorSetting
+                        accent={accentColor.accent}
+                        customAccent={accentColor.customAccent}
+                        onChange={accentColor.setAccent}
+                        onReset={() => void accentColor.reset()}
+                        premiumType={userData.premiumtype ?? 0}
+                      />
+                    )}
+                  </div>
+                </SettingsCard>
+                {cat.name === "appearance" && displaySettings}
+              </Fragment>
             );
           })}
 

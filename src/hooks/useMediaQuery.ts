@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 type Subscriber = (matches: boolean) => void;
 const subscriptions = new Map<
@@ -20,16 +20,11 @@ function subscribe(query: string, cb: Subscriber): () => void {
   return () => entry.subscribers.delete(cb);
 }
 
+/** False on the server and during hydration, so the first render matches. */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia(query).matches;
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    return subscribe(query, setMatches);
-  }, [query]);
-
-  return matches;
+  return useSyncExternalStore(
+    useCallback((onChange: () => void) => subscribe(query, onChange), [query]),
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
 }

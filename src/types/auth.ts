@@ -7,6 +7,8 @@ export interface UserSettings {
   hide_favorites: boolean;
   custom_banner: boolean;
   custom_avatar: boolean;
+  custom_background?: boolean;
+  colored_profile_cards?: boolean;
   hide_presence: boolean;
   dms_allowed: boolean;
   global_dms_allowed?: boolean;
@@ -79,6 +81,7 @@ export interface User {
   avatar: string; // Discord avatar hash or "None"
   banner: string | null; // Discord banner hash, "None", or null
   accent_color: string; // Color code, "None", or null
+  custom_accent_color?: string | null;
   global_name: string; // Can be "None"
   locale: string;
   created_at: string;

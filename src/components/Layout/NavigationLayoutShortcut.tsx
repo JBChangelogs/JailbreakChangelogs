@@ -8,6 +8,7 @@ import { useSafeAuthContext } from "@/contexts/AuthContext";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import {
   getDesktopNavigation,
+  getLayoutShortcutHidden,
   subscribeDesktopNavigation,
 } from "@/utils/ui/desktopNavigation";
 import {
@@ -35,6 +36,11 @@ export default function NavigationLayoutShortcut() {
     getDesktopNavigation,
     () => "sidebar",
   );
+  const hidden = useSyncExternalStore(
+    subscribeDesktopNavigation,
+    getLayoutShortcutHidden,
+    () => false,
+  );
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -53,6 +59,8 @@ export default function NavigationLayoutShortcut() {
     navigation === "sidebar" &&
     !auth?.isLoading &&
     pathname !== "/settings";
+
+  if (hidden) return null;
 
   return (
     <Popover open={open}>

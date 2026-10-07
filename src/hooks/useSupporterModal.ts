@@ -137,6 +137,44 @@ export const useSupporterModal = () => {
     [openModal],
   );
 
+  const checkBackgroundAccess = useCallback(
+    (userTier: number) => {
+      // Treat premium types > 3 as tier 0 (free)
+      const effectiveTier = userTier > 3 ? 0 : userTier;
+      if (effectiveTier < 2) {
+        openModal({
+          feature: "custom_background",
+          currentTier: effectiveTier,
+          requiredTier: 2,
+          currentLimit: TIER_NAMES[effectiveTier as keyof typeof TIER_NAMES],
+          requiredLimit: "Supporter II",
+        });
+        return false; // Access denied
+      }
+      return true; // Access granted
+    },
+    [openModal],
+  );
+
+  const checkAccentColorAccess = useCallback(
+    (userTier: number) => {
+      // Treat premium types > 3 as tier 0 (free)
+      const effectiveTier = userTier > 3 ? 0 : userTier;
+      if (effectiveTier < 1) {
+        openModal({
+          feature: "accent_color",
+          currentTier: effectiveTier,
+          requiredTier: 1,
+          currentLimit: TIER_NAMES[effectiveTier as keyof typeof TIER_NAMES],
+          requiredLimit: "Supporter I",
+        });
+        return false; // Access denied
+      }
+      return true; // Access granted
+    },
+    [openModal],
+  );
+
   const checkTradeAdDuration = useCallback(
     (selectedDuration: number, userTier: number) => {
       // Map of max allowed duration per tier (only tiers 1-3 are valid premium)
@@ -185,6 +223,8 @@ export const useSupporterModal = () => {
     checkCommentLength,
     checkAvatarAccess,
     checkBannerAccess,
+    checkBackgroundAccess,
+    checkAccentColorAccess,
     checkTradeAdDuration,
     COMMENT_CHAR_LIMITS,
   };
