@@ -941,8 +941,11 @@ export default function UserProfileClient({
   }
 
   const isOwnProfile = currentUserId === user.id;
-  // Accent colors are a profile-only touch; cards and lists ignore them.
-  const accentColor = accentColorToHex(user.accent_color);
+  // Accent colors only recolor profile cards when the owner opts in.
+  const accentColor =
+    user.settings_v2?.custom_accent_color === true
+      ? accentColorToHex(user.accent_color)
+      : null;
 
   // Shown only when the owner switched it on; never gated on supporter tier.
   const hasVisibleBackground =

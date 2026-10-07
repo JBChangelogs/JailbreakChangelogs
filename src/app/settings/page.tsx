@@ -380,7 +380,11 @@ export default function SettingsPage() {
                         onUploadStateChange={setIsPreviewUploading}
                         onToggle={handleSettingChange}
                         togglesDisabled={isPreviewUploading}
-                        accent={accentColor.accent}
+                        accent={
+                          userData.settings_v2?.custom_accent_color === true
+                            ? accentColor.accent
+                            : null
+                        }
                       />
                     )}
                     {listedSettings.map((entry) => {
@@ -438,6 +442,15 @@ export default function SettingsPage() {
                         onChange={accentColor.setAccent}
                         onReset={() => void accentColor.reset()}
                         premiumType={userData.premiumtype ?? 0}
+                        accentCardsEnabled={
+                          userData.settings_v2?.custom_accent_color === true
+                        }
+                        onAccentCardsChange={(enabled) =>
+                          void handleSettingChange(
+                            "custom_accent_color",
+                            enabled,
+                          )
+                        }
                       />
                     )}
                   </div>

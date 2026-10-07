@@ -8,6 +8,7 @@ export interface UserSettings {
   custom_banner: boolean;
   custom_avatar: boolean;
   custom_background?: boolean;
+  custom_accent_color?: boolean;
   hide_presence: boolean;
   dms_allowed: boolean;
   global_dms_allowed?: boolean;
