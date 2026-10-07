@@ -943,7 +943,7 @@ export default function UserProfileClient({
   const isOwnProfile = currentUserId === user.id;
   // Accent colors only recolor profile cards when the owner opts in.
   const accentColor =
-    user.settings_v2?.custom_accent_color === true
+    user.settings_v2?.colored_profile_cards === true
       ? accentColorToHex(user.accent_color)
       : null;
 

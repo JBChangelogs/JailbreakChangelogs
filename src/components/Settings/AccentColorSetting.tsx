@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/popover";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { hexToHsv, hsvToHex, type Hsv } from "@/utils/ui/accentColor";
-import { Switch } from "@/components/ui/switch";
 
 const PRESETS = [
   "#5865f2",
@@ -162,8 +161,6 @@ interface AccentColorSettingProps {
   onChange: (hex: string) => void;
   onReset: () => void;
   premiumType: number;
-  accentCardsEnabled: boolean;
-  onAccentCardsChange: (enabled: boolean) => void;
 }
 
 export function AccentColorSetting({
@@ -172,8 +169,6 @@ export function AccentColorSetting({
   onChange,
   onReset,
   premiumType,
-  accentCardsEnabled,
-  onAccentCardsChange,
 }: AccentColorSettingProps) {
   const [open, setOpen] = useState(false);
   const { modalState, closeModal, checkAccentColorAccess } =
@@ -184,7 +179,7 @@ export function AccentColorSetting({
       <div className="min-w-0">
         <p className="text-primary-text text-base font-medium">Accent color</p>
         <p className="text-secondary-text text-sm">
-          Colors your profile card.{" "}
+          Set a custom accent color for your profile cards.{" "}
           {customAccent
             ? "Using your custom color."
             : "Using your Discord color."}
@@ -204,16 +199,6 @@ export function AccentColorSetting({
       </div>
 
       <div className="flex shrink-0 items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-secondary-text text-xs">
-            Color profile cards
-          </span>
-          <Switch
-            checked={accentCardsEnabled}
-            onCheckedChange={onAccentCardsChange}
-            aria-label="Use accent color on profile cards"
-          />
-        </div>
         <Popover
           open={open}
           onOpenChange={(next) =>

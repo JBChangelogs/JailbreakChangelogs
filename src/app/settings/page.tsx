@@ -381,7 +381,7 @@ export default function SettingsPage() {
                         onToggle={handleSettingChange}
                         togglesDisabled={isPreviewUploading}
                         accent={
-                          userData.settings_v2?.custom_accent_color === true
+                          userData.settings_v2?.colored_profile_cards === true
                             ? accentColor.accent
                             : null
                         }
@@ -442,15 +442,6 @@ export default function SettingsPage() {
                         onChange={accentColor.setAccent}
                         onReset={() => void accentColor.reset()}
                         premiumType={userData.premiumtype ?? 0}
-                        accentCardsEnabled={
-                          userData.settings_v2?.custom_accent_color === true
-                        }
-                        onAccentCardsChange={(enabled) =>
-                          void handleSettingChange(
-                            "custom_accent_color",
-                            enabled,
-                          )
-                        }
                       />
                     )}
                   </div>
