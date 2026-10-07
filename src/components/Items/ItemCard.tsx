@@ -1,4 +1,3 @@
-import { isSeasonalItem } from "@/utils/items/season";
 import React from "react";
 import { Item } from "@/types";
 import Image from "next/image";
@@ -19,13 +18,9 @@ import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatFullValue, getValueChange } from "@/utils/trading/values";
 import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
-import { hasSeason, unlockLevel } from "@/utils/items/season";
+import { hasSeason } from "@/utils/items/season";
+import { ItemUnlockBadges } from "./ItemUnlockBadges";
 import { hasItemValue } from "@/utils/items/itemValue";
-import {
-  formatUnlockLevelBadge,
-  formatUnlockRequirementsTooltip,
-  hasUnlockLevel,
-} from "@/utils/items/itemUnlockPresentation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -264,12 +259,6 @@ function ItemCard({
   const dupedChange = isValuesPage
     ? getValueChange(item.recent_changes, "duped_value")
     : null;
-  const metadataLevel = unlockLevel(item.level);
-  const hasMetadataLevel = hasUnlockLevel(metadataLevel);
-  const requirementsTooltipText = formatUnlockRequirementsTooltip(
-    item.season ?? undefined,
-    metadataLevel,
-  );
 
   const formatChange = (difference: number) => {
     const diff = Math.abs(difference);
@@ -309,24 +298,8 @@ function ItemCard({
               className="h-4 w-4 sm:h-5 sm:w-5"
             />
           </div>
-          {isValuesPage && (hasSeason(item) || hasMetadataLevel) && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
-                  {isSeasonalItem(item) && (
-                    <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-                      S{item.season}
-                    </span>
-                  )}
-                  {hasMetadataLevel && (
-                    <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-                      {formatUnlockLevelBadge(metadataLevel)}
-                    </span>
-                  )}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>{requirementsTooltipText}</TooltipContent>
-            </Tooltip>
+          {isValuesPage && (
+            <ItemUnlockBadges season={item.season} level={item.level} />
           )}
           <Tooltip>
             <TooltipTrigger asChild>

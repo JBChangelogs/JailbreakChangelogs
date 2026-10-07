@@ -1,3 +1,4 @@
+import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
 import { isSeasonalItem } from "@/utils/items/season";
 import React from "react";
 import Image from "next/image";
@@ -228,6 +229,9 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                       />
                     )}
                   </div>
+                  {!isCustom && (
+                    <ItemUnlockBadges season={item.season} level={item.level} />
+                  )}
                   {!isCustom && (
                     <div className="pointer-events-none absolute top-1.5 right-1.5 z-10">
                       <CategoryIconBadge

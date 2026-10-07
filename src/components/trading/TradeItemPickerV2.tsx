@@ -1,5 +1,7 @@
 "use client";
 
+import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
+
 import { isSeasonalItem } from "@/utils/items/season";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
@@ -1097,6 +1099,7 @@ export default function TradeItemPickerV2({
                           </Tooltip>
                         );
                       })()}
+                    <ItemUnlockBadges season={item.season} level={item.level} />
                     <div className="absolute top-1.5 right-1.5 z-10">
                       <CategoryIconBadge
                         type={item.type}

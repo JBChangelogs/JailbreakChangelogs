@@ -1,3 +1,4 @@
+import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
 import { isSeasonalItem } from "@/utils/items/season";
 import React from "react";
 import { TradeItem } from "@/types/trading";
@@ -145,6 +146,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       </div>
                     )}
                   </div>
+                  <ItemUnlockBadges season={item.season} level={item.level} />
                   <div className="pointer-events-none absolute top-1.5 right-1.5 z-10">
                     <CategoryIconBadge
                       type={item.type}

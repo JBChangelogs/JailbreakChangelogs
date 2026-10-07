@@ -30,6 +30,12 @@ test("browse filters keep demand/trend collapsed and the shared range visible", 
   expect(markup).toContain('aria-expanded="false"');
   expect(markup).toContain('hidden=""');
   expect(markup).toContain('aria-pressed="true"');
+  const selectedButton = markup.match(
+    /<button\b[^>]*aria-pressed="true"[^>]*>/,
+  )?.[0];
+  expect(selectedButton).toContain("hover:bg-button-info-hover!");
+  expect(selectedButton).toContain("active:bg-button-info-active!");
+  expect(selectedButton).not.toContain("hover:bg-button-secondary-hover!");
   expect(markup).not.toContain("Untradable");
   expect(markup).toContain('</fieldset></div><div class="w-full">');
   expect(markup.match(/role="slider"/g)).toHaveLength(2);

@@ -57,13 +57,8 @@ export function BrowseItemFilters({
               key={option.value}
               type="button"
               size="sm"
-              variant="secondary"
+              variant={filters.includes(option.value) ? "default" : "secondary"}
               aria-pressed={filters.includes(option.value)}
-              className={
-                filters.includes(option.value)
-                  ? "bg-button-info! text-form-button-text!"
-                  : undefined
-              }
               onClick={() => onToggle(option.value)}
             >
               <Icon icon={option.icon} style={{ color: option.iconColor }} />
