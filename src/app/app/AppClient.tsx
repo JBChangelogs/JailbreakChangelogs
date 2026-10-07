@@ -3,7 +3,13 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { Check, Download, FlaskConical, Info } from "lucide-react";
+import {
+  Check,
+  Download,
+  ExternalLink,
+  FlaskConical,
+  Info,
+} from "lucide-react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -45,6 +51,31 @@ const allPlatforms = ["Windows", "macOS", "Linux"] as const;
 const previews = "https://assets.jailbreakchangelogs.com/app";
 const features = [
   {
+    label: "Messages",
+    title: "Agree on the trade, then meet in-game",
+    description:
+      "Direct messages with unread counts, online status and replies.",
+    points: [
+      "Accepted trade offers appear in the chat, showing the items and values on each side.",
+      "Send a game invite and the other person can join your server straight from the conversation. Detecting your Roblox session is Windows only.",
+    ],
+    image: `${previews}/preview-messages.png`,
+    alt: "Messages tab with a conversation showing an accepted trade offer and a game invite",
+  },
+  {
+    label: "Trades",
+    title: "Build a trade ad without leaving the list",
+    description:
+      "Add items from the values list or your own inventory, and keep a running total for each side.",
+    points: [
+      "Shift-click an item to add it to Offering, or Ctrl-click to add it to Requesting.",
+      "Mark each item as clean, duped or OG, or move it to the other side.",
+      "Tag what you're after, such as adds, overpays, upgrades or OG owners, and add a note.",
+    ],
+    image: `${previews}/preview-trades.png`,
+    alt: "Trade ad builder with offering and requesting panels next to a searchable item list",
+  },
+  {
     label: "Robberies",
     title: "Find an open robbery and join in one click",
     description:
@@ -69,31 +100,6 @@ const features = [
     ],
     image: `${previews}/preview-values.png`,
     alt: "Values tab showing item cards with clean and duped values, demand and trend",
-  },
-  {
-    label: "Trades",
-    title: "Build a trade ad without leaving the list",
-    description:
-      "Add items from the values list or your own inventory, and keep a running total for each side.",
-    points: [
-      "Shift-click an item to add it to Offering, or Ctrl-click to add it to Requesting.",
-      "Mark each item as clean, duped or OG, or move it to the other side.",
-      "Tag what you're after, such as adds, overpays, upgrades or OG owners, and add a note.",
-    ],
-    image: `${previews}/preview-trades.png`,
-    alt: "Trade ad builder with offering and requesting panels next to a searchable item list",
-  },
-  {
-    label: "Messages",
-    title: "Agree on the trade, then meet in-game",
-    description:
-      "Direct messages with unread counts, online status and replies.",
-    points: [
-      "Accepted trade offers appear in the chat, showing the items and values on each side.",
-      "Send a game invite and the other person can join your server straight from the conversation. Detecting your Roblox session is Windows only.",
-    ],
-    image: `${previews}/preview-messages.png`,
-    alt: "Messages tab with a conversation showing an accepted trade offer and a game invite",
   },
   {
     label: "Dupe Finder",
@@ -201,6 +207,16 @@ export default function AppClient({ releases }: { releases: Releases }) {
               Robbery alerts, values, trades, messages and the Dupe Finder in
               one window.
             </p>
+            <a
+              href="https://github.com/JBChangelogs/JailbreakChangelogsApp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-link hover:text-link-hover focus-visible:ring-border-focus mt-3 inline-flex items-center gap-1.5 rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <Icon icon="mdi:github" aria-hidden="true" className="size-4" />
+              Open source on GitHub
+              <ExternalLink aria-hidden="true" className="size-3.5" />
+            </a>
             <p className="text-secondary-text mt-4 flex max-w-lg gap-2 text-sm leading-relaxed">
               <FlaskConical
                 aria-hidden="true"
@@ -415,13 +431,13 @@ export default function AppClient({ releases }: { releases: Releases }) {
           <TabsList
             aria-label="App features"
             hideIndicator
-            className="border-border-card bg-secondary-bg w-full min-w-0 gap-1 rounded-xl border p-1"
+            className="border-border-card bg-secondary-bg w-full min-w-0 flex-wrap gap-1 rounded-xl border p-1 lg:flex-nowrap"
           >
             {features.map((feature, index) => (
               <TabsTrigger
                 key={feature.label}
                 value={feature.label}
-                className="data-[state=active]:bg-tertiary-bg relative isolate flex-1 overflow-hidden rounded-lg px-4 py-2.5 transition-colors duration-200"
+                className="data-[state=active]:bg-tertiary-bg relative isolate flex-auto overflow-hidden rounded-lg px-3 py-2 transition-colors duration-200 sm:px-4 sm:py-2.5 lg:flex-1"
               >
                 <span
                   aria-hidden="true"
