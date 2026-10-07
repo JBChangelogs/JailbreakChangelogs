@@ -17,7 +17,9 @@ export async function generateViewport({
   try {
     const user = await fetchUserByIdForMetadata(id);
     return {
-      themeColor: formatAccentColor(user?.accent_color),
+      themeColor: formatAccentColor(
+        user?.custom_accent_color ?? user?.accent_color,
+      ),
     };
   } catch (error: unknown) {
     if (

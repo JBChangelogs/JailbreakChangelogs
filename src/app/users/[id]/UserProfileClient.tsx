@@ -184,6 +184,7 @@ interface User {
   global_name: string;
   usernumber: number;
   accent_color: string;
+  custom_accent_color?: string | null;
   custom_avatar?: string;
   banner?: string;
   custom_banner?: string;
@@ -944,7 +945,8 @@ export default function UserProfileClient({
   // Accent colors only recolor profile cards when the owner opts in.
   const accentColor =
     user.settings_v2?.colored_profile_cards === true
-      ? accentColorToHex(user.accent_color)
+      ? (accentColorToHex(user.custom_accent_color) ??
+        accentColorToHex(user.accent_color))
       : null;
 
   // Shown only when the owner switched it on; never gated on supporter tier.

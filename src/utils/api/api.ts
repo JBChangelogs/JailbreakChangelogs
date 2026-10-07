@@ -253,9 +253,9 @@ function throwUserAccessErrorFrom403(data: unknown): never {
 }
 
 const USER_LIST_FIELDS =
-  "id,username,global_name,avatar,banner,custom_banner,usernumber,premiumtype,created_at,settings_v2,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
+  "id,username,global_name,avatar,banner,custom_banner,accent_color,custom_accent_color,usernumber,premiumtype,created_at,settings_v2,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
 const USER_SEARCH_FIELDS =
-  "id,username,global_name,avatar,banner,custom_banner,accent_color,usernumber,premiumtype,created_at,settings_v2,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
+  "id,username,global_name,avatar,banner,custom_banner,accent_color,custom_accent_color,usernumber,premiumtype,created_at,settings_v2,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
 const MAX_USER_PAGE_SIZE = 30;
 
 const clampUserPageSize = (value: number) =>
@@ -456,7 +456,12 @@ export async function fetchUserByIdForMetadata(id: string) {
   }
 
   try {
-    const fields = ["accent_color", "global_name", "username"].join(",");
+    const fields = [
+      "accent_color",
+      "custom_accent_color",
+      "global_name",
+      "username",
+    ].join(",");
 
     const response = await fetch(
       `${BASE_API_URL}/v2/users/${id}?fields=${fields}`,
