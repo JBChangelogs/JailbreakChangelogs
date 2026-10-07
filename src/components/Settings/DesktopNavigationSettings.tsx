@@ -146,15 +146,14 @@ export default function DesktopNavigationSettings() {
         </p>
       </div>
 
-      {!canSwitchNavigation && (
-        <p className="border-button-info bg-button-info/10 text-secondary-text rounded-lg border p-3 text-sm">
-          <span className="text-primary-text font-medium">
-            Larger screen required.
-          </span>{" "}
-          You can change this on screens 1536px wide or larger. The preview
-          shows both layouts.
-        </p>
-      )}
+      {/* CSS, not useMediaQuery, so wide screens never flash the notice. */}
+      <p className="border-button-info bg-button-info/10 text-secondary-text rounded-lg border p-3 text-sm 2xl:hidden">
+        <span className="text-primary-text font-medium">
+          Larger screen required.
+        </span>{" "}
+        You can change this on screens 1536px wide or larger. The preview shows
+        both layouts.
+      </p>
 
       <div className="grid items-center gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <div
