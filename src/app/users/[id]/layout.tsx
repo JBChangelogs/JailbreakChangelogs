@@ -1,19 +1,10 @@
+import { accentColorToHex } from "@/utils/ui/accentColor";
 import type { Viewport, Metadata } from "next";
 import { fetchUserByIdForMetadata, PUBLIC_API_URL } from "@/utils/api/api";
 import { getMaintenanceMetadata } from "@/utils/api/maintenance";
 
 function formatAccentColor(color: number | string | null | undefined): string {
-  if (!color || color === "None" || color === "0") return "#2462cd";
-
-  if (typeof color === "string") {
-    return `#${color.substring(0, 6)}`;
-  }
-
-  if (typeof color === "number") {
-    return `#${color.toString().substring(0, 6)}`;
-  }
-
-  return "#2462cd";
+  return accentColorToHex(color) ?? "#2462cd";
 }
 
 export async function generateViewport({
@@ -26,7 +17,9 @@ export async function generateViewport({
   try {
     const user = await fetchUserByIdForMetadata(id);
     return {
-      themeColor: formatAccentColor(user?.accent_color),
+      themeColor: formatAccentColor(
+        user?.custom_accent_color ?? user?.accent_color,
+      ),
     };
   } catch (error: unknown) {
     if (

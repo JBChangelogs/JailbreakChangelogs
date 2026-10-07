@@ -81,7 +81,7 @@ const features = [
     description:
       "A live grid of open robberies across Jailbreak servers, with a Bounties tab next to it.",
     points: [
-      "Each card shows the criminal and cop count, who's already joined, the server's location, and a Join button. Private servers show their code, and Cargo Planes show a departure countdown.",
+      "Each card shows the criminal and cop count, who's already joined, the server's location, and a Join button. Casinos show their code when one is available, and Cargo Planes show a departure countdown.",
       "Filter by server size and country, sort by when a robbery was logged, and hide servers you've already joined.",
       "Turn on the bell next to any robbery in the sidebar to get an alert when it opens. Alerts keep working while you're on other tabs.",
     ],

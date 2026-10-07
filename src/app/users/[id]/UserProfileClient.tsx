@@ -1,5 +1,7 @@
 "use client";
 
+import { accentCardTheme, accentColorToHex } from "@/utils/ui/accentColor";
+
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -11,6 +13,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Icon } from "../../../components/ui/IconWrapper";
 import { Banner } from "@/components/Profile/Banner";
+import { ProfileBackground } from "@/components/Profile/ProfileBackground";
 import { UserSettingsV2, FollowingData } from "@/types/auth";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
@@ -18,9 +21,9 @@ import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import {
-  AvatarUploadDialog,
-  BannerUploadDialog,
-} from "@/components/Settings/AvatarUploadDialog";
+  AvatarEditOverlay,
+  BannerEditOverlay,
+} from "@/components/Profile/EditableProfileImages";
 import { safeSetJSON } from "@/utils/storage/safeStorage";
 import { cn } from "@/lib/utils";
 
@@ -181,9 +184,12 @@ interface User {
   global_name: string;
   usernumber: number;
   accent_color: string;
+  custom_accent_color?: string | null;
   custom_avatar?: string;
   banner?: string;
   custom_banner?: string;
+  /** Profile background image URL (16:9, may be an animated GIF), or null. */
+  custom_background?: string | null;
   settings_v2?: UserSettingsV2;
   presence?: {
     status: "Online" | "Offline";
@@ -254,7 +260,10 @@ export default function UserProfileClient({
   const [reportAvatarReason, setReportAvatarReason] = useState("");
   const [isSubmittingAvatarReport, setIsSubmittingAvatarReport] =
     useState(false);
-  const [isReportBannerOpen, setIsReportBannerOpen] = useState(false);
+  // Banner and background reports share one dialog; this holds which is open.
+  const [reportImageTarget, setReportImageTarget] = useState<
+    "banner" | "background" | null
+  >(null);
   const [reportBannerReason, setReportBannerReason] = useState("");
   const [isSubmittingBannerReport, setIsSubmittingBannerReport] =
     useState(false);
@@ -668,7 +677,7 @@ export default function UserProfileClient({
   };
 
   const handleReportBanner = async () => {
-    if (!user || !reportBannerReason.trim()) return;
+    if (!user || !reportImageTarget || !reportBannerReason.trim()) return;
 
     setIsSubmittingBannerReport(true);
     const toastId = toast.loading("Submitting report...");
@@ -683,7 +692,7 @@ export default function UserProfileClient({
         credentials: "include",
         headers: { ...devTokenHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
-          target: "banner",
+          target: reportImageTarget,
           reason: reportBannerReason.trim(),
         }),
       });
@@ -695,10 +704,10 @@ export default function UserProfileClient({
       }
 
       toast.success("Report submitted", { id: toastId });
-      setIsReportBannerOpen(false);
+      setReportImageTarget(null);
       setReportBannerReason("");
     } catch (error) {
-      log.error("Error reporting banner:", error);
+      log.error(`Error reporting ${reportImageTarget}:`, error);
       toast.error(
         error instanceof Error ? error.message : "Failed to submit report",
         { id: toastId },
@@ -932,6 +941,18 @@ export default function UserProfileClient({
     notFound();
   }
 
+  const isOwnProfile = currentUserId === user.id;
+  // Accent colors only recolor profile cards when the owner opts in.
+  const accentColor =
+    user.settings_v2?.colored_profile_cards === true
+      ? (accentColorToHex(user.custom_accent_color) ??
+        accentColorToHex(user.accent_color))
+      : null;
+
+  // Shown only when the owner switched it on; never gated on supporter tier.
+  const hasVisibleBackground =
+    user.settings_v2?.custom_background === true && !!user.custom_background;
+
   if (user.settings_v2?.profile_public === false && currentUserId !== user.id) {
     return (
       <main className="min-h-screen pb-8">
@@ -1042,21 +1063,36 @@ export default function UserProfileClient({
   );
 
   return (
-    <main className="min-h-screen pb-8">
+    <main
+      className="relative isolate min-h-screen pb-8"
+      data-accent-cards={accentColor ? "" : undefined}
+      style={accentColor ? accentCardTheme(accentColor) : undefined}
+    >
+      {hasVisibleBackground && user.custom_background && (
+        <ProfileBackground src={user.custom_background} />
+      )}
       <LinSuperIdol userId={userId} />
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
         <ProfileIdentityBar user={user} identityRef={profileIdentityRef} />
         <div className="border-border-card bg-secondary-bg overflow-hidden rounded-2xl border">
-          {/* Banner Section */}
-          <Banner
-            userId={user.id}
-            username={user.username}
-            banner={user.banner}
-            customBanner={user.custom_banner}
-            settings={user.settings_v2}
-            premiumType={user.premiumtype}
-          />
+          {/* Banner Section: the owner can click it to upload a new one. */}
+          <div className="relative">
+            <Banner
+              userId={user.id}
+              username={user.username}
+              banner={user.banner}
+              customBanner={user.custom_banner}
+              settings={user.settings_v2}
+              premiumType={user.premiumtype}
+            />
+            {isOwnProfile && (
+              <BannerEditOverlay
+                userData={user}
+                onUploaded={handleProfileBannerUploaded}
+              />
+            )}
+          </div>
 
           {/* Profile Content */}
           <div className="px-5 pt-5 pb-6 sm:px-6 md:px-8 md:pb-8">
@@ -1065,7 +1101,7 @@ export default function UserProfileClient({
               <div className="relative z-30 -mt-10 flex shrink-0 flex-col items-center">
                 <div
                   className={cn(
-                    "bg-secondary-bg p-1",
+                    "bg-secondary-bg relative p-1",
                     user.premiumtype === 3 ? "rounded-[20px]" : "rounded-full",
                   )}
                 >
@@ -1089,6 +1125,12 @@ export default function UserProfileClient({
                     settings={user.settings_v2}
                     premiumType={user.premiumtype}
                   />
+                  {isOwnProfile && (
+                    <AvatarEditOverlay
+                      userData={user}
+                      onUploaded={handleProfileAvatarUploaded}
+                    />
+                  )}
                 </div>
                 <div className="mt-3 hidden max-w-44 flex-wrap items-center justify-center gap-2 md:flex">
                   {profileConnections}
@@ -1198,40 +1240,6 @@ export default function UserProfileClient({
                     <div className="flex justify-start gap-2 md:flex-wrap md:justify-end">
                       {currentUserId === user.id ? (
                         <>
-                          <AvatarUploadDialog
-                            userData={user}
-                            activateAfterUpload
-                            onUploaded={handleProfileAvatarUploaded}
-                          >
-                            {(openFilePicker, isUploading) => (
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                className={profileActionButtonClassName}
-                                onClick={openFilePicker}
-                                disabled={isUploading}
-                              >
-                                {isUploading ? "Uploading..." : "Edit avatar"}
-                              </Button>
-                            )}
-                          </AvatarUploadDialog>
-                          <BannerUploadDialog
-                            userData={user}
-                            activateAfterUpload
-                            onUploaded={handleProfileBannerUploaded}
-                          >
-                            {(openFilePicker, isUploading) => (
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                className={profileActionButtonClassName}
-                                onClick={openFilePicker}
-                                disabled={isUploading}
-                              >
-                                {isUploading ? "Uploading..." : "Edit banner"}
-                              </Button>
-                            )}
-                          </BannerUploadDialog>
                           <Button
                             asChild
                             variant="default"
@@ -1342,7 +1350,7 @@ export default function UserProfileClient({
                               {(user.banner ?? user.custom_banner) && (
                                 <DropdownMenuItem
                                   onClick={() => {
-                                    setIsReportBannerOpen(true);
+                                    setReportImageTarget("banner");
                                     setReportBannerReason("");
                                   }}
                                   className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
@@ -1352,6 +1360,21 @@ export default function UserProfileClient({
                                     className="mr-2 h-4 w-4"
                                   />
                                   Report Banner
+                                </DropdownMenuItem>
+                              )}
+                              {hasVisibleBackground && (
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setReportImageTarget("background");
+                                    setReportBannerReason("");
+                                  }}
+                                  className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
+                                >
+                                  <Icon
+                                    icon="heroicons:flag"
+                                    className="mr-2 h-4 w-4"
+                                  />
+                                  Report Background
                                 </DropdownMenuItem>
                               )}
                               {bio && (
@@ -1428,7 +1451,7 @@ export default function UserProfileClient({
                                     {(user.banner ?? user.custom_banner) && (
                                       <DropdownMenuItem
                                         onClick={() => {
-                                          setIsReportBannerOpen(true);
+                                          setReportImageTarget("banner");
                                           setReportBannerReason("");
                                         }}
                                         className="rounded-none px-3 py-2"
@@ -1438,6 +1461,21 @@ export default function UserProfileClient({
                                           className="mr-2 h-4 w-4"
                                         />
                                         Banner
+                                      </DropdownMenuItem>
+                                    )}
+                                    {hasVisibleBackground && (
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          setReportImageTarget("background");
+                                          setReportBannerReason("");
+                                        }}
+                                        className="rounded-none px-3 py-2"
+                                      >
+                                        <Icon
+                                          icon="heroicons:photo"
+                                          className="mr-2 h-4 w-4"
+                                        />
+                                        Background
                                       </DropdownMenuItem>
                                     )}
                                     {bio && (
@@ -1760,13 +1798,17 @@ export default function UserProfileClient({
         </div>
       </ConfirmDialog>
       <ConfirmDialog
-        isOpen={isReportBannerOpen}
+        isOpen={reportImageTarget !== null}
         onClose={() => {
-          setIsReportBannerOpen(false);
+          setReportImageTarget(null);
           setReportBannerReason("");
         }}
         onConfirm={() => void handleReportBanner()}
-        title="Report Banner"
+        title={
+          reportImageTarget === "background"
+            ? "Report Background"
+            : "Report Banner"
+        }
         confirmText="Submit Report"
         confirmVariant="destructive"
         confirmDisabled={!reportBannerReason.trim() || isSubmittingBannerReport}
@@ -1777,30 +1819,33 @@ export default function UserProfileClient({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={
-                user.settings_v2?.custom_banner === true &&
-                user.premiumtype &&
-                user.premiumtype >= 2 &&
-                user.custom_banner &&
-                user.custom_banner !== "N/A"
-                  ? user.custom_banner
-                  : user.banner && user.banner !== "None"
-                    ? `https://cdn.discordapp.com/banners/${user.id}/${user.banner}?size=512`
-                    : undefined
+                reportImageTarget === "background"
+                  ? (user.custom_background ?? undefined)
+                  : user.settings_v2?.custom_banner === true &&
+                      user.premiumtype &&
+                      user.premiumtype >= 2 &&
+                      user.custom_banner &&
+                      user.custom_banner !== "N/A"
+                    ? user.custom_banner
+                    : user.banner && user.banner !== "None"
+                      ? `https://cdn.discordapp.com/banners/${user.id}/${user.banner}?size=512`
+                      : undefined
               }
-              alt={`${user.username}'s banner`}
+              alt={`${user.username}'s ${reportImageTarget ?? "banner"}`}
               className="object-contain"
               style={{ width: "100%", height: "auto" }}
             />
           </div>
           <p className="text-secondary-text text-sm">
-            Please describe why you are reporting this banner.
+            Please describe why you are reporting this{" "}
+            {reportImageTarget ?? "banner"}.
           </p>
           <div>
             <textarea
               className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
               rows={4}
               maxLength={500}
-              placeholder="Explain why you're reporting this banner..."
+              placeholder={`Explain why you're reporting this ${reportImageTarget ?? "banner"}...`}
               value={reportBannerReason}
               onChange={(e) => setReportBannerReason(e.target.value)}
             />

@@ -6,6 +6,8 @@ export interface MeResponse {
   username: string;
   supporter: number;
   avatar: string;
+  /** Full CDN URL, unlike the hash other endpoints return. */
+  banner?: string | null;
   roblox?: {
     roblox_id?: string | null;
     roblox_username?: string | null;
@@ -24,6 +26,7 @@ export function normalizeMeResponse(raw: MeResponse): UserData {
     username: raw.name,
     global_name: raw.username,
     avatar: raw.avatar,
+    banner: raw.banner ?? null,
     premiumtype: raw.supporter,
     premiumduration: 0,
     roblox_id: raw.roblox?.roblox_id ?? "",

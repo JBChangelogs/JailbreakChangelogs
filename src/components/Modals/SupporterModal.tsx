@@ -38,7 +38,10 @@ const SUPPORTER_TIERS = [
   {
     name: "Supporter I",
     price: "75R$",
-    features: ["Post Comments up to 400 characters"],
+    features: [
+      "Post Comments up to 400 characters",
+      "Custom Profile Accent Color",
+    ],
     color: "border-[#CD7F32]",
     tierNumber: 1,
   },
@@ -49,6 +52,7 @@ const SUPPORTER_TIERS = [
       "Post Comments up to 800 characters",
       `Upload and Use Custom Avatars (${getAllowedFileExtensions()})`,
       `Upload and Use Custom Banners (${getAllowedFileExtensions()})`,
+      `Upload a Custom Profile Background (${getAllowedFileExtensions()})`,
     ],
     color: "border-[#C0C0C0]",
     recommended: true,
@@ -103,6 +107,22 @@ const getFeatureDescription = (
         title: "Unlock Custom Banners",
         description:
           "You're trying to upload and use a custom banner, but this feature requires Supporter II or higher. Upgrade to unlock custom banner functionality!",
+        current: `Current tier: ${currentLimit}`,
+        required: `Required: ${requiredLimit}`,
+      };
+    case "accent_color":
+      return {
+        title: "Unlock Custom Accent Colors",
+        description:
+          "You're trying to set a custom profile accent color, but this feature requires a supporter tier. Upgrade to unlock custom accent colors!",
+        current: `Current tier: ${currentLimit}`,
+        required: `Required: ${requiredLimit}`,
+      };
+    case "custom_background":
+      return {
+        title: "Unlock Custom Backgrounds",
+        description:
+          "You're trying to upload a custom profile background, but this feature requires Supporter II or higher. Upgrade to unlock custom backgrounds!",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
@@ -285,6 +305,19 @@ export default function SupporterModal({
                           return (
                             <span className="text-secondary-text block">
                               Upload and Use Custom Banners (
+                              {getAllowedFileExtensions()})
+                            </span>
+                          );
+                        } else if (feature === "accent_color") {
+                          return (
+                            <span className="text-secondary-text block">
+                              Choose a Custom Profile Accent Color
+                            </span>
+                          );
+                        } else if (feature === "custom_background") {
+                          return (
+                            <span className="text-secondary-text block">
+                              Upload a Custom Profile Background (
                               {getAllowedFileExtensions()})
                             </span>
                           );

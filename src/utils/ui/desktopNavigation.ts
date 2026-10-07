@@ -24,6 +24,15 @@ function applyDesktopNavigation(mode: DesktopNavigation) {
 }
 
 export function setDesktopNavigation(mode: DesktopNavigation) {
+  // Slide the new navigation in for switches the user makes (see the
+  // nav-layout-entering rules in globals.css); synced changes apply instantly.
+  const root = document.documentElement;
+  const reduceMotion =
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? true;
+  if (!reduceMotion) {
+    root.classList.add("nav-layout-entering");
+    window.setTimeout(() => root.classList.remove("nav-layout-entering"), 400);
+  }
   applyDesktopNavigation(mode);
   window.dispatchEvent(
     new CustomEvent("sendRealtimePreference", {
@@ -32,6 +41,19 @@ export function setDesktopNavigation(mode: DesktopNavigation) {
   );
 }
 
+const LAYOUT_SHORTCUT_HIDDEN_KEY = "navigation-layout-shortcut-hidden";
+
+/** Whether the header's "Change navigation layout" button is turned off. */
+export function getLayoutShortcutHidden(): boolean {
+  return safeLocalStorage.getItem(LAYOUT_SHORTCUT_HIDDEN_KEY) === "true";
+}
+
+export function setLayoutShortcutHidden(hidden: boolean) {
+  safeLocalStorage.setItem(LAYOUT_SHORTCUT_HIDDEN_KEY, String(hidden));
+  window.dispatchEvent(new Event("desktopNavigationChanged"));
+}
+
+/** Fires for both the layout and the header-button setting. */
 export function subscribeDesktopNavigation(onChange: () => void) {
   window.addEventListener("desktopNavigationChanged", onChange);
   return () => window.removeEventListener("desktopNavigationChanged", onChange);
