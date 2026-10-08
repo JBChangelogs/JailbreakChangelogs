@@ -7,7 +7,11 @@ import {
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
-import { toAccentStyle, type Accent } from "@/utils/ui/accentColor";
+import {
+  accentColorToHex,
+  toAccentStyle,
+  type Accent,
+} from "@/utils/ui/accentColor";
 
 const log = createLogger("API");
 
@@ -375,10 +379,16 @@ export const fetchAccentColor = async (): Promise<Accent | null> => {
     gradient?: unknown;
     style?: unknown;
   };
-  return typeof data.color === "string"
+  // Normalized to lowercase "#rrggbb", which the picker and comparisons use.
+  const toHex = (value: unknown) =>
+    typeof value === "string" || typeof value === "number"
+      ? accentColorToHex(value)
+      : null;
+  const color = toHex(data.color);
+  return color
     ? {
-        color: data.color,
-        gradient: typeof data.gradient === "string" ? data.gradient : null,
+        color,
+        gradient: toHex(data.gradient),
         style: toAccentStyle(data.style),
       }
     : null;
