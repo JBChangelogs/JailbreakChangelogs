@@ -12,6 +12,7 @@ import {
   useQuery,
   useInfiniteQuery,
   useQueryClient,
+  skipToken,
   type InfiniteData,
 } from "@tanstack/react-query";
 import type { Dispatch, SetStateAction } from "react";
@@ -133,7 +134,7 @@ export default function MessagesInbox() {
   );
   const conversationQuery = useQuery<ConversationListData>({
     queryKey: conversationKey,
-    enabled: false,
+    queryFn: skipToken,
     gcTime: 0,
     retry: false,
   });
@@ -189,7 +190,7 @@ export default function MessagesInbox() {
   );
   const threadQuery = useInfiniteQuery<MessageThreadPage>({
     queryKey: threadKey,
-    enabled: false,
+    queryFn: skipToken,
     initialPageParam: 1,
     getNextPageParam: (last, _pages, lastPageParam) => {
       const page = last.pagination.page ?? Number(lastPageParam);
@@ -286,7 +287,12 @@ export default function MessagesInbox() {
   );
   const blockedQuery = useQuery<{
     blocked_users?: Array<{ blocked_user_id: string | number }>;
-  } | null>({ queryKey: blockedKey, enabled: false, gcTime: 0, retry: false });
+  } | null>({
+    queryKey: blockedKey,
+    queryFn: skipToken,
+    gcTime: 0,
+    retry: false,
+  });
   const blockedByMeByUserId = useMemo(
     () => blockedUserMap(blockedQuery.data),
     [blockedQuery.data],
@@ -312,7 +318,7 @@ export default function MessagesInbox() {
   );
   const currentUserQuery = useQuery<MessageUser | null>({
     queryKey: ["message-current-user", currentUserId],
-    enabled: false,
+    queryFn: skipToken,
     gcTime: 0,
     retry: false,
   });
