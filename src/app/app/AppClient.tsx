@@ -233,9 +233,8 @@ export default function AppClient({
     staleTime: 0,
     refetchOnMount: "always",
   });
-  // The navigation runs the same check to show the app link, so the answer is
-  // usually cached by now. Show it right away and refresh it quietly; only
-  // wait when there's no answer yet.
+  // A cached answer (from an earlier visit) shows right away and refreshes
+  // quietly; only wait when there's no answer yet.
   const checking =
     platform !== "Mobile" && (isLoading || (signedIn && access.isPending));
   const granted =

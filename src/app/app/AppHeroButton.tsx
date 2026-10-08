@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
-import { useAppAccess } from "./access";
 
 export default function AppHeroButton() {
-  if (!useAppAccess()) return null;
   return (
     <Link
       href="/app"

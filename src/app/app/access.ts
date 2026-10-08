@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   getExperimentHeader,
@@ -33,15 +31,3 @@ export async function fetchAppAccess(signal?: AbortSignal): Promise<boolean> {
  */
 export const appAccessKey = (userId: string | undefined) =>
   ["app-access", userId, getExperimentHeader()] as const;
-
-export function useAppAccess() {
-  const { user, isAuthenticated, isLoading } = useAuthContext();
-  const { data } = useQuery({
-    queryKey: appAccessKey(user?.id),
-    enabled: !isLoading && isAuthenticated && !!user,
-    queryFn: ({ signal }) => fetchAppAccess(signal),
-    retry: false,
-    staleTime: 5 * 60 * 1000,
-  });
-  return data === true;
-}

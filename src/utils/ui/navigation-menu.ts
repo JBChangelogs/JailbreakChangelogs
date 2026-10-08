@@ -6,7 +6,6 @@ export interface NavigationItem {
   badge?: "coming-soon" | "new" | "live";
   className?: string;
   prefetch?: boolean;
-  desktopApp?: boolean;
 }
 
 export interface NavigationSection {
@@ -156,7 +155,6 @@ export const navigationSections: NavigationSection[] = [
         icon: "material-symbols:desktop-windows-rounded",
         title: "Desktop App",
         description: "Download for Windows, macOS and Linux in early access",
-        desktopApp: true,
       },
     ],
   },
