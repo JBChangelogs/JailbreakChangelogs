@@ -63,11 +63,11 @@ export function canOverrideExperiments(user: Pick<UserData, "flags"> | null) {
   );
 }
 
-export function readExperimentOverrides(userId: string): ExperimentOverrides {
-  const stored = safeGetJSON<unknown>(`experiment-overrides:${userId}`, null);
-  if (!stored || typeof stored !== "object" || Array.isArray(stored)) return {};
+/** Keeps only valid experiment keys forced to a known variant. */
+export function toExperimentOverrides(value: unknown): ExperimentOverrides {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   return Object.fromEntries(
-    Object.entries(stored).filter(
+    Object.entries(value).filter(
       ([key, variant]) =>
         /^[a-z0-9_]{1,64}$/.test(key) &&
         (variant === "treatment" || variant === "control"),
@@ -75,11 +75,54 @@ export function readExperimentOverrides(userId: string): ExperimentOverrides {
   );
 }
 
+/**
+ * This browser's forced variants for `userId`. They're what X-Experiment
+ * sends; with sync on they mirror the synced ones, so the first requests
+ * after a reload already carry them.
+ */
+export function readExperimentOverrides(userId: string): ExperimentOverrides {
+  return toExperimentOverrides(
+    safeGetJSON<unknown>(`experiment-overrides:${userId}`, null),
+  );
+}
+
+const OVERRIDES_EVENT = "experimentOverridesChange";
+
+/** Tells this tab that the forced variants or the sync setting changed. */
+export function notifyExperimentOverridesChange() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent?.(new Event(OVERRIDES_EVENT));
+  }
+}
+
+/** Calls back when forced variants or sync change, in this tab or another. */
+export function subscribeExperimentOverrides(callback: () => void) {
+  window.addEventListener(OVERRIDES_EVENT, callback);
+  window.addEventListener("storage", callback);
+  return () => {
+    window.removeEventListener(OVERRIDES_EVENT, callback);
+    window.removeEventListener("storage", callback);
+  };
+}
+
+export function sameExperimentOverrides(
+  a: ExperimentOverrides,
+  b: ExperimentOverrides,
+) {
+  const keys = Object.keys(a);
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => a[key] === b[key])
+  );
+}
+
 export function saveExperimentOverrides(
   userId: string,
   overrides: ExperimentOverrides,
 ) {
-  return safeSetJSON(`experiment-overrides:${userId}`, overrides);
+  const saved = safeSetJSON(`experiment-overrides:${userId}`, overrides);
+  notifyExperimentOverridesChange();
+  return saved;
 }
 
 export function serializeExperimentOverrides(overrides: ExperimentOverrides) {

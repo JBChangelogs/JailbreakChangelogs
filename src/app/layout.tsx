@@ -1,4 +1,5 @@
 import { withDiscordEmbed } from "@/lib/discord-embed";
+import { ExperimentOverridesIndicator } from "@/components/Experiments/ExperimentOverridesIndicator";
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
@@ -207,6 +208,7 @@ export default async function RootLayout({
                         id="main-layout"
                         className="site-layout flex min-h-screen flex-col"
                       >
+                        <ExperimentOverridesIndicator />
                         <Suspense
                           fallback={
                             <div
@@ -348,6 +350,7 @@ export default async function RootLayout({
                   <NitroAnchorCloseSupporterModal />
                   <NitroVideoCloseSupporterModal />
                   <div className="site-layout flex min-h-screen flex-col">
+                    <ExperimentOverridesIndicator />
                     <Suspense
                       fallback={
                         <div

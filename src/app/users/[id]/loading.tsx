@@ -17,7 +17,7 @@ export default function UserProfileLoading() {
     >
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb loading={true} />
-        <div className="border-border-card bg-secondary-bg overflow-hidden rounded-2xl border">
+        <div className="border-border-card bg-secondary-bg mx-3 overflow-hidden rounded-2xl border sm:mx-0">
           <Skeleton className="h-40 rounded-none md:h-70" />
           <div className="px-5 pt-5 pb-6 sm:px-6 md:px-8 md:pb-8">
             <div className="grid grid-cols-[104px_minmax(0,1fr)] items-center gap-x-4 gap-y-3 md:grid-cols-[176px_minmax(0,1fr)_auto] md:items-start md:gap-x-7">

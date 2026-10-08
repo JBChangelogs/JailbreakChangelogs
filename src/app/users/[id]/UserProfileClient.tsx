@@ -1,6 +1,6 @@
 "use client";
 
-import { accentCardTheme, accentColorToHex } from "@/utils/ui/accentColor";
+import { accentCardTheme, userCardAccent } from "@/utils/ui/accentColor";
 
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -51,8 +51,6 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileOverview from "@/components/Profile/ProfileOverview";
 import ProfileIdentityBar from "@/components/Profile/ProfileIdentityBar";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { DiscordIcon } from "@/components/Icons/DiscordIcon";
-import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { profileSocialQueryOptions } from "@/utils/api/profileSocialQueries";
 import type { ProfileDataResult } from "@/services/profileDataService";
 const FollowersModal = dynamic(
@@ -185,6 +183,8 @@ interface User {
   usernumber: number;
   accent_color: string;
   custom_accent_color?: string | null;
+  accent_gradient?: number | null;
+  accent_style?: string;
   custom_avatar?: string;
   banner?: string;
   custom_banner?: string;
@@ -862,7 +862,7 @@ export default function UserProfileClient({
         <main className="min-h-screen pb-8">
           <div className="container mx-auto max-w-7xl">
             <Breadcrumb />
-            <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
+            <div className="border-border-card bg-secondary-bg mx-3 overflow-hidden rounded-lg border shadow-md sm:mx-0">
               <div className="flex min-h-[65vh] items-center justify-center p-8">
                 <div className="flex flex-col items-center justify-center space-y-6">
                   <div className="w-full max-w-md rounded-lg p-6 text-center">
@@ -911,11 +911,7 @@ export default function UserProfileClient({
 
   const isOwnProfile = currentUserId === user.id;
   // Accent colors only recolor profile cards when the owner opts in.
-  const accentColor =
-    user.settings_v2?.colored_profile_cards === true
-      ? (accentColorToHex(user.custom_accent_color) ??
-        accentColorToHex(user.accent_color))
-      : null;
+  const accent = userCardAccent(user);
 
   // Shown only when the owner switched it on; never gated on supporter tier.
   const hasVisibleBackground =
@@ -926,7 +922,7 @@ export default function UserProfileClient({
       <main className="min-h-screen pb-8">
         <div className="container mx-auto">
           <Breadcrumb userData={user} />
-          <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
+          <div className="border-border-card bg-secondary-bg mx-3 overflow-hidden rounded-lg border shadow-md sm:mx-0">
             <div className="p-8">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <div className="relative -mt-6">
@@ -994,47 +990,11 @@ export default function UserProfileClient({
   const profileActionButtonClassName =
     "md:h-10! md:gap-2! md:px-5! md:text-base! md:[&_svg]:size-5!";
 
-  const profileConnections = (
-    <>
-      <Tooltip delayDuration={500}>
-        <TooltipTrigger asChild>
-          <Link
-            href={`https://discord.com/users/${user.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary-text bg-tertiary-bg border-border-card hover:text-link-hover focus-visible:ring-border-focus inline-flex size-8 items-center justify-center rounded-lg border shadow-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <DiscordIcon className="h-3.5 w-3.5" />
-            <span className="sr-only">Visit Discord profile</span>
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent>Visit Discord Profile</TooltipContent>
-      </Tooltip>
-
-      {user.roblox_id && (
-        <Tooltip delayDuration={500}>
-          <TooltipTrigger asChild>
-            <Link
-              href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-text bg-tertiary-bg border-border-card hover:text-link-hover focus-visible:ring-border-focus inline-flex size-8 items-center justify-center rounded-lg border shadow-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-            >
-              <RobloxIcon className="h-3.5 w-3.5" />
-              <span className="sr-only">Visit Roblox profile</span>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>Visit Roblox Profile</TooltipContent>
-        </Tooltip>
-      )}
-    </>
-  );
-
   return (
     <main
       className="relative isolate min-h-screen pb-8"
-      data-accent-cards={accentColor ? "" : undefined}
-      style={accentColor ? accentCardTheme(accentColor) : undefined}
+      data-accent-cards={accent?.style}
+      style={accent ? accentCardTheme(accent) : undefined}
     >
       {hasVisibleBackground && user.custom_background && (
         <ProfileBackground src={user.custom_background} />
@@ -1043,7 +1003,7 @@ export default function UserProfileClient({
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
         <ProfileIdentityBar user={user} identityRef={profileIdentityRef} />
-        <div className="border-border-card bg-secondary-bg overflow-hidden rounded-2xl border">
+        <div className="border-border-card bg-secondary-bg mx-3 overflow-hidden rounded-2xl border sm:mx-0">
           {/* Banner Section: the owner can click it to upload a new one. */}
           <div className="relative">
             <Banner
@@ -1099,9 +1059,6 @@ export default function UserProfileClient({
                       onUploaded={handleProfileAvatarUploaded}
                     />
                   )}
-                </div>
-                <div className="mt-3 hidden max-w-44 flex-wrap items-center justify-center gap-2 md:flex">
-                  {profileConnections}
                 </div>
               </div>
               <div className="contents md:block md:w-full md:min-w-0 md:flex-1">
@@ -1196,9 +1153,6 @@ export default function UserProfileClient({
                           </span>{" "}
                           following
                         </button>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 md:hidden">
-                        {profileConnections}
                       </div>
                     </div>
                   </div>

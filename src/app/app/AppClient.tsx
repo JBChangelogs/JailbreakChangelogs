@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import {
+  BellRing,
   Check,
   Download,
   ExternalLink,
   FlaskConical,
+  Gamepad2,
   Info,
+  Radar,
 } from "lucide-react";
+import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -20,10 +24,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuthContext } from "@/contexts/AuthContext";
+import type { ChangelogEntry } from "@/lib/changelog-parser";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
-import { fetchAppAccess } from "./access";
+import { appAccessKey, fetchAppAccess } from "./access";
+import { AppReleaseNotes } from "./AppReleaseNotes";
 import type { Releases } from "./releases";
 import { getBrowserDownloadPlatform } from "./platform";
 
@@ -128,7 +135,42 @@ const features = [
   },
 ];
 
-export default function AppClient({ releases }: { releases: Releases }) {
+// Things the website can't do, in the app's own wording.
+const appOnly = [
+  {
+    icon: DiscordIcon,
+    title: "Discord Rich Presence",
+    description:
+      "Your Discord status shows what you're doing in the app, with an optional Join Server button so friends can join your Jailbreak server.",
+  },
+  {
+    icon: Radar,
+    title: "Auto trade scanning",
+    description:
+      "While you're in a Jailbreak trading server, keeps the calculator in sync with the open trade, and clears it when you leave the trade menu.",
+  },
+  {
+    icon: BellRing,
+    title: "Robbery and bounty alerts",
+    description:
+      "Watch robbery types and bounty ranges for a player or a whole server, and get alerted the moment one hits, even with the app in the background.",
+  },
+  {
+    icon: Gamepad2,
+    title: "Join from a game invite",
+    description:
+      "Send a game invite in Messages and the other person can join your server straight from the conversation. Detecting your Roblox session is Windows only.",
+  },
+];
+
+export default function AppClient({
+  releases,
+  changes,
+}: {
+  releases: Releases;
+  /** Recent app releases from GitHub, newest first. */
+  changes: ChangelogEntry[];
+}) {
   const [active, setActive] = useState(0);
   const [hovered, setHovered] = useState(false);
   // The screenshot shown in the open lightbox; autoplay waits until it closes.
@@ -146,6 +188,19 @@ export default function AppClient({ releases }: { releases: Releases }) {
     setHeld(true);
     setHold((count) => count + 1);
   };
+  // Autoplay only while the screenshot is on screen. Switching tabs changes
+  // the height of the text below it, which would move whatever you're reading.
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [previewVisible, setPreviewVisible] = useState(true);
+  useEffect(() => {
+    const preview = previewRef.current;
+    if (!preview) return;
+    const observer = new IntersectionObserver(([entry]) =>
+      setPreviewVisible(entry.isIntersecting),
+    );
+    observer.observe(preview);
+    return () => observer.disconnect();
+  }, []);
   const platform = useSyncExternalStore(
     subscribePlatform,
     getBrowserDownloadPlatform,
@@ -171,17 +226,17 @@ export default function AppClient({ releases }: { releases: Releases }) {
     useAuthContext();
   const signedIn = isAuthenticated && !!user;
   const access = useQuery({
-    queryKey: ["app-access", user?.id],
+    queryKey: appAccessKey(user?.id),
     enabled: !isLoading && signedIn && platform !== "Mobile",
     queryFn: ({ signal }) => fetchAppAccess(signal),
     retry: false,
     staleTime: 0,
-    gcTime: 0,
     refetchOnMount: "always",
   });
+  // A cached answer (from an earlier visit) shows right away and refreshes
+  // quietly; only wait when there's no answer yet.
   const checking =
-    platform !== "Mobile" &&
-    (isLoading || (signedIn && (access.isPending || access.isFetching)));
+    platform !== "Mobile" && (isLoading || (signedIn && access.isPending));
   const granted =
     signedIn && !checking && !access.isError && access.data === true;
 
@@ -273,14 +328,18 @@ export default function AppClient({ releases }: { releases: Releases }) {
                   </p>
                 </>
               ) : checking ? (
-                <div
-                  className="text-secondary-text flex items-center gap-3 text-sm"
-                  role="status"
-                >
-                  <Spinner />
-                  {isLoading
-                    ? "Loading your account…"
-                    : "Checking your access…"}
+                // Shaped like the download button, so nothing jumps.
+                <div role="status">
+                  <span className="sr-only">
+                    {isLoading
+                      ? "Loading your account…"
+                      : "Checking your access…"}
+                  </span>
+                  <Skeleton aria-hidden="true" className="h-12 w-full" />
+                  <Skeleton
+                    aria-hidden="true"
+                    className="mx-auto mt-2 h-4 w-28"
+                  />
                 </div>
               ) : !signedIn ? (
                 <>
@@ -402,9 +461,19 @@ export default function AppClient({ releases }: { releases: Releases }) {
                   <Button
                     className="mt-5 w-full"
                     size="lg"
+                    disabled={access.isFetching}
                     onClick={() => void access.refetch()}
                   >
-                    {access.isError ? "Retry" : "Check again"}
+                    {access.isFetching ? (
+                      <>
+                        <Spinner />
+                        Checking…
+                      </>
+                    ) : access.isError ? (
+                      "Retry"
+                    ) : (
+                      "Check again"
+                    )}
                   </Button>
                 </>
               )}
@@ -451,7 +520,10 @@ export default function AppClient({ releases }: { releases: Releases }) {
                           animationDuration: "6s",
                           animationTimingFunction: "linear",
                           animationPlayState:
-                            hovered || held || previewIndex !== null
+                            hovered ||
+                            held ||
+                            previewIndex !== null ||
+                            !previewVisible
                               ? "paused"
                               : "running",
                         }
@@ -465,7 +537,7 @@ export default function AppClient({ releases }: { releases: Releases }) {
               </TabsTrigger>
             ))}
           </TabsList>
-          <div onClickCapture={pause} className="mt-6">
+          <div ref={previewRef} onClickCapture={pause} className="mt-6">
             <ImageLightbox
               src={features[previewIndex ?? active].image}
               alt={features[previewIndex ?? active].alt}
@@ -529,6 +601,41 @@ export default function AppClient({ releases }: { releases: Releases }) {
           ))}
         </Tabs>
       </section>
+      <section
+        aria-labelledby="app-only-heading"
+        className="border-border-card mx-auto mt-16 max-w-6xl border-t pt-8"
+      >
+        <h2
+          id="app-only-heading"
+          className="text-primary-text text-2xl font-semibold tracking-tight"
+        >
+          Only in the desktop app
+        </h2>
+        <p className="text-secondary-text mt-2 max-w-2xl">
+          Running on your computer, the app can follow your Roblox game and show
+          your status on Discord, so it can do things the website can&apos;t.
+        </p>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {appOnly.map(({ icon: FeatureIcon, title, description }) => (
+            <li
+              key={title}
+              className="border-border-card bg-secondary-bg rounded-xl border p-5"
+            >
+              <span
+                aria-hidden="true"
+                className="bg-button-info/10 text-link inline-flex size-10 items-center justify-center rounded-lg"
+              >
+                <FeatureIcon className="size-5" />
+              </span>
+              <h3 className="text-primary-text mt-4 font-semibold">{title}</h3>
+              <p className="text-secondary-text mt-1.5 text-sm leading-relaxed">
+                {description}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+      {changes.length > 0 && <AppReleaseNotes changes={changes} />}
     </main>
   );
 }

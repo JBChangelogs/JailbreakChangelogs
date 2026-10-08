@@ -38,7 +38,6 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
     "@/lib/utils": { cn: () => "" },
     "@/utils/ui/navigation": navigationUtils,
     "@/utils/ui/navigation-menu": { navigationSections: [] },
-    "@/app/app/access": { useAppAccess: () => false },
   };
   const exports = {} as { default: (props: { collapsed: boolean }) => void };
   runInNewContext(
@@ -62,7 +61,7 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
   );
 
   exports.default({ collapsed: false });
-  expect(dependencies).toEqual(["/supporting", false, false]);
+  expect(dependencies).toEqual(["/supporting", false]);
   expect(navigation.scrollTop).toBe(410);
 
   pathname = "/changelogs/123";
@@ -70,7 +69,7 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
   cleanup?.();
   expect(disconnected).toBe(true);
   exports.default({ collapsed: true });
-  expect(dependencies).toEqual([pathname, true, false]);
+  expect(dependencies).toEqual([pathname, true]);
   expect(navigation.scrollTop).toBe(140);
 
   link = { top: 100, bottom: 140 };

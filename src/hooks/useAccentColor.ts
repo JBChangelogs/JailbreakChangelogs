@@ -6,17 +6,27 @@ import { toast } from "sonner";
 import { useDebounce } from "@/hooks/useDebounce";
 import { fetchAccentColor, saveAccentColor } from "@/services/settingsService";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
-import { accentColorToHex } from "@/utils/ui/accentColor";
+import { accentColorToHex, type Accent } from "@/utils/ui/accentColor";
+
+const sameAccent = (a: Accent, b: Accent | null) =>
+  a.color === b?.color && a.gradient === b.gradient && a.style === b.style;
+
+const discordAccent = (
+  color: number | string | null | undefined,
+): Accent | null => {
+  const hex = accentColorToHex(color);
+  return hex ? { color: hex, gradient: null, style: "solid" } : null;
+};
 
 /** Query key for the public profile the appearance settings read from. */
 export const appearanceProfileKey = (userId: string) =>
   ["appearance-profile", userId] as const;
 
 /**
- * The user's profile accent color for the settings page. `accent` is what the
- * profile shows right now (a picked-but-unsaved color, the custom color, or
- * Discord's); `customAccent` is only the custom one. Picks save after the
- * picker settles, to stay under the API's rate limit.
+ * The user's profile card accent for the settings page. `accent` is what the
+ * profile shows right now (a picked-but-unsaved accent, the custom one, or
+ * Discord's color); `customAccent` is only the custom one. Picks save after
+ * the picker settles, to stay under the API's rate limit.
  */
 export function useAccentColor(userId: string | undefined) {
   const queryClient = useQueryClient();
@@ -39,7 +49,7 @@ export function useAccentColor(userId: string | undefined) {
     staleTime: 60_000,
   });
 
-  const [draft, setDraft] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Accent | null>(null);
   const debouncedDraft = useDebounce(draft, 600);
 
   // Saves and resets run one at a time so an older one can't land after a
@@ -58,7 +68,9 @@ export function useAccentColor(userId: string | undefined) {
     const value = debouncedDraft;
     // While a save is pending, the saved color may still change, so a pick
     // matching it needs its own write.
-    if (!value || (pending.current === 0 && value === customAccent)) return;
+    if (!value || (pending.current === 0 && sameAccent(value, customAccent))) {
+      return;
+    }
     void enqueue(() =>
       saveAccentColor(value)
         .then(() => {
@@ -66,7 +78,14 @@ export function useAccentColor(userId: string | undefined) {
           queryClient.setQueryData<Record<string, unknown>>(
             profileKey,
             (current) =>
-              current ? { ...current, accent_color: value } : current,
+              current
+                ? {
+                    ...current,
+                    accent_color: value.color,
+                    accent_gradient: value.gradient,
+                    accent_style: value.style,
+                  }
+                : current,
           );
         })
         .catch((error: unknown) => {
@@ -99,7 +118,7 @@ export function useAccentColor(userId: string | undefined) {
     });
 
   return {
-    accent: draft ?? customAccent ?? accentColorToHex(profile?.accent_color),
+    accent: draft ?? customAccent ?? discordAccent(profile?.accent_color),
     customAccent,
     setAccent: setDraft,
     reset,

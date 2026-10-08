@@ -11,7 +11,7 @@ import { appearanceProfileKey } from "@/hooks/useAccentColor";
 import { cn } from "@/lib/utils";
 import type { UserData, UserSettingsV2 } from "@/types/auth";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
-import { accentCardTheme } from "@/utils/ui/accentColor";
+import { accentCardTheme, type Accent } from "@/utils/ui/accentColor";
 import { UserAvatar } from "@/utils/ui/avatar";
 
 interface PublicProfile {
@@ -31,8 +31,8 @@ interface AppearancePreviewProps {
   onUploadStateChange?: (isUploading: boolean) => void;
   onToggle: (name: "custom_avatar" | "custom_banner", value: boolean) => void;
   togglesDisabled?: boolean;
-  /** Accent color to theme the card with, from useAccentColor. */
-  accent?: string | null;
+  /** Accent to theme the card with, from useAccentColor. */
+  accent?: Accent | null;
 }
 
 /**
@@ -74,7 +74,7 @@ export function AppearancePreview({
   return (
     <div
       className="border-border-card bg-secondary-bg mb-5 overflow-hidden rounded-xl border"
-      data-accent-cards={accent ? "" : undefined}
+      data-accent-cards={accent?.style}
       style={accent ? accentCardTheme(accent) : undefined}
     >
       <div className="relative">

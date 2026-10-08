@@ -7,6 +7,11 @@ import {
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
+import {
+  accentColorToHex,
+  toAccentStyle,
+  type Accent,
+} from "@/utils/ui/accentColor";
 
 const log = createLogger("API");
 
@@ -331,8 +336,8 @@ export const removeCustomBackground = async (): Promise<void> => {
   }
 };
 
-/** The user's custom accent color ("#rrggbb"), or null when using Discord's. */
-export const fetchAccentColor = async (): Promise<string | null> => {
+/** The user's custom card accent, or null when using their Discord color. */
+export const fetchAccentColor = async (): Promise<Accent | null> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     "/v2/users/me/accent-color",
@@ -347,23 +352,42 @@ export const fetchAccentColor = async (): Promise<string | null> => {
       await getResponseErrorMessage(response, "Failed to load accent color"),
     );
   }
-  const data = (await response.json()) as { color?: unknown };
-  return typeof data.color === "string" ? data.color : null;
+  const data = (await response.json()) as {
+    color?: unknown;
+    gradient?: unknown;
+    style?: unknown;
+  };
+  // Normalized to lowercase "#rrggbb", which the picker and comparisons use.
+  const toHex = (value: unknown) =>
+    typeof value === "string" || typeof value === "number"
+      ? accentColorToHex(value)
+      : null;
+  const color = toHex(data.color);
+  return color
+    ? {
+        color,
+        gradient: toHex(data.gradient),
+        style: toAccentStyle(data.style),
+      }
+    : null;
 };
 
-/** Sets a custom accent color, or resets to Discord's when `color` is null. */
-export const saveAccentColor = async (color: string | null): Promise<void> => {
+/**
+ * Sets a custom card accent, or resets the color, gradient and style when
+ * `accent` is null. A PUT replaces all three, so always send the full accent.
+ */
+export const saveAccentColor = async (accent: Accent | null): Promise<void> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     "/v2/users/me/accent-color",
   );
   const response = await fetch(url, {
-    method: color ? "PUT" : "DELETE",
+    method: accent ? "PUT" : "DELETE",
     credentials: "include",
-    headers: color
+    headers: accent
       ? { ...headers, "Content-Type": "application/json" }
       : headers,
-    body: color ? JSON.stringify({ color }) : undefined,
+    body: accent ? JSON.stringify(accent) : undefined,
   });
   if (!response.ok) {
     if (response.status === 403) {

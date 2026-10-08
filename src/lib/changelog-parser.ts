@@ -58,51 +58,68 @@ function stripHtmlTags(text: string): string {
   return cleaned.trim();
 }
 
+const APP_RELEASES_URL =
+  "https://api.github.com/repos/JBChangelogs/JailbreakChangelogsApp/releases";
+
 /**
  * Fetches changelog entries from GitHub Releases API
  * Uses Next.js fetch cache with 10 minute revalidation
  */
-export const getCachedChangelogEntries = cache(
-  async (): Promise<ChangelogEntry[]> => {
-    try {
-      const headers: HeadersInit = {
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      };
+export const getCachedChangelogEntries = cache(() =>
+  fetchChangelogEntries(process.env.GITHUB_API_RELEASES_URL!, 100),
+);
 
-      if (process.env.GITHUB_TOKEN) {
-        headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
-      }
+/**
+ * The desktop app's published releases, newest first. Drafts are dropped:
+ * with GITHUB_TOKEN set, GitHub returns them too.
+ */
+export const getCachedAppChangelogEntries = cache(async () =>
+  (await fetchChangelogEntries(APP_RELEASES_URL, 10)).filter(
+    (entry) => !entry.isDraft,
+  ),
+);
 
-      const baseUrl = process.env.GITHUB_API_RELEASES_URL!;
-      const url = baseUrl.includes("?")
-        ? `${baseUrl}&per_page=100`
-        : `${baseUrl}?per_page=100`;
+async function fetchChangelogEntries(
+  baseUrl: string,
+  perPage: number,
+): Promise<ChangelogEntry[]> {
+  try {
+    const headers: HeadersInit = {
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    };
 
-      const response = await fetch(url, {
-        headers,
-        next: { revalidate: 600 }, // 10 minutes
+    if (process.env.GITHUB_TOKEN) {
+      headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
+
+    const url = baseUrl.includes("?")
+      ? `${baseUrl}&per_page=${perPage}`
+      : `${baseUrl}?per_page=${perPage}`;
+
+    const response = await fetch(url, {
+      headers,
+      next: { revalidate: 600 }, // 10 minutes
+    });
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetch releases failed", {
+        status: response.status,
+        statusText: response.statusText,
+        body,
       });
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        log.error("fetch releases failed", {
-          status: response.status,
-          statusText: response.statusText,
-          body,
-        });
-        return [];
-      }
-
-      const releases: GithubRelease[] = await response.json();
-
-      return releases.map(mapGithubReleaseToEntry);
-    } catch (error) {
-      log.error("Error fetching changelogs from GitHub:", error);
       return [];
     }
-  },
-);
+
+    const releases: GithubRelease[] = await response.json();
+
+    return releases.map(mapGithubReleaseToEntry);
+  } catch (error) {
+    log.error("Error fetching changelogs from GitHub:", error);
+    return [];
+  }
+}
 
 export const getCachedLatestChangelogEntry = cache(
   async (): Promise<ChangelogEntry | null> => {

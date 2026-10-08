@@ -137,3 +137,17 @@ ads: this prose stays intact
     "```md\n* **ads:** this code stays intact\n```",
   ]);
 });
+
+test("reads Keep a Changelog headings from app releases", () => {
+  const sections = parseChangelogSections(
+    "### Added\n\n- Value Calculator page\n- Scan trade\n\n### Changed\n\n- Trade ad totals count duped values\n\n### Fixed\n\n- Rich Presence no longer drops out",
+    "0.5.14",
+  );
+  expect(
+    sections.map(({ kind, title, count }) => [kind, title, count]),
+  ).toEqual([
+    ["new", "Added", 2],
+    ["other", "Changed", 1],
+    ["fixes", "Fixed", 1],
+  ]);
+});

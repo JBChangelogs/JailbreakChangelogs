@@ -82,6 +82,8 @@ interface User {
   banner: string | null; // Discord banner hash, "None", or null
   accent_color: string; // Color code, "None", or null
   custom_accent_color?: string | null;
+  accent_gradient?: number | null; // 0xRRGGBB, like accent_color
+  accent_style?: string; // "solid" | "glass" | "transparent"
   global_name: string; // Can be "None"
   locale: string;
   created_at: string;

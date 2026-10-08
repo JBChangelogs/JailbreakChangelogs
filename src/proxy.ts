@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getDevToken } from "@/utils/api/apiDevToken";
 import { isTestingDeploy } from "@/utils/deployment";
 
 interface UserFlag {
@@ -82,6 +83,17 @@ function isAllowedWithoutTesterRole(request: NextRequest): boolean {
   if (searchParams.has("token")) return true;
 
   return false;
+}
+
+/**
+ * The session token. Local dev signs in with NEXT_PUBLIC_DEV_TOKEN, which API
+ * requests also send, so it wins over any leftover localhost cookie.
+ */
+function getSessionToken(request: NextRequest): string | undefined {
+  const { isDevEnv, injectedToken } = getDevToken();
+  if (isDevEnv && injectedToken) return injectedToken;
+  const token = request.cookies.get("jbcl_token")?.value;
+  return token && token !== "undefined" ? token : undefined;
 }
 
 function hasTestingAccess(user: ProxyUser | null): boolean {
@@ -200,8 +212,8 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isTestingRestricted && isAccessDeniedPath) {
-    const token = request.cookies.get("jbcl_token")?.value;
-    if (token && token !== "undefined") {
+    const token = getSessionToken(request);
+    if (token) {
       const user = await fetchCurrentUser(token);
       if (hasTestingAccess(user)) {
         return NextResponse.redirect(new URL("/", request.url));
@@ -215,8 +227,8 @@ export async function proxy(request: NextRequest) {
     (isTestingRestricted && !isAllowedWithoutTesterRole(request))
   ) {
     const deniedPath = isTestingRestricted ? "/access-denied" : "/";
-    const token = request.cookies.get("jbcl_token")?.value;
-    if (!token || token === "undefined") {
+    const token = getSessionToken(request);
+    if (!token) {
       if (request.nextUrl.pathname.startsWith("/api/")) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
       }
