@@ -42,9 +42,10 @@ export function parseChangelogSections(content: string, version: string) {
         .replace(/^[^\p{L}\p{N}]+/u, "")
         .trim();
       const heading = title.toLowerCase();
-      const kind = ["features", "new features"].includes(heading)
+      // Includes Keep a Changelog's "Added" and "Fixed", used by the app.
+      const kind = ["features", "new features", "added"].includes(heading)
         ? "new"
-        : ["bug fixes", "fixes"].includes(heading)
+        : ["bug fixes", "fixes", "fixed"].includes(heading)
           ? "fixes"
           : ["performance", "performance improvements"].includes(heading)
             ? "performance"

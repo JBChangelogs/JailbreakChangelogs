@@ -7,6 +7,7 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { parseExperimentsResponse } from "@/utils/api/experiments";
 import { getAuthToken } from "@/utils/api/routeAuth";
 import AppClient from "./AppClient";
+import { getCachedAppChangelogEntries } from "@/lib/changelog-parser";
 import { fetchReleases } from "./releases";
 
 const description =
@@ -71,5 +72,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AppPage() {
   if (!(await hasAppAccess())) notFound();
-  return <AppClient releases={await fetchReleases()} />;
+  const [releases, changes] = await Promise.all([
+    fetchReleases(),
+    getCachedAppChangelogEntries(),
+  ]);
+  return <AppClient releases={releases} changes={changes.slice(0, 5)} />;
 }

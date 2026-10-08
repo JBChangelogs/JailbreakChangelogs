@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import {
@@ -10,6 +10,7 @@ import {
   FlaskConical,
   Info,
 } from "lucide-react";
+import { ReleaseTimelineEntry } from "@/components/Changelogs/ReleaseChanges";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -22,6 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuthContext } from "@/contexts/AuthContext";
+import type { ChangelogEntry } from "@/lib/changelog-parser";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 import { fetchAppAccess } from "./access";
 import type { Releases } from "./releases";
@@ -128,7 +130,14 @@ const features = [
   },
 ];
 
-export default function AppClient({ releases }: { releases: Releases }) {
+export default function AppClient({
+  releases,
+  changes,
+}: {
+  releases: Releases;
+  /** Recent app releases from GitHub, newest first. */
+  changes: ChangelogEntry[];
+}) {
   const [active, setActive] = useState(0);
   const [hovered, setHovered] = useState(false);
   // The screenshot shown in the open lightbox; autoplay waits until it closes.
@@ -146,6 +155,19 @@ export default function AppClient({ releases }: { releases: Releases }) {
     setHeld(true);
     setHold((count) => count + 1);
   };
+  // Autoplay only while the screenshot is on screen. Switching tabs changes
+  // the height of the text below it, which would move whatever you're reading.
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [previewVisible, setPreviewVisible] = useState(true);
+  useEffect(() => {
+    const preview = previewRef.current;
+    if (!preview) return;
+    const observer = new IntersectionObserver(([entry]) =>
+      setPreviewVisible(entry.isIntersecting),
+    );
+    observer.observe(preview);
+    return () => observer.disconnect();
+  }, []);
   const platform = useSyncExternalStore(
     subscribePlatform,
     getBrowserDownloadPlatform,
@@ -451,7 +473,10 @@ export default function AppClient({ releases }: { releases: Releases }) {
                           animationDuration: "6s",
                           animationTimingFunction: "linear",
                           animationPlayState:
-                            hovered || held || previewIndex !== null
+                            hovered ||
+                            held ||
+                            previewIndex !== null ||
+                            !previewVisible
                               ? "paused"
                               : "running",
                         }
@@ -465,7 +490,7 @@ export default function AppClient({ releases }: { releases: Releases }) {
               </TabsTrigger>
             ))}
           </TabsList>
-          <div onClickCapture={pause} className="mt-6">
+          <div ref={previewRef} onClickCapture={pause} className="mt-6">
             <ImageLightbox
               src={features[previewIndex ?? active].image}
               alt={features[previewIndex ?? active].alt}
@@ -529,6 +554,42 @@ export default function AppClient({ releases }: { releases: Releases }) {
           ))}
         </Tabs>
       </section>
+      {changes.length > 0 && (
+        <section
+          aria-labelledby="app-changes-heading"
+          className="border-border-card mx-auto mt-16 max-w-6xl border-t pt-8"
+        >
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-8 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+              <h2
+                id="app-changes-heading"
+                className="text-primary-text text-2xl font-semibold tracking-tight"
+              >
+                What&apos;s new
+              </h2>
+              <a
+                href="https://github.com/JBChangelogs/JailbreakChangelogsApp/releases"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link hover:text-link-hover inline-flex items-center gap-1 text-sm font-medium transition-colors"
+              >
+                All releases on GitHub
+                <ExternalLink aria-hidden="true" className="size-3.5" />
+              </a>
+            </div>
+            <div className="border-border-card ml-2 border-l-2 sm:ml-3">
+              {changes.map((entry, index) => (
+                <ReleaseTimelineEntry
+                  key={entry.slug}
+                  entry={entry}
+                  latest={index === 0}
+                  initiallyOpen={index === 0}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 }
