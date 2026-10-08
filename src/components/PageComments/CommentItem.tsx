@@ -46,6 +46,7 @@ import {
   convertUrlsToLinksHTML,
   processMentions,
   sanitizeHTML,
+  isCommentIdentityHidden,
 } from "./commentUtils";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useCommentsContext } from "./CommentsContext";
@@ -120,7 +121,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     setReactionBreakdownOpenId,
     setBreakdownTab,
     getStableReactionOrder,
-    isTester,
     canDeleteAnyComment,
   } = useCommentsContext();
   const { twemojiEnabled } = useTwemoji();
@@ -176,12 +176,27 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
   }, [editingCommentId, comment.id, comment.content, comment.replies]);
 
   const isIdentityHidden = (userId: string) => {
-    const settings = userData[userId]?.settings;
-    return (
-      !!userId &&
-      (!settings?.show_recent_comments || !settings?.profile_public) &&
-      currentUserId !== userId
+    return isCommentIdentityHidden(
+      userId,
+      userData[userId]?.settings,
+      currentUserId,
     );
+  };
+
+  const copyCommentLink = async (commentId: number) => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("commentsPage");
+    url.searchParams.delete("commentsSort");
+    if (type === "vsuggestion") url.searchParams.set("tab", "discussion");
+    else if (isRobloxContext || type === "item")
+      url.searchParams.set("tab", "comments");
+    url.hash = `comment-${commentId}`;
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      toast.success("Comment link copied");
+    } catch {
+      toast.error("Failed to copy comment link");
+    }
   };
 
   // For trade/inventory contexts, prefer Roblox identity
@@ -689,25 +704,15 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             View Reactions
                           </DropdownMenuItem>
                         )}
-                        {isTester && (
-                          <DropdownMenuItem
-                            onClick={() => {
-                              void navigator.clipboard
-                                .writeText(String(comment.id))
-                                .then(() => {
-                                  toast.success(
-                                    `Comment ID ${comment.id} copied`,
-                                  );
-                                });
-                            }}
-                          >
-                            <Icon
-                              icon="heroicons-outline:clipboard"
-                              className="mr-2 h-4 w-4"
-                            />
-                            Copy Comment ID
-                          </DropdownMenuItem>
-                        )}
+                        <DropdownMenuItem
+                          onClick={() => void copyCommentLink(comment.id)}
+                        >
+                          <Icon
+                            icon="heroicons-outline:clipboard"
+                            className="mr-2 h-4 w-4"
+                          />
+                          Copy comment link
+                        </DropdownMenuItem>
                         {currentUserId === comment.user_id ? (
                           <>
                             {/* Check if comment is still editable (within 1 hour) */}
@@ -1000,20 +1005,10 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
               View Reactions
             </ContextMenuItem>
           )}
-          {isTester && (
-            <ContextMenuItem
-              onClick={() => {
-                void navigator.clipboard
-                  .writeText(String(comment.id))
-                  .then(() => {
-                    toast.success(`Comment ID ${comment.id} copied`);
-                  });
-              }}
-            >
-              <Icon icon="heroicons-outline:clipboard" className="h-4 w-4" />
-              Copy Comment ID
-            </ContextMenuItem>
-          )}
+          <ContextMenuItem onClick={() => void copyCommentLink(comment.id)}>
+            <Icon icon="heroicons-outline:clipboard" className="h-4 w-4" />
+            Copy comment link
+          </ContextMenuItem>
           {isLoggedIn && (
             <>
               <ContextMenuSeparator />
@@ -1440,25 +1435,17 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                             View Reactions
                                           </DropdownMenuItem>
                                         )}
-                                      {isTester && (
-                                        <DropdownMenuItem
-                                          onClick={() => {
-                                            void navigator.clipboard
-                                              .writeText(String(reply.id))
-                                              .then(() => {
-                                                toast.success(
-                                                  `Comment ID ${reply.id} copied`,
-                                                );
-                                              });
-                                          }}
-                                        >
-                                          <Icon
-                                            icon="heroicons-outline:clipboard"
-                                            className="mr-2 h-4 w-4"
-                                          />
-                                          Copy Comment ID
-                                        </DropdownMenuItem>
-                                      )}
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          void copyCommentLink(reply.id)
+                                        }
+                                      >
+                                        <Icon
+                                          icon="heroicons-outline:clipboard"
+                                          className="mr-2 h-4 w-4"
+                                        />
+                                        Copy comment link
+                                      </DropdownMenuItem>
                                       {currentUserId === reply.user_id ? (
                                         <>
                                           {isCommentEditable(reply.date) && (
@@ -1684,25 +1671,15 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             View Reactions
                           </ContextMenuItem>
                         )}
-                        {isTester && (
-                          <ContextMenuItem
-                            onClick={() => {
-                              void navigator.clipboard
-                                .writeText(String(reply.id))
-                                .then(() => {
-                                  toast.success(
-                                    `Comment ID ${reply.id} copied`,
-                                  );
-                                });
-                            }}
-                          >
-                            <Icon
-                              icon="heroicons-outline:clipboard"
-                              className="h-4 w-4"
-                            />
-                            Copy Comment ID
-                          </ContextMenuItem>
-                        )}
+                        <ContextMenuItem
+                          onClick={() => void copyCommentLink(reply.id)}
+                        >
+                          <Icon
+                            icon="heroicons-outline:clipboard"
+                            className="h-4 w-4"
+                          />
+                          Copy comment link
+                        </ContextMenuItem>
                         {isLoggedIn && (
                           <>
                             <ContextMenuSeparator />

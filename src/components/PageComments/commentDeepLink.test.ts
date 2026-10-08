@@ -7,6 +7,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
   const effects: { callback: () => unknown; deps: unknown[] }[] = [];
   const updates: unknown[] = [];
   const requests: string[] = [];
+  const historyOptions: unknown[] = [];
   let timer: () => Promise<void>;
   let clearHighlight: () => void;
   const highlighted = new Set<string>();
@@ -45,6 +46,10 @@ test("comment links locate the correct page, expand the thread, and fall back wh
     useCommentState: (props: unknown) => {
       comments: { id: number }[];
       totalComments: number;
+      page: number;
+      sortOrder: string | null;
+      handlePageChange: (event: unknown, page: number) => void;
+      handleSortChange: (sort: string) => void;
       setComments: (
         updater: (comments: { id: number }[]) => { id: number }[],
       ) => void;
@@ -59,6 +64,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
       exports,
       Set,
       document: {
+        querySelector: () => null,
         querySelectorAll: (selector: string) =>
           selector === "#comment-42"
             ? [
@@ -79,6 +85,9 @@ test("comment links locate the correct page, expand the thread, and fall back wh
       },
       cancelAnimationFrame: () => {},
       URL,
+      URLSearchParams,
+      localStorage: { setItem: () => {} },
+      CustomEvent: class {},
       setTimeout: (callback: typeof timer, delay: number) => {
         if (delay === 10_000) clearHighlight = callback;
         else timer = callback;
@@ -89,12 +98,13 @@ test("comment links locate the correct page, expand the thread, and fall back wh
         location,
         history: {
           replaceState: (_state: unknown, _title: string, path: string) => {
-            expect(path).toBe("/changelogs/5?tab=comments");
+            expect(path).toBe(location.pathname + location.search);
             location.hash = "";
           },
         },
         addEventListener: () => {},
         removeEventListener: () => {},
+        dispatchEvent: () => {},
       },
       fetch: async (url: string) => {
         requests.push(url);
@@ -111,6 +121,31 @@ test("comment links locate the correct page, expand the thread, and fall back wh
             });
       },
       require: (name: string) => {
+        if (name === "nuqs")
+          return {
+            parseAsInteger: { withDefault: () => ({}) },
+            parseAsString: {},
+            useQueryStates: () => {
+              const params = new URLSearchParams(location.search);
+              return [
+                {
+                  commentsPage: Number(params.get("commentsPage") ?? 1),
+                  commentsSort: params.get("commentsSort"),
+                },
+                (
+                  values: Record<string, string | number | null>,
+                  options?: unknown,
+                ) => {
+                  historyOptions.push(options);
+                  for (const [key, value] of Object.entries(values)) {
+                    if (value === null) params.delete(key);
+                    else params.set(key, String(value));
+                  }
+                  location.search = "?" + params.toString();
+                },
+              ];
+            },
+          };
         if (name === "react")
           return {
             useState: (initial: unknown) => [
@@ -197,6 +232,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
   clearHighlight!();
   expect(location.hash).toBe("#comment-42");
   location.pathname = "/changelogs/5";
+  location.search = "?tab=comments";
   lookupStatus = 404;
   effect!.callback();
   await timer!();
@@ -215,4 +251,60 @@ test("comment links locate the correct page, expand the thread, and fall back wh
   expect(next.comments.map((comment) => comment.id)).toEqual([7, 99]);
   expect(next.totalComments).toBe(25);
   expect(cancelled).toContainEqual({ queryKey: key, exact: true });
+
+  location.hash = "";
+  location.search = "?tab=comments&commentsPage=3&commentsSort=oldest";
+  effects.length = 0;
+  const linkedPage = exports.useCommentState(props);
+  expect(linkedPage.page).toBe(3);
+  expect(linkedPage.sortOrder).toBe("oldest");
+  effects
+    .find((entry) => entry.deps[0] === 5 && entry.deps.includes(queryClient))!
+    .callback();
+  await timer!();
+  expect(new URL(requests.at(-1)!).searchParams.get("page")).toBe("3");
+  expect(new URL(requests.at(-1)!).searchParams.get("sort")).toBe("oldest");
+  linkedPage.handleSortChange("newest");
+  expect(new URLSearchParams(location.search).get("commentsPage")).toBe("1");
+  expect(new URLSearchParams(location.search).get("commentsSort")).toBe(
+    "newest",
+  );
+  expect(new URLSearchParams(location.search).get("tab")).toBe("comments");
+  expect(historyOptions.at(-1)).toEqual({ history: "push" });
+  const pageOneUrl = location.search;
+  exports.useCommentState(props).handlePageChange({}, 2);
+  expect(new URLSearchParams(location.search).get("commentsPage")).toBe("2");
+  expect(historyOptions.at(-1)).toEqual({ history: "push" });
+  const pageTwoUrl = location.search;
+  location.search = pageOneUrl;
+  expect(exports.useCommentState(props).page).toBe(1);
+  location.search = pageTwoUrl;
+  expect(exports.useCommentState(props).page).toBe(2);
+  expect(exports.useCommentState(props).sortOrder).toBe("newest");
+  location.search = "?commentsPage=99&commentsSort=newest";
+  const outOfRangePage = {
+    comments: [],
+    userMap: {},
+    totalPages: 3,
+    totalComments: 25,
+    page: 99,
+  };
+  queryClient.setQueryData(
+    ["comments", "changelog", 5, 99, "newest", null],
+    outOfRangePage,
+  );
+  effects.length = 0;
+  exports.useCommentState(props);
+  effects.find((entry) => entry.deps[0] === outOfRangePage)!.callback();
+  expect(new URLSearchParams(location.search).get("commentsPage")).toBe("3");
+  for (const invalidPage of ["-1", "0", "NaN", "1.5"]) {
+    location.search = `?commentsPage=${invalidPage}`;
+    effects.length = 0;
+    expect(exports.useCommentState(props).page).toBe(1);
+    effects
+      .find((entry) => entry.deps[0] === 5 && entry.deps.includes(queryClient))!
+      .callback();
+    await timer!();
+    expect(new URL(requests.at(-1)!).searchParams.get("page")).toBe("1");
+  }
 });
