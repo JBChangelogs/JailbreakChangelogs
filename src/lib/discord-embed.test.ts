@@ -82,6 +82,50 @@ test("each section links to related tools without repeating the current page", (
   }
 });
 
+test("embed titles use page names with one consistent site suffix", () => {
+  for (const [title, path, expected] of [
+    [
+      "Inventory Checker",
+      "/inventories",
+      "Inventory Checker | Jailbreak Changelogs",
+    ],
+    ["FAQ", "/faq", "FAQ | Jailbreak Changelogs"],
+    [
+      "Timeline - Jailbreak Changelogs",
+      "/changelogs/timeline",
+      "Timeline | Jailbreak Changelogs",
+    ],
+    [
+      "Support Us | Jailbreak Changelogs",
+      "/supporting",
+      "Support Us | Jailbreak Changelogs",
+    ],
+    [
+      { default: "Values", template: "%s | Jailbreak Changelogs" },
+      "/values",
+      "Values | Jailbreak Changelogs",
+    ],
+    [
+      { absolute: "Home | Jailbreak Changelogs" },
+      "/",
+      "Home | Jailbreak Changelogs",
+    ],
+    ["Under Maintenance", "/", "Under Maintenance | Jailbreak Changelogs"],
+    [
+      "Torpedo (Vehicle)",
+      "/item/Vehicle/Torpedo",
+      "Torpedo (Vehicle) | Jailbreak Changelogs",
+    ],
+  ] as const) {
+    const metadata = withDiscordEmbed(
+      { title, openGraph: { title: "Different OG title" } },
+      path,
+    );
+    const data = JSON.parse(embedUrl(metadata).searchParams.get("data")!);
+    expect(data.title).toBe(expected);
+  }
+});
+
 test("values and supporting previews keep their different images and plain titles", async () => {
   for (const [metadata, path, image] of [
     [valuesMetadata, "/values", "JBCL_X_TC_Embed_Graphic.png"],
@@ -132,7 +176,7 @@ test("child metadata replaces the parent link and preserves fallback metadata an
     expect(url.origin).toBe(process.env.DISCORD_EMBED_ORIGIN);
     const payload = await GET(new Request(url)).json();
     expect(payload.component.components[0].content).toBe(
-      "## Torpedo\nVehicle\nCash value: $10,000,000",
+      "## Torpedo | Jailbreak Changelogs\nVehicle\nCash value: $10,000,000",
     );
     expect(payload.component.components.at(-1).components[0].url).toBe(
       "https://jailbreakchangelogs.com/values",

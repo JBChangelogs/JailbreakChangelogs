@@ -141,7 +141,12 @@ export function withDiscordEmbed(
   details?: string,
 ): Metadata {
   const og = metadata.openGraph;
-  const title = og?.title ?? metadata.title;
+  const title = metadata.title ?? og?.title;
+  const pageTitle =
+    typeof title === "string"
+      ? title
+      : ((title && "absolute" in title ? title.absolute : title?.default) ??
+        "Jailbreak Changelogs");
   const rawImages = og?.images;
   const images = rawImages
     ? Array.isArray(rawImages)
@@ -149,11 +154,7 @@ export function withDiscordEmbed(
       : [rawImages]
     : [];
   const data: EmbedData = {
-    title:
-      typeof title === "string"
-        ? title
-        : ((title && "absolute" in title ? title.absolute : title?.default) ??
-          "Jailbreak Changelogs"),
+    title: `${path === "/" && pageTitle === "Jailbreak Changelogs" ? "Home" : pageTitle.replace(/\s+[|–—-]\s+Jailbreak Changelogs$/, "")} | Jailbreak Changelogs`,
     description: [og?.description ?? metadata.description ?? "", details]
       .filter(Boolean)
       .join("\n"),
