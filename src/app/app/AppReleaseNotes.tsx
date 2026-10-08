@@ -124,8 +124,11 @@ export function AppReleaseNotes({ changes }: { changes: ChangelogEntry[] }) {
   const select = (index: number) => {
     setSelected(index);
     setSwitched(true);
-    // When the cards are stacked, bring the opened release into view.
-    openRef.current?.scrollIntoView({ block: "nearest" });
+    // Stacked (below lg), the list sits above the large card, so jump to the
+    // start of the opened release. Side by side it's already in view.
+    if (!window.matchMedia("(min-width: 1024px)").matches) {
+      openRef.current?.scrollIntoView({ block: "start" });
+    }
   };
 
   // Rows never come or go, so the list doesn't shift; the open release is
@@ -231,7 +234,7 @@ export function AppReleaseNotes({ changes }: { changes: ChangelogEntry[] }) {
         </article>
 
         {changes.length > 1 && (
-          <div className="flex flex-col gap-4">
+          <div className="order-first flex flex-col gap-4 lg:order-none">
             <ul className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
               {releaseRow(changes[0], 0)}
             </ul>
