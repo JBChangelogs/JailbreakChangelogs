@@ -423,10 +423,7 @@ export default function UserStatsSection({
                   inline={true}
                 />
               </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-              >
+              <TooltipContent side="top" className="max-w-62.5">
                 <p>
                   {activeFilteredStats
                     ? `Only counts clean ${filterLabel} items' cash value.`
@@ -476,10 +473,7 @@ export default function UserStatsSection({
                   inline={true}
                 />
               </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-              >
+              <TooltipContent side="top" className="max-w-62.5">
                 <p>
                   {activeFilteredStats
                     ? `Clean ${filterLabel} item value plus duped ${filterLabel} item value${showOnlyNonOriginal ? " and money" : ""}. Duped items use their clean value when no duped value is available.`
@@ -535,10 +529,7 @@ export default function UserStatsSection({
                     inline={true}
                   />
                 </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-                >
+                <TooltipContent side="top" className="max-w-62.5">
                   <p>
                     {activeFilteredStats
                       ? `Combined value of all duped ${filterLabel} items. Uses clean value when no duped value is available.`
@@ -681,10 +672,7 @@ export default function UserStatsSection({
                       />
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-secondary-bg text-primary-text max-w-65 border-none shadow-(--color-card-shadow)"
-                  >
+                  <TooltipContent side="top" className="max-w-65">
                     <p>
                       This note comes from the user&apos;s last inventory scan.
                     </p>
@@ -708,10 +696,7 @@ export default function UserStatsSection({
                     />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                >
+                <TooltipContent side="top">
                   <p>Click to copy</p>
                 </TooltipContent>
               </Tooltip>

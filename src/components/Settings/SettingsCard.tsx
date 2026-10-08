@@ -69,10 +69,7 @@ export default function SettingsCard({
                 <Icon icon="heroicons:link" className="h-4 w-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-            >
+            <TooltipContent side="top">
               <p>Copy URL</p>
             </TooltipContent>
           </Tooltip>

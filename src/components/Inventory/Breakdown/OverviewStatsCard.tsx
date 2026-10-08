@@ -43,10 +43,7 @@ export default function OverviewStatsCard({
                   inline={true}
                 />
               </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-              >
+              <TooltipContent side="top" className="max-w-62.5">
                 Includes total cash value of all items, including duped
                 items&apos; cash value.
               </TooltipContent>
@@ -67,10 +64,7 @@ export default function OverviewStatsCard({
                   inline={true}
                 />
               </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-              >
+              <TooltipContent side="top" className="max-w-62.5">
                 Only counts clean items&apos; cash value. Does not include cash
                 value of duped items.
               </TooltipContent>

@@ -59,10 +59,7 @@ export default function CollectionProgressSection({
                     inline={true}
                   />
                 </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-                >
+                <TooltipContent side="top" className="max-w-62.5">
                   How many of the {overallProgress.total} items in Jailbreak you
                   own. Unverifiable items are assumed owned.
                 </TooltipContent>

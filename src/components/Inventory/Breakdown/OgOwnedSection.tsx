@@ -53,10 +53,7 @@ export default function OgOwnedSection({
                   inline={true}
                 />
               </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-              >
+              <TooltipContent side="top" className="max-w-62.5">
                 Items where this player is the original owner in
                 Jailbreak&apos;s records, regardless of trading history.
               </TooltipContent>
