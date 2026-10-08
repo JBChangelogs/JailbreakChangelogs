@@ -332,16 +332,17 @@ export function AccentColorSetting({
           </div>
         </div>
 
-        <div className="border-border-card bg-tertiary-bg flex items-center gap-2 rounded-xl border p-2">
+        <div className="border-border-card bg-tertiary-bg flex flex-wrap items-center gap-2 rounded-xl border p-2 sm:flex-nowrap">
           <ColorSwatch
             label={current.gradient ? "Start" : "Color"}
             value={current.color}
             onChange={(color) => update({ color })}
             canOpen={canEdit}
           />
-          {/* Runs left to right so its ends line up with the swatches. */}
+          {/* Runs left to right so its ends line up with the swatches. On
+              small screens it sits above them, full width. */}
           <div
-            className="relative grid h-11 min-w-0 flex-1 place-items-center rounded-lg border border-black/10 shadow-inner"
+            className="relative order-first grid h-11 min-w-0 flex-1 basis-full place-items-center rounded-lg border border-black/10 shadow-inner sm:order-none sm:basis-0"
             style={{
               background: current.gradient
                 ? `linear-gradient(90deg, ${current.color}, ${current.gradient}) border-box`
@@ -363,12 +364,14 @@ export function AccentColorSetting({
             )}
           </div>
           {current.gradient && (
-            <ColorSwatch
-              label="End"
-              value={current.gradient}
-              onChange={(gradient) => update({ gradient })}
-              canOpen={canEdit}
-            />
+            <div className="ml-auto sm:ml-0">
+              <ColorSwatch
+                label="End"
+                value={current.gradient}
+                onChange={(gradient) => update({ gradient })}
+                canOpen={canEdit}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -377,7 +380,7 @@ export function AccentColorSetting({
         <legend className="text-primary-text mb-2 text-sm font-medium">
           Card style
         </legend>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid gap-2 sm:grid-cols-3">
           {ACCENT_STYLES.map((style) => (
             <label
               key={style}
