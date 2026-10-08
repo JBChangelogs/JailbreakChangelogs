@@ -2,6 +2,11 @@
 
 import { useId, useSyncExternalStore } from "react";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -14,62 +19,41 @@ import {
 type Preview = (typeof THEME_OPTIONS)[number]["preview"];
 
 /**
- * A tiny page in the theme's colors: a header with a logo and nav, and a
- * card with a heading, text, a button and a link.
+ * The theme's colors: dots for its main colors on its page background, each
+ * named in a tooltip. Hidden from screen readers; the label names the theme.
  */
 function ThemePreview({ preview: p }: { preview: Preview }) {
-  const line = (width: string, color = p.muted) => (
-    <span
-      className={`block h-1 rounded-full ${width}`}
-      style={{ background: color, opacity: color === p.muted ? 0.55 : 1 }}
-    />
-  );
   return (
     <span
       aria-hidden="true"
-      className="flex h-28 flex-col overflow-hidden"
-      style={{ background: p.page, color: p.text }}
+      className="flex h-20 items-center justify-center"
+      style={{ background: p.page }}
     >
-      <span
-        className="flex h-6 shrink-0 items-center gap-1.5 px-2"
-        style={{
-          background: p.card,
-          borderBottom: `1px solid ${p.border}`,
-        }}
-      >
-        <span
-          className="size-2.5 shrink-0 rounded-full"
-          style={{ background: p.button }}
-        />
-        {line("w-5")}
-        {line("w-4")}
-        <span className="ml-auto">{line("w-5", p.link)}</span>
-      </span>
-      <span className="flex flex-1 p-2">
-        <span
-          className="flex flex-1 flex-col rounded-md p-2"
-          style={{ background: p.card, border: `1px solid ${p.border}` }}
-        >
-          <span className="text-[11px] leading-none font-semibold">Aa</span>
-          <span className="mt-1.5 space-y-1">
-            {line("w-4/5")}
-            {line("w-3/5")}
-          </span>
-          <span className="mt-auto flex items-center gap-1.5">
-            <span
-              className="rounded px-1.5 py-0.5 text-[8px] leading-none font-semibold text-white"
-              style={{ background: p.button }}
-            >
-              Button
-            </span>
-            <span
-              className="text-[8px] leading-none font-medium"
-              style={{ color: p.link }}
-            >
-              Link
-            </span>
-          </span>
-        </span>
+      <span className="flex -space-x-2">
+        {(
+          [
+            ["Cards", p.card],
+            ["Secondary text", p.muted],
+            ["Text", p.text],
+            ["Buttons", p.button],
+            ["Links", p.link],
+          ] as const
+        ).map(([use, color]) => (
+          <Tooltip key={use}>
+            <TooltipTrigger asChild>
+              <span
+                className="size-8 rounded-full border-2"
+                style={{
+                  background: color,
+                  borderColor: p.page,
+                  // Outlined so colors close to the background still show.
+                  outline: `1px solid color-mix(in srgb, ${p.text} 25%, transparent)`,
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{use}</TooltipContent>
+          </Tooltip>
+        ))}
       </span>
     </span>
   );

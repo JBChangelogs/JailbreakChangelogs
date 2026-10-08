@@ -5,8 +5,6 @@ import { safeLocalStorage } from "@/utils/storage/safeStorage";
 interface ThemePreview {
   page: string;
   card: string;
-  surface: string;
-  border: string;
   text: string;
   muted: string;
   button: string;
@@ -14,9 +12,9 @@ interface ThemePreview {
 }
 
 /**
- * The themes in the order the picker shows them. Previews copy each theme's
- * colors from globals.css: the Halloween theme is set on the page root, so a
- * preview can't borrow it live. Keep them in step with globals.css.
+ * The themes in the order the picker shows them. Each preview lists the
+ * theme's main colors, copied from globals.css: the Halloween theme is set on
+ * the page root, so a preview can't read it live. Keep them in step.
  */
 export const THEME_OPTIONS: {
   value: Theme;
@@ -31,8 +29,6 @@ export const THEME_OPTIONS: {
     preview: {
       page: "#140f10",
       card: "#1d1517",
-      surface: "#261b1e",
-      border: "#3b292d",
       text: "#ffffff",
       muted: "hsl(214 16% 64%)",
       button: "#bb0d00",
@@ -46,8 +42,6 @@ export const THEME_OPTIONS: {
     preview: {
       page: "#121317",
       card: "#17181d",
-      surface: "#1c1e24",
-      border: "hsl(214 8% 22%)",
       text: "#ffffff",
       muted: "hsl(214 16% 64%)",
       button: "hsl(210 99% 35%)",
@@ -61,8 +55,6 @@ export const THEME_OPTIONS: {
     preview: {
       page: "#ffffff",
       card: "hsl(240 5% 94%)",
-      surface: "hsl(220 8% 91%)",
-      border: "hsl(214 7% 86%)",
       text: "hsl(240 8% 9%)",
       muted: "hsl(214 16% 36%)",
       button: "hsl(210 99% 35%)",
@@ -76,8 +68,6 @@ export const THEME_OPTIONS: {
     preview: {
       page: "#000000",
       card: "#0a0a0a",
-      surface: "#111111",
-      border: "hsl(214 8% 20%)",
       text: "#ffffff",
       muted: "hsl(214 16% 64%)",
       button: "hsl(210 80% 32%)",
