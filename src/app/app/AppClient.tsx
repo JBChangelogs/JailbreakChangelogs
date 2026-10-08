@@ -24,11 +24,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import type { ChangelogEntry } from "@/lib/changelog-parser";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
-import { fetchAppAccess } from "./access";
+import { appAccessKey, fetchAppAccess } from "./access";
 import { AppReleaseNotes } from "./AppReleaseNotes";
 import type { Releases } from "./releases";
 import { getBrowserDownloadPlatform } from "./platform";
@@ -225,17 +226,18 @@ export default function AppClient({
     useAuthContext();
   const signedIn = isAuthenticated && !!user;
   const access = useQuery({
-    queryKey: ["app-access", user?.id],
+    queryKey: appAccessKey(user?.id),
     enabled: !isLoading && signedIn && platform !== "Mobile",
     queryFn: ({ signal }) => fetchAppAccess(signal),
     retry: false,
     staleTime: 0,
-    gcTime: 0,
     refetchOnMount: "always",
   });
+  // The navigation runs the same check to show the app link, so the answer is
+  // usually cached by now. Show it right away and refresh it quietly; only
+  // wait when there's no answer yet.
   const checking =
-    platform !== "Mobile" &&
-    (isLoading || (signedIn && (access.isPending || access.isFetching)));
+    platform !== "Mobile" && (isLoading || (signedIn && access.isPending));
   const granted =
     signedIn && !checking && !access.isError && access.data === true;
 
@@ -327,14 +329,18 @@ export default function AppClient({
                   </p>
                 </>
               ) : checking ? (
-                <div
-                  className="text-secondary-text flex items-center gap-3 text-sm"
-                  role="status"
-                >
-                  <Spinner />
-                  {isLoading
-                    ? "Loading your account…"
-                    : "Checking your access…"}
+                // Shaped like the download button, so nothing jumps.
+                <div role="status">
+                  <span className="sr-only">
+                    {isLoading
+                      ? "Loading your account…"
+                      : "Checking your access…"}
+                  </span>
+                  <Skeleton aria-hidden="true" className="h-12 w-full" />
+                  <Skeleton
+                    aria-hidden="true"
+                    className="mx-auto mt-2 h-4 w-28"
+                  />
                 </div>
               ) : !signedIn ? (
                 <>
@@ -456,9 +462,19 @@ export default function AppClient({
                   <Button
                     className="mt-5 w-full"
                     size="lg"
+                    disabled={access.isFetching}
                     onClick={() => void access.refetch()}
                   >
-                    {access.isError ? "Retry" : "Check again"}
+                    {access.isFetching ? (
+                      <>
+                        <Spinner />
+                        Checking…
+                      </>
+                    ) : access.isError ? (
+                      "Retry"
+                    ) : (
+                      "Check again"
+                    )}
                   </Button>
                 </>
               )}

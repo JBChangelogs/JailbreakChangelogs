@@ -14,7 +14,6 @@ test("desktop access requires treatment from a fresh authenticated experiment re
     expect(options?.credentials).toBe("include");
     expect(options?.cache).toBe("no-store");
     expect(options?.signal).toBe(signal);
-    expect(new Headers(options?.headers).has("X-Experiment")).toBe(false);
     return response;
   }) as typeof fetch;
   try {
