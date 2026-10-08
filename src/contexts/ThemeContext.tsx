@@ -6,12 +6,12 @@ import { debounce } from "@/utils/helpers/debounce";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 
 /** "halloween" is the temporary seasonal theme (see globals.css). */
-export const THEMES = ["halloween", "dark", "light", "amoled"] as const;
+const THEMES = ["halloween", "dark", "light", "amoled"] as const;
 export type Theme = (typeof THEMES)[number];
 /** For visitors who haven't picked a theme; THEME_INIT_SCRIPT matches it. */
-export const DEFAULT_THEME: Theme = "halloween";
+const DEFAULT_THEME: Theme = "halloween";
 
-export const isTheme = (value: unknown): value is Theme =>
+const isTheme = (value: unknown): value is Theme =>
   THEMES.includes(value as Theme);
 
 // Spamming the toggle shouldn't spam the realtime WS with one
