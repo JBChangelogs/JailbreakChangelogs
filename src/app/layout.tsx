@@ -348,6 +348,7 @@ export default async function RootLayout({
                   <NitroAdNavigation />
                   <NitroAnchorCloseSupporterModal />
                   <NitroVideoCloseSupporterModal />
+                  <ExperimentOverridesIndicator />
                   <div className="site-layout flex min-h-screen flex-col">
                     <Suspense
                       fallback={
