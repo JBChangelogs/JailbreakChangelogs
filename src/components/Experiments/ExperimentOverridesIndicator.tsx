@@ -49,11 +49,19 @@ export function ExperimentOverridesIndicator() {
       saveExperimentOverrides(userId, change(readExperimentOverrides(userId)));
     };
 
+    /** The event's preference key, if it's one of ours. */
+    const overrideKey = (event: Event) => {
+      const key = (event as CustomEvent<{ key?: unknown } | null>).detail?.key;
+      return typeof key === "string" &&
+        key.startsWith(OVERRIDE_PREFERENCE_PREFIX)
+        ? key
+        : null;
+    };
+
     const onSet = (event: Event) => {
-      const { key, value } = (
-        event as CustomEvent<{ key: string; value: unknown }>
-      ).detail;
-      if (!key.startsWith(OVERRIDE_PREFERENCE_PREFIX)) return;
+      const key = overrideKey(event);
+      if (!key) return;
+      const { value } = (event as CustomEvent<{ value?: unknown }>).detail;
       const experiment = key.slice(OVERRIDE_PREFERENCE_PREFIX.length);
       update((overrides) => {
         const next = { ...overrides };
@@ -62,8 +70,8 @@ export function ExperimentOverridesIndicator() {
       });
     };
     const onDelete = (event: Event) => {
-      const { key } = (event as CustomEvent<{ key: string }>).detail;
-      if (!key.startsWith(OVERRIDE_PREFERENCE_PREFIX)) return;
+      const key = overrideKey(event);
+      if (!key) return;
       update((overrides) => {
         const next = { ...overrides };
         delete next[key.slice(OVERRIDE_PREFERENCE_PREFIX.length)];

@@ -261,8 +261,18 @@ export default function ExperimentsClient() {
       });
       const current = await fetchAssignments(next);
       validateExperimentOverrides(next, previous, current.experiments);
-      // With sync on, this browser's copy follows the synced variants.
-      if (isOverrideSyncEnabled()) await writeSyncedOverrides(next, previous);
+      // With sync on, this browser's copy follows the synced variants. Diff
+      // against what the server has now, since another device may have
+      // changed it. If a write fails partway, match the server instead.
+      if (isOverrideSyncEnabled()) {
+        try {
+          await writeSyncedOverrides(next, await fetchSyncedOverrides());
+        } catch (error) {
+          const synced = await fetchSyncedOverrides().catch(() => null);
+          if (synced) saveExperimentOverrides(accountId, synced);
+          throw error;
+        }
+      }
       if (!saveExperimentOverrides(accountId, next)) {
         throw new Error(
           "Unable to save overrides. Allow browser storage and try again.",
