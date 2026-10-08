@@ -6,7 +6,7 @@ import { debounce } from "@/utils/helpers/debounce";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 
 /** "halloween" is the temporary seasonal theme (see globals.css). */
-const THEMES = ["halloween", "dark", "light", "amoled"] as const;
+const THEMES = ["halloween", "dark", "light", "amoled", "catppuccin"] as const;
 export type Theme = (typeof THEMES)[number];
 /** For visitors who haven't picked a theme; THEME_INIT_SCRIPT matches it. */
 const DEFAULT_THEME: Theme = "halloween";

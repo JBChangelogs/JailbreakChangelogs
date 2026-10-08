@@ -281,7 +281,7 @@ export default function ModernPricingSection() {
                 }
               >
                 {tier.recommended && (
-                  <div className="bg-button-info absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-5 py-2 text-xs font-semibold text-white">
+                  <div className="bg-button-info text-form-button-text absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-5 py-2 text-xs font-semibold">
                     Popular
                   </div>
                 )}

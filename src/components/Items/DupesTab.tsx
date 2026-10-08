@@ -222,7 +222,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
             </p>
             <button
               onClick={() => setSearchTerm("")}
-              className="border-border-card bg-button-info text-primary-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+              className="border-border-card bg-button-info text-form-button-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
             >
               Clear search
             </button>

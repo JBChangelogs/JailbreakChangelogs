@@ -58,7 +58,7 @@ export const ThemeShortcut = ({
           />
         </Link>
       </TooltipTrigger>
-      <TooltipContent>Change theme</TooltipContent>
+      <TooltipContent>Change theme · {label}</TooltipContent>
     </Tooltip>
   );
 };

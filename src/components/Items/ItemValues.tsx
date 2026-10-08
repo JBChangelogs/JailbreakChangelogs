@@ -62,8 +62,8 @@ function ItemValues({
               <span
                 className={`inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs leading-none font-semibold ${
                   cashChange.difference > 0
-                    ? "bg-status-success text-white"
-                    : "bg-status-error text-white"
+                    ? "bg-status-success text-form-button-text"
+                    : "bg-status-error text-form-button-text"
                 }`}
               >
                 {cashChange.difference > 0 ? "+" : "-"}
@@ -86,8 +86,8 @@ function ItemValues({
               <span
                 className={`inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs leading-none font-semibold ${
                   dupedChange.difference > 0
-                    ? "bg-status-success text-white"
-                    : "bg-status-error text-white"
+                    ? "bg-status-success text-form-button-text"
+                    : "bg-status-error text-form-button-text"
                 }`}
               >
                 {dupedChange.difference > 0 ? "+" : "-"}

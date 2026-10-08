@@ -648,6 +648,73 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   ); /* Hero overlay - Light mode (lighter) */
 }
 
+:root.catppuccin {
+  --color-primary-bg: #1e1e2e;
+  --color-secondary-bg: #181825;
+  --color-tertiary-bg: #313244;
+  --color-quaternary-bg: #45475a;
+  --color-surface-bg: #181825;
+  --color-overlay-bg: rgb(17 17 27 / 80%);
+
+  --color-primary-text: #cdd6f4;
+  --color-secondary-text: #bac2de;
+  --color-tertiary-text: #a6adc8;
+  --color-quaternary-text: #9399b2;
+  --color-card-headline: #cdd6f4;
+  --color-card-paragraph: #bac2de;
+
+  --color-border-primary: #45475a;
+  --color-border-card: #45475a;
+  --color-border-secondary: #313244;
+  --color-border-tertiary: #313244;
+  --color-border-focus: #cba6f7;
+  --color-card-tag-bg: #89b4fa;
+  --color-card-tag-text: #1e1e2e;
+  --color-card-highlight: #cba6f7;
+
+  --color-link: #89b4fa;
+  --color-link-hover: #89dceb;
+  --color-link-active: #b4befe;
+  --color-link-visited: #b4befe;
+
+  --color-button-info: #cba6f7;
+  --color-button-info-hover: #b4befe;
+  --color-button-info-active: #89b4fa;
+  --color-button-info-disabled: #45475a;
+  --color-button-secondary: #313244;
+  --color-button-secondary-hover: #45475a;
+  --color-button-secondary-active: #585b70;
+  --color-form-button: #cba6f7;
+  --color-form-button-text: #1e1e2e;
+  --color-button-success: #a6e3a1;
+  --color-button-success-hover: #94e2d5;
+  --color-button-danger: #f38ba8;
+  --color-button-danger-hover: #eba0ac;
+
+  --color-form-input: #181825;
+  --color-form-input-focus: #313244;
+  --color-form-input-disabled: #181825;
+  --color-form-label: #bac2de;
+  --color-form-placeholder: #9399b2;
+  --color-border-error: #f38ba8;
+  --color-form-error: #f38ba8;
+  --color-form-success: #a6e3a1;
+  --color-status-success: #a6e3a1;
+  --color-status-warning: #f9e2af;
+  --color-status-error: #f38ba8;
+  --color-status-info: #89b4fa;
+  --color-status-neutral: #9399b2;
+  --color-warning: #fab387;
+  --color-warning-light: #f9e2af;
+  --color-warning-dark: #fab387;
+  --color-tertiary: #94e2d5;
+  --color-highlight: #cba6f7;
+  --color-secondary: #a6adc8;
+  --color-overlay-light: rgb(17 17 27 / 50%);
+  --color-overlay-medium: rgb(17 17 27 / 70%);
+  --color-overlay-dark: rgb(17 17 27 / 90%);
+}
+
 /* Temporary Halloween theme: remove these blocks, and "halloween" from THEMES,
    after the seasonal branding ends. It builds on the dark theme. */
 :root.halloween {

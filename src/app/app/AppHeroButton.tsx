@@ -14,7 +14,7 @@ export default function AppHeroButton() {
         className="h-5 w-5"
       />
       <span className="group-hover:underline">Get the Desktop App</span>
-      <span className="bg-button-info rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+      <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
         New
       </span>
       <Icon

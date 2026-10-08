@@ -1,4 +1,4 @@
-import { Ghost, Moon, MoonStar, Sun, type LucideIcon } from "lucide-react";
+import { Cat, Ghost, Moon, MoonStar, Sun, type LucideIcon } from "lucide-react";
 import type { Theme } from "@/contexts/ThemeContext";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
@@ -46,6 +46,19 @@ export const THEME_OPTIONS: {
       muted: "hsl(214 16% 64%)",
       button: "hsl(210 99% 35%)",
       link: "hsl(210 100% 70%)",
+    },
+  },
+  {
+    value: "catppuccin",
+    label: "Catppuccin Mocha",
+    icon: Cat,
+    preview: {
+      page: "#1e1e2e",
+      card: "#181825",
+      text: "#cdd6f4",
+      muted: "#bac2de",
+      button: "#cba6f7",
+      link: "#89b4fa",
     },
   },
   {
