@@ -597,8 +597,8 @@ export default function AppClient({
           Only in the desktop app
         </h2>
         <p className="text-secondary-text mt-2 max-w-2xl">
-          The app can see what you&apos;re doing in Roblox and Discord, so it
-          can do things the website can&apos;t.
+          Running on your computer, the app can follow your Roblox game and show
+          your status on Discord, so it can do things the website can&apos;t.
         </p>
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {appOnly.map(({ icon: FeatureIcon, title, description }) => (
