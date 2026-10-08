@@ -156,12 +156,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       </div>
 
       {userData.roblox_username ? (
-        <Button
-          onClick={handleOpen}
-          size="md"
-          className="text-sm uppercase"
-          disabled={isDisconnecting}
-        >
+        <Button onClick={handleOpen} size="md" disabled={isDisconnecting}>
           Disconnect Roblox
         </Button>
       ) : (
@@ -170,7 +165,6 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
             setLoginModal({ open: true, tab: "roblox" });
           }}
           size="md"
-          className="text-sm uppercase"
         >
           <svg
             className="h-5 w-5"
