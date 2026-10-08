@@ -116,7 +116,7 @@ const filterLabelMap: Record<FilterSort, string> = filterOptions.reduce(
   {} as Record<FilterSort, string>,
 );
 
-export function getFilterDisplayName(filterSort: string): string {
+function getFilterDisplayName(filterSort: string): string {
   if (filterSort === "name-all-items" || !filterSort) {
     return "All Items";
   }

@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { Slot } from "@radix-ui/react-slot";
+import { Slot } from "radix-ui";
 
 import { Icon } from "@/components/ui/IconWrapper";
 import { cn } from "@/lib/utils";
 
-export interface LightboxImage {
+interface LightboxImage {
   src: string;
   alt: string;
 }
@@ -94,7 +94,7 @@ export const ImageLightbox = ({
   };
 
   const trigger = triggerAsChild ? (
-    <Slot onClick={openLightbox}>{children}</Slot>
+    <Slot.Root onClick={openLightbox}>{children}</Slot.Root>
   ) : (
     <button
       type="button"

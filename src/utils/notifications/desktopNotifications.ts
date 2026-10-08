@@ -1,7 +1,6 @@
 import { safeGetJSON, safeSetJSON } from "@/utils/storage/safeStorage";
 
-export const DESKTOP_NOTIFICATIONS_STORAGE_KEY =
-  "desktop_notifications_enabled";
+const DESKTOP_NOTIFICATIONS_STORAGE_KEY = "desktop_notifications_enabled";
 
 export type DesktopNotificationPermission =
   | NotificationPermission

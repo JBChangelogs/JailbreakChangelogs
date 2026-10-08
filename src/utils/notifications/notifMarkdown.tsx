@@ -72,8 +72,3 @@ export function formatNotifPlainText(text: string): string {
     .join("\n")
     .trimEnd();
 }
-
-/** @deprecated Prefer {@link formatNotifPlainText} — kept for existing imports. */
-export function stripNotifMarkdown(text: string): string {
-  return formatNotifPlainText(text);
-}

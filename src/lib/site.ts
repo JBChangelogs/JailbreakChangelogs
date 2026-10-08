@@ -9,5 +9,3 @@ export const siteConfig = {
   },
   keywords: ["Jailbreak", "Changelog", "Roblox", "Updates", "Development"],
 };
-
-export type SiteConfig = typeof siteConfig;

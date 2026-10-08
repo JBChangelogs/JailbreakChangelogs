@@ -75,6 +75,26 @@ export async function fetchSyncedOverrides(): Promise<ExperimentOverrides> {
 }
 
 /**
+ * Applies this browser's change, from `previous` to `next`, on top of the
+ * server's forced variants. Keys this browser hasn't seen yet (added on
+ * another device) are kept rather than deleted as stale.
+ */
+export function mergeOverrideChanges(
+  server: ExperimentOverrides,
+  previous: ExperimentOverrides,
+  next: ExperimentOverrides,
+): ExperimentOverrides {
+  const merged = { ...server };
+  for (const key of Object.keys(previous)) {
+    if (!(key in next)) delete merged[key];
+  }
+  for (const [key, variant] of Object.entries(next)) {
+    if (previous[key] !== variant) merged[key] = variant;
+  }
+  return merged;
+}
+
+/**
  * Makes the synced forced variants match `next`, given that they are
  * `current` now. Sets and deletes keys one at a time: deleting all
  * preferences would wipe every other feature's preferences too.

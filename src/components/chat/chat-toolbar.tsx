@@ -1,28 +1,3 @@
-/**
- * @module chat-toolbar
- *
- * Sticky bottom input area for message composition. Compose
- * `ChatToolbarTextarea`, `ChatToolbarAddon`, and `ChatToolbarButton`
- * inside a `ChatToolbar` container.
- *
- * Typical structure:
- * ```
- * ChatToolbar
- * ├── ChatToolbarAddon (align="inline-start")  ← left button(s)
- * │   └── ChatToolbarButton
- * ├── ChatToolbarTextarea                       ← auto-growing input
- * └── ChatToolbarAddon (align="inline-end")     ← right button(s)
- *     └── ChatToolbarButton (×N)
- * ```
- *
- * The `align` prop on `ChatToolbarAddon` controls position via CSS
- * `order`:
- * - `"inline-start"` → left of the textarea
- * - `"inline-end"` → right of the textarea
- * - `"block-start"` → full-width row above the textarea
- * - `"block-end"` → full-width row below the textarea
- */
-
 "use client";
 
 import * as React from "react";
@@ -31,56 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CommentTextarea } from "@/components/PageComments/CommentTextarea";
 import type { EmojiStringMap } from "@/utils/comments/emojiShortcodes";
-
-export interface ChatToolbarProps extends React.ComponentProps<"div"> {
-  children?: React.ReactNode;
-}
-
-/**
- * Sticky bottom container for the message input and action buttons.
- * Renders a bordered, rounded inner wrapper with flex-wrap layout.
- *
- * @example
- * ```tsx
- * <ChatToolbar>
- *   <ChatToolbarAddon align="inline-start">
- *     <ChatToolbarButton><PlusIcon /></ChatToolbarButton>
- *   </ChatToolbarAddon>
- *
- *   <ChatToolbarTextarea
- *     value={message}
- *     onChange={(e) => setMessage(e.target.value)}
- *     onSubmit={() => handleSendMessage()}
- *   />
- *
- *   <ChatToolbarAddon align="inline-end">
- *     <ChatToolbarButton><GiftIcon /></ChatToolbarButton>
- *     <ChatToolbarButton><SendIcon /></ChatToolbarButton>
- *   </ChatToolbarAddon>
- * </ChatToolbar>
- * ```
- */
-export function ChatToolbar({
-  children,
-  className,
-  ...props
-}: ChatToolbarProps) {
-  return (
-    <div
-      className={cn("bg-tertiary-bg sticky bottom-0 p-2 pt-0", className)}
-      {...props}
-    >
-      <div
-        className={cn(
-          "bg-secondary-bg rounded-md border px-3 py-2",
-          "flex flex-wrap items-start gap-x-2",
-        )}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
 
 /** Modifier key that allows inserting a new line instead of submitting */
 const NEWLINE_MODIFIER_KEY = "shiftKey" as const;
@@ -339,67 +264,6 @@ export function ChatToolbarTextarea({
           </div>
         ) : null}
       </div>
-    </div>
-  );
-}
-
-const chatToolbarAddonAlignStyles = {
-  "inline-start": "order-1",
-  "inline-end": "order-3",
-  "block-start": "order-0 w-full",
-  "block-end": "order-4 w-full",
-};
-
-export interface ChatToolbarAddonProps extends React.ComponentProps<"div"> {
-  children?: React.ReactNode;
-  /**
-   * Position of this addon relative to the textarea.
-   * - `"inline-start"` — left of the textarea (default)
-   * - `"inline-end"` — right of the textarea
-   * - `"block-start"` — full-width row above the textarea
-   * - `"block-end"` — full-width row below the textarea
-   */
-  align?: "inline-start" | "inline-end" | "block-start" | "block-end";
-}
-
-/**
- * Groups action buttons at a specific position within the toolbar.
- * Use the `align` prop to control placement relative to the textarea.
- *
- * @example
- * ```tsx
- * // Left side
- * <ChatToolbarAddon align="inline-start">
- *   <ChatToolbarButton><PlusIcon /></ChatToolbarButton>
- * </ChatToolbarAddon>
- *
- * // Right side
- * <ChatToolbarAddon align="inline-end">
- *   <ChatToolbarButton><SendIcon /></ChatToolbarButton>
- * </ChatToolbarAddon>
- *
- * // Full-width row above
- * <ChatToolbarAddon align="block-start">
- *   <ChatToolbarButton><AttachIcon /></ChatToolbarButton>
- * </ChatToolbarAddon>
- * ```
- */
-export function ChatToolbarAddon({
-  children,
-  className,
-  align = "inline-start",
-  ...props
-}: ChatToolbarAddonProps) {
-  return (
-    <div
-      className={cn(
-        "flex h-10 items-center gap-1.5",
-        chatToolbarAddonAlignStyles[align],
-        className,
-      )}
-      {...props}
-    >
-      {children}
     </div>
   );
 }

@@ -25,6 +25,7 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   fetchSyncedOverrides,
   isOverrideSyncEnabled,
+  mergeOverrideChanges,
   setOverrideSyncEnabled,
   writeSyncedOverrides,
 } from "@/utils/api/experimentOverrideSync";
@@ -252,28 +253,35 @@ export default function ExperimentsClient() {
       accountId: string;
       next: ExperimentOverrides;
       previous: ExperimentOverrides;
-      action: "key" | "toggle" | "reset";
+      action: "key" | "toggle" | "reset" | "clear";
     }) => {
       if (!allowed || accountId !== userId)
         throw new Error("Tester or owner access is required.");
       await queryClient.cancelQueries({
         queryKey: ["user-experiments", accountId],
       });
-      const current = await fetchAssignments(next);
+      // With sync on, apply this change on top of what the server has now,
+      // since another device may have changed it. Clearing clears everything.
+      const server = isOverrideSyncEnabled()
+        ? await fetchSyncedOverrides()
+        : null;
+      const target =
+        server && action !== "clear"
+          ? mergeOverrideChanges(server, previous, next)
+          : next;
+      const current = await fetchAssignments(target);
       validateExperimentOverrides(next, previous, current.experiments);
-      // With sync on, this browser's copy follows the synced variants. Diff
-      // against what the server has now, since another device may have
-      // changed it. If a write fails partway, match the server instead.
-      if (isOverrideSyncEnabled()) {
+      // If a write fails partway, match the server instead.
+      if (server) {
         try {
-          await writeSyncedOverrides(next, await fetchSyncedOverrides());
+          await writeSyncedOverrides(target, server);
         } catch (error) {
           const synced = await fetchSyncedOverrides().catch(() => null);
           if (synced) saveExperimentOverrides(accountId, synced);
           throw error;
         }
       }
-      if (!saveExperimentOverrides(accountId, next)) {
+      if (!saveExperimentOverrides(accountId, target)) {
         throw new Error(
           "Unable to save overrides. Allow browser storage and try again.",
         );
@@ -282,7 +290,7 @@ export default function ExperimentsClient() {
         accountId,
         effective: current.experiments,
         descriptions: current.descriptions,
-        overrides: next,
+        overrides: target,
         action,
       };
     },
@@ -311,7 +319,7 @@ export default function ExperimentsClient() {
         setKeyError({ accountId, message: error.message });
       } else {
         toast.error(
-          action === "reset"
+          action === "reset" || action === "clear"
             ? "Unable to reset experiment overrides"
             : "Unable to update experiment",
           {
@@ -329,7 +337,7 @@ export default function ExperimentsClient() {
 
   function updateOverrides(
     next: ExperimentOverrides,
-    action: "key" | "toggle" | "reset",
+    action: "key" | "toggle" | "reset" | "clear",
   ) {
     if (!allowed || !userId || saving) return;
     if (action === "key") setKeyError(null);
@@ -418,7 +426,7 @@ export default function ExperimentsClient() {
                     disabled={
                       loading || saving || !Object.keys(overrides).length
                     }
-                    onClick={() => updateOverrides({}, "reset")}
+                    onClick={() => updateOverrides({}, "clear")}
                   >
                     Clear forced
                   </Button>

@@ -16,14 +16,14 @@ export interface UserSettings {
   updated_at?: number;
 }
 
-export interface ApiSettingEntry {
+interface ApiSettingEntry {
   name: string;
   value: boolean;
   description: string;
   index: number;
 }
 
-export interface ApiSettingCategory {
+interface ApiSettingCategory {
   name: string;
   description: string;
   index: number;
@@ -66,16 +66,16 @@ export interface UserPresence {
   last_updated: number;
 }
 
-export type CustomBanner = string;
+type CustomBanner = string;
 
-export interface UserPrimaryGuild {
+interface UserPrimaryGuild {
   tag: string | null;
   badge: string | null;
   identity_enabled: boolean;
   identity_guild_id: string | null;
 }
 
-export interface User {
+interface User {
   id: string;
   username: string;
   avatar: string; // Discord avatar hash or "None"
@@ -125,12 +125,6 @@ export interface UserData extends User {
   primary_guild?: UserPrimaryGuild | null;
 }
 
-export interface AuthResponse {
-  success: boolean;
-  data?: UserData;
-  error?: string;
-}
-
 export interface AuthState {
   isAuthenticated: boolean;
   user: UserData | null;
@@ -148,13 +142,4 @@ export interface FollowingData {
   user_id: string;
   following_id: string;
   created_at: string;
-}
-
-export interface Item {
-  id: string;
-  name: string;
-  value: number;
-  type: string;
-  rarity: string;
-  image?: string;
 }

@@ -9,7 +9,7 @@ import { navigationSections } from "@/utils/ui/navigation-menu";
 import NavigationLayoutShortcut from "@/components/Layout/NavigationLayoutShortcut";
 import { getNavigationSection } from "@/utils/ui/navigation";
 import Image from "next/image";
-import * as NavigationMenu from "@radix-ui/react-navigation-menu";
+import { NavigationMenu as NavigationMenu } from "radix-ui";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -56,7 +56,7 @@ import {
 } from "./dropdown-menu";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
 
-export const NavDropdownItem = ({
+const NavDropdownItem = ({
   href,
   icon,
   title,

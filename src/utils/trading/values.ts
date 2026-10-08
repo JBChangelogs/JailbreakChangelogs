@@ -1,5 +1,4 @@
-import { Item, FilterSort, ValueSort } from "@/types";
-import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { FilterSort, ValueSort } from "@/types";
 import { hasItemValue } from "@/utils/items/itemValue";
 import { isSeasonalItem } from "@/utils/items/season";
 
@@ -25,7 +24,7 @@ export const trendOrder = [
   "Hyped",
 ] as const;
 
-export const demandValueMap: Record<string, string> = {
+const demandValueMap: Record<string, string> = {
   "demand-close-to-none": "Close To None",
   "demand-very-low": "Very Low",
   "demand-low": "Low",
@@ -36,7 +35,7 @@ export const demandValueMap: Record<string, string> = {
   "demand-very-high": "Very High",
 };
 
-export const trendValueMap: Record<string, string> = {
+const trendValueMap: Record<string, string> = {
   "trend-stable": "Stable",
   "trend-rising": "Rising",
   "trend-hyped": "Hyped",
@@ -59,7 +58,7 @@ export const parseCashValue = (value: string | null | undefined): number => {
   return num;
 };
 
-export const sortByCashValue = (
+const sortByCashValue = (
   a: string | null | undefined,
   b: string | null | undefined,
   order: "asc" | "desc" = "desc",
@@ -77,7 +76,7 @@ export const sortByCashValue = (
   return order === "desc" ? bValue - aValue : aValue - bValue;
 };
 
-export const sortByDemand = (
+const sortByDemand = (
   a: string,
   b: string,
   order: "asc" | "desc" = "desc",
@@ -98,27 +97,6 @@ export const sortByDemand = (
   const bIndex = demandOrder.indexOf(
     normalizedB as (typeof demandOrder)[number],
   );
-  return order === "desc" ? bIndex - aIndex : aIndex - bIndex;
-};
-
-export const sortByTrend = (
-  a: string | null,
-  b: string | null,
-  order: "asc" | "desc" = "desc",
-): number => {
-  // Normalize trend strings to handle case variations
-  const normalizeTrend = (trend: string) =>
-    trend.charAt(0).toUpperCase() + trend.slice(1).toLowerCase();
-
-  const normalizedA = a ? normalizeTrend(a) : null;
-  const normalizedB = b ? normalizeTrend(b) : null;
-
-  const aIndex = normalizedA
-    ? trendOrder.indexOf(normalizedA as (typeof trendOrder)[number])
-    : -1;
-  const bIndex = normalizedB
-    ? trendOrder.indexOf(normalizedB as (typeof trendOrder)[number])
-    : -1;
   return order === "desc" ? bIndex - aIndex : aIndex - bIndex;
 };
 
@@ -384,26 +362,6 @@ export const sortByValueSort = <T>(
   return sorted;
 };
 
-// Helper function to get the current cash value for an item
-export const getEffectiveCashValue = (item: Item): string | null => {
-  return item.cash_value;
-};
-
-// Helper function to get the current duped value for an item
-export const getEffectiveDupedValue = (item: Item): string | null => {
-  return item.duped_value;
-};
-
-// Helper function to get the current demand for an item
-export const getEffectiveDemand = (item: Item): string | null => {
-  return item.demand;
-};
-
-// Helper function to get the current trend for an item
-export const getEffectiveTrend = (item: Item): string | null => {
-  return item.trend;
-};
-
 type FilterableItem = {
   id: number;
   type: string;
@@ -551,46 +509,6 @@ export const filterByTypes = <T extends FilterableItem>(
     }
 
     return true;
-  });
-};
-
-export const sortAndFilterItems = async (
-  items: Item[],
-  filterSorts: FilterSort[],
-  valueSort: ValueSort,
-  searchTerm: string = "",
-  userFavorites?: Array<{ item_id: string }>,
-): Promise<Item[]> => {
-  let result = [...items];
-
-  // Apply filter based on filterSorts
-  result = filterByTypes(result, filterSorts, userFavorites);
-
-  // Apply search filter
-  if (searchTerm) {
-    // Check if search term uses id: syntax (secret item ID search)
-    const idMatch = searchTerm.trim().match(/^id:\s*(\d+)$/i);
-
-    if (idMatch) {
-      // Secret item ID search - find item by exact ID match
-      const searchId = parseInt(idMatch[1]);
-      result = result.filter((item) => item.id === searchId);
-    } else {
-      result = result.filter((item) =>
-        matchesTextSearch([item.name, item.type], searchTerm),
-      );
-    }
-  }
-
-  return sortByValueSort(result, valueSort, {
-    getCashValue: getEffectiveCashValue,
-    getDupedValue: getEffectiveDupedValue,
-    getDemand: getEffectiveDemand,
-    getTrend: getEffectiveTrend,
-    getLastUpdated: (item) => item.last_updated,
-    getTimesTraded: (item) => item.metadata?.TimesTraded ?? 0,
-    getUniqueCirculation: (item) => item.metadata?.UniqueCirculation ?? 0,
-    getDemandMultiple: (item) => item.metadata?.DemandMultiple ?? 0,
   });
 };
 

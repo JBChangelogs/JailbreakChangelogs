@@ -118,7 +118,7 @@ export const createTradeOffer = async (
   }
 };
 
-export interface TradeOfferV2ItemInfo {
+interface TradeOfferV2ItemInfo {
   cash_value?: string | null;
   duped_value?: string | null;
   trend?: string | null;
@@ -127,7 +127,7 @@ export interface TradeOfferV2ItemInfo {
   notes?: string | null;
 }
 
-export interface TradeOfferV2Item {
+interface TradeOfferV2Item {
   id?: string | number | null;
   duped?: boolean;
   amount?: number;

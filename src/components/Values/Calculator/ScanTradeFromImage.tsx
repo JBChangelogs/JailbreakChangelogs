@@ -10,14 +10,14 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
-export interface ScannedTradeItem {
+interface ScannedTradeItem {
   name: string;
   type: string;
   id: number;
   score?: number;
 }
 
-export interface ScanTradeResponse {
+interface ScanTradeResponse {
   offering: ScannedTradeItem[];
   requesting: ScannedTradeItem[];
 }

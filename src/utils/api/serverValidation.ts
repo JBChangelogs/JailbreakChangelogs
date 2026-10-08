@@ -12,10 +12,10 @@ const ALLOWED_RULES_HOSTS = [
   "discord.gg",
 ];
 
-export const SERVER_LINK_ERROR_MESSAGE =
+const SERVER_LINK_ERROR_MESSAGE =
   "Server link must start with: https://www.roblox.com/share?code=";
 
-export const SERVER_RULES_LINK_ERROR_MESSAGE =
+const SERVER_RULES_LINK_ERROR_MESSAGE =
   "Server rules contain an unsafe link. Only Roblox, Discord, and JailbreakChangelogs links are allowed.";
 
 const trimTrailingUrlPunctuation = (url: string): string => {

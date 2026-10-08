@@ -6,7 +6,7 @@ export const IMAGE_PATHS = {
 } as const;
 
 // Type mappings for image paths
-export const TYPE_MAPPINGS: Record<string, string> = {
+const TYPE_MAPPINGS: Record<string, string> = {
   "body color": "body colors",
   drift: "drifts",
   furniture: "furnitures",
@@ -80,7 +80,7 @@ export const getDriftVideoPath = (
  * @param isValuesPage - Whether this is for the values page (default: false)
  * @returns The full path to the drift's thumbnail image
  */
-export const getDriftThumbnailPath = (
+const getDriftThumbnailPath = (
   name: string,
   isValuesPage: boolean = false,
 ): string => {
@@ -96,7 +96,7 @@ export const getDriftThumbnailPath = (
  * @param name - The item name
  * @returns The full path to the video's thumbnail image
  */
-export const getVideoThumbnailPath = (type: string, name: string): string => {
+const getVideoThumbnailPath = (type: string, name: string): string => {
   const normalizedType = type.toLowerCase();
   const mappedType = TYPE_MAPPINGS[normalizedType] || normalizedType;
   return `${IMAGE_PATHS.VALUES}/${mappedType}/${name}.webp`;

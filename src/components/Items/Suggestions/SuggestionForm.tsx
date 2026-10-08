@@ -46,7 +46,7 @@ import { formatFullValue } from "@/utils/trading/values";
 import { UserAvatar } from "@/utils/ui/avatar";
 import type { Item } from "@/types/index";
 
-export interface SuggestionFormUser {
+interface SuggestionFormUser {
   id: string;
   username?: string;
   roblox_id?: string;

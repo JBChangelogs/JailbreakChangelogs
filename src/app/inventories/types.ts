@@ -1,9 +1,9 @@
-export interface TradeHistoryEntry {
+interface TradeHistoryEntry {
   UserId: number;
   TradeTime: number;
 }
 
-export interface InventoryTradeNote {
+interface InventoryTradeNote {
   note: string;
   timestamp: number;
 }
@@ -56,8 +56,8 @@ export interface UserConnectionData {
   roblox_username?: string;
 }
 
-export type TradeConfidence = "confirmed" | "partial";
-export type TradeStatus = "completed" | "pending";
+type TradeConfidence = "confirmed" | "partial";
+type TradeStatus = "completed" | "pending";
 
 export interface TradeList<T> {
   completed: T[];

@@ -32,7 +32,7 @@ const toDate = (timestamp: string | number): Date => {
  * @param options Formatting options
  * @returns Formatted date string
  */
-export const formatTimestamp = (
+const formatTimestamp = (
   timestamp: string | number,
   options: FormatOptions = {},
 ): string => {
@@ -158,23 +158,6 @@ export const formatFullDate = (timestamp: string | number): string => {
 };
 
 /**
- * Formats a Unix timestamp in a short date format (e.g., "8 Jan 2025")
- * @param timestamp Unix timestamp in seconds
- * @returns Formatted date string in short format
- */
-export const formatShortDate = (timestamp: string | number): string => {
-  const date = toDate(timestamp);
-
-  // Get day, month, and year
-  const day = date.getDate();
-  const month = date.toLocaleString("en-US", { month: "short" });
-  const year = date.getFullYear();
-
-  // Format as "8 Jan 2025"
-  return `${day} ${month} ${year}`;
-};
-
-/**
  * Formats a Unix timestamp in a custom format: "Saturday 5 July 2025 at 22:32"
  * @param timestamp Unix timestamp in seconds or milliseconds
  * @returns Formatted date string in custom format
@@ -192,25 +175,6 @@ export const formatCustomDate = (timestamp: string | number): string => {
   const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
 
   return `${weekday} ${day} ${month} ${year} at ${hours12}:${minutes} ${period}`;
-};
-
-/**
- * Formats a Unix timestamp in compact format: "11/9/2025 8:51 PM"
- * @param timestamp Unix timestamp in seconds or milliseconds
- * @returns Formatted date string in compact format
- */
-export const formatCompactDateTime = (timestamp: string | number): string => {
-  const date = toDate(timestamp);
-
-  const month = date.getMonth() + 1; // getMonth() is 0-indexed
-  const day = date.getDate();
-  const year = date.getFullYear();
-  const hours24 = date.getHours();
-  const minutes = date.getMinutes();
-  const period = hours24 >= 12 ? "PM" : "AM";
-  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
-
-  return `${month}/${day}/${year} ${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
 };
 /**
  * Formats a date in a Discord-like style:
@@ -305,20 +269,6 @@ export const formatMonthDayYear = (timestamp: string | number): string => {
 };
 
 /**
- * Formats a Unix timestamp as "Jul 12"
- * @param timestamp Unix timestamp in seconds or milliseconds
- * @returns Formatted date string with month and day only
- */
-export const formatMonthDay = (timestamp: string | number): string => {
-  const date = toDate(timestamp);
-
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-};
-
-/**
  * Formats a Unix timestamp as "Mon, Jan 8, 2025"
  * @param timestamp Unix timestamp in seconds or milliseconds
  * @returns Formatted date string with short weekday, month, day, and year
@@ -333,26 +283,3 @@ export const formatWeekdayShortDate = (timestamp: string | number): string => {
     day: "numeric",
   });
 };
-
-/**
- * Formats a Unix timestamp as "5 Jan 2026, 19:30"
- * @param timestamp Unix timestamp in seconds or milliseconds
- * @returns Formatted date string with day, month, year, and 24-hour time
- */
-export const formatDayMonthYearTime = (timestamp: string | number): string => {
-  const date = toDate(timestamp);
-
-  const day = date.getDate();
-  const month = date.toLocaleString("en-US", { month: "short" });
-  const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-
-  return `${day} ${month} ${year}, ${hours}:${minutes}`;
-};
-
-/**
- * Returns the current Unix timestamp in seconds
- * @returns Current timestamp in seconds
- */
-export const getCurrentTimestamp = (): number => Math.floor(Date.now() / 1000);

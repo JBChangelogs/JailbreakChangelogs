@@ -62,39 +62,3 @@ export const jaroWinklerDistance = (str1: string, str2: string): number => {
 
   return winkler;
 };
-
-// Function to find similar strings using Jaro-Winkler distance
-export const findSimilarStrings = <
-  T extends string | { [key: string]: string | number },
->(
-  input: string,
-  items: T[],
-  options: {
-    key?: string;
-    minSimilarity?: number;
-    maxResults?: number;
-  } = {},
-): T[] => {
-  const { key, minSimilarity = 0.7, maxResults = 5 } = options;
-
-  return items
-    .map((item) => {
-      const compareString =
-        typeof item === "string"
-          ? item
-          : (item[key as keyof typeof item] as string);
-      return {
-        item,
-        similarity: jaroWinklerDistance(input, compareString),
-      };
-    })
-    .filter(({ similarity }) => similarity >= minSimilarity)
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, maxResults)
-    .map(({ item }) => item);
-};
-
-// Function to calculate similarity percentage
-export const calculateSimilarity = (str1: string, str2: string): number => {
-  return jaroWinklerDistance(str1, str2) * 100;
-};

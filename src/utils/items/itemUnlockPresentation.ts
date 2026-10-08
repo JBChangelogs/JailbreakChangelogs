@@ -2,11 +2,11 @@ export function hasUnlockLevel(level?: string): level is string {
   return typeof level === "string" && level.length > 0;
 }
 
-export function isTopPercentUnlockLevel(level: string): boolean {
+function isTopPercentUnlockLevel(level: string): boolean {
   return level.includes("%");
 }
 
-export function formatUnlockLevelTooltipLabel(level: string): string {
+function formatUnlockLevelTooltipLabel(level: string): string {
   return isTopPercentUnlockLevel(level) ? `Top ${level}` : `Level ${level}`;
 }
 

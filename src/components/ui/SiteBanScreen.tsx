@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { formatFullDate } from "@/utils/helpers/timestamp";
 
-export function SiteBanScreen() {
+function SiteBanScreen() {
   const { siteBan, logout } = useAuthContext();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 

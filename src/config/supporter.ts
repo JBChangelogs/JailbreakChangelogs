@@ -6,4 +6,3 @@ export const SUPPORTER_TIER_NAMES = {
 } as const;
 
 export const HIDE_ADS_REQUIRED_TIER = 2;
-export const HIDE_ADS_FEATURE_TEXT = "Hide all advertisements";

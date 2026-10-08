@@ -13,7 +13,7 @@ export interface CommonTradeSubmission {
   offering: CommonTradeSubmissionItem[];
 }
 
-export interface CommonTradeItem extends Partial<
+interface CommonTradeItem extends Partial<
   Pick<
     TradeItem,
     "cash_value" | "duped_value" | "demand" | "duped_demand" | "trend"
@@ -44,7 +44,7 @@ export interface SuggestionLimits {
   max_cash: number;
 }
 
-export interface UserSettings {
+interface UserSettings {
   custom_avatar?: boolean;
   hide_presence?: boolean | number;
   profile_public?: boolean | number;

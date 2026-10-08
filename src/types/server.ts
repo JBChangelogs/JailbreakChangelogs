@@ -1,6 +1,6 @@
 import type { UserSettings } from "@/types/auth";
 
-export interface ServerUser {
+interface ServerUser {
   id: string;
   username: string;
   global_name: string;

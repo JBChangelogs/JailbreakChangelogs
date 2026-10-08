@@ -15,7 +15,7 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import { formatShortDateTime } from "@/utils/helpers/timestamp";
 import type { SuggestionUser } from "@/components/Items/Suggestions/types";
 
-export interface ActiveVoters {
+interface ActiveVoters {
   up: { created_at: number; user: SuggestionUser }[];
   down: { created_at: number; user: SuggestionUser }[];
   upCount: number;
