@@ -59,6 +59,7 @@ const log = createLogger("INVENTORY");
 import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
 import NetworthHistoryChart from "@/components/Inventory/NetworthHistoryChart";
 import InventoryBreakdown from "@/components/Inventory/InventoryBreakdown";
+import InventoryFeaturePreview from "@/components/Inventory/InventoryFeaturePreview";
 import UserTradeHistory from "@/components/Inventory/UserTradeHistory";
 
 const MemoInventoryItems = React.memo(InventoryItems);
@@ -132,6 +133,7 @@ export default function InventoryCheckerClient({
     shallow: true,
   });
   const [mountedTabs, setMountedTabs] = useState<Set<number>>(new Set([0]));
+  const pendingSectionRef = useRef<string | null>(null);
   const [showOnlyOriginal, setShowOnlyOriginal] = useState(false);
   const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
@@ -347,6 +349,29 @@ export default function InventoryCheckerClient({
 
   // Derive active tab from robloxId to avoid setState in effect
   const effectiveActiveTab = activeTab > tabIndex.max ? 0 : activeTab;
+  useEffect(() => {
+    if (effectiveActiveTab !== tabIndex.breakdown || !pendingSectionRef.current)
+      return;
+    const target = document.getElementById(pendingSectionRef.current);
+    if (!target) return;
+    pendingSectionRef.current = null;
+    const headerHeight =
+      Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue(
+          "--header-height",
+        ),
+      ) || 0;
+    window.scrollTo({
+      top: Math.max(
+        0,
+        target.getBoundingClientRect().top + window.scrollY - headerHeight - 12,
+      ),
+      behavior: "smooth",
+    });
+    target
+      .querySelector<HTMLInputElement>("input")
+      ?.focus({ preventScroll: true });
+  }, [effectiveActiveTab, mountedTabs, tabIndex.breakdown]);
   const itemsData: Item[] = items;
 
   // Destructure scanWebSocket properties before useEffect to satisfy exhaustive-deps
@@ -1050,6 +1075,25 @@ export default function InventoryCheckerClient({
                 queueStatusMessage={queueStatusMessage}
                 fetchQueuePosition={fetchQueuePosition}
               />
+
+              {effectiveActiveTab === 0 && robloxId && (
+                <InventoryFeaturePreview
+                  networthData={networthData}
+                  itemsData={itemsData}
+                  inventoryData={currentData}
+                  isOwnInventory={isOwnInventory}
+                  ownerName={
+                    deferredRobloxUsers[robloxId]?.displayName ||
+                    deferredRobloxUsers[robloxId]?.name
+                  }
+                  tabs={tabIndex}
+                  onExplore={(event, index, section) => {
+                    pendingSectionRef.current = section ?? null;
+                    handleTabChange(event, index);
+                    document.getElementById(`inventory-tab-${index}`)?.focus();
+                  }}
+                />
+              )}
 
               {/* Tabbed Interface */}
               <div className="mt-6">
