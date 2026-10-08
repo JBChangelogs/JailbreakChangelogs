@@ -293,22 +293,47 @@ export const NavbarModern = ({
       <div className="flex h-15 items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            data-desktop-sidebar-toggle
-            onClick={onToggleSidebar}
-            aria-label={
-              sidebarCollapsed ? "Expand navigation" : "Collapse navigation"
-            }
-            aria-expanded={!sidebarCollapsed}
-            aria-controls="desktop-sidebar-navigation"
-            title={
-              sidebarCollapsed ? "Expand navigation" : "Collapse navigation"
-            }
-            className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link hidden size-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none 2xl:flex"
-          >
-            <Icon icon="mdi:menu" className="size-5" />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                data-desktop-sidebar-toggle
+                onClick={onToggleSidebar}
+                aria-label={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+                aria-expanded={!sidebarCollapsed}
+                aria-controls="desktop-sidebar-navigation"
+                className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link hidden size-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none 2xl:flex"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="3" width="20" height="18" rx="2" />
+                  <path d="M8 3v18" />
+                  <path
+                    d="M4.5 7.5h1.5M4.5 11.5h1.5M4.5 15.5h1.5"
+                    className="opacity-[var(--desktop-sidebar-collapsed-opacity,0)]"
+                  />
+                  <path
+                    d="M4 3h4v18H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z M4 7h2v1H4Z M4 11h2v1H4Z M4 15h2v1H4Z"
+                    fill="currentColor"
+                    fillRule="evenodd"
+                    stroke="none"
+                    className="opacity-[var(--desktop-sidebar-expanded-opacity,1)]"
+                  />
+                </svg>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              {sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+            </TooltipContent>
+          </Tooltip>
           <Link href="/" style={{ display: "block" }}>
             <Image
               src={

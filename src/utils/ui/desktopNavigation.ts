@@ -6,9 +6,37 @@ import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
 export type DesktopNavigation = "sidebar" | "top-bar";
 export const DESKTOP_NAVIGATION_KEY = "desktop-navigation";
+export const DESKTOP_SIDEBAR_COLLAPSED_KEY = "desktop-sidebar-collapsed";
 
 // Set the layout before first paint; the server still renders both menus.
-export const DESKTOP_NAVIGATION_INIT_SCRIPT = `(function(){var n='sidebar';try{if(localStorage.getItem('${DESKTOP_NAVIGATION_KEY}')==='top-bar')n='top-bar';}catch(e){}document.documentElement.setAttribute('data-desktop-navigation',n);})();`;
+export const DESKTOP_NAVIGATION_INIT_SCRIPT = `(function(){var n='sidebar',c=false;try{if(localStorage.getItem('${DESKTOP_NAVIGATION_KEY}')==='top-bar')n='top-bar';c=localStorage.getItem('${DESKTOP_SIDEBAR_COLLAPSED_KEY}')==='true';}catch(e){}document.documentElement.setAttribute('data-desktop-navigation',n);document.documentElement.setAttribute('data-desktop-sidebar-collapsed',String(c));})();`;
+
+export function getDesktopSidebarCollapsed(): boolean {
+  return (
+    typeof document !== "undefined" &&
+    document.documentElement.dataset.desktopSidebarCollapsed === "true"
+  );
+}
+
+function applyDesktopSidebarCollapsed(collapsed: boolean) {
+  document.documentElement.dataset.desktopSidebarCollapsed = String(collapsed);
+  safeLocalStorage.setItem(DESKTOP_SIDEBAR_COLLAPSED_KEY, String(collapsed));
+  window.dispatchEvent(new Event("desktopNavigationChanged"));
+}
+
+let sidebarPreferenceTimeout: number | undefined;
+
+export function setDesktopSidebarCollapsed(collapsed: boolean) {
+  applyDesktopSidebarCollapsed(collapsed);
+  window.clearTimeout(sidebarPreferenceTimeout);
+  sidebarPreferenceTimeout = window.setTimeout(() => {
+    window.dispatchEvent(
+      new CustomEvent("sendRealtimePreference", {
+        detail: { key: "desktop_sidebar_collapsed", value: collapsed },
+      }),
+    );
+  }, 300);
+}
 
 export function getDesktopNavigation(): DesktopNavigation {
   return typeof document !== "undefined" &&
@@ -53,7 +81,7 @@ export function setLayoutShortcutHidden(hidden: boolean) {
   window.dispatchEvent(new Event("desktopNavigationChanged"));
 }
 
-/** Fires for both the layout and the header-button setting. */
+/** Fires for layout, sidebar collapse, and the header-button setting. */
 export function subscribeDesktopNavigation(onChange: () => void) {
   window.addEventListener("desktopNavigationChanged", onChange);
   return () => window.removeEventListener("desktopNavigationChanged", onChange);
@@ -68,13 +96,23 @@ export function syncDesktopNavigationPreferences() {
       event as CustomEvent<{ key: string; value: unknown }>
     ).detail;
     if (key === "desktop_navigation") apply(value);
+    if (key === "desktop_sidebar_collapsed")
+      applyDesktopSidebarCollapsed(value === true);
   };
   const handlePreferences = (event: Event) => {
-    apply(
-      (event as CustomEvent<Record<string, unknown>>).detail.desktop_navigation,
+    const preferences = (event as CustomEvent<Record<string, unknown>>).detail;
+    apply(preferences.desktop_navigation);
+    applyDesktopSidebarCollapsed(
+      preferences.desktop_sidebar_collapsed === true,
     );
   };
   const handleDeleted = (event: Event) => {
+    if (
+      (event as CustomEvent<{ key: string }>).detail.key ===
+      "desktop_sidebar_collapsed"
+    ) {
+      applyDesktopSidebarCollapsed(false);
+    }
     if (
       (event as CustomEvent<{ key: string }>).detail.key ===
       "desktop_navigation"
@@ -85,7 +123,12 @@ export function syncDesktopNavigationPreferences() {
   window.addEventListener("realtimePreference", handlePreference);
   window.addEventListener("realtimePreferences", handlePreferences);
   window.addEventListener("realtimePreferenceDeleted", handleDeleted);
-  if (hasSyncedPreferences()) apply(getCachedPreference("desktop_navigation"));
+  if (hasSyncedPreferences()) {
+    apply(getCachedPreference("desktop_navigation"));
+    applyDesktopSidebarCollapsed(
+      getCachedPreference("desktop_sidebar_collapsed") === true,
+    );
+  }
   return () => {
     window.removeEventListener("realtimePreference", handlePreference);
     window.removeEventListener("realtimePreferences", handlePreferences);

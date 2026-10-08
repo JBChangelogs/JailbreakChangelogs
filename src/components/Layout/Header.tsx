@@ -15,7 +15,14 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
-import { useState, useEffect, useRef, useCallback, memo } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useSyncExternalStore,
+  memo,
+} from "react";
 import { logout, trackLogoutSource } from "@/utils/auth/auth";
 import LoginModal from "../Auth/LoginModal";
 import EscapeLoginModal from "../Auth/EscapeLoginModal";
@@ -28,7 +35,12 @@ import type { UserData } from "@/types/auth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
 import { Spinner } from "@/components/ui/Spinner";
-import { syncDesktopNavigationPreferences } from "@/utils/ui/desktopNavigation";
+import {
+  getDesktopSidebarCollapsed,
+  setDesktopSidebarCollapsed,
+  subscribeDesktopNavigation,
+  syncDesktopNavigationPreferences,
+} from "@/utils/ui/desktopNavigation";
 import { trackDesktopNavigationUsage } from "@/utils/analytics/rybbit";
 import DesktopSidebar from "./DesktopSidebar";
 import { navigationSections } from "@/utils/ui/navigation-menu";
@@ -459,7 +471,11 @@ export default function Header() {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const sidebarCollapsed = useSyncExternalStore(
+    subscribeDesktopNavigation,
+    getDesktopSidebarCollapsed,
+    () => false,
+  );
   useEffect(syncDesktopNavigationPreferences, []);
   useEffect(trackDesktopNavigationUsage, []);
   const [openNavSection, setOpenNavSection] = useState<string>("updates");
@@ -790,7 +806,7 @@ export default function Header() {
             setUnreadCount={setUnreadCount}
             sidebarCollapsed={sidebarCollapsed}
             onToggleSidebar={() =>
-              setSidebarCollapsed((collapsed) => !collapsed)
+              setDesktopSidebarCollapsed(!getDesktopSidebarCollapsed())
             }
             onUserMenuOpenChange={setDesktopUserMenuOpen}
             setUtmModalOpen={setUtmModalOpen}

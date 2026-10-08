@@ -35,6 +35,11 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
     "next/link": { default: () => null },
     "next/navigation": { usePathname: () => pathname },
     "@/components/ui/IconWrapper": { Icon: () => null },
+    "@/components/ui/tooltip": {
+      Tooltip: () => null,
+      TooltipTrigger: () => null,
+      TooltipContent: () => null,
+    },
     "@/lib/utils": { cn: () => "" },
     "@/utils/ui/navigation": navigationUtils,
     "@/utils/ui/navigation-menu": { navigationSections: [] },

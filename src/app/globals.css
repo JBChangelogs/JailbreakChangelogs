@@ -1132,10 +1132,15 @@ img.twemoji {
 
   .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) {
     --desktop-sidebar-width: 240px;
+    --desktop-sidebar-expanded-opacity: 1;
+    --desktop-sidebar-collapsed-opacity: 0;
   }
 
-  .site-layout:has([data-desktop-sidebar="collapsed"]) {
+  html:where([data-desktop-sidebar-collapsed="true"])
+    .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) {
     --desktop-sidebar-width: 72px;
+    --desktop-sidebar-expanded-opacity: 0;
+    --desktop-sidebar-collapsed-opacity: 1;
   }
 
   html[data-desktop-navigation="top-bar"] .site-layout {

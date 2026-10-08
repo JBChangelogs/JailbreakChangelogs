@@ -37,12 +37,12 @@ export default function NavigationLayoutShortcut() {
               className="size-5"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.8"
+              strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <rect x="3" y="4" width="18" height="16" rx="2" />
-              <path d="M9 4v16M13 9h4M13 13h4" />
+              <rect x="2" y="3" width="20" height="18" rx="2" />
+              <path d="M8 3v18M12 8h6M12 12h6M12 16h6" />
             </svg>
           </Link>
         </TooltipTrigger>
