@@ -2,6 +2,7 @@
 
 import React from "react";
 import { createLogger } from "@/services/logger";
+import { Button } from "@/components/ui/button";
 
 const log = createLogger("UI");
 
@@ -67,12 +68,7 @@ class ValuesErrorBoundary extends React.Component<
             There was an issue loading the values page. This is usually
             temporary.
           </p>
-          <button
-            onClick={this.resetError}
-            className="border-border-card bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-4 py-2 focus:outline-none"
-          >
-            Try Again
-          </button>
+          <Button onClick={this.resetError}>Try Again</Button>
         </div>
       );
     }

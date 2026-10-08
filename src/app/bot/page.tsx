@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Icon } from "../../components/ui/IconWrapper";
 import { getRandomBackgroundImage } from "@/utils/helpers/fisherYatesShuffle";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
+import { Button } from "@/components/ui/button";
 
 export default function BotPage() {
   const initialImage = getRandomBackgroundImage();
@@ -71,15 +72,16 @@ export default function BotPage() {
               </div>
             </div>
 
-            <a
-              href="https://discord.com/discovery/applications/1281308669299920907"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active inline-block rounded-lg px-8 py-3 text-lg font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
-              data-rybbit-event="Bot Invite Click"
-            >
-              Invite to Your Server
-            </a>
+            <Button asChild size="lg">
+              <a
+                href="https://discord.com/discovery/applications/1281308669299920907"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-rybbit-event="Bot Invite Click"
+              >
+                Invite to Your Server
+              </a>
+            </Button>
           </div>
         </div>
       </section>

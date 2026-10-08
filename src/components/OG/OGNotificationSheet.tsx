@@ -506,7 +506,8 @@ export default function OGNotificationSheet({
                       tab: isAuthenticated ? "roblox" : "discord",
                     });
                   }}
-                  className="h-14 w-full text-base font-bold"
+                  size="lg"
+                  className="w-full"
                 >
                   {isAuthenticated
                     ? "Link Roblox Account"

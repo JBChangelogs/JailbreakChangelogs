@@ -821,19 +821,13 @@ export default function UserStatsSection({
                       onClick={handleOpenScanHistory}
                       disabled={isLoadingScanHistory}
                       size="sm"
-                      className="font-medium"
                     >
                       {isLoadingScanHistory
                         ? "Loading..."
                         : "View Scan History"}
                     </Button>
                     {isOwnInventory && (
-                      <Button
-                        asChild
-                        variant="secondary"
-                        size="sm"
-                        className="font-medium"
-                      >
+                      <Button asChild variant="secondary" size="sm">
                         <Link href="/settings?highlight=inventory-data-deletion">
                           <Icon
                             icon="heroicons:trash"

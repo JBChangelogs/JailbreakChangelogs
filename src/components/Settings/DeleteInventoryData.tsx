@@ -88,7 +88,6 @@ export const DeleteInventoryData = ({
         variant="destructive"
         onClick={() => setOpen(true)}
         disabled={!robloxId || scheduled}
-        className="font-semibold"
       >
         {scheduled ? "Deletion Scheduled" : "Delete Inventory Data"}
       </Button>

@@ -57,11 +57,7 @@ export const DeleteAccount = ({ onCopyLink }: { onCopyLink?: () => void }) => {
         </p>
       </div>
 
-      <Button
-        variant="destructive"
-        onClick={() => setOpen(true)}
-        className="font-semibold"
-      >
+      <Button variant="destructive" onClick={() => setOpen(true)}>
         Delete Account
       </Button>
 

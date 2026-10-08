@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { createLogger } from "@/services/logger";
+import { Button } from "@/components/ui/button";
 
 const log = createLogger("UI");
 
@@ -56,18 +57,12 @@ export default function Error({
                 : "An unexpected error occurred while loading the changelog details."}
             </p>
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
-              <button
-                onClick={handleRetry}
-                className="border-border-card bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-6 py-3 font-medium transition-colors"
-              >
+              <Button size="lg" onClick={handleRetry}>
                 Try again
-              </button>
-              <Link
-                href="/values/changelogs"
-                className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus hover:bg-quaternary-bg rounded-lg border px-6 py-3 text-center font-medium transition-colors"
-              >
-                View all changelogs
-              </Link>
+              </Button>
+              <Button asChild size="lg" variant="secondary">
+                <Link href="/values/changelogs">View all changelogs</Link>
+              </Button>
             </div>
           </div>
         </div>

@@ -1244,12 +1244,9 @@ export default function ChangelogDetailsClient({
                   "No changes available in this changelog"}
               </p>
               {(searchQuery || selectedType || selectedSuggestionType) && (
-                <button
-                  onClick={clearSearch}
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-3 cursor-pointer rounded-lg px-4 py-2 transition-colors duration-200"
-                >
+                <Button onClick={clearSearch} className="mt-3">
                   Clear filters
-                </button>
+                </Button>
               )}
             </div>
           )}

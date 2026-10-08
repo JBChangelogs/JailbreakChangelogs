@@ -15,6 +15,7 @@ import {
 } from "@/utils/api/api";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 import { SeasonRateLimitError, useLatestSeason } from "@/hooks/useLatestSeason";
+import { Button } from "@/components/ui/button";
 
 interface SeasonLeaderboardEntry {
   id: number;
@@ -109,13 +110,12 @@ export default function SeasonLeaderboardPage() {
                 </div>
 
                 <div className="flex justify-center">
-                  <Link
-                    href="/seasons"
-                    className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors"
-                  >
-                    <Icon icon="line-md:calendar" className="h-5 w-5" />
-                    View Seasons
-                  </Link>
+                  <Button asChild size="lg">
+                    <Link href="/seasons">
+                      <Icon icon="line-md:calendar" />
+                      View Seasons
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
