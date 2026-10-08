@@ -17,11 +17,16 @@ import {
   DESKTOP_SIDEBAR_COLLAPSED_KEY,
 } from "@/utils/ui/desktopNavigation";
 
-const chromium = Bun.which("chromium") ?? Bun.which("google-chrome");
+const chromium =
+  Bun.which(process.env.CHROME_BIN ?? "google-chrome") ?? Bun.which("chromium");
 
-test.skipIf(!chromium)(
+test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
   "saved sidebar appearance is correct before hydration and toggling preserves icon positions and fades labels",
   async () => {
+    expect(
+      chromium,
+      "This visual check requires Chrome or Chromium",
+    ).not.toBeNull();
     const imports: Record<string, unknown> = {
       react: { useRef: () => ({ current: null }), useLayoutEffect: () => {} },
       "react/jsx-runtime": jsxRuntime,
@@ -154,7 +159,12 @@ test.skipIf(!chromium)(
           "--dump-dom",
           pathToFileURL(htmlPath).href,
         ],
-        { stdout: "pipe", stderr: "pipe" },
+        {
+          stdout: "pipe",
+          stderr: "pipe",
+          timeout: 20_000,
+          killSignal: "SIGKILL",
+        },
       );
       const [status, output, errors] = await Promise.all([
         process.exited,
