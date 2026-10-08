@@ -1502,10 +1502,7 @@ export default function TradeDetailsClient({
                                                   />
                                                 </span>
                                               </TooltipTrigger>
-                                              <TooltipContent
-                                                side="top"
-                                                className="bg-primary-bg text-secondary-text border-none shadow-(--color-card-shadow)"
-                                              >
+                                              <TooltipContent side="top">
                                                 <p>
                                                   {offer.created_at
                                                     ? formatCustomDate(

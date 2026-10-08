@@ -61,12 +61,7 @@ export const ExportInventoryData = ({ robloxId }: { robloxId?: string }) => {
         </p>
       </div>
 
-      <Button
-        onClick={handleExport}
-        disabled={!robloxId || loading}
-        size="md"
-        className="text-sm uppercase"
-      >
+      <Button onClick={handleExport} disabled={!robloxId || loading} size="md">
         {loading ? "Scheduling Export..." : "Export Data"}
       </Button>
     </div>

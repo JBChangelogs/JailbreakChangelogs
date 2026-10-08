@@ -112,10 +112,7 @@ const SearchableInventoryListSection = memo(
                 inline={true}
               />
             </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-            >
+            <TooltipContent side="top" className="max-w-62.5">
               {tooltipContent}
             </TooltipContent>
           </Tooltip>

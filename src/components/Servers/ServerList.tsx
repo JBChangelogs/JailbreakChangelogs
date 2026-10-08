@@ -686,10 +686,7 @@ const ServerList: React.FC = () => {
                               />
                             </span>
                           </TooltipTrigger>
-                          <TooltipContent
-                            side="top"
-                            className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
-                          >
+                          <TooltipContent side="top">
                             <p>Supporter Type {supporterTier}</p>
                           </TooltipContent>
                         </Tooltip>

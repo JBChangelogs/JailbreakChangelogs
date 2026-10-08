@@ -1421,7 +1421,8 @@ export default function ValueSuggestionDetailPage() {
                                 label="You're updating too fast."
                               />
                               <div className="flex justify-end gap-2">
-                                <button
+                                <Button
+                                  size="sm"
                                   type="button"
                                   onClick={handleEditSave}
                                   disabled={
@@ -1429,7 +1430,6 @@ export default function ValueSuggestionDetailPage() {
                                     !!editRateLimitUntil ||
                                     editReason.trim().length < 350
                                   }
-                                  className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   {editSaving ? (
                                     <>
@@ -1439,7 +1439,7 @@ export default function ValueSuggestionDetailPage() {
                                   ) : (
                                     "Save"
                                   )}
-                                </button>
+                                </Button>
                               </div>
                             </div>
                           ) : suggestion.reason.trim() ? (
@@ -1647,7 +1647,8 @@ export default function ValueSuggestionDetailPage() {
                                 label="You're updating too fast."
                               />
                               <div className="flex justify-end">
-                                <button
+                                <Button
+                                  size="sm"
                                   type="button"
                                   onClick={handleCommonTradesSave}
                                   disabled={
@@ -1655,7 +1656,6 @@ export default function ValueSuggestionDetailPage() {
                                     !!editRateLimitUntil ||
                                     tradeItemsLoading
                                   }
-                                  className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   {editSaving ? (
                                     <>
@@ -1665,7 +1665,7 @@ export default function ValueSuggestionDetailPage() {
                                   ) : (
                                     "Save common trades"
                                   )}
-                                </button>
+                                </Button>
                               </div>
                             </div>
                           ) : suggestion.common_trades?.length ? (

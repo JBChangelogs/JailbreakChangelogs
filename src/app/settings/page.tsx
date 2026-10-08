@@ -11,6 +11,7 @@ import { AccentColorSetting } from "@/components/Settings/AccentColorSetting";
 import { AppearancePreview } from "@/components/Settings/AppearancePreview";
 import { BackgroundSettings } from "@/components/Settings/BackgroundSettings";
 import DesktopNavigationSettings from "@/components/Settings/DesktopNavigationSettings";
+import ThemeSettings from "@/components/Settings/ThemeSettings";
 import SettingsCard from "@/components/Settings/SettingsCard";
 import SupporterHistorySection from "@/components/Settings/SupporterHistorySection";
 import PurchasedGiftsSection from "@/components/Settings/PurchasedGiftsSection";
@@ -159,7 +160,11 @@ export default function SettingsPage() {
       scrollRef={(el) => scrollHighlightedSectionIntoView("display", el)}
       onCopyLink={() => copySectionLink("display", "Display")}
     >
-      <DesktopNavigationSettings />
+      {/* First, since the header's theme button opens this card. */}
+      <ThemeSettings />
+      <div className="border-border-card mt-5 border-t pt-5">
+        <DesktopNavigationSettings />
+      </div>
       <div className="border-border-card mt-5 border-t pt-5">
         <SettingToggle
           name="twemoji_enabled"

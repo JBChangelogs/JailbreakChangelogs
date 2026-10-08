@@ -35,10 +35,10 @@ import { navigationSections } from "@/utils/ui/navigation-menu";
 import { getNavigationHref, getNavigationSection } from "@/utils/ui/navigation";
 import { cn } from "@/lib/utils";
 
-const AnimatedThemeToggler = dynamic(
+const ThemeShortcut = dynamic(
   () =>
     import("@/components/ui/animated-theme-toggler").then((mod) => ({
-      default: mod.AnimatedThemeToggler,
+      default: mod.ThemeShortcut,
     })),
   {
     ssr: false,
@@ -406,7 +406,7 @@ const MobileDrawer = memo(function MobileDrawer({
             Settings
           </Link>
           <Button
-            className="min-h-11 w-full font-semibold"
+            className="min-h-11 w-full"
             onClick={() => {
               setLoginModal({ open: true });
               onClose();
@@ -861,7 +861,7 @@ export default function Header() {
                     </Link>
                   )}
                   <div className="flex items-center justify-center">
-                    <AnimatedThemeToggler
+                    <ThemeShortcut
                       size="sm"
                       className="focus-visible:ring-link data-[state=open]:bg-quaternary-bg border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     />

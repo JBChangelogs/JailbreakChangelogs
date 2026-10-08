@@ -456,10 +456,7 @@ export default function OGNotificationSheet({
                         inline={true}
                       />
                     </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="bg-secondary-bg text-primary-text max-w-60 border-none shadow-(--color-card-shadow)"
-                    >
+                    <TooltipContent side="top" className="max-w-60">
                       <p>
                         We don&apos;t store your email address separately
                         &mdash; it&apos;s obtained from Discord OAuth and used
@@ -506,7 +503,8 @@ export default function OGNotificationSheet({
                       tab: isAuthenticated ? "roblox" : "discord",
                     });
                   }}
-                  className="h-14 w-full text-base font-bold"
+                  size="lg"
+                  className="w-full"
                 >
                   {isAuthenticated
                     ? "Link Roblox Account"

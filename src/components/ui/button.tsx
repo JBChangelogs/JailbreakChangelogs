@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-bold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 focus-visible:ring-border-focus active:scale-95 focus-visible:ring-2 focus-visible:outline-none cursor-pointer",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 focus-visible:ring-border-focus active:scale-95 focus-visible:ring-2 focus-visible:outline-none cursor-pointer",
   {
     variants: {
       variant: {
@@ -25,10 +25,12 @@ const buttonVariants = cva(
           "text-primary-text! hover:bg-secondary-bg! active:bg-tertiary-bg!",
         link: "text-link! underline-offset-4 hover:underline active:scale-100",
       },
+      // One scale: same weight and radius, with height, padding and text
+      // growing together, so a small button looks like a smaller medium one.
       size: {
-        sm: "h-8! gap-1.5! px-3! text-xs! [&_svg]:size-4!",
-        md: "h-10! px-5! text-base! [&_svg]:size-5!",
-        lg: "h-12! px-8! py-3! text-lg! [&_svg]:size-6!",
+        sm: "h-8! gap-1.5! px-3! text-sm! [&_svg]:size-4!",
+        md: "h-10! px-4! text-sm! [&_svg]:size-4!",
+        lg: "h-12! px-6! text-base! [&_svg]:size-5!",
         icon: "size-10! [&_svg]:size-5!",
       },
     },

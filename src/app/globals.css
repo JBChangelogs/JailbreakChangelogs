@@ -648,8 +648,9 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   ); /* Hero overlay - Light mode (lighter) */
 }
 
-/* Temporary Halloween palette: remove this block after the seasonal branding ends. */
-:root {
+/* Temporary Halloween theme: remove these blocks, and "halloween" from THEMES,
+   after the seasonal branding ends. It builds on the dark theme. */
+:root.halloween {
   --color-border-focus: #f93627;
   --color-card-tag-bg: #bb0d00;
   --color-card-tag-text: #ffffff;
@@ -667,20 +668,7 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --color-highlight: #f93627;
 }
 
-:root.light {
-  --color-primary-bg: #fffafa;
-  --color-secondary-bg: #f8eeee;
-  --color-tertiary-bg: #f0e1e3;
-  --color-border-card: #e5cfd2;
-  --color-button-secondary: #eddbde;
-  --color-button-secondary-hover: #e5c9cd;
-  --color-button-secondary-active: #dab5bc;
-  --color-link: #bb0d00;
-  --color-link-hover: #9c0b00;
-  --color-link-active: #7d0900;
-}
-
-:root:not(.light):not(.amoled) {
+:root.halloween {
   --color-primary-bg: #140f10;
   --color-secondary-bg: #1d1517;
   --color-tertiary-bg: #261b1e;
@@ -688,7 +676,7 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  :root {
+  :root.halloween {
     cursor: url("/cursors/halloween-ghost.svg") 10 1, auto;
   }
 }
