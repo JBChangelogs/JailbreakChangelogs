@@ -1,13 +1,14 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import type { Metadata } from "next";
 import { getOGFinderMaintenanceMetadata } from "@/utils/api/maintenance";
 
 export async function generateMetadata(): Promise<Metadata> {
   const maintenanceMetadata = await getOGFinderMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(maintenanceMetadata, `/og`);
   }
 
-  return {
+  const metadata: Metadata = {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: "OG Finder",
     description:
@@ -41,6 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
     },
   };
+  return withDiscordEmbed(metadata, `/og`);
 }
 
 export default function OGFinderLayout({

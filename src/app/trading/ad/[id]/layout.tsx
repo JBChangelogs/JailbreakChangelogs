@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import React from "react";
 import { Metadata } from "next";
 import { getMaintenanceMetadata } from "@/utils/api/maintenance";
@@ -12,12 +13,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Check for maintenance mode first
   const maintenanceMetadata = await getMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(
+      maintenanceMetadata,
+      `/trading/ad/${encodeURIComponent((await params).id)}`,
+    );
   }
 
   const { id } = await params;
 
-  return {
+  const metadata: Metadata = {
     title: `Trade #${id}`,
     description: "View and interact with this trade offer.",
     openGraph: {
@@ -42,6 +46,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ],
     },
   };
+  return withDiscordEmbed(
+    metadata,
+    `/trading/ad/${encodeURIComponent((await params).id)}`,
+  );
 }
 
 export default function TradeAdLayout({

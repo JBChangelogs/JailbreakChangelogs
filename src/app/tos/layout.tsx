@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Terms of Service",
   description:
@@ -34,6 +35,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/tos");
 
 export default function TermsOfServiceLayout({
   children,

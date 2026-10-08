@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Hyperchrome Pity Calculator",
   description:
     "Estimate robberies needed for your next Hyperchrome level and compare pity progression between big and small servers.",
@@ -33,6 +34,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/hyperchrome-pity");
 
 export default function HyperchromeLayout({
   children,

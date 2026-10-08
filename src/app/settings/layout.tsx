@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Settings",
   description: "Manage your account settings and preferences",
   openGraph: {
@@ -25,6 +26,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/settings");
 
 export default function SettingsLayout({
   children,

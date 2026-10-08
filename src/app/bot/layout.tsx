@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Discord Bot",
   description:
@@ -35,6 +36,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/bot");
 
 export default function BotLayout({ children }: { children: React.ReactNode }) {
   return children;

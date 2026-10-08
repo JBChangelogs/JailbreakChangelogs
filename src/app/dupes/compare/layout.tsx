@@ -1,13 +1,14 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import type { Metadata } from "next";
 import { getDupeFinderMaintenanceMetadata } from "@/utils/api/maintenance";
 
 export async function generateMetadata(): Promise<Metadata> {
   const maintenanceMetadata = await getDupeFinderMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(maintenanceMetadata, `/dupes/compare`);
   }
 
-  return {
+  const metadata: Metadata = {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: "Duplicate Comparison | Jailbreak Changelogs",
     description:
@@ -41,6 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
     },
   };
+  return withDiscordEmbed(metadata, `/dupes/compare`);
 }
 
 export default function CompareLayout({

@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -65,7 +66,7 @@ const hasAppAccess = cache(async () => {
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  return (await hasAppAccess()) ? metadata : {};
+  return (await hasAppAccess()) ? withDiscordEmbed(metadata, "/app") : {};
 }
 
 export default async function AppPage() {

@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Direct Messages",
   description: "View your conversations and send direct messages.",
   openGraph: {
@@ -25,6 +26,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/messages");
 
 export default function MessagesLayout({
   children,

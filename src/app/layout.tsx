@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
@@ -43,10 +44,10 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const maintenanceMetadata = await getMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(maintenanceMetadata, `/`);
   }
 
-  return {
+  const metadata: Metadata = {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: {
       template: "%s | Jailbreak Changelogs",
@@ -84,6 +85,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
     },
   };
+  return withDiscordEmbed(metadata, `/`);
 }
 
 const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'||t==='amoled'){document.documentElement.classList.add(t);}}catch(e){}})();`;

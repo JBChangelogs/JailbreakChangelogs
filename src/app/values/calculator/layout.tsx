@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Value Calculator",
   description: "Calculate the value of your Roblox Jailbreak items and trades",
   metadataBase: new URL("https://jailbreakchangelogs.com"),
@@ -30,6 +31,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/values/calculator");
 
 export default function CalculatorLayout({
   children,

@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "My Reports",
   description: "View and track your content reports and reported issues.",
   robots: {
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
     follow: false,
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/reports");
 
 export default function ReportsLayout({
   children,

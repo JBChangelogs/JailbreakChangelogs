@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { accentColorToHex } from "@/utils/ui/accentColor";
 import type { Viewport, Metadata } from "next";
 import { fetchUserByIdForMetadata, PUBLIC_API_URL } from "@/utils/api/api";
@@ -45,7 +46,10 @@ export async function generateMetadata({
   // Check for maintenance mode first
   const maintenanceMetadata = await getMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(
+      maintenanceMetadata,
+      `/users/${encodeURIComponent((await params).id)}`,
+    );
   }
 
   const { id } = await params;
@@ -55,7 +59,7 @@ export async function generateMetadata({
     const user = await fetchUserByIdForMetadata(userId);
 
     if (!user) {
-      return {
+      const metadata: Metadata = {
         metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "User Not Found",
         description:
@@ -89,6 +93,10 @@ export async function generateMetadata({
           ],
         },
       };
+      return withDiscordEmbed(
+        metadata,
+        `/users/${encodeURIComponent((await params).id)}`,
+      );
     }
 
     const displayName =
@@ -103,7 +111,7 @@ export async function generateMetadata({
       : `${displayName}'s Profile`;
     const imageUrl = `${PUBLIC_API_URL}/v2/users/${encodeURIComponent(userId)}/image`;
 
-    return {
+    const metadata: Metadata = {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: titleFormat,
       description: `Check out ${displayName}'s profile on Jailbreak Changelogs. View their contributions and stay connected.`,
@@ -134,6 +142,10 @@ export async function generateMetadata({
         images: [imageUrl],
       },
     };
+    return withDiscordEmbed(
+      metadata,
+      `/users/${encodeURIComponent((await params).id)}`,
+    );
   } catch (error: unknown) {
     // Check if this is a banned user error
     if (
@@ -146,7 +158,7 @@ export async function generateMetadata({
       const privateMessage = error.message
         .replace("PRIVATE_PROFILE:", "")
         .trim();
-      return {
+      const metadata: Metadata = {
         metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "Private Profile",
         description: privateMessage || "This user's profile is private.",
@@ -177,6 +189,10 @@ export async function generateMetadata({
           ],
         },
       };
+      return withDiscordEmbed(
+        metadata,
+        `/users/${encodeURIComponent((await params).id)}`,
+      );
     }
 
     // Check if this is a banned user error
@@ -188,7 +204,7 @@ export async function generateMetadata({
       error.message.startsWith("BANNED_USER:")
     ) {
       const bannedMessage = error.message.replace("BANNED_USER:", "").trim();
-      return {
+      const metadata: Metadata = {
         metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "User Banned",
         description: bannedMessage,
@@ -219,10 +235,14 @@ export async function generateMetadata({
           ],
         },
       };
+      return withDiscordEmbed(
+        metadata,
+        `/users/${encodeURIComponent((await params).id)}`,
+      );
     }
 
     // Fallback for other errors (including NOT_FOUND)
-    return {
+    const metadata: Metadata = {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "User Not Found",
       description:
@@ -256,6 +276,10 @@ export async function generateMetadata({
         ],
       },
     };
+    return withDiscordEmbed(
+      metadata,
+      `/users/${encodeURIComponent((await params).id)}`,
+    );
   }
 }
 

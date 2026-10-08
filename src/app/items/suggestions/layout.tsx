@@ -1,4 +1,6 @@
-export const metadata = {
+import type { Metadata } from "next";
+import { withDiscordEmbed } from "@/lib/discord-embed";
+const pageMetadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Item Suggestions",
   description:
@@ -39,6 +41,8 @@ export const metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/items/suggestions");
 
 export default function ValueSuggestionsLayout({
   children,

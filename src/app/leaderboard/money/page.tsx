@@ -1,14 +1,17 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Money Leaderboard - Coming Back Soon",
   description:
     "The Money Leaderboard is being improved. We'll be back soon with a better experience.",
   robots: { index: false, follow: false },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/leaderboard/money");
 
 export default function MoneyLeaderboardPage() {
   return (

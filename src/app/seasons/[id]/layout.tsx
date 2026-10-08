@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 import { fetchSeason, Reward } from "@/utils/api/api";
 import { getMaintenanceMetadata } from "@/utils/api/maintenance";
@@ -10,7 +11,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Check for maintenance mode first
   const maintenanceMetadata = await getMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(
+      maintenanceMetadata,
+      `/seasons/${encodeURIComponent((await params).id)}`,
+    );
   }
 
   try {
@@ -18,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const season = await fetchSeason(id);
 
     if (!season) {
-      return {
+      const metadata: Metadata = {
         metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "Season Not Found",
         description: "The requested season could not be found.",
@@ -26,6 +30,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           canonical: `/seasons/${id}`,
         },
       };
+      return withDiscordEmbed(
+        metadata,
+        `/seasons/${encodeURIComponent((await params).id)}`,
+      );
     }
 
     // Get all level rewards with images
@@ -47,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       alt: `${reward.item} - Season ${season.season} Reward`,
     }));
 
-    return {
+    const metadata: Metadata = {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: `Season ${season.season}: ${season.title}`,
       description: season.description,
@@ -68,9 +76,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         images: images.map((img: { url: string }) => img.url),
       },
     };
+    return withDiscordEmbed(
+      metadata,
+      `/seasons/${encodeURIComponent((await params).id)}`,
+    );
   } catch {
     const { id } = await params;
-    return {
+    const metadata: Metadata = {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Jailbreak Seasons",
       description: "Explore all seasons of Roblox Jailbreak.",
@@ -95,6 +107,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ],
       },
     };
+    return withDiscordEmbed(
+      metadata,
+      `/seasons/${encodeURIComponent((await params).id)}`,
+    );
   }
 }
 

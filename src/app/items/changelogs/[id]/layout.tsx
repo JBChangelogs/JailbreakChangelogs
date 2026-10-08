@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 import { getMaintenanceMetadata } from "@/utils/api/maintenance";
 
@@ -9,12 +10,15 @@ export async function generateMetadata({
   // Check for maintenance mode first
   const maintenanceMetadata = await getMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(
+      maintenanceMetadata,
+      `/items/changelogs/${encodeURIComponent((await params).id)}`,
+    );
   }
 
   const { id } = await params;
 
-  return {
+  const metadata: Metadata = {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: `Item Changelog #${id} | Jailbreak Changelogs`,
     description: `View value changes in this Jailbreak Changelogs Value update.`,
@@ -45,6 +49,10 @@ export async function generateMetadata({
       ],
     },
   };
+  return withDiscordEmbed(
+    metadata,
+    `/items/changelogs/${encodeURIComponent((await params).id)}`,
+  );
 }
 
 export default function ValueChangelogLayout({

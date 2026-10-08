@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Weekly Contracts",
   description: "Check the latest weekly contracts for Roblox Jailbreak.",
   alternates: { canonical: "/seasons/contracts" },
@@ -28,6 +29,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/seasons/contracts");
 
 export default function ContractsLayout({
   children,

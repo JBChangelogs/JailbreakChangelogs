@@ -1,7 +1,8 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
+  const metadata: Metadata = {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: "Season Leaderboard",
     description:
@@ -45,6 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "jailbreak changelogs",
     ],
   };
+  return withDiscordEmbed(metadata, `/seasons/leaderboard`);
 }
 
 export default function SeasonLeaderboardLayout({

@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Bounty LIVE Tracker",
   description:
     "Track high-bounty players in Roblox Jailbreak. Get real-time updates on players with the highest bounties across servers.",
@@ -33,6 +34,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/bounties");
 
 export default function BountiesLayout({
   children,

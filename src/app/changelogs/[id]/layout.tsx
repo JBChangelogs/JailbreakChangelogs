@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 import { fetchChangelog } from "@/utils/api/api";
 import { getMaintenanceMetadata } from "@/utils/api/maintenance";
@@ -10,14 +11,17 @@ export async function generateMetadata({
   // Check for maintenance mode first
   const maintenanceMetadata = await getMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(
+      maintenanceMetadata,
+      `/changelogs/${encodeURIComponent((await params).id)}`,
+    );
   }
 
   try {
     const { id } = await params;
     const changelog = await fetchChangelog(id);
 
-    return {
+    const metadata: Metadata = {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: changelog.title,
       description: `View the complete changelog for ${changelog.title}. Track updates, features, and modifications in this Jailbreak update.`,
@@ -43,10 +47,14 @@ export async function generateMetadata({
           : [],
       },
     };
+    return withDiscordEmbed(
+      metadata,
+      `/changelogs/${encodeURIComponent((await params).id)}`,
+    );
   } catch {
     // Don't log the error to console as it's expected for non-existent changelogs
     const { id } = await params;
-    return {
+    const metadata: Metadata = {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Changelog Not Found",
       description: "The requested changelog could not be found.",
@@ -69,6 +77,10 @@ export async function generateMetadata({
         ],
       },
     };
+    return withDiscordEmbed(
+      metadata,
+      `/changelogs/${encodeURIComponent((await params).id)}`,
+    );
   }
 }
 

@@ -1,7 +1,8 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { siteConfig } from "@/lib/site";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Development Changelog",
   description: siteConfig.description,
   openGraph: {
@@ -30,6 +31,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/dev/changelogs");
 
 export default function ChangelogLayout({
   children,

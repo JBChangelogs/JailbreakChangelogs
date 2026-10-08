@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import type { Metadata } from "next";
 import { getInventoryMaintenanceMetadata } from "@/utils/api/maintenance";
 
@@ -5,10 +6,10 @@ export async function generateMetadata(): Promise<Metadata> {
   // Check for inventory maintenance mode first
   const maintenanceMetadata = await getInventoryMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(maintenanceMetadata, `/inventories`);
   }
 
-  return {
+  const metadata: Metadata = {
     title: "Inventory Checker",
     description: "Check any player's Jailbreak inventory and stats",
     metadataBase: new URL("https://jailbreakchangelogs.com"),
@@ -39,6 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
     },
   };
+  return withDiscordEmbed(metadata, `/inventories`);
 }
 
 export default function InventoryCheckerLayout({

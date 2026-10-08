@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 import { getMaintenanceMetadata } from "@/utils/api/maintenance";
 
@@ -7,11 +8,15 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const maintenanceMetadata = await getMaintenanceMetadata();
-  if (maintenanceMetadata) return maintenanceMetadata;
+  if (maintenanceMetadata)
+    return withDiscordEmbed(
+      maintenanceMetadata,
+      `/items/suggestions/${encodeURIComponent((await params).id)}`,
+    );
 
   const { id } = await params;
 
-  return {
+  const metadata: Metadata = {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: `Item Suggestion #${id} | Jailbreak Changelogs`,
     description: `View this community item suggestion on Jailbreak Changelogs.`,
@@ -42,6 +47,10 @@ export async function generateMetadata({
       ],
     },
   };
+  return withDiscordEmbed(
+    metadata,
+    `/items/suggestions/${encodeURIComponent((await params).id)}`,
+  );
 }
 
 export default function ValueSuggestionDetailLayout({

@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: "Robbery LIVE Tracker",
   description:
     "Track live status of robberies and mansions in Roblox Jailbreak. Get real-time updates on what's open across servers.",
@@ -33,6 +34,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/robberies");
 
 export default function RobberiesLayout({
   children,

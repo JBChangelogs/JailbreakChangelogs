@@ -1,7 +1,8 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import React from "react";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   title: {
     template: "%s | Jailbreak Changelogs",
     default: "View Trade Ads",
@@ -32,6 +33,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/trading");
 
 export default function TradingLayout({
   children,

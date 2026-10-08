@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Jailbreak Update Timeline | Jailbreak Changelogs",
   description:
@@ -22,6 +23,8 @@ export const metadata: Metadata = {
       "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/changelogs/timeline");
 
 export default function TimelineLayout({
   children,

@@ -15,6 +15,18 @@ Once you have the environment file (.env.local) set up, you can proceed with the
 
 **Note:** You can reference the [`.env.example`](.env.example) file to see the structure and required environment variables for the project.
 
+### Testing Discord previews
+
+`DISCORD_EMBED_ORIGIN` is optional. Leave it empty for the production default, `https://jailbreakchangelogs.com`.
+
+To test previews through a public tunnel before deploying, set it in `.env.local` to the tunnel's origin, for example:
+
+```env
+DISCORD_EMBED_ORIGIN="https://jbcl-frontend.jailbreakchangelogs.com"
+```
+
+Rebuild with `bun run build`, then run `bun start:cf`. Share the tunnel URL in Discord or use the [Embed Debugger](https://discord.com/developers/embeds). Discord must be able to fetch both the page and its linked JSON without signing in. Clear the override when you finish testing.
+
 ## Where do I go from here?
 
 If you've noticed a bug or have a feature request, make sure to check our [Discord server](https://discord.jailbreakchangelogs.com) in the issues channel to see if someone else in the community has already reported it. If not, go ahead and [submit an issue](https://jailbreakchangelogs.com?report-issue)!

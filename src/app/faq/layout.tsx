@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "FAQ",
   description:
@@ -34,6 +35,8 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(pageMetadata, "/faq");
 
 export default function FAQLayout({ children }: { children: React.ReactNode }) {
   return <div className="text-primary-text min-h-screen">{children}</div>;

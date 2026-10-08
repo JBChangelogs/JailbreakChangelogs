@@ -1,3 +1,4 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 import { fetchItem } from "@/utils/api/api";
 import { hasItemValue } from "@/utils/items/itemValue";
@@ -153,14 +154,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Check for maintenance mode first
   const maintenanceMetadata = await getMaintenanceMetadata();
   if (maintenanceMetadata) {
-    return maintenanceMetadata;
+    return withDiscordEmbed(
+      maintenanceMetadata,
+      `/item/${encodeURIComponent((await params).type)}/${encodeURIComponent((await params).name)}`,
+    );
   }
 
   try {
     const { type, name } = await params;
     const item = await fetchItem(type, name);
     if (!item) {
-      return {
+      const metadata: Metadata = {
         metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "Item Not Found",
         description: "The requested item could not be found.",
@@ -188,6 +192,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           images: [FALLBACK_IMAGE],
         },
       };
+      return withDiscordEmbed(
+        metadata,
+        `/item/${encodeURIComponent((await params).type)}/${encodeURIComponent((await params).name)}`,
+      );
     }
     const imageUrl = getItemImagePath(item.type, item.name, false, true);
     const finalImageUrl = imageUrl || FALLBACK_IMAGE;
@@ -197,7 +205,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const canonicalPath = `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`;
     const fullUrl = `https://jailbreakchangelogs.com${canonicalPath}`;
 
-    return {
+    const metadata: Metadata = {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: `${item.name} (${item.type})`,
       description: hasItemValue(item.description)
@@ -232,9 +240,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         images: [finalImageUrl],
       },
     };
+    return withDiscordEmbed(
+      metadata,
+      canonicalPath,
+      `Cash value: ${formatFullValue(item.cash_value)}${hasItemValue(item.duped_value) ? `\nDuped value: ${formatFullValue(item.duped_value)}` : ""}`,
+    );
   } catch {
     const { type, name } = await params;
-    return {
+    const metadata: Metadata = {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Error",
       description: "An error occurred while loading the item details.",
@@ -263,6 +276,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         images: [FALLBACK_IMAGE],
       },
     };
+    return withDiscordEmbed(
+      metadata,
+      `/item/${encodeURIComponent((await params).type)}/${encodeURIComponent((await params).name)}`,
+    );
   }
 }
 

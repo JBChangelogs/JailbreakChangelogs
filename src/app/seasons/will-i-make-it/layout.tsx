@@ -1,6 +1,7 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
+const pageMetadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Will I Make It to Level 10?",
   description:
@@ -34,6 +35,11 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+export const metadata = withDiscordEmbed(
+  pageMetadata,
+  "/seasons/will-i-make-it",
+);
 
 export default function WillIMakeItLayout({
   children,

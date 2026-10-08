@@ -1,8 +1,9 @@
+import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 import { defaultMetadata } from "./metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return defaultMetadata;
+  return withDiscordEmbed(defaultMetadata, `/changelogs`);
 }
 
 export default function ChangelogsLayout({
