@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Icon } from "@/components/ui/IconWrapper";
+import { cn } from "@/lib/utils";
 import {
   fetchCustomBackground,
   removeCustomBackground,
@@ -101,36 +102,61 @@ export const BackgroundSettings = ({
                 <div className="bg-tertiary-bg border-border-card border-t p-3">
                   {backgroundUrl ? (
                     <>
-                      <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                      {/* Click to change, like the banner and avatar. */}
+                      <button
+                        type="button"
+                        onClick={openFilePicker}
+                        disabled={isUploading || removing}
+                        aria-label={
+                          isUploading
+                            ? "Uploading background"
+                            : "Change background"
+                        }
+                        className="group/background focus-visible:ring-border-focus relative block aspect-video w-full cursor-pointer overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:outline-none disabled:cursor-wait"
+                      >
                         <Image
                           src={backgroundUrl}
-                          alt="Your custom background"
+                          alt=""
                           fill
                           sizes="(min-width: 1024px) 720px, 100vw"
                           unoptimized
                           className="object-cover"
                         />
-                      </div>
-                      <div className="mt-3 grid grid-cols-2 gap-2">
-                        <Button
-                          onClick={openFilePicker}
-                          disabled={isUploading || removing}
-                        >
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover/background:bg-black/40 group-focus-visible/background:bg-black/40">
+                          <span
+                            className={cn(
+                              "flex items-center gap-2 rounded-full bg-black/60 px-4 py-2 text-sm font-medium text-white opacity-0 transition-opacity group-hover/background:opacity-100 group-focus-visible/background:opacity-100",
+                              isUploading && "opacity-100",
+                            )}
+                          >
+                            <Icon
+                              icon={
+                                isUploading
+                                  ? "svg-spinners:ring-resize"
+                                  : "material-symbols:photo-camera"
+                              }
+                              className="size-4"
+                            />
+                            {isUploading ? "Uploading..." : "Change background"}
+                          </span>
+                        </span>
+                        {/* Always visible so touch users can tell it's editable. */}
+                        <span className="absolute top-3 right-3 rounded-full bg-black/50 p-2 text-white">
                           <Icon
-                            icon={
-                              isUploading
-                                ? "svg-spinners:ring-resize"
-                                : "material-symbols:cloud-upload"
-                            }
+                            icon="material-symbols:photo-camera"
+                            className="size-4"
                           />
-                          {isUploading ? "Uploading..." : "Change"}
-                        </Button>
+                        </span>
+                      </button>
+                      <div className="mt-3 flex justify-end">
                         <Button
                           variant="secondary"
+                          size="sm"
                           onClick={() => setConfirmRemove(true)}
                           disabled={isUploading || removing}
                         >
-                          Remove
+                          <Icon icon="material-symbols:delete-outline" />
+                          Remove background
                         </Button>
                       </div>
                     </>
