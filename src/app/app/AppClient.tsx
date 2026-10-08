@@ -33,7 +33,7 @@ const downloads = {
   Windows: {
     url: "https://updates.jailbreakchangelogs.com/JBCLSetup.exe",
     format: ".exe",
-    icon: "mdi:microsoft-windows",
+    icon: "mage:microsoft-windows",
   },
   macOS: {
     url: "https://updates.jailbreakchangelogs.com/JBCLSetup.dmg",
