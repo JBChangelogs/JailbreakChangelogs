@@ -69,9 +69,14 @@ export const getCachedChangelogEntries = cache(() =>
   fetchChangelogEntries(process.env.GITHUB_API_RELEASES_URL!, 100),
 );
 
-/** The desktop app's releases, newest first. */
-export const getCachedAppChangelogEntries = cache(() =>
-  fetchChangelogEntries(APP_RELEASES_URL, 10),
+/**
+ * The desktop app's published releases, newest first. Drafts are dropped:
+ * with GITHUB_TOKEN set, GitHub returns them too.
+ */
+export const getCachedAppChangelogEntries = cache(async () =>
+  (await fetchChangelogEntries(APP_RELEASES_URL, 10)).filter(
+    (entry) => !entry.isDraft,
+  ),
 );
 
 async function fetchChangelogEntries(
