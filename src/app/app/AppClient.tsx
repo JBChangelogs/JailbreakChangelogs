@@ -4,13 +4,16 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import {
+  BellRing,
   Check,
   Download,
   ExternalLink,
   FlaskConical,
+  Gamepad2,
   Info,
+  Radar,
 } from "lucide-react";
-import { ReleaseTimelineEntry } from "@/components/Changelogs/ReleaseChanges";
+import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -26,6 +29,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import type { ChangelogEntry } from "@/lib/changelog-parser";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 import { fetchAppAccess } from "./access";
+import { AppReleaseNotes } from "./AppReleaseNotes";
 import type { Releases } from "./releases";
 import { getBrowserDownloadPlatform } from "./platform";
 
@@ -127,6 +131,34 @@ const features = [
     ],
     image: `${previews}/preview-richpresence.png`,
     alt: "Rich Presence settings with a live Discord status preview and toggles for each detail",
+  },
+];
+
+// Things the website can't do, in the app's own wording.
+const appOnly = [
+  {
+    icon: DiscordIcon,
+    title: "Discord Rich Presence",
+    description:
+      "Your Discord status shows what you're doing in the app, with an optional Join Server button so friends can join your Jailbreak server.",
+  },
+  {
+    icon: Radar,
+    title: "Auto trade scanning",
+    description:
+      "While you're in a Jailbreak trading server, keeps the calculator in sync with the open trade, and clears it when you leave the trade menu.",
+  },
+  {
+    icon: BellRing,
+    title: "Robbery and bounty alerts",
+    description:
+      "Watch robbery types and bounty ranges for a player or a whole server, and get alerted the moment one hits, even with the app in the background.",
+  },
+  {
+    icon: Gamepad2,
+    title: "Join from a game invite",
+    description:
+      "Send a game invite in Messages and the other person can join your server straight from the conversation. Detecting your Roblox session is Windows only.",
   },
 ];
 
@@ -554,42 +586,41 @@ export default function AppClient({
           ))}
         </Tabs>
       </section>
-      {changes.length > 0 && (
-        <section
-          aria-labelledby="app-changes-heading"
-          className="border-border-card mx-auto mt-16 max-w-6xl border-t pt-8"
+      <section
+        aria-labelledby="app-only-heading"
+        className="border-border-card mx-auto mt-16 max-w-6xl border-t pt-8"
+      >
+        <h2
+          id="app-only-heading"
+          className="text-primary-text text-2xl font-semibold tracking-tight"
         >
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-8 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-              <h2
-                id="app-changes-heading"
-                className="text-primary-text text-2xl font-semibold tracking-tight"
+          Only in the desktop app
+        </h2>
+        <p className="text-secondary-text mt-2 max-w-2xl">
+          The app can see what you&apos;re doing in Roblox and Discord, so it
+          can do things the website can&apos;t.
+        </p>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {appOnly.map(({ icon: FeatureIcon, title, description }) => (
+            <li
+              key={title}
+              className="border-border-card bg-secondary-bg rounded-xl border p-5"
+            >
+              <span
+                aria-hidden="true"
+                className="bg-button-info/10 text-link inline-flex size-10 items-center justify-center rounded-lg"
               >
-                What&apos;s new
-              </h2>
-              <a
-                href="https://github.com/JBChangelogs/JailbreakChangelogsApp/releases"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:text-link-hover inline-flex items-center gap-1 text-sm font-medium transition-colors"
-              >
-                All releases on GitHub
-                <ExternalLink aria-hidden="true" className="size-3.5" />
-              </a>
-            </div>
-            <div className="border-border-card ml-2 border-l-2 sm:ml-3">
-              {changes.map((entry, index) => (
-                <ReleaseTimelineEntry
-                  key={entry.slug}
-                  entry={entry}
-                  latest={index === 0}
-                  initiallyOpen={index === 0}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+                <FeatureIcon className="size-5" />
+              </span>
+              <h3 className="text-primary-text mt-4 font-semibold">{title}</h3>
+              <p className="text-secondary-text mt-1.5 text-sm leading-relaxed">
+                {description}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+      {changes.length > 0 && <AppReleaseNotes changes={changes} />}
     </main>
   );
 }
