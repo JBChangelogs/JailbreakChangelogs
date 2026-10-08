@@ -1,21 +1,50 @@
-import { afterEach, expect, spyOn, test } from "bun:test";
+import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 import { NextRequest } from "next/server";
 import { proxy } from "./proxy";
 
 const originalFetch = globalThis.fetch;
-const originalEnvironment = process.env.RAILWAY_ENVIRONMENT_NAME;
-const originalApi = process.env.RAILWAY_INTERNAL_API_URL;
-const originalService = process.env.RAILWAY_SERVICE_NAME;
+// Bun loads .env into tests, so clear anything a local setup might provide.
+const envKeys = [
+  "RAILWAY_ENVIRONMENT_NAME",
+  "RAILWAY_INTERNAL_API_URL",
+  "RAILWAY_SERVICE_NAME",
+  "NEXT_PUBLIC_RAILWAY_ENVIRONMENT_NAME",
+  "NEXT_PUBLIC_DEV_TOKEN",
+  "NEXT_PUBLIC_API_URL",
+];
+const originalEnv = Object.fromEntries(
+  envKeys.map((key) => [key, process.env[key]]),
+);
+
+beforeEach(() => {
+  for (const key of envKeys) delete process.env[key];
+});
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
-  if (originalEnvironment === undefined)
-    delete process.env.RAILWAY_ENVIRONMENT_NAME;
-  else process.env.RAILWAY_ENVIRONMENT_NAME = originalEnvironment;
-  if (originalApi === undefined) delete process.env.RAILWAY_INTERNAL_API_URL;
-  else process.env.RAILWAY_INTERNAL_API_URL = originalApi;
-  if (originalService === undefined) delete process.env.RAILWAY_SERVICE_NAME;
-  else process.env.RAILWAY_SERVICE_NAME = originalService;
+  for (const key of envKeys) {
+    if (originalEnv[key] === undefined) delete process.env[key];
+    else process.env[key] = originalEnv[key];
+  }
+});
+
+test("local development signs in to experiments with the dev token", async () => {
+  process.env.NEXT_PUBLIC_RAILWAY_ENVIRONMENT_NAME = "development";
+  process.env.NEXT_PUBLIC_DEV_TOKEN = "dev-token";
+  process.env.NEXT_PUBLIC_API_URL = "https://api.example.com";
+  const fetchMock = spyOn(globalThis, "fetch").mockResolvedValueOnce(
+    Response.json({ flags: [{ flag: "is_tester", enabled: true }] }),
+  );
+  // Even with a leftover (possibly expired) session cookie.
+  const response = await proxy(
+    new NextRequest("http://localhost:5500/experiments", {
+      headers: { cookie: "jbcl_token=stale" },
+    }),
+  );
+  expect(response.headers.get("x-middleware-next")).toBe("1");
+  expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+    headers: { Authorization: "dev-token" },
+  });
 });
 
 test("production experiments routes require a session, including subpaths and token query strings", async () => {

@@ -4,7 +4,7 @@ type BuildApiUrlWithDevTokenOptions = {
   tokenParamName?: string;
 };
 
-const getDevToken = (): {
+export const getDevToken = (): {
   isDevEnv: boolean;
   injectedToken: string | undefined;
 } => {
