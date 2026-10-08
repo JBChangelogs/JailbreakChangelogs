@@ -19,6 +19,9 @@ import {
 } from "@/utils/api/experiments";
 
 /**
+ * Mounted inside .site-layout so it can sit beside the desktop sidebar,
+ * whose width is --desktop-sidebar-width there.
+ *
  * A site-wide reminder that experiments are forced, linking to the
  * experiments page. While sync is on it also keeps this browser's copy of the
  * synced forced variants current, since that copy is what X-Experiment sends.
@@ -95,7 +98,7 @@ export function ExperimentOverridesIndicator() {
   return (
     <Link
       href="/experiments"
-      className="border-status-warning/40 bg-secondary-bg/90 text-primary-text hover:border-status-warning focus-visible:ring-border-focus fixed bottom-4 left-4 z-40 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur transition-colors focus-visible:ring-2 focus-visible:outline-none"
+      className="border-status-warning/40 bg-secondary-bg/90 text-primary-text hover:border-status-warning focus-visible:ring-border-focus fixed bottom-4 left-[calc(var(--desktop-sidebar-width,0px)+1rem)] z-40 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur transition-[left,border-color] duration-300 ease-in-out focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none"
     >
       <FlaskConical
         aria-hidden="true"

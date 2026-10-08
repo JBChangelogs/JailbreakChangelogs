@@ -203,11 +203,11 @@ export default async function RootLayout({
                         <NitroAnchorCloseSupporterModal />
                         <NitroVideoCloseSupporterModal />
                       </AdErrorBoundary>
-                      <ExperimentOverridesIndicator />
                       <div
                         id="main-layout"
                         className="site-layout flex min-h-screen flex-col"
                       >
+                        <ExperimentOverridesIndicator />
                         <Suspense
                           fallback={
                             <div
@@ -348,8 +348,8 @@ export default async function RootLayout({
                   <NitroAdNavigation />
                   <NitroAnchorCloseSupporterModal />
                   <NitroVideoCloseSupporterModal />
-                  <ExperimentOverridesIndicator />
                   <div className="site-layout flex min-h-screen flex-col">
+                    <ExperimentOverridesIndicator />
                     <Suspense
                       fallback={
                         <div
