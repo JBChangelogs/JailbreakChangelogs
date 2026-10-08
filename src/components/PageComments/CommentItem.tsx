@@ -175,7 +175,14 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     }
   }, [editingCommentId, comment.id, comment.content, comment.replies]);
 
-  const commentAuthorSettings = userData[comment.user_id]?.settings;
+  const isIdentityHidden = (userId: string) => {
+    const settings = userData[userId]?.settings;
+    return (
+      !!userId &&
+      (!settings?.show_recent_comments || !settings?.profile_public) &&
+      currentUserId !== userId
+    );
+  };
 
   // For trade/inventory contexts, prefer Roblox identity
   const isRobloxContext =
@@ -196,11 +203,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
 
   // Hide identity if show_recent_comments or profile_public is falsy
   // and the viewer is not the comment author
-  const hideRecent =
-    !isUnknownUser &&
-    (!commentAuthorSettings?.show_recent_comments ||
-      !commentAuthorSettings?.profile_public) &&
-    currentUserId !== comment.user_id;
+  const hideRecent = isIdentityHidden(comment.user_id);
 
   // Truncation logic for long comments
   const isExpanded = expandedComments.has(comment.id);
@@ -230,11 +233,13 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
       ? (comment.replies?.find((r) => r.id === replyingToReplyId) ?? null)
       : null;
   const replyTargetName = replyTarget
-    ? isRobloxContext
-      ? userData[replyTarget.user_id]?.roblox_display_name ||
-        userData[replyTarget.user_id]?.roblox_username ||
-        replyTarget.author
-      : userData[replyTarget.user_id]?.username || replyTarget.author
+    ? isIdentityHidden(replyTarget.user_id)
+      ? "Hidden User"
+      : isRobloxContext
+        ? userData[replyTarget.user_id]?.roblox_display_name ||
+          userData[replyTarget.user_id]?.roblox_username ||
+          replyTarget.author
+        : userData[replyTarget.user_id]?.username || replyTarget.author
     : null;
 
   const replyForm =
@@ -1071,11 +1076,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
               ).map((reply) => {
                 const replyUser = userData[reply.user_id];
                 const isUnknownReplyUser = !reply.user_id;
-                const replyHideRecent =
-                  !isUnknownReplyUser &&
-                  (!replyUser?.settings?.show_recent_comments ||
-                    !replyUser?.settings?.profile_public) &&
-                  currentUserId !== reply.user_id;
+                const replyHideRecent = isIdentityHidden(reply.user_id);
                 const replyDisplayName = isUnknownReplyUser
                   ? "Unknown User"
                   : isRobloxContext
@@ -1094,13 +1095,17 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                   ? (comment.replies?.find((r) => r.id === replyToTargetId) ??
                     null)
                   : null;
+                const replyToTargetHidden =
+                  !!replyToTarget && isIdentityHidden(replyToTarget.user_id);
                 const replyToTargetName = replyToTarget
-                  ? isRobloxContext
-                    ? userData[replyToTarget.user_id]?.roblox_display_name ||
-                      userData[replyToTarget.user_id]?.roblox_username ||
-                      replyToTarget.author
-                    : userData[replyToTarget.user_id]?.username ||
-                      replyToTarget.author
+                  ? replyToTargetHidden
+                    ? "Hidden User"
+                    : isRobloxContext
+                      ? userData[replyToTarget.user_id]?.roblox_display_name ||
+                        userData[replyToTarget.user_id]?.roblox_username ||
+                        replyToTarget.author
+                      : userData[replyToTarget.user_id]?.username ||
+                        replyToTarget.author
                   : null;
 
                 return (
@@ -1225,15 +1230,24 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                               icon="material-symbols:arrow-right"
                                               className="text-secondary-text h-4 w-4 shrink-0"
                                             />
-                                            <CommentAuthorName
-                                              userId={replyToTarget.user_id}
-                                              name={replyToTargetName}
-                                              user={
-                                                userData[replyToTarget.user_id]
-                                              }
-                                              className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
-                                            />
-                                            {type === "vsuggestion" &&
+                                            {replyToTargetHidden ? (
+                                              <span className="text-secondary-text text-sm font-semibold">
+                                                Hidden User
+                                              </span>
+                                            ) : (
+                                              <CommentAuthorName
+                                                userId={replyToTarget.user_id}
+                                                name={replyToTargetName}
+                                                user={
+                                                  userData[
+                                                    replyToTarget.user_id
+                                                  ]
+                                                }
+                                                className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                              />
+                                            )}
+                                            {!replyToTargetHidden &&
+                                              type === "vsuggestion" &&
                                               suggestion &&
                                               replyToTarget.user_id ===
                                                 suggestion.suggester && (
@@ -1241,7 +1255,8 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                                   OP
                                                 </span>
                                               )}
-                                            {type === "vsuggestion" &&
+                                            {!replyToTargetHidden &&
+                                              type === "vsuggestion" &&
                                               suggestion?.upvoterIds?.includes(
                                                 replyToTarget.user_id,
                                               ) && (
@@ -1255,7 +1270,8 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                                   </span>
                                                 </span>
                                               )}
-                                            {type === "vsuggestion" &&
+                                            {!replyToTargetHidden &&
+                                              type === "vsuggestion" &&
                                               suggestion?.downvoterIds?.includes(
                                                 replyToTarget.user_id,
                                               ) && (
@@ -1273,13 +1289,13 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                         )}
                                       </div>
                                     </div>
-                                    <CommentTimestamp
-                                      date={reply.date}
-                                      editedAt={reply.edited_at}
-                                      commentId={reply.id}
-                                    />
                                   </>
                                 )}
+                                <CommentTimestamp
+                                  date={reply.date}
+                                  editedAt={reply.edited_at}
+                                  commentId={reply.id}
+                                />
                               </div>
 
                               {/* Reply action menu */}
