@@ -42,6 +42,9 @@ export function ExperimentOverridesIndicator() {
 
   useEffect(() => {
     if (!userId) return;
+    // Set once a realtime update arrives, so an older REST response that
+    // lands afterwards can't overwrite it.
+    let realtimeSeen = false;
     const update = (
       change: (overrides: ExperimentOverrides) => ExperimentOverrides,
     ) => {
@@ -61,6 +64,7 @@ export function ExperimentOverridesIndicator() {
     const onSet = (event: Event) => {
       const key = overrideKey(event);
       if (!key) return;
+      realtimeSeen = true;
       const { value } = (event as CustomEvent<{ value?: unknown }>).detail;
       const experiment = key.slice(OVERRIDE_PREFERENCE_PREFIX.length);
       update((overrides) => {
@@ -72,6 +76,7 @@ export function ExperimentOverridesIndicator() {
     const onDelete = (event: Event) => {
       const key = overrideKey(event);
       if (!key) return;
+      realtimeSeen = true;
       update((overrides) => {
         const next = { ...overrides };
         delete next[key.slice(OVERRIDE_PREFERENCE_PREFIX.length)];
@@ -79,12 +84,14 @@ export function ExperimentOverridesIndicator() {
       });
     };
     // A full snapshot (on connect, or after a clear) replaces the copy.
-    const onSnapshot = (event: Event) =>
+    const onSnapshot = (event: Event) => {
+      realtimeSeen = true;
       update(() =>
         overridesFromPreferences(
           (event as CustomEvent<Record<string, unknown>>).detail ?? {},
         ),
       );
+    };
 
     window.addEventListener("realtimePreference", onSet);
     window.addEventListener("realtimePreferenceDeleted", onDelete);
@@ -92,7 +99,9 @@ export function ExperimentOverridesIndicator() {
     // Load over REST too, for when the socket is slow or not connected.
     if (isOverrideSyncEnabled()) {
       fetchSyncedOverrides()
-        .then((overrides) => update(() => overrides))
+        .then((overrides) => {
+          if (!realtimeSeen) update(() => overrides);
+        })
         .catch(() => {});
     }
     return () => {

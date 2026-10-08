@@ -1,5 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import {
+  mergeOverrideChanges,
   overridesFromPreferences,
   writeSyncedOverrides,
 } from "./experimentOverrideSync";
@@ -60,4 +61,24 @@ test("syncs overrides key by key, never deleting every preference", async () => 
     ["DELETE", `${base}/experiment_override:a`],
     ["DELETE", `${base}/experiment_override:b`],
   ]);
+});
+
+test("applies this browser's change on top of the server's variants", () => {
+  // "remote" was added on another device after this browser last synced.
+  const server = {
+    kept: "treatment",
+    removed: "control",
+    remote: "treatment",
+  } as const;
+  const previous = { kept: "treatment", removed: "control" } as const;
+  expect(
+    mergeOverrideChanges(server, previous, {
+      kept: "control",
+      added: "treatment",
+    } as const),
+  ).toEqual({ kept: "control", added: "treatment", remote: "treatment" });
+  // Removing the last local key still keeps the other device's key.
+  expect(mergeOverrideChanges(server, previous, {})).toEqual({
+    remote: "treatment",
+  });
 });
