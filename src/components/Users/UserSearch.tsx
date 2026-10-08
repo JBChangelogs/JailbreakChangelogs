@@ -20,7 +20,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
-import { accentCardTheme, accentColorToHex } from "@/utils/ui/accentColor";
+import { accentCardTheme, userCardAccent } from "@/utils/ui/accentColor";
 
 function InlineSpinner() {
   return (
@@ -248,11 +248,7 @@ export default function UserSearch() {
           </div>
         ) : (
           users.map((user) => {
-            const accentColor =
-              user.settings_v2?.colored_profile_cards === true
-                ? (accentColorToHex(user.custom_accent_color) ??
-                  accentColorToHex(user.accent_color))
-                : null;
+            const accent = userCardAccent(user);
             return (
               <Tooltip key={user.id} delayDuration={0}>
                 <TooltipTrigger asChild>
@@ -260,10 +256,8 @@ export default function UserSearch() {
                     href={`/users/${user.id}`}
                     prefetch={false}
                     className="border-border-card group bg-secondary-bg hover:border-border-focus/60 relative block h-full overflow-hidden rounded-xl border shadow-md transition-[border-color,box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                    data-accent-cards={accentColor ? "" : undefined}
-                    style={
-                      accentColor ? accentCardTheme(accentColor) : undefined
-                    }
+                    data-accent-cards={accent?.style}
+                    style={accent ? accentCardTheme(accent) : undefined}
                   >
                     <DiscordUserCard
                       user={user}

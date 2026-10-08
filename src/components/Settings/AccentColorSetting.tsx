@@ -1,14 +1,30 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ArrowLeftRight } from "lucide-react";
+import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { getProfileBanner } from "@/components/Profile/Banner";
+import { appearanceProfileKey } from "@/hooks/useAccentColor";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
-import { hexToHsv, hsvToHex, type Hsv } from "@/utils/ui/accentColor";
+import type { UserData } from "@/types/auth";
+import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
+import { UserAvatar } from "@/utils/ui/avatar";
+import {
+  ACCENT_STYLES,
+  accentCardTheme,
+  hexToHsv,
+  hsvToHex,
+  type Accent,
+  type AccentStyle,
+  type Hsv,
+} from "@/utils/ui/accentColor";
 
 const PRESETS = [
   "#5865f2",
@@ -153,14 +169,58 @@ function ColorPicker({
   );
 }
 
-interface AccentColorSettingProps {
-  /** The color the profile shows right now, or null if none. */
-  accent: string | null;
-  /** Only the custom color; null means the Discord color is in use. */
-  customAccent: string | null;
+/** A labelled swatch showing its hex; opens a ColorPicker once `canOpen` allows it. */
+function ColorSwatch({
+  label,
+  value,
+  onChange,
+  canOpen,
+}: {
+  label: string;
+  value: string;
   onChange: (hex: string) => void;
+  canOpen: () => boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={(next) => setOpen(next && canOpen())}>
+      <PopoverTrigger className="border-border-card bg-secondary-bg hover:border-border-focus/60 focus-visible:ring-border-focus flex cursor-pointer items-center gap-2.5 rounded-lg border py-1.5 pr-3 pl-1.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none">
+        <span
+          aria-hidden="true"
+          className="size-8 shrink-0 rounded-md border border-black/20 shadow-inner"
+          style={{ backgroundColor: value }}
+        />
+        <span>
+          <span className="text-secondary-text block text-xs">{label}</span>
+          <span className="text-primary-text block font-mono text-sm uppercase">
+            {value}
+          </span>
+        </span>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-64 p-3">
+        <ColorPicker value={value} onChange={onChange} />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+const STYLE_NAMES: Record<AccentStyle, string> = {
+  solid: "Solid",
+  glass: "Glass",
+  transparent: "Transparent",
+};
+
+const segment =
+  "text-secondary-text has-checked:bg-button-info has-checked:text-form-button-text has-focus-visible:ring-border-focus cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors has-focus-visible:ring-2";
+
+interface AccentColorSettingProps {
+  /** The accent the profile shows right now, or null if none. */
+  accent: Accent | null;
+  /** Only the custom accent; null means the Discord color is in use. */
+  customAccent: Accent | null;
+  onChange: (accent: Accent) => void;
   onReset: () => void;
-  premiumType: number;
+  userData: UserData;
 }
 
 export function AccentColorSetting({
@@ -168,18 +228,59 @@ export function AccentColorSetting({
   customAccent,
   onChange,
   onReset,
-  premiumType,
+  userData,
 }: AccentColorSettingProps) {
-  const [open, setOpen] = useState(false);
+  const id = useId();
+  const premiumType = userData.premiumtype ?? 0;
   const { modalState, closeModal, checkAccentColorAccess } =
     useSupporterModal();
+  const canEdit = () => checkAccentColorAccess(premiumType);
+  // The style previews show the user's own banner, avatar and name. /v2/users/me
+  // has no custom banner, so read the public profile (shared with the preview).
+  const { data: profile } = useQuery({
+    queryKey: appearanceProfileKey(userData.id),
+    queryFn: () =>
+      fetchUserById(userData.id, PUBLIC_API_URL) as Promise<{
+        avatar?: string | null;
+        banner?: string | null;
+        custom_avatar?: string | null;
+        custom_banner?: string | null;
+      }>,
+    staleTime: 60_000,
+  });
+  const banner = getProfileBanner({
+    userId: userData.id,
+    banner: profile?.banner ?? userData.banner,
+    customBanner: profile?.custom_banner ?? userData.custom_banner,
+    settings: userData.settings_v2,
+    premiumType,
+    size: 600,
+  });
+  const name =
+    userData.global_name && userData.global_name !== "None"
+      ? userData.global_name
+      : userData.username;
+  const current = accent ?? {
+    color: DEFAULT_COLOR,
+    gradient: null,
+    style: "solid" as const,
+  };
+  const update = (patch: Partial<Accent>) => onChange({ ...current, ...patch });
+  const setGradient = (on: boolean) => {
+    if (!canEdit()) return;
+    // Start the gradient a little further round the color wheel.
+    const hsv = hexToHsv(current.color);
+    update({
+      gradient: on ? hsvToHex({ ...hsv, h: (hsv.h + 60) % 360 }) : null,
+    });
+  };
 
   return (
-    <div className="-mx-3 mb-1 flex items-center justify-between gap-4 rounded-lg px-3 py-2">
-      <div className="min-w-0">
+    <div className="-mx-3 mb-1 space-y-5 rounded-lg px-3 py-2">
+      <div>
         <p className="text-primary-text text-base font-medium">Accent color</p>
         <p className="text-secondary-text text-sm">
-          Set a custom accent color for your profile cards.{" "}
+          Choose the color and style of your profile cards.{" "}
           {customAccent
             ? "Using your custom color."
             : "Using your Discord color."}
@@ -198,23 +299,145 @@ export function AccentColorSetting({
         </p>
       </div>
 
-      <div className="flex shrink-0 items-center gap-3">
-        <Popover
-          open={open}
-          onOpenChange={(next) =>
-            setOpen(next && checkAccentColorAccess(premiumType))
-          }
-        >
-          <PopoverTrigger
-            aria-label="Choose accent color"
-            className="border-border-card focus-visible:ring-border-focus size-11 shrink-0 cursor-pointer rounded-lg border-2 shadow-inner transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:outline-none"
-            style={{ backgroundColor: accent ?? DEFAULT_COLOR }}
+      <div role="group" aria-labelledby={`${id}-color`}>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <p
+            id={`${id}-color`}
+            className="text-primary-text text-sm font-medium"
+          >
+            Color
+          </p>
+          <div
+            role="radiogroup"
+            aria-label="Fill"
+            className="border-border-card bg-tertiary-bg inline-flex rounded-lg border p-0.5"
+          >
+            {(
+              [
+                [false, "Single color"],
+                [true, "Gradient"],
+              ] as const
+            ).map(([gradient, label]) => (
+              <label key={label} className={segment}>
+                <input
+                  type="radio"
+                  name={`${id}-fill`}
+                  checked={!!current.gradient === gradient}
+                  onChange={() => setGradient(gradient)}
+                  className="sr-only"
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-border-card bg-tertiary-bg flex items-center gap-2 rounded-xl border p-2">
+          <ColorSwatch
+            label={current.gradient ? "Start" : "Color"}
+            value={current.color}
+            onChange={(color) => update({ color })}
+            canOpen={canEdit}
           />
-          <PopoverContent align="end" className="w-64 p-3">
-            <ColorPicker value={accent ?? DEFAULT_COLOR} onChange={onChange} />
-          </PopoverContent>
-        </Popover>
+          {/* Runs left to right so its ends line up with the swatches. */}
+          <div
+            className="relative grid h-11 min-w-0 flex-1 place-items-center rounded-lg border border-black/10 shadow-inner"
+            style={{
+              background: current.gradient
+                ? `linear-gradient(90deg, ${current.color}, ${current.gradient}) border-box`
+                : current.color,
+            }}
+          >
+            {current.gradient && (
+              <button
+                type="button"
+                aria-label="Swap start and end colors"
+                onClick={() =>
+                  canEdit() &&
+                  update({ color: current.gradient!, gradient: current.color })
+                }
+                className="border-border-card bg-secondary-bg text-secondary-text hover:text-primary-text focus-visible:ring-border-focus cursor-pointer rounded-full border p-1.5 shadow-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <ArrowLeftRight aria-hidden="true" className="size-3.5" />
+              </button>
+            )}
+          </div>
+          {current.gradient && (
+            <ColorSwatch
+              label="End"
+              value={current.gradient}
+              onChange={(gradient) => update({ gradient })}
+              canOpen={canEdit}
+            />
+          )}
+        </div>
       </div>
+
+      <fieldset>
+        <legend className="text-primary-text mb-2 text-sm font-medium">
+          Card style
+        </legend>
+        <div className="grid grid-cols-3 gap-2">
+          {ACCENT_STYLES.map((style) => (
+            <label
+              key={style}
+              className="group border-border-card has-checked:border-button-info has-focus-visible:ring-border-focus hover:border-border-focus/60 cursor-pointer overflow-hidden rounded-lg border transition-colors has-focus-visible:ring-2"
+            >
+              <input
+                type="radio"
+                name={`${id}-style`}
+                value={style}
+                checked={current.style === style}
+                onChange={() => canEdit() && update({ style })}
+                className="sr-only"
+              />
+              {/* Your own card in this style, over your banner. */}
+              <span
+                aria-hidden="true"
+                data-accent-cards={style}
+                style={accentCardTheme({ ...current, style })}
+                className="relative flex h-20 items-end p-2"
+              >
+                <Image
+                  src={banner.primary ?? banner.fallback}
+                  alt=""
+                  fill
+                  sizes="200px"
+                  draggable={false}
+                  className="object-cover"
+                />
+                <span className="bg-secondary-bg border-border-card relative flex w-full min-w-0 items-center gap-1.5 rounded-md border p-1.5">
+                  <UserAvatar
+                    userId={userData.id}
+                    avatarHash={profile?.avatar ?? userData.avatar}
+                    username={userData.username}
+                    size={5}
+                    custom_avatar={
+                      (profile?.custom_avatar ?? userData.custom_avatar) ||
+                      undefined
+                    }
+                    settings={userData.settings_v2}
+                    premiumType={premiumType}
+                    showBadge={false}
+                  />
+                  <span className="text-primary-text truncate text-xs font-semibold">
+                    {name}
+                  </span>
+                </span>
+              </span>
+              <span className="border-border-card group-has-checked:bg-button-info/10 flex items-center justify-between gap-2 border-t px-2.5 py-1.5">
+                <span className="text-primary-text text-sm">
+                  {STYLE_NAMES[style]}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info size-3.5 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-secondary-bg)]"
+                />
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       <SupporterModal
         isOpen={modalState.isOpen}

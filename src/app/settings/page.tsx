@@ -330,6 +330,16 @@ export default function SettingsPage() {
                   (entry) => !PREVIEW_SETTINGS.has(entry.name),
                 )
               : sortedSettings;
+            // Shown just above the custom background setting.
+            const accentSetting = isAppearanceCat && (
+              <AccentColorSetting
+                accent={accentColor.accent}
+                customAccent={accentColor.customAccent}
+                onChange={accentColor.setAccent}
+                onReset={() => void accentColor.reset()}
+                userData={userData}
+              />
+            );
             return (
               <Fragment key={cat.name}>
                 <SettingsCard
@@ -393,57 +403,55 @@ export default function SettingsPage() {
                       const isAppearanceUploadBusy =
                         isPreviewUploading || isBackgroundUploading;
                       return (
-                        <div
-                          key={entry.name}
-                          className="-mx-3 mb-1 rounded-lg px-3 py-2 transition-colors duration-500"
-                          style={
-                            isHighlighted
-                              ? {
-                                  backgroundColor:
-                                    "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                                }
-                              : undefined
-                          }
-                          ref={(el) => {
-                            if (isHighlighted && el) {
-                              setTimeout(() => {
-                                (el as HTMLElement).scrollIntoView({
-                                  behavior: "smooth",
-                                  block: "center",
-                                });
-                              }, 100);
+                        <Fragment key={entry.name}>
+                          {entry.name === "custom_background" && accentSetting}
+                          <div
+                            className="-mx-3 mb-1 rounded-lg px-3 py-2 transition-colors duration-500"
+                            style={
+                              isHighlighted
+                                ? {
+                                    backgroundColor:
+                                      "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                                  }
+                                : undefined
                             }
-                          }}
-                        >
-                          <SettingToggle
-                            name={entry.name}
-                            value={entry.value}
-                            description={entry.description}
-                            displayName={formatSettingName(entry.name)}
-                            onChange={handleSettingChange}
-                            disabled={isAppearanceCat && isAppearanceUploadBusy}
-                            userData={userData}
-                          />
-                          {isAppearanceCat &&
-                            entry.name === "custom_background" &&
-                            entry.value && (
-                              <BackgroundSettings
-                                userData={userData}
-                                onUploadStateChange={setIsBackgroundUploading}
-                              />
-                            )}
-                        </div>
+                            ref={(el) => {
+                              if (isHighlighted && el) {
+                                setTimeout(() => {
+                                  (el as HTMLElement).scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center",
+                                  });
+                                }, 100);
+                              }
+                            }}
+                          >
+                            <SettingToggle
+                              name={entry.name}
+                              value={entry.value}
+                              description={entry.description}
+                              displayName={formatSettingName(entry.name)}
+                              onChange={handleSettingChange}
+                              disabled={
+                                isAppearanceCat && isAppearanceUploadBusy
+                              }
+                              userData={userData}
+                            />
+                            {isAppearanceCat &&
+                              entry.name === "custom_background" &&
+                              entry.value && (
+                                <BackgroundSettings
+                                  userData={userData}
+                                  onUploadStateChange={setIsBackgroundUploading}
+                                />
+                              )}
+                          </div>
+                        </Fragment>
                       );
                     })}
-                    {isAppearanceCat && (
-                      <AccentColorSetting
-                        accent={accentColor.accent}
-                        customAccent={accentColor.customAccent}
-                        onChange={accentColor.setAccent}
-                        onReset={() => void accentColor.reset()}
-                        premiumType={userData.premiumtype ?? 0}
-                      />
-                    )}
+                    {!listedSettings.some(
+                      (entry) => entry.name === "custom_background",
+                    ) && accentSetting}
                   </div>
                 </SettingsCard>
                 {cat.name === "appearance" && displaySettings}

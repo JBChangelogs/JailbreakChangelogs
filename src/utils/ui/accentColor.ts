@@ -27,29 +27,122 @@ const luminance = (hex: string) => {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 };
 
-/** Black or white, whichever contrasts more with `hex` (WCAG). */
-export function readableTextColor(hex: string): "#000000" | "#ffffff" {
-  const l = luminance(hex);
-  return (l + 0.05) / 0.05 > 1.05 / (l + 0.05) ? "#000000" : "#ffffff";
+/**
+ * Black or white, whichever contrasts more with every one of `hexes` (WCAG),
+ * so text stays readable across both ends of a gradient.
+ */
+export function readableTextColor(
+  ...hexes: [string, ...string[]]
+): "#000000" | "#ffffff" {
+  const ls = hexes.map(luminance);
+  const onBlack = Math.min(...ls.map((l) => (l + 0.05) / 0.05));
+  const onWhite = Math.min(...ls.map((l) => 1.05 / (l + 0.05)));
+  return onBlack > onWhite ? "#000000" : "#ffffff";
+}
+
+export const ACCENT_STYLES = ["solid", "glass", "transparent"] as const;
+export type AccentStyle = (typeof ACCENT_STYLES)[number];
+
+/** A profile card accent: "#rrggbb" colors, plus how the card is filled. */
+export interface Accent {
+  color: string;
+  /** End color of a gradient from `color`; null for a solid color. */
+  gradient: string | null;
+  style: AccentStyle;
+}
+
+export const toAccentStyle = (style: unknown): AccentStyle =>
+  ACCENT_STYLES.includes(style as AccentStyle)
+    ? (style as AccentStyle)
+    : "solid";
+
+/**
+ * The accent a user's cards are colored with, or null when they haven't
+ * turned on colored profile cards. Missing fields count as no gradient and
+ * the solid style.
+ */
+export function userCardAccent(user: {
+  settings_v2?: { colored_profile_cards?: boolean } | null;
+  accent_color?: number | string | null;
+  custom_accent_color?: number | string | null;
+  accent_gradient?: number | string | null;
+  accent_style?: string | null;
+}): Accent | null {
+  if (user.settings_v2?.colored_profile_cards !== true) return null;
+  const color =
+    accentColorToHex(user.custom_accent_color) ??
+    accentColorToHex(user.accent_color);
+  if (!color) return null;
+  return {
+    color,
+    gradient: accentColorToHex(user.accent_gradient),
+    style: toAccentStyle(user.accent_style),
+  };
 }
 
 /**
- * Accent colors for an element marked `data-accent-cards`. Every card inside
- * it (anything using the card background) is recolored by the rule in
- * globals.css: the accent becomes the card background, with text, surfaces
- * and borders derived from it. Content outside cards is left alone.
+ * Accent colors for an element marked `data-accent-cards={accent.style}`.
+ * Every card inside it (anything using the card background) is recolored by
+ * the rules in globals.css. Content outside cards is left alone.
+ *
+ * Solid cards are filled with the accent, with text, surfaces and borders
+ * derived from it. Glass and transparent cards are translucent tints that keep
+ * the theme's text: transparent is a faint see-through wash; glass is a
+ * frosted pane (blur, sheen and a light rim, in globals.css). Over a plain
+ * page both keep theme text at WCAG AA in every theme, sheen included.
  */
-export function accentCardTheme(hex: string): CSSProperties {
-  const text = readableTextColor(hex);
+export function accentCardTheme({
+  color,
+  gradient,
+  style,
+}: Accent): CSSProperties {
+  // The midpoint stands in for a gradient where one color is needed.
+  const base = gradient ? `color-mix(in srgb, ${color}, ${gradient})` : color;
+  const fill = (hex: string) =>
+    style === "glass"
+      ? `color-mix(in srgb, color-mix(in srgb, ${hex} 35%, var(--color-primary-bg)) 60%, transparent)`
+      : style === "transparent"
+        ? `color-mix(in srgb, ${hex} 15%, transparent)`
+        : hex;
+  const background: Record<string, string> = gradient
+    ? {
+        "--accent-card-gradient": `linear-gradient(135deg, ${fill(color)}, ${fill(gradient)})`,
+        // Only the gradient fills the card, so translucent fills don't stack.
+        "--accent-card-surface": "transparent",
+      }
+    : {};
+
+  if (style !== "solid") {
+    // Surfaces are translucent layers of the theme text over the tint.
+    const overlay = (amount: number) =>
+      `color-mix(in srgb, var(--color-primary-text) ${amount}%, transparent)`;
+    return {
+      "--accent-card-bg": fill(base),
+      ...background,
+      "--accent-card-tertiary": overlay(12),
+      "--accent-card-quaternary": overlay(20),
+      // Glass gets a light rim, like the edge of a pane.
+      "--accent-card-border":
+        style === "glass"
+          ? `color-mix(in srgb, color-mix(in srgb, ${base} 40%, white) 55%, transparent)`
+          : overlay(28),
+      "--accent-card-text-secondary": overlay(80),
+    } as CSSProperties;
+  }
+
+  const text = gradient
+    ? readableTextColor(color, gradient)
+    : readableTextColor(color);
   const mix = (amount: number) =>
-    `color-mix(in srgb, ${hex} ${100 - amount}%, ${text})`;
+    `color-mix(in srgb, ${base} ${100 - amount}%, ${text})`;
   return {
-    "--accent-card-bg": hex,
+    "--accent-card-bg": base,
+    ...background,
     "--accent-card-tertiary": mix(12),
     "--accent-card-quaternary": mix(20),
     "--accent-card-border": mix(28),
     "--accent-card-text": text,
-    "--accent-card-text-secondary": `color-mix(in srgb, ${text} 72%, ${hex})`,
+    "--accent-card-text-secondary": `color-mix(in srgb, ${text} 72%, ${base})`,
   } as CSSProperties;
 }
 
