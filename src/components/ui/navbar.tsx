@@ -31,10 +31,10 @@ import {
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
 import { Spinner } from "@/components/ui/Spinner";
 
-const AnimatedThemeToggler = dynamic(
+const ThemeShortcut = dynamic(
   () =>
     import("@/components/ui/animated-theme-toggler").then((mod) => ({
-      default: mod.AnimatedThemeToggler,
+      default: mod.ThemeShortcut,
     })),
   {
     ssr: false,
@@ -502,8 +502,8 @@ export const NavbarModern = ({
             <TooltipContent>Messages</TooltipContent>
           </Tooltip>
 
-          {/* Theme toggle */}
-          <AnimatedThemeToggler className="focus-visible:ring-link data-[state=open]:bg-quaternary-bg border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none" />
+          {/* Theme settings shortcut */}
+          <ThemeShortcut className="focus-visible:ring-link data-[state=open]:bg-quaternary-bg border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none" />
 
           <NavigationLayoutShortcut />
 

@@ -5,7 +5,14 @@ import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import { debounce } from "@/utils/helpers/debounce";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 
-type Theme = "light" | "dark" | "amoled";
+/** "halloween" is the temporary seasonal theme (see globals.css). */
+export const THEMES = ["halloween", "dark", "light", "amoled"] as const;
+export type Theme = (typeof THEMES)[number];
+/** For visitors who haven't picked a theme; THEME_INIT_SCRIPT matches it. */
+export const DEFAULT_THEME: Theme = "halloween";
+
+export const isTheme = (value: unknown): value is Theme =>
+  THEMES.includes(value as Theme);
 
 // Spamming the toggle shouldn't spam the realtime WS with one
 // "set_preference" message per click — wait for clicks to settle first.
@@ -25,7 +32,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return DEFAULT_THEME;
 
   const savedTheme = safeLocalStorage.getItem("theme");
 
@@ -36,17 +43,17 @@ function getInitialTheme(): Theme {
     const migratedTheme = prefersDark ? "dark" : "light";
     safeLocalStorage.setItem("theme", migratedTheme);
     return migratedTheme;
-  } else if (savedTheme && ["light", "dark", "amoled"].includes(savedTheme)) {
-    return savedTheme as Theme;
+  } else if (isTheme(savedTheme)) {
+    return savedTheme;
   }
 
-  return "dark";
+  return DEFAULT_THEME;
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Always start with "dark" to match the server render and avoid hydration
+  // Always start with the default to match the server render and avoid hydration
   // mismatches. The actual theme is read from localStorage in useEffect below.
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
   const resolvedTheme: "light" | "dark" = theme === "light" ? "light" : "dark";
 
   // Timestamp of the last user-initiated change. Incoming WS echoes arriving
@@ -66,7 +73,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const cached = getCachedPreference("theme");
-    if (cached === "light" || cached === "dark" || cached === "amoled") {
+    if (isTheme(cached)) {
       setThemeState(cached);
       return;
     }
@@ -76,7 +83,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("light", "dark", "amoled");
+    root.classList.remove(...THEMES);
     root.classList.add(theme);
     safeLocalStorage.setItem("theme", theme);
   }, [theme]);
@@ -90,11 +97,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const handlePreferenceUpdate = (e: Event) => {
       const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
         .detail;
-      if (
-        key === "theme" &&
-        !isBlocked() &&
-        (value === "light" || value === "dark" || value === "amoled")
-      ) {
+      if (key === "theme" && !isBlocked() && isTheme(value)) {
         setThemeState(value);
       }
     };
@@ -102,22 +105,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (isBlocked()) return;
       const prefs = (e as CustomEvent<Record<string, unknown>>).detail;
       const incoming = prefs?.theme;
-      if (
-        incoming === "light" ||
-        incoming === "dark" ||
-        incoming === "amoled"
-      ) {
+      if (isTheme(incoming)) {
         setThemeState(incoming);
       } else {
         safeLocalStorage.removeItem("theme");
-        setThemeState("dark");
+        setThemeState(DEFAULT_THEME);
       }
     };
     const handlePreferenceDeleted = (e: Event) => {
       const { key } = (e as CustomEvent<{ key: string }>).detail;
       if (key !== "theme" || isBlocked()) return;
       safeLocalStorage.removeItem("theme");
-      setThemeState("dark");
+      setThemeState(DEFAULT_THEME);
     };
     window.addEventListener("realtimePreference", handlePreferenceUpdate);
     window.addEventListener("realtimePreferences", handlePreferences);

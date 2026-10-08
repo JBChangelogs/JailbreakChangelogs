@@ -52,12 +52,12 @@ function mergeToastClassNames(
 }
 
 const Toaster = ({ toastOptions, style, icons, ...props }: ToasterProps) => {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   useSonnerTwemoji();
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={resolvedTheme}
       className="toaster group"
       style={
         {
