@@ -3,6 +3,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { UserAvatar } from "@/utils/ui/avatar";
 import CommentTimestamp from "./CommentTimestamp";
 import { UserData } from "@/types/auth";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface ReportCommentModalProps {
   open: boolean;
@@ -12,6 +13,7 @@ interface ReportCommentModalProps {
   setReportReason: (reason: string) => void;
   commentContent: string;
   commentOwner: string;
+  identityHidden: boolean;
   commentId: number;
   commentUserId: string;
   commentAvatar?: string | null;
@@ -31,6 +33,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
   setReportReason,
   commentContent,
   commentOwner,
+  identityHidden,
   commentId,
   commentUserId,
   commentAvatar,
@@ -66,16 +69,29 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
           <div className="border-border-card bg-tertiary-bg/50 rounded-lg border p-3">
             <div className="flex gap-2 sm:gap-3">
               <div className="flex shrink-0 items-center">
-                <UserAvatar
-                  userId={commentUserId}
-                  avatarHash={commentAvatar ?? null}
-                  username={commentOwner}
-                  custom_avatar={commentCustomAvatar ?? undefined}
-                  size={7}
-                  showBadge={false}
-                  settings={commentSettings}
-                  premiumType={commentPremiumType}
-                />
+                {identityHidden ? (
+                  <div
+                    className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-7 w-7 items-center justify-center rounded-full border ring-1"
+                    role="img"
+                    aria-label="Hidden User"
+                  >
+                    <Icon
+                      icon="heroicons:lock-closed"
+                      className="text-secondary-text h-4 w-4"
+                    />
+                  </div>
+                ) : (
+                  <UserAvatar
+                    userId={commentUserId}
+                    avatarHash={commentAvatar ?? null}
+                    username={commentOwner}
+                    custom_avatar={commentCustomAvatar ?? undefined}
+                    size={7}
+                    showBadge={false}
+                    settings={commentSettings}
+                    premiumType={commentPremiumType}
+                  />
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 flex-col pt-1.5 pb-1.5">

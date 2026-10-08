@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { parseSortGroups, type SortGroup } from "@/utils/api/sortGroups";
 import {
   CommentData,
@@ -89,7 +90,20 @@ export function useCommentState(props: ChangelogCommentsProps) {
     new Set(),
   );
   const sortPrefKey = `comments_sort_${type}`;
-  const [sortOrder, setSortOrder] = useState<string | null>(null);
+  const [preferredSort, setSortOrder] = useState<string | null>(null);
+  const [{ commentsPage, commentsSort }, setCommentParams] = useQueryStates({
+    commentsPage: parseAsInteger.withDefault(1),
+    commentsSort: parseAsString,
+  });
+  const page =
+    Number.isSafeInteger(commentsPage) && commentsPage > 0 ? commentsPage : 1;
+  const sortOrder = commentsSort ?? preferredSort;
+  const setPage = useCallback(
+    (value: number) => {
+      void setCommentParams({ commentsPage: value, commentsSort: sortOrder });
+    },
+    [setCommentParams, sortOrder],
+  );
   const sortGroupsQuery = useQuery({
     queryKey: ["comment-sorts"],
     queryFn: async ({ signal }): Promise<SortGroup[]> => {
@@ -149,7 +163,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const reactionBan = bans["reactions"] ?? null;
 
   // --- Pagination ---
-  const [page, setPage] = useState(1);
   const [commentsReady, setCommentsReady] = useState(false);
   const commentType = type === "item" ? itemType || type : type;
   const commentQueryOptions = useCallback(
@@ -199,9 +212,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
     enabled: commentsReady && Boolean(changelogId && PUBLIC_API_URL),
   });
   useEffect(() => {
-    if (commentsQuery.data?.page && commentsQuery.data.page !== page)
-      setPage(commentsQuery.data.page);
-  }, [commentsQuery.data?.page, page]);
+    if (!commentsQuery.data) return;
+    const resolvedPage = Math.min(
+      commentsQuery.data.page,
+      Math.max(1, commentsQuery.data.totalPages),
+    );
+    if (resolvedPage !== page) setPage(resolvedPage);
+  }, [commentsQuery.data, page, setPage]);
   const comments = commentsQuery.data?.comments ?? initialComments;
   const totalPages = commentsQuery.data?.totalPages ?? 1;
   const totalComments = commentsQuery.data?.totalComments ?? 0;
@@ -730,7 +747,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const refreshCommentsFromServer = useCallback(
     async (_silent = false, targetPage = 1, sort?: string, force = false) => {
       const effectiveSort = sort ?? sortOrder;
-      setPage(targetPage);
+      void setCommentParams({
+        commentsPage: targetPage,
+        commentsSort: effectiveSort,
+      });
       setCommentsReady(true);
       try {
         if (force) {
@@ -746,12 +766,19 @@ export function useCommentState(props: ChangelogCommentsProps) {
         log.error("Error refreshing comments:", err);
       }
     },
-    [changelogId, commentType, sortOrder, queryClient, commentQueryOptions],
+    [
+      changelogId,
+      commentType,
+      sortOrder,
+      queryClient,
+      commentQueryOptions,
+      setCommentParams,
+    ],
   );
 
   const scrolledCommentHash = useRef("");
 
-  // A profile activity link may point to any page or reply in this discussion.
+  // Comment links locate the current page; page links retain their chosen sort.
   useEffect(() => {
     if (!changelogId) return;
     let ignore = false;
@@ -760,7 +787,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
       clearTimeout(timeoutId);
       scrolledCommentHash.current = "";
       setCommentsReady(false);
-      setPage(1);
       timeoutId = setTimeout(async () => {
         const targetId = /^#comment-([1-9][0-9]*)$/.exec(
           window.location.hash,
@@ -808,7 +834,17 @@ export function useCommentState(props: ChangelogCommentsProps) {
             log.error("Error locating linked comment", error);
           }
         }
-        if (!ignore) await refreshCommentsFromServer(false, 1);
+        if (!ignore) {
+          const requestedPage = Number(
+            new URLSearchParams(window.location.search).get("commentsPage"),
+          );
+          await refreshCommentsFromServer(
+            false,
+            Number.isSafeInteger(requestedPage) && requestedPage > 0
+              ? requestedPage
+              : 1,
+          );
+        }
       }, 300);
     };
     loadComments();
@@ -1214,7 +1250,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     textarea?.focus();
   }, [replyingToId]);
 
-  const handleSortChange = (order: string) => {
+  const clearCommentHash = () => {
     if (/^#comment-[1-9][0-9]*$/.test(window.location.hash)) {
       window.history.replaceState(
         null,
@@ -1222,10 +1258,16 @@ export function useCommentState(props: ChangelogCommentsProps) {
         window.location.pathname + window.location.search,
       );
     }
+  };
+
+  const handleSortChange = (order: string) => {
+    clearCommentHash();
     localStorage.setItem(sortPrefKey, order);
     setSortOrder(order);
-    setPage(1);
-    void refreshCommentsFromServer(false, 1, order);
+    void setCommentParams(
+      { commentsPage: 1, commentsSort: order },
+      { history: "push" },
+    );
     window.dispatchEvent(
       new CustomEvent("sendRealtimePreference", {
         detail: { key: sortPrefKey, value: order },
@@ -1465,8 +1507,11 @@ export function useCommentState(props: ChangelogCommentsProps) {
     event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
-    setPage(value);
-    void refreshCommentsFromServer(false, value);
+    clearCommentHash();
+    void setCommentParams(
+      { commentsPage: value, commentsSort: sortOrder },
+      { history: "push" },
+    );
     const commentsHeader = document.querySelector("#comments-header");
     if (commentsHeader) {
       commentsHeader.scrollIntoView({ behavior: "smooth" });

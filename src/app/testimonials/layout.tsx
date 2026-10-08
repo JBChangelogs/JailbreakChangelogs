@@ -15,7 +15,7 @@ const pageMetadata: Metadata = {
       "See what the Jailbreak community says about Jailbreak Changelogs. Trusted by thousands of players, content creators, and even the game developers themselves.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
         width: 2400,
         height: 1260,
         alt: "Jailbreak Changelogs Banner",
@@ -31,7 +31,7 @@ const pageMetadata: Metadata = {
     description:
       "See what the Jailbreak community says about Jailbreak Changelogs. Trusted by thousands of players, content creators, and even the game developers themselves.",
     images: [
-      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
     ],
   },
 };

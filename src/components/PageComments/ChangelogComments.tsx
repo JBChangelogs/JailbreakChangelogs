@@ -16,6 +16,7 @@ import ReportCommentModal from "./ReportCommentModal";
 import SupporterModal from "../Modals/SupporterModal";
 import type { CommentData } from "@/utils/api/api";
 import type { ChangelogCommentsProps } from "./commentTypes";
+import { isCommentIdentityHidden } from "./commentUtils";
 
 export default function ChangelogComments(props: ChangelogCommentsProps) {
   const state = useCommentState(props);
@@ -61,6 +62,11 @@ function CommentsLayout() {
         .find((r) => r.id === reportingCommentId) ??
       null)
     : null;
+  const reportingIdentityHidden = isCommentIdentityHidden(
+    reportingComment?.user_id || "",
+    userData[reportingComment?.user_id || ""]?.settings,
+    currentUserId,
+  );
 
   return (
     <div className="space-y-2 sm:space-y-3">
@@ -175,13 +181,11 @@ function CommentsLayout() {
         reportReason={reportReason}
         setReportReason={setReportReason}
         commentContent={reportingComment?.content || ""}
+        identityHidden={reportingIdentityHidden}
         commentOwner={(() => {
           const ruid = reportingComment?.user_id || "";
           if (!ruid) return "";
-          const hidden =
-            !userData[ruid]?.settings?.show_recent_comments &&
-            currentUserId !== ruid;
-          if (hidden) return "Hidden User";
+          if (reportingIdentityHidden) return "Hidden User";
           if (type === "tradev2" || type === "inventory")
             return (
               userData[ruid]?.roblox_display_name ||

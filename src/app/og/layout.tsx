@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
       images: [
         {
-          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
           width: 2400,
           height: 1260,
           alt: "Jailbreak Changelogs Banner",
@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
       images: [
-        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
       ],
     },
   };

@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "View the top 25 players in the current Roblox Jailbreak season ranked by their total experience and see who's leading the seaso",
       images: [
         {
-          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
           width: 2400,
           height: 1260,
           alt: "Jailbreak Changelogs Banner",
@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "View the top 25 players in the current Roblox Jailbreak season ranked by their total experience and see who's leading the seaso",
       images: [
-        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
       ],
     },
     keywords: [

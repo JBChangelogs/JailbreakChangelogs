@@ -46,6 +46,7 @@ import {
   convertUrlsToLinksHTML,
   processMentions,
   sanitizeHTML,
+  isCommentIdentityHidden,
 } from "./commentUtils";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useCommentsContext } from "./CommentsContext";
@@ -120,7 +121,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     setReactionBreakdownOpenId,
     setBreakdownTab,
     getStableReactionOrder,
-    isTester,
     canDeleteAnyComment,
   } = useCommentsContext();
   const { twemojiEnabled } = useTwemoji();
@@ -175,7 +175,29 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     }
   }, [editingCommentId, comment.id, comment.content, comment.replies]);
 
-  const commentAuthorSettings = userData[comment.user_id]?.settings;
+  const isIdentityHidden = (userId: string) => {
+    return isCommentIdentityHidden(
+      userId,
+      userData[userId]?.settings,
+      currentUserId,
+    );
+  };
+
+  const copyCommentLink = async (commentId: number) => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("commentsPage");
+    url.searchParams.delete("commentsSort");
+    if (type === "vsuggestion") url.searchParams.set("tab", "discussion");
+    else if (isRobloxContext || type === "item")
+      url.searchParams.set("tab", "comments");
+    url.hash = `comment-${commentId}`;
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      toast.success("Comment link copied");
+    } catch {
+      toast.error("Failed to copy comment link");
+    }
+  };
 
   // For trade/inventory contexts, prefer Roblox identity
   const isRobloxContext =
@@ -196,11 +218,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
 
   // Hide identity if show_recent_comments or profile_public is falsy
   // and the viewer is not the comment author
-  const hideRecent =
-    !isUnknownUser &&
-    (!commentAuthorSettings?.show_recent_comments ||
-      !commentAuthorSettings?.profile_public) &&
-    currentUserId !== comment.user_id;
+  const hideRecent = isIdentityHidden(comment.user_id);
 
   // Truncation logic for long comments
   const isExpanded = expandedComments.has(comment.id);
@@ -230,11 +248,13 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
       ? (comment.replies?.find((r) => r.id === replyingToReplyId) ?? null)
       : null;
   const replyTargetName = replyTarget
-    ? isRobloxContext
-      ? userData[replyTarget.user_id]?.roblox_display_name ||
-        userData[replyTarget.user_id]?.roblox_username ||
-        replyTarget.author
-      : userData[replyTarget.user_id]?.username || replyTarget.author
+    ? isIdentityHidden(replyTarget.user_id)
+      ? "Hidden User"
+      : isRobloxContext
+        ? userData[replyTarget.user_id]?.roblox_display_name ||
+          userData[replyTarget.user_id]?.roblox_username ||
+          replyTarget.author
+        : userData[replyTarget.user_id]?.username || replyTarget.author
     : null;
 
   const replyForm =
@@ -684,25 +704,15 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             View Reactions
                           </DropdownMenuItem>
                         )}
-                        {isTester && (
-                          <DropdownMenuItem
-                            onClick={() => {
-                              void navigator.clipboard
-                                .writeText(String(comment.id))
-                                .then(() => {
-                                  toast.success(
-                                    `Comment ID ${comment.id} copied`,
-                                  );
-                                });
-                            }}
-                          >
-                            <Icon
-                              icon="heroicons-outline:clipboard"
-                              className="mr-2 h-4 w-4"
-                            />
-                            Copy Comment ID
-                          </DropdownMenuItem>
-                        )}
+                        <DropdownMenuItem
+                          onClick={() => void copyCommentLink(comment.id)}
+                        >
+                          <Icon
+                            icon="heroicons-outline:clipboard"
+                            className="mr-2 h-4 w-4"
+                          />
+                          Copy comment link
+                        </DropdownMenuItem>
                         {currentUserId === comment.user_id ? (
                           <>
                             {/* Check if comment is still editable (within 1 hour) */}
@@ -995,20 +1005,10 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
               View Reactions
             </ContextMenuItem>
           )}
-          {isTester && (
-            <ContextMenuItem
-              onClick={() => {
-                void navigator.clipboard
-                  .writeText(String(comment.id))
-                  .then(() => {
-                    toast.success(`Comment ID ${comment.id} copied`);
-                  });
-              }}
-            >
-              <Icon icon="heroicons-outline:clipboard" className="h-4 w-4" />
-              Copy Comment ID
-            </ContextMenuItem>
-          )}
+          <ContextMenuItem onClick={() => void copyCommentLink(comment.id)}>
+            <Icon icon="heroicons-outline:clipboard" className="h-4 w-4" />
+            Copy comment link
+          </ContextMenuItem>
           {isLoggedIn && (
             <>
               <ContextMenuSeparator />
@@ -1071,11 +1071,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
               ).map((reply) => {
                 const replyUser = userData[reply.user_id];
                 const isUnknownReplyUser = !reply.user_id;
-                const replyHideRecent =
-                  !isUnknownReplyUser &&
-                  (!replyUser?.settings?.show_recent_comments ||
-                    !replyUser?.settings?.profile_public) &&
-                  currentUserId !== reply.user_id;
+                const replyHideRecent = isIdentityHidden(reply.user_id);
                 const replyDisplayName = isUnknownReplyUser
                   ? "Unknown User"
                   : isRobloxContext
@@ -1094,13 +1090,17 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                   ? (comment.replies?.find((r) => r.id === replyToTargetId) ??
                     null)
                   : null;
+                const replyToTargetHidden =
+                  !!replyToTarget && isIdentityHidden(replyToTarget.user_id);
                 const replyToTargetName = replyToTarget
-                  ? isRobloxContext
-                    ? userData[replyToTarget.user_id]?.roblox_display_name ||
-                      userData[replyToTarget.user_id]?.roblox_username ||
-                      replyToTarget.author
-                    : userData[replyToTarget.user_id]?.username ||
-                      replyToTarget.author
+                  ? replyToTargetHidden
+                    ? "Hidden User"
+                    : isRobloxContext
+                      ? userData[replyToTarget.user_id]?.roblox_display_name ||
+                        userData[replyToTarget.user_id]?.roblox_username ||
+                        replyToTarget.author
+                      : userData[replyToTarget.user_id]?.username ||
+                        replyToTarget.author
                   : null;
 
                 return (
@@ -1225,15 +1225,24 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                               icon="material-symbols:arrow-right"
                                               className="text-secondary-text h-4 w-4 shrink-0"
                                             />
-                                            <CommentAuthorName
-                                              userId={replyToTarget.user_id}
-                                              name={replyToTargetName}
-                                              user={
-                                                userData[replyToTarget.user_id]
-                                              }
-                                              className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
-                                            />
-                                            {type === "vsuggestion" &&
+                                            {replyToTargetHidden ? (
+                                              <span className="text-secondary-text text-sm font-semibold">
+                                                Hidden User
+                                              </span>
+                                            ) : (
+                                              <CommentAuthorName
+                                                userId={replyToTarget.user_id}
+                                                name={replyToTargetName}
+                                                user={
+                                                  userData[
+                                                    replyToTarget.user_id
+                                                  ]
+                                                }
+                                                className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                              />
+                                            )}
+                                            {!replyToTargetHidden &&
+                                              type === "vsuggestion" &&
                                               suggestion &&
                                               replyToTarget.user_id ===
                                                 suggestion.suggester && (
@@ -1241,7 +1250,8 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                                   OP
                                                 </span>
                                               )}
-                                            {type === "vsuggestion" &&
+                                            {!replyToTargetHidden &&
+                                              type === "vsuggestion" &&
                                               suggestion?.upvoterIds?.includes(
                                                 replyToTarget.user_id,
                                               ) && (
@@ -1255,7 +1265,8 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                                   </span>
                                                 </span>
                                               )}
-                                            {type === "vsuggestion" &&
+                                            {!replyToTargetHidden &&
+                                              type === "vsuggestion" &&
                                               suggestion?.downvoterIds?.includes(
                                                 replyToTarget.user_id,
                                               ) && (
@@ -1273,13 +1284,13 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                         )}
                                       </div>
                                     </div>
-                                    <CommentTimestamp
-                                      date={reply.date}
-                                      editedAt={reply.edited_at}
-                                      commentId={reply.id}
-                                    />
                                   </>
                                 )}
+                                <CommentTimestamp
+                                  date={reply.date}
+                                  editedAt={reply.edited_at}
+                                  commentId={reply.id}
+                                />
                               </div>
 
                               {/* Reply action menu */}
@@ -1424,25 +1435,17 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                             View Reactions
                                           </DropdownMenuItem>
                                         )}
-                                      {isTester && (
-                                        <DropdownMenuItem
-                                          onClick={() => {
-                                            void navigator.clipboard
-                                              .writeText(String(reply.id))
-                                              .then(() => {
-                                                toast.success(
-                                                  `Comment ID ${reply.id} copied`,
-                                                );
-                                              });
-                                          }}
-                                        >
-                                          <Icon
-                                            icon="heroicons-outline:clipboard"
-                                            className="mr-2 h-4 w-4"
-                                          />
-                                          Copy Comment ID
-                                        </DropdownMenuItem>
-                                      )}
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          void copyCommentLink(reply.id)
+                                        }
+                                      >
+                                        <Icon
+                                          icon="heroicons-outline:clipboard"
+                                          className="mr-2 h-4 w-4"
+                                        />
+                                        Copy comment link
+                                      </DropdownMenuItem>
                                       {currentUserId === reply.user_id ? (
                                         <>
                                           {isCommentEditable(reply.date) && (
@@ -1668,25 +1671,15 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             View Reactions
                           </ContextMenuItem>
                         )}
-                        {isTester && (
-                          <ContextMenuItem
-                            onClick={() => {
-                              void navigator.clipboard
-                                .writeText(String(reply.id))
-                                .then(() => {
-                                  toast.success(
-                                    `Comment ID ${reply.id} copied`,
-                                  );
-                                });
-                            }}
-                          >
-                            <Icon
-                              icon="heroicons-outline:clipboard"
-                              className="h-4 w-4"
-                            />
-                            Copy Comment ID
-                          </ContextMenuItem>
-                        )}
+                        <ContextMenuItem
+                          onClick={() => void copyCommentLink(reply.id)}
+                        >
+                          <Icon
+                            icon="heroicons-outline:clipboard"
+                            className="h-4 w-4"
+                          />
+                          Copy comment link
+                        </ContextMenuItem>
                         {isLoggedIn && (
                           <>
                             <ContextMenuSeparator />

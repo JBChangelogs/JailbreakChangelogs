@@ -65,7 +65,7 @@ export async function generateMetadata({
         title: "Changelog Not Found",
         description: "The requested changelog could not be found.",
         images: [
-          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
         ],
       },
       twitter: {
@@ -73,7 +73,7 @@ export async function generateMetadata({
         title: "Changelog Not Found",
         description: "The requested changelog could not be found.",
         images: [
-          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
         ],
       },
     };

@@ -365,7 +365,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
         <div className="bg-tertiary-bg rounded-md p-4 text-center">
           <div className="mb-3 flex justify-center">
             <Image
-              src={`/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`}
+              src={`/logos/collab/h/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}_Halloween.webp`}
               alt="Jailbreak Changelogs x Trading Core"
               width={220}
               height={48}
