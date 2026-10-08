@@ -314,7 +314,7 @@ export default function Breadcrumb({
                   ) : (
                     <Link
                       href={item.href}
-                      className="text-secondary-text hover:text-link-hover flex items-center text-sm font-medium"
+                      className="text-secondary-text hover:text-highlight flex items-center text-sm font-medium"
                     >
                       <svg
                         className="mr-2.5 h-3 w-3 shrink-0"
@@ -360,7 +360,7 @@ export default function Breadcrumb({
                 ) : (
                   <Link
                     href={item.href}
-                    className="text-secondary-text hover:text-link-hover ml-1 truncate text-sm font-medium md:ml-2"
+                    className="text-secondary-text hover:text-highlight ml-1 truncate text-sm font-medium md:ml-2"
                   >
                     {item.label}
                   </Link>

@@ -10,7 +10,7 @@ export const highlightBrandName = (text: string) => {
   return parts.map((part, index) => {
     if (brandCheckRegex.test(part)) {
       return (
-        <span key={index} className="text-link font-semibold">
+        <span key={index} className="text-highlight font-semibold">
           {part}
         </span>
       );

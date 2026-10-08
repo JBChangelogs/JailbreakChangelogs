@@ -672,10 +672,10 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --color-card-tag-text: #1e1e2e;
   --color-card-highlight: #cba6f7;
 
-  --color-link: #89b4fa;
-  --color-link-hover: #89dceb;
-  --color-link-active: #b4befe;
-  --color-link-visited: #b4befe;
+  --color-link: var(--color-highlight);
+  --color-link-hover: #f5c2e7;
+  --color-link-active: #cba6f7;
+  --color-link-visited: var(--color-highlight);
 
   --color-button-info: #cba6f7;
   --color-button-info-hover: #b4befe;
@@ -713,6 +713,73 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --color-overlay-light: rgb(17 17 27 / 50%);
   --color-overlay-medium: rgb(17 17 27 / 70%);
   --color-overlay-dark: rgb(17 17 27 / 90%);
+}
+
+:root.catppuccin-latte {
+  --color-primary-bg: #eff1f5;
+  --color-secondary-bg: #e6e9ef;
+  --color-tertiary-bg: #dce0e8;
+  --color-quaternary-bg: #dce0e8;
+  --color-surface-bg: #e6e9ef;
+  --color-overlay-bg: rgb(220 224 232 / 80%);
+
+  --color-primary-text: #4c4f69;
+  --color-secondary-text: #5c5f77;
+  --color-tertiary-text: #6c6f85;
+  --color-quaternary-text: #7c7f93;
+  --color-card-headline: #4c4f69;
+  --color-card-paragraph: #5c5f77;
+
+  --color-border-primary: #bcc0cc;
+  --color-border-card: #bcc0cc;
+  --color-border-secondary: #ccd0da;
+  --color-border-tertiary: #ccd0da;
+  --color-border-focus: #8839ef;
+  --color-card-tag-bg: color-mix(in srgb, #1e66f5 90%, black);
+  --color-card-tag-text: #eff1f5;
+  --color-card-highlight: #8839ef;
+
+  --color-link: var(--color-highlight);
+  --color-link-hover: color-mix(in srgb, #8839ef 85%, black);
+  --color-link-active: color-mix(in srgb, #8839ef 75%, black);
+  --color-link-visited: var(--color-highlight);
+
+  --color-button-info: #8839ef;
+  --color-button-info-hover: color-mix(in srgb, #8839ef 85%, black);
+  --color-button-info-active: color-mix(in srgb, #8839ef 85%, black);
+  --color-button-info-disabled: #bcc0cc;
+  --color-button-secondary: #ccd0da;
+  --color-button-secondary-hover: #bcc0cc;
+  --color-button-secondary-active: #acb0be;
+  --color-form-button: #8839ef;
+  --color-form-button-text: #eff1f5;
+  --color-button-success: color-mix(in srgb, #40a02b 75%, black);
+  --color-button-success-hover: color-mix(in srgb, #40a02b 65%, black);
+  --color-button-danger: #d20f39;
+  --color-button-danger-hover: color-mix(in srgb, #d20f39 85%, black);
+
+  --color-form-input: #e6e9ef;
+  --color-form-input-focus: #dce0e8;
+  --color-form-input-disabled: #e6e9ef;
+  --color-form-label: #5c5f77;
+  --color-form-placeholder: #7c7f93;
+  --color-border-error: #d20f39;
+  --color-form-error: #d20f39;
+  --color-form-success: #40a02b;
+  --color-status-success: color-mix(in srgb, #40a02b 75%, black);
+  --color-status-warning: #df8e1d;
+  --color-status-error: #d20f39;
+  --color-status-info: #1e66f5;
+  --color-status-neutral: #7c7f93;
+  --color-warning: #fe640b;
+  --color-warning-light: #df8e1d;
+  --color-warning-dark: #fe640b;
+  --color-tertiary: #179299;
+  --color-highlight: color-mix(in srgb, #8839ef 98%, black);
+  --color-secondary: #6c6f85;
+  --color-overlay-light: rgb(220 224 232 / 50%);
+  --color-overlay-medium: rgb(220 224 232 / 70%);
+  --color-overlay-dark: rgb(220 224 232 / 90%);
 }
 
 /* Temporary Halloween theme: remove these blocks, and "halloween" from THEMES,

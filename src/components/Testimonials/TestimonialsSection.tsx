@@ -49,7 +49,7 @@ export default function TestimonialsSection({
                   )}
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-card-headline group-hover:text-link mb-1 font-bold transition-colors">
+                  <h3 className="text-card-headline group-hover:text-highlight mb-1 font-bold transition-colors">
                     {testimonial.name}
                   </h3>
                   <p className="text-primary-text bg-tertiary-bg border-border-card inline-flex h-6 w-fit items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">

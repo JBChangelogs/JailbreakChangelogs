@@ -223,7 +223,7 @@ export default async function Home() {
 
   return (
     <main className="bg-primary-bg min-h-screen">
-      <section className="relative overflow-hidden pt-16 pb-8 md:py-20 [.light_&]:[--color-link:#ff877d]">
+      <section className="relative overflow-hidden pt-16 pb-8 md:py-20 [.light:not(.catppuccin-latte)_&]:[--color-link:#ff877d]">
         <div className="absolute inset-0 z-0">
           <HeroBackgroundCarousel initialImage={initialImage} />
           <div className="absolute inset-0 z-10 bg-gradient-to-br from-[#140f10]/75 via-[#261b1e]/60 to-black/80" />
@@ -306,7 +306,7 @@ export default async function Home() {
             <div className="order-2 pt-6 md:order-3 md:col-span-2">
               <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-link text-sm font-semibold tracking-[0.2em] uppercase">
+                  <p className="text-highlight text-sm font-semibold tracking-[0.2em] uppercase [.catppuccin-latte_&]:text-[#7287fd]">
                     Trusted by Badimo
                   </p>
                   <a
@@ -342,17 +342,17 @@ export default async function Home() {
                     key={testimonial.id}
                     href="/testimonials"
                     prefetch={false}
-                    className="block rounded-2xl transition-colors hover:bg-black/45 [.light_&]:hover:bg-white/[0.08]"
+                    className="hover:bg-tertiary-bg block rounded-2xl transition-colors"
                   >
                     <blockquote
-                      className="flex h-full flex-col rounded-2xl border border-white/20 bg-black/35 p-4 text-left [.light_&]:border-white/15 [.light_&]:bg-white/[0.04] [.light_&]:backdrop-blur-sm"
+                      className="border-border-card bg-secondary-bg/95 flex h-full flex-col rounded-2xl border p-4 text-left"
                       style={
                         {
                           viewTransitionName: `hero-card-${i + 5}`,
                         } as React.CSSProperties
                       }
                     >
-                      <p className="line-clamp-5 text-sm leading-relaxed text-white/90">
+                      <p className="text-secondary-text line-clamp-5 text-sm leading-relaxed">
                         &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
                       </p>
                       <footer className="mt-auto flex items-center gap-3 pt-4">
@@ -376,10 +376,10 @@ export default async function Home() {
                           />
                         )}
                         <div>
-                          <p className="text-sm font-bold text-white">
+                          <p className="text-primary-text text-sm font-bold">
                             {testimonial.name}
                           </p>
-                          <p className="text-xs text-white/80">
+                          <p className="text-secondary-text text-xs">
                             {testimonial.role}
                           </p>
                         </div>
@@ -393,8 +393,8 @@ export default async function Home() {
                   View Testimonials
                 </Link>
               </Button>
-              <div className="rounded-2xl border border-white/20 bg-black/35 p-5 md:p-6 [.light_&]:border-white/15 [.light_&]:bg-white/[0.04] [.light_&]:backdrop-blur-sm">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-6 lg:grid-cols-4 lg:gap-x-8 lg:divide-x lg:divide-white/10">
+              <div className="border-border-card bg-secondary-bg/95 rounded-2xl border p-5 md:p-6">
+                <div className="lg:divide-border-card grid grid-cols-2 gap-x-6 gap-y-6 lg:grid-cols-4 lg:gap-x-8 lg:divide-x">
                   {heroStats.map((stat, i) => (
                     <div
                       key={stat.label}
@@ -408,14 +408,14 @@ export default async function Home() {
                       <div className="mb-2 flex items-center gap-2">
                         <Icon
                           icon={stat.icon}
-                          className="h-4 w-4 text-white/50"
+                          className="text-secondary-text h-4 w-4"
                           inline={true}
                         />
-                        <span className="text-xs font-semibold tracking-wide text-white/60 uppercase">
+                        <span className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                           {stat.label}
                         </span>
                       </div>
-                      <p className="text-2xl leading-none font-bold text-white md:text-3xl">
+                      <p className="text-primary-text text-2xl leading-none font-bold md:text-3xl">
                         {stat.prefix ?? ""}
                         {stat.valueStr ?? (
                           <CountUpNumber
@@ -425,7 +425,7 @@ export default async function Home() {
                         )}
                       </p>
                       {stat.badge ? (
-                        <p className="mt-1.5 text-[10px] font-medium tracking-wide text-white/40 uppercase">
+                        <p className="text-secondary-text mt-1.5 text-[10px] font-medium tracking-wide uppercase">
                           {stat.badge}
                         </p>
                       ) : null}

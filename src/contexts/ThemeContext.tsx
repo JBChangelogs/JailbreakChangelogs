@@ -6,7 +6,14 @@ import { debounce } from "@/utils/helpers/debounce";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 
 /** "halloween" is the temporary seasonal theme (see globals.css). */
-const THEMES = ["halloween", "dark", "light", "amoled", "catppuccin"] as const;
+const THEMES = [
+  "halloween",
+  "dark",
+  "light",
+  "amoled",
+  "catppuccin",
+  "catppuccin-latte",
+] as const;
 export type Theme = (typeof THEMES)[number];
 /** For visitors who haven't picked a theme; THEME_INIT_SCRIPT matches it. */
 const DEFAULT_THEME: Theme = "halloween";
@@ -54,7 +61,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Always start with the default to match the server render and avoid hydration
   // mismatches. The actual theme is read from localStorage in useEffect below.
   const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
-  const resolvedTheme: "light" | "dark" = theme === "light" ? "light" : "dark";
+  const resolvedTheme: "light" | "dark" =
+    theme === "light" || theme === "catppuccin-latte" ? "light" : "dark";
 
   // Timestamp of the last user-initiated change. Incoming WS echoes arriving
   // within THEME_SYNC_BLOCK_MS of this are ignored to prevent stale echoes
@@ -85,6 +93,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     root.classList.remove(...THEMES);
     root.classList.add(theme);
+    if (theme === "catppuccin-latte") root.classList.add("light");
     safeLocalStorage.setItem("theme", theme);
   }, [theme]);
 
