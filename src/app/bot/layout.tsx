@@ -17,7 +17,7 @@ const pageMetadata: Metadata = {
     siteName: "Jailbreak Changelogs",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
         width: 2400,
         height: 1260,
         alt: "Jailbreak Changelogs Banner",
@@ -32,7 +32,7 @@ const pageMetadata: Metadata = {
     description:
       "Get instant updates about Jailbreak seasons, changelogs, and items directly in your Discord server. Track seasons, view changelogs, and manage trades with our powerful Discord bot.",
     images: [
-      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
     ],
   },
 };

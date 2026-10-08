@@ -14,7 +14,7 @@ const pageMetadata: Metadata = {
       "Estimate robberies needed for your next Hyperchrome level and compare pity progression between big and small servers.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
         width: 2400,
         height: 1260,
         alt: "Jailbreak Changelogs Banner",
@@ -30,7 +30,7 @@ const pageMetadata: Metadata = {
     description:
       "Estimate robberies needed for your next Hyperchrome level and compare pity progression between big and small servers.",
     images: [
-      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
     ],
   },
 };

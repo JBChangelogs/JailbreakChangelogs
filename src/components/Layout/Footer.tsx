@@ -56,10 +56,11 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               aria-label="Jailbreak Changelogs home"
             >
               <Image
-                src="/logos/JBCL_Long_Transparent.webp"
+                src="/logos/h/JBCL_Halloween_Logo_Long-Form-Halloween.webp"
                 alt="Jailbreak Changelogs"
                 width={256}
                 height={58}
+                loading="eager"
                 className="h-auto w-56"
               />
             </Link>

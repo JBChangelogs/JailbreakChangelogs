@@ -12,7 +12,7 @@ import { fetchReleases } from "./releases";
 const description =
   "Download the Jailbreak Changelogs desktop app for Windows, macOS and Linux. Available in early access to selected accounts.";
 const embedImage =
-  "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png";
+  "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png";
 
 const metadata: Metadata = {
   title: "Desktop App",

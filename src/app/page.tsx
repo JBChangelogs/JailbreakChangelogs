@@ -223,18 +223,18 @@ export default async function Home() {
 
   return (
     <main className="bg-primary-bg min-h-screen">
-      <section className="relative overflow-hidden pt-16 pb-8 md:py-20">
+      <section className="relative overflow-hidden pt-16 pb-8 md:py-20 [.light_&]:[--color-link:#ff877d]">
         <div className="absolute inset-0 z-0">
           <HeroBackgroundCarousel initialImage={initialImage} />
-          <div className="absolute inset-0 z-10 bg-gradient-to-br from-slate-950/75 via-slate-900/60 to-black/80" />
-          <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_15%_20%,rgba(37,99,235,0.22),transparent_40%),radial-gradient(circle_at_85%_35%,rgba(14,165,233,0.18),transparent_35%)]" />
+          <div className="absolute inset-0 z-10 bg-gradient-to-br from-[#140f10]/75 via-[#261b1e]/60 to-black/80" />
+          <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_15%_20%,rgba(187,13,0,0.22),transparent_40%),radial-gradient(circle_at_85%_35%,rgba(249,54,39,0.18),transparent_35%)]" />
           <div className="absolute inset-y-0 left-0 z-10 w-full bg-gradient-to-r from-black/70 via-black/35 to-transparent md:w-2/3" />
         </div>
 
         <div className="relative z-10 container mx-auto px-4">
           <div className="grid items-stretch gap-6 md:grid-cols-2 lg:gap-8">
             <div className="order-1 md:pt-2">
-              <h1 className="mb-5 max-w-3xl text-3xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)] md:text-5xl lg:text-6xl">
+              <h1 className="mb-5 max-w-3xl text-3xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)] text-shadow-[0_0_32px_rgba(249,54,39,0.22)] md:text-5xl lg:text-6xl">
                 Jailbreak Changelogs: The All-in-One Platform
               </h1>
               <p className="mb-6 max-w-2xl text-base text-white/95 drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)] md:text-lg">
@@ -306,10 +306,7 @@ export default async function Home() {
             <div className="order-2 pt-6 md:order-3 md:col-span-2">
               <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p
-                    className="text-sm font-semibold tracking-[0.2em] uppercase"
-                    style={{ color: "#66B3FF" }}
-                  >
+                  <p className="text-link text-sm font-semibold tracking-[0.2em] uppercase">
                     Trusted by Badimo
                   </p>
                   <a

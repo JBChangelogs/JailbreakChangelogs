@@ -64,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Your all-in-one Roblox Jailbreak platform for changelogs and game update tracking, values, trading, inventory lookups, OG item tracking, dupe detection, and more.",
       images: [
         {
-          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
           width: 2400,
           height: 1260,
           alt: "Jailbreak Changelogs Banner",
@@ -81,7 +81,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Your all-in-one Roblox Jailbreak platform for changelogs and game update tracking, values, trading, inventory lookups, OG item tracking, dupe detection, and more.",
       images: [
-        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
       ],
     },
   };
@@ -146,10 +146,11 @@ export default async function RootLayout({
             <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
               <div className="mx-auto max-w-md p-8 text-center">
                 <Image
-                  src="/logos/JBCL_Long_Transparent.webp"
+                  src="/logos/h/JBCL_Halloween_Logo_Long-Form-Halloween.webp"
                   alt="Jailbreak Changelogs"
                   width={256}
                   height={58}
+                  loading="eager"
                   className="mx-auto mb-6 h-24 w-auto"
                 />
                 <h1 className="text-primary-text mb-4 text-2xl font-bold">
@@ -292,7 +293,7 @@ export default async function RootLayout({
           <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
             <div className="mx-auto max-w-md p-8 text-center">
               <Image
-                src="/logos/JBCL_Long_Transparent.webp"
+                src="/logos/h/JBCL_Halloween_Logo_Long-Form-Halloween.webp"
                 alt="Jailbreak Changelogs"
                 width={256}
                 height={58}

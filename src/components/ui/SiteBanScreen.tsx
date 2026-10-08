@@ -36,11 +36,11 @@ export function SiteBanScreen() {
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="mx-auto w-full max-w-lg lg:mx-0">
           <Image
-            src="/logos/JBCL_Long_Transparent.webp"
+            src="/logos/h/JBCL_Halloween_Logo_Long-Form-Halloween.webp"
             alt="Jailbreak Changelogs"
             width={256}
             height={58}
-            priority
+            loading="eager"
             className="mx-auto mb-8 h-auto w-56 drop-shadow-lg sm:w-64"
           />
           <section

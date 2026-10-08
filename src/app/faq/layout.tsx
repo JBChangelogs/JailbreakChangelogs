@@ -15,7 +15,7 @@ const pageMetadata: Metadata = {
       "Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
         width: 2400,
         height: 1260,
         alt: "Jailbreak Changelogs Banner",
@@ -31,7 +31,7 @@ const pageMetadata: Metadata = {
     description:
       "Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.",
     images: [
-      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
     ],
   },
 };
