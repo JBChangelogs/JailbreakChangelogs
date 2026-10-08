@@ -108,7 +108,7 @@ export default function DiscordUserCard({
             />
           </div>
           {presence?.status === "Online" ? (
-            <span className="text-status-success-vibrant bg-status-success-vibrant/10 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium">
+            <span className="text-status-success-vibrant bg-status-success-vibrant/10 in-[[data-accent-cards]]:text-primary-text in-[[data-accent-cards]]:bg-tertiary-bg inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium">
               <span className="bg-status-success-vibrant size-1.5 rounded-full" />
               Online
             </span>
