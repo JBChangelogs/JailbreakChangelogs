@@ -86,7 +86,7 @@ export type ValueSort =
   | "trend-manipulated"
   | "trend-recovering";
 
-export interface DupedOwner {
+interface DupedOwner {
   item_id: number;
   owner: string;
   user_id: null | string;
@@ -143,34 +143,6 @@ export interface RobloxUser {
   hasVerifiedBadge?: boolean;
 }
 
-export interface RobloxAvatar {
-  targetId: number;
-  imageUrl: string;
-}
-
-export interface ItemHoarder {
-  user_id: string;
-  count: number;
-}
-
-export interface ItemsResponse {
-  items: Item[];
-  total: number;
-}
-
-export interface SearchFilters {
-  name?: string;
-  type?: string;
-  minValue?: number;
-  maxValue?: number;
-  isLimited?: boolean;
-  isSeasonal?: boolean;
-  isTradable?: boolean;
-}
-
-export type SortOption = "cash_value";
-export type SortOrder = "asc" | "desc";
-
 export interface ItemDetails {
   id: number;
   name: string;
@@ -202,14 +174,6 @@ export interface ItemDetails {
   };
 }
 
-export interface DupeResult {
-  item_id: number;
-  owner: string;
-  user_id: number | null;
-  proof: string | null;
-  created_at: number;
-}
-
 export interface FavoriteItem {
   created_at: number;
   item: Pick<Item, "id" | "name" | "type"> &
@@ -224,7 +188,7 @@ export interface DupeFinderHistoryEntry {
   TradeTime: number;
 }
 
-export interface DupeFinderInfo {
+interface DupeFinderInfo {
   title: string;
   value: string;
 }

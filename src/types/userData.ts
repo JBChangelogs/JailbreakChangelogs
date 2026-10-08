@@ -1,5 +1,5 @@
 // User Data API Response Types
-export interface RobloxUserData {
+interface RobloxUserData {
   description: string;
   created: string;
   isBanned: boolean;
@@ -15,7 +15,7 @@ export interface RobloxUsersResponse {
 }
 
 // User Connection Data API Response Types
-export interface UserConnectionItem {
+interface UserConnectionItem {
   requestedUsername: string;
   hasVerifiedBadge: boolean;
   id: number;
@@ -28,7 +28,7 @@ export interface UserConnectionResponse {
 }
 
 // Dupe Finder Data API Response Types
-export interface DupeFinderItem {
+interface DupeFinderItem {
   item_id: number;
   latest_owner?: string;
   logged_at: number;

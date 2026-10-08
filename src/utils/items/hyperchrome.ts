@@ -15,12 +15,6 @@ export const HYPERCHROME_PITY_SMALL = HYPERCHROME_CHANCE_DENOMINATORS.map(
     ),
 );
 
-// The Mansion (CEO) robbery only changes the per-roll drop chance to a flat
-// 1/500 regardless of current level. Pity is tracked per HyperChrome color,
-// not per robbery source, so CEO robberies count toward the exact same pity
-// threshold as normal robberies at the player's current level.
-export const HYPERCHROME_MANSION_CHANCE_DENOMINATOR = 500;
-
 export type HyperchromeLevel = 0 | 1 | 2 | 3 | 4;
 
 export function calculateRobberiesToLevelUp(

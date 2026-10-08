@@ -9,7 +9,6 @@
  * ```
  * ChatEvent
  * ├── ChatEventAddon   ← side column (avatar)
- * │   └── ChatEventAvatar
  * └── ChatEventBody    ← main content (flex-1)
  *     ├── ChatEventTitle
  *     │   ├── sender name
@@ -38,12 +37,6 @@
  */
 
 import { cn } from "@/lib/utils";
-import {
-  AvatarFallbackProps,
-  AvatarImageProps,
-  AvatarProps,
-} from "@radix-ui/react-avatar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMemo } from "react";
 import { formatDiscordTimestamp } from "@/utils/helpers/timestamp";
 
@@ -56,7 +49,7 @@ import { formatDiscordTimestamp } from "@/utils/helpers/timestamp";
  * - `"longDate"` — long date (e.g. "January 1, 2024")
  * - `"relative"` — relative time (e.g. "2 hours ago", "yesterday")
  */
-export type ChatEventTimeFormat =
+type ChatEventTimeFormat =
   | "time"
   | "date"
   | "dateTime"
@@ -259,56 +252,6 @@ export function ChatEventTitle({
     >
       {children}
     </div>
-  );
-}
-
-export interface ChatEventAvatarProps extends AvatarProps {
-  className?: string;
-  /** Image URL for the avatar. */
-  src?: AvatarImageProps["src"];
-  /** Alt text for the avatar image. */
-  alt?: string;
-  /** Fallback content shown while the image loads or if it fails (e.g. initials). */
-  fallback?: React.ReactNode;
-  /** Additional props forwarded to the inner `AvatarImage`. */
-  imageProps?: AvatarImageProps;
-  /** Additional props forwarded to the inner `AvatarFallback`. */
-  fallbackProps?: AvatarFallbackProps;
-}
-
-/**
- * Avatar sized for message rows. Responsive sizing via container
- * queries (`size-8` → `@md/chat:size-10`). Built on Radix UI Avatar
- * primitives.
- *
- * @example
- * ```tsx
- * <ChatEventAvatar
- *   src="https://example.com/avatar.png"
- *   alt="@annsmith"
- *   fallback="AS"
- * />
- * ```
- */
-export function ChatEventAvatar({
-  className,
-  src,
-  alt,
-  fallback,
-  imageProps,
-  fallbackProps,
-  ...props
-}: ChatEventAvatarProps) {
-  return (
-    <Avatar
-      className={cn("size-8 rounded-full @md/chat:size-10", className)}
-      {...props}
-    >
-      <AvatarImage src={src} alt={alt} {...imageProps} />
-      {fallback && (
-        <AvatarFallback {...fallbackProps}>{fallback}</AvatarFallback>
-      )}
-    </Avatar>
   );
 }
 

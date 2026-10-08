@@ -1,4 +1,4 @@
-export const COLLAPSED_CONTENT_HEIGHT_REM = 9;
+const COLLAPSED_CONTENT_HEIGHT_REM = 9;
 
 export function hasMeaningfulCollapsedOverflow(
   element: HTMLElement,

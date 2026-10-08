@@ -5,7 +5,7 @@ import { Changelog } from "@/utils/api/api";
  * Expected format: "Month Day[st/nd/rd/th] Year / UPDATE NAME"
  * Example: "May 1st 2021 / MID-SEASON UPDATE"
  */
-export function extractYearFromTitle(title: string): number | null {
+function extractYearFromTitle(title: string): number | null {
   // Match pattern: Month Day[st/nd/rd/th] Year
   const yearMatch = title.match(
     /\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?\s+(\d{4})\b/i,
@@ -21,7 +21,7 @@ export function extractYearFromTitle(title: string): number | null {
 /**
  * Calculates the number of changelogs per year
  */
-export function calculateChangelogsByYear(
+function calculateChangelogsByYear(
   changelogs: Changelog[],
 ): Map<number, number> {
   const yearCounts = new Map<number, number>();

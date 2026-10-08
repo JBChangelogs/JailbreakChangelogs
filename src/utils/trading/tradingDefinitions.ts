@@ -15,15 +15,3 @@ export const trendDescriptions: Record<string, string> = {
   Hyped:
     "Items which are experiencing a significant, but temporary, spike in demand which is driven by the community",
 };
-
-export const demandDescriptions: Record<string, string> = {
-  "Close To None":
-    "Nearly no interest from traders; typically very hard to trade.",
-  "Very Low": "Minimal interest; trades usually require significant overpay.",
-  Low: "Limited interest; often needs added value to move.",
-  "Below Average": "Below average interest; trades can be inconsistent.",
-  Average: "Average interest; generally trades without heavy overpay.",
-  Decent: "Above average interest; trades reliably with moderate pull power.",
-  High: "Strong interest; usually trades quickly at solid value.",
-  "Very High": "Very strong interest; often commands overpay due to demand.",
-};

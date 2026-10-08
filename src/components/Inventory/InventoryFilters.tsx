@@ -19,14 +19,6 @@ export interface InventorySortGroup {
   options: { value: string; label: string }[];
 }
 
-export interface InventoryStats {
-  isLargeInventory: boolean;
-  totalItems: number;
-  duplicates: Array<[string, number]>;
-  totalDuplicates: number;
-  uniqueItems: number;
-}
-
 interface InventoryFiltersProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;

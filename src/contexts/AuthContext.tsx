@@ -66,9 +66,7 @@ interface AuthContextType extends AuthState {
   wsConnected: boolean;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined,
-);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function getJbclToken(): string | null {
   if (typeof document === "undefined") return null;
@@ -651,19 +649,3 @@ export function useIsAuthenticated(): boolean {
   const { isAuthenticated } = useAuthContext();
   return isAuthenticated;
 }
-
-// Utility function to get current user's premium type
-export const getCurrentUserPremiumType = (): number => {
-  if (typeof window === "undefined") return 0;
-
-  try {
-    const userData = safeGetJSON<UserData>("user", null);
-    if (userData) {
-      return userData.premiumtype || 0;
-    }
-  } catch (error) {
-    log.error("Error parsing user data", error);
-  }
-
-  return 0;
-};

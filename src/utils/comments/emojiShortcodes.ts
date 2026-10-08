@@ -212,7 +212,7 @@ export function transformEmojiShortcodes(
 /**
  * Submit transform: :shortcode: → emoji; \:shortcode: → plain :shortcode: text.
  */
-export function transformEmojiShortcodesForSubmit(
+function transformEmojiShortcodesForSubmit(
   text: string,
   emojiMap: EmojiStringMap,
 ): string {
@@ -220,7 +220,7 @@ export function transformEmojiShortcodesForSubmit(
 }
 
 /** Apply submit-time shortcode rules (emoji lookup + \:name: → plain :name:). */
-export function prepareEmojiShortcodeContent(
+function prepareEmojiShortcodeContent(
   text: string,
   emojiMap: EmojiStringMap,
 ): string {

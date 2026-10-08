@@ -97,37 +97,3 @@ export async function fetchRobloxDataForUser(userId: string) {
     };
   }
 }
-
-export async function pollConnectedBots() {
-  try {
-    const botsData = await fetchConnectedBots({ includePrivate: false });
-
-    return {
-      success: true,
-      data: botsData,
-    };
-  } catch (error) {
-    log.error("[SERVER ACTION] Failed to poll connected bots:", error);
-    return {
-      success: false,
-      error: "Failed to fetch connected bots",
-    };
-  }
-}
-
-export async function pollQueueInfo() {
-  try {
-    const queueInfo = await fetchQueueInfo({ includePrivate: false });
-
-    return {
-      success: true,
-      data: queueInfo,
-    };
-  } catch (error) {
-    log.error("[SERVER ACTION] Failed to poll queue info:", error);
-    return {
-      success: false,
-      error: "Failed to fetch queue info",
-    };
-  }
-}

@@ -14,7 +14,3 @@ export const FEATURE_FLAGS = {
 export function isFeatureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
   return FEATURE_FLAGS[feature];
 }
-
-export function getFeatureFlags() {
-  return FEATURE_FLAGS;
-}

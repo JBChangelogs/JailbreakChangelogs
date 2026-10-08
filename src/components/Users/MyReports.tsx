@@ -120,7 +120,7 @@ function SpoilerImage({
   );
 }
 
-export interface ReportMetadataComment {
+interface ReportMetadataComment {
   id?: number;
   date: string;
   author: string;
@@ -132,20 +132,20 @@ export interface ReportMetadataComment {
   parent_id: number | null;
 }
 
-export interface ReportMetadataDescription {
+interface ReportMetadataDescription {
   user_id: string | number;
   description: string;
   last_updated: string;
 }
 
-export interface ReportMetadataMessage {
+interface ReportMetadataMessage {
   id: number | string;
   content: string;
   user_id: string | number;
   recipient_id: string | number;
 }
 
-export interface ReportMetadataSuggestion {
+interface ReportMetadataSuggestion {
   id: number;
   field: string;
   current_value: string;
@@ -157,24 +157,24 @@ export interface ReportMetadataSuggestion {
   item_type: string;
 }
 
-export interface ReportMetadataUsername {
+interface ReportMetadataUsername {
   username: string;
   global_name: string;
   last_updated: number;
 }
 
-export interface ReportMetadataUser {
+interface ReportMetadataUser {
   username: string;
   global_name: string;
 }
 
-export interface ReportMetadataItem {
+interface ReportMetadataItem {
   id: string | number;
   name: string;
   type: string;
 }
 
-export interface ReportMetadata {
+interface ReportMetadata {
   comment?: ReportMetadataComment;
   avatar?: string;
   username?: string | ReportMetadataUsername;
@@ -188,7 +188,7 @@ export interface ReportMetadata {
   item?: ReportMetadataItem;
 }
 
-export interface ReportUser {
+interface ReportUser {
   id: string;
   username: string;
   global_name: string;
@@ -197,7 +197,7 @@ export interface ReportUser {
   usernumber: number;
 }
 
-export interface Report {
+interface Report {
   id: number;
   report_id: string;
   type: string;
@@ -218,7 +218,7 @@ interface ReportsResponse {
   size: number;
 }
 
-export function getTypeLabel(type: string) {
+function getTypeLabel(type: string) {
   return humanizeIdentifier(type);
 }
 
@@ -288,7 +288,7 @@ function ItemTypeBadge({ type }: { type: string }) {
   );
 }
 
-export function getStatusStyle(status: string): {
+function getStatusStyle(status: string): {
   label: string;
   className: string;
 } {
@@ -342,7 +342,7 @@ function getCommentTargetUrl(comment: ReportMetadataComment): string | null {
   }
 }
 
-export function getReportedUserId(report: Report): string | null {
+function getReportedUserId(report: Report): string | null {
   switch (report.type) {
     case "comment":
       return normalizeUserId(report.metadata.comment?.user_id);
@@ -367,7 +367,7 @@ export function getReportedUserId(report: Report): string | null {
   }
 }
 
-export function ReportContext({ report }: { report: Report }) {
+function ReportContext({ report }: { report: Report }) {
   const router = useRouter();
   const { type, metadata } = report;
   const contextClassName = "mt-3 max-w-4xl";

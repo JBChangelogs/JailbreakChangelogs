@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Field, Label, Description } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
@@ -30,6 +29,8 @@ export const EmailNotificationSettings = ({
   userData,
 }: EmailNotificationSettingsProps) => {
   const userId = userData?.id;
+  const switchId = useId();
+  const descriptionId = useId();
   const queryClient = useQueryClient();
   const linkedKey = ["email", "linked", userId] as const;
   const statusKey = ["email", "notifications", userId] as const;
@@ -162,18 +163,26 @@ export const EmailNotificationSettings = ({
       <div className="flex flex-col gap-4">
         {/* Toggle Section */}
         {/* ... existing code ... */}
-        <Field className="w-full">
+        <div className="w-full">
           <div className="mb-1 flex w-full items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <Label className="text-primary-text flex items-center gap-2 text-base font-medium">
+              <label
+                htmlFor={switchId}
+                className="text-primary-text flex items-center gap-2 text-base font-medium"
+              >
                 <Icon icon="heroicons:envelope" className="h-5 w-5" />
                 Email Notifications
-              </Label>
-              <Description className="text-secondary-text mt-1 text-sm">
+              </label>
+              <p
+                id={descriptionId}
+                className="text-secondary-text mt-1 text-sm"
+              >
                 Receive important updates and notifications via email.
-              </Description>
+              </p>
             </div>
             <Switch
+              id={switchId}
+              aria-describedby={descriptionId}
               checked={enabled}
               onCheckedChange={handleToggle}
               disabled={
@@ -185,7 +194,7 @@ export const EmailNotificationSettings = ({
               }
             />
           </div>
-        </Field>
+        </div>
 
         {(linkedQuery.isError || statusQuery.isError) && (
           <p className="text-status-error text-sm">

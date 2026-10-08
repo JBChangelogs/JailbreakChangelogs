@@ -198,28 +198,6 @@ interface CustomBannerResponse {
   custom_banner: string | null;
 }
 
-export const fetchCustomBanner = async (): Promise<string | null> => {
-  const { url, headers } = buildApiFetchRequest(
-    PUBLIC_API_URL!,
-    "/v2/users/me/banner",
-  );
-  const response = await fetch(url, {
-    method: "GET",
-    credentials: "include",
-    cache: "no-store",
-    headers,
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      await getResponseErrorMessage(response, "Failed to load custom banner"),
-    );
-  }
-
-  const data = (await response.json()) as CustomBannerResponse;
-  return typeof data.custom_banner === "string" ? data.custom_banner : null;
-};
-
 export const uploadCustomBanner = async (file: File): Promise<string> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
@@ -398,28 +376,6 @@ export const saveAccentColor = async (color: string | null): Promise<void> => {
       await getResponseErrorMessage(response, "Failed to save accent color"),
     );
   }
-};
-
-export const fetchCustomAvatar = async (): Promise<string | null> => {
-  const { url, headers } = buildApiFetchRequest(
-    PUBLIC_API_URL!,
-    "/v2/users/me/avatar",
-  );
-  const response = await fetch(url, {
-    method: "GET",
-    credentials: "include",
-    cache: "no-store",
-    headers,
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      await getResponseErrorMessage(response, "Failed to load custom avatar"),
-    );
-  }
-
-  const data = (await response.json()) as CustomAvatarResponse;
-  return typeof data.custom_avatar === "string" ? data.custom_avatar : null;
 };
 
 export const uploadCustomAvatar = async (file: File): Promise<string> => {

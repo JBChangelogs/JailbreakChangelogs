@@ -1,4 +1,4 @@
-export const UPLOAD_CONFIG = {
+const UPLOAD_CONFIG = {
   MAX_FILE_SIZE: 20 * 1024 * 1024, // 20MB in bytes
   MAX_FILE_SIZE_MB: 20, // 20MB for display purposes
   ALLOWED_FILE_TYPES: [

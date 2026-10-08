@@ -2,7 +2,7 @@ import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { observeSiteBanResponse } from "@/utils/api/siteBanInterceptor";
 
-export const BAN_REFERENCE_HEADER = "Ban-Reference";
+const BAN_REFERENCE_HEADER = "Ban-Reference";
 
 export interface BanReferenceDetails {
   reference: string;

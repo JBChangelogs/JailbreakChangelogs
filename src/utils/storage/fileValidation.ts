@@ -16,7 +16,7 @@ export interface FileValidationResult {
  * @param allowedMimeTypes - Array of allowed MIME types
  * @returns Validation result with error or warning messages
  */
-export function validateFileType(
+function validateFileType(
   file: File,
   allowedExtensions: string[],
   allowedMimeTypes: string[],
@@ -68,7 +68,7 @@ export function validateFileType(
  * @param maxSizeMB - Maximum file size in MB (for display)
  * @returns Validation result
  */
-export function validateFileSize(
+function validateFileSize(
   file: File,
   maxSizeBytes: number,
   maxSizeMB: number,

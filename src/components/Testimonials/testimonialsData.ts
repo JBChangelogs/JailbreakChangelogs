@@ -2,7 +2,7 @@ import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import type { BadimoTestimonial } from "@/components/Testimonials/badimoTestimonial";
 
-export type ApiTestimonialCard = {
+type ApiTestimonialCard = {
   id: number;
   name: string;
   role: string;

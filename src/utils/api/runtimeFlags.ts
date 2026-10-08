@@ -13,7 +13,7 @@ export function getBooleanFlag(name: string, fallback = false): boolean {
   }
 }
 
-export function getJsonFlag<T>(name: string, fallback: T): T {
+function getJsonFlag<T>(name: string, fallback: T): T {
   try {
     return flags.getJson<T>(name, undefined, fallback);
   } catch {

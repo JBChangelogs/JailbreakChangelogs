@@ -102,13 +102,3 @@ export function showScanErrorToast(
   }
   activeScanLoadingToast = null;
 }
-
-/**
- * Clears error toast tracking (useful for cleanup)
- */
-export function clearScanErrorToast(): void {
-  if (activeScanErrorToast) {
-    toast.dismiss(activeScanErrorToast);
-    activeScanErrorToast = null;
-  }
-}

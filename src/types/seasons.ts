@@ -1,4 +1,4 @@
-export interface XpData {
+interface XpData {
   xp_rates: {
     curveK: number;
     totalDays: number;

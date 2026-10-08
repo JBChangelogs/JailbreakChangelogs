@@ -1,5 +1,3 @@
-import { parse } from "date-fns";
-
 export function parseMarkdown(text: string) {
   // Force headings onto their own paragraph even without a blank line before them
   const normalized = text.replace(/([^\n])\n(#{1,6} )/g, "$1\n\n$2");
@@ -105,7 +103,7 @@ export function extractContentInfo(sections: string) {
   };
 }
 
-export function cleanMarkdown(text: string): string {
+function cleanMarkdown(text: string): string {
   return text
     .replace(/^#+\s*/gm, "") // headers
     .replace(/^[- ]+/gm, "") // list markers
@@ -147,18 +145,4 @@ export function getBadgeColor(type?: "video" | "audio" | "image" | "mentions") {
     default:
       return "bg-button-info";
   }
-}
-
-export function parseDateFromTitle(title: string): Date | null {
-  const dateMatch = title.match(
-    /^([A-Za-z]+\s+\d{1,2}(?:st|nd|rd|th)?\s+\d{4})/,
-  );
-  if (dateMatch) {
-    try {
-      return parse(dateMatch[1], "MMMM do yyyy", new Date());
-    } catch {
-      return null;
-    }
-  }
-  return null;
 }

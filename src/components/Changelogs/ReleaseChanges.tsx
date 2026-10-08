@@ -36,11 +36,7 @@ const categories = {
   other: { label: "Other", color: "text-secondary-text", icon: FileText },
 };
 
-export function ReleaseChangeCounts({
-  sections,
-}: {
-  sections: ChangelogSection[];
-}) {
+function ReleaseChangeCounts({ sections }: { sections: ChangelogSection[] }) {
   return (
     <span className="text-secondary-text inline-flex flex-wrap gap-x-3 gap-y-1 text-sm">
       {Object.entries(categories).map(([kind, category]) => {

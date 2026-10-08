@@ -32,7 +32,7 @@ export function robberyMarkerToDisplayName(
   return markerName === "MoneyTruck" ? "Bank Truck" : apiName;
 }
 
-export const ROBBERY_IMAGE_PRIORITY: readonly string[] = [
+const ROBBERY_IMAGE_PRIORITY: readonly string[] = [
   "Jewelry",
   "TrainCargo",
   "PowerPlant",

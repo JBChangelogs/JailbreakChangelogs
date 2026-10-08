@@ -53,7 +53,6 @@ import {
   ItemDetails,
   type ItemType,
   RobloxUser,
-  DuplicateVariantsResponse,
   DupeOwnerSearchResult,
   DupeItemSearchResult,
 } from "@/types";
@@ -981,21 +980,6 @@ export async function fetchItemHistoryClient(
   }
 }
 
-export async function fetchChangelogList(): Promise<Changelog[]> {
-  const response = await fetch(`${BASE_API_URL}/v2/changelogs`, {
-    credentials: "include",
-    headers: {
-      "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
-    },
-  });
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    log.error("fetchChangelogList failed", { status: response.status, body });
-    throw new Error("Failed to fetch changelog list");
-  }
-  return response.json();
-}
-
 export async function fetchChangelog(id: string): Promise<Changelog> {
   const response = await fetch(`${BASE_API_URL}/v2/changelogs/${id}`, {
     headers: {
@@ -1008,94 +992,6 @@ export async function fetchChangelog(id: string): Promise<Changelog> {
     throw new Error("Failed to fetch changelog");
   }
   return response.json();
-}
-
-export async function fetchLatestChangelog(): Promise<Changelog> {
-  const response = await fetch(`${BASE_API_URL}/v2/changelogs/latest`, {
-    headers: {
-      "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
-    },
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    log.error("fetchLatestChangelog failed", { status: response.status, body });
-    throw new Error("Failed to fetch latest changelog");
-  }
-  return response.json();
-}
-
-export async function fetchUsersBatch(userIds: string[]) {
-  try {
-    if (userIds.length === 0) {
-      return {};
-    }
-
-    const response = await fetch(
-      `${BASE_API_URL}/v2/users/batch?ids=${userIds.join(",")}&nocache=false`,
-      {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-UserBatch/1.0",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return {};
-      }
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchUsersBatch: Failed", { status: response.status, body });
-      throw new Error("Failed to fetch users batch");
-    }
-
-    const responseData = await response.json();
-
-    // Handle different response formats:
-    // 1. Array of users (normal case)
-    // 2. Object with error message but still contains users
-    // 3. Object with users array
-    let userDataArray: UserData[] = [];
-
-    if (Array.isArray(responseData)) {
-      userDataArray = responseData;
-    } else if (responseData && typeof responseData === "object") {
-      // Check if it's an object with an array of users
-      if (Array.isArray(responseData.users)) {
-        userDataArray = responseData.users;
-      } else if (Array.isArray(responseData.data)) {
-        userDataArray = responseData.data;
-      } else {
-        // If it's an object with user IDs as keys, convert to array
-        const users = Object.values(responseData).filter(
-          (item): item is UserData =>
-            item !== null &&
-            typeof item === "object" &&
-            "id" in item &&
-            typeof (item as { id: unknown }).id === "string",
-        ) as UserData[];
-        if (users.length > 0) {
-          userDataArray = users;
-        }
-      }
-    }
-
-    // Build user map from array, handling partial failures gracefully
-    const userMap = userDataArray.reduce(
-      (acc: Record<string, UserData>, user: UserData) => {
-        if (user && user.id) {
-          acc[user.id] = user;
-        }
-        return acc;
-      },
-      {},
-    );
-
-    return userMap;
-  } catch (error) {
-    log.error("Error fetching users batch", error);
-    return {};
-  }
 }
 
 export async function fetchDupeFinderData(userId: string) {
@@ -1270,86 +1166,9 @@ export async function fetchMostDuplicatedItems(): Promise<DuplicatedItem[]> {
   }
 }
 
-export async function fetchDuplicateVariants(
-  id: string,
-): Promise<DuplicateVariantsResponse | null> {
-  try {
-    const url = `${INVENTORY_API_URL}/item/duplicates/variants?id=${encodeURIComponent(id)}`;
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
-      },
-      cache: "no-store",
-    });
-
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchDuplicateVariants failed", {
-        status: response.status,
-        body,
-      });
-      throw new Error(`Failed to fetch duplicate variants: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    log.error("Error fetching duplicate variants", err);
-    return null;
-  }
-}
-
 export interface ItemHoarder {
   user_id: string;
   count: number;
-}
-
-export interface SeasonContract {
-  team: "Criminal" | "Police";
-  name: string;
-  description: string;
-  reqseasonpass: boolean;
-  goal: number;
-  reward: number;
-}
-
-export interface SeasonContractsResponse {
-  data: SeasonContract[];
-  updated_at: number;
-}
-
-export async function fetchSeasonContracts(): Promise<SeasonContractsResponse | null> {
-  try {
-    const response = await fetch(`${INVENTORY_API_URL}/seasons/contract`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchSeasonContracts failed", {
-        status: response.status,
-        body,
-      });
-      throw new Error("Failed to fetch season contracts");
-    }
-
-    const data = await response.json();
-    return data as SeasonContractsResponse;
-  } catch (err) {
-    log.error("Error fetching season contracts", err);
-    return null;
-  }
 }
 
 export async function fetchSeasonsList() {
@@ -1846,11 +1665,6 @@ export interface UserScan {
   upsert_count: number;
 }
 
-export interface MoneyLeaderboardEntry {
-  user_id: string;
-  money: number;
-}
-
 export interface NetworthLeaderboardEntry {
   user_id: string;
   networth: number;
@@ -1861,14 +1675,6 @@ export interface NetworthLeaderboardEntry {
   duplicates_count?: number;
   duplicates_value?: number | null;
   duplicates_percentages?: Record<string, number> | null;
-}
-
-export interface SeasonLeaderboardEntry {
-  id: number;
-  total_exp: number;
-  name: string;
-  lvl: number;
-  exp: number;
 }
 
 export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
@@ -1959,77 +1765,6 @@ export async function fetchUserScansLeaderboard(): Promise<UserScan[]> {
   }
 }
 
-export async function fetchMoneyLeaderboard(): Promise<
-  MoneyLeaderboardEntry[]
-> {
-  try {
-    const response = await fetch(
-      `${INVENTORY_API_URL}/money/leaderboard?limit=1000`,
-      {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return [];
-      }
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchMoneyLeaderboard failed", {
-        status: response.status,
-        body,
-      });
-      throw new Error("Failed to fetch money leaderboard");
-    }
-
-    const data = await response.json();
-    return data as MoneyLeaderboardEntry[];
-  } catch (err) {
-    log.error("Error fetching money leaderboard", err);
-    return [];
-  }
-}
-
-export interface SeasonLeaderboardResponse {
-  data: SeasonLeaderboardEntry[];
-  updated_at: number;
-}
-
-export async function fetchSeasonLeaderboard(): Promise<SeasonLeaderboardResponse> {
-  try {
-    const response = await fetch(`${INVENTORY_API_URL}/seasons/leaderboard`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return { data: [], updated_at: 0 };
-      }
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchSeasonLeaderboard failed", {
-        status: response.status,
-        body,
-      });
-      throw new Error("Failed to fetch season leaderboard");
-    }
-
-    const data = await response.json();
-    return {
-      data: data.data as SeasonLeaderboardEntry[],
-      updated_at: data.updated_at,
-    };
-  } catch (err) {
-    log.error("Error fetching season leaderboard", err);
-    return { data: [], updated_at: 0 };
-  }
-}
-
 export interface UserNetworthData {
   snapshot_time: number;
   networth: number;
@@ -2070,35 +1805,6 @@ export async function fetchUserNetworth(
   } catch (err) {
     log.error("Error fetching user networth", err);
     return [];
-  }
-}
-
-export async function fetchUserMoneyRank(robloxId: string) {
-  try {
-    const response = await fetch(
-      `${INVENTORY_API_URL}/money/rank?user_id=${robloxId}`,
-      {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      const body = await response.json().catch(() => ({}));
-      log.error("fetchUserMoneyRank failed", { status: response.status, body });
-      throw new Error("Failed to fetch user money rank");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    log.error("Error fetching user money rank", err);
-    return null;
   }
 }
 

@@ -1,7 +1,7 @@
 import { jaroWinklerDistance } from "@/utils/helpers/fuzzySearch";
 
-export const FUZZY_MATCH_THRESHOLD = 0.85;
-export const FUZZY_MIN_TOKEN_LENGTH = 3;
+const FUZZY_MATCH_THRESHOLD = 0.85;
+const FUZZY_MIN_TOKEN_LENGTH = 3;
 
 const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, "");
 const tokenize = (str: string) => str.toLowerCase().match(/[a-z0-9]+/g) || [];

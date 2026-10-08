@@ -30,7 +30,7 @@ export const isCustomTradeItem = (item: TradeItemLike): boolean => {
   return id.length > 0 && !isNumericId(id);
 };
 
-export const canUseTradeItemDetailLink = (item: TradeItemLike): boolean => {
+const canUseTradeItemDetailLink = (item: TradeItemLike): boolean => {
   const type = normalizeString(item.type);
   const name = normalizeString(item.name);
 
@@ -122,11 +122,3 @@ export const matchesCategoryFilterSort = (
       return true;
   }
 };
-
-/** Empty/undefined filterSorts means "all items" (no filtering applied). */
-export const matchesAnyCategoryFilterSort = (
-  item: CategoryFilterableItem,
-  filterSorts: FilterSort[],
-): boolean =>
-  filterSorts.length === 0 ||
-  filterSorts.some((filterSort) => matchesCategoryFilterSort(item, filterSort));
