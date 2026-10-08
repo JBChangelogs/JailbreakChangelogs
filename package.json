@@ -129,7 +129,7 @@
     ]
   },
   "browserslist": "> 1%",
-  "version": "0.56.0",
+  "version": "0.57.0",
   "engines": {
     "node": "24.x"
   }
