@@ -73,6 +73,11 @@ function TooltipContent({
         {...props}
       >
         <TooltipTwemojiInner>{children}</TooltipTwemojiInner>
+        <TooltipPrimitive.Arrow
+          className="fill-border-primary"
+          width={11}
+          height={5}
+        />
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   );
