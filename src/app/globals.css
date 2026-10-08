@@ -689,7 +689,7 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
 
 @media (hover: hover) and (pointer: fine) {
   :root {
-    cursor: url("/cursors/halloween-ghost.svg") 16 2, auto;
+    cursor: url("/cursors/halloween-ghost.svg") 10 1, auto;
   }
 }
 
