@@ -1547,7 +1547,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 </div>
               )}
 
-            {!showItemSourceTabs && items.length === 0 && (
+            {!showItemSourceTabs && items.length === 0 && !useCatalogApi && (
               <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
                 <p className="text-secondary-text text-sm">
                   Item list is unavailable right now. Try again later.
@@ -1557,7 +1557,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
             {showItemSourceTabs &&
               itemsInputMode === "values" &&
-              items.length === 0 && (
+              items.length === 0 &&
+              !useCatalogApi && (
                 <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
                   <p className="text-secondary-text text-sm">
                     Item list is unavailable right now. Try again later.
