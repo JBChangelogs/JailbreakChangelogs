@@ -169,7 +169,7 @@ export default function OGFinderClient({
             setShowNotificationSheet(true);
             trackEvent("Open OG Notification Sheet");
           }}
-          variant="success"
+          variant="default"
           size="lg"
           title="Get Notified"
         >
