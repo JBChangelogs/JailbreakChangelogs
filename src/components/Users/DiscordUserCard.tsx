@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { getProfileBanner } from "@/components/Profile/Banner";
-import { Lock } from "lucide-react";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import { UserAvatar } from "@/utils/ui/avatar";
@@ -16,6 +15,7 @@ import {
   type UserPresence,
   type UserFlag,
 } from "@/types/auth";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface DiscordUserCardProps {
   user: {
@@ -159,7 +159,11 @@ export default function DiscordUserCard({
         <div className="border-border-card text-secondary-text mt-auto flex items-center gap-2 border-t pt-3 text-xs">
           {isPrivate ? (
             <>
-              <Lock aria-hidden="true" className="size-3.5" />
+              <Icon
+                icon="lucide:lock"
+                aria-hidden="true"
+                className="size-3.5"
+              />
               Private profile
             </>
           ) : (

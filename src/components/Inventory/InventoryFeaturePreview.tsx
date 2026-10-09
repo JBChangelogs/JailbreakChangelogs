@@ -1,14 +1,4 @@
 import { useId, useState, type MouseEvent } from "react";
-import {
-  ArrowRight,
-  ChartPie,
-  History,
-  Copy,
-  ShieldAlert,
-  ChartNoAxesCombined,
-  MessageSquare,
-  ChevronDown,
-} from "lucide-react";
 import type { InventoryData } from "@/app/inventories/types";
 import type { Item } from "@/types";
 import type { UserNetworthData } from "@/utils/api/api";
@@ -20,6 +10,7 @@ import {
 } from "@/components/Inventory/Breakdown/constants";
 import { useInventoryBreakdownStats } from "@/hooks/useInventoryBreakdownStats";
 import { usePartialItems } from "@/hooks/usePartialItems";
+import { Icon } from "@/components/ui/IconWrapper";
 
 export default function InventoryFeaturePreview({
   networthData,
@@ -63,13 +54,13 @@ export default function InventoryFeaturePreview({
       tab: tabs.trades,
       title: "Trade History",
       description: "Explore past trades and counterparties.",
-      icon: History,
+      icon: "lucide:history",
     },
     {
       tab: tabs.copies,
       title: "Multiple Copies",
       description: "Find repeated items and compare copy counts.",
-      icon: Copy,
+      icon: "lucide:copy",
     },
     {
       tab: tabs.dupes,
@@ -78,7 +69,7 @@ export default function InventoryFeaturePreview({
         dupedCount > 0
           ? `${formatInventoryCount(dupedCount)} ${dupedCount === 1 ? "item" : "items"} flagged as duplicated.`
           : "Inspect items flagged as duplicated.",
-      icon: ShieldAlert,
+      icon: "lucide:shield-alert",
     },
     {
       tab: tabs.graphs,
@@ -87,13 +78,13 @@ export default function InventoryFeaturePreview({
         networthData.length > 0
           ? `${isOwnInventory ? "Your networth" : "Networth"} across ${formatInventoryCount(networthData.length)} recorded ${networthData.length === 1 ? "snapshot" : "snapshots"}.`
           : "Track networth and cash over time.",
-      icon: ChartNoAxesCombined,
+      icon: "lucide:chart-no-axes-combined",
     },
     {
       tab: tabs.comments,
       title: "Comments",
       description: "Ask questions and discuss this inventory.",
-      icon: MessageSquare,
+      icon: "lucide:message-square",
     },
   ];
   const showBreakdown = tabs.breakdown !== null && categories.length > 0;
@@ -126,7 +117,8 @@ export default function InventoryFeaturePreview({
           onClick={() => setFeaturesExpanded((expanded) => !expanded)}
         >
           {featuresExpanded ? "Hide features" : "View features"}
-          <ChevronDown
+          <Icon
+            icon="lucide:chevron-down"
             aria-hidden="true"
             className={featuresExpanded ? "rotate-180" : ""}
           />
@@ -141,7 +133,11 @@ export default function InventoryFeaturePreview({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="text-primary-text flex items-center gap-2 font-semibold">
-                  <ChartPie aria-hidden="true" className="text-link size-4" />
+                  <Icon
+                    icon="lucide:chart-pie"
+                    aria-hidden="true"
+                    className="text-link size-4"
+                  />
                   Inventory Breakdown
                 </h3>
                 <p className="text-secondary-text mt-1 text-sm">
@@ -155,7 +151,8 @@ export default function InventoryFeaturePreview({
                   if (tabs.breakdown !== null) onExplore(event, tabs.breakdown);
                 }}
               >
-                Explore breakdown <ArrowRight aria-hidden="true" />
+                Explore breakdown{" "}
+                <Icon icon="lucide:arrow-right" aria-hidden="true" />
               </Button>
             </div>
             <div className="border-border-card mt-4 grid gap-5 border-t pt-4 sm:grid-cols-2">
@@ -257,12 +254,14 @@ export default function InventoryFeaturePreview({
                 className="group border-border-card bg-secondary-bg hover:bg-tertiary-bg focus-visible:ring-border-focus flex cursor-pointer flex-col items-start justify-start rounded-lg border p-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span className="text-primary-text flex w-full items-center gap-2 text-sm font-semibold">
-                  <feature.icon
+                  <Icon
+                    icon={feature.icon}
                     aria-hidden="true"
                     className="text-link size-4 shrink-0"
                   />
                   {feature.title}
-                  <ArrowRight
+                  <Icon
+                    icon="lucide:arrow-right"
                     aria-hidden="true"
                     className="text-secondary-text ml-auto size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5"
                   />

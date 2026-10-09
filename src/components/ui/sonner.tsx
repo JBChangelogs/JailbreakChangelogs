@@ -4,8 +4,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Spinner } from "@/components/ui/Spinner";
 import { useSonnerTwemoji } from "@/hooks/useSonnerTwemoji";
 import { Toaster as Sonner } from "sonner";
-import { TriangleAlert, X } from "lucide-react";
 import type { CSSProperties } from "react";
+import { Icon } from "@/components/ui/IconWrapper";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -76,8 +76,14 @@ const Toaster = ({ toastOptions, style, icons, ...props }: ToasterProps) => {
       }}
       icons={{
         loading: <Spinner className="h-4 w-4" />,
-        warning: <TriangleAlert className="h-5 w-5" aria-hidden="true" />,
-        close: <X className="h-4 w-4" aria-hidden="true" />,
+        warning: (
+          <Icon
+            icon="lucide:triangle-alert"
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+        ),
+        close: <Icon icon="lucide:x" className="h-4 w-4" aria-hidden="true" />,
         ...icons,
       }}
       {...props}

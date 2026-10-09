@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -45,6 +44,7 @@ import {
   validateExperimentOverrides,
   type ExperimentOverrides,
 } from "@/utils/api/experiments";
+import { Icon } from "@/components/ui/IconWrapper";
 
 const segment =
   "text-secondary-text has-checked:bg-button-info has-checked:text-form-button-text has-focus-visible:ring-border-focus has-disabled:cursor-not-allowed has-disabled:opacity-50 cursor-pointer rounded-md px-3 py-1 text-sm font-medium transition-colors has-focus-visible:ring-2";
@@ -521,7 +521,8 @@ export default function ExperimentsClient() {
                       void experimentsQuery.refetch();
                     }}
                   >
-                    <RefreshCw
+                    <Icon
+                      icon="lucide:refresh-cw"
                       aria-hidden="true"
                       className={
                         experimentsQuery.isFetching && !loading

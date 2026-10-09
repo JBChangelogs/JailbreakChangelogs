@@ -2,7 +2,6 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { FlaskConical } from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
   Tooltip,
@@ -26,6 +25,7 @@ import {
   subscribeExperimentOverrides,
   type ExperimentOverrides,
 } from "@/utils/api/experiments";
+import { Icon } from "@/components/ui/IconWrapper";
 
 /**
  * Mounted inside .site-layout so it can sit beside the desktop sidebar,
@@ -147,7 +147,8 @@ export function ExperimentOverridesBadge({
           : "text-status-warning hover:bg-quaternary-bg focus-visible:ring-link flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none xl:h-10 xl:w-10"
       }
     >
-      <FlaskConical
+      <Icon
+        icon="lucide:flask-conical"
         aria-hidden="true"
         className="text-status-warning size-3.5"
       />

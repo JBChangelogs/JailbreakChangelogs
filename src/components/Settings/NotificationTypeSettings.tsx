@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Search } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { NotificationPreferenceToggle } from "@/components/Settings/NotificationPreferenceToggle";
 import type { NotificationPreferenceEntry } from "@/services/notificationPreferencesService";
 import type { UserData } from "@/types/auth";
+import { Icon } from "@/components/ui/IconWrapper";
 
 // Types the API adds that aren't listed here show up under "Other".
 const GROUPS = [
@@ -91,7 +91,8 @@ export function NotificationTypeSettings({
   return (
     <div>
       <div className="relative mb-3">
-        <Search
+        <Icon
+          icon="lucide:search"
           aria-hidden="true"
           className="text-secondary-text pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
         />
@@ -137,7 +138,8 @@ export function NotificationTypeSettings({
                     disabled={!!search}
                     className="focus-visible:ring-border-focus flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-sm text-left focus-visible:ring-2 focus-visible:outline-none disabled:cursor-default"
                   >
-                    <ChevronRight
+                    <Icon
+                      icon="lucide:chevron-right"
                       aria-hidden="true"
                       className={`text-secondary-text size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-90" : ""}`}
                     />

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Check, ChevronRight, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ChangelogEntry } from "@/lib/changelog-parser";
@@ -10,6 +9,7 @@ import {
   type ChangelogSection,
 } from "@/lib/changelog-sections";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
+import { Icon } from "@/components/ui/IconWrapper";
 
 const RELEASES_URL =
   "https://github.com/JBChangelogs/JailbreakChangelogsApp/releases";
@@ -70,7 +70,8 @@ function ReleaseSections({
                 className="text-secondary-text flex gap-2.5 text-sm leading-relaxed"
               >
                 {block.isChange && (
-                  <Check
+                  <Icon
+                    icon="lucide:check"
                     aria-hidden="true"
                     className="text-link mt-0.5 size-4 shrink-0"
                   />
@@ -162,7 +163,8 @@ export function AppReleaseNotes({ changes }: { changes: ChangelogEntry[] }) {
             Viewing
           </span>
         ) : (
-          <ChevronRight
+          <Icon
+            icon="lucide:chevron-right"
             aria-hidden="true"
             className="text-secondary-text size-4 shrink-0"
           />
@@ -193,7 +195,11 @@ export function AppReleaseNotes({ changes }: { changes: ChangelogEntry[] }) {
           className="text-link hover:text-link-hover inline-flex items-center gap-1 text-sm font-medium transition-colors"
         >
           All releases on GitHub
-          <ExternalLink aria-hidden="true" className="size-3.5" />
+          <Icon
+            icon="lucide:external-link"
+            aria-hidden="true"
+            className="size-3.5"
+          />
         </a>
       </div>
 
@@ -223,7 +229,11 @@ export function AppReleaseNotes({ changes }: { changes: ChangelogEntry[] }) {
                   className="text-link hover:text-link-hover ml-auto inline-flex items-center gap-1 text-xs font-medium"
                 >
                   View on GitHub
-                  <ExternalLink aria-hidden="true" className="size-3" />
+                  <Icon
+                    icon="lucide:external-link"
+                    aria-hidden="true"
+                    className="size-3"
+                  />
                 </a>
               )}
             </div>

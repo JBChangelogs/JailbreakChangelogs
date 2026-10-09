@@ -1,8 +1,8 @@
 "use client";
 
 import { useId, useState, useSyncExternalStore } from "react";
-import { LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Switch } from "@/components/ui/switch";
 import {
   Carousel,
@@ -96,7 +96,7 @@ type ThemeOption = (typeof THEME_OPTIONS)[number];
 
 /** One theme's radio card: its colors above, its name below. */
 function ThemeCard({
-  option: { value, label, icon: ThemeIcon, preview },
+  option: { value, label, icon, preview },
   name,
   checked,
   onChange,
@@ -129,7 +129,8 @@ function ThemeCard({
       >
         <span className="flex min-w-0 items-center gap-2">
           {!compact && (
-            <ThemeIcon
+            <Icon
+              icon={icon}
               aria-hidden="true"
               className="text-secondary-text size-4 shrink-0"
             />
@@ -175,7 +176,7 @@ function AllThemesPopover({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant={variant} className={cn("gap-2", className)}>
-          <LayoutGrid />
+          <Icon icon="lucide:layout-grid" aria-hidden="true" />
           All themes
           <span className="bg-button-info/15 text-link rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums">
             {THEME_OPTIONS.length}

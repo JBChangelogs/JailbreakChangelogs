@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Icon } from "@/components/ui/IconWrapper";
 import {
   Tooltip,
   TooltipContent,
@@ -39,7 +40,7 @@ export const ThemeShortcut = ({
   );
   if (hidden) return null;
 
-  const { icon: ThemeIcon, label } = themeOption(theme);
+  const { icon, label } = themeOption(theme);
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -52,7 +53,8 @@ export const ThemeShortcut = ({
             className,
           )}
         >
-          <ThemeIcon
+          <Icon
+            icon={icon}
             aria-hidden="true"
             className={size === "sm" ? "size-4" : "size-5"}
           />

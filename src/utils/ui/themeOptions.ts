@@ -1,12 +1,3 @@
-import {
-  Disc3,
-  Cat,
-  Ghost,
-  Moon,
-  MoonStar,
-  Sun,
-  type LucideIcon,
-} from "lucide-react";
 import type { Theme } from "@/contexts/ThemeContext";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
@@ -27,13 +18,14 @@ interface ThemePreview {
 export const THEME_OPTIONS: {
   value: Theme;
   label: string;
-  icon: LucideIcon;
+  /** An Iconify name; the header and settings picker render it. */
+  icon: string;
   preview: ThemePreview;
 }[] = [
   {
     value: "future-tone",
     label: "Future Tone",
-    icon: Disc3,
+    icon: "lucide:disc-3",
     preview: {
       page: "#0f5a5e",
       card: "#0a3f42",
@@ -46,7 +38,7 @@ export const THEME_OPTIONS: {
   {
     value: "catppuccin-latte",
     label: "Catppuccin Latte",
-    icon: Cat,
+    icon: "lucide:cat",
     preview: {
       page: "#eff1f5",
       card: "#e6e9ef",
@@ -59,7 +51,7 @@ export const THEME_OPTIONS: {
   {
     value: "halloween",
     label: "Halloween",
-    icon: Ghost,
+    icon: "lucide:ghost",
     preview: {
       page: "#140f10",
       card: "#1d1517",
@@ -72,7 +64,7 @@ export const THEME_OPTIONS: {
   {
     value: "catppuccin",
     label: "Catppuccin Mocha",
-    icon: Cat,
+    icon: "lucide:cat",
     preview: {
       page: "#1e1e2e",
       card: "#181825",
@@ -85,7 +77,7 @@ export const THEME_OPTIONS: {
   {
     value: "amoled",
     label: "AMOLED",
-    icon: MoonStar,
+    icon: "lucide:moon-star",
     preview: {
       page: "#000000",
       card: "#0a0a0a",
@@ -98,7 +90,7 @@ export const THEME_OPTIONS: {
   {
     value: "dark",
     label: "Dark",
-    icon: Moon,
+    icon: "lucide:moon",
     preview: {
       page: "#121317",
       card: "#17181d",
@@ -111,7 +103,7 @@ export const THEME_OPTIONS: {
   {
     value: "light",
     label: "Light",
-    icon: Sun,
+    icon: "lucide:sun",
     preview: {
       page: "#ffffff",
       card: "hsl(240 5% 94%)",

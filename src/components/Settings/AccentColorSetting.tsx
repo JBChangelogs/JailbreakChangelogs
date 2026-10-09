@@ -7,7 +7,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ArrowLeftRight } from "lucide-react";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileBanner } from "@/components/Profile/Banner";
@@ -25,6 +24,7 @@ import {
   type AccentStyle,
   type Hsv,
 } from "@/utils/ui/accentColor";
+import { Icon } from "@/components/ui/IconWrapper";
 
 const PRESETS = [
   "#5865f2",
@@ -359,7 +359,11 @@ export function AccentColorSetting({
                 }
                 className="border-border-card bg-secondary-bg text-secondary-text hover:text-primary-text focus-visible:ring-border-focus cursor-pointer rounded-full border p-1.5 shadow-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
-                <ArrowLeftRight aria-hidden="true" className="size-3.5" />
+                <Icon
+                  icon="lucide:arrow-left-right"
+                  aria-hidden="true"
+                  className="size-3.5"
+                />
               </button>
             )}
           </div>

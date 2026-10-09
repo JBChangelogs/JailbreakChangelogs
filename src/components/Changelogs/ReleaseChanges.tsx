@@ -3,14 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChangelogDate } from "./ChangelogDate";
 import type { ChangelogEntry } from "@/lib/changelog-parser";
-import {
-  ChevronDown,
-  ArrowUpRight,
-  Sparkles,
-  Bug,
-  Gauge,
-  FileText,
-} from "lucide-react";
 import { Icon } from "@/components/ui/IconWrapper";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -22,25 +14,28 @@ import {
 } from "@/lib/changelog-sections";
 
 const categories = {
-  new: { label: "New features", color: "text-link", icon: Sparkles },
+  new: { label: "New features", color: "text-link", icon: "lucide:sparkles" },
   fixes: {
     label: "Fixes",
     color: "text-status-warning release-fix-count",
-    icon: Bug,
+    icon: "lucide:bug",
   },
   performance: {
     label: "Performance",
     color: "text-form-success",
-    icon: Gauge,
+    icon: "lucide:gauge",
   },
-  other: { label: "Other", color: "text-secondary-text", icon: FileText },
+  other: {
+    label: "Other",
+    color: "text-secondary-text",
+    icon: "lucide:file-text",
+  },
 };
 
 function ReleaseChangeCounts({ sections }: { sections: ChangelogSection[] }) {
   return (
     <span className="text-secondary-text inline-flex flex-wrap gap-x-3 gap-y-1 text-sm">
       {Object.entries(categories).map(([kind, category]) => {
-        const CountIcon = category.icon;
         const count = sections
           .filter((section) => section.kind === kind)
           .reduce((total, section) => total + section.count, 0);
@@ -59,7 +54,11 @@ function ReleaseChangeCounts({ sections }: { sections: ChangelogSection[] }) {
             key={kind}
             className={`${category.color} inline-flex items-center gap-1.5 font-medium`}
           >
-            <CountIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            <Icon
+              icon={category.icon}
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
             {count} {label}
           </span>
         ) : null;
@@ -154,7 +153,8 @@ function ChangeSection({ section }: { section: ChangelogSection }) {
           className="text-link hover:text-link-hover ml-8 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 sm:ml-7"
         >
           {expanded ? "Show less" : `Show all (${section.count})`}
-          <ChevronDown
+          <Icon
+            icon="lucide:chevron-down"
             className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`}
             aria-hidden="true"
           />
@@ -260,7 +260,8 @@ export function ReleaseTimelineEntry({
               <ReleaseChangeCounts sections={sections} />
             </div>
           </div>
-          <ChevronDown
+          <Icon
+            icon="lucide:chevron-down"
             className="text-secondary-text h-5 w-5 shrink-0 transition-transform group-open:rotate-180"
             aria-hidden="true"
           />
@@ -280,7 +281,11 @@ export function ReleaseTimelineEntry({
                 className="text-link hover:text-link-hover inline-flex items-center gap-1 text-sm transition-colors"
               >
                 View on GitHub
-                <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                <Icon
+                  icon="lucide:arrow-up-right"
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
               </a>
             )}
           </div>
