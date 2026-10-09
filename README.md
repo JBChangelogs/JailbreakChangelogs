@@ -16,7 +16,7 @@
   <a href="https://discord.jailbreakchangelogs.com"><img alt="Discord" src="https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=Discord&color=4d3dff"></a>
   <a href="https://status.jailbreakchangelogs.com"><img alt="Status" src="https://uptime.jailbreakchangelogs.com/api/badge/2/status"></a>
   <a href="https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml"><img alt="Type Check" src="https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml/badge.svg?branch=main"></a>
-  <a href="https://deepwiki.com/JBChangelogs/JailbreakChangelogs"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg"></a>
+  <a href="https://deepwiki.com/JBChangelogs/JailbreakChangelogs"><img alt="Ask DeepWiki" src="./.github/assets/deepwiki-badge.svg"></a>
   <a href="https://coderabbit.ai"><img alt="CodeRabbit Reviews" src="https://img.shields.io/coderabbit/prs/github/JBChangelogs/JailbreakChangelogs?utm_source=oss&utm_medium=github&utm_campaign=JBChangelogs%2FJailbreakChangelogs&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews"></a>
 </p>
 
