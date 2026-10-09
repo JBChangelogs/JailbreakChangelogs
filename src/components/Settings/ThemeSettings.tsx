@@ -166,7 +166,7 @@ function AllThemesPopover({
       <PopoverTrigger asChild>
         <Button variant="ghost" className="gap-2">
           <LayoutGrid />
-          <span className="hidden sm:inline">All themes</span>
+          All themes
           <span className="bg-button-info/15 text-link rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums">
             {THEME_OPTIONS.length}
           </span>
@@ -228,25 +228,30 @@ export default function ThemeSettings() {
           <h3 id={`${id}-label`} className="text-primary-text font-medium">
             Theme
           </h3>
-          <div className="col-start-2 row-start-1 flex gap-2 sm:row-span-2">
-            <AllThemesPopover
-              name={`${id}-theme-all`}
-              theme={theme}
-              onPick={(index) => {
-                setTheme(THEME_OPTIONS[index].value);
-                carousel?.scrollTo(index);
-              }}
-            />
-            <CarouselPrevious
-              variant="ghost"
-              className="static translate-y-0"
-              aria-label="Previous themes"
-            />
-            <CarouselNext
-              variant="ghost"
-              className="static translate-y-0"
-              aria-label="Next themes"
-            />
+          {/* On mobile the All themes button sits under the arrows. */}
+          <div className="col-start-2 row-start-1 flex flex-col items-end gap-1 sm:row-span-2 sm:flex-row sm:items-center sm:gap-2">
+            <div className="order-last sm:order-first">
+              <AllThemesPopover
+                name={`${id}-theme-all`}
+                theme={theme}
+                onPick={(index) => {
+                  setTheme(THEME_OPTIONS[index].value);
+                  carousel?.scrollTo(index);
+                }}
+              />
+            </div>
+            <div className="flex gap-2">
+              <CarouselPrevious
+                variant="ghost"
+                className="static translate-y-0"
+                aria-label="Previous themes"
+              />
+              <CarouselNext
+                variant="ghost"
+                className="static translate-y-0"
+                aria-label="Next themes"
+              />
+            </div>
           </div>
           <p className="text-secondary-text col-span-2 mt-1 text-sm sm:col-span-1 sm:col-start-1 sm:row-start-2">
             Choose how the site looks.
