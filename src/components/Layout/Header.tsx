@@ -31,6 +31,7 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { canOverrideExperiments } from "@/utils/api/experiments";
+import { ExperimentOverridesBadge } from "@/components/Experiments/ExperimentOverridesIndicator";
 import type { UserData } from "@/types/auth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
@@ -849,6 +850,7 @@ export default function Header() {
                   </Link>
                 </div>
                 <div className="flex items-center gap-2">
+                  <ExperimentOverridesBadge placement="header" />
                   {/* Notification icon */}
                   <NotificationPopover
                     unreadCount={unreadCount}

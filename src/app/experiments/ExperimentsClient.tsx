@@ -20,6 +20,10 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuthContext } from "@/contexts/AuthContext";
+import {
+  getExperimentIndicatorPlacement,
+  setExperimentIndicatorPlacement,
+} from "@/utils/ui/experimentIndicator";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
@@ -99,6 +103,11 @@ export default function ExperimentsClient() {
     () => false,
   );
   const [syncBusy, setSyncBusy] = useState(false);
+  const indicatorPlacement = useSyncExternalStore(
+    subscribeExperimentOverrides,
+    getExperimentIndicatorPlacement,
+    () => "floating",
+  );
   // Turning sync on when this browser and the synced variants disagree.
   const [syncChoice, setSyncChoice] = useState<{
     local: ExperimentOverrides;
@@ -360,13 +369,47 @@ export default function ExperimentsClient() {
         <p className="text-secondary-text text-sm">
           Try features before they roll out.{" "}
           {synced
-            ? "Changes apply on every device you sync."
-            : "Changes apply to this browser."}
+            ? "Forced variants apply on every device you sync."
+            : "Forced variants apply to this browser."}
         </p>
         {isLoading ? (
-          <p className="text-secondary-text mt-6" role="status">
-            Checking tester access…
-          </p>
+          <div
+            className="mt-6 space-y-6"
+            role="status"
+            aria-label="Loading experiments"
+          >
+            <span className="sr-only">Loading experiments…</span>
+            <div aria-hidden="true" className="space-y-6">
+              {[0, 1].map((card) => (
+                <div
+                  key={card}
+                  className="border-border-card bg-secondary-bg flex items-center justify-between gap-4 rounded-lg border px-4 py-3"
+                >
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <Skeleton className="h-4 w-40 max-w-full motion-reduce:animate-none" />
+                    <Skeleton className="h-4 w-80 max-w-full motion-reduce:animate-none" />
+                  </div>
+                  <Skeleton
+                    className={`${card === 0 ? "w-44 rounded-lg" : "w-11 rounded-full"} h-8 shrink-0 motion-reduce:animate-none`}
+                  />
+                </div>
+              ))}
+              <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
+                <div className="border-border-card border-b px-4 py-4">
+                  <Skeleton className="h-5 w-32 motion-reduce:animate-none" />
+                </div>
+                <div className="divide-border-card divide-y">
+                  {[0, 1].map((row) => (
+                    <div key={row} className="space-y-3 px-4 py-4">
+                      <Skeleton className="h-5 w-48 max-w-full motion-reduce:animate-none" />
+                      <Skeleton className="h-4 w-80 max-w-full motion-reduce:animate-none" />
+                      <Skeleton className="h-3 w-40 max-w-full motion-reduce:animate-none" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         ) : !user ? (
           <div className="mt-6">
             <p className="text-secondary-text mb-4">
@@ -380,6 +423,43 @@ export default function ExperimentsClient() {
           </p>
         ) : (
           <>
+            <div className="border-border-card bg-secondary-bg mt-6 flex flex-col items-start justify-between gap-4 rounded-lg border px-4 py-3 sm:flex-row sm:items-center">
+              <div className="min-w-0 flex-1">
+                <p
+                  id="experiment-indicator-label"
+                  className="text-primary-text text-sm font-semibold"
+                >
+                  Experiment badge
+                </p>
+                <p className="text-secondary-text text-sm">
+                  Choose where it appears. Hiding it keeps your experiments
+                  active.
+                </p>
+              </div>
+              <div
+                role="radiogroup"
+                aria-labelledby="experiment-indicator-label"
+                className="border-border-card bg-tertiary-bg flex shrink-0 rounded-lg border p-0.5"
+              >
+                {(["floating", "header", "hidden"] as const).map((value) => (
+                  <label key={value} className={segment}>
+                    <input
+                      type="radio"
+                      name="experiment-indicator-placement"
+                      value={value}
+                      checked={indicatorPlacement === value}
+                      onChange={() => setExperimentIndicatorPlacement(value)}
+                      className="sr-only"
+                    />
+                    {value === "floating"
+                      ? "Floating"
+                      : value === "header"
+                        ? "Header"
+                        : "Hidden"}
+                  </label>
+                ))}
+              </div>
+            </div>
             <div className="border-border-card bg-secondary-bg mt-6 flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
               <div className="min-w-0">
                 <label

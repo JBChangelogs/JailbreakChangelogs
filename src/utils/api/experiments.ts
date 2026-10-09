@@ -88,14 +88,14 @@ export function readExperimentOverrides(userId: string): ExperimentOverrides {
 
 const OVERRIDES_EVENT = "experimentOverridesChange";
 
-/** Tells this tab that the forced variants or the sync setting changed. */
+/** Tells this tab that forced variants, sync, or badge placement changed. */
 export function notifyExperimentOverridesChange() {
   if (typeof window !== "undefined") {
     window.dispatchEvent?.(new Event(OVERRIDES_EVENT));
   }
 }
 
-/** Calls back when forced variants or sync change, in this tab or another. */
+/** Calls back when experiment preferences change, in this tab or another. */
 export function subscribeExperimentOverrides(callback: () => void) {
   window.addEventListener(OVERRIDES_EVENT, callback);
   window.addEventListener("storage", callback);

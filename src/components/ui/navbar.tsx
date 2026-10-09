@@ -14,6 +14,7 @@ import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { canOverrideExperiments } from "@/utils/api/experiments";
+import { ExperimentOverridesBadge } from "@/components/Experiments/ExperimentOverridesIndicator";
 import { useTheme } from "@/contexts/ThemeContext";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
@@ -497,6 +498,7 @@ export const NavbarModern = ({
               </Tooltip>
             )}
           {/* Notification icon */}
+          <ExperimentOverridesBadge placement="header" />
           <NotificationPopover
             unreadCount={unreadCount}
             setUnreadCount={setUnreadCount}
