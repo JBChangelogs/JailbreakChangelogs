@@ -7,7 +7,7 @@ test("highlights the section containing a page, including nested routes", () => 
     ["/dev/changelogs/2026/update", "updates"],
     ["/seasons/30", "seasons"],
     ["/seasons/contracts", "seasons"],
-    ["/seasons/will-i-make-it", "trackers"],
+    ["/seasons/will-i-make-it", "seasons"],
     ["/values/calculator", "trading"],
     ["/item/vehicle/Torpedo", "trading"],
     ["/items/suggestions/123", "trading"],

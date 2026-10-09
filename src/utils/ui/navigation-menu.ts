@@ -58,7 +58,13 @@ export const navigationSections: NavigationSection[] = [
         title: "Weekly Contracts",
         description:
           "Check this week's contracts and plan ahead without launching the game",
-        className: "col-span-2",
+      },
+      {
+        href: "/seasons/will-i-make-it",
+        icon: "material-symbols:trending-up-rounded",
+        title: "Will I Make It",
+        description:
+          "Enter your level and XP to see if you'll hit level 10 before the season ends",
       },
     ],
   },
@@ -136,13 +142,6 @@ export const navigationSections: NavigationSection[] = [
         icon: "material-symbols:content-copy-rounded",
         title: "Dupe Finder",
         description: "Check if items are duped before you trade",
-      },
-      {
-        href: "/seasons/will-i-make-it",
-        icon: "material-symbols:trending-up-rounded",
-        title: "Will I Make It",
-        description:
-          "Enter your level and XP to see if you'll hit level 10 before the season ends",
       },
       {
         href: "/hyperchrome-pity",

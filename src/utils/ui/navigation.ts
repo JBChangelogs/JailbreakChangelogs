@@ -7,7 +7,6 @@ const sectionPaths = {
     "/inventories",
     "/og",
     "/dupes",
-    "/seasons/will-i-make-it",
     "/hyperchrome-pity",
     "/app",
     "/bot",
