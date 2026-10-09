@@ -2,10 +2,8 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
 import {
   BellRing,
-  Check,
   Download,
   ExternalLink,
   FlaskConical,
@@ -17,16 +15,15 @@ import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import type { ChangelogEntry } from "@/lib/changelog-parser";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 import { appAccessKey, fetchAppAccess } from "./access";
@@ -54,86 +51,7 @@ const downloads = {
   },
 };
 const allPlatforms = ["Windows", "macOS", "Linux"] as const;
-
-const previews = "https://assets.jailbreakchangelogs.com/app";
-const features = [
-  {
-    label: "Messages",
-    title: "Agree on the trade, then meet in-game",
-    description:
-      "Direct messages with unread counts, online status and replies.",
-    points: [
-      "Accepted trade offers appear in the chat, showing the items and values on each side.",
-      "Send a game invite and the other person can join your server straight from the conversation. Detecting your Roblox session is Windows only.",
-    ],
-    image: `${previews}/preview-messages.png`,
-    alt: "Messages tab with a conversation showing an accepted trade offer and a game invite",
-  },
-  {
-    label: "Trades",
-    title: "Build a trade ad without leaving the list",
-    description:
-      "Add items from the values list or your own inventory, and keep a running total for each side.",
-    points: [
-      "Shift-click an item to add it to Offering, or Ctrl-click to add it to Requesting.",
-      "Mark each item as clean, duped or OG, or move it to the other side.",
-      "Tag what you're after, such as adds, overpays, upgrades or OG owners, and add a note.",
-    ],
-    image: `${previews}/preview-trades.png`,
-    alt: "Trade ad builder with offering and requesting panels next to a searchable item list",
-  },
-  {
-    label: "Robberies",
-    title: "Find an open robbery and join in one click",
-    description:
-      "A live grid of open robberies across Jailbreak servers, with a Bounties tab next to it.",
-    points: [
-      "Each card shows the criminal and cop count, who's already joined, the server's location, and a Join button. Casinos show their code when one is available, and Cargo Planes show a departure countdown.",
-      "Filter by server size and country, sort by when a robbery was logged, and hide servers you've already joined.",
-      "Turn on the bell next to any robbery in the sidebar to get an alert when it opens. Alerts keep working while you're on other tabs.",
-    ],
-    image: `${previews}/preview-robberies.png`,
-    alt: "Robberies tab showing a grid of open robbery servers with filters and alert toggles",
-  },
-  {
-    label: "Values",
-    title: "Clean and duped values side by side",
-    description:
-      "Browse every item, with clean and duped values on every card.",
-    points: [
-      "Each value shows whether it went up or down, plus a demand rating, a trend, and when it was last updated.",
-      "Narrow by type, from vehicles and HyperChromes to rims, horns, drifts and furniture, or by seasonal, limited and untradable items.",
-      "Filter by demand from Close to None up to Very High, or by trend such as Rising, Hoarded, Manipulated or Hyped.",
-    ],
-    image: `${previews}/preview-values.png`,
-    alt: "Values tab showing item cards with clean and duped values, demand and trend",
-  },
-  {
-    label: "Dupe Finder",
-    title: "Check a player's dupes before you trade",
-    description:
-      "Search a Roblox username to see how many duped items they have and what those items are worth in total.",
-    points: [
-      "See when each copy was logged and how many owners it has had.",
-      "Search within their dupes, filter by type, and sort to show duplicates first.",
-    ],
-    image: `${previews}/preview-dupes.png`,
-    alt: "Dupe Finder showing a player's duped items with value and ownership details",
-  },
-  {
-    label: "Rich Presence",
-    title: "Show friends what you're up to on Discord",
-    description:
-      "Your Discord status shows what you're doing in the app, such as “Checking the value list”, and Settings shows a live preview of it.",
-    points: [
-      "Choose which lines appear: the page you're viewing, the app tab you're on, and the Roblox activity badge.",
-      "Add a Join Server button so friends can join your exact Jailbreak server from your status, plus a Visit Website button.",
-      "Turn Rich Presence off to clear your status entirely. You can stop sharing your Roblox game and server separately, and that setting applies outside Discord too.",
-    ],
-    image: `${previews}/preview-richpresence.png`,
-    alt: "Rich Presence settings with a live Discord status preview and toggles for each detail",
-  },
-];
+const previewOrigin = "https://assets.jailbreakchangelogs.com";
 
 // Things the website can't do, in the app's own wording.
 const appOnly = [
@@ -171,35 +89,24 @@ export default function AppClient({
   /** Recent app releases from GitHub, newest first. */
   changes: ChangelogEntry[];
 }) {
-  const [active, setActive] = useState(0);
-  const [hovered, setHovered] = useState(false);
-  // The screenshot shown in the open lightbox; autoplay waits until it closes.
-  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
-  // Picking a tab or opening a preview pauses autoplay; it resumes after a
-  // short delay. Bumping `hold` restarts the delay and the current segment.
-  const [hold, setHold] = useState(0);
-  const [held, setHeld] = useState(false);
+  const { theme } = useTheme();
+  // The preview posts its content height, so the iframe fits it with no
+  // inner scrollbar. Until then it uses the CSS estimate below.
+  const previewRef = useRef<HTMLIFrameElement>(null);
+  const [previewHeight, setPreviewHeight] = useState<number>();
   useEffect(() => {
-    if (!held) return;
-    const timeout = setTimeout(() => setHeld(false), 5000);
-    return () => clearTimeout(timeout);
-  }, [held, hold]);
-  const pause = () => {
-    setHeld(true);
-    setHold((count) => count + 1);
-  };
-  // Autoplay only while the screenshot is on screen. Switching tabs changes
-  // the height of the text below it, which would move whatever you're reading.
-  const previewRef = useRef<HTMLDivElement>(null);
-  const [previewVisible, setPreviewVisible] = useState(true);
-  useEffect(() => {
-    const preview = previewRef.current;
-    if (!preview) return;
-    const observer = new IntersectionObserver(([entry]) =>
-      setPreviewVisible(entry.isIntersecting),
-    );
-    observer.observe(preview);
-    return () => observer.disconnect();
+    const onMessage = (e: MessageEvent) => {
+      if (
+        e.origin !== previewOrigin ||
+        e.source !== previewRef.current?.contentWindow ||
+        e.data?.type !== "jbcl-preview-height"
+      )
+        return;
+      const height = Number(e.data.height);
+      if (Number.isFinite(height) && height > 0) setPreviewHeight(height);
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
   }, []);
   const platform = useSyncExternalStore(
     subscribePlatform,
@@ -488,118 +395,20 @@ export default function AppClient({
         <h2 id="app-features-heading" className="sr-only">
           App features
         </h2>
-        <Tabs
-          value={features[active].label}
-          onValueChange={(value) => {
-            setActive(features.findIndex((f) => f.label === value));
-            pause();
-          }}
-          onPointerEnter={() => setHovered(true)}
-          onPointerLeave={() => setHovered(false)}
-        >
-          <TabsList
-            aria-label="App features"
-            hideIndicator
-            className="border-border-card bg-secondary-bg w-full min-w-0 flex-wrap gap-1 rounded-xl border p-1 lg:flex-nowrap"
-          >
-            {features.map((feature, index) => (
-              <TabsTrigger
-                key={feature.label}
-                value={feature.label}
-                className="data-[state=active]:bg-tertiary-bg relative isolate flex-auto overflow-hidden rounded-lg px-3 py-2 transition-colors duration-200 sm:px-4 sm:py-2.5 lg:flex-1"
-              >
-                <span
-                  aria-hidden="true"
-                  className={`bg-button-info/20 absolute inset-0 -z-10 origin-left transition-opacity duration-300 motion-reduce:hidden ${index === active ? "opacity-100" : "opacity-0"}`}
-                  style={
-                    index === active
-                      ? {
-                          // Alternating between two identical keyframes
-                          // restarts the fill when autoplay is paused.
-                          animationName: `app-preview-progress${hold % 2 ? "-restart" : ""}`,
-                          animationDuration: "6s",
-                          animationTimingFunction: "linear",
-                          animationPlayState:
-                            hovered ||
-                            held ||
-                            previewIndex !== null ||
-                            !previewVisible
-                              ? "paused"
-                              : "running",
-                        }
-                      : undefined
-                  }
-                  onAnimationEnd={() =>
-                    setActive((current) => (current + 1) % features.length)
-                  }
-                />
-                {feature.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <div ref={previewRef} onClickCapture={pause} className="mt-6">
-            <ImageLightbox
-              src={features[previewIndex ?? active].image}
-              alt={features[previewIndex ?? active].alt}
-              previewRadius="rounded-xl"
-              noReferrer
-              onOpenChange={(open) =>
-                setPreviewIndex((current) =>
-                  open ? (current ?? active) : null,
-                )
-              }
-              className="border-border-card w-full border shadow-2xl"
-            >
-              <div className="grid">
-                {features.map((feature, index) => (
-                  <Image
-                    key={feature.image}
-                    src={feature.image}
-                    alt={index === active ? feature.alt : ""}
-                    aria-hidden={index !== active}
-                    width={2560}
-                    height={1439}
-                    sizes="(min-width: 1152px) 1152px, 100vw"
-                    referrerPolicy="no-referrer"
-                    className={`h-auto w-full transition-opacity duration-700 ease-in-out [grid-area:1/1] motion-reduce:transition-none ${index === active ? "opacity-100" : "opacity-0"}`}
-                  />
-                ))}
-              </div>
-            </ImageLightbox>
-          </div>
-          {features.map((feature) => (
-            <TabsContent
-              key={feature.label}
-              value={feature.label}
-              className="animate-in fade-in-0 slide-in-from-bottom-2 mt-8 duration-500 motion-reduce:animate-none"
-            >
-              <div className="grid gap-6 md:grid-cols-2 md:gap-12">
-                <div>
-                  <h3 className="text-primary-text text-2xl font-semibold tracking-tight">
-                    {feature.title}
-                  </h3>
-                  <p className="text-secondary-text mt-3 leading-relaxed">
-                    {feature.description}
-                  </p>
-                </div>
-                <ul className="space-y-3">
-                  {feature.points.map((point) => (
-                    <li
-                      key={point}
-                      className="text-secondary-text flex gap-3 text-sm leading-relaxed"
-                    >
-                      <Check
-                        aria-hidden="true"
-                        className="text-link mt-0.5 size-4 shrink-0"
-                      />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+        <div className="mt-6 overflow-hidden rounded-2xl">
+          <iframe
+            ref={previewRef}
+            src={`${previewOrigin}/app/preview.html?theme=${encodeURIComponent(theme)}`}
+            className="block w-full border-0 bg-transparent"
+            style={{
+              height:
+                previewHeight ?? "clamp(720px, calc(56.25vw + 300px), 1000px)",
+            }}
+            loading="lazy"
+            allow="autoplay"
+            title="Desktop app preview"
+          />
+        </div>
       </section>
       <section
         aria-labelledby="app-only-heading"
