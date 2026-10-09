@@ -132,6 +132,7 @@ export default function DiscordUserCard({
             size="sm"
             className="flex shrink-0 gap-1"
             disableTooltips={disableBadgeTooltips}
+            disableClick
             limit={badgeLimit}
           />
         </div>

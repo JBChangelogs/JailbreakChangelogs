@@ -23,6 +23,7 @@ interface UserBadgesProps {
     identity_guild_id: string | null;
   } | null;
   disableTooltips?: boolean;
+  disableClick?: boolean;
   customBgClass?: string;
   noContainer?: boolean;
   limit?: number;
@@ -39,6 +40,7 @@ export const UserBadges = ({
   className = "",
   primary_guild,
   disableTooltips = false,
+  disableClick = false,
   customBgClass,
   noContainer = false,
   limit,
@@ -101,8 +103,8 @@ export const UserBadges = ({
         alt={flag.flag}
         width={badgeSize}
         height={badgeSize}
-        className="cursor-pointer"
-        onClick={(e) => handleFlagClick(e, flag)}
+        className={disableClick ? undefined : "cursor-pointer"}
+        onClick={disableClick ? undefined : (e) => handleFlagClick(e, flag)}
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).style.display = "none";
           setFailedFlagCount((c) => c + 1);
@@ -136,8 +138,8 @@ export const UserBadges = ({
           alt={`Supporter Type ${premiumType}`}
           width={badgeSize}
           height={badgeSize}
-          className="cursor-pointer"
-          onClick={handlePremiumClick}
+          className={disableClick ? undefined : "cursor-pointer"}
+          onClick={disableClick ? undefined : handlePremiumClick}
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
@@ -176,8 +178,8 @@ export const UserBadges = ({
           alt="Early Adopter"
           width={badgeSize}
           height={badgeSize}
-          className="cursor-pointer"
-          onClick={handleEarlyAdopterClick}
+          className={disableClick ? undefined : "cursor-pointer"}
+          onClick={disableClick ? undefined : handleEarlyAdopterClick}
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
