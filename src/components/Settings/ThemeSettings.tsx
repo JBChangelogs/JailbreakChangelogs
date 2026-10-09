@@ -1,6 +1,15 @@
 "use client";
 
-import { useId, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -69,30 +78,100 @@ export default function ThemeSettings() {
     getThemeShortcutHidden,
     () => false,
   );
+  const railRef = useRef<HTMLDivElement>(null);
+  const [canScroll, setCanScroll] = useState({ prev: false, next: false });
+
+  const updateCanScroll = useCallback(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    setCanScroll({
+      prev: rail.scrollLeft > 1,
+      next: rail.scrollLeft + rail.clientWidth < rail.scrollWidth - 1,
+    });
+  }, []);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const observer = new ResizeObserver(updateCanScroll);
+    observer.observe(rail);
+    return () => observer.disconnect();
+  }, [updateCanScroll]);
+
+  // Bring the chosen theme fully into view, e.g. one past the edge on load or
+  // a partly shown one that was just clicked.
+  useEffect(() => {
+    const rail = railRef.current;
+    const card = rail?.querySelector<HTMLElement>("label:has(:checked)");
+    if (!rail || !card) return;
+    const start = card.offsetLeft;
+    const end = start + card.offsetWidth;
+    if (start < rail.scrollLeft || end > rail.scrollLeft + rail.clientWidth) {
+      rail.scrollTo({ left: start, behavior: "smooth" });
+    }
+  }, [theme]);
+
+  const scrollRail = (direction: 1 | -1) => {
+    const rail = railRef.current;
+    rail?.scrollBy({
+      left: direction * rail.clientWidth * 0.8,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <div className="space-y-5">
-      <div>
-        <h3 id={`${id}-label`} className="text-primary-text font-medium">
-          Theme
-        </h3>
-        <p className="text-secondary-text mt-1 text-sm">
-          Choose how the site looks.
-          {isAuthenticated
-            ? " Syncs with your account."
-            : " Saved on this browser."}
-        </p>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h3 id={`${id}-label`} className="text-primary-text font-medium">
+            Theme
+          </h3>
+          <p className="text-secondary-text mt-1 text-sm">
+            Choose how the site looks.
+            {isAuthenticated
+              ? " Syncs with your account."
+              : " Saved on this browser."}
+          </p>
+        </div>
+        {(canScroll.prev || canScroll.next) && (
+          <div className="flex shrink-0 gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8!"
+              disabled={!canScroll.prev}
+              onClick={() => scrollRail(-1)}
+              aria-label="Previous themes"
+            >
+              <ChevronLeft />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8!"
+              disabled={!canScroll.next}
+              onClick={() => scrollRail(1)}
+              aria-label="Next themes"
+            >
+              <ChevronRight />
+            </Button>
+          </div>
+        )}
       </div>
 
       <div
         role="radiogroup"
         aria-labelledby={`${id}-label`}
-        className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+        ref={railRef}
+        onScroll={updateCanScroll}
+        // Card widths leave the next card peeking out, so it's clear there are
+        // more themes to scroll to. Padding keeps the focus rings unclipped.
+        className="scrollbar-hide relative -m-1 grid snap-x snap-mandatory scroll-px-1 auto-cols-[44%] grid-flow-col gap-3 overflow-x-auto p-1 sm:auto-cols-[30%] lg:auto-cols-[22%]"
       >
         {THEME_OPTIONS.map(({ value, label, icon: ThemeIcon, preview }) => (
           <label
             key={value}
-            className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2"
+            className="group border-border-card snap-start has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2"
           >
             <input
               type="radio"
