@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,13 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useWhatsNewPreference } from "@/hooks/useWhatsNewPreference";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
-import ReleaseChanges from "./ReleaseChanges";
+const ReleaseChanges = dynamic(() => import("./ReleaseChanges"), {
+  loading: () => (
+    <div className="text-secondary-text min-h-32" role="status">
+      Loading changes...
+    </div>
+  ),
+});
 
 const LAST_SEEN_RELEASE_KEY = "jbcl:last-seen-dev-release";
 

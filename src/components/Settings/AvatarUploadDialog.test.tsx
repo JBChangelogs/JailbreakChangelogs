@@ -50,8 +50,11 @@ test("avatar and banner uploads open a prompt and validate dropped and picked fi
       },
       require: (name: string) => {
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "react-easy-crop")
+          throw new Error("Cropper must not load before an image is selected");
         if (name === "react")
           return {
+            lazy: () => "lazy-cropper",
             useCallback: (callback: unknown) => callback,
             useEffect: () => {},
             useRef: (current: unknown) => ({ current }),

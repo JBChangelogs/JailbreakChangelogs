@@ -56,8 +56,26 @@ import { UserData } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("INVENTORY");
-import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
-import NetworthHistoryChart from "@/components/Inventory/NetworthHistoryChart";
+const MoneyHistoryChart = dynamic(
+  () => import("@/components/Inventory/MoneyHistoryChart"),
+  {
+    loading: () => (
+      <div className="h-100" role="status" aria-label="Loading money chart">
+        <Spinner />
+      </div>
+    ),
+  },
+);
+const NetworthHistoryChart = dynamic(
+  () => import("@/components/Inventory/NetworthHistoryChart"),
+  {
+    loading: () => (
+      <div className="h-100" role="status" aria-label="Loading networth chart">
+        <Spinner />
+      </div>
+    ),
+  },
+);
 import InventoryBreakdown from "@/components/Inventory/InventoryBreakdown";
 import InventoryFeaturePreview from "@/components/Inventory/InventoryFeaturePreview";
 import UserTradeHistory from "@/components/Inventory/UserTradeHistory";

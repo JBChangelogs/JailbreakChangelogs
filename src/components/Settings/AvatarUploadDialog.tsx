@@ -1,6 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useDropzone } from "react-dropzone";
-import Cropper, { type Area, type Point } from "react-easy-crop";
+import type { Area, Point } from "react-easy-crop";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +39,8 @@ import {
 } from "@/utils/images/cropImage";
 import { validateFile } from "@/utils/storage/fileValidation";
 import SupporterModal from "../Modals/SupporterModal";
+
+const Cropper = lazy(() => import("react-easy-crop"));
 
 const log = createLogger("UI");
 type UploadPhase = "processing" | "uploading" | null;
@@ -386,21 +395,32 @@ const ImageUploadDialog = ({
             aria-busy={isUploading}
           >
             {selectedSource && (
-              <Cropper
-                image={selectedSource}
-                crop={crop}
-                zoom={zoom}
-                rotation={rotation}
-                aspect={config.aspect}
-                cropShape={
-                  isAvatar && userData.premiumtype !== 3 ? "round" : "rect"
+              <Suspense
+                fallback={
+                  <div
+                    className="flex h-full items-center justify-center"
+                    role="status"
+                  >
+                    Loading image editor...
+                  </div>
                 }
-                showGrid={false}
-                onCropChange={isUploading ? () => undefined : setCrop}
-                onZoomChange={isUploading ? undefined : setZoom}
-                onRotationChange={isUploading ? undefined : setRotation}
-                onCropComplete={handleCropComplete}
-              />
+              >
+                <Cropper
+                  image={selectedSource}
+                  crop={crop}
+                  zoom={zoom}
+                  rotation={rotation}
+                  aspect={config.aspect}
+                  cropShape={
+                    isAvatar && userData.premiumtype !== 3 ? "round" : "rect"
+                  }
+                  showGrid={false}
+                  onCropChange={isUploading ? () => undefined : setCrop}
+                  onZoomChange={isUploading ? undefined : setZoom}
+                  onRotationChange={isUploading ? undefined : setRotation}
+                  onCropComplete={handleCropComplete}
+                />
+              </Suspense>
             )}
             {isUploading && (
               <div className="absolute inset-0 z-10 cursor-wait" />
