@@ -864,33 +864,47 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --color-overlay-dark: rgb(8 45 48 / 90%);
 }
 
+.theme-cursor-icon {
+  display: none;
+  background-image: var(--theme-cursor-icon);
+}
+
+:root.future-tone .theme-cursor-icon {
+  width: 24px;
+  height: 24px;
+}
+
 @media (hover: hover) and (pointer: fine) {
   :root.halloween {
-    --theme-cursor: url("/cursors/halloween-ghost.svg") 10 1, auto;
+    --theme-cursor-icon: url("/cursors/halloween-ghost.svg");
   }
 
   :root.dark {
-    --theme-cursor: url("/cursors/dark-moon.svg") 7 2, auto;
+    --theme-cursor-icon: url("/cursors/dark-moon.svg");
   }
 
   :root.amoled {
-    --theme-cursor: url("/cursors/amoled-arrow.svg") 2 2, auto;
+    --theme-cursor-icon: url("/cursors/amoled-arrow.svg");
   }
 
   :root.light {
-    --theme-cursor: url("/cursors/light-sun.svg") 12 1, auto;
+    --theme-cursor-icon: url("/cursors/light-sun.svg");
   }
 
   :root.catppuccin {
-    --theme-cursor: url("/cursors/catppuccin-mocha-cat.svg") 3 2, auto;
+    --theme-cursor-icon: url("/cursors/catppuccin-mocha-cat.svg");
   }
 
   :root.catppuccin-latte {
-    --theme-cursor: url("/cursors/catppuccin-latte-cat.svg") 3 2, auto;
+    --theme-cursor-icon: url("/cursors/catppuccin-latte-cat.svg");
   }
 
-  :root:not([data-theme-cursor="off"]) {
-    cursor: var(--theme-cursor, auto);
+  :root.future-tone {
+    --theme-cursor-icon: url("/cursors/future-tone.svg");
+  }
+
+  :root:not([data-theme-cursor="off"]) .theme-cursor-icon {
+    display: block;
   }
 }
 

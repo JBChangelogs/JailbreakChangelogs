@@ -18,6 +18,7 @@ import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
 import OfflineNavigationRecovery from "@/components/Layout/OfflineNavigationRecovery";
 import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
+import ThemeCursor from "@/components/Settings/ThemeCursor";
 import { TwemojiProvider } from "@/contexts/TwemojiContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
@@ -169,6 +170,7 @@ export default async function RootLayout({
             </div>
           </noscript>
           <CustomThemeProvider>
+            <ThemeCursor />
             <TwemojiProvider>
               <QueryProvider>
                 <Toaster
@@ -317,6 +319,7 @@ export default async function RootLayout({
           </div>
         </noscript>
         <CustomThemeProvider>
+          <ThemeCursor />
           <TwemojiProvider>
             <QueryProvider>
               <Toaster
