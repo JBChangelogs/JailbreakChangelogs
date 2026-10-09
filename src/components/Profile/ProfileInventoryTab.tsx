@@ -1,5 +1,6 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -378,8 +379,7 @@ export default function ProfileInventoryTab({
 
       {status === "error" && (
         <div className="py-6 text-center">
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+          <NotFoundIllustration
             alt="Failed to load inventory"
             width={160}
             height={128}
@@ -410,8 +410,7 @@ export default function ProfileInventoryTab({
 
       {status === "loaded" && !hasItems && (
         <div className="py-6 text-center">
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+          <NotFoundIllustration
             alt="No inventory items"
             width={160}
             height={128}

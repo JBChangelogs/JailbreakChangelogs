@@ -1,5 +1,6 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -327,8 +328,7 @@ export default function FavoritesTab({
 
         {favorites.length === 0 ? (
           <div className="py-6 text-center">
-            <Image
-              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            <NotFoundIllustration
               alt="No favorites"
               width={160}
               height={128}

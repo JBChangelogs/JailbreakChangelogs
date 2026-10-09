@@ -1,9 +1,9 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { formatProfileDate } from "@/utils/helpers/timestamp";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
@@ -120,8 +120,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
           </span>
         </h2>
         <div className="py-6 text-center">
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+          <NotFoundIllustration
             alt="No private servers"
             width={160}
             height={128}

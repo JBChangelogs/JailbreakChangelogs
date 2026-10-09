@@ -1,7 +1,7 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -73,13 +73,11 @@ export default function Error({
           </div>
 
           <div className="relative mt-12 w-full lg:mt-0 lg:w-1/2">
-            <Image
+            <NotFoundIllustration
               className="w-full max-w-lg lg:mx-auto"
-              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
               alt="Error illustration"
               width={500}
               height={400}
-              loading="eager"
             />
           </div>
         </div>

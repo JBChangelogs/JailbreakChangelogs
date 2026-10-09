@@ -1,5 +1,6 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useRef, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
@@ -152,8 +153,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
           Dupers [0]
         </h2>
         <div className="py-6 text-center">
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+          <NotFoundIllustration
             alt="No dupers"
             width={160}
             height={128}
@@ -207,8 +207,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
       {filteredDupes.length === 0 && searchTerm.trim() && (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
           <div className="py-6">
-            <Image
-              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            <NotFoundIllustration
               alt="No results"
               width={160}
               height={128}

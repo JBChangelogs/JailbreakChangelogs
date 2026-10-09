@@ -1,5 +1,6 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -19,7 +20,6 @@ import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import { createLogger } from "@/services/logger";
 // RE-ADD: voting — import { toast } from "sonner";
-import Image from "next/image";
 import Link from "next/link";
 import {
   Dialog,
@@ -347,8 +347,7 @@ export default function ItemSuggestionsTab({
           Item Suggestions [0]
         </h2>
         <div className="py-6 text-center">
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+          <NotFoundIllustration
             alt="No suggestions"
             width={160}
             height={128}

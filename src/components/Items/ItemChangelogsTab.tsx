@@ -1,8 +1,8 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
@@ -318,8 +318,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
           Item Changes [0]
         </h2>
         <div className="py-6 text-center">
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+          <NotFoundIllustration
             alt="No changelogs"
             width={160}
             height={128}

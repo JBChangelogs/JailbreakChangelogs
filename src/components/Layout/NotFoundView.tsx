@@ -1,7 +1,7 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import Link from "next/link";
-import Image from "next/image";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -69,13 +69,11 @@ export default function NotFoundView({
           </div>
 
           <div className="relative mt-12 w-full lg:mt-0 lg:w-1/2">
-            <Image
+            <NotFoundIllustration
               className="w-full max-w-lg lg:mx-auto"
-              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
               alt="404 Error Illustration"
               width={500}
               height={400}
-              loading="eager"
             />
           </div>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { createLogger } from "@/services/logger";
 import { useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +9,6 @@ const log = createLogger("UI");
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
-import Image from "next/image";
 import Comment from "../ProfileComments/Comments";
 import { fetchCommentDetails } from "@/app/users/[id]/actions";
 import { PUBLIC_API_URL } from "@/utils/api/api";
@@ -390,8 +390,7 @@ export default function CommentsTab({
         {totalComments === 0 ? (
           <div className="py-6 text-center">
             {!preview && (
-              <Image
-                src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+              <NotFoundIllustration
                 alt="No comments"
                 width={160}
                 height={128}

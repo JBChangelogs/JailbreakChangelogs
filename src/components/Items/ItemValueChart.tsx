@@ -1,7 +1,7 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useState, use, useId } from "react";
-import Image from "next/image";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -125,8 +125,7 @@ const ItemValueChart = ({
   if (history.length === 0) {
     return (
       <div className="py-6 text-center">
-        <Image
-          src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+        <NotFoundIllustration
           alt="No data"
           width={160}
           height={128}
@@ -971,8 +970,7 @@ const ItemValueChart = ({
             </>
           ) : (
             <div className="py-6 text-center">
-              <Image
-                src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+              <NotFoundIllustration
                 alt="No data"
                 width={160}
                 height={128}
@@ -1518,8 +1516,7 @@ const ItemValueChart = ({
         !hideTradingMetrics &&
         tradingData.length === 0 && (
           <div className="py-6 text-center">
-            <Image
-              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            <NotFoundIllustration
               alt="No data"
               width={160}
               height={128}

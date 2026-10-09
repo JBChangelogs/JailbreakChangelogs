@@ -1,7 +1,7 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import type { TradeAd } from "@/types/trading";
 import { useEffect, useState } from "react";
@@ -313,8 +313,7 @@ export default function TradeAdsProfileTab({
       ) : sortedTradeAds.length === 0 ? (
         <div className="py-6 text-center">
           {!preview && (
-            <Image
-              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+            <NotFoundIllustration
               alt="No trade ads"
               width={160}
               height={128}

@@ -1,7 +1,7 @@
 "use client";
 
+import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import type { ChangeEvent, MouseEvent } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -109,8 +109,7 @@ export function SuggestionResults({
         </div>
       ) : noSuggestionsFound || filteredSuggestions.length === 0 ? (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-          <Image
-            src="/assets/images/404.svg"
+          <NotFoundIllustration
             alt="No suggestions found"
             width={180}
             height={180}
