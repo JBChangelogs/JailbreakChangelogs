@@ -15,6 +15,23 @@ Once you have the environment file (.env.local) set up, you can proceed with the
 
 **Note:** You can reference the [`.env.example`](.env.example) file to see the structure and required environment variables for the project.
 
+### Signing in locally
+
+Discord login cookies don't work on `localhost`, so local dev signs in with your session token instead.
+
+1. Open [api.jailbreakchangelogs.com](https://api.jailbreakchangelogs.com) and copy the token under **Your Session Token**.
+2. If no token shows, sign in on [jailbreakchangelogs.com](https://jailbreakchangelogs.com), then come back to the API homepage in the same browser.
+3. Add these to `.env.local`:
+
+```env
+RAILWAY_ENVIRONMENT_NAME="development"
+NEXT_PUBLIC_DEV_TOKEN="<your session token>"
+```
+
+The token is only used when `RAILWAY_ENVIRONMENT_NAME` is `development`. Restart `bun dev` after changing either value.
+
+**Keep your token private.** It signs in as you, so never commit it or paste it in screenshots, issues, or PRs.
+
 ### Testing Discord previews
 
 `DISCORD_EMBED_ORIGIN` is optional. Leave it empty for the production default, `https://jailbreakchangelogs.com`.
