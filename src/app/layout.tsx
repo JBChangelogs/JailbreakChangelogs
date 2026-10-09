@@ -89,7 +89,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return withDiscordEmbed(metadata, `/`);
 }
 
-const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'&&t!=='amoled'&&t!=='catppuccin'&&t!=='catppuccin-latte')t='halloween';document.documentElement.classList.add(t);if(t==='catppuccin-latte')document.documentElement.classList.add('light');}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'&&t!=='amoled'&&t!=='catppuccin'&&t!=='catppuccin-latte'&&t!=='future-tone')t='halloween';document.documentElement.classList.add(t);if(t==='catppuccin-latte')document.documentElement.classList.add('light');}catch(e){}})();`;
 
 export default async function RootLayout({
   children,
