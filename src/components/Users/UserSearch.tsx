@@ -9,13 +9,7 @@ import Form from "next/form";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { UserData } from "@/types/auth";
 import DiscordUserCard from "@/components/Users/DiscordUserCard";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { fetchPaginatedUsers, searchUsers } from "@/utils/api/api";
-import { UserDetailsTooltip } from "../ui/UserDetailsTooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 import { Spinner } from "@/components/ui/Spinner";
@@ -250,30 +244,21 @@ export default function UserSearch() {
           users.map((user) => {
             const accent = userCardAccent(user);
             return (
-              <Tooltip key={user.id} delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={`/users/${user.id}`}
-                    prefetch={false}
-                    className="border-border-card group bg-secondary-bg hover:border-border-focus/60 relative block h-full overflow-hidden rounded-xl border shadow-md transition-[border-color,box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                    data-accent-cards={accent?.style}
-                    style={accent ? accentCardTheme(accent) : undefined}
-                  >
-                    <DiscordUserCard
-                      user={user}
-                      disableBadgeTooltips={true}
-                      badgeLimit={3}
-                      currentUserId={currentUserId}
-                    />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-sm min-w-75 p-0">
-                  <UserDetailsTooltip
-                    user={user}
-                    currentUserId={currentUserId}
-                  />
-                </TooltipContent>
-              </Tooltip>
+              <Link
+                key={user.id}
+                href={`/users/${user.id}`}
+                prefetch={false}
+                className="border-border-card group bg-secondary-bg hover:border-border-focus/60 relative block h-full overflow-hidden rounded-xl border shadow-md transition-[border-color,box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                data-accent-cards={accent?.style}
+                style={accent ? accentCardTheme(accent) : undefined}
+              >
+                <DiscordUserCard
+                  user={user}
+                  disableBadgeTooltips={true}
+                  badgeLimit={3}
+                  currentUserId={currentUserId}
+                />
+              </Link>
             );
           })
         )}
