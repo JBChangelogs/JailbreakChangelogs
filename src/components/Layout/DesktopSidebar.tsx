@@ -50,7 +50,7 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
         : "text-primary-text/85 hover:bg-quaternary-bg hover:text-primary-text",
     );
   const labelClassName =
-    "whitespace-nowrap opacity-[var(--desktop-sidebar-expanded-opacity,1)] transition-opacity duration-300 motion-reduce:transition-none";
+    "whitespace-nowrap opacity-[var(--desktop-sidebar-expanded-opacity,1)] transition-opacity duration-225 ease-[ease-out] motion-reduce:transition-none";
 
   return (
     <aside
@@ -81,7 +81,7 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
                 <span className={labelClassName}>{section.title}</span>
                 <span
                   aria-hidden="true"
-                  className="bg-border-card absolute left-3 h-px w-6 opacity-[var(--desktop-sidebar-collapsed-opacity,0)] transition-opacity duration-300 motion-reduce:transition-none"
+                  className="bg-border-card absolute left-3 h-px w-6 opacity-[var(--desktop-sidebar-collapsed-opacity,0)] transition-opacity duration-225 ease-[ease-out] motion-reduce:transition-none"
                 />
               </h2>
               <ul className="space-y-0.5">

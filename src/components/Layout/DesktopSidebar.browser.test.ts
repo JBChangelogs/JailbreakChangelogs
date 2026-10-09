@@ -104,7 +104,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
         `<!doctype html><html><head>
         <script>localStorage.setItem('${DESKTOP_SIDEBAR_COLLAPSED_KEY}', 'true');${DESKTOP_NAVIGATION_INIT_SCRIPT}</script>
         <style>${css.css}</style></head><body>
-        <div class="site-layout">${expanded}<main>Page content</main></div>
+        <div class="site-layout">${expanded}<main>Page content</main><footer>Footer</footer><div data-rail-side="left" style="position:fixed;left:var(--desktop-sidebar-width)"></div></div>
         <pre id="result"></pre><script>
         window.onload = () => {
           const root = document.documentElement;
@@ -145,9 +145,28 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
           const middle = { icons: positions(), opacity: +getComputedStyle(label).opacity };
           finish();
           const collapsed = { icons: positions(), opacity: +getComputedStyle(label).opacity, scrollLeft: navigation.scrollLeft };
+          const main = document.querySelector('main');
+          const footer = document.querySelector('footer');
+          const rail = document.querySelector('[data-rail-side="left"]');
+          const spam = [];
+          for (let i = 0; i < 16; i++) {
+            const before = sidebar.getBoundingClientRect().width;
+            root.dataset.desktopSidebarCollapsed = String(i % 2 === 1);
+            const start = sidebar.getBoundingClientRect().width;
+            const animations = [sidebar, main, footer, rail, label].flatMap(element => element.getAnimations());
+            animations.forEach(animation => { animation.pause(); animation.currentTime = 40; });
+            const width = sidebar.getBoundingClientRect().width;
+            spam.push({before, start, width, margin: parseFloat(getComputedStyle(main).marginLeft), footerMargin: parseFloat(getComputedStyle(footer).marginLeft), railLeft: rail.getBoundingClientRect().left, widthTransitions: sidebar.getAnimations().length});
+          }
+          [sidebar, main, footer, rail, label].forEach(element => element.getAnimations().forEach(animation => animation.finish()));
+          const afterSpam = {width: sidebar.getBoundingClientRect().width, opacity: +getComputedStyle(label).opacity};
+          root.dataset.desktopSidebarCollapsed = 'false';
+          sidebar.getBoundingClientRect();
+          const freshTransition = sidebar.getAnimations()[0].effect.getTiming();
+          const labelTransition = label.getAnimations()[0].effect.getTiming();
           root.dataset.desktopNavigation = 'top-bar';
           const topBarWidth = getComputedStyle(document.querySelector('.site-layout')).getPropertyValue('--desktop-sidebar-width').trim();
-          document.querySelector('#result').textContent = JSON.stringify({initial, measuredIcons, tickerTop, expanded, expandedMeasuredIcons, middle, collapsed, topBarWidth});
+          document.querySelector('#result').textContent = JSON.stringify({initial, measuredIcons, tickerTop, expanded, expandedMeasuredIcons, middle, collapsed, spam, afterSpam, freshTransition, labelTransition, topBarWidth});
         };
         </script></body></html>`,
       );
@@ -203,6 +222,24 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
       expect(result.middle.opacity).toBeLessThan(1);
       expect(result.collapsed).toMatchObject({ opacity: 0, scrollLeft: 0 });
       expect(result.collapsed.icons).toEqual(result.expanded.icons);
+      for (const frame of result.spam) {
+        expect(frame.start).toBeCloseTo(frame.before, 1);
+        expect(frame.width).toBeGreaterThanOrEqual(72);
+        expect(frame.width).toBeLessThanOrEqual(240);
+        expect(frame.margin).toBeCloseTo(frame.width, 1);
+        expect(frame.footerMargin).toBeCloseTo(frame.width, 1);
+        expect(frame.railLeft).toBeCloseTo(frame.width, 1);
+        expect(frame.widthTransitions).toBeLessThanOrEqual(1);
+      }
+      expect(result.afterSpam).toEqual({ width: 72, opacity: 0 });
+      expect(result.freshTransition).toMatchObject({
+        duration: 225,
+        easing: "ease-out",
+      });
+      expect(result.labelTransition).toMatchObject({
+        duration: 225,
+        easing: "ease-out",
+      });
       expect(result.topBarWidth).toBe("0px");
     } finally {
       rmSync(directory, { recursive: true, force: true });
