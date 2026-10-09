@@ -811,7 +811,31 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
 
 @media (hover: hover) and (pointer: fine) {
   :root.halloween {
-    cursor: url("/cursors/halloween-ghost.svg") 10 1, auto;
+    --theme-cursor: url("/cursors/halloween-ghost.svg") 10 1, auto;
+  }
+
+  :root.dark {
+    --theme-cursor: url("/cursors/dark-moon.svg") 7 2, auto;
+  }
+
+  :root.amoled {
+    --theme-cursor: url("/cursors/amoled-arrow.svg") 2 2, auto;
+  }
+
+  :root.light {
+    --theme-cursor: url("/cursors/light-sun.svg") 12 1, auto;
+  }
+
+  :root.catppuccin {
+    --theme-cursor: url("/cursors/catppuccin-mocha-cat.svg") 3 2, auto;
+  }
+
+  :root.catppuccin-latte {
+    --theme-cursor: url("/cursors/catppuccin-latte-cat.svg") 3 2, auto;
+  }
+
+  :root:not([data-theme-cursor="off"]) {
+    cursor: var(--theme-cursor, auto);
   }
 }
 

@@ -26,6 +26,11 @@ import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
+  getThemeCursorEnabled,
+  setThemeCursorEnabled,
+  subscribeThemeCursor,
+} from "@/utils/ui/themeCursor";
+import {
   getThemeShortcutHidden,
   setThemeShortcutHidden,
   subscribeThemeShortcut,
@@ -210,6 +215,11 @@ export default function ThemeSettings() {
   const id = useId();
   const { isAuthenticated } = useAuthContext();
   const { theme, setTheme } = useTheme();
+  const cursorEnabled = useSyncExternalStore(
+    subscribeThemeCursor,
+    getThemeCursorEnabled,
+    () => true,
+  );
   const shortcutHidden = useSyncExternalStore(
     subscribeThemeShortcut,
     getThemeShortcutHidden,
@@ -291,6 +301,25 @@ export default function ThemeSettings() {
           className="w-full sm:hidden"
         />
       </Carousel>
+
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <label
+            htmlFor={`${id}-cursor`}
+            className="text-primary-text font-medium"
+          >
+            Use theme cursor
+          </label>
+          <p className="text-secondary-text mt-1 text-sm">
+            Match your cursor to your selected theme. Saved on this browser.
+          </p>
+        </div>
+        <Switch
+          id={`${id}-cursor`}
+          checked={cursorEnabled}
+          onCheckedChange={setThemeCursorEnabled}
+        />
+      </div>
 
       <div className="flex items-center justify-between gap-4">
         <div>
