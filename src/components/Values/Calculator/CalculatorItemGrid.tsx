@@ -10,7 +10,7 @@ import {
   getVideoPath,
 } from "@/utils/ui/images";
 import { Icon } from "../../ui/IconWrapper";
-import { formatCurrencyValue, parseValueString } from "./calculatorUtils";
+import { parseValueString } from "./calculatorUtils";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { QuickAddPopover } from "@/components/trading/QuickAddPopover";
 import { DupedBadge } from "@/components/trading/DupedBadge";
@@ -97,8 +97,8 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
               item.duped_value !== undefined &&
               item.duped_value !== "N/A";
             const displayValue = getSelectedValue
-              ? formatCurrencyValue(getSelectedValue(item))
-              : formatCurrencyValue(parseValueString(item.cash_value));
+              ? getSelectedValue(item).toLocaleString()
+              : parseValueString(item.cash_value).toLocaleString();
             const isLimited = item.is_limited === 1;
             const isSeasonal = isSeasonalItem(item);
             const lastInstanceId =

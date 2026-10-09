@@ -1,3 +1,7 @@
+import {
+  parseValueString,
+  formatTradeValue,
+} from "@/components/Values/Calculator/calculatorUtils";
 import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
 import { isSeasonalItem } from "@/utils/items/season";
 import React from "react";
@@ -55,24 +59,6 @@ const groupItems = (items: TradeItem[]) => {
   );
 
   return Object.values(grouped);
-};
-
-const parseTradeValue = (value: string | number | null | undefined): number => {
-  if (value === null || value === undefined) return 0;
-  const normalized = String(value).trim().toLowerCase().replace(/,/g, "");
-  if (!normalized || normalized === "n/a") return 0;
-  if (normalized.endsWith("m")) {
-    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000_000;
-  }
-  if (normalized.endsWith("k")) {
-    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000;
-  }
-  return parseFloat(normalized) || 0;
-};
-
-const formatTradeValue = (value: number): string => {
-  if (!Number.isFinite(value)) return "0";
-  return Math.round(value).toLocaleString();
 };
 
 export const ItemGrid: React.FC<ItemGridProps> = ({
@@ -194,7 +180,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             const rawValue = item.isDuped ? item.duped_value : item.cash_value;
             const hasValue = rawValue != null && rawValue !== "N/A";
             const displayValue = hasValue
-              ? formatTradeValue(parseTradeValue(rawValue))
+              ? formatTradeValue(parseValueString(rawValue))
               : "N/A";
 
             const stepperButtonClass =

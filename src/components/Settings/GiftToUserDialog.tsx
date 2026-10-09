@@ -1,3 +1,4 @@
+import { getSupporterGiftTierLabel } from "@/utils/auth/supporterAccess";
 import Image from "next/image";
 import Link from "next/link";
 import type { SupporterGift, UserData } from "@/types/auth";
@@ -36,19 +37,6 @@ interface GiftToUserDialogProps {
   onDismiss: () => void;
   onSubmit: () => void;
 }
-
-const getSupporterGiftTierLabel = (level: number) => {
-  switch (level) {
-    case 1:
-      return "Supporter One Gift";
-    case 2:
-      return "Supporter Two Gift";
-    case 3:
-      return "Supporter Three Gift";
-    default:
-      return `Supporter Gift ${level}`;
-  }
-};
 
 export default function GiftToUserDialog({
   open,

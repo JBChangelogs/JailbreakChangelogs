@@ -1,6 +1,5 @@
 import React from "react";
 import { Icon } from "../../ui/IconWrapper";
-import { formatCurrencyValue } from "./calculatorUtils";
 
 interface TradeSummaryBarProps {
   offeringTotal: number;
@@ -33,8 +32,8 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
     difference === 0
       ? "Even trade"
       : difference > 0
-        ? `You're giving ${formatCurrencyValue(Math.abs(difference))} more`
-        : `You're getting ${formatCurrencyValue(Math.abs(difference))} more`;
+        ? `You're giving ${Math.abs(difference).toLocaleString()} more`
+        : `You're getting ${Math.abs(difference).toLocaleString()} more`;
 
   const netColorClass =
     difference === 0
@@ -61,7 +60,7 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
             </span>
           </p>
           <p className="text-primary-text truncate text-xl font-bold sm:text-2xl">
-            {formatCurrencyValue(offeringTotal)}
+            {offeringTotal.toLocaleString()}
           </p>
         </div>
 
@@ -82,7 +81,7 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
             </span>
           </p>
           <p className="text-primary-text truncate text-xl font-bold sm:text-2xl">
-            {formatCurrencyValue(requestingTotal)}
+            {requestingTotal.toLocaleString()}
           </p>
         </div>
       </div>

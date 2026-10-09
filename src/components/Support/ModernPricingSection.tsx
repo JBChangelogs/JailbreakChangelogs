@@ -544,7 +544,7 @@ export default function ModernPricingSection() {
               <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
-                    icon="token-branded:ltc"
+                    icon="simple-icons:litecoin"
                     className="h-4 w-4"
                     inline={true}
                   />

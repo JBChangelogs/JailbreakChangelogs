@@ -38,11 +38,6 @@ import { bangers } from "@/app/fonts";
 import ItemSignatures from "@/components/Items/ItemSignatures";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 
-// Helper function to format numbers with commas
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat().format(num);
-};
-
 interface OGItem {
   tradePopularMetric: number;
   level: number | null;
@@ -255,7 +250,7 @@ export default function OGItemCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-primary-text cursor-help text-xl font-bold">
-                {formatNumber(item.uniqueCirculation)}
+                {item.uniqueCirculation.toLocaleString()}
               </div>
             </TooltipTrigger>
             <TooltipContent>

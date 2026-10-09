@@ -66,7 +66,7 @@ export default function RetryErrorDisplay({
             // Offline status icon when not retrying
             <div className="bg-status-error/10 flex h-8 w-8 items-center justify-center rounded-full">
               <Icon
-                icon="heroicons-solid:status-offline"
+                icon="heroicons:signal-slash-solid"
                 className="text-status-error h-5 w-5"
                 inline={true}
               />

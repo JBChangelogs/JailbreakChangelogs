@@ -125,13 +125,13 @@ export default function SeasonContractsClient({
                 <div className="flex items-center justify-center gap-4">
                   {team === "Criminal" ? (
                     <Icon
-                      icon="ri:criminal-fill"
+                      icon="mdi:robber"
                       className="text-primary-text h-8 w-8 shrink-0 sm:h-10 sm:w-10"
                       inline={true}
                     />
                   ) : (
                     <Icon
-                      icon="game-icons:police-officer-head"
+                      icon="mdi:police-badge"
                       className="text-primary-text h-8 w-8 shrink-0 sm:h-10 sm:w-10"
                       inline={true}
                     />

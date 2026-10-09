@@ -1,3 +1,7 @@
+import {
+  parseValueString,
+  formatTradeValue,
+} from "@/components/Values/Calculator/calculatorUtils";
 import React, { useEffect, useState } from "react";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import Link from "next/link";
@@ -66,24 +70,6 @@ const groupTradeItems = (items: TradeItem[]) => {
   };
 };
 
-const parseTradeValue = (value: string | number | null | undefined): number => {
-  if (value === null || value === undefined) return 0;
-  const normalized = String(value).trim().toLowerCase().replace(/,/g, "");
-  if (!normalized || normalized === "n/a") return 0;
-  if (normalized.endsWith("m")) {
-    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000_000;
-  }
-  if (normalized.endsWith("k")) {
-    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000;
-  }
-  return parseFloat(normalized) || 0;
-};
-
-const formatTradeValue = (value: number): string => {
-  if (!Number.isFinite(value)) return "0";
-  return Math.round(value).toLocaleString();
-};
-
 const RelativeTimeText = ({
   timestamp,
   fallback = "unknown",
@@ -109,11 +95,11 @@ const TradeSidePreview = ({
   const hasStandardItems = standardItems.length > 0;
   const cashTotal = standardItems.reduce((sum, item) => {
     if (item.isDuped) return sum;
-    return sum + parseTradeValue(item.cash_value);
+    return sum + parseValueString(item.cash_value);
   }, 0);
   const dupedTotal = standardItems.reduce((sum, item) => {
     if (!item.isDuped) return sum;
-    return sum + parseTradeValue(item.duped_value);
+    return sum + parseValueString(item.duped_value);
   }, 0);
 
   return (
@@ -142,7 +128,7 @@ const TradeSidePreview = ({
               const hasKnownItemValue =
                 rawItemValue != null && rawItemValue !== "N/A";
               const itemValue = hasKnownItemValue
-                ? formatTradeValue(parseTradeValue(rawItemValue))
+                ? formatTradeValue(parseValueString(rawItemValue))
                 : "N/A";
 
               const rawNameNode = itemHref ? (

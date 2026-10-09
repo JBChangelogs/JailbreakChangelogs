@@ -1,5 +1,6 @@
 "use client";
 
+import { getUserAvatar } from "@/utils/ui/images";
 import {
   Dialog,
   DialogContent,
@@ -37,10 +38,6 @@ const EMPTY_MESSAGES: Record<"All" | "Police" | "Criminal", string> = {
   Criminal: "No criminals found",
   All: "No players found",
 };
-
-function getUserAvatar(userId: string): string {
-  return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
-}
 
 export default function RobberyPlayersModal({
   isOpen,

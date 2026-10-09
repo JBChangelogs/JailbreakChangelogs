@@ -1,5 +1,6 @@
 "use client";
 
+import { getUserAvatar } from "@/utils/ui/images";
 import { useMemo, useState } from "react";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { usePathname } from "next/navigation";
@@ -41,10 +42,6 @@ interface TradeHistoryModalProps {
   isDupeTab?: boolean;
   usersData?: Record<string, RobloxUser>;
 }
-
-const getUserAvatar = (userId: string) => {
-  return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
-};
 
 const TradeAvatarImage = ({ userId }: { userId: string }) => {
   const [isLoading, setIsLoading] = useState(true);

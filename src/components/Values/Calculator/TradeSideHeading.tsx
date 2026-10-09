@@ -1,5 +1,4 @@
 import { Icon } from "@/components/ui/IconWrapper";
-import { formatCurrencyValue } from "./calculatorUtils";
 
 export function TradeSideHeading({
   side,
@@ -29,7 +28,7 @@ export function TradeSideHeading({
         · {count} {count === 1 ? "item" : "items"}
       </span>
       <span className="text-primary-text text-sm font-bold tabular-nums">
-        {formatCurrencyValue(total)}
+        {total.toLocaleString()}
       </span>
     </div>
   );

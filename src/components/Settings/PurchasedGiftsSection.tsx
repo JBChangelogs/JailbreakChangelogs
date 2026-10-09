@@ -1,3 +1,4 @@
+import { getSupporterGiftTierLabel } from "@/utils/auth/supporterAccess";
 import Image from "next/image";
 import type { SupporterGift } from "@/types/auth";
 import { Button as CustomButton } from "@/components/ui/button";
@@ -17,19 +18,6 @@ interface PurchasedGiftsSectionProps {
   onOpenGiftModal: (gift: SupporterGift) => void;
   onPurchaseGift: () => void;
 }
-
-const getSupporterGiftTierLabel = (level: number) => {
-  switch (level) {
-    case 1:
-      return "Supporter One Gift";
-    case 2:
-      return "Supporter Two Gift";
-    case 3:
-      return "Supporter Three Gift";
-    default:
-      return `Supporter Gift ${level}`;
-  }
-};
 
 export default function PurchasedGiftsSection({
   gifts,

@@ -1,5 +1,6 @@
 "use client";
 
+import { parseValueString } from "@/components/Values/Calculator/calculatorUtils";
 import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
 
 import { isSeasonalItem } from "@/utils/items/season";
@@ -101,22 +102,6 @@ interface TradeItemPickerV2Props {
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
 const ITEMS_PER_PAGE_COMPACT = 20;
-
-const parseValueString = (
-  valStr: string | number | null | undefined,
-): number => {
-  if (valStr === undefined || valStr === null) return 0;
-  const cleanedValStr = String(valStr).toLowerCase().replace(/,/g, "");
-  if (cleanedValStr === "n/a" || cleanedValStr === "null") return 0;
-  if (cleanedValStr.endsWith("m")) {
-    return parseFloat(cleanedValStr) * 1_000_000;
-  } else if (cleanedValStr.endsWith("k")) {
-    return parseFloat(cleanedValStr) * 1_000;
-  } else if (cleanedValStr.endsWith("b")) {
-    return parseFloat(cleanedValStr) * 1_000_000_000;
-  }
-  return parseFloat(cleanedValStr);
-};
 
 const formatValue = (
   valStr: string | number | null | undefined,

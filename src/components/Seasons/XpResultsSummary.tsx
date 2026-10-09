@@ -42,9 +42,9 @@ export default function XpResultsSummary({
 
   const getStatusIcon = (achievable: boolean) =>
     achievable ? (
-      <Icon icon="fa:check" className="text-green-400" inline={true} />
+      <Icon icon="heroicons:check" className="text-green-400" inline={true} />
     ) : (
-      <Icon icon="fa:times" className="text-red-400" inline={true} />
+      <Icon icon="heroicons:x-mark" className="text-red-400" inline={true} />
     );
 
   // Helper function to calculate XP within current level
@@ -186,7 +186,13 @@ export default function XpResultsSummary({
         type: "error",
         message: "Target not achievable",
         subtitle: "Consider focusing on getting as close as possible.",
-        icon: <Icon icon="fa:times" className="text-red-400" inline={true} />,
+        icon: (
+          <Icon
+            icon="heroicons:x-mark"
+            className="text-red-400"
+            inline={true}
+          />
+        ),
       };
     }
     return {

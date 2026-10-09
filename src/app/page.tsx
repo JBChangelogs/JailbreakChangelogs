@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getRandomBackgroundImage } from "@/utils/helpers/fisherYatesShuffle";
+import { getRandomBackgroundImage } from "@/utils/helpers/backgroundImages";
 import {
   fetchHomepageImpactStats,
   fetchHomepageStats,

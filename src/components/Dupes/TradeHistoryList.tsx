@@ -1,5 +1,6 @@
 "use client";
 
+import { getUserAvatar } from "@/utils/ui/images";
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
@@ -20,9 +21,6 @@ type ResolvedUsers = Record<
   string,
   { name: string; displayName: string; hasVerifiedBadge: boolean }
 >;
-
-const getUserAvatar = (userId: string) =>
-  `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
 
 function ChainCard({
   fromUser,

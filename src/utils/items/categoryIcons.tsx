@@ -45,7 +45,7 @@ export const getCategoryIcon = (type: string): CategoryIcon | null => {
       return { Icon: createIconifyIcon("mdi:car") };
     case "hyperchromes":
     case "hyperchrome":
-      return { Icon: createIconifyIcon("fa6-solid:jar") };
+      return { Icon: createIconifyIcon("mdi:flask") };
     case "rims":
     case "rim":
       return { Icon: createIconifyIcon("solar:wheel-bold") };
@@ -63,7 +63,7 @@ export const getCategoryIcon = (type: string): CategoryIcon | null => {
       return { Icon: createIconifyIcon("mdi:sticker") };
     case "tire styles":
     case "tire style":
-      return { Icon: createIconifyIcon("ph:tire-bold") };
+      return { Icon: createIconifyIcon("mdi:tire") };
     case "drifts":
     case "drift":
       return { Icon: createIconifyIcon("mdi:fire") };
@@ -74,7 +74,7 @@ export const getCategoryIcon = (type: string): CategoryIcon | null => {
       return { Icon: createIconifyIcon("mdi:bullhorn") };
     case "weapon skins":
     case "weapon skin":
-      return { Icon: createIconifyIcon("fa7-solid:gun") };
+      return { Icon: createIconifyIcon("mdi:pistol") };
     default:
       return null;
   }

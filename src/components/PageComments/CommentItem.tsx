@@ -384,10 +384,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                 </>
               ) : (
                 <>
-                  <Icon
-                    icon="streamline-plump:mail-send-email-message-solid"
-                    inline={true}
-                  />
+                  <Icon icon="heroicons:paper-airplane-solid" inline={true} />
                   Reply
                 </>
               )}

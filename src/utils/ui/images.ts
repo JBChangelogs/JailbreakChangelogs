@@ -182,3 +182,6 @@ export const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     img.onerror = null;
   }
 };
+
+export const getUserAvatar = (userId: string): string =>
+  `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;

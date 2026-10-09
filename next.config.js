@@ -21,24 +21,7 @@ const nextConfig = {
     compilationMode: "annotation",
   },
   experimental: {
-    optimizePackageImports: [
-      "radix-ui",
-      "@mui/material",
-      "@mui/lab",
-      "@mui/x-date-pickers",
-      "lucide-react",
-    ],
-  },
-  turbopack: {
-    rules: {
-      "*.svg": {
-        loaders: ["@svgr/webpack"],
-        as: "*.js",
-      },
-    },
-  },
-  typescript: {
-    ignoreBuildErrors: true,
+    optimizePackageImports: ["radix-ui"],
   },
   images: {
     unoptimized: true,

@@ -40,11 +40,6 @@ import {
 import { bangers } from "@/app/fonts";
 import ItemSignatures from "@/components/Items/ItemSignatures";
 
-// Helper function to format numbers with commas
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat().format(num);
-};
-
 interface InventoryItemCardProps {
   item: InventoryItem;
   itemData?: CatalogValues;
@@ -250,7 +245,7 @@ export default function InventoryItemCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-primary-text cursor-help text-xl font-bold">
-                {formatNumber(item.uniqueCirculation)}
+                {item.uniqueCirculation.toLocaleString()}
               </div>
             </TooltipTrigger>
             <TooltipContent>

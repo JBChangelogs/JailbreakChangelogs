@@ -1,3 +1,4 @@
+import { parseValueString } from "@/components/Values/Calculator/calculatorUtils";
 import React, {
   useState,
   useEffect,
@@ -279,21 +280,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     });
 
     return Array.from(grouped.values());
-  };
-
-  const parseValueString = (
-    valStr: string | number | null | undefined,
-  ): number => {
-    if (valStr === undefined || valStr === null) return 0;
-    const cleanedValStr = String(valStr).toLowerCase().replace(/,/g, "");
-    if (cleanedValStr === "n/a") return 0;
-    if (cleanedValStr.endsWith("m")) {
-      return parseFloat(cleanedValStr) * 1_000_000;
-    } else if (cleanedValStr.endsWith("k")) {
-      return parseFloat(cleanedValStr) * 1_000;
-    } else {
-      return parseFloat(cleanedValStr);
-    }
   };
 
   const calculateTotalValue = (items: TradeItem[]): number => {

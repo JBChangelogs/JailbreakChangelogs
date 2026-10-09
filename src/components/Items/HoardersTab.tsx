@@ -1,5 +1,6 @@
 "use client";
 
+import { getUserAvatar } from "@/utils/ui/images";
 import { useRef, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
@@ -16,9 +17,6 @@ import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
 const EMPTY_HOARDERS: ItemHoarder[] = [];
-
-const getUserAvatar = (userId: string) =>
-  `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
 
 const getUserDisplay = (
   userId: string,

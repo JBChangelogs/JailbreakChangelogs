@@ -27,7 +27,7 @@ export default function AccessDeniedPage() {
 
       <div className="border-border-card bg-secondary-bg/85 relative z-10 w-full max-w-2xl rounded-2xl border p-8 shadow-xl backdrop-blur">
         <p className="text-link mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-[0.18em] uppercase">
-          <Icon icon="grommet-icons:test" className="h-3.5 w-3.5" />
+          <Icon icon="heroicons:beaker" className="h-3.5 w-3.5" />
           <span>Testing Environment</span>
         </p>
         <h1 className="text-primary-text mb-4 text-3xl font-semibold">

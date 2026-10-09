@@ -76,7 +76,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     aria-label="Twitter/X"
                   >
                     <Icon
-                      icon="prime:twitter"
+                      icon="simple-icons:twitter"
                       className="text-primary-text h-5 w-5"
                       inline={true}
                     />
@@ -130,7 +130,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     aria-label="Bluesky"
                   >
                     <Icon
-                      icon="ri:bluesky-fill"
+                      icon="simple-icons:bluesky"
                       className="text-primary-text h-5 w-5"
                       inline={true}
                     />

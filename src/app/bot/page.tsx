@@ -1,5 +1,5 @@
 import { Icon } from "../../components/ui/IconWrapper";
-import { getRandomBackgroundImage } from "@/utils/helpers/fisherYatesShuffle";
+import { getRandomBackgroundImage } from "@/utils/helpers/backgroundImages";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 import { Button } from "@/components/ui/button";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";

@@ -115,7 +115,7 @@ export default function FeatureMaintenance({
                 aria-label="Twitter/X"
               >
                 <Icon
-                  icon="prime:twitter"
+                  icon="simple-icons:twitter"
                   className="text-primary-text h-6 w-6"
                   inline={true}
                 />
