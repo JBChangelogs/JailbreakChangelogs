@@ -68,7 +68,7 @@ export default function HeroBackgroundCarousel({
       <Image
         key={`layer-${layerIndex}`}
         src={src}
-        alt="Jailbreak Background"
+        alt=""
         fill
         sizes="100vw"
         quality={85}
