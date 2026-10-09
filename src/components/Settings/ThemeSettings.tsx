@@ -154,17 +154,21 @@ function AllThemesPopover({
   name,
   theme,
   onPick,
+  className,
+  variant = "ghost",
 }: {
   name: string;
   theme: string;
   onPick: (index: number) => void;
+  className?: string;
+  variant?: "ghost" | "secondary";
 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" className="gap-2">
+        <Button variant={variant} className={cn("gap-2", className)}>
           <LayoutGrid />
           All themes
           <span className="bg-button-info/15 text-link rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums">
@@ -211,6 +215,10 @@ export default function ThemeSettings() {
     () => false,
   );
   const [carousel, setCarousel] = useState<CarouselApi>();
+  const pickTheme = (index: number) => {
+    setTheme(THEME_OPTIONS[index].value);
+    carousel?.scrollTo(index);
+  };
 
   return (
     <div className="space-y-6">
@@ -228,30 +236,23 @@ export default function ThemeSettings() {
           <h3 id={`${id}-label`} className="text-primary-text font-medium">
             Theme
           </h3>
-          {/* On mobile the All themes button sits under the arrows. */}
-          <div className="col-start-2 row-start-1 flex flex-col items-end gap-1 sm:row-span-2 sm:flex-row sm:items-center sm:gap-2">
-            <div className="order-last sm:order-first">
-              <AllThemesPopover
-                name={`${id}-theme-all`}
-                theme={theme}
-                onPick={(index) => {
-                  setTheme(THEME_OPTIONS[index].value);
-                  carousel?.scrollTo(index);
-                }}
-              />
-            </div>
-            <div className="flex gap-2">
-              <CarouselPrevious
-                variant="ghost"
-                className="static translate-y-0"
-                aria-label="Previous themes"
-              />
-              <CarouselNext
-                variant="ghost"
-                className="static translate-y-0"
-                aria-label="Next themes"
-              />
-            </div>
+          <div className="col-start-2 row-start-1 flex gap-2 sm:row-span-2">
+            <AllThemesPopover
+              name={`${id}-theme-all`}
+              theme={theme}
+              onPick={pickTheme}
+              className="hidden sm:inline-flex"
+            />
+            <CarouselPrevious
+              variant="ghost"
+              className="static translate-y-0"
+              aria-label="Previous themes"
+            />
+            <CarouselNext
+              variant="ghost"
+              className="static translate-y-0"
+              aria-label="Next themes"
+            />
           </div>
           <p className="text-secondary-text col-span-2 mt-1 text-sm sm:col-span-1 sm:col-start-1 sm:row-start-2">
             Choose how the site looks.
@@ -279,6 +280,14 @@ export default function ThemeSettings() {
             </CarouselItem>
           ))}
         </CarouselContent>
+        {/* On mobile there's no room beside the arrows, so it goes here. */}
+        <AllThemesPopover
+          name={`${id}-theme-all-mobile`}
+          theme={theme}
+          onPick={pickTheme}
+          variant="secondary"
+          className="w-full sm:hidden"
+        />
       </Carousel>
 
       <div className="flex items-center justify-between gap-4">
