@@ -1,6 +1,8 @@
 "use client";
 
-import { useId, useSyncExternalStore } from "react";
+import { useId, useState, useSyncExternalStore } from "react";
+import { Check, LayoutGrid } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
   Carousel,
@@ -8,7 +10,13 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Tooltip,
   TooltipContent,
@@ -66,6 +74,85 @@ function ThemePreview({ preview: p }: { preview: Preview }) {
   );
 }
 
+/**
+ * Every theme at once as small swatches, so themes past the carousel's edge
+ * aren't missed. Picking one also scrolls the carousel to it.
+ */
+function AllThemesPopover({
+  theme,
+  onPick,
+}: {
+  theme: string;
+  onPick: (index: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" className="gap-2">
+          <LayoutGrid />
+          <span className="hidden sm:inline">All themes</span>
+          <span className="bg-button-info/15 text-link rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums">
+            {THEME_OPTIONS.length}
+          </span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-80 p-3">
+        <p className="text-primary-text px-1 pb-2 text-sm font-medium">
+          All themes
+        </p>
+        <ul className="grid grid-cols-2 gap-2">
+          {THEME_OPTIONS.map(({ value, label, preview: p }, index) => {
+            const selected = theme === value;
+            return (
+              <li key={value}>
+                <button
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => {
+                    onPick(index);
+                    setOpen(false);
+                  }}
+                  className="border-border-card hover:border-border-focus/60 focus-visible:ring-border-focus aria-pressed:border-button-info aria-pressed:ring-button-info/30 block w-full cursor-pointer overflow-hidden rounded-lg border text-left transition-[border-color,box-shadow] focus-visible:ring-2 focus-visible:outline-none aria-pressed:ring-2"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="flex h-10 items-center gap-1 px-2.5"
+                    style={{ background: p.page }}
+                  >
+                    {[p.card, p.text, p.button].map((color, i) => (
+                      <span
+                        key={i}
+                        className="size-3.5 rounded-full"
+                        style={{
+                          background: color,
+                          outline: `1px solid color-mix(in srgb, ${p.text} 25%, transparent)`,
+                        }}
+                      />
+                    ))}
+                  </span>
+                  <span className="border-border-card flex items-center gap-1.5 border-t px-2.5 py-1.5">
+                    <span className="text-primary-text truncate text-xs font-medium">
+                      {label}
+                    </span>
+                    {selected && (
+                      <Check
+                        aria-hidden="true"
+                        className="text-link ml-auto size-3.5 shrink-0"
+                      />
+                    )}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 /** Theme picker with previews, plus the header theme button setting. */
 export default function ThemeSettings() {
   const id = useId();
@@ -76,6 +163,7 @@ export default function ThemeSettings() {
     getThemeShortcutHidden,
     () => false,
   );
+  const [carousel, setCarousel] = useState<CarouselApi>();
 
   return (
     <div className="space-y-6">
@@ -87,12 +175,20 @@ export default function ThemeSettings() {
           startIndex: THEME_OPTIONS.findIndex(({ value }) => value === theme),
         }}
         onKeyDownCapture={undefined}
+        setApi={setCarousel}
       >
         <div className="grid grid-cols-[1fr_auto] items-center gap-x-4">
           <h3 id={`${id}-label`} className="text-primary-text font-medium">
             Theme
           </h3>
           <div className="col-start-2 row-start-1 flex gap-2 sm:row-span-2">
+            <AllThemesPopover
+              theme={theme}
+              onPick={(index) => {
+                setTheme(THEME_OPTIONS[index].value);
+                carousel?.scrollTo(index);
+              }}
+            />
             <CarouselPrevious
               variant="ghost"
               className="static translate-y-0"
