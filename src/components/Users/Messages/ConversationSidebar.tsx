@@ -33,6 +33,7 @@ interface ConversationSidebarProps {
   selectedUserId: string | null;
   currentUserId: string | null;
   isLoadingConversations: boolean;
+  errorMessage?: string | null;
   isAuthenticated: boolean;
   twemojiEnabled: boolean;
   recentlyHiddenConversations: ConversationSummary[];
@@ -42,11 +43,11 @@ interface ConversationSidebarProps {
   unhideRecentlyHiddenConversation: (conversation: ConversationSummary) => void;
 }
 
-function ConversationListSkeleton() {
+export function ConversationListSkeleton() {
   return (
     <div role="status" aria-label="Loading conversations">
       <span className="sr-only">Loading conversations</span>
-      {Array.from({ length: 6 }, (_, index) => (
+      {Array.from({ length: 10 }, (_, index) => (
         <div
           key={index}
           aria-hidden="true"
@@ -77,6 +78,7 @@ export function ConversationSidebar({
   selectedUserId,
   currentUserId,
   isLoadingConversations,
+  errorMessage,
   isAuthenticated,
   twemojiEnabled,
   recentlyHiddenConversations,
@@ -202,8 +204,11 @@ export function ConversationSidebar({
         ) : isLoadingConversations ? (
           <ConversationListSkeleton />
         ) : conversations.length === 0 ? (
-          <p className="text-secondary-text px-4 py-4 text-sm">
-            No conversations yet.
+          <p
+            role={errorMessage ? "alert" : undefined}
+            className="text-secondary-text px-4 py-4 text-sm"
+          >
+            {errorMessage ?? "No conversations yet."}
           </p>
         ) : (
           conversations.map((conversation) => {

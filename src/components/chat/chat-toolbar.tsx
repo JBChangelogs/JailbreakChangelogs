@@ -15,6 +15,8 @@ export interface ChatToolbarTextareaProps extends React.ComponentProps<
 > {
   /** Called when the user presses Enter (without Shift). Use this to trigger message sending. */
   onSubmit?: () => void;
+  /** Mobile composers can reserve Enter for a new line. */
+  submitOnEnter?: boolean;
   /** Optional overlay rendered inside the textarea container (right side). */
   rightOverlay?: React.ReactNode;
   /** Optional className applied to the overlay wrapper. */
@@ -51,6 +53,7 @@ export interface ChatToolbarTextareaProps extends React.ComponentProps<
 export function ChatToolbarTextarea({
   className,
   onSubmit,
+  submitOnEnter = true,
   rightOverlay,
   rightOverlayClassName,
   showResizeHandle = false,
@@ -86,7 +89,13 @@ export function ChatToolbarTextarea({
   }, [manualHeight, showResizeHandle]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e[NEWLINE_MODIFIER_KEY]) {
+    if (
+      submitOnEnter &&
+      e.key === "Enter" &&
+      !e[NEWLINE_MODIFIER_KEY] &&
+      !e.nativeEvent.isComposing &&
+      !e.defaultPrevented
+    ) {
       e.preventDefault();
       onSubmit?.();
     }
@@ -208,7 +217,7 @@ export function ChatToolbarTextarea({
               "resize-none overflow-y-auto bg-transparent p-2 text-base text-inherit shadow-none md:text-sm",
               "border-none placeholder:whitespace-nowrap focus:outline-none",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              rightOverlay ? "pr-20" : "",
+              rightOverlay ? "pr-28 lg:pr-24" : "",
               className,
             )}
             rows={1}
@@ -233,7 +242,7 @@ export function ChatToolbarTextarea({
               "h-fit max-h-60 min-h-10 @md/chat:text-base",
               "resize-none overflow-y-auto bg-transparent p-2 text-base text-inherit shadow-none md:text-sm",
               "border-none placeholder:whitespace-nowrap focus-visible:border-none focus-visible:ring-0 focus-visible:outline-none",
-              rightOverlay ? "pr-20" : "",
+              rightOverlay ? "pr-28 lg:pr-24" : "",
               className,
             )}
             rows={1}

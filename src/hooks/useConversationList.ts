@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
@@ -94,12 +94,16 @@ export function useConversationList({
   refreshKey,
 }: UseConversationListOptions) {
   const queryClient = useQueryClient();
+  const [routeUserError, setRouteUserError] = useState<{
+    id: string;
+    message: string;
+  } | null>(null);
   const loadUserById = useCallback(
     async (
       id: string,
       options?: { forceRefresh?: boolean },
     ): Promise<MessageUser | null> => {
-      if (!PUBLIC_API_URL) return null;
+      if (!PUBLIC_API_URL) throw new Error("Public API URL is not configured");
       const queryKey = ["message-user-lookup", id, USER_LOOKUP_FIELDS];
       const cached = queryClient.getQueryData<MessageUser | null>(queryKey);
       try {
@@ -116,7 +120,13 @@ export function useConversationList({
               headers,
               signal,
             });
-            if (!response.ok) return null;
+            if (!response.ok)
+              throw new Error(
+                await getResponseErrorMessage(
+                  response,
+                  "Unable to load user details.",
+                ),
+              );
             return toMessageUser(await response.json());
           },
           staleTime:
@@ -128,7 +138,7 @@ export function useConversationList({
         });
       } catch (error) {
         log.error("Error loading user by id:", error);
-        return null;
+        throw error;
       }
     },
     [queryClient],
@@ -155,7 +165,13 @@ export function useConversationList({
               headers,
               signal,
             });
-            if (!response.ok) return [];
+            if (!response.ok)
+              throw new Error(
+                await getResponseErrorMessage(
+                  response,
+                  "Unable to load conversation users.",
+                ),
+              );
             return response.json();
           },
           staleTime: 5 * 60_000,
@@ -178,6 +194,7 @@ export function useConversationList({
         }
       } catch (error) {
         log.error("Error loading users batch:", error);
+        throw error;
       }
 
       return result;
@@ -347,7 +364,7 @@ export function useConversationList({
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) {
-      setSelectedUserId(null);
+      setSelectedUserId(routeConversationIdRef.current);
       return;
     }
     if (!conversationListQuery.isSuccess) return;
@@ -391,12 +408,12 @@ export function useConversationList({
         signal,
       });
       if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        log.error("fetch blocked users failed", {
-          status: response.status,
-          body,
-        });
-        throw new Error("Failed to fetch blocked users");
+        throw new Error(
+          await getResponseErrorMessage(
+            response,
+            "Failed to fetch blocked users",
+          ),
+        );
       }
       const rawBody = await response.text();
       return rawBody ? parseJsonWithLargeIds(rawBody) : null;
@@ -425,14 +442,36 @@ export function useConversationList({
       (conversation) => conversation.user.id === routeConversationId,
     );
     if (exists) {
+      setRouteUserError(null);
       setSelectedUserId(routeConversationId);
       return;
     }
 
     let isCancelled = false;
     const ensureRouteConversationUser = async () => {
-      const loadedUser = await loadUserById(routeConversationId);
-      if (!loadedUser || isCancelled) return;
+      let loadedUser: MessageUser | null;
+      try {
+        loadedUser = await loadUserById(routeConversationId);
+      } catch (error) {
+        if (!isCancelled)
+          setRouteUserError({
+            id: routeConversationId,
+            message:
+              error instanceof Error
+                ? error.message
+                : "Unable to load user details.",
+          });
+        return;
+      }
+      if (isCancelled) return;
+      if (!loadedUser) {
+        setRouteUserError({
+          id: routeConversationId,
+          message: "This user could not be found.",
+        });
+        return;
+      }
+      setRouteUserError(null);
 
       setConversations((prev) => {
         const existingIndex = prev.findIndex(
@@ -471,4 +510,5 @@ export function useConversationList({
     setConversations,
     setSelectedUserId,
   ]);
+  return { routeUserError };
 }

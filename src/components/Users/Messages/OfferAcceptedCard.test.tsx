@@ -11,6 +11,7 @@ import type {
   TradeOfferDetails,
   useOfferDetailsBatch,
 } from "@/hooks/useOfferDetailsBatch";
+import { getResponseErrorMessage } from "@/utils/api/api";
 import type { OfferAcceptedMetadata } from "@/utils/messages/types";
 import { formatOfferItemSummary } from "@/utils/messages/formatting";
 import type { Message } from "@/utils/messages/types";
@@ -32,6 +33,7 @@ test("inline accepted offers keep their own links and details, allow only owners
   const requests: unknown[][] = [];
   const errors: string[] = [];
   const details: ReturnType<typeof useOfferDetailsBatch> = {
+    errorMessage: "Unable to load trade offer details.",
     status: "loaded",
     map: {
       "47810:12464": {
@@ -205,6 +207,10 @@ test("inline accepted offers keep their own links and details, allow only owners
       (node) => node.props.children === "Unable to load trade offer details.",
     ),
   ).toBe(true);
+  details.errorMessage = "Offers not found.";
+  expect(
+    render().some((node) => node.props.children === "Offers not found."),
+  ).toBe(true);
   details.status = "idle";
   expect(
     render().some(
@@ -215,8 +221,7 @@ test("inline accepted offers keep their own links and details, allow only owners
   details.map["47810:12464"] = null;
   expect(
     render().some(
-      (node) =>
-        node.props.children === "Trade offer details are no longer available.",
+      (node) => node.props.children === "No trade offer details found.",
     ),
   ).toBe(true);
   expect(completeButton(render())).toBeUndefined();
@@ -264,6 +269,13 @@ test("accepted trade cards use the message content column and one row timestamp"
       exports,
       require: (name: string) => {
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "react")
+          return {
+            useRef: (current: unknown) => ({ current }),
+            useEffect: () => {},
+          };
+        if (name === "@/hooks/useMediaQuery")
+          return { useMediaQuery: () => false };
         if (name === "@/utils/messages/parsing")
           return { asId, parseOfferAcceptedMetadata };
         if (name === "@/utils/messages/invites")
@@ -465,7 +477,8 @@ test("completion updates a newer batch and cancels stale fetches without changin
           return { useQuery: () => ({}), useQueryClient: () => client };
         if (
           name === "@/utils/api/apiDevToken" ||
-          name === "@/utils/api/parseJsonWithLargeIds"
+          name === "@/utils/api/parseJsonWithLargeIds" ||
+          name === "@/utils/api/api"
         )
           return {};
         throw new Error(`Unexpected import: ${name}`);
@@ -540,7 +553,7 @@ test("completion updates a newer batch and cancels stale fetches without changin
   client.clear();
 });
 
-test("batch offer details retain accepted and completed offers while unavailable offers remain null", async () => {
+test("batch offer details retain accepted and completed offers and preserve backend error messages", async () => {
   let queryFn: () => Promise<
     Record<string, TradeOfferDetails | null>
   > = async () => ({});
@@ -552,6 +565,8 @@ test("batch offer details retain accepted and completed offers while unavailable
     { trade: 40000, id: 12000, status: 3 },
     { trade: 30000, id: 11000, status: 2 },
   ];
+  let responseStatus = 200;
+  let errorBody: unknown = null;
   runInNewContext(
     transpileModule(
       readFileSync(
@@ -569,8 +584,10 @@ test("batch offer details retain accepted and completed offers while unavailable
       exports,
       process: { env: { NEXT_PUBLIC_API_URL: "https://api.example.test" } },
       fetch: async () => ({
-        ok: true,
-        text: async () => JSON.stringify(records),
+        ok: responseStatus === 200,
+        status: responseStatus,
+        text: async () =>
+          JSON.stringify(responseStatus === 200 ? records : errorBody),
       }),
       require: (name: string) => {
         if (name === "react")
@@ -599,6 +616,7 @@ test("batch offer details retain accepted and completed offers while unavailable
           };
         if (name === "@/utils/api/parseJsonWithLargeIds")
           return { parseJsonWithLargeIds: JSON.parse };
+        if (name === "@/utils/api/api") return { getResponseErrorMessage };
         throw new Error(`Unexpected import: ${name}`);
       },
     },
@@ -614,4 +632,26 @@ test("batch offer details retain accepted and completed offers while unavailable
   expect(result["40000:12000"]?.status).toBe(3);
   expect(result["30000:11000"]).toBeNull();
   expect(result["20000:10000"]).toBeNull();
+  responseStatus = 404;
+  errorBody = { error: "offers_not_found", message: "Offers not found." };
+  await expect(queryFn()).rejects.toThrow("Offers not found.");
+  responseStatus = 401;
+  errorBody = { detail: "Unauthorized" };
+  await expect(queryFn()).rejects.toThrow("Unauthorized");
+  responseStatus = 403;
+  errorBody = { detail: "Forbidden" };
+  await expect(queryFn()).rejects.toThrow("Forbidden");
+  responseStatus = 422;
+  errorBody = { detail: [{ msg: "Input should be a valid list" }] };
+  await expect(queryFn()).rejects.toThrow("Input should be a valid list");
+  responseStatus = 429;
+  errorBody = { detail: "Too many requests" };
+  await expect(queryFn()).rejects.toThrow(
+    "Too many requests. Please try again shortly.",
+  );
+  responseStatus = 500;
+  errorBody = {};
+  await expect(queryFn()).rejects.toThrow(
+    "Unable to load trade offer details.",
+  );
 });

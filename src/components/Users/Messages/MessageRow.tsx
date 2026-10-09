@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useEffect, useRef } from "react";
 import type { Dispatch, RefObject, SetStateAction } from "react";
 import Link from "next/link";
 import Twemoji from "react-twemoji";
@@ -18,16 +19,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   ChatEvent,
   ChatEventAddon,
   ChatEventBody,
@@ -35,9 +26,7 @@ import {
   ChatEventTime,
   ChatEventTitle,
 } from "@/components/chat/chat-event";
-import { CommentTextarea } from "@/components/PageComments/CommentTextarea";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { UserData } from "@/types/auth";
@@ -55,6 +44,27 @@ import { getMessageDomId } from "@/utils/messages/sorting";
 import { isUserMessage, parseMessageEmbed } from "@/utils/messages/invites";
 import { MessageEmbedCard } from "./MessageEmbedCard";
 import { OfferAcceptedCard } from "./OfferAcceptedCard";
+import { MessageEditor } from "./MessageEditor";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
+function MessageSheetAction({
+  className,
+  ...props
+}: React.ComponentProps<typeof Button>) {
+  return (
+    <Button
+      variant="ghost"
+      className={cn("min-h-12 w-full justify-start px-3", className)}
+      {...props}
+    />
+  );
+}
 
 interface MessageRowProps {
   message: Message;
@@ -66,20 +76,15 @@ interface MessageRowProps {
   currentUserMessageUser: MessageUser | null;
   selectedUser: MessageUser | null;
   activeMessageId: string | null;
+  replyingToMessage: Message | null;
   editingMessageId: string | null;
-  editContent: string;
-  editEmojiOpen: boolean;
   emojiStringMap: EmojiStringMap;
   twemojiEnabled: boolean;
   isSending: boolean;
   deletingMessageId: string | null;
-  editCursorPosRef: RefObject<number | null>;
-  editTextareaRef: RefObject<HTMLTextAreaElement | null>;
   messagesContainerRef: RefObject<HTMLDivElement | null>;
   setActiveMessageId: Dispatch<SetStateAction<string | null>>;
   setEditingMessageId: Dispatch<SetStateAction<string | null>>;
-  setEditContent: Dispatch<SetStateAction<string>>;
-  setEditEmojiOpen: Dispatch<SetStateAction<boolean>>;
   setReplyingToMessage: Dispatch<SetStateAction<Message | null>>;
   setReportingMessage: Dispatch<SetStateAction<Message | null>>;
   setReportReason: Dispatch<SetStateAction<string>>;
@@ -88,8 +93,10 @@ interface MessageRowProps {
     skipConfirmation?: boolean,
   ) => void | Promise<void>;
   handleRetryFailedMessage: (message: Message) => void | Promise<void>;
-  handleEditMessage: (messageId: string) => void | Promise<void>;
-  insertEditEmoji: (emoji: string, keepOpen?: boolean) => void;
+  handleEditMessage: (
+    messageId: string,
+    content: string,
+  ) => void | Promise<void>;
 }
 
 export function MessageRow({
@@ -102,28 +109,34 @@ export function MessageRow({
   currentUserMessageUser,
   selectedUser,
   activeMessageId,
+  replyingToMessage,
   editingMessageId,
-  editContent,
-  editEmojiOpen,
   emojiStringMap,
   twemojiEnabled,
   isSending,
   deletingMessageId,
-  editCursorPosRef,
-  editTextareaRef,
   messagesContainerRef,
   setActiveMessageId,
   setEditingMessageId,
-  setEditContent,
-  setEditEmojiOpen,
   setReplyingToMessage,
   setReportingMessage,
   setReportReason,
   handleDeleteMessage,
   handleRetryFailedMessage,
   handleEditMessage,
-  insertEditEmoji,
 }: MessageRowProps) {
+  const isMobile = useMediaQuery("(max-width: 1023px)");
+  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartRef = useRef({ x: 0, y: 0 });
+  const cancelLongPress = () => {
+    if (longPressRef.current !== null) clearTimeout(longPressRef.current);
+    longPressRef.current = null;
+  };
+  useEffect(
+    () => cancelLongPress,
+    [message.id, isMobile, isSending, deletingMessageId, editingMessageId],
+  );
+
   const acceptedOffer = parseOfferAcceptedMetadata(message.metadata);
   const embedMetadata = parseMessageEmbed(message.metadata);
   if (acceptedOffer || (message.type === "system" && !embedMetadata)) {
@@ -139,7 +152,7 @@ export function MessageRow({
         data-message-row
         className={
           acceptedOffer
-            ? "group items-start py-1.5"
+            ? "group/message lg:hover:bg-tertiary-bg items-start rounded-md py-1.5 transition-colors"
             : "border-link bg-button-info/10 my-0.5 items-start rounded-l-none rounded-r-md border-l-2 py-0.5 pl-2"
         }
       >
@@ -216,6 +229,10 @@ export function MessageRow({
   })();
 
   const isMessageMenuActive = activeMessageId === message.id;
+  const canOpenActions =
+    message.status !== "pending" &&
+    ((message.type !== "system" && !embedMetadata) ||
+      message.status === "failed");
   const isLatestSeenOwnMessage =
     isOwnMessage &&
     typeof message.readAt === "number" &&
@@ -225,22 +242,25 @@ export function MessageRow({
     Item: React.ComponentType<{
       onClick?: React.MouseEventHandler;
       className?: string;
+      disabled?: boolean;
       children?: React.ReactNode;
     }>,
     skipShiftKey = false,
   ) =>
-    embedMetadata?.type === "gift_sent" &&
-    message.id === message.clientId &&
-    message.status !== "failed" ? null : (
+    !canOpenActions ? null : (
       <>
         {message.status !== "failed" && (
-          <Item onClick={() => setReplyingToMessage(message)}>
+          <Item
+            disabled={isSending || !!deletingMessageId}
+            onClick={() => setReplyingToMessage(message)}
+          >
             <Icon icon="heroicons-outline:reply" className="mr-2 h-4 w-4" />
             Reply
           </Item>
         )}
         {!isOwnMessage && message.status !== "failed" && (
           <Item
+            disabled={isSending || !!deletingMessageId}
             onClick={() => {
               setReportingMessage(message);
               setReportReason("");
@@ -255,9 +275,9 @@ export function MessageRow({
           <>
             {embedMetadata?.type !== "gift_sent" && (
               <Item
+                disabled={isSending || !!deletingMessageId}
                 onClick={() => {
                   setEditingMessageId(message.id);
-                  setEditContent(message.content);
                 }}
               >
                 <Icon
@@ -268,6 +288,7 @@ export function MessageRow({
               </Item>
             )}
             <Item
+              disabled={isSending || !!deletingMessageId}
               onClick={(e: React.MouseEvent) =>
                 void handleDeleteMessage(
                   message.id,
@@ -284,12 +305,16 @@ export function MessageRow({
         {isOwnMessage && message.status === "failed" && (
           <>
             {embedMetadata?.type !== "gift_sent" && (
-              <Item onClick={() => void handleRetryFailedMessage(message)}>
+              <Item
+                disabled={isSending || !!deletingMessageId}
+                onClick={() => void handleRetryFailedMessage(message)}
+              >
                 <Icon icon="lucide:rotate-cw" className="mr-2 h-4 w-4" />
                 Retry
               </Item>
             )}
             <Item
+              disabled={isSending || !!deletingMessageId}
               onClick={() => void handleDeleteMessage(message.id, true)}
               className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
             >
@@ -302,27 +327,32 @@ export function MessageRow({
     );
 
   const messageMenu = (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="secondary"
-          size="icon"
-          className={cn(
-            "pointer-events-none !size-7 rounded-md p-0 opacity-0 transition-all duration-200 data-[state=open]:pointer-events-auto data-[state=open]:opacity-100 sm:!size-8 lg:opacity-0 lg:group-hover:pointer-events-auto lg:group-hover:opacity-100 lg:disabled:opacity-0 lg:group-hover:disabled:opacity-100",
-            isMessageMenuActive && "pointer-events-auto opacity-100",
-          )}
-          disabled={
-            isSending ||
-            Boolean(deletingMessageId) ||
-            message.status === "pending" ||
-            (embedMetadata?.type === "gift_sent" &&
-              message.id === message.clientId &&
-              message.status !== "failed")
-          }
-        >
-          <Icon icon="heroicons:ellipsis-horizontal" className="!size-4" />
-        </Button>
-      </DropdownMenuTrigger>
+    <DropdownMenu
+      onOpenChange={(open) => setActiveMessageId(open ? message.id : null)}
+    >
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:bg-tertiary-bg! !size-8 rounded-md p-0"
+              aria-label="More message actions"
+              disabled={
+                isSending ||
+                Boolean(deletingMessageId) ||
+                message.status === "pending" ||
+                (embedMetadata?.type === "gift_sent" &&
+                  message.id === message.clientId &&
+                  message.status !== "failed")
+              }
+            >
+              <Icon icon="heroicons:ellipsis-horizontal" className="!size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent side="top">More message actions</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent align="end">
         {renderMenuItems(DropdownMenuItem)}
       </DropdownMenuContent>
@@ -330,9 +360,58 @@ export function MessageRow({
   );
 
   return (
-    <ContextMenu key={domId}>
-      <ContextMenuTrigger asChild>
-        <div id={`message-${domId}`} className="group" data-message-row>
+    <ContextMenu
+      key={domId}
+      onOpenChange={(open) => setActiveMessageId(open ? message.id : null)}
+    >
+      <ContextMenuTrigger
+        asChild
+        disabled={
+          isMobile || isSending || !!deletingMessageId || !canOpenActions
+        }
+      >
+        <div
+          id={`message-${domId}`}
+          className="group/message"
+          data-message-row
+          onPointerDown={(event) => {
+            if (
+              !isMobile ||
+              event.pointerType === "mouse" ||
+              isSending ||
+              deletingMessageId ||
+              editingMessageId ||
+              !canOpenActions
+            )
+              return;
+            if (
+              (event.target as HTMLElement).closest(
+                "a,button,textarea,input,select,[role='menuitem']",
+              )
+            )
+              return;
+            cancelLongPress();
+            touchStartRef.current = { x: event.clientX, y: event.clientY };
+            longPressRef.current = setTimeout(() => {
+              longPressRef.current = null;
+              setActiveMessageId(message.id);
+            }, 500);
+          }}
+          onPointerMove={(event) => {
+            if (
+              Math.hypot(
+                event.clientX - touchStartRef.current.x,
+                event.clientY - touchStartRef.current.y,
+              ) > 8
+            )
+              cancelLongPress();
+          }}
+          onPointerUp={cancelLongPress}
+          onPointerCancel={cancelLongPress}
+          onContextMenu={(event) => {
+            if (isMobile) event.preventDefault();
+          }}
+        >
           {showDaySeparator && typeof message.createdAt === "number" && (
             <ChatEvent className="items-center gap-2 py-2">
               <div className="border-secondary-text/30 flex-1 border-t" />
@@ -346,26 +425,15 @@ export function MessageRow({
           )}
           <ChatEvent
             className={cn(
-              "group-hover:bg-tertiary-bg relative w-full flex-col items-start rounded-md py-0.5 transition-colors",
+              "relative w-full flex-col items-start rounded-md py-0.5 transition-colors",
+              editingMessageId === message.id
+                ? "bg-tertiary-bg"
+                : "lg:group-hover/message:bg-tertiary-bg",
+              editingMessageId !== message.id &&
+                (isMessageMenuActive || replyingToMessage?.id === message.id) &&
+                "bg-quaternary-bg lg:bg-tertiary-bg",
               message.parentId && "mt-0.5",
             )}
-            onClick={(event) => {
-              if (editingMessageId) return;
-              if (message.status === "pending") return;
-
-              const target = event.target as HTMLElement | null;
-              if (
-                target?.closest(
-                  "a,button,textarea,input,select,[role='menuitem']",
-                )
-              ) {
-                return;
-              }
-
-              setActiveMessageId((prev) =>
-                prev === message.id ? null : message.id,
-              );
-            }}
           >
             {message.parentId && (
               <div className="-mb-1 flex items-center gap-2">
@@ -473,7 +541,7 @@ export function MessageRow({
                     <ChatEventTime
                       timestamp={message.createdAt}
                       format="time"
-                      className="text-secondary-text invisible text-[10px] group-hover:visible"
+                      className="text-secondary-text invisible text-[10px] lg:group-hover/message:visible"
                     />
                   ) : null
                 ) : (
@@ -500,11 +568,11 @@ export function MessageRow({
               <ChatEventBody>
                 {!isGroupedWithPrevious ? (
                   <ChatEventTitle className="w-full items-start">
-                    <div className="flex min-w-0 flex-col items-start gap-0.5 sm:flex-row sm:items-center sm:gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
                       <Link
                         href={`/users/${sender.id}`}
                         prefetch={false}
-                        className="text-primary-text hover:text-link cursor-pointer truncate text-sm font-medium transition-colors sm:text-base"
+                        className="text-primary-text hover:text-link max-w-full cursor-pointer text-sm font-medium wrap-break-word transition-colors sm:text-base"
                       >
                         {getDisplayName(sender)}
                       </Link>
@@ -512,161 +580,22 @@ export function MessageRow({
                         <ChatEventTime
                           timestamp={message.createdAt}
                           format="discord"
-                          className="text-secondary-text text-xs"
+                          className="text-secondary-text shrink-0 text-xs"
                         />
                       )}
                     </div>
                   </ChatEventTitle>
                 ) : null}
                 {editingMessageId === message.id ? (
-                  <div className="mt-2 space-y-2">
-                    <div className="border-border-card bg-tertiary-bg focus-within:border-button-info rounded border transition-colors">
-                      <CommentTextarea
-                        ref={editTextareaRef}
-                        value={editContent}
-                        onChange={setEditContent}
-                        emojiMap={emojiStringMap}
-                        disabled={isSending}
-                        rows={3}
-                        className="text-primary-text placeholder-secondary-text w-full resize-y bg-transparent p-3 text-sm focus:outline-none disabled:opacity-60"
-                        autoCorrect="off"
-                        autoComplete="off"
-                        spellCheck="false"
-                        autoCapitalize="off"
-                        onKeyDown={(e) => {
-                          if (e.key === "Escape") {
-                            setEditingMessageId(null);
-                            setEditContent("");
-                          }
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            void handleEditMessage(message.id);
-                          }
-                        }}
-                      />
-                      <div className="border-border-card flex items-center justify-between gap-2 border-t px-3 py-2">
-                        <Popover
-                          open={editEmojiOpen}
-                          onOpenChange={setEditEmojiOpen}
-                        >
-                          <Tooltip delayDuration={500}>
-                            <TooltipTrigger asChild>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-secondary-text hover:text-primary-text h-7 w-7 p-0"
-                                  disabled={isSending}
-                                  onPointerDown={() => {
-                                    editCursorPosRef.current =
-                                      editTextareaRef.current?.selectionStart ??
-                                      null;
-                                  }}
-                                >
-                                  <Icon
-                                    icon="heroicons:face-smile"
-                                    className="h-4 w-4"
-                                  />
-                                </Button>
-                              </PopoverTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent>Add an emoji</TooltipContent>
-                          </Tooltip>
-                          <PopoverContent
-                            align="start"
-                            side="top"
-                            sideOffset={8}
-                            className="w-72 p-0"
-                            onOpenAutoFocus={(e) => e.preventDefault()}
-                          >
-                            <div className="grid max-h-56 grid-cols-8 gap-px overflow-y-auto p-1.5">
-                              {Object.entries(emojiStringMap)
-                                .slice(0, 120)
-                                .map(([name, emoji]) => (
-                                  <Tooltip key={name} delayDuration={0}>
-                                    <TooltipTrigger asChild>
-                                      <button
-                                        type="button"
-                                        onClick={(e) =>
-                                          insertEditEmoji(emoji, e.shiftKey)
-                                        }
-                                        className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-transparent text-lg transition-colors"
-                                      >
-                                        {twemojiEnabled ? (
-                                          <Twemoji
-                                            tag="span"
-                                            options={{
-                                              className:
-                                                "twemoji pointer-events-none",
-                                            }}
-                                          >
-                                            {emoji}
-                                          </Twemoji>
-                                        ) : (
-                                          <span className="pointer-events-none">
-                                            {emoji}
-                                          </span>
-                                        )}
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>:{name}:</TooltipContent>
-                                  </Tooltip>
-                                ))}
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                        <div className="flex items-center gap-2 lg:hidden">
-                          <Button
-                            size="sm"
-                            className="h-8 px-4 text-xs"
-                            onClick={() => void handleEditMessage(message.id)}
-                            disabled={isSending || !editContent.trim()}
-                          >
-                            {isSending ? (
-                              <Spinner className="mr-1 h-3 w-3" />
-                            ) : null}
-                            Update
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-secondary-text h-8 px-4 text-xs"
-                            onClick={() => {
-                              setEditingMessageId(null);
-                              setEditContent("");
-                            }}
-                            disabled={isSending}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                        <div className="text-secondary-text hidden items-center gap-1 text-[11px] lg:flex">
-                          Esc to{" "}
-                          <button
-                            type="button"
-                            className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-                            onClick={() => {
-                              setEditingMessageId(null);
-                              setEditContent("");
-                            }}
-                            disabled={isSending}
-                          >
-                            cancel
-                          </button>{" "}
-                          • Enter to{" "}
-                          <button
-                            type="button"
-                            className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-                            onClick={() => void handleEditMessage(message.id)}
-                            disabled={isSending || !editContent.trim()}
-                          >
-                            save
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <MessageEditor
+                    key={message.id}
+                    message={message}
+                    emojiStringMap={emojiStringMap}
+                    twemojiEnabled={twemojiEnabled}
+                    isSending={isSending}
+                    onSave={handleEditMessage}
+                    onCancel={() => setEditingMessageId(null)}
+                  />
                 ) : (
                   <div className="flex w-full items-start gap-2">
                     <div className="min-w-0 flex-1">
@@ -718,21 +647,107 @@ export function MessageRow({
                     </div>
                   )}
               </ChatEventBody>
-              {editingMessageId !== message.id &&
-                message.status !== "pending" && (
-                  <div className="absolute top-0 right-0 z-10">
-                    {messageMenu}
-                  </div>
-                )}
+              {editingMessageId !== message.id && canOpenActions && (
+                <Button
+                  variant="ghost"
+                  className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:right-0 lg:hidden"
+                  aria-haspopup="dialog"
+                  disabled={isSending || !!deletingMessageId}
+                  onClick={() => setActiveMessageId(message.id)}
+                >
+                  Message actions
+                </Button>
+              )}
+              {editingMessageId !== message.id && canOpenActions && (
+                <div
+                  className={cn(
+                    "border-border-card bg-secondary-bg pointer-events-none absolute top-0 right-2 z-10 hidden -translate-y-1/2 items-center gap-0.5 rounded-lg border p-0.5 opacity-0 shadow-md lg:flex lg:group-hover/message:pointer-events-auto lg:group-hover/message:opacity-100 lg:group-focus-within/message:pointer-events-auto lg:group-focus-within/message:opacity-100",
+                    isMessageMenuActive && "pointer-events-auto opacity-100",
+                  )}
+                >
+                  {message.status !== "failed" && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="hover:bg-tertiary-bg! !size-8"
+                          aria-label="Reply to message"
+                          disabled={isSending || !!deletingMessageId}
+                          onClick={() => setReplyingToMessage(message)}
+                        >
+                          <Icon
+                            icon="heroicons-outline:reply"
+                            className="!size-4"
+                          />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Reply</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {isOwnMessage &&
+                    message.status !== "failed" &&
+                    embedMetadata?.type !== "gift_sent" && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-tertiary-bg! !size-8"
+                            aria-label="Edit message"
+                            disabled={isSending || !!deletingMessageId}
+                            onClick={() => {
+                              setEditingMessageId(message.id);
+                            }}
+                          >
+                            <Icon
+                              icon="heroicons-outline:pencil"
+                              className="!size-4"
+                            />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">Edit</TooltipContent>
+                      </Tooltip>
+                    )}
+                  {messageMenu}
+                </div>
+              )}
             </div>
           </ChatEvent>
         </div>
       </ContextMenuTrigger>
-      {message.status !== "pending" && (
+      {canOpenActions && (
         <ContextMenuContent>
           {renderMenuItems(ContextMenuItem, true)}
         </ContextMenuContent>
       )}
+      <Sheet
+        open={isMobile && isMessageMenuActive && canOpenActions}
+        onOpenChange={(open) => {
+          if (!open) setActiveMessageId(null);
+        }}
+      >
+        <SheetContent
+          side="bottom"
+          overlayClassName="bg-black/20 backdrop-blur-none"
+          className="bg-secondary-bg max-h-[80dvh] overflow-y-auto rounded-t-2xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))] outline-none"
+          aria-describedby={undefined}
+          aria-labelledby={`message-actions-${domId}`}
+          tabIndex={-1}
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+            (event.target as HTMLElement).focus();
+          }}
+        >
+          <div className="bg-border-card mx-auto mb-4 h-1 w-10 rounded-full" />
+          <SheetTitle id={`message-actions-${domId}`} className="sr-only">
+            Message actions
+          </SheetTitle>
+          <div onClick={() => setActiveMessageId(null)}>
+            {renderMenuItems(MessageSheetAction, true)}
+          </div>
+        </SheetContent>
+      </Sheet>
     </ContextMenu>
   );
 }

@@ -1,238 +1,224 @@
-import Link from "next/link";
 import { Icon } from "../../components/ui/IconWrapper";
 import { getRandomBackgroundImage } from "@/utils/helpers/fisherYatesShuffle";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 import { Button } from "@/components/ui/button";
+import { DiscordIcon } from "@/components/Icons/DiscordIcon";
+
+const features = [
+  {
+    title: "Inventory Lookups",
+    icon: "mdi:console",
+    commands: ["/inventory"],
+    description:
+      "Browse your inventory or look up another player’s items without leaving Discord.",
+  },
+  {
+    title: "Item Values & Demand",
+    icon: "mdi:chart-line",
+    commands: ["/item", "/items"],
+    description:
+      "Check cash and duped values, demand, and item details before your next trade.",
+  },
+  {
+    title: "Dupe Checks",
+    icon: "mdi:swap-horizontal",
+    commands: ["/dupecheck", "/dupes"],
+    description:
+      "Check an item from a specific original owner or browse a player’s recorded dupes.",
+  },
+  {
+    title: "Original Items",
+    icon: "material-symbols:fingerprint-rounded",
+    commands: ["/ogs"],
+    description:
+      "Find the original items logged for you or another player in the inventory database.",
+  },
+  {
+    title: "Networth History",
+    icon: "mdi:cash-multiple",
+    commands: ["/networth"],
+    description:
+      "View recorded networth and explore its history with graphs and past snapshots.",
+  },
+  {
+    title: "Seasons & Rewards",
+    icon: "mdi:calendar",
+    commands: ["/season", "/rewards"],
+    description:
+      "Look up a Jailbreak season and browse its rewards right in your server.",
+  },
+  {
+    title: "Changelog History",
+    icon: "mdi:file-document",
+    commands: ["/changelog", "/changelogs"],
+    description:
+      "Browse recorded Jailbreak updates or pull up the patch notes for a specific release.",
+  },
+  {
+    title: "Personal Reminders",
+    icon: "mdi:clock-outline",
+    commands: ["/reminder"],
+    description:
+      "Set a timed reminder and receive a Discord DM when it’s due. Requires a website account.",
+  },
+  {
+    title: "Your Notifications",
+    icon: "mdi:bell-outline",
+    commands: ["/notifications", "/notificationhistory"],
+    description:
+      "Read your website notifications and their history privately in Discord. Requires a website account.",
+  },
+];
 
 export default function BotPage() {
   const initialImage = getRandomBackgroundImage();
 
   return (
     <main className="bg-primary-bg min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-20">
-        {/* Background Image */}
+      <section className="relative overflow-hidden pt-16 pb-12 md:py-20">
         <div className="absolute inset-0 z-0">
           <HeroBackgroundCarousel initialImage={initialImage} />
+          <div className="bg-hero-overlay absolute inset-0 z-10" />
+          <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_15%_20%,var(--color-highlight),transparent_40%)] opacity-20" />
+          <div className="absolute inset-y-0 left-0 z-10 w-full bg-gradient-to-r from-black/70 via-black/35 to-transparent md:w-2/3" />
           <div
-            className="absolute inset-0 z-10"
-            style={{ backgroundColor: "var(--color-hero-overlay)" }}
-          ></div>
+            aria-hidden="true"
+            className="from-primary-bg via-primary-bg/60 pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t to-transparent md:h-32"
+          />
         </div>
 
         <div className="relative z-10 container mx-auto px-4">
-          <div className="text-center">
-            <h1
-              className="mb-6 text-3xl font-bold md:text-5xl"
-              style={{ color: "var(--color-form-button-text)" }}
-            >
-              Welcome to our Discord Bot Page
-            </h1>
-            <p
-              className="mx-auto mb-8 max-w-2xl text-base md:text-lg"
-              style={{ color: "var(--color-form-button-text)" }}
-            >
-              Your go-to resource for information and updates about our Discord
-              bot!
-            </p>
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
+            <div>
+              <h1 className="mb-5 max-w-3xl text-3xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)] md:text-5xl lg:text-6xl">
+                Jailbreak Changelogs Discord Bot
+              </h1>
+              <p className="mb-6 max-w-2xl text-base text-white/95 drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)] md:text-lg">
+                Look up inventories, check item values, review dupes, and catch
+                up on updates without leaving your server.
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg">
+                  <a
+                    href="https://discord.com/discovery/applications/1281308669299920907"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-rybbit-event="Bot Invite Click"
+                  >
+                    <DiscordIcon className="h-5 w-5" />
+                    Invite to Your Server
+                  </a>
+                </Button>
+                <Button asChild size="lg" variant="heroOutline">
+                  <a href="#bot-features">Explore Features</a>
+                </Button>
+              </div>
+              <p className="mt-5 flex items-center gap-2 text-sm text-white/80">
+                <Icon icon="mdi:account-group" className="h-4 w-4" />
+                Trusted by Jailbreak communities
+              </p>
+            </div>
 
-            {/* Achievement Banner */}
-            <div className="mx-auto mb-8 max-w-2xl">
-              <div className="from-tertiary via-tertiary to-tertiary relative overflow-hidden rounded-xl bg-linear-to-r p-1">
-                <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
-                  <div className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-center">
-                    <div className="flex items-center gap-2">
-                      <div>
-                        <h2 className="text-card-headline flex items-center gap-2 text-lg font-bold md:text-xl">
-                          <Icon
-                            icon="mdi:trophy"
-                            className="text-tertiary h-6 w-6"
-                            inline={true}
-                          />
-                          #1 Roblox Jailbreak Bot
-                        </h2>
-                        <p className="text-card-paragraph text-xs md:text-sm">
-                          The most popular Discord bot for Jailbreak servers
-                        </p>
-                      </div>
-                    </div>
-                    <div className="hidden md:block">
-                      <span className="text-tertiary-text">|</span>
-                    </div>
-                    <div className="text-center md:text-left">
-                      <p className="text-tertiary text-sm font-semibold md:text-base">
-                        Most Servers Added
-                      </p>
-                      <p className="text-card-paragraph text-xs">
-                        Trusted by Jailbreak communities
+            <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 shadow-xl md:p-6">
+              <div className="border-border-card mb-5 flex items-center gap-3 border-b pb-5">
+                <div className="bg-button-info/15 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                  <DiscordIcon className="text-link h-6 w-6" />
+                </div>
+                <div>
+                  <h2 className="text-primary-text text-lg font-bold">
+                    Example Commands
+                  </h2>
+                  <p className="text-secondary-text text-sm">
+                    Look up inventories, item values, and dupes.
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {[
+                  {
+                    command: "/inventory",
+                    description: "Look up a player’s inventory",
+                    icon: "mdi:console",
+                  },
+                  {
+                    command: "/item",
+                    description: "Check an item’s value and demand",
+                    icon: "mdi:chart-line",
+                  },
+                  {
+                    command: "/dupecheck",
+                    description: "Check for duplicated items",
+                    icon: "mdi:swap-horizontal",
+                  },
+                ].map(({ command, description, icon }) => (
+                  <div
+                    key={command}
+                    className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-xl border p-4"
+                  >
+                    <Icon icon={icon} className="text-link h-5 w-5 shrink-0" />
+                    <div>
+                      <code className="text-primary-text text-sm font-semibold">
+                        {command}
+                      </code>
+                      <p className="text-secondary-text mt-1 text-sm">
+                        {description}
                       </p>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
+              <p className="text-secondary-text mt-5 text-xs">
+                Plus networth history, seasons, and personal reminders.
+              </p>
             </div>
-
-            <Button asChild size="lg">
-              <a
-                href="https://discord.com/discovery/applications/1281308669299920907"
-                target="_blank"
-                rel="noopener noreferrer"
-                data-rybbit-event="Bot Invite Click"
-              >
-                Invite to Your Server
-              </a>
-            </Button>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16">
+      <section id="bot-features" className="scroll-mt-20 pt-6 pb-12 md:pb-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-primary-text mb-12 text-center text-3xl font-bold">
-            Bot Features
-          </h2>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {/* Feature 1 - Inventory Commands */}
-            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                  <Icon
-                    icon="mdi:console"
-                    className="text-link h-6 w-6"
-                    inline={true}
-                  />
-                </div>
-                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
-                  Inventory Commands
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                Check player inventories directly from Discord with /inventory
-                commands. View detailed item listings without leaving your
-                server.
-              </p>
-            </div>
-
-            {/* Feature 2 - OG Finder */}
-            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                  <Icon
-                    icon="material-symbols:fingerprint-rounded"
-                    className="text-link h-6 w-6"
-                    inline={true}
-                  />
-                </div>
-                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
-                  OG Finder
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                Find original owners of rare items using /og commands in
-                Discord. Track item provenance and authenticity directly through
-                the bot.
-              </p>
-            </div>
-
-            {/* Feature 3 - Dupe Detection */}
-            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                  <Icon
-                    icon="mdi:swap-horizontal"
-                    className="text-link h-6 w-6"
-                    inline={true}
-                  />
-                </div>
-                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
-                  Dupe Detection
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                Check for duplicated items with /dupe commands. Verify item
-                authenticity before trading.
-              </p>
-            </div>
-
-            {/* Feature 4 - Season Tracking */}
-            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                  <Icon
-                    icon="mdi:calendar"
-                    className="text-link h-6 w-6"
-                    inline={true}
-                  />
-                </div>
-                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
-                  Season Tracking
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                View latest season content and rewards without leaving Discord.
-                Stay updated on seasonal progress and requirements.
-              </p>
-            </div>
-
-            {/* Feature 5 - Changelog History */}
-            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                  <Icon
-                    icon="mdi:file-document"
-                    className="text-link h-6 w-6"
-                    inline={true}
-                  />
-                </div>
-                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
-                  Changelog History
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                View previous changelogs and seasons directly from Discord.
-                Browse the complete history of Jailbreak updates.
-              </p>
-            </div>
-
-            {/* Feature 6 - Trade Features */}
-            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                  <Icon
-                    icon="mdi:chat"
-                    className="text-link h-6 w-6"
-                    inline={true}
-                  />
-                </div>
-                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
-                  Trade Features
-                </h3>
-              </div>
-              <p className="text-card-paragraph">
-                Receive DMs when users want to trade with you and get trade ads
-                automatically posted to our Discord server for maximum
-                visibility.
-              </p>
-            </div>
-          </div>
-          <div className="mt-12 text-center">
-            <p className="text-tertiary-text flex items-center justify-center gap-1">
-              Bot made with{" "}
-              <Icon
-                icon="line-md:heart-filled"
-                className="inline h-4 w-4 text-blue-500"
-                style={{ color: "#1d80e2" }}
-              />
-              {" by "}
-              <Link
-                href="/users/659865209741246514"
-                prefetch={false}
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 hover:underline"
-              >
-                Jakobiis
-              </Link>
+          <div className="mb-6">
+            <h2 className="text-primary-text text-3xl font-bold md:text-4xl">
+              Bot Features
+            </h2>
+            <p className="text-secondary-text mt-3 max-w-2xl">
+              Check inventories, item values, seasons, and more with Discord
+              commands.
             </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {features.map(({ title, icon, commands, description }) => (
+              <div
+                key={title}
+                className="border-border-card bg-secondary-bg flex flex-col rounded-2xl border p-5 md:p-6"
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="bg-button-info/15 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg">
+                    <Icon
+                      icon={icon}
+                      className="text-link h-6 w-6"
+                      inline={true}
+                    />
+                  </div>
+                  <h3 className="text-primary-text text-lg font-semibold">
+                    {title}
+                  </h3>
+                </div>
+                <p className="text-secondary-text mb-5 text-sm leading-relaxed">
+                  {description}
+                </p>
+                <div className="mt-auto flex flex-wrap gap-2">
+                  {commands.map((command) => (
+                    <code
+                      key={command}
+                      className="bg-tertiary-bg text-link rounded-md px-2 py-1 text-xs"
+                    >
+                      {command}
+                    </code>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

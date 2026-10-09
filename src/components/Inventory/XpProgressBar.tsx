@@ -119,11 +119,7 @@ export default function XpProgressBar({
         {/* Progress Fill */}
         <div
           className="bg-button-info absolute top-0 left-0 h-full transition-all duration-500"
-          style={
-            progressPercentage === 100
-              ? { left: 0, right: 0 }
-              : { width: `${progressPercentage}%` }
-          }
+          style={{ width: `${progressPercentage}%` }}
         />
 
         {/* Base text layer */}
@@ -161,15 +157,15 @@ export default function XpProgressBar({
           </div>
         </div>
 
-        {/* Clipped text layer (white only where the fill covers) */}
+        {/* Clipped text layer uses the theme's contrasting color over the fill */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-20"
+          className="pointer-events-none absolute inset-0 z-20 transition-all duration-500"
           style={clippedTextStyle}
         >
           {/* Mobile Layout - Stack vertically on small screens */}
           <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
-            <div className="text-xs leading-tight font-bold text-white">
+            <div className="text-form-button-text text-xs leading-tight font-bold">
               <div className="text-center">LEVEL {currentLevel}</div>
               <div className="text-center text-[10px] leading-tight">
                 {mobileSecondaryText}
@@ -180,20 +176,20 @@ export default function XpProgressBar({
           {/* Desktop Layout - Horizontal layout for larger screens */}
           <div className="hidden sm:block">
             <div className="absolute top-1/2 left-2 -translate-y-1/2">
-              <span className="text-sm font-bold text-white">
+              <span className="text-form-button-text text-sm font-bold">
                 {currentXpInLevel.toLocaleString()}/
                 {xpRequiredForNextLevel.toLocaleString()}
               </span>
             </div>
 
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <span className="text-sm font-bold text-white">
+              <span className="text-form-button-text text-sm font-bold">
                 LEVEL {currentLevel}
               </span>
             </div>
 
             <div className="absolute top-1/2 right-2 -translate-y-1/2">
-              <span className="text-sm font-bold text-white">
+              <span className="text-form-button-text text-sm font-bold">
                 SEASON {season?.season || "?"}
               </span>
             </div>

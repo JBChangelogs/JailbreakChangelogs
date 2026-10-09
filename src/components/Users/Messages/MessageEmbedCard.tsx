@@ -98,7 +98,7 @@ export function MessageEmbedCard({
       ? formatGiftMessageContent(message, metadata.level, isMine, senderLabel)
       : message.content;
   return (
-    <div className="bg-tertiary-bg relative mt-1 max-w-md overflow-hidden rounded-2xl px-4 py-3 whitespace-normal transition-colors group-hover:bg-[color-mix(in_srgb,var(--color-tertiary-bg),white_5%)]">
+    <div className="bg-tertiary-bg lg:group-hover/message:bg-secondary-bg relative mt-1 max-w-md overflow-hidden rounded-2xl px-4 py-3 whitespace-normal transition-colors">
       <span
         className={`absolute inset-y-0 left-0 w-1 ${isGift ? "" : "bg-link"}`}
         style={isGift ? { backgroundColor: giftColor } : undefined}

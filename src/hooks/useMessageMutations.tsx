@@ -34,7 +34,6 @@ interface UseMessageMutationsOptions {
   selectedUserId: string | null;
   messages: Message[];
   conversations: ConversationSummary[];
-  editContent: string;
   isSending: boolean;
   reportingMessage: Message | null;
   reportReason: string;
@@ -50,7 +49,6 @@ interface UseMessageMutationsOptions {
   setMessages: Setter<Message[]>;
   setConversations: Setter<ConversationSummary[]>;
   setEditingMessageId: Setter<string | null>;
-  setEditContent: Setter<string>;
   setDeletingMessageId: Setter<string | null>;
   setReplyingToMessage: Setter<Message | null>;
   setReportingMessage: Setter<Message | null>;
@@ -72,7 +70,6 @@ export function useMessageMutations({
   selectedUserId,
   messages,
   conversations,
-  editContent,
   isSending,
   reportingMessage,
   reportReason,
@@ -85,7 +82,6 @@ export function useMessageMutations({
   setMessages,
   setConversations,
   setEditingMessageId,
-  setEditContent,
   setDeletingMessageId,
   setReplyingToMessage,
   setReportingMessage,
@@ -95,7 +91,7 @@ export function useMessageMutations({
   updateLocalThreadMessage,
   removeLocalThreadMessage,
 }: UseMessageMutationsOptions) {
-  const handleEditMessage = async (messageId: string) => {
+  const handleEditMessage = async (messageId: string, editContent: string) => {
     const apiContent = prepareMessageContentForApi(editContent);
     const displayContent = prepareMessageDisplayContent(editContent);
     if (!apiContent || !selectedUserId || isSending) return;
@@ -103,7 +99,6 @@ export function useMessageMutations({
     const originalMessage = messages.find((m) => m.id === messageId);
     if (originalMessage?.content === displayContent) {
       setEditingMessageId(null);
-      setEditContent("");
       return;
     }
 
@@ -222,7 +217,6 @@ export function useMessageMutations({
       );
 
       setEditingMessageId(null);
-      setEditContent("");
       toast.success("Message edited", { id: toastId });
     } catch (error) {
       log.error("Error editing message:", error);

@@ -21,6 +21,16 @@ interface UseMessageNavigationScrollOptions {
   isLoadingMessages: boolean;
 }
 
+export function getConversationIdFromPathname(path: string): string | null {
+  const parts = path.split("/").filter(Boolean);
+  if (parts[0] !== "messages" || parts.length < 2) return null;
+  try {
+    return decodeURIComponent(parts[1]).trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 export function useMessageNavigationScroll({
   pathname,
   selectedUserId,
@@ -29,18 +39,6 @@ export function useMessageNavigationScroll({
   currentUserId,
   isLoadingMessages,
 }: UseMessageNavigationScrollOptions) {
-  const getConversationIdFromPathname = (path: string): string | null => {
-    if (!path.startsWith("/messages")) return null;
-    const parts = path.split("/").filter(Boolean);
-    if (parts.length < 2) return null;
-    try {
-      const decoded = decodeURIComponent(parts[1] ?? "").trim();
-      return decoded || null;
-    } catch {
-      return null;
-    }
-  };
-
   const [routeConversationId, setRouteConversationId] = useState<string | null>(
     () => getConversationIdFromPathname(pathname),
   );
@@ -49,8 +47,8 @@ export function useMessageNavigationScroll({
     null,
   );
 
-  const selectedUserIdRef = useRef<string | null>(null);
-  const routeConversationIdRef = useRef<string | null>(null);
+  const selectedUserIdRef = useRef<string | null>(selectedUserId);
+  const routeConversationIdRef = useRef<string | null>(routeConversationId);
 
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const prependScrollRestoreRef = useRef<{

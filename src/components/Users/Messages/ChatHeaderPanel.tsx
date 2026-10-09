@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   ChatHeader,
   ChatHeaderAddon,
@@ -28,7 +29,6 @@ interface ChatHeaderPanelProps {
   selectedUserBlockedByMe: boolean;
   isProcessingBlockAction: boolean;
   goToConversationList: () => void;
-  onViewProfile: () => void;
   onToggleBlock: () => void;
 }
 
@@ -41,9 +41,10 @@ export function ChatHeaderPanel({
   selectedUserBlockedByMe,
   isProcessingBlockAction,
   goToConversationList,
-  onViewProfile,
   onToggleBlock,
 }: ChatHeaderPanelProps) {
+  const [blockConfirmOpen, setBlockConfirmOpen] = useState(false);
+  const blockAction = selectedUserBlockedByMe ? "Unblock" : "Block";
   return (
     <ChatHeader className="border-border-card border-b px-4 py-3">
       <ChatHeaderAddon>
@@ -126,49 +127,50 @@ export function ChatHeaderPanel({
           )}
         </div>
       </ChatHeaderMain>
-      <ChatHeaderAddon>
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="!size-8 sm:!size-10"
-              aria-label="Conversation actions"
-            >
-              <Icon
-                icon="heroicons:ellipsis-horizontal"
-                className="!size-4 sm:!size-5"
-              />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="p-0">
-            <DropdownMenuItem
-              onClick={onViewProfile}
-              className="bg-tertiary-bg rounded-none px-3 py-2"
-            >
-              <Icon icon="heroicons:user-circle" className="h-4 w-4" />
-              View Profile
-            </DropdownMenuItem>
-            {currentUserId !== selectedUser.id && (
-              <DropdownMenuItem
-                onClick={onToggleBlock}
+      {currentUserId !== selectedUser.id && (
+        <ChatHeaderAddon>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-quaternary-bg! active:bg-quaternary-bg! !size-11 bg-transparent lg:!size-10"
+                aria-label={`${blockAction} ${getDisplayName(selectedUser)}`}
                 disabled={isProcessingBlockAction}
-                className="bg-tertiary-bg text-button-danger hover:bg-button-danger/10 hover:text-button-danger focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2"
+                onClick={() => setBlockConfirmOpen(true)}
               >
-                <Icon
-                  icon={
-                    selectedUserBlockedByMe
-                      ? "heroicons:lock-open"
-                      : "heroicons:no-symbol"
-                  }
-                  className="h-4 w-4"
-                />
-                {selectedUserBlockedByMe ? "Unblock User" : "Block User"}
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </ChatHeaderAddon>
+                {isProcessingBlockAction ? (
+                  <Spinner className="!size-5" />
+                ) : (
+                  <Icon
+                    icon={
+                      selectedUserBlockedByMe
+                        ? "heroicons:lock-open"
+                        : "heroicons:no-symbol"
+                    }
+                    className="!size-5"
+                  />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{blockAction} user</TooltipContent>
+          </Tooltip>
+        </ChatHeaderAddon>
+      )}
+      <ConfirmDialog
+        isOpen={blockConfirmOpen}
+        onClose={() => setBlockConfirmOpen(false)}
+        onConfirm={onToggleBlock}
+        title={`${blockAction} ${getDisplayName(selectedUser)}?`}
+        confirmText={blockAction}
+        confirmVariant={selectedUserBlockedByMe ? "default" : "destructive"}
+        confirmDisabled={isProcessingBlockAction}
+        message={
+          selectedUserBlockedByMe
+            ? "This removes your block on this user."
+            : "You won’t be able to exchange messages with this user. They won’t be notified."
+        }
+      />
     </ChatHeader>
   );
 }

@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
+import { getResponseErrorMessage } from "@/utils/api/api";
 
 export type OfferDetailsBatchEntry = {
   trade?: number | string;
@@ -66,8 +67,14 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
         },
         body: payloadJson,
       });
-      if (!response.ok)
-        throw new Error(`Offer details request failed (${response.status})`);
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(
+            response,
+            "Unable to load trade offer details.",
+          ),
+        );
+      }
       const raw = await response.text();
       const parsed = raw ? (parseJsonWithLargeIds(raw) as unknown) : null;
       const items = Array.isArray(parsed) ? parsed : [];
@@ -121,5 +128,11 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
           ? "error"
           : "loading";
 
-  return { map: detailsQuery.data ?? EMPTY_DETAILS, markCompleted, status };
+  return {
+    map: detailsQuery.data ?? EMPTY_DETAILS,
+    markCompleted,
+    status,
+    errorMessage:
+      detailsQuery.error?.message ?? "Unable to load trade offer details.",
+  };
 }
