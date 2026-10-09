@@ -810,58 +810,58 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
 }
 
 :root.hatsune-miku {
-  --color-primary-bg: #1b1e20;
-  --color-secondary-bg: #232729;
-  --color-tertiary-bg: #2c3134;
-  --color-quaternary-bg: #373b3e;
-  --color-surface-bg: #232729;
-  --color-overlay-bg: rgb(27 30 32 / 80%);
+  --color-primary-bg: #0f5a5e;
+  --color-secondary-bg: #0a3f42;
+  --color-tertiary-bg: #0d4d51;
+  --color-quaternary-bg: #137a7f;
+  --color-surface-bg: #0a3f42;
+  --color-overlay-bg: rgb(8 45 48 / 80%);
 
-  --color-secondary-text: #bec8d1;
-  --color-tertiary-text: #8f9ba4;
-  --color-quaternary-text: #6b767e;
-  --color-card-paragraph: #bec8d1;
+  --color-secondary-text: #cfeceb;
+  --color-tertiary-text: #9dd5d2;
+  --color-quaternary-text: #6fb3b0;
+  --color-card-paragraph: #cfeceb;
 
-  --color-border-primary: #3f4549;
-  --color-border-card: #3f4549;
-  --color-border-secondary: #2f3437;
-  --color-border-tertiary: #2a2e30;
-  --color-border-focus: #86cecb;
+  --color-border-primary: #1b7c80;
+  --color-border-card: #1f8387;
+  --color-border-secondary: #146a6e;
+  --color-border-tertiary: #115c60;
+  --color-border-focus: #e12885;
 
-  --color-card-tag-bg: #137a7f;
+  --color-card-tag-bg: #c91f77;
   --color-card-tag-text: #ffffff;
   --color-card-highlight: #86cecb;
 
-  --color-link: #86cecb;
-  --color-link-hover: #a8e0de;
-  --color-link-active: #5fbfbb;
-  --color-link-visited: #8f9ba4;
+  --color-link: #ffb0d8;
+  --color-link-hover: #ffc9e5;
+  --color-link-active: #ff94c8;
+  --color-link-visited: #e8a5c9;
 
-  --color-button-info: #137a7f;
-  --color-button-info-hover: #0f6468;
-  --color-button-info-active: #0c5155;
-  --color-button-info-disabled: #373b3e;
+  --color-button-info: #c91f77;
+  --color-button-info-hover: #ad1a66;
+  --color-button-info-active: #921556;
+  --color-button-info-disabled: #1f6e72;
   --color-button-secondary: #373b3e;
   --color-button-secondary-hover: #454a4e;
   --color-button-secondary-active: #2f3437;
-  --color-form-button: #137a7f;
+  --color-form-button: #c91f77;
   --color-form-button-text: #ffffff;
 
-  --color-form-input: #1b1e20;
-  --color-form-input-focus: #232729;
-  --color-form-input-disabled: #2a2e30;
-  --color-form-label: #bec8d1;
-  --color-form-placeholder: #6b767e;
+  --color-form-input: #0a3f42;
+  --color-form-input-focus: #0d4d51;
+  --color-form-input-disabled: #0c4548;
+  --color-form-label: #cfeceb;
+  --color-form-placeholder: #6fb3b0;
 
   --color-status-info: #86cecb;
-  --color-status-neutral: #6b767e;
-  --color-highlight: #86cecb;
-  --color-secondary: #8f9ba4;
+  --color-status-neutral: #5fa5a8;
+  --color-highlight: #f81084;
+  --color-secondary: #9dd5d2;
   --color-tertiary: #e12885;
 
-  --color-overlay-light: rgb(27 30 32 / 50%);
-  --color-overlay-medium: rgb(27 30 32 / 70%);
-  --color-overlay-dark: rgb(27 30 32 / 90%);
+  --color-overlay-light: rgb(8 45 48 / 50%);
+  --color-overlay-medium: rgb(8 45 48 / 70%);
+  --color-overlay-dark: rgb(8 45 48 / 90%);
 }
 
 @media (hover: hover) and (pointer: fine) {

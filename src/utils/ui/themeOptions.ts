@@ -1,5 +1,5 @@
 import {
-  Mic,
+  Disc3,
   Cat,
   Ghost,
   Moon,
@@ -33,14 +33,14 @@ export const THEME_OPTIONS: {
   {
     value: "hatsune-miku",
     label: "Hatsune Miku",
-    icon: Mic,
+    icon: Disc3,
     preview: {
-      page: "#1b1e20",
-      card: "#232729",
+      page: "#0f5a5e",
+      card: "#0a3f42",
       text: "#ffffff",
-      muted: "#bec8d1",
-      button: "#137a7f",
-      link: "#86cecb",
+      muted: "#cfeceb",
+      button: "#c91f77",
+      link: "#ffb0d8",
     },
   },
   {
