@@ -23,6 +23,19 @@ export const THEME_OPTIONS: {
   preview: ThemePreview;
 }[] = [
   {
+    value: "catppuccin-latte",
+    label: "Catppuccin Latte",
+    icon: Cat,
+    preview: {
+      page: "#eff1f5",
+      card: "#e6e9ef",
+      text: "#4c4f69",
+      muted: "#5c5f77",
+      button: "#8839ef",
+      link: "color-mix(in srgb, #8839ef 98%, black)",
+    },
+  },
+  {
     value: "halloween",
     label: "Halloween",
     icon: Ghost,
@@ -33,19 +46,6 @@ export const THEME_OPTIONS: {
       muted: "hsl(214 16% 64%)",
       button: "#bb0d00",
       link: "#ff877d",
-    },
-  },
-  {
-    value: "dark",
-    label: "Dark",
-    icon: Moon,
-    preview: {
-      page: "#121317",
-      card: "#17181d",
-      text: "#ffffff",
-      muted: "hsl(214 16% 64%)",
-      button: "hsl(210 99% 35%)",
-      link: "hsl(210 100% 70%)",
     },
   },
   {
@@ -75,6 +75,19 @@ export const THEME_OPTIONS: {
     },
   },
   {
+    value: "dark",
+    label: "Dark",
+    icon: Moon,
+    preview: {
+      page: "#121317",
+      card: "#17181d",
+      text: "#ffffff",
+      muted: "hsl(214 16% 64%)",
+      button: "hsl(210 99% 35%)",
+      link: "hsl(210 100% 70%)",
+    },
+  },
+  {
     value: "light",
     label: "Light",
     icon: Sun,
@@ -87,23 +100,10 @@ export const THEME_OPTIONS: {
       link: "hsl(210 99% 40%)",
     },
   },
-  {
-    value: "catppuccin-latte",
-    label: "Catppuccin Latte",
-    icon: Cat,
-    preview: {
-      page: "#eff1f5",
-      card: "#e6e9ef",
-      text: "#4c4f69",
-      muted: "#5c5f77",
-      button: "#8839ef",
-      link: "color-mix(in srgb, #8839ef 98%, black)",
-    },
-  },
 ];
 
 export const themeOption = (theme: Theme) =>
-  THEME_OPTIONS.find((option) => option.value === theme) ?? THEME_OPTIONS[0];
+  THEME_OPTIONS.find((option) => option.value === theme) ?? THEME_OPTIONS[1];
 
 const SHORTCUT_HIDDEN_KEY = "theme-shortcut-hidden";
 const SHORTCUT_EVENT = "themeShortcutChanged";

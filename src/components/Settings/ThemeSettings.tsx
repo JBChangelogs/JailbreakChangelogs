@@ -3,6 +3,13 @@
 import { useId, useSyncExternalStore } from "react";
 import { Switch } from "@/components/ui/switch";
 import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -71,54 +78,79 @@ export default function ThemeSettings() {
   );
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h3 id={`${id}-label`} className="text-primary-text font-medium">
-          Theme
-        </h3>
-        <p className="text-secondary-text mt-1 text-sm">
-          Choose how the site looks.
-          {isAuthenticated
-            ? " Syncs with your account."
-            : " Saved on this browser."}
-        </p>
-      </div>
-
-      <div
-        role="radiogroup"
+    <div className="space-y-6">
+      <Carousel
         aria-labelledby={`${id}-label`}
-        className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+        className="space-y-4"
+        opts={{
+          align: "start",
+          startIndex: THEME_OPTIONS.findIndex(({ value }) => value === theme),
+        }}
+        onKeyDownCapture={undefined}
       >
-        {THEME_OPTIONS.map(({ value, label, icon: ThemeIcon, preview }) => (
-          <label
-            key={value}
-            className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2"
-          >
-            <input
-              type="radio"
-              name={`${id}-theme`}
-              value={value}
-              checked={theme === value}
-              onChange={() => setTheme(value)}
-              className="sr-only"
+        <div className="grid grid-cols-[1fr_auto] items-center gap-x-4">
+          <h3 id={`${id}-label`} className="text-primary-text font-medium">
+            Theme
+          </h3>
+          <div className="col-start-2 row-start-1 flex gap-2 sm:row-span-2">
+            <CarouselPrevious
+              variant="ghost"
+              className="static translate-y-0"
+              aria-label="Previous themes"
             />
-            <ThemePreview preview={preview} />
-            <span className="border-border-card group-has-checked:bg-button-info/10 flex items-center gap-2 border-t px-3 py-2">
-              <ThemeIcon
-                aria-hidden="true"
-                className="text-secondary-text size-4 shrink-0"
-              />
-              <span className="text-primary-text text-sm font-medium">
-                {label}
-              </span>
-              <span
-                aria-hidden="true"
-                className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info ml-auto size-3.5 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-secondary-bg)]"
-              />
-            </span>
-          </label>
-        ))}
-      </div>
+            <CarouselNext
+              variant="ghost"
+              className="static translate-y-0"
+              aria-label="Next themes"
+            />
+          </div>
+          <p className="text-secondary-text col-span-2 mt-1 text-sm sm:col-span-1 sm:col-start-1 sm:row-start-2">
+            Choose how the site looks.
+            {isAuthenticated
+              ? " Syncs with your account."
+              : " Saved on this browser."}
+          </p>
+        </div>
+        <CarouselContent
+          role="radiogroup"
+          aria-labelledby={`${id}-label`}
+          className="-ml-3 py-1"
+        >
+          {THEME_OPTIONS.map(({ value, label, icon: ThemeIcon, preview }) => (
+            <CarouselItem
+              key={value}
+              className="basis-[85%] pl-3 sm:basis-[200px]"
+            >
+              <label className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 block h-full cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2">
+                <input
+                  type="radio"
+                  name={`${id}-theme`}
+                  value={value}
+                  checked={theme === value}
+                  onChange={() => setTheme(value)}
+                  className="sr-only"
+                />
+                <ThemePreview preview={preview} />
+                <span className="border-border-card group-has-checked:bg-button-info/10 flex min-h-14 items-center gap-2 border-t px-3 py-2">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <ThemeIcon
+                      aria-hidden="true"
+                      className="text-secondary-text size-4 shrink-0"
+                    />
+                    <span className="text-primary-text text-sm font-medium">
+                      {label}
+                    </span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info ml-auto size-3.5 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-secondary-bg)]"
+                  />
+                </span>
+              </label>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
 
       <div className="flex items-center justify-between gap-4">
         <div>
