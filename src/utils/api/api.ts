@@ -131,7 +131,8 @@ function getErrorMessageFromResponse(data: unknown, fallback: string): string {
     const first = detail[0];
     if (typeof first === "string" && first.trim()) return first;
     if (first && typeof first === "object") {
-      const firstMessage = (first as Record<string, unknown>).message;
+      const firstRecord = first as Record<string, unknown>;
+      const firstMessage = firstRecord.message ?? firstRecord.msg;
       if (typeof firstMessage === "string" && firstMessage.trim()) {
         return firstMessage;
       }

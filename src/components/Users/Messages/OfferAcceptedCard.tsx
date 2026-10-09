@@ -53,7 +53,7 @@ export function OfferAcceptedCard({
   };
 
   return (
-    <div className="bg-tertiary-bg relative mt-1 w-full max-w-md overflow-hidden rounded-2xl px-4 py-3 whitespace-normal">
+    <div className="bg-tertiary-bg lg:group-hover/message:bg-secondary-bg relative mt-1 w-full max-w-md overflow-hidden rounded-2xl px-4 py-3 whitespace-normal transition-colors">
       <span className="bg-link absolute inset-y-0 left-0 w-1" />
       <p className="text-link flex items-center gap-1.5 text-sm font-semibold">
         <Icon icon="heroicons:check-circle" className="h-4 w-4 shrink-0" />
@@ -86,11 +86,11 @@ export function OfferAcceptedCard({
       ) : (
         <p className="text-secondary-text mt-2 text-xs" role="status">
           {offerDetails.status === "error" ? (
-            "Unable to load trade offer details."
+            offerDetails.errorMessage
           ) : offerDetails.status === "idle" ? (
             "Trade offer details are unavailable."
           ) : offer === null ? (
-            "Trade offer details are no longer available."
+            "No trade offer details found."
           ) : (
             <span className="flex items-center gap-2">
               <Spinner className="h-3.5 w-3.5" />

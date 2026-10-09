@@ -86,34 +86,29 @@ export function ComposerFooter({
           </span>
         </div>
       ) : null}
-      <div className="bg-secondary-bg border-border-card shrink-0 border-t p-3">
+      <div className="shrink-0 px-3 pt-1 pb-3">
         {messageBan && <BanBanner ban={messageBan} className="mb-3" />}
         {replyingToMessage && (
-          <div className="bg-tertiary-bg border-border-card flex w-full items-center justify-between rounded-t-md border-x border-t px-3 py-2 text-xs">
-            <div className="flex items-center gap-2 truncate">
-              <Icon
-                icon="heroicons-outline:reply"
-                className="text-secondary-text h-3 w-3 shrink-0"
-              />
-              <span className="text-secondary-text">
+          <div className="bg-secondary-bg border-border-card flex min-h-11 w-full items-center justify-between rounded-t-xl border px-3 text-sm lg:min-h-8 lg:text-xs">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="text-secondary-text truncate">
                 Replying to{" "}
                 <span className="text-primary-text font-bold">
-                  {replyingToMessage.senderId === asId(currentUser?.id)
-                    ? "yourself"
-                    : getDisplayName(
-                        replyingToMessage.senderId === selectedUserId
-                          ? selectedUser
-                          : (currentUserEnriched ??
-                              currentUserMessageUser ??
-                              selectedUser),
-                      )}
+                  {getDisplayName(
+                    replyingToMessage.senderId === selectedUserId
+                      ? selectedUser
+                      : (currentUserEnriched ??
+                          currentUserMessageUser ??
+                          selectedUser),
+                  )}
                 </span>
               </span>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-5 w-5 rounded-full p-0"
+              className="!size-11 rounded-full p-0 lg:!size-8"
+              aria-label="Cancel reply"
               onClick={() => setReplyingToMessage(null)}
             >
               <Icon icon="lucide:x" className="h-3 w-3" />
@@ -122,7 +117,7 @@ export function ComposerFooter({
         )}
         <div
           className={cn(
-            "border-border-card bg-tertiary-bg text-primary-text focus-within:border-link focus-within:ring-link/20 flex w-full items-center gap-2 rounded-xl border px-2 py-2 shadow-none transition-colors focus-within:ring-2 sm:px-3 sm:py-3",
+            "border-border-card bg-tertiary-bg text-primary-text focus-within:border-link focus-within:ring-link/20 flex w-full items-center rounded-xl border px-2 py-1 shadow-none transition-colors focus-within:ring-2 sm:px-3 lg:py-2",
             replyingToMessage && "rounded-t-none border-t-0",
           )}
         >

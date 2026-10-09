@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useTwemoji } from "@/contexts/TwemojiContext";
 import Twemoji from "react-twemoji";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 export interface MessageComposerProps {
   conversationId: string | null;
@@ -49,6 +50,7 @@ export function MessageComposer({
   const cursorPosRef = React.useRef<number | null>(null);
   const emojiStringMap = useEmojiStringMap();
   const { twemojiEnabled } = useTwemoji();
+  const isMobile = useMediaQuery("(max-width: 1023px)");
 
   React.useEffect(() => {
     setDraft("");
@@ -103,6 +105,7 @@ export function MessageComposer({
           }
         }}
         onSubmit={submit}
+        submitOnEnter={!isMobile}
         placeholder={placeholder}
         maxLength={1000}
         disabled={disabled}
@@ -112,7 +115,7 @@ export function MessageComposer({
         spellCheck="false"
         autoCapitalize="off"
         rightOverlay={
-          <div className="flex items-center gap-1">
+          <div className="flex items-center">
             {overLimit > 0 ? (
               <span className="text-form-error text-xs font-medium tabular-nums">
                 -{overLimit}
@@ -126,7 +129,7 @@ export function MessageComposer({
                       type="button"
                       aria-label="Open emoji picker"
                       disabled={disabled}
-                      className="hover:bg-tertiary-bg! size-9! p-0! transition-colors [&_svg]:size-5!"
+                      className="hover:bg-tertiary-bg! size-11! p-0! transition-colors lg:size-9! [&_svg]:size-5!"
                     >
                       <Icon icon="heroicons:face-smile" className="h-4 w-4" />
                     </ChatToolbarButton>
@@ -172,8 +175,9 @@ export function MessageComposer({
             </Popover>
             <ChatToolbarButton
               onClick={submit}
+              onPointerDown={(event) => event.preventDefault()}
               aria-label="Send message"
-              className="hover:bg-tertiary-bg! size-9! p-0! transition-colors [&_svg]:size-5!"
+              className="hover:bg-tertiary-bg! size-11! p-0! transition-colors lg:size-9! [&_svg]:size-5!"
               disabled={!draft.trim() || isSending || disabled || overLimit > 0}
             >
               {isSending ? (
@@ -184,7 +188,7 @@ export function MessageComposer({
             </ChatToolbarButton>
           </div>
         }
-        className="text-primary-text placeholder-secondary-text"
+        className={`text-primary-text placeholder-secondary-text ${overLimit > 0 ? "pr-36 lg:pr-32" : ""}`}
       />
     </>
   );

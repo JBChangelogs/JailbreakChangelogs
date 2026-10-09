@@ -17,7 +17,6 @@ import {
 } from "@tanstack/react-query";
 import type { Dispatch, SetStateAction } from "react";
 import { usePathname } from "next/navigation";
-import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -28,6 +27,7 @@ import { Chat } from "@/components/chat/chat";
 import { ChatMessages } from "@/components/chat/chat-messages";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Spinner } from "@/components/ui/Spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ChatEventTime } from "@/components/chat/chat-event";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
@@ -43,7 +43,11 @@ import { MessageRow } from "@/components/Users/Messages/MessageRow";
 import { ActiveOfferReminder } from "@/components/Users/Messages/ActiveOfferReminder";
 import { ChatHeaderPanel } from "@/components/Users/Messages/ChatHeaderPanel";
 import { ComposerFooter } from "@/components/Users/Messages/ComposerFooter";
-import { ConversationSidebar } from "@/components/Users/Messages/ConversationSidebar";
+import {
+  ConversationSidebar,
+  ConversationListSkeleton,
+} from "@/components/Users/Messages/ConversationSidebar";
+import { MessageThreadLoading } from "@/components/Users/Messages/MessageThreadLoading";
 import { NewConversationModal } from "@/components/Users/Messages/NewConversationModal";
 import { useMessagesRealtime } from "@/hooks/useMessagesRealtime";
 import {
@@ -59,7 +63,10 @@ import { useMessageMutations } from "@/hooks/useMessageMutations";
 import { useOfferDetailsBatch } from "@/hooks/useOfferDetailsBatch";
 import { useMessageBlocking } from "@/hooks/useMessageBlocking";
 import { useLocalMessageOverlay } from "@/hooks/useLocalMessageOverlay";
-import { useMessageNavigationScroll } from "@/hooks/useMessageNavigationScroll";
+import {
+  getConversationIdFromPathname,
+  useMessageNavigationScroll,
+} from "@/hooks/useMessageNavigationScroll";
 import { useUserSearch } from "@/hooks/useUserSearch";
 import type {
   ConversationSummary,
@@ -97,7 +104,6 @@ function blockedUserMap(data: unknown): Record<string, boolean> {
 
 export default function MessagesInbox() {
   const pathname = usePathname();
-  const router = useRouter();
 
   useLockBodyScroll(true);
 
@@ -144,7 +150,10 @@ export default function MessagesInbox() {
   );
   const totalConversations = conversationQuery.data?.total ?? null;
   const isLoadingConversations =
-    isAuthenticated && conversationQuery.isFetching;
+    isAuthenticated &&
+    !conversationQuery.isError &&
+    (conversationQuery.isPending ||
+      (conversationQuery.isFetching && conversations.length === 0));
   const setConversations = useCallback<
     Dispatch<SetStateAction<ConversationSummary[]>>
   >(
@@ -183,7 +192,9 @@ export default function MessagesInbox() {
   );
   const [recentlyHiddenConversations, setRecentlyHiddenConversations] =
     useState<ConversationSummary[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(() =>
+    getConversationIdFromPathname(pathname),
+  );
   const threadKey = useMemo(
     () => ["message-thread", currentUserId, selectedUserId],
     [currentUserId, selectedUserId],
@@ -261,10 +272,6 @@ export default function MessagesInbox() {
   const messagesTotalPages =
     threadQuery.data?.pages.at(-1)?.pagination.totalPages ?? null;
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState("");
-  const [editEmojiOpen, setEditEmojiOpen] = useState(false);
-  const editCursorPosRef = useRef<number | null>(null);
-  const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
     null,
@@ -385,42 +392,8 @@ export default function MessagesInbox() {
     setActiveMessageId(null);
   }, [selectedUserId]);
 
-  useEffect(() => {
-    const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (!target) return;
-      if (target.closest("[data-message-row]")) return;
-      setActiveMessageId(null);
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown, true);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown, true);
-    };
-  }, []);
   const readMessageIdsRef = useRef<Set<string>>(new Set());
   const typingSentAtByUserIdRef = useRef<Map<string, number>>(new Map());
-
-  const insertEditEmoji = useCallback(
-    (emoji: string, keepOpen = false) => {
-      const cursor = editCursorPosRef.current ?? editContent.length;
-      const next =
-        editContent.slice(0, cursor) + emoji + editContent.slice(cursor);
-      setEditContent(next);
-      editCursorPosRef.current = cursor + emoji.length;
-      if (!keepOpen) {
-        setEditEmojiOpen(false);
-        requestAnimationFrame(() => {
-          const el = editTextareaRef.current;
-          if (!el) return;
-          el.focus();
-          const pos = editCursorPosRef.current ?? next.length;
-          el.setSelectionRange(pos, pos);
-        });
-      }
-    },
-    [editContent],
-  );
 
   const {
     localThreadMessagesByUserIdRef,
@@ -548,7 +521,7 @@ export default function MessagesInbox() {
   const selectedUserBlockedByMe =
     !!selectedUser?.id && blockedByMeByUserId[selectedUser.id] === true;
 
-  useConversationList({
+  const { routeUserError } = useConversationList({
     isAuthenticated,
     currentUserId,
     currentUserMessageUser,
@@ -788,7 +761,6 @@ export default function MessagesInbox() {
     selectedUserId,
     messages,
     conversations,
-    editContent,
     isSending,
     reportingMessage,
     reportReason,
@@ -801,7 +773,6 @@ export default function MessagesInbox() {
     setMessages,
     setConversations,
     setEditingMessageId,
-    setEditContent,
     setDeletingMessageId,
     setReplyingToMessage,
     setReportingMessage,
@@ -813,11 +784,42 @@ export default function MessagesInbox() {
   });
   if (isLoading) {
     return (
-      <div data-messages-shell className="h-full overflow-hidden px-4 pb-4">
+      <div data-messages-shell className="h-full overflow-hidden">
         <div className="flex h-full min-h-0 flex-col">
-          <Breadcrumb loading={true} containerClassName="py-4" />
-          <div className="border-border-card bg-secondary-bg mt-0 flex min-h-0 flex-1 items-center justify-center rounded-lg border shadow-md">
-            <p className="text-secondary-text text-sm">Loading...</p>
+          <Breadcrumb loading={isLoading} containerClassName="px-4 py-4" />
+          <div className="border-border-card bg-secondary-bg grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:mx-4 lg:grid-cols-[320px_1fr] lg:rounded-lg lg:border">
+            <aside
+              className={cn(
+                "border-border-card min-h-0 overflow-hidden lg:border-r",
+                routeConversationId && "hidden lg:block",
+              )}
+            >
+              <div
+                aria-hidden="true"
+                className="bg-tertiary-bg border-border-card space-y-4 border-b p-4"
+              >
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+              <ConversationListSkeleton />
+            </aside>
+            <div
+              className={cn(
+                "min-h-0",
+                !routeConversationId && "hidden lg:block",
+              )}
+            >
+              {routeConversationId ? (
+                <MessageThreadLoading />
+              ) : (
+                <div
+                  className="flex h-full items-center justify-center"
+                  role="status"
+                >
+                  <Spinner className="size-6" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -856,7 +858,7 @@ export default function MessagesInbox() {
       <div className="flex h-full min-h-0 flex-col">
         <Breadcrumb containerClassName="px-4 py-4" />
 
-        <div className="bg-secondary-bg border-border-card mx-4 mt-0 grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-lg border lg:grid-cols-[320px_1fr]">
+        <div className="bg-secondary-bg border-border-card mt-0 grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:mx-4 lg:grid-cols-[320px_1fr] lg:rounded-lg lg:border">
           <ConversationSidebar
             userSearchQuery={userSearchQuery}
             setUserSearchQuery={setUserSearchQuery}
@@ -868,6 +870,7 @@ export default function MessagesInbox() {
             selectedUserId={selectedUserId}
             currentUserId={currentUserId}
             isLoadingConversations={isLoadingConversations}
+            errorMessage={conversationQuery.error?.message}
             isAuthenticated={isAuthenticated}
             twemojiEnabled={twemojiEnabled}
             recentlyHiddenConversations={recentlyHiddenConversations}
@@ -887,7 +890,11 @@ export default function MessagesInbox() {
               selectedUserId ? "block" : "hidden lg:block",
             )}
           >
-            {!selectedUser ? (
+            {routeConversationId &&
+            routeUserError?.id !== routeConversationId &&
+            (!selectedUser || isLoadingMessages) ? (
+              <MessageThreadLoading />
+            ) : !selectedUser ? (
               <div className="flex h-full items-center justify-center p-6">
                 <div className="text-center">
                   <div className="border-border-card bg-tertiary-bg/40 mx-auto flex h-24 w-24 items-center justify-center rounded-full border shadow-sm">
@@ -897,10 +904,16 @@ export default function MessagesInbox() {
                     />
                   </div>
                   <h2 className="text-primary-text mt-5 text-lg font-semibold">
-                    Your messages
+                    {routeUserError?.id === routeConversationId &&
+                    routeConversationId
+                      ? "Unable to load this conversation"
+                      : "Your messages"}
                   </h2>
                   <p className="text-secondary-text mt-1 text-sm">
-                    Search for a user to start a chat.
+                    {routeUserError?.id === routeConversationId &&
+                    routeConversationId
+                      ? routeUserError.message
+                      : "Search for a user to start a chat."}
                   </p>
                   <div className="mt-5 flex justify-center">
                     <Button onClick={() => setNewConversationOpen(true)}>
@@ -912,6 +925,7 @@ export default function MessagesInbox() {
             ) : (
               <Chat className="h-full min-h-0">
                 <ChatHeaderPanel
+                  key={selectedUser.id}
                   selectedUser={selectedUser}
                   currentUserId={currentUserId}
                   isTargetOnline={isTargetOnline}
@@ -920,9 +934,6 @@ export default function MessagesInbox() {
                   selectedUserBlockedByMe={selectedUserBlockedByMe}
                   isProcessingBlockAction={isProcessingBlockAction}
                   goToConversationList={goToConversationList}
-                  onViewProfile={() =>
-                    router.push(`/users/${encodeURIComponent(selectedUser.id)}`)
-                  }
                   onToggleBlock={() =>
                     void handleBlockToggle(
                       selectedUser.id,
@@ -957,7 +968,7 @@ export default function MessagesInbox() {
                 <ChatMessages
                   ref={messagesContainerRef}
                   onScroll={handleMessagesScroll}
-                  className="bg-secondary-bg relative !flex-col px-2 py-3 sm:px-4"
+                  className="bg-secondary-bg relative !flex-col px-2 py-3 sm:px-4 lg:pt-5"
                   style={{ overflowAnchor: "none" }}
                 >
                   {!isLoadingMessages &&
@@ -978,6 +989,27 @@ export default function MessagesInbox() {
                       <p className="text-secondary-text mt-3 text-sm">
                         Loading messages…
                       </p>
+                    </div>
+                  ) : threadQuery.isError && messages.length === 0 ? (
+                    <div
+                      className="mx-auto my-auto space-y-3 px-4 text-center"
+                      role="alert"
+                    >
+                      <p className="text-secondary-text text-sm">
+                        {threadQuery.error?.message ??
+                          "Failed to load messages"}
+                      </p>
+                      <Button
+                        size="sm"
+                        disabled={threadQuery.isFetching}
+                        onClick={() =>
+                          void queryClient.invalidateQueries({
+                            queryKey: threadKey,
+                          })
+                        }
+                      >
+                        Retry
+                      </Button>
                     </div>
                   ) : messages.length === 0 ? (
                     <div className="mx-auto my-auto w-full max-w-md px-4">
@@ -1024,27 +1056,24 @@ export default function MessagesInbox() {
                           currentUserMessageUser={currentUserMessageUser}
                           selectedUser={selectedUser}
                           activeMessageId={activeMessageId}
+                          replyingToMessage={replyingToMessage}
                           editingMessageId={editingMessageId}
-                          editContent={editContent}
-                          editEmojiOpen={editEmojiOpen}
+
                           emojiStringMap={emojiStringMap}
                           twemojiEnabled={twemojiEnabled}
                           isSending={isSending}
                           deletingMessageId={deletingMessageId}
-                          editCursorPosRef={editCursorPosRef}
-                          editTextareaRef={editTextareaRef}
+
                           messagesContainerRef={messagesContainerRef}
                           setActiveMessageId={setActiveMessageId}
                           setEditingMessageId={setEditingMessageId}
-                          setEditContent={setEditContent}
-                          setEditEmojiOpen={setEditEmojiOpen}
+
                           setReplyingToMessage={setReplyingToMessage}
                           setReportingMessage={setReportingMessage}
                           setReportReason={setReportReason}
                           handleDeleteMessage={handleDeleteMessage}
                           handleRetryFailedMessage={handleRetryFailedMessage}
                           handleEditMessage={handleEditMessage}
-                          insertEditEmoji={insertEditEmoji}
                         />
                       </Fragment>
                     ))

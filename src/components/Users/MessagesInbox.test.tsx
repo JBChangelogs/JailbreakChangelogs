@@ -7,6 +7,15 @@ import type { Dispatch, SetStateAction } from "react";
 import type { ConversationListData } from "@/hooks/useConversationList";
 import type { MessageThreadPage } from "@/hooks/useMessageThread";
 import type { ConversationSummary, Message } from "@/utils/messages/types";
+import { cn } from "@/lib/utils";
+
+type Node = { type: unknown; props: Record<string, unknown> };
+function nodes(value: unknown): Node[] {
+  if (Array.isArray(value)) return value.flatMap(nodes);
+  if (!value || typeof value !== "object" || !("props" in value)) return [];
+  const node = value as Node;
+  return [node, ...nodes(node.props.children)];
+}
 
 test("inbox cache setters preserve pagination, realtime changes and sibling conversations", () => {
   const client = new QueryClient();
@@ -55,10 +64,20 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
   const captured = {} as Record<string, Setters>;
   const callbacks: unknown[] = [];
   let stateIndex = 0;
+  let authLoading = true;
+  let threadLoading = false;
+  let conversationFetching = false;
+  let threadError: Error | null = null;
+  let routeUserError: { id: string; message: string } | null = null;
   const exports = {} as { default: () => unknown };
   const ref = (current: unknown) => ({ current });
   const readQuery = ({ queryKey }: { queryKey: readonly unknown[] }) => ({
     data: client.getQueryData(queryKey),
+    isLoading: queryKey[0] === "message-thread" && threadLoading,
+    isError: queryKey[0] === "message-thread" && !!threadError,
+    error: queryKey[0] === "message-thread" ? threadError : null,
+    isPending: !client.getQueryData(queryKey),
+    isFetching: queryKey[0] === "conversation-list" && conversationFetching,
   });
   const noop = () => {};
   runInNewContext(
@@ -90,7 +109,14 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
               noop,
             ],
           };
-        if (name === "react/jsx-runtime") return { jsx: noop, jsxs: noop };
+        if (name === "react/jsx-runtime") {
+          const jsx = (type: unknown, props: Node["props"]) => ({
+            type,
+            props,
+          });
+          return { jsx, jsxs: jsx };
+        }
+        if (name === "@/lib/utils") return { cn };
         if (name === "@tanstack/react-query")
           return {
             useQueryClient: () => client,
@@ -105,7 +131,7 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
             useAuthContext: () => ({
               user: { id: "me", username: "Me" },
               isAuthenticated: true,
-              isLoading: true,
+              isLoading: authLoading,
               bans: {},
             }),
           };
@@ -117,7 +143,9 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
           return { useLockBodyScroll: noop };
         if (name === "@/hooks/useMessageNavigationScroll")
           return {
+            getConversationIdFromPathname: () => "them",
             useMessageNavigationScroll: () => ({
+              routeConversationId: "them",
               selectedUserIdRef: ref("them"),
               routeConversationIdRef: ref("them"),
               messagesContainerRef: ref(null),
@@ -133,7 +161,7 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
           return {
             useMessagesRealtime: (options: Setters) => {
               captured.realtime = options;
-              return { typingUserIds: [] };
+              return { typingUserIds: new Set() };
             },
           };
         if (name === "@/hooks/useSendMessage")
@@ -151,7 +179,7 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
             },
           };
         if (name === "@/hooks/useConversationList")
-          return { useConversationList: noop };
+          return { useConversationList: () => ({ routeUserError }) };
         if (name === "@/hooks/useMessageThread")
           return { useMessageThread: noop };
         if (name === "@/hooks/useUserSearch")
@@ -164,12 +192,26 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
           return { useOptimizedRealTimeRelativeDate: () => "" };
         if (name === "@/utils/messages/parsing")
           return { asId: String, parseOfferAcceptedMetadata: () => null };
-        return {};
+        if (name === "@/utils/messages/formatting")
+          return {
+            getDisplayName: (user: { username: string }) => user.username,
+          };
+        return new Proxy({}, { get: (_, key) => String(key) });
       },
     },
   );
   try {
-    exports.default();
+    const render = () => {
+      stateIndex = 0;
+      return nodes(exports.default());
+    };
+    const loadingTree = render();
+    expect(
+      loadingTree.some((node) => node.type === "ConversationListSkeleton"),
+    ).toBe(true);
+    expect(
+      loadingTree.some((node) => node.type === "MessageThreadLoading"),
+    ).toBe(true);
     expect(
       captured.mutations.messages
         ?.filter(({ id }) => id === "duplicate")
@@ -240,6 +282,51 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
     expect(
       client.getQueryData<ConversationListData>(conversationKey)?.items,
     ).toHaveLength(2);
+    authLoading = false;
+    conversationFetching = true;
+    expect(
+      render().find((node) => node.type === "ConversationSidebar")!.props
+        .isLoadingConversations,
+    ).toBe(false);
+    const loadedConversations = client.getQueryData(conversationKey);
+    client.setQueryData(conversationKey, { items: [], total: null });
+    expect(
+      render().find((node) => node.type === "ConversationSidebar")!.props
+        .isLoadingConversations,
+    ).toBe(true);
+    conversationFetching = false;
+    expect(
+      render().find((node) => node.type === "ConversationSidebar")!.props
+        .isLoadingConversations,
+    ).toBe(false);
+    client.setQueryData(conversationKey, loadedConversations);
+    threadLoading = true;
+    const threadLoadingTree = render();
+    expect(
+      threadLoadingTree.some((node) => node.type === "ConversationSidebar"),
+    ).toBe(true);
+    expect(
+      threadLoadingTree.some((node) => node.type === "MessageThreadLoading"),
+    ).toBe(true);
+    expect(
+      threadLoadingTree.some((node) => node.type === "ChatHeaderPanel"),
+    ).toBe(false);
+    threadLoading = false;
+    expect(render().some((node) => node.type === "ChatHeaderPanel")).toBe(true);
+    client.setQueryData(threadKey, { pages: [page([], 1)], pageParams: [1] });
+    threadError = new Error("Unauthorized");
+    expect(
+      render().some((node) => node.props.children === "Unauthorized"),
+    ).toBe(true);
+    client.setQueryData(conversationKey, { items: [], total: 0 });
+    routeUserError = { id: "them", message: "User not found." };
+    const failedTree = render();
+    expect(
+      failedTree.some((node) => node.type === "MessageThreadLoading"),
+    ).toBe(false);
+    expect(
+      failedTree.some((node) => node.props.children === "User not found."),
+    ).toBe(true);
   } finally {
     client.clear();
   }

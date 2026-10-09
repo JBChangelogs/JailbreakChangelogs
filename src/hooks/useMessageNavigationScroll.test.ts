@@ -3,8 +3,17 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { ModuleKind, ScriptTarget, transpileModule } from "typescript";
 import type { useMessageNavigationScroll } from "./useMessageNavigationScroll";
+import { getConversationIdFromPathname } from "./useMessageNavigationScroll";
 import type { Message } from "@/utils/messages/types";
 import { isUserMessage } from "@/utils/messages/invites";
+
+test("conversation selection comes from the thread URL before effects run", () => {
+  expect(getConversationIdFromPathname("/messages/123")).toBe("123");
+  expect(getConversationIdFromPathname("/messages/%31%32%33")).toBe("123");
+  expect(getConversationIdFromPathname("/messages")).toBeNull();
+  expect(getConversationIdFromPathname("/messages-other/123")).toBeNull();
+  expect(getConversationIdFromPathname("/messages/%ZZ")).toBeNull();
+});
 
 test("user embeds scroll on send, resizing stays pinned, and refreshes preserve reading and prepend positions", () => {
   type ScrollState = ReturnType<typeof useMessageNavigationScroll>;
