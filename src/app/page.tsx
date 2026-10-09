@@ -15,6 +15,7 @@ import CountUpNumber from "@/components/Home/CountUpNumber";
 import { Button } from "@/components/ui/button";
 import AppHeroButton from "@/app/app/AppHeroButton";
 import { getHomepageTestimonials } from "@/components/Testimonials/homepageTestimonials";
+import { badimoTestimonial } from "@/components/Testimonials/badimoTestimonial";
 import { highlightBrandName } from "@/components/Testimonials/testimonialText";
 import { UserAvatar } from "@/utils/ui/avatar";
 
@@ -238,6 +239,36 @@ export default async function Home() {
         <div className="relative z-10 container mx-auto px-4">
           <div className="grid items-stretch gap-6 md:grid-cols-2 lg:gap-8">
             <div className="order-1 md:pt-2">
+              <a
+                href="https://x.com/badimo/status/1983975178733543491"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-1 text-sm text-white backdrop-blur-sm transition-colors hover:bg-black/55"
+              >
+                <span className="font-semibold whitespace-nowrap">
+                  Trusted by
+                </span>
+                {/* Wordmark has ~30% transparent padding; cover-crop it to the lettering and pull in the side padding */}
+                <Image
+                  src={badimoTestimonial.avatarUrl}
+                  alt="Badimo"
+                  width={1000}
+                  height={563}
+                  className="-mx-2 h-8 w-24 object-cover"
+                />
+                <span
+                  aria-hidden="true"
+                  className="hidden h-4 w-px bg-white/25 sm:block"
+                />
+                <span className="hidden text-white/75 sm:inline">
+                  the developers of Jailbreak
+                </span>
+                <Icon
+                  icon="mdi:open-in-new"
+                  className="h-4 w-4 shrink-0 text-white/70"
+                  inline={true}
+                />
+              </a>
               <h1 className="mb-5 max-w-3xl text-3xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)] md:text-5xl lg:text-6xl">
                 Jailbreak Changelogs: The All-in-One Platform
               </h1>
@@ -323,95 +354,6 @@ export default async function Home() {
             </div>
 
             <div className="order-2 md:order-3 md:col-span-2 md:pt-6">
-              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                <div>
-                  <p className="text-highlight text-sm font-semibold tracking-[0.2em] uppercase [.catppuccin-latte_&]:text-[#7287fd]">
-                    Trusted by Badimo
-                  </p>
-                  <a
-                    href="https://x.com/badimo/status/1983975178733543491"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-white/85 underline decoration-white/40 underline-offset-2 transition-colors hover:text-white"
-                  >
-                    Source: @badimo on X (formerly Twitter)
-                    <Icon
-                      icon="mdi:open-in-new"
-                      className="h-4 w-4"
-                      inline={true}
-                    />
-                  </a>
-                  <h2 className="text-xl font-bold text-white md:text-2xl">
-                    And loved by the Jailbreak Community
-                  </h2>
-                </div>
-                <Button
-                  asChild
-                  variant="heroOutline"
-                  className="hidden md:inline-flex"
-                >
-                  <Link href="/testimonials" prefetch={false}>
-                    View All Testimonials
-                  </Link>
-                </Button>
-              </div>
-              <div className="mb-4 hidden grid-cols-1 items-stretch gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
-                {testimonials.map((testimonial, i) => (
-                  <Link
-                    key={testimonial.id}
-                    href="/testimonials"
-                    prefetch={false}
-                    className="hover:bg-tertiary-bg block rounded-2xl transition-colors"
-                  >
-                    <blockquote
-                      className="border-border-card bg-secondary-bg/95 flex h-full flex-col rounded-2xl border p-4 text-left"
-                      style={
-                        {
-                          viewTransitionName: `hero-card-${i + 5}`,
-                        } as React.CSSProperties
-                      }
-                    >
-                      <p className="text-secondary-text line-clamp-5 text-sm leading-relaxed">
-                        &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
-                      </p>
-                      <footer className="mt-auto flex items-center gap-3 pt-4">
-                        {testimonial.id === "badimo" ? (
-                          <Image
-                            src={testimonial.avatarUrl}
-                            alt={testimonial.name}
-                            width={40}
-                            height={40}
-                            className="h-10 w-10 object-contain"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <UserAvatar
-                            userId={testimonial.userId}
-                            avatarHash={testimonial.avatarHash}
-                            username={testimonial.name}
-                            size={10}
-                            cdnSize={128}
-                            showBadge={false}
-                          />
-                        )}
-                        <div>
-                          <p className="text-primary-text text-sm font-bold">
-                            {testimonial.name}
-                          </p>
-                          <p className="text-secondary-text text-xs">
-                            {testimonial.role}
-                          </p>
-                        </div>
-                      </footer>
-                    </blockquote>
-                  </Link>
-                ))}
-              </div>
-              <Button asChild variant="heroOutline" className="mb-4 md:hidden">
-                <Link href="/testimonials" prefetch={false}>
-                  View Testimonials
-                </Link>
-              </Button>
               <div className="border-border-card bg-secondary-bg/95 rounded-2xl border p-5 md:p-6">
                 <div className="lg:divide-border-card grid grid-cols-2 gap-x-6 gap-y-6 lg:grid-cols-4 lg:gap-x-8 lg:divide-x">
                   {heroStats.map((stat, i) => (
@@ -454,6 +396,75 @@ export default async function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="py-8">
+        <div className="container mx-auto px-4">
+          <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <h2 className="text-primary-text text-xl font-bold md:text-2xl">
+              Loved by the Jailbreak Community
+            </h2>
+            <Button asChild variant="outline" className="hidden md:inline-flex">
+              <Link href="/testimonials" prefetch={false}>
+                View All Testimonials
+              </Link>
+            </Button>
+          </div>
+          <div className="group hidden overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)] md:block">
+            <div
+              className="animate-marquee flex w-max group-hover:[animation-play-state:paused] motion-reduce:animate-none"
+              style={{ animationDuration: `${testimonials.length * 20}s` }}
+            >
+              {[false, true].flatMap((isCopy) =>
+                testimonials.map((testimonial) => (
+                  <blockquote
+                    key={`${isCopy}-${testimonial.id}`}
+                    aria-hidden={isCopy || undefined}
+                    className="border-border-card bg-secondary-bg/95 mr-3 flex w-96 shrink-0 flex-col rounded-2xl border p-4 text-left"
+                  >
+                    <p className="text-secondary-text line-clamp-5 text-sm leading-relaxed">
+                      &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
+                    </p>
+                    <footer className="mt-auto flex items-center gap-3 pt-4">
+                      {testimonial.id === "badimo" ? (
+                        <Image
+                          src={testimonial.avatarUrl}
+                          alt={testimonial.name}
+                          width={40}
+                          height={40}
+                          className="h-10 w-10 object-contain"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <UserAvatar
+                          userId={testimonial.userId}
+                          avatarHash={testimonial.avatarHash}
+                          username={testimonial.name}
+                          size={10}
+                          cdnSize={128}
+                          showBadge={false}
+                        />
+                      )}
+                      <div>
+                        <p className="text-primary-text text-sm font-bold">
+                          {testimonial.name}
+                        </p>
+                        <p className="text-secondary-text text-xs">
+                          {testimonial.role}
+                        </p>
+                      </div>
+                    </footer>
+                  </blockquote>
+                )),
+              )}
+            </div>
+          </div>
+          <Button asChild variant="outline" className="md:hidden">
+            <Link href="/testimonials" prefetch={false}>
+              View Testimonials
+            </Link>
+          </Button>
         </div>
       </section>
 

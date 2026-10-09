@@ -14,7 +14,7 @@ type ApiHomepageTestimonial = {
 
 export type HomepageTestimonial = BadimoTestimonial | ApiHomepageTestimonial;
 
-type RandomTestimonial = {
+type ListedTestimonial = {
   id: number;
   content: string;
   role: string | null;
@@ -26,7 +26,7 @@ type RandomTestimonial = {
   };
 };
 
-function isRandomTestimonial(value: unknown): value is RandomTestimonial {
+function isListedTestimonial(value: unknown): value is ListedTestimonial {
   if (!value || typeof value !== "object") return false;
   const item = value as Record<string, unknown>;
   if (!item.user || typeof item.user !== "object") return false;
@@ -49,7 +49,7 @@ export async function getHomepageTestimonials(): Promise<
   try {
     const { url, headers } = buildApiFetchRequest(
       BASE_API_URL,
-      "/v2/testimonials/random",
+      "/v2/testimonials?page=1",
     );
     const response = await fetch(url, {
       headers: {
@@ -69,20 +69,17 @@ export async function getHomepageTestimonials(): Promise<
 
     return [
       badimoTestimonial,
-      ...items
-        .filter(isRandomTestimonial)
-        .slice(0, 2)
-        .map((item) => ({
-          id: item.id,
-          name:
-            item.user.global_name && item.user.global_name !== "None"
-              ? item.user.global_name
-              : item.user.username || "Community Member",
-          role: item.role || "Community Member",
-          quote: item.content,
-          userId: item.user.id,
-          avatarHash: item.user.avatar,
-        })),
+      ...items.filter(isListedTestimonial).map((item) => ({
+        id: item.id,
+        name:
+          item.user.global_name && item.user.global_name !== "None"
+            ? item.user.global_name
+            : item.user.username || "Community Member",
+        role: item.role || "Community Member",
+        quote: item.content,
+        userId: item.user.id,
+        avatarHash: item.user.avatar,
+      })),
     ];
   } catch {
     return [badimoTestimonial];

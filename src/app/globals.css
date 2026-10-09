@@ -37,6 +37,13 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --radius-xl: 1rem;
   --radius-2xl: 1.25rem;
 
+  --animate-marquee: marquee 120s linear infinite;
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
   /* DARK THEME - Default (current theme) */
   /* Background Colors - Comprehensive Gray Scale */
   --color-primary-bg: #121317; /* Main page background */
