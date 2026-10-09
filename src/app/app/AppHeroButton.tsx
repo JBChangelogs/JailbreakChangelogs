@@ -7,7 +7,7 @@ export default function AppHeroButton() {
   return (
     <Link
       href="/app"
-      className="group mt-5 hidden items-center gap-2 font-semibold text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)] lg:inline-flex"
+      className="group hidden h-10 items-center gap-2 text-sm font-semibold text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)] lg:inline-flex"
     >
       <Icon
         icon="material-symbols:desktop-windows-rounded"

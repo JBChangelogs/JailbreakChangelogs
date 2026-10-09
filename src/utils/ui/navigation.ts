@@ -10,6 +10,7 @@ const sectionPaths = {
     "/seasons/will-i-make-it",
     "/hyperchrome-pity",
     "/app",
+    "/bot",
   ],
   updates: ["/changelogs", "/dev/changelogs"],
   seasons: ["/seasons"],

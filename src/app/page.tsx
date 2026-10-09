@@ -223,18 +223,22 @@ export default async function Home() {
 
   return (
     <main className="bg-primary-bg min-h-screen">
-      <section className="relative overflow-hidden pt-16 pb-8 md:py-20 [.light:not(.catppuccin-latte)_&]:[--color-link:#ff877d]">
+      <section className="relative overflow-hidden pt-16 pb-8 md:py-20">
         <div className="absolute inset-0 z-0">
           <HeroBackgroundCarousel initialImage={initialImage} />
-          <div className="absolute inset-0 z-10 bg-gradient-to-br from-[#140f10]/75 via-[#261b1e]/60 to-black/80" />
-          <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_15%_20%,rgba(187,13,0,0.22),transparent_40%),radial-gradient(circle_at_85%_35%,rgba(249,54,39,0.18),transparent_35%)]" />
+          <div className="bg-hero-overlay absolute inset-0 z-10" />
+          <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_15%_20%,var(--color-highlight),transparent_40%)] opacity-20" />
           <div className="absolute inset-y-0 left-0 z-10 w-full bg-gradient-to-r from-black/70 via-black/35 to-transparent md:w-2/3" />
+          <div
+            aria-hidden="true"
+            className="from-primary-bg via-primary-bg/60 pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t to-transparent md:h-32"
+          />
         </div>
 
         <div className="relative z-10 container mx-auto px-4">
           <div className="grid items-stretch gap-6 md:grid-cols-2 lg:gap-8">
             <div className="order-1 md:pt-2">
-              <h1 className="mb-5 max-w-3xl text-3xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)] text-shadow-[0_0_32px_rgba(249,54,39,0.22)] md:text-5xl lg:text-6xl">
+              <h1 className="mb-5 max-w-3xl text-3xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)] md:text-5xl lg:text-6xl">
                 Jailbreak Changelogs: The All-in-One Platform
               </h1>
               <p className="mb-6 max-w-2xl text-base text-white/95 drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)] md:text-lg">
@@ -264,7 +268,22 @@ export default async function Home() {
                   </a>
                 </Button>
               </div>
-              <AppHeroButton />
+              <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+                <AppHeroButton />
+                <Link
+                  href="/bot"
+                  className="group inline-flex h-10 items-center gap-2 text-sm font-semibold text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]"
+                >
+                  <Icon icon="mdi:robot" className="h-5 w-5" />
+                  <span className="group-hover:underline">
+                    Add the Discord Bot
+                  </span>
+                  <Icon
+                    icon="material-symbols:arrow-forward-rounded"
+                    className="h-5 w-5 transition-transform group-hover:translate-x-0.5"
+                  />
+                </Link>
+              </div>
             </div>
 
             <div className="order-3 md:order-2">

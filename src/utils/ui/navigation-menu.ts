@@ -156,6 +156,12 @@ export const navigationSections: NavigationSection[] = [
         title: "Desktop App",
         description: "Download for Windows, macOS and Linux in early access",
       },
+      {
+        href: "/bot",
+        icon: "mdi:robot",
+        title: "Discord Bot",
+        description: "Check inventories, item values, and more in Discord",
+      },
     ],
   },
   {
