@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, useSyncExternalStore } from "react";
-import { Check, LayoutGrid } from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -74,14 +74,58 @@ function ThemePreview({ preview: p }: { preview: Preview }) {
   );
 }
 
+type ThemeOption = (typeof THEME_OPTIONS)[number];
+
+/** One theme's radio card: its colors above, its name below. */
+function ThemeCard({
+  option: { value, label, icon: ThemeIcon, preview },
+  name,
+  checked,
+  onChange,
+}: {
+  option: ThemeOption;
+  name: string;
+  checked: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <label className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 block h-full cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2">
+      <input
+        type="radio"
+        name={name}
+        value={value}
+        checked={checked}
+        onChange={onChange}
+        className="sr-only"
+      />
+      <ThemePreview preview={preview} />
+      <span className="border-border-card group-has-checked:bg-button-info/10 flex min-h-14 items-center gap-2 border-t px-3 py-2">
+        <span className="flex min-w-0 items-center gap-2">
+          <ThemeIcon
+            aria-hidden="true"
+            className="text-secondary-text size-4 shrink-0"
+          />
+          <span className="text-primary-text text-sm font-medium">{label}</span>
+        </span>
+        <span
+          aria-hidden="true"
+          className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info ml-auto size-3.5 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-secondary-bg)]"
+        />
+      </span>
+    </label>
+  );
+}
+
 /**
- * Every theme at once as small swatches, so themes past the carousel's edge
- * aren't missed. Picking one also scrolls the carousel to it.
+ * Every theme at once, as the same cards in a grid, so themes past the
+ * carousel's edge aren't missed. Picking one also scrolls the carousel to it.
  */
 function AllThemesPopover({
+  name,
   theme,
   onPick,
 }: {
+  name: string;
   theme: string;
   onPick: (index: number) => void;
 }) {
@@ -98,56 +142,28 @@ function AllThemesPopover({
           </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-3">
-        <p className="text-primary-text px-1 pb-2 text-sm font-medium">
-          All themes
-        </p>
-        <ul className="grid grid-cols-2 gap-2">
-          {THEME_OPTIONS.map(({ value, label, preview: p }, index) => {
-            const selected = theme === value;
-            return (
-              <li key={value}>
-                <button
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => {
-                    onPick(index);
-                    setOpen(false);
-                  }}
-                  className="border-border-card hover:border-border-focus/60 focus-visible:ring-border-focus aria-pressed:border-button-info aria-pressed:ring-button-info/30 block w-full cursor-pointer overflow-hidden rounded-lg border text-left transition-[border-color,box-shadow] focus-visible:ring-2 focus-visible:outline-none aria-pressed:ring-2"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="flex h-10 items-center gap-1 px-2.5"
-                    style={{ background: p.page }}
-                  >
-                    {[p.card, p.text, p.button].map((color, i) => (
-                      <span
-                        key={i}
-                        className="size-3.5 rounded-full"
-                        style={{
-                          background: color,
-                          outline: `1px solid color-mix(in srgb, ${p.text} 25%, transparent)`,
-                        }}
-                      />
-                    ))}
-                  </span>
-                  <span className="border-border-card flex items-center gap-1.5 border-t px-2.5 py-1.5">
-                    <span className="text-primary-text truncate text-xs font-medium">
-                      {label}
-                    </span>
-                    {selected && (
-                      <Check
-                        aria-hidden="true"
-                        className="text-link ml-auto size-3.5 shrink-0"
-                      />
-                    )}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+      <PopoverContent
+        align="end"
+        className="max-h-[70vh] w-[min(28rem,calc(100vw-2rem))] overflow-y-auto p-3"
+      >
+        <div
+          role="radiogroup"
+          aria-label="All themes"
+          className="grid grid-cols-2 gap-3 p-1"
+        >
+          {THEME_OPTIONS.map((option, index) => (
+            <ThemeCard
+              key={option.value}
+              option={option}
+              name={name}
+              checked={theme === option.value}
+              onChange={() => {
+                onPick(index);
+                setOpen(false);
+              }}
+            />
+          ))}
+        </div>
       </PopoverContent>
     </Popover>
   );
@@ -183,6 +199,7 @@ export default function ThemeSettings() {
           </h3>
           <div className="col-start-2 row-start-1 flex gap-2 sm:row-span-2">
             <AllThemesPopover
+              name={`${id}-theme-all`}
               theme={theme}
               onPick={(index) => {
                 setTheme(THEME_OPTIONS[index].value);
@@ -212,37 +229,17 @@ export default function ThemeSettings() {
           aria-labelledby={`${id}-label`}
           className="-ml-3 py-1"
         >
-          {THEME_OPTIONS.map(({ value, label, icon: ThemeIcon, preview }) => (
+          {THEME_OPTIONS.map((option) => (
             <CarouselItem
-              key={value}
+              key={option.value}
               className="basis-[85%] pl-3 sm:basis-[200px]"
             >
-              <label className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 block h-full cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2">
-                <input
-                  type="radio"
-                  name={`${id}-theme`}
-                  value={value}
-                  checked={theme === value}
-                  onChange={() => setTheme(value)}
-                  className="sr-only"
-                />
-                <ThemePreview preview={preview} />
-                <span className="border-border-card group-has-checked:bg-button-info/10 flex min-h-14 items-center gap-2 border-t px-3 py-2">
-                  <span className="flex min-w-0 items-center gap-2">
-                    <ThemeIcon
-                      aria-hidden="true"
-                      className="text-secondary-text size-4 shrink-0"
-                    />
-                    <span className="text-primary-text text-sm font-medium">
-                      {label}
-                    </span>
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info ml-auto size-3.5 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-secondary-bg)]"
-                  />
-                </span>
-              </label>
+              <ThemeCard
+                option={option}
+                name={`${id}-theme`}
+                checked={theme === option.value}
+                onChange={() => setTheme(option.value)}
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
