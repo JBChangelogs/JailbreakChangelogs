@@ -99,6 +99,54 @@ const Carousel = React.forwardRef<
     );
 
     React.useEffect(() => {
+      if (!api || orientation !== "horizontal") return;
+
+      const viewport = api.rootNode();
+      let lastScroll = -Infinity;
+      const onWheel = (event: WheelEvent) => {
+        if (event.ctrlKey || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
+          return;
+        }
+
+        if (opts?.dragFree) {
+          const engine = api.internalEngine();
+          const unit =
+            event.deltaMode === 1
+              ? 16
+              : event.deltaMode === 2
+                ? viewport.clientWidth
+                : 1;
+          const target = engine.target.get();
+          const destination = target - event.deltaX * unit;
+          const distance =
+            (engine.options.loop
+              ? destination
+              : engine.limit.constrain(destination)) - target;
+          if (!distance) return;
+
+          event.preventDefault();
+          // Embla 8's public API only scrolls to slides; use its engine for pixels.
+          engine.scrollBody.useBaseFriction().useBaseDuration();
+          engine.scrollTo.distance(distance, false);
+          return;
+        }
+
+        const forward = event.deltaX > 0;
+        if (forward ? !api.canScrollNext() : !api.canScrollPrev()) return;
+
+        event.preventDefault();
+        // Wheel gestures emit many events; space out slide changes.
+        if (event.timeStamp - lastScroll < 250) return;
+        lastScroll = event.timeStamp;
+        if (forward) api.scrollNext();
+        else api.scrollPrev();
+      };
+
+      viewport.addEventListener("wheel", onWheel, { passive: false });
+      return () => viewport.removeEventListener("wheel", onWheel);
+    }, [api, orientation, opts?.dragFree]);
+
+    React.useEffect(() => {
       if (!api || !setApi) {
         return;
       }

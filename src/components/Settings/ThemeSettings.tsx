@@ -228,6 +228,7 @@ export default function ThemeSettings() {
         className="space-y-4"
         opts={{
           align: "start",
+          dragFree: true,
           startIndex: THEME_OPTIONS.findIndex(({ value }) => value === theme),
         }}
         onKeyDownCapture={undefined}
