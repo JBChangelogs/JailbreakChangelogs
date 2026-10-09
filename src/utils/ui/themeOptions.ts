@@ -1,4 +1,12 @@
-import { Cat, Ghost, Moon, MoonStar, Sun, type LucideIcon } from "lucide-react";
+import {
+  Disc3,
+  Cat,
+  Ghost,
+  Moon,
+  MoonStar,
+  Sun,
+  type LucideIcon,
+} from "lucide-react";
 import type { Theme } from "@/contexts/ThemeContext";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
@@ -22,6 +30,19 @@ export const THEME_OPTIONS: {
   icon: LucideIcon;
   preview: ThemePreview;
 }[] = [
+  {
+    value: "future-tone",
+    label: "Future Tone",
+    icon: Disc3,
+    preview: {
+      page: "#0f5a5e",
+      card: "#0a3f42",
+      text: "#ffffff",
+      muted: "#cfeceb",
+      button: "#c91f77",
+      link: "#ffb0d8",
+    },
+  },
   {
     value: "catppuccin-latte",
     label: "Catppuccin Latte",
