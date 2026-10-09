@@ -132,7 +132,7 @@ function ThemeCard({
           <span
             className={cn(
               "text-primary-text font-medium",
-              compact ? "text-xs leading-tight" : "truncate text-sm",
+              compact ? "text-xs leading-tight" : "text-sm leading-tight",
             )}
           >
             {label}
