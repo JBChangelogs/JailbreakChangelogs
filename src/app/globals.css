@@ -809,7 +809,7 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --color-border-card: #3b292d;
 }
 
-:root.hatsune-miku {
+:root.future-tone {
   --color-primary-bg: #0f5a5e;
   --color-secondary-bg: #0a3f42;
   --color-tertiary-bg: #0d4d51;

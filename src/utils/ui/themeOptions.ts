@@ -31,8 +31,8 @@ export const THEME_OPTIONS: {
   preview: ThemePreview;
 }[] = [
   {
-    value: "hatsune-miku",
-    label: "Hatsune Miku",
+    value: "future-tone",
+    label: "Future Tone",
     icon: Disc3,
     preview: {
       page: "#0f5a5e",

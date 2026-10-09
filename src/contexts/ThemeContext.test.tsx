@@ -17,7 +17,7 @@ test("mounting preserves saved themes before and after effects replay", () => {
     "amoled",
     "catppuccin",
     "catppuccin-latte",
-    "hatsune-miku",
+    "future-tone",
   ]) {
     let stored = saved;
     const writes: string[] = [];

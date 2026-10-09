@@ -13,7 +13,7 @@ const THEMES = [
   "amoled",
   "catppuccin",
   "catppuccin-latte",
-  "hatsune-miku",
+  "future-tone",
 ] as const;
 export type Theme = (typeof THEMES)[number];
 /** For visitors who haven't picked a theme; THEME_INIT_SCRIPT matches it. */
