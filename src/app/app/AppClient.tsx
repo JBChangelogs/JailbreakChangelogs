@@ -383,7 +383,6 @@ export default function AppClient({
             style={{ height: "clamp(720px, calc(56.25vw + 300px), 1000px)" }}
             loading="lazy"
             allow="autoplay"
-            scrolling="no"
             title="Desktop app preview"
           />
         </div>
