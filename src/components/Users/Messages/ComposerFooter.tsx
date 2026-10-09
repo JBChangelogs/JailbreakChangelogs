@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
+import { useEffect, useRef } from "react";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -57,6 +58,19 @@ export function ComposerFooter({
   onTyping,
   onSendGift,
 }: ComposerFooterProps) {
+  const composerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!replyingToMessage) return;
+    // Focus after the message menu closes and restores focus.
+    const frame = requestAnimationFrame(() => {
+      const textarea = composerRef.current?.querySelector("textarea");
+      if (!textarea || textarea.disabled) return;
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [replyingToMessage]);
+
   return (
     <>
       {isTyping ? (
@@ -116,8 +130,9 @@ export function ComposerFooter({
           </div>
         )}
         <div
+          ref={composerRef}
           className={cn(
-            "border-border-card bg-tertiary-bg text-primary-text focus-within:border-link focus-within:ring-link/20 flex w-full items-center rounded-xl border px-2 py-1 shadow-none transition-colors focus-within:ring-2 sm:px-3 lg:py-2",
+            "border-border-card bg-tertiary-bg text-primary-text flex w-full items-center rounded-xl border px-2 py-1 shadow-none sm:px-3 lg:py-2",
             replyingToMessage && "rounded-t-none border-t-0",
           )}
         >
