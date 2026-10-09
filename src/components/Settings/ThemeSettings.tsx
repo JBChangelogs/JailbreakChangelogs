@@ -105,7 +105,7 @@ function ThemeCard({
   compact?: boolean;
 }) {
   return (
-    <label className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 block h-full cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2">
+    <label className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2">
       <input
         type="radio"
         name={name}
@@ -117,7 +117,8 @@ function ThemeCard({
       <ThemePreview preview={preview} compact={compact} />
       <span
         className={cn(
-          "border-border-card group-has-checked:bg-button-info/10 flex items-center gap-2 border-t",
+          // flex-1 so a short name's row still fills the card beside a wrapped one.
+          "border-border-card group-has-checked:bg-button-info/10 flex flex-1 items-center gap-2 border-t",
           compact ? "min-h-10 px-2 py-1.5" : "min-h-14 px-3 py-2",
         )}
       >
@@ -130,8 +131,8 @@ function ThemeCard({
           )}
           <span
             className={cn(
-              "text-primary-text truncate font-medium",
-              compact ? "text-xs leading-tight" : "text-sm",
+              "text-primary-text font-medium",
+              compact ? "text-xs leading-tight" : "truncate text-sm",
             )}
           >
             {label}
