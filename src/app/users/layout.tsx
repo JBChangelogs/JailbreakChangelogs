@@ -14,7 +14,15 @@ const pageMetadata: Metadata = {
   openGraph: {
     title: "User Search - Find Community Members",
     description:
-      "Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!.",
+      "Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!",
+    images: [
+      {
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+        width: 2400,
+        height: 1260,
+        alt: "Jailbreak Changelogs Banner",
+      },
+    ],
     type: "website",
     siteName: "Jailbreak Changelogs",
     url: "https://jailbreakchangelogs.com/users",
@@ -24,6 +32,9 @@ const pageMetadata: Metadata = {
     title: "User Search - Find Community Members",
     description:
       "Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!",
+    images: [
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+    ],
   },
 };
 

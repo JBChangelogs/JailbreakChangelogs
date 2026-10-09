@@ -13,6 +13,14 @@ const pageMetadata: Metadata = {
     title: "Jailbreak Update Timeline | Complete History of Changes",
     description:
       "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
+    images: [
+      {
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+        width: 2400,
+        height: 1260,
+        alt: "Jailbreak Changelogs Banner",
+      },
+    ],
     siteName: "Jailbreak Changelogs",
     url: "https://jailbreakchangelogs.com/changelogs/timeline",
   },
@@ -21,6 +29,9 @@ const pageMetadata: Metadata = {
     title: "Jailbreak Update Timeline | Complete History of Changes",
     description:
       "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
+    images: [
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+    ],
   },
 };
 
