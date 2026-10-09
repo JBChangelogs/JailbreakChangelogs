@@ -162,6 +162,39 @@ test("navigation and collapse send local changes and apply realtime updates with
     key: "desktop_sidebar_collapsed",
     value: true,
   });
+  // A reply to the previous save must not undo a newer click awaiting debounce.
+  exports.setDesktopSidebarCollapsed(false);
+  browser.dispatchEvent(
+    new CustomEvent("realtimePreference", {
+      detail: { key: "desktop_sidebar_collapsed", value: true },
+    }),
+  );
+  expect(exports.getDesktopSidebarCollapsed()).toBe(false);
+  expect(stored.get(DESKTOP_SIDEBAR_COLLAPSED_KEY)).toBe("false");
+  browser.dispatchEvent(
+    new CustomEvent("realtimePreferences", {
+      detail: {
+        desktop_navigation: "top-bar",
+        desktop_sidebar_collapsed: true,
+      },
+    }),
+  );
+  expect(exports.getDesktopNavigation()).toBe("top-bar");
+  expect(exports.getDesktopSidebarCollapsed()).toBe(false);
+  exports.setDesktopSidebarCollapsed(true);
+  browser.dispatchEvent(
+    new CustomEvent("realtimePreferenceDeleted", {
+      detail: { key: "desktop_sidebar_collapsed" },
+    }),
+  );
+  expect(exports.getDesktopSidebarCollapsed()).toBe(true);
+  expect(outgoing).toHaveLength(2);
+  pendingSend?.();
+  expect(outgoing[2]).toEqual({
+    key: "desktop_sidebar_collapsed",
+    value: true,
+  });
+
   for (const [value, expected] of [
     [false, false],
     [true, true],
@@ -190,7 +223,7 @@ test("navigation and collapse send local changes and apply realtime updates with
   );
   expect(exports.getDesktopSidebarCollapsed()).toBe(false);
   expect(stored.get(DESKTOP_SIDEBAR_COLLAPSED_KEY)).toBe("false");
-  expect(outgoing).toHaveLength(2);
+  expect(outgoing).toHaveLength(3);
   cleanup();
   unsubscribe();
   browser.dispatchEvent(
@@ -203,6 +236,6 @@ test("navigation and collapse send local changes and apply realtime updates with
   synced = true;
   const cleanupCached = exports.syncDesktopNavigationPreferences();
   expect(exports.getDesktopSidebarCollapsed()).toBe(true);
-  expect(outgoing).toHaveLength(2);
+  expect(outgoing).toHaveLength(3);
   cleanupCached();
 });

@@ -5,6 +5,15 @@ import Link from "next/link";
 import { FlaskConical } from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  getExperimentIndicatorPlacement,
+  syncExperimentIndicatorPlacement,
+} from "@/utils/ui/experimentIndicator";
+import {
   fetchSyncedOverrides,
   isOverrideSyncEnabled,
   OVERRIDE_PREFERENCE_PREFIX,
@@ -30,15 +39,10 @@ export function ExperimentOverridesIndicator() {
   const { user } = useAuthContext();
   const userId = user && canOverrideExperiments(user) ? user.id : null;
 
-  const summary = useSyncExternalStore(
-    subscribeExperimentOverrides,
-    () =>
-      userId
-        ? `${Object.keys(readExperimentOverrides(userId)).length}:${isOverrideSyncEnabled()}`
-        : "0:false",
-    () => "0:false",
-  );
-  const [count, synced] = summary.split(":");
+  useEffect(() => {
+    if (!userId) return;
+    return syncExperimentIndicatorPlacement();
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -111,18 +115,51 @@ export function ExperimentOverridesIndicator() {
     };
   }, [userId]);
 
-  if (count === "0") return null;
-  return (
+  return <ExperimentOverridesBadge placement="floating" />;
+}
+
+/** Display only; the site-wide indicator keeps syncing even when hidden. */
+export function ExperimentOverridesBadge({
+  placement,
+}: {
+  placement: "floating" | "header";
+}) {
+  const { user } = useAuthContext();
+  const userId = user && canOverrideExperiments(user) ? user.id : null;
+  const summary = useSyncExternalStore(
+    subscribeExperimentOverrides,
+    () =>
+      userId
+        ? `${Object.keys(readExperimentOverrides(userId)).length}:${isOverrideSyncEnabled()}:${getExperimentIndicatorPlacement()}`
+        : "0:false:floating",
+    () => "0:false:floating",
+  );
+  const [count, synced, selectedPlacement] = summary.split(":");
+  if (count === "0" || placement !== selectedPlacement) return null;
+  const label = `${count} experiment${count === "1" ? "" : "s"} forced · ${synced === "true" ? "synced" : "this browser"}`;
+  const badge = (
     <Link
       href="/experiments"
-      className="border-status-warning/40 bg-secondary-bg/90 text-primary-text hover:border-status-warning focus-visible:ring-border-focus fixed bottom-4 left-[calc(var(--desktop-sidebar-width,0px)+1rem)] z-40 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur transition-[left,border-color] duration-300 ease-in-out focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none"
+      aria-label={label}
+      className={
+        placement === "floating"
+          ? "border-status-warning/40 bg-secondary-bg/90 text-primary-text hover:border-status-warning focus-visible:ring-border-focus fixed bottom-4 left-[calc(var(--desktop-sidebar-width,0px)+1rem)] z-40 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur transition-[left,border-color] duration-300 ease-in-out focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none"
+          : "text-status-warning hover:bg-quaternary-bg focus-visible:ring-link flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none xl:h-10 xl:w-10"
+      }
     >
       <FlaskConical
         aria-hidden="true"
         className="text-status-warning size-3.5"
       />
-      {count} experiment{count === "1" ? "" : "s"} forced ·{" "}
-      {synced === "true" ? "synced" : "this browser"}
+      {placement === "floating" && label}
     </Link>
+  );
+  return placement === "header" ? (
+    <Tooltip>
+      <TooltipTrigger asChild>{badge}</TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  ) : (
+    badge
   );
 }

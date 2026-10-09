@@ -30,6 +30,7 @@ export function setDesktopSidebarCollapsed(collapsed: boolean) {
   applyDesktopSidebarCollapsed(collapsed);
   window.clearTimeout(sidebarPreferenceTimeout);
   sidebarPreferenceTimeout = window.setTimeout(() => {
+    sidebarPreferenceTimeout = undefined;
     window.dispatchEvent(
       new CustomEvent("sendRealtimePreference", {
         detail: { key: "desktop_sidebar_collapsed", value: collapsed },
@@ -91,27 +92,29 @@ export function syncDesktopNavigationPreferences() {
   const apply = (value: unknown) => {
     applyDesktopNavigation(value === "top-bar" ? "top-bar" : "sidebar");
   };
+  const applyCollapsed = (value: unknown) => {
+    // Earlier save replies must not override a click still awaiting debounce.
+    if (sidebarPreferenceTimeout === undefined)
+      applyDesktopSidebarCollapsed(value === true);
+  };
   const handlePreference = (event: Event) => {
     const { key, value } = (
       event as CustomEvent<{ key: string; value: unknown }>
     ).detail;
     if (key === "desktop_navigation") apply(value);
-    if (key === "desktop_sidebar_collapsed")
-      applyDesktopSidebarCollapsed(value === true);
+    if (key === "desktop_sidebar_collapsed") applyCollapsed(value);
   };
   const handlePreferences = (event: Event) => {
     const preferences = (event as CustomEvent<Record<string, unknown>>).detail;
     apply(preferences.desktop_navigation);
-    applyDesktopSidebarCollapsed(
-      preferences.desktop_sidebar_collapsed === true,
-    );
+    applyCollapsed(preferences.desktop_sidebar_collapsed);
   };
   const handleDeleted = (event: Event) => {
     if (
       (event as CustomEvent<{ key: string }>).detail.key ===
       "desktop_sidebar_collapsed"
     ) {
-      applyDesktopSidebarCollapsed(false);
+      applyCollapsed(false);
     }
     if (
       (event as CustomEvent<{ key: string }>).detail.key ===
@@ -125,9 +128,7 @@ export function syncDesktopNavigationPreferences() {
   window.addEventListener("realtimePreferenceDeleted", handleDeleted);
   if (hasSyncedPreferences()) {
     apply(getCachedPreference("desktop_navigation"));
-    applyDesktopSidebarCollapsed(
-      getCachedPreference("desktop_sidebar_collapsed") === true,
-    );
+    applyCollapsed(getCachedPreference("desktop_sidebar_collapsed"));
   }
   return () => {
     window.removeEventListener("realtimePreference", handlePreference);

@@ -1310,18 +1310,18 @@ img.twemoji {
 /* Move the sidebar, content, and left ads together when toggling navigation. */
 @media (min-width: 1536px) and (prefers-reduced-motion: no-preference) {
   .site-layout [data-desktop-sidebar] {
-    transition: width 300ms ease-in-out;
+    transition: width 225ms ease-out;
   }
 
   .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > main,
   .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > footer {
     transition:
-      margin-left 300ms ease-in-out,
-      width 300ms ease-in-out;
+      margin-left 225ms ease-out,
+      width 225ms ease-out;
   }
 
   .site-layout [data-rail-side="left"] {
-    transition: left 300ms ease-in-out;
+    transition: left 225ms ease-out;
   }
 }
 

@@ -1,21 +1,14 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import { Check, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { useId, useSyncExternalStore } from "react";
 import { Switch } from "@/components/ui/switch";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import {
   Tooltip,
   TooltipContent,
@@ -83,176 +76,81 @@ export default function ThemeSettings() {
     getThemeShortcutHidden,
     () => false,
   );
-  const railRef = useRef<HTMLDivElement>(null);
-  const [canScroll, setCanScroll] = useState({ prev: false, next: false });
-  const [listOpen, setListOpen] = useState(false);
-
-  const updateCanScroll = useCallback(() => {
-    const rail = railRef.current;
-    if (!rail) return;
-    setCanScroll({
-      prev: rail.scrollLeft > 1,
-      next: rail.scrollLeft + rail.clientWidth < rail.scrollWidth - 1,
-    });
-  }, []);
-
-  useEffect(() => {
-    const rail = railRef.current;
-    if (!rail) return;
-    const observer = new ResizeObserver(updateCanScroll);
-    observer.observe(rail);
-    return () => observer.disconnect();
-  }, [updateCanScroll]);
-
-  // Bring the chosen theme fully into view, e.g. one past the edge on load or
-  // a partly shown one that was just clicked.
-  useEffect(() => {
-    const rail = railRef.current;
-    const card = rail?.querySelector<HTMLElement>("label:has(:checked)");
-    if (!rail || !card) return;
-    const start = card.offsetLeft;
-    const end = start + card.offsetWidth;
-    if (start < rail.scrollLeft || end > rail.scrollLeft + rail.clientWidth) {
-      rail.scrollTo({ left: start, behavior: "smooth" });
-    }
-  }, [theme]);
-
-  const scrollRail = (direction: 1 | -1) => {
-    const rail = railRef.current;
-    rail?.scrollBy({
-      left: direction * rail.clientWidth * 0.8,
-      behavior: "smooth",
-    });
-  };
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
-        <div>
+    <div className="space-y-6">
+      <Carousel
+        aria-labelledby={`${id}-label`}
+        className="space-y-4"
+        opts={{
+          align: "start",
+          startIndex: THEME_OPTIONS.findIndex(({ value }) => value === theme),
+        }}
+        onKeyDownCapture={undefined}
+      >
+        <div className="grid grid-cols-[1fr_auto] items-center gap-x-4">
           <h3 id={`${id}-label`} className="text-primary-text font-medium">
             Theme
           </h3>
-          <p className="text-secondary-text mt-1 text-sm">
+          <div className="col-start-2 row-start-1 flex gap-2 sm:row-span-2">
+            <CarouselPrevious
+              variant="ghost"
+              className="static translate-y-0"
+              aria-label="Previous themes"
+            />
+            <CarouselNext
+              variant="ghost"
+              className="static translate-y-0"
+              aria-label="Next themes"
+            />
+          </div>
+          <p className="text-secondary-text col-span-2 mt-1 text-sm sm:col-span-1 sm:col-start-1 sm:row-start-2">
             Choose how the site looks.
             {isAuthenticated
               ? " Syncs with your account."
               : " Saved on this browser."}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          {/* Lists every theme at once, so ones past the edge aren't missed. */}
-          <Popover open={listOpen} onOpenChange={setListOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <LayoutGrid />
-                All themes ({THEME_OPTIONS.length})
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-60 p-1">
-              <ul>
-                {THEME_OPTIONS.map(({ value, label, preview }) => (
-                  <li key={value}>
-                    <button
-                      type="button"
-                      aria-pressed={theme === value}
-                      onClick={() => {
-                        setTheme(value);
-                        setListOpen(false);
-                      }}
-                      className="text-primary-text hover:bg-tertiary-bg focus-visible:ring-border-focus flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 text-left text-sm focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="flex size-6 shrink-0 items-center justify-center rounded-full border"
-                        style={{
-                          background: preview.page,
-                          borderColor: preview.card,
-                        }}
-                      >
-                        <span
-                          className="size-3 rounded-full"
-                          style={{ background: preview.button }}
-                        />
-                      </span>
+        <CarouselContent
+          role="radiogroup"
+          aria-labelledby={`${id}-label`}
+          className="-ml-3 py-1"
+        >
+          {THEME_OPTIONS.map(({ value, label, icon: ThemeIcon, preview }) => (
+            <CarouselItem
+              key={value}
+              className="basis-[85%] pl-3 sm:basis-[200px]"
+            >
+              <label className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 block h-full cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2">
+                <input
+                  type="radio"
+                  name={`${id}-theme`}
+                  value={value}
+                  checked={theme === value}
+                  onChange={() => setTheme(value)}
+                  className="sr-only"
+                />
+                <ThemePreview preview={preview} />
+                <span className="border-border-card group-has-checked:bg-button-info/10 flex min-h-14 items-center gap-2 border-t px-3 py-2">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <ThemeIcon
+                      aria-hidden="true"
+                      className="text-secondary-text size-4 shrink-0"
+                    />
+                    <span className="text-primary-text text-sm font-medium">
                       {label}
-                      {theme === value && (
-                        <Check
-                          aria-hidden="true"
-                          className="text-link ml-auto size-4"
-                        />
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </PopoverContent>
-          </Popover>
-          {(canScroll.prev || canScroll.next) && (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8!"
-                disabled={!canScroll.prev}
-                onClick={() => scrollRail(-1)}
-                aria-label="Previous themes"
-              >
-                <ChevronLeft />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8!"
-                disabled={!canScroll.next}
-                onClick={() => scrollRail(1)}
-                aria-label="Next themes"
-              >
-                <ChevronRight />
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div
-        role="radiogroup"
-        aria-labelledby={`${id}-label`}
-        ref={railRef}
-        onScroll={updateCanScroll}
-        // Card widths leave the next card peeking out, so it's clear there are
-        // more themes to scroll to. Padding keeps the focus rings unclipped.
-        className="scrollbar-hide relative -m-1 grid snap-x snap-mandatory scroll-px-1 auto-cols-[44%] grid-flow-col gap-3 overflow-x-auto p-1 sm:auto-cols-[30%] lg:auto-cols-[22%]"
-      >
-        {THEME_OPTIONS.map(({ value, label, icon: ThemeIcon, preview }) => (
-          <label
-            key={value}
-            className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 cursor-pointer snap-start overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2"
-          >
-            <input
-              type="radio"
-              name={`${id}-theme`}
-              value={value}
-              checked={theme === value}
-              onChange={() => setTheme(value)}
-              className="sr-only"
-            />
-            <ThemePreview preview={preview} />
-            <span className="border-border-card group-has-checked:bg-button-info/10 flex items-center gap-2 border-t px-3 py-2">
-              <ThemeIcon
-                aria-hidden="true"
-                className="text-secondary-text size-4 shrink-0"
-              />
-              <span className="text-primary-text text-sm font-medium">
-                {label}
-              </span>
-              <span
-                aria-hidden="true"
-                className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info ml-auto size-3.5 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-secondary-bg)]"
-              />
-            </span>
-          </label>
-        ))}
-      </div>
+                    </span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info ml-auto size-3.5 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-secondary-bg)]"
+                  />
+                </span>
+              </label>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
 
       <div className="flex items-center justify-between gap-4">
         <div>
