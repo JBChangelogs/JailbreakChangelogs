@@ -1,4 +1,12 @@
-import { Cat, Ghost, Moon, MoonStar, Sun, type LucideIcon } from "lucide-react";
+import {
+  Mic,
+  Cat,
+  Ghost,
+  Moon,
+  MoonStar,
+  Sun,
+  type LucideIcon,
+} from "lucide-react";
 import type { Theme } from "@/contexts/ThemeContext";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
@@ -22,6 +30,19 @@ export const THEME_OPTIONS: {
   icon: LucideIcon;
   preview: ThemePreview;
 }[] = [
+  {
+    value: "hatsune-miku",
+    label: "Hatsune Miku",
+    icon: Mic,
+    preview: {
+      page: "#1b1e20",
+      card: "#232729",
+      text: "#ffffff",
+      muted: "#bec8d1",
+      button: "#137a7f",
+      link: "#86cecb",
+    },
+  },
   {
     value: "catppuccin-latte",
     label: "Catppuccin Latte",

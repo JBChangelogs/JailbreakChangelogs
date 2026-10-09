@@ -809,6 +809,61 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --color-border-card: #3b292d;
 }
 
+:root.hatsune-miku {
+  --color-primary-bg: #1b1e20;
+  --color-secondary-bg: #232729;
+  --color-tertiary-bg: #2c3134;
+  --color-quaternary-bg: #373b3e;
+  --color-surface-bg: #232729;
+  --color-overlay-bg: rgb(27 30 32 / 80%);
+
+  --color-secondary-text: #bec8d1;
+  --color-tertiary-text: #8f9ba4;
+  --color-quaternary-text: #6b767e;
+  --color-card-paragraph: #bec8d1;
+
+  --color-border-primary: #3f4549;
+  --color-border-card: #3f4549;
+  --color-border-secondary: #2f3437;
+  --color-border-tertiary: #2a2e30;
+  --color-border-focus: #86cecb;
+
+  --color-card-tag-bg: #137a7f;
+  --color-card-tag-text: #ffffff;
+  --color-card-highlight: #86cecb;
+
+  --color-link: #86cecb;
+  --color-link-hover: #a8e0de;
+  --color-link-active: #5fbfbb;
+  --color-link-visited: #8f9ba4;
+
+  --color-button-info: #137a7f;
+  --color-button-info-hover: #0f6468;
+  --color-button-info-active: #0c5155;
+  --color-button-info-disabled: #373b3e;
+  --color-button-secondary: #373b3e;
+  --color-button-secondary-hover: #454a4e;
+  --color-button-secondary-active: #2f3437;
+  --color-form-button: #137a7f;
+  --color-form-button-text: #ffffff;
+
+  --color-form-input: #1b1e20;
+  --color-form-input-focus: #232729;
+  --color-form-input-disabled: #2a2e30;
+  --color-form-label: #bec8d1;
+  --color-form-placeholder: #6b767e;
+
+  --color-status-info: #86cecb;
+  --color-status-neutral: #6b767e;
+  --color-highlight: #86cecb;
+  --color-secondary: #8f9ba4;
+  --color-tertiary: #e12885;
+
+  --color-overlay-light: rgb(27 30 32 / 50%);
+  --color-overlay-medium: rgb(27 30 32 / 70%);
+  --color-overlay-dark: rgb(27 30 32 / 90%);
+}
+
 @media (hover: hover) and (pointer: fine) {
   :root.halloween {
     cursor: url("/cursors/halloween-ghost.svg") 10 1, auto;
