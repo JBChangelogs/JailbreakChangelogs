@@ -8,8 +8,13 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -80,6 +85,7 @@ export default function ThemeSettings() {
   );
   const railRef = useRef<HTMLDivElement>(null);
   const [canScroll, setCanScroll] = useState({ prev: false, next: false });
+  const [listOpen, setListOpen] = useState(false);
 
   const updateCanScroll = useCallback(() => {
     const rail = railRef.current;
@@ -121,7 +127,7 @@ export default function ThemeSettings() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
         <div>
           <h3 id={`${id}-label`} className="text-primary-text font-medium">
             Theme
@@ -133,30 +139,79 @@ export default function ThemeSettings() {
               : " Saved on this browser."}
           </p>
         </div>
-        {(canScroll.prev || canScroll.next) && (
-          <div className="flex shrink-0 gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8!"
-              disabled={!canScroll.prev}
-              onClick={() => scrollRail(-1)}
-              aria-label="Previous themes"
-            >
-              <ChevronLeft />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8!"
-              disabled={!canScroll.next}
-              onClick={() => scrollRail(1)}
-              aria-label="Next themes"
-            >
-              <ChevronRight />
-            </Button>
-          </div>
-        )}
+        <div className="flex shrink-0 items-center gap-1">
+          {/* Lists every theme at once, so ones past the edge aren't missed. */}
+          <Popover open={listOpen} onOpenChange={setListOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <LayoutGrid />
+                All themes ({THEME_OPTIONS.length})
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-60 p-1">
+              <ul>
+                {THEME_OPTIONS.map(({ value, label, preview }) => (
+                  <li key={value}>
+                    <button
+                      type="button"
+                      aria-pressed={theme === value}
+                      onClick={() => {
+                        setTheme(value);
+                        setListOpen(false);
+                      }}
+                      className="text-primary-text hover:bg-tertiary-bg focus-visible:ring-border-focus flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 text-left text-sm focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="flex size-6 shrink-0 items-center justify-center rounded-full border"
+                        style={{
+                          background: preview.page,
+                          borderColor: preview.card,
+                        }}
+                      >
+                        <span
+                          className="size-3 rounded-full"
+                          style={{ background: preview.button }}
+                        />
+                      </span>
+                      {label}
+                      {theme === value && (
+                        <Check
+                          aria-hidden="true"
+                          className="text-link ml-auto size-4"
+                        />
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </PopoverContent>
+          </Popover>
+          {(canScroll.prev || canScroll.next) && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8!"
+                disabled={!canScroll.prev}
+                onClick={() => scrollRail(-1)}
+                aria-label="Previous themes"
+              >
+                <ChevronLeft />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8!"
+                disabled={!canScroll.next}
+                onClick={() => scrollRail(1)}
+                aria-label="Next themes"
+              >
+                <ChevronRight />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <div
@@ -171,7 +226,7 @@ export default function ThemeSettings() {
         {THEME_OPTIONS.map(({ value, label, icon: ThemeIcon, preview }) => (
           <label
             key={value}
-            className="group border-border-card snap-start has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2"
+            className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 cursor-pointer snap-start overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2"
           >
             <input
               type="radio"
