@@ -1046,10 +1046,10 @@ export default function UserProfileClient({
                     }
                     showBadge={true}
                     className={cn(
-                      "[&>div]:size-24! [&>div]:min-h-24! [&>div]:min-w-24! md:[&>div]:size-38! md:[&>div]:min-h-38! md:[&>div]:min-w-38!",
+                      "z-auto! [&>div]:size-24! [&>div]:min-h-24! [&>div]:min-w-24! md:[&>div]:size-38! md:[&>div]:min-h-38! md:[&>div]:min-w-38!",
                       user.premiumtype === 3 && "[&>div]:rounded-2xl!",
                     )}
-                    presenceBadgeClassName="size-6! md:size-8!"
+                    presenceBadgeClassName="z-40 size-6! md:size-8!"
                     settings={user.settings_v2}
                     premiumType={user.premiumtype}
                   />
