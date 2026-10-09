@@ -80,7 +80,7 @@ export default function BotPage() {
           <HeroBackgroundCarousel initialImage={initialImage} />
           <div className="bg-hero-overlay absolute inset-0 z-10" />
           <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_15%_20%,var(--color-highlight),transparent_40%)] opacity-20" />
-          <div className="absolute inset-y-0 left-0 z-10 w-full bg-gradient-to-r from-black/70 via-black/35 to-transparent md:w-2/3" />
+          <div className="absolute inset-y-0 left-0 z-10 w-full bg-gradient-to-r from-black/50 via-black/20 to-transparent md:w-2/3 md:from-black/70 md:via-black/35" />
           <div
             aria-hidden="true"
             className="from-primary-bg via-primary-bg/60 pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t to-transparent md:h-32"

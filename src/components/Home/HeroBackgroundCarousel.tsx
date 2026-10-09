@@ -75,10 +75,9 @@ export default function HeroBackgroundCarousel({
         priority={isFirstRender && isActive}
         fetchPriority={isActive ? "high" : "auto"}
         loading="eager"
-        className={`object-cover transition-opacity duration-1000 ${
+        className={`object-cover object-[60%_50%] transition-opacity duration-1000 md:object-[center_70%] ${
           isActive ? "z-10" : "z-0"
         } ${isFading ? "opacity-0" : "opacity-100"}`}
-        style={{ objectPosition: "center 70%" }}
       />
     );
   };
