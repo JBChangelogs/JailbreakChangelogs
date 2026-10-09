@@ -22,6 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -37,14 +38,23 @@ type Preview = (typeof THEME_OPTIONS)[number]["preview"];
  * The theme's colors: dots for its main colors on its page background, each
  * named in a tooltip. Hidden from screen readers; the label names the theme.
  */
-function ThemePreview({ preview: p }: { preview: Preview }) {
+function ThemePreview({
+  preview: p,
+  compact,
+}: {
+  preview: Preview;
+  compact?: boolean;
+}) {
   return (
     <span
       aria-hidden="true"
-      className="flex h-20 items-center justify-center"
+      className={cn(
+        "flex items-center justify-center",
+        compact ? "h-12" : "h-20",
+      )}
       style={{ background: p.page }}
     >
-      <span className="flex -space-x-2">
+      <span className={cn("flex", compact ? "-space-x-1.5" : "-space-x-2")}>
         {(
           [
             ["Cards", p.card],
@@ -57,7 +67,10 @@ function ThemePreview({ preview: p }: { preview: Preview }) {
           <Tooltip key={use}>
             <TooltipTrigger asChild>
               <span
-                className="size-8 rounded-full border-2"
+                className={cn(
+                  "rounded-full border-2",
+                  compact ? "size-5" : "size-8",
+                )}
                 style={{
                   background: color,
                   borderColor: p.page,
@@ -82,11 +95,14 @@ function ThemeCard({
   name,
   checked,
   onChange,
+  compact,
 }: {
   option: ThemeOption;
   name: string;
   checked: boolean;
   onChange: () => void;
+  /** Smaller, for the All themes popover. */
+  compact?: boolean;
 }) {
   return (
     <label className="group border-border-card has-checked:border-button-info has-checked:ring-button-info/30 has-focus-visible:ring-border-focus hover:border-border-focus/60 block h-full cursor-pointer overflow-hidden rounded-xl border transition-[border-color,box-shadow] has-checked:ring-2 has-focus-visible:ring-2">
@@ -98,14 +114,28 @@ function ThemeCard({
         onChange={onChange}
         className="sr-only"
       />
-      <ThemePreview preview={preview} />
-      <span className="border-border-card group-has-checked:bg-button-info/10 flex min-h-14 items-center gap-2 border-t px-3 py-2">
+      <ThemePreview preview={preview} compact={compact} />
+      <span
+        className={cn(
+          "border-border-card group-has-checked:bg-button-info/10 flex items-center gap-2 border-t",
+          compact ? "min-h-10 px-2 py-1.5" : "min-h-14 px-3 py-2",
+        )}
+      >
         <span className="flex min-w-0 items-center gap-2">
-          <ThemeIcon
-            aria-hidden="true"
-            className="text-secondary-text size-4 shrink-0"
-          />
-          <span className="text-primary-text text-sm font-medium">{label}</span>
+          {!compact && (
+            <ThemeIcon
+              aria-hidden="true"
+              className="text-secondary-text size-4 shrink-0"
+            />
+          )}
+          <span
+            className={cn(
+              "text-primary-text font-medium",
+              compact ? "text-xs leading-tight" : "text-sm",
+            )}
+          >
+            {label}
+          </span>
         </span>
         <span
           aria-hidden="true"
@@ -144,16 +174,17 @@ function AllThemesPopover({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="max-h-[70vh] w-[min(28rem,calc(100vw-2rem))] overflow-y-auto p-3"
+        className="max-h-[70vh] w-[min(25rem,calc(100vw-2rem))] overflow-y-auto p-2"
       >
         <div
           role="radiogroup"
           aria-label="All themes"
-          className="grid grid-cols-2 gap-3 p-1"
+          className="grid grid-cols-2 gap-2 p-1 sm:grid-cols-3"
         >
           {THEME_OPTIONS.map((option, index) => (
             <ThemeCard
               key={option.value}
+              compact
               option={option}
               name={name}
               checked={theme === option.value}
