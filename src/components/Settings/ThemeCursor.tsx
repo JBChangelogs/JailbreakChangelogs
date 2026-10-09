@@ -11,7 +11,7 @@ export default function ThemeCursor() {
   const enabled = useSyncExternalStore(
     subscribeThemeCursor,
     getThemeCursorEnabled,
-    () => true,
+    () => false,
   );
 
   useEffect(() => {

@@ -903,7 +903,7 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
     --theme-cursor-icon: url("/cursors/future-tone.svg");
   }
 
-  :root:not([data-theme-cursor="off"]) .theme-cursor-icon {
+  :root[data-theme-cursor="on"] .theme-cursor-icon {
     display: block;
   }
 }

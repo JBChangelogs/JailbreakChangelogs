@@ -2,8 +2,8 @@ import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
 export function getThemeCursorEnabled(): boolean {
   return (
-    typeof document === "undefined" ||
-    document.documentElement.dataset.themeCursor !== "off"
+    typeof document !== "undefined" &&
+    document.documentElement.dataset.themeCursor === "on"
   );
 }
 

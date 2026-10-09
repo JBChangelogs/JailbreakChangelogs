@@ -219,7 +219,7 @@ export default function ThemeSettings() {
   const cursorEnabled = useSyncExternalStore(
     subscribeThemeCursor,
     getThemeCursorEnabled,
-    () => true,
+    () => false,
   );
   const shortcutHidden = useSyncExternalStore(
     subscribeThemeShortcut,

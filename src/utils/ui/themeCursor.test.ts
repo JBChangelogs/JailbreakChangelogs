@@ -18,7 +18,7 @@ test("cursor preference restores before hydration without changing the saved the
     "catppuccin-latte",
     "future-tone",
   ]) {
-    for (const saved of [null, "true", "false"]) {
+    for (const saved of [null, "true", "false", "invalid"]) {
       const classes = new Set<string>();
       const dataset: Record<string, string> = {};
       runInNewContext(initScript, {
@@ -32,7 +32,7 @@ test("cursor preference restores before hydration without changing the saved the
           },
         },
       });
-      expect(dataset.themeCursor).toBe(saved === "false" ? "off" : "on");
+      expect(dataset.themeCursor).toBe(saved === "true" ? "on" : "off");
       expect(classes.has(theme)).toBe(true);
       if (theme === "catppuccin-latte") expect(classes.has("light")).toBe(true);
     }
@@ -74,7 +74,7 @@ test("cursor toggle applies immediately, saves locally and notifies subscribers"
       }),
     },
   );
-  expect(exports.getThemeCursorEnabled()).toBe(true);
+  expect(exports.getThemeCursorEnabled()).toBe(false);
   let notifications = 0;
   const unsubscribe = exports.subscribeThemeCursor(() => notifications++);
   exports.setThemeCursorEnabled(false);
