@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   BellRing,
@@ -51,6 +51,7 @@ const downloads = {
   },
 };
 const allPlatforms = ["Windows", "macOS", "Linux"] as const;
+const previewOrigin = "https://assets.jailbreakchangelogs.com";
 
 // Things the website can't do, in the app's own wording.
 const appOnly = [
@@ -89,6 +90,24 @@ export default function AppClient({
   changes: ChangelogEntry[];
 }) {
   const { theme } = useTheme();
+  // The preview posts its content height, so the iframe fits it with no
+  // inner scrollbar. Until then it uses the CSS estimate below.
+  const previewRef = useRef<HTMLIFrameElement>(null);
+  const [previewHeight, setPreviewHeight] = useState<number>();
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (
+        e.origin !== previewOrigin ||
+        e.source !== previewRef.current?.contentWindow ||
+        e.data?.type !== "jbcl-preview-height"
+      )
+        return;
+      const height = Number(e.data.height);
+      if (Number.isFinite(height) && height > 0) setPreviewHeight(height);
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
   const platform = useSyncExternalStore(
     subscribePlatform,
     getBrowserDownloadPlatform,
@@ -378,9 +397,13 @@ export default function AppClient({
         </h2>
         <div className="mt-6 overflow-hidden rounded-2xl">
           <iframe
-            src={`https://assets.jailbreakchangelogs.com/app/preview.html?theme=${encodeURIComponent(theme)}`}
+            ref={previewRef}
+            src={`${previewOrigin}/app/preview.html?theme=${encodeURIComponent(theme)}`}
             className="block w-full border-0 bg-transparent"
-            style={{ height: "clamp(720px, calc(56.25vw + 300px), 1000px)" }}
+            style={{
+              height:
+                previewHeight ?? "clamp(720px, calc(56.25vw + 300px), 1000px)",
+            }}
             loading="lazy"
             allow="autoplay"
             title="Desktop app preview"
