@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileTabError from "./ProfileTabError";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -105,19 +106,11 @@ export default function UserBansTab({ userId }: { userId: string }) {
           ))}
         </div>
       ) : error ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-          <Icon
-            icon="heroicons:exclamation-circle"
-            className="text-button-danger h-8 w-8 opacity-70"
-          />
-          <p className="text-secondary-text text-sm">{error}</p>
-          <button
-            onClick={() => void bansQuery.refetch()}
-            className="border-border-card bg-secondary-bg text-primary-text hover:bg-tertiary-bg inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors"
-          >
-            Retry
-          </button>
-        </div>
+        <ProfileTabError
+          title="Failed to load bans"
+          message={error}
+          onRetry={() => void bansQuery.refetch()}
+        />
       ) : bans.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
           <Icon

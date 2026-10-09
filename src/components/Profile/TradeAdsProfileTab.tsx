@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,8 +12,11 @@ import { TradeAdCard } from "@/components/trading/TradeAdCard";
 import { Icon } from "@/components/ui/IconWrapper";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const log = createLogger("UI");
+
+class SignInRequiredError extends Error {}
 
 interface User {
   id: string;
@@ -72,6 +76,7 @@ export default function TradeAdsProfileTab({
   preview = false,
   onViewAll,
 }: TradeAdsProfileTabProps) {
+  const { setLoginModal } = useAuthContext();
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -229,7 +234,22 @@ export default function TradeAdsProfileTab({
           status: response.status,
           body: data,
         });
-        throw new Error(`Failed to fetch trade ads (${response.status})`);
+        if (response.status === 401) {
+          throw new SignInRequiredError(
+            "Sign in to see this user's trade ads.",
+          );
+        }
+        const error =
+          data && typeof data === "object"
+            ? (data as Record<string, unknown>)
+            : {};
+        const message = [error.message, error.detail].find(
+          (value): value is string =>
+            typeof value === "string" && value.trim().length > 0,
+        );
+        throw new Error(
+          message ?? `Failed to fetch trade ads (${response.status})`,
+        );
       }
 
       // Backwards compatibility: older API returned a plain list.
@@ -277,6 +297,7 @@ export default function TradeAdsProfileTab({
   const clientTradeAds = adsQuery.data?.items ?? [];
   const isFetchingTradeAds = Boolean(baseUrl && user.id) && adsQuery.isPending;
   const tradeAdsError = adsQuery.data ? null : adsQuery.error?.message;
+  const isSignInRequired = adsQuery.error instanceof SignInRequiredError;
 
   const sortedTradeAds = [...clientTradeAds].sort(
     (a, b) => b.created_at - a.created_at,
@@ -300,16 +321,22 @@ export default function TradeAdsProfileTab({
       {isFetchingTradeAds ? (
         <TradeAdsTabSkeleton preview={preview} />
       ) : tradeAdsError ? (
-        <div className="mx-auto max-w-lg p-8 text-center">
-          <Icon
-            icon="heroicons:exclamation-triangle"
-            className="text-button-info mx-auto mb-4 h-12 w-12"
-          />
-          <h3 className="text-primary-text mb-2 text-xl font-semibold">
-            Failed to load trade ads
-          </h3>
-          <p className="text-secondary-text text-sm">{tradeAdsError}</p>
-        </div>
+        <ProfileTabError
+          title={
+            isSignInRequired ? "Sign in required" : "Failed to load trade ads"
+          }
+          message={tradeAdsError}
+          signInRequired={isSignInRequired}
+          onRetry={() => void adsQuery.refetch()}
+        >
+          {isSignInRequired && (
+            <Button
+              onClick={() => setLoginModal({ open: true, tab: "discord" })}
+            >
+              Sign in
+            </Button>
+          )}
+        </ProfileTabError>
       ) : sortedTradeAds.length === 0 ? (
         <div className="py-6 text-center">
           {!preview && (

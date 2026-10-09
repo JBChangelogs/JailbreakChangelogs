@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -378,34 +379,27 @@ export default function ProfileInventoryTab({
       )}
 
       {status === "error" && (
-        <div className="py-6 text-center">
-          <NotFoundIllustration
-            alt="Failed to load inventory"
-            width={160}
-            height={128}
-            className="mx-auto mb-4"
-          />
-          <p className="text-primary-text mb-1 font-semibold">
-            {isNotFound ? "Inventory Not Found" : "Failed to Load Inventory"}
-          </p>
-          <p className="text-secondary-text mx-auto mb-6 max-w-sm text-sm leading-relaxed">
-            {isNotFound
+        <ProfileTabError
+          title={
+            isNotFound ? "Inventory not found" : "Failed to load inventory"
+          }
+          message={
+            isNotFound
               ? "This user's inventory could not be found."
-              : (error ?? "Something went wrong while loading the inventory.")}
-          </p>
-          {isNotFound ? (
-            <Button asChild variant="default" size="sm">
+              : (error ?? "Something went wrong while loading the inventory.")
+          }
+          onRetry={
+            !isNotFound && hasValidRobloxId && INVENTORY_API_URL
+              ? () => void inventoryQuery.refetch()
+              : undefined
+          }
+        >
+          {isNotFound && (
+            <Button asChild variant="default">
               <Link href="/inventories">Browse Inventories</Link>
             </Button>
-          ) : (
-            hasValidRobloxId &&
-            INVENTORY_API_URL && (
-              <Button size="sm" onClick={() => void inventoryQuery.refetch()}>
-                Try Again
-              </Button>
-            )
           )}
-        </div>
+        </ProfileTabError>
       )}
 
       {status === "loaded" && !hasItems && (

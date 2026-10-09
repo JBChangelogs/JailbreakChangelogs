@@ -41,6 +41,8 @@ test("all overview showcases hide loaded empty data while full sections, loading
             };
           if (name === "@tanstack/react-query")
             return { useQuery: () => result, useQueryClient: () => ({}) };
+          if (name === "@/contexts/AuthContext")
+            return { useAuthContext: () => ({ setLoginModal: () => {} }) };
           if (name === "@/services/logger")
             return { createLogger: () => ({ error: () => {} }) };
           return {};

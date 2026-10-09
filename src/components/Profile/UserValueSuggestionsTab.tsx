@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -328,10 +329,11 @@ export default function UserValueSuggestionsTab({
         <h2 className="text-primary-text mb-3 text-lg font-semibold">
           Item Suggestions
         </h2>
-        <p className="text-status-error mb-4 text-sm">{error}</p>
-        <Button onClick={() => void suggestionsQuery.refetch()} size="sm">
-          Try Again
-        </Button>
+        <ProfileTabError
+          title="Failed to load item suggestions"
+          message={error}
+          onRetry={() => void suggestionsQuery.refetch()}
+        />
       </div>
     );
   }

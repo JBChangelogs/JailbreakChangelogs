@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -105,7 +106,11 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
         <h2 className="text-primary-text mb-3 text-lg font-semibold">
           Private Servers
         </h2>
-        <p className="text-status-error">Error: {error}</p>
+        <ProfileTabError
+          title="Failed to load private servers"
+          message={error}
+          onRetry={() => void serversQuery.refetch()}
+        />
       </div>
     );
   }

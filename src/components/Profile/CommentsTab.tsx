@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { createLogger } from "@/services/logger";
 import { useState, useEffect, useCallback } from "react";
@@ -334,7 +335,11 @@ export default function CommentsTab({
               {preview ? "Recent comments" : "Comments"}
             </h2>
           </div>
-          <p className="text-status-error">Error: {error}</p>
+          <ProfileTabError
+            title="Failed to load comments"
+            message={error}
+            onRetry={() => void commentsQuery.refetch()}
+          />
         </div>
       </div>
     );

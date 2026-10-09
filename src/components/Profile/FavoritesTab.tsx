@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -248,7 +249,11 @@ export default function FavoritesTab({
               </span>
             </h2>
           </div>
-          <p className="text-status-error">Error: {error}</p>
+          <ProfileTabError
+            title="Failed to load favorites"
+            message={error}
+            onRetry={() => void favoritesQuery.refetch()}
+          />
         </div>
       </div>
     );
