@@ -130,7 +130,7 @@ function ThemeCard({
           )}
           <span
             className={cn(
-              "text-primary-text font-medium",
+              "text-primary-text truncate font-medium",
               compact ? "text-xs leading-tight" : "text-sm",
             )}
           >
@@ -174,7 +174,7 @@ function AllThemesPopover({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="max-h-[70vh] w-[min(25rem,calc(100vw-2rem))] overflow-y-auto p-2"
+        className="max-h-[70vh] w-[min(30rem,calc(100vw-2rem))] overflow-y-auto p-2"
       >
         <div
           role="radiogroup"
