@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -17,8 +17,10 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
   const activeHref = getNavigationHref(pathname);
   const navigationRef = useRef<HTMLElement>(null);
+  const [openTooltip, setOpenTooltip] = useState<string | null>(null);
 
   useLayoutEffect(() => {
+    setOpenTooltip(null);
     const navigation = navigationRef.current;
     if (!navigation) return;
 
@@ -85,7 +87,18 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
               <ul className="space-y-0.5">
                 {section.items.map((item) => (
                   <li key={item.href}>
-                    <Tooltip>
+                    <Tooltip
+                      open={collapsed && openTooltip === item.href}
+                      onOpenChange={(open) =>
+                        setOpenTooltip((current) =>
+                          open && collapsed
+                            ? item.href
+                            : current === item.href
+                              ? null
+                              : current,
+                        )
+                      }
+                    >
                       <TooltipTrigger asChild>
                         <Link
                           href={item.href}

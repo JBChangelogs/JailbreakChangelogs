@@ -26,6 +26,7 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
   const imports: Record<string, unknown> = {
     react: {
       useRef: () => ({ current: navigation }),
+      useState: () => [null, () => {}],
       useLayoutEffect: (effect: () => () => void, deps: unknown[]) => {
         dependencies = deps;
         cleanup = effect();
