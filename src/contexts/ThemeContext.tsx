@@ -58,9 +58,7 @@ function getInitialTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Always start with the default to match the server render and avoid hydration
-  // mismatches. The actual theme is read from localStorage in useEffect below.
-  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
+  const [theme, setThemeState] = useState<Theme | null>(null);
   const resolvedTheme: "light" | "dark" =
     theme === "light" || theme === "catppuccin-latte" ? "light" : "dark";
 
@@ -90,6 +88,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (theme === null) return;
     const root = document.documentElement;
     root.classList.remove(...THEMES);
     root.classList.add(theme);
@@ -153,7 +152,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
+    <ThemeContext.Provider
+      value={{ theme: theme ?? DEFAULT_THEME, setTheme, resolvedTheme }}
+    >
       {children}
     </ThemeContext.Provider>
   );
