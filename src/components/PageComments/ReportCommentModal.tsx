@@ -60,7 +60,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
       onConfirm={() => void handleSubmit()}
       title="Report Comment"
       confirmText={isSubmitting ? "Submitting..." : "Submit Report"}
-      confirmVariant="destructive"
+      confirmVariant="default"
       confirmDisabled={!reportReason.trim() || isSubmitting}
       closeOnConfirm={false}
     >

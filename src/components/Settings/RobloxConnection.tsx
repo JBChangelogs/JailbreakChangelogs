@@ -156,7 +156,12 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       </div>
 
       {userData.roblox_username ? (
-        <Button onClick={handleOpen} size="md" disabled={isDisconnecting}>
+        <Button
+          variant="destructive"
+          onClick={handleOpen}
+          size="md"
+          disabled={isDisconnecting}
+        >
           Disconnect Roblox
         </Button>
       ) : (

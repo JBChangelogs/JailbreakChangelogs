@@ -201,11 +201,7 @@ export default function UserProfileSection({
                 scanWebSocket.status === "connecting"
               }
               variant={
-                scanWebSocket.status === "completed"
-                  ? "success"
-                  : scanWebSocket.status === "error"
-                    ? "destructive"
-                    : "default"
+                scanWebSocket.status === "completed" ? "success" : "default"
               }
               size="md"
               className="gap-2"
@@ -272,7 +268,7 @@ export default function UserProfileSection({
                       d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
                     />
                   </svg>
-                  Scan Failed
+                  Retry Scan
                 </>
               ) : (
                 <>

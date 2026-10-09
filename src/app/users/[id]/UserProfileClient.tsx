@@ -1544,7 +1544,7 @@ export default function UserProfileClient({
         onConfirm={() => void handleReportUser()}
         title="Report User"
         confirmText="Submit Report"
-        confirmVariant="destructive"
+        confirmVariant="default"
         confirmDisabled={!reportUserReason.trim() || isSubmittingUserReport}
         closeOnConfirm={false}
       >
@@ -1613,7 +1613,7 @@ export default function UserProfileClient({
         onConfirm={() => void handleReportDescription()}
         title="Report Description"
         confirmText="Submit Report"
-        confirmVariant="destructive"
+        confirmVariant="default"
         confirmDisabled={
           !reportDescriptionReason.trim() || isSubmittingDescriptionReport
         }
@@ -1677,7 +1677,7 @@ export default function UserProfileClient({
         onConfirm={() => void handleReportAvatar()}
         title="Report Avatar"
         confirmText="Submit Report"
-        confirmVariant="destructive"
+        confirmVariant="default"
         confirmDisabled={!reportAvatarReason.trim() || isSubmittingAvatarReport}
         closeOnConfirm={false}
       >
@@ -1732,7 +1732,7 @@ export default function UserProfileClient({
             : "Report Banner"
         }
         confirmText="Submit Report"
-        confirmVariant="destructive"
+        confirmVariant="default"
         confirmDisabled={!reportBannerReason.trim() || isSubmittingBannerReport}
         closeOnConfirm={false}
       >
@@ -1788,7 +1788,7 @@ export default function UserProfileClient({
         onConfirm={() => void handleReportUsername()}
         title="Report Username"
         confirmText="Submit Report"
-        confirmVariant="destructive"
+        confirmVariant="default"
         confirmDisabled={
           !reportUsernameReason.trim() || isSubmittingUsernameReport
         }

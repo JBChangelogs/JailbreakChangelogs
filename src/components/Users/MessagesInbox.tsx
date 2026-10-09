@@ -1120,7 +1120,7 @@ export default function MessagesInbox() {
         onConfirm={() => void handleReportMessage()}
         title="Report Message"
         confirmText="Submit Report"
-        confirmVariant="destructive"
+        confirmVariant="default"
         confirmDisabled={!reportReason.trim() || isSubmittingReport}
         closeOnConfirm={false}
       >

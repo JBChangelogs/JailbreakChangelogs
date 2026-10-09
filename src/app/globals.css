@@ -681,9 +681,9 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --color-button-info-hover: #b4befe;
   --color-button-info-active: #89b4fa;
   --color-button-info-disabled: #45475a;
-  --color-button-secondary: #313244;
-  --color-button-secondary-hover: #45475a;
-  --color-button-secondary-active: #585b70;
+  --color-button-secondary: #45475a;
+  --color-button-secondary-hover: #585b70;
+  --color-button-secondary-active: #45475a;
   --color-form-button: #cba6f7;
   --color-form-button-text: #1e1e2e;
   --color-button-success: #a6e3a1;

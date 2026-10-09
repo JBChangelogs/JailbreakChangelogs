@@ -52,7 +52,7 @@ export function ReportSuggestionModal({
       onConfirm={() => void handleSubmit()}
       title="Report Item Suggestion"
       confirmText={isSubmitting ? "Submitting..." : "Submit Report"}
-      confirmVariant="destructive"
+      confirmVariant="default"
       confirmDisabled={!reportReason.trim() || isSubmitting}
       closeOnConfirm={false}
     >

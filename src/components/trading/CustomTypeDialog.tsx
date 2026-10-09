@@ -110,7 +110,7 @@ export function CustomTypeDialog({
                 Offering
               </Button>
               <Button
-                variant="destructive"
+                variant="default"
                 onClick={() => handleSelect("requesting")}
                 disabled={selectedOnRequesting}
                 className="w-full"

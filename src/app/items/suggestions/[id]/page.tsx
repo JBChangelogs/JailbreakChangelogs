@@ -1378,7 +1378,7 @@ export default function ValueSuggestionDetailPage() {
                             suggestion.status === "pending" && (
                               <Button
                                 size="sm"
-                                variant={isEditing ? "destructive" : "default"}
+                                variant={isEditing ? "secondary" : "default"}
                                 onClick={() => {
                                   if (isEditing) {
                                     setIsEditing(false);
@@ -1584,7 +1584,7 @@ export default function ValueSuggestionDetailPage() {
                                 size="sm"
                                 variant={
                                   isEditingCommonTrades
-                                    ? "destructive"
+                                    ? "secondary"
                                     : "default"
                                 }
                                 onClick={() => {

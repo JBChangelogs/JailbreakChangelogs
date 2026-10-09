@@ -141,11 +141,13 @@ export function NotificationTypeSettings({
                       aria-hidden="true"
                       className={`text-secondary-text size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-90" : ""}`}
                     />
-                    <span className="text-primary-text font-medium">
-                      {group.label}
-                    </span>
-                    <span className="text-secondary-text text-sm">
-                      {enabledCount} of {all.length} on
+                    <span className="flex min-w-0 flex-col sm:flex-row sm:items-center sm:gap-2">
+                      <span className="text-primary-text font-medium">
+                        {group.label}
+                      </span>
+                      <span className="text-secondary-text shrink-0 text-sm whitespace-nowrap">
+                        {enabledCount} of {all.length} on
+                      </span>
                     </span>
                   </button>
                   <Switch

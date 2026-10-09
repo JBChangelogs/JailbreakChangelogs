@@ -113,7 +113,7 @@ export default function ReportFalseDupeModal({
           : "Report a False Dupe"
       }
       confirmText={isSubmitting ? "Submitting..." : "Submit Report"}
-      confirmVariant="destructive"
+      confirmVariant="default"
       confirmDisabled={!reason.trim() || isSubmitting}
       closeOnConfirm={false}
     >
