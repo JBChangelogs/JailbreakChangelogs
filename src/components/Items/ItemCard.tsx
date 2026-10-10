@@ -529,7 +529,7 @@ function ItemCard({
                     </span>
                     <div className="flex items-center gap-1">
                       <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-                        {isMobile
+                        {isMobile && hasItemValue(currentItemData.cash_value)
                           ? currentItemData.cash_value
                           : formatFullValue(currentItemData.cash_value)}
                       </span>
@@ -566,7 +566,7 @@ function ItemCard({
                     </span>
                     <div className="flex items-center gap-1">
                       <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-                        {isMobile
+                        {isMobile && hasItemValue(currentItemData.duped_value)
                           ? currentItemData.duped_value
                           : formatFullValue(currentItemData.duped_value)}
                       </span>
@@ -601,7 +601,7 @@ function ItemCard({
                     Cash Value
                   </span>
                   <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold min-[480px]:px-3">
-                    {isMobile
+                    {isMobile && hasItemValue(currentItemData.cash_value)
                       ? currentItemData.cash_value
                       : formatFullValue(currentItemData.cash_value)}
                   </span>
@@ -612,7 +612,7 @@ function ItemCard({
                     Duped Value
                   </span>
                   <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold min-[480px]:px-3">
-                    {isMobile
+                    {isMobile && hasItemValue(currentItemData.duped_value)
                       ? currentItemData.duped_value
                       : formatFullValue(currentItemData.duped_value)}
                   </span>
