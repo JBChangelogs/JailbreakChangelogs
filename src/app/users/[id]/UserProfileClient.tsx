@@ -70,111 +70,6 @@ import type { UserFlag } from "@/types/auth";
 
 const log = createLogger("UI");
 
-// Global audio instance to prevent overlapping playback
-let globalSuperIdolAudio: HTMLAudioElement | null = null;
-let isPlaying = false;
-
-const LinSuperIdol = ({ userId }: { userId: string }) => {
-  const [showPlayButton, setShowPlayButton] = useState(false);
-
-  useEffect(() => {
-    if (userId === "231616789979594754") {
-      // Create audio instance only if it doesn't exist
-      if (!globalSuperIdolAudio) {
-        globalSuperIdolAudio = new Audio("/assets/audios/super_idol.mp3");
-        globalSuperIdolAudio.volume = 0.7;
-
-        // Handle when audio ends
-        globalSuperIdolAudio.onended = () => {
-          isPlaying = false;
-          globalSuperIdolAudio!.currentTime = 0;
-        };
-
-        // Handle errors
-        globalSuperIdolAudio.onerror = () => {
-          isPlaying = false;
-          setShowPlayButton(true);
-        };
-      }
-
-      // Defer state updates to avoid cascading renders
-      setTimeout(() => {
-        // If audio is already playing, stop it and restart
-        if (isPlaying && globalSuperIdolAudio) {
-          globalSuperIdolAudio.pause();
-          globalSuperIdolAudio.currentTime = 0;
-          isPlaying = false;
-        }
-
-        // Play the audio
-        if (globalSuperIdolAudio && !isPlaying) {
-          globalSuperIdolAudio
-            .play()
-            .then(() => {
-              isPlaying = true;
-              setShowPlayButton(false);
-            })
-            .catch(() => {
-              isPlaying = false;
-              setShowPlayButton(true);
-            });
-        }
-      }, 0);
-
-      return () => {
-        if (globalSuperIdolAudio && isPlaying) {
-          globalSuperIdolAudio.pause();
-          globalSuperIdolAudio.currentTime = 0;
-          isPlaying = false;
-        }
-      };
-    }
-  }, [userId]);
-
-  const handlePlayClick = () => {
-    if (globalSuperIdolAudio) {
-      // If already playing, stop and restart
-      if (isPlaying) {
-        globalSuperIdolAudio.pause();
-        globalSuperIdolAudio.currentTime = 0;
-        isPlaying = false;
-      }
-
-      globalSuperIdolAudio
-        .play()
-        .then(() => {
-          isPlaying = true;
-          setShowPlayButton(false);
-        })
-        .catch(() => {
-          isPlaying = false;
-        });
-    }
-  };
-
-  if (!showPlayButton) return null;
-
-  return (
-    <div className="fixed right-4 bottom-4 z-50">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            onClick={handlePlayClick}
-            className="bg-secondary-bg/80 text-primary-text/80 group hover:bg-secondary-bg hover:text-primary-text cursor-pointer rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
-          >
-            <Icon
-              icon="material-symbols:music-note"
-              className="text-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100"
-              inline={true}
-            />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>Lin is a super idol</TooltipContent>
-      </Tooltip>
-    </div>
-  );
-};
-
 interface User {
   id: string;
   username: string;
@@ -999,7 +894,6 @@ export default function UserProfileClient({
       {hasVisibleBackground && user.custom_background && (
         <ProfileBackground src={user.custom_background} />
       )}
-      <LinSuperIdol userId={userId} />
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
         <ProfileIdentityBar user={user} identityRef={profileIdentityRef} />
