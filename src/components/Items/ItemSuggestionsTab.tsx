@@ -344,7 +344,10 @@ export default function ItemSuggestionsTab({
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <h2 className="text-primary-text mb-3 text-lg font-semibold">
-          Item Suggestions [0]
+          Item Suggestions{" "}
+          <span className="text-secondary-text ml-1 text-sm font-normal">
+            0
+          </span>
         </h2>
         <div className="py-6 text-center">
           <NotFoundIllustration
@@ -373,7 +376,10 @@ export default function ItemSuggestionsTab({
       {/* Header */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-primary-text text-2xl font-bold">
-          Item Suggestions ({total})
+          Item Suggestions{" "}
+          <span className="text-secondary-text ml-1 text-sm font-normal">
+            {total}
+          </span>
         </h3>
         <Button asChild size="sm" variant="default">
           <Link href="/items/suggestions">All Suggestions</Link>

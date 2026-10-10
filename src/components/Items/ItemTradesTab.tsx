@@ -229,7 +229,7 @@ export default function ItemTradesTab({
 
   const userLink = (userId: string) => (
     <Link
-      href={`/inventories/${encodeURIComponent(userId)}`}
+      href={`/inventories/${encodeURIComponent(userId)}?tab=trades`}
       target="_blank"
       rel="noopener noreferrer"
       prefetch={false}
@@ -243,7 +243,17 @@ export default function ItemTradesTab({
   return (
     <section className="space-y-4">
       <div>
-        <h3 className="text-primary-text text-2xl font-bold">Recent Trades</h3>
+        <h3 className="text-primary-text text-2xl font-bold">
+          Recent Trades
+          {data && (
+            <>
+              {" "}
+              <span className="text-secondary-text ml-1 text-sm font-normal">
+                {trades.length}
+              </span>
+            </>
+          )}
+        </h3>
         {data && trades.length > 0 && (
           <p className="text-secondary-text mt-1 text-sm">
             {completedCount} completed · {pendingCount} pending

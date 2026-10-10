@@ -13,6 +13,7 @@ import {
 } from "@/utils/api/api";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { createLogger } from "@/services/logger";
 
@@ -171,7 +172,10 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <h2 className="text-primary-text mb-3 text-lg font-semibold">
-          Hoarders [0]
+          Hoarders{" "}
+          <span className="text-secondary-text ml-1 text-sm font-normal">
+            0
+          </span>
         </h2>
         <div className="py-6 text-center">
           <NotFoundIllustration
@@ -183,9 +187,12 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
           <p className="text-primary-text mb-1 font-semibold">
             No Hoarders Found
           </p>
-          <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
+          <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
             No users with multiple copies of this item have been tracked yet.
           </p>
+          <Button asChild variant="default" size="sm">
+            <Link href="/inventories">Open Inventory Checker</Link>
+          </Button>
         </div>
       </div>
     );
@@ -195,8 +202,14 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-primary-text text-2xl font-bold">
-          Hoarders ({hoarders.length})
+          Hoarders{" "}
+          <span className="text-secondary-text ml-1 text-sm font-normal">
+            {hoarders.length}
+          </span>
         </h3>
+        <Button asChild size="sm" variant="default">
+          <Link href="/inventories">Inventory Checker</Link>
+        </Button>
       </div>
 
       <div className="relative">
@@ -284,7 +297,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                     width: "100%",
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
-                  className="flex flex-col gap-2 rounded-lg border border-transparent px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0"
+                  className="group hover:bg-tertiary-bg flex flex-col gap-2 rounded-lg border border-transparent px-4 py-3 transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-0"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
                     <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -318,7 +331,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                       <Link
                         href={`/inventories/${hoarder.user_id}`}
                         prefetch={false}
-                        className="text-primary-text hover:text-link-hover truncate text-sm font-bold transition-colors sm:text-lg"
+                        className="text-primary-text group-hover:text-link-hover truncate text-sm font-bold transition-colors after:absolute after:inset-0 after:rounded-lg sm:text-lg"
                       >
                         {displayName}
                       </Link>
