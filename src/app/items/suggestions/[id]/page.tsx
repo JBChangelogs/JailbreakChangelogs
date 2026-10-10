@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useQueryState } from "nuqs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { notFound, useParams } from "next/navigation";
@@ -12,7 +18,11 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { PUBLIC_API_URL, fetchItemsClientPage } from "@/utils/api/api";
+import {
+  PUBLIC_API_URL,
+  fetchItemHistoryClient,
+  fetchItemsClientPage,
+} from "@/utils/api/api";
 import { parseBan, showBanToast } from "@/utils/api/ban";
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { BanBanner } from "@/components/ui/BanBanner";
@@ -38,13 +48,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Image from "next/image";
+import ChartUpdateNotice, {
+  itemHistoryStaleTime,
+} from "@/components/Items/ChartUpdateNotice";
 import Link from "next/link";
 import type { Item } from "@/types/index";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
-import ItemValueChart, {
-  type ValueHistory,
-} from "@/components/Items/ItemValueChart";
+import ItemValueChart from "@/components/Items/ItemValueChart";
 import {
   CommonTradesDisplay,
   CommonTradesEditor,
@@ -351,6 +362,47 @@ function VoteRateLimitBanner({ seconds }: { seconds: number }) {
       {seconds >= 60
         ? `${Math.floor(seconds / 60)}m ${seconds % 60}s`
         : `${seconds}s`}
+    </div>
+  );
+}
+
+function SuggestionHistoryChart({
+  itemId,
+  historyData,
+  loading,
+}: {
+  itemId: number;
+  historyData: ComponentProps<typeof ItemValueChart>["historyData"];
+  loading: boolean;
+}) {
+  const [tab, setTab] = useState("value");
+  const showTrading = tab === "trading" && itemId !== 587;
+
+  return (
+    <div className="space-y-4">
+      {itemId !== 587 && (
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList fullWidth>
+            <TabsTrigger value="value" fullWidth>
+              Value History
+            </TabsTrigger>
+            <TabsTrigger value="trading" fullWidth>
+              Trading Metrics
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )}
+      <ChartUpdateNotice />
+      {loading ? (
+        <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
+      ) : (
+        <ItemValueChart
+          historyData={historyData}
+          hideTradingMetrics={!showTrading}
+          showOnlyValueHistory={!showTrading}
+          showOnlyTradingMetrics={showTrading}
+        />
+      )}
     </div>
   );
 }
@@ -828,24 +880,11 @@ export default function ValueSuggestionDetailPage() {
   }, [silentRefreshVotes]);
 
   const historyQuery = useQuery({
-    queryKey: ["item-history", item?.id],
-    queryFn: async ({ signal }): Promise<ValueHistory[] | null> => {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL!,
-        `/v2/items/${item!.id}/history`,
-      );
-      const response = await fetch(url, {
-        credentials: "include",
-        headers,
-        signal,
-      });
-      if (!response.ok) throw new Error("Failed to load item history.");
-      const data = await response.json();
-      return Array.isArray(data) ? data : null;
-    },
+    queryKey: ["item", item?.id, "history"],
+    queryFn: () => fetchItemHistoryClient(String(item!.id)),
     enabled: !!item?.id && isValueSuggestion,
-    staleTime: 60_000,
-    gcTime: 5 * 60_000,
+    staleTime: itemHistoryStaleTime,
+    gcTime: 60 * 60_000,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -1698,7 +1737,7 @@ export default function ValueSuggestionDetailPage() {
                         </TabsTrigger>
                         {isValueSuggestion && (
                           <TabsTrigger value="history" fullWidth>
-                            Value History
+                            Charts
                           </TabsTrigger>
                         )}
                         <TabsTrigger value="discussion" fullWidth>
@@ -1911,15 +1950,11 @@ export default function ValueSuggestionDetailPage() {
                               <TabsContent value="history" className="mt-4">
                                 <div className="border-border-card bg-secondary-bg rounded-xl border">
                                   <div className="p-5">
-                                    {historyLoading ? (
-                                      <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
-                                    ) : (
-                                      <ItemValueChart
-                                        historyData={itemHistory}
-                                        showOnlyValueHistory
-                                        hideTradingMetrics
-                                      />
-                                    )}
+                                    <SuggestionHistoryChart
+                                      itemId={suggestion.item_id}
+                                      historyData={itemHistory}
+                                      loading={historyLoading}
+                                    />
                                   </div>
                                 </div>
                               </TabsContent>
@@ -2135,7 +2170,7 @@ export default function ValueSuggestionDetailPage() {
                         </div>
                       )}
 
-                      {/* Value History Chart */}
+                      {/* History Charts */}
                       {isValueSuggestion && (
                         <div className="border-border-card bg-secondary-bg rounded-xl border">
                           <div className="border-border-card border-b px-5 py-3.5">
@@ -2145,19 +2180,15 @@ export default function ValueSuggestionDetailPage() {
                                 className="text-secondary-text h-4 w-4"
                                 inline
                               />
-                              Value History
+                              Charts
                             </h2>
                           </div>
                           <div className="p-5">
-                            {historyLoading ? (
-                              <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
-                            ) : (
-                              <ItemValueChart
-                                historyData={itemHistory}
-                                showOnlyValueHistory
-                                hideTradingMetrics
-                              />
-                            )}
+                            <SuggestionHistoryChart
+                              itemId={suggestion.item_id}
+                              historyData={itemHistory}
+                              loading={historyLoading}
+                            />
                           </div>
                         </div>
                       )}

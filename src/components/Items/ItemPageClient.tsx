@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchItemClient, fetchItemHistoryClient } from "@/utils/api/api";
 import ItemDetailsClient from "@/components/Items/ItemDetailsClient";
+import { itemHistoryStaleTime } from "@/components/Items/ChartUpdateNotice";
 import ItemCommentsServer from "@/components/Items/SuspenseWrapper/ItemCommentsServer";
 import SimilarItems from "@/components/Items/SimilarItems";
 import FavoriteButtonWrapper from "@/components/Items/SuspenseWrapper/FavoriteButtonWrapper";
@@ -32,8 +33,8 @@ export default function ItemPageClient({ type, name }: Props) {
         ? queryClient.fetchQuery({
             queryKey: ["item", itemId, "history"],
             queryFn: () => fetchItemHistoryClient(String(itemId)),
-            staleTime: 30_000,
-            gcTime: 5 * 60_000,
+            staleTime: itemHistoryStaleTime,
+            gcTime: 60 * 60_000,
             retry: false,
           })
         : null,

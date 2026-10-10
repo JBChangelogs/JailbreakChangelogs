@@ -34,6 +34,7 @@ const ItemValueChart = dynamic(
 );
 
 import { ValueHistory } from "@/components/Items/ItemValueChart";
+import ChartUpdateNotice from "@/components/Items/ChartUpdateNotice";
 import HoardersTab from "@/components/Items/HoardersTab";
 import DupesTab from "@/components/Items/DupesTab";
 import ItemSuggestionsTab from "@/components/Items/ItemSuggestionsTab";
@@ -112,19 +113,6 @@ const TAB_INDEX_TO_NAME: Record<number, string | null> = {
   7: "similar",
   8: "comments",
 };
-
-const CHART_UPDATE_TIME = (() => {
-  const today = new Date();
-  const utcTime = new Date(
-    Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 22, 0, 0),
-  );
-  return utcTime.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZoneName: "short",
-  });
-})();
 
 interface ItemDetailsClientProps {
   item: ItemDetails;
@@ -838,14 +826,7 @@ export default function ItemDetailsClient({
 
                         {/* Chart Update Notice */}
                         <div className="mt-4 mb-4">
-                          <div className="bg-button-info/10 border-button-info/30 rounded-lg border p-3">
-                            <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
-                              Chart Update Schedule
-                            </div>
-                            <div className="text-secondary-text mt-1 text-xs">
-                              Charts update daily at {CHART_UPDATE_TIME}
-                            </div>
-                          </div>
+                          <ChartUpdateNotice />
                         </div>
 
                         {/* Chart Content */}
