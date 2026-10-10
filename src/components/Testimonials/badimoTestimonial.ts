@@ -7,6 +7,7 @@ export const badimoTestimonial = {
   quote:
     "We've been watching this place grow and we think it's absolutely wonderful. We even use Jailbreakchangelogs to check our own changelogs. Your search and filter settings make it so easy. Thank you for this incredible resource!",
   url: "https://www.roblox.com/communities/3059674/Badimo",
+  sourceUrl: "https://x.com/badimo/status/1983975178733543491",
   avatarUrl: `${TESTIMONIALS_BASE_URL}/Badimo.webp`,
 } as const;
 

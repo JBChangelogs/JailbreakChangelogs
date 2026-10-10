@@ -55,9 +55,10 @@ function isApiTestimonial(value: unknown): value is ApiTestimonial {
 export async function fetchTestimonials(
   page: number,
   signal?: AbortSignal,
+  baseUrl: string | undefined = PUBLIC_API_URL,
 ): Promise<TestimonialsPageData> {
   const { url, headers } = buildApiFetchRequest(
-    PUBLIC_API_URL,
+    baseUrl,
     `/v2/testimonials?page=${page}`,
   );
   const response = await fetch(url, { headers, signal });

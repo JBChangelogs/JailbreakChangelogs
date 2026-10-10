@@ -5,13 +5,15 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import TestimonialsSection from "@/components/Testimonials/TestimonialsSection";
-import { badimoTestimonial } from "@/components/Testimonials/badimoTestimonial";
-import { fetchTestimonials } from "@/components/Testimonials/testimonialsData";
+import {
+  fetchTestimonials,
+  type TestimonialsPageData,
+} from "@/components/Testimonials/testimonialsData";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function TestimonialsSkeleton() {
   return (
-    <div className="container mx-auto px-6 py-8">
+    <div className="py-8">
       <div className="columns-1 gap-6 md:columns-2 lg:columns-3">
         {Array.from({ length: 6 }, (_, index) => (
           <Skeleton key={index} className="mb-6 h-44 break-inside-avoid" />
@@ -21,7 +23,15 @@ function TestimonialsSkeleton() {
   );
 }
 
-export default function TestimonialsClient() {
+type TestimonialsClientProps = {
+  initialPage: number;
+  initialData?: TestimonialsPageData;
+};
+
+export default function TestimonialsClient({
+  initialPage,
+  initialData,
+}: TestimonialsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedPage = Number(searchParams.get("page"));
@@ -34,6 +44,8 @@ export default function TestimonialsClient() {
     queryKey: ["testimonials", page],
     queryFn: ({ signal }) => fetchTestimonials(page, signal),
     placeholderData: keepPreviousData,
+    initialData: page === initialPage ? initialData : undefined,
+    staleTime: 60 * 1000,
   });
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.size)) : 1;
@@ -52,9 +64,7 @@ export default function TestimonialsClient() {
 
   return (
     <>
-      <TestimonialsSection
-        testimonials={page === 1 ? [badimoTestimonial, ...items] : items}
-      />
+      <TestimonialsSection testimonials={items} />
       {isError && (
         <p className="text-secondary-text pb-6 text-center">
           Failed to load community testimonials. Please try again later.
