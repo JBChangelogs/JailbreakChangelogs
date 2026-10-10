@@ -2084,7 +2084,7 @@ export default function ValueSuggestionDetailPage() {
                                   {suggesterStats.acceptance_rate.toFixed(0)}%
                                 </span>
                               </div>
-                              <div className="bg-tertiary-bg h-1.5 overflow-hidden rounded-full">
+                              <div className="bg-quaternary-bg h-1.5 overflow-hidden rounded-full">
                                 <div
                                   className={`h-full rounded-full transition-all ${suggesterStats.acceptance_rate >= 50 ? "bg-button-success" : "bg-button-danger"}`}
                                   style={{

@@ -368,7 +368,7 @@ export function SuggestionCard({
               inline
             />
             {suggestion.common_trades.length} Common Trade
-            {suggestion.common_trades.length > 1 ? "s" : ""} — view details
+            {suggestion.common_trades.length > 1 ? "s" : ""}
           </div>
         )}
 

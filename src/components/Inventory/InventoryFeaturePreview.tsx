@@ -197,7 +197,7 @@ export default function InventoryFeaturePreview({
                       aria-label="Collection completion"
                       value={progress.owned}
                       max={progress.total}
-                      className="bg-tertiary-bg [&::-moz-progress-bar]:bg-button-info [&::-webkit-progress-bar]:bg-tertiary-bg [&::-webkit-progress-value]:bg-button-info block h-3 w-full appearance-none overflow-hidden rounded-full border-0 [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full"
+                      className="bg-quaternary-bg [&::-moz-progress-bar]:bg-button-info [&::-webkit-progress-bar]:bg-quaternary-bg [&::-webkit-progress-value]:bg-button-info block h-3 w-full appearance-none overflow-hidden rounded-full border-0 [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full"
                     />
                     <p className="text-secondary-text mt-2 text-[13px]">
                       <span className="text-primary-text font-medium">

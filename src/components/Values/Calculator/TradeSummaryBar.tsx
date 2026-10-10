@@ -90,7 +90,7 @@ export const TradeSummaryBar: React.FC<TradeSummaryBarProps> = ({
           above), not by side — a larger offering share means you're giving
           away more, so it's red; a larger requesting share means you're
           getting more, so it's green. */}
-      <div className="bg-tertiary-bg mt-3 flex h-1.5 w-full overflow-hidden rounded-full">
+      <div className="bg-quaternary-bg mt-3 flex h-1.5 w-full overflow-hidden rounded-full">
         {hasItems ? (
           <>
             <div

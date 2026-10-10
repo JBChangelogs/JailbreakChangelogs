@@ -156,22 +156,13 @@ function CommonTradeComparison({
       : difference === 0
         ? "Equal listed value"
         : `${difference > 0 ? "Offering" : "Requesting"} is ${formatCurrencyValue(Math.abs(difference))} higher`;
-  const comparisonColor =
-    difference === null || difference === 0
-      ? "border-border-card bg-tertiary-bg text-primary-text"
-      : difference > 0
-        ? "border-status-error bg-status-error text-form-button-text"
-        : "border-status-success bg-status-success text-form-button-text";
 
   return (
     <div className="border-border-card mt-3 border-t pt-3">
       <div className="grid grid-cols-2 items-center gap-3 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
         <div className="min-w-0">
-          <p className="text-status-success text-xs font-medium tracking-wide uppercase">
-            Offering{" "}
-            <span className="text-secondary-text normal-case">
-              ({commonTradeCount(offering)})
-            </span>
+          <p className="text-secondary-text text-xs font-medium tracking-wide uppercase">
+            Offering
           </p>
           <p className="text-primary-text text-xl font-bold break-words sm:text-2xl">
             {offeringTotal === null
@@ -179,17 +170,12 @@ function CommonTradeComparison({
               : formatCurrencyValue(offeringTotal)}
           </p>
         </div>
-        <span
-          className={`${comparisonColor} col-span-2 row-start-1 rounded-lg border px-3 py-1.5 text-center text-sm leading-tight font-bold tabular-nums lg:col-span-1 lg:col-start-2 lg:row-start-1`}
-        >
+        <span className="border-border-card bg-tertiary-bg text-primary-text col-span-2 row-start-1 rounded-lg border px-3 py-1.5 text-center text-sm leading-tight font-bold tabular-nums lg:col-span-1 lg:col-start-2 lg:row-start-1">
           {label}
         </span>
         <div className="min-w-0 text-right">
-          <p className="text-button-danger text-xs font-medium tracking-wide uppercase">
-            Requesting{" "}
-            <span className="text-secondary-text normal-case">
-              ({commonTradeCount(requesting)})
-            </span>
+          <p className="text-secondary-text text-xs font-medium tracking-wide uppercase">
+            Requesting
           </p>
           <p className="text-primary-text text-xl font-bold break-words sm:text-2xl">
             {requestingTotal === null
@@ -200,22 +186,15 @@ function CommonTradeComparison({
       </div>
       {difference !== null && (
         <div
-          className="bg-tertiary-bg mt-3 flex h-1.5 overflow-hidden rounded-full"
+          className="bg-quaternary-bg mt-3 flex h-1.5 overflow-hidden rounded-full"
           aria-hidden="true"
         >
           <div
-            className="bg-button-danger h-full"
+            className="bg-button-info h-full"
             style={{ width: `${offeringShare}%` }}
-          />
-          <div
-            className="bg-status-success h-full"
-            style={{ width: `${100 - offeringShare}%` }}
           />
         </div>
       )}
-      <p className="text-secondary-text mt-3 text-center text-xs">
-        Based on current listed values
-      </p>
     </div>
   );
 }
@@ -249,7 +228,7 @@ function TradeItemSummary({
     <>
       {showImage && (
         <div
-          className={`bg-quaternary-bg relative h-14 w-20 shrink-0 overflow-hidden rounded-md sm:h-16 sm:w-24 lg:h-20 lg:w-32 ${showValues ? "sm:row-span-2 sm:self-center" : ""}`}
+          className={`bg-quaternary-bg relative aspect-video w-20 shrink-0 overflow-hidden rounded-md sm:w-24 lg:w-32 ${showValues ? "sm:row-span-2 sm:self-center" : ""}`}
         >
           <Image
             src={itemImage(item)}
@@ -263,7 +242,7 @@ function TradeItemSummary({
       )}
       <div className="min-w-0 flex-1">
         <p
-          className={`truncate text-sm font-medium ${itemHref ? "text-primary-text hover:text-link" : "text-primary-text"}`}
+          className={`truncate ${showValues ? "text-base font-semibold" : "text-sm font-medium"} ${itemHref ? "text-primary-text group-hover:text-link transition-colors" : "text-primary-text"}`}
         >
           {item.name ?? `Item #${item.id ?? "Unknown"}`}
           {amount > 1 && (
@@ -296,7 +275,7 @@ function TradeItemSummary({
       </div>
       {showValues && (
         <dl
-          className={`col-span-2 grid grid-cols-2 gap-x-3 gap-y-2 text-xs ${showImage ? "sm:col-span-1 sm:col-start-2" : ""}`}
+          className={`col-span-2 grid max-w-md grid-cols-2 gap-x-3 gap-y-2 text-xs ${showImage ? "sm:col-span-1 sm:col-start-2" : ""}`}
         >
           {[
             [
@@ -347,7 +326,7 @@ function TradeItemSummary({
     return (
       <Link
         href={itemHref}
-        className={`border-border-card bg-secondary-bg hover:border-button-info/50 min-w-0 items-center gap-2.5 rounded-lg border p-2 transition-colors ${showValues ? "grid grid-cols-[auto_minmax(0,1fr)]" : "flex"}`}
+        className={`group border-border-card hover:border-button-info/50 min-w-0 items-center gap-2.5 rounded-lg border p-2 transition-colors ${showValues ? "bg-tertiary-bg grid grid-cols-[auto_minmax(0,1fr)]" : "bg-secondary-bg flex"}`}
       >
         {content}
       </Link>
@@ -356,7 +335,7 @@ function TradeItemSummary({
 
   return (
     <div
-      className={`border-border-card bg-secondary-bg min-w-0 items-center gap-2.5 rounded-lg border p-2 ${showValues ? "grid grid-cols-[auto_minmax(0,1fr)]" : "flex"}`}
+      className={`border-border-card min-w-0 items-center gap-2.5 rounded-lg border p-2 ${showValues ? "bg-tertiary-bg grid grid-cols-[auto_minmax(0,1fr)]" : "bg-secondary-bg flex"}`}
     >
       {content}
     </div>
@@ -447,14 +426,9 @@ export function CommonTradesDisplay({
               }
             >
               {showTradeLabels && (
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="bg-button-info/10 text-link flex h-5 min-w-5 items-center justify-center rounded-md px-1.5 text-[0.6875rem] font-bold">
-                    {index + 1}
-                  </span>
-                  <p className="text-primary-text text-xs font-semibold">
-                    Trade example
-                  </p>
-                </div>
+                <p className="text-primary-text mb-3 text-sm font-semibold">
+                  Trade {index + 1}
+                </p>
               )}
               <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
                 <div className="min-w-0 space-y-1.5">
@@ -515,6 +489,11 @@ export function CommonTradesDisplay({
           );
         })}
       </div>
+      {appearance === "detail" && (
+        <p className="text-secondary-text mt-3 text-center text-xs">
+          Based on current listed values
+        </p>
+      )}
     </div>
   );
 }

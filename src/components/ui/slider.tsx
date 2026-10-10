@@ -17,7 +17,7 @@ const Slider = React.forwardRef<
     )}
     {...props}
   >
-    <SliderPrimitive.Track className="bg-tertiary-bg relative h-1.5 w-full grow cursor-pointer overflow-hidden rounded-full">
+    <SliderPrimitive.Track className="bg-quaternary-bg relative h-1.5 w-full grow cursor-pointer overflow-hidden rounded-full">
       <SliderPrimitive.Range className="bg-button-info absolute h-full" />
     </SliderPrimitive.Track>
     {Array.from({

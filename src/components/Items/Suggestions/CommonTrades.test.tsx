@@ -45,7 +45,7 @@ test("detail common trades show values and use duped demand while unresolved ite
   expect(markup).toContain("bg-button-info text-form-button-text");
   expect(markup).toContain(getDemandColor("Low"));
   expect(markup).toContain(getTrendColor("Rising"));
-  expect(markup).toContain("col-span-2 grid grid-cols-2");
+  expect(markup).toContain("col-span-2 grid max-w-md grid-cols-2");
   expect(markup).not.toContain('rounded-lg border p-2"><dt');
   expect(markup).not.toContain("shadow-lg");
 });
@@ -82,10 +82,7 @@ test("comparison accounts for quantity and duped value in both directions", () =
   );
   expect(markup).toContain("Offering is 1M higher");
   expect(markup).toContain(
-    "border-status-error bg-status-error text-form-button-text",
-  );
-  expect(render({ offering: requesting, requesting: offering })).toContain(
-    "border-status-success bg-status-success text-form-button-text",
+    'border-border-card bg-tertiary-bg text-primary-text col-span-2 row-start-1 rounded-lg border px-3 py-1.5 text-center text-sm leading-tight font-bold tabular-nums lg:col-span-1 lg:col-start-2 lg:row-start-1">Offering is 1M higher',
   );
   expect(markup).toContain("Based on current listed values");
   expect(markup).toContain("mr-1 h-3 w-3 shrink-0");
