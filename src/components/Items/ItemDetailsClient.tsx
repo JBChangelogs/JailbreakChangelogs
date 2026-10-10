@@ -33,7 +33,7 @@ const ItemValueChart = dynamic(
   },
 );
 
-import { ValueHistory } from "@/components/Items/ItemValueChart";
+import type { ValueHistory } from "@/components/Items/ItemValueChart";
 import ChartUpdateNotice from "@/components/Items/ChartUpdateNotice";
 import HoardersTab from "@/components/Items/HoardersTab";
 import DupesTab from "@/components/Items/DupesTab";

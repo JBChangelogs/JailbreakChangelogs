@@ -17,7 +17,7 @@ import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import MostScannedLeaderboardClient from "@/components/Inventory/MostScannedLeaderboardClient";
 import InventoryFAQ from "@/components/Inventory/InventoryFAQ";
-import NetworthCapHistoryChart from "@/components/Inventory/NetworthCapHistoryChart";
+import { NetworthCapHistoryChart } from "@/components/Inventory/LazyCharts";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 

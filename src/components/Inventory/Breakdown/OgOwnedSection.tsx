@@ -9,7 +9,7 @@ import {
   formatInventoryCount,
   formatPercentage,
 } from "@/components/Inventory/Breakdown/constants";
-import CategoryPieCard from "@/components/Inventory/Breakdown/CategoryPieCard";
+import { CategoryPieCard } from "@/components/Inventory/LazyCharts";
 import CategoryProgressBar from "@/components/Inventory/Breakdown/CategoryProgressBar";
 import SearchableInventoryListSection from "@/components/Inventory/Breakdown/SearchableInventoryListSection";
 import type { useInventoryBreakdownStats } from "@/hooks/useInventoryBreakdownStats";

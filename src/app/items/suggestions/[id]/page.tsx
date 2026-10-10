@@ -55,7 +55,8 @@ import Link from "next/link";
 import type { Item } from "@/types/index";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
-import ItemValueChart from "@/components/Items/ItemValueChart";
+import dynamic from "next/dynamic";
+
 import {
   CommonTradesDisplay,
   CommonTradesEditor,
@@ -68,6 +69,16 @@ import { ReportSuggestionModal } from "@/components/Items/Suggestions/ReportSugg
 import type { CommonTrade } from "@/components/Items/Suggestions/types";
 import { useSuggestionReporting } from "@/hooks/useSuggestionReporting";
 import { hasMeaningfulCollapsedOverflow } from "@/utils/ui/collapsibleContent";
+
+const ItemValueChart = dynamic(
+  () => import("@/components/Items/ItemValueChart"),
+  {
+    loading: () => (
+      <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
+    ),
+    ssr: false,
+  },
+);
 
 interface UserSettings {
   custom_avatar?: boolean;

@@ -11,7 +11,7 @@ import {
   formatNetworth,
   formatPercentage,
 } from "@/components/Inventory/Breakdown/constants";
-import CategoryPieCard from "@/components/Inventory/Breakdown/CategoryPieCard";
+import { CategoryPieCard } from "@/components/Inventory/LazyCharts";
 import CategoryProgressBar from "@/components/Inventory/Breakdown/CategoryProgressBar";
 
 interface ValueChartEntry {
