@@ -195,6 +195,8 @@ export default async function Home() {
       getHomepageTestimonials(),
     ]);
 
+  const registeredUsersK = Math.floor((homepageStats?.total_users ?? 0) / 1000);
+
   const heroStats: HeroStatCard[] = [
     {
       label: "Registered Users",
@@ -240,7 +242,7 @@ export default async function Home() {
           <div className="grid items-stretch gap-6 md:grid-cols-2 lg:gap-8">
             <div className="order-1 md:pt-2">
               <a
-                href="https://x.com/badimo/status/1983975178733543491"
+                href={badimoTestimonial.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-1 text-sm text-white backdrop-blur-sm transition-colors hover:bg-black/55"
@@ -402,9 +404,16 @@ export default async function Home() {
       <section className="py-8">
         <div className="container mx-auto px-4">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <h2 className="text-primary-text text-xl font-bold md:text-2xl">
-              Loved by the Jailbreak Community
-            </h2>
+            <div>
+              <h2 className="text-primary-text text-xl font-bold md:text-2xl">
+                Loved by the Jailbreak Community
+              </h2>
+              {registeredUsersK >= 1 && (
+                <p className="text-secondary-text mt-1">
+                  Join {registeredUsersK}k+ Jailbreak players
+                </p>
+              )}
+            </div>
             <Button asChild variant="outline" className="hidden md:inline-flex">
               <Link href="/testimonials" prefetch={false}>
                 View All Testimonials
