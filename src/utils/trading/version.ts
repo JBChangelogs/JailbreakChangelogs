@@ -1,7 +1,4 @@
-import { createLogger } from "@/services/logger";
 import { isTestingDeploy } from "@/utils/deployment";
-
-const log = createLogger("API");
 
 /**
  * Determines which GitHub branch to fetch version data from based on Railway environment
@@ -35,33 +32,15 @@ export async function getWebsiteVersion(): Promise<{
   branch: string;
   commitUrl: string;
 }> {
-  try {
-    const branch = getGitBranch();
-    const railwayEnv = process.env.RAILWAY_ENVIRONMENT_NAME;
-    const environment = isTestingDeploy()
-      ? "testing"
-      : railwayEnv || "development";
+  const sha = process.env.NEXT_PUBLIC_BUILD_COMMIT_SHA;
+  const railwayEnv = process.env.RAILWAY_ENVIRONMENT_NAME;
 
-    const response = await fetch(
-      `${process.env.GITHUB_API_COMMITS_URL}/${branch}`,
-      {
-        next: { revalidate: 3600 },
-      },
-    );
-    const data = await response.json();
-    return {
-      version: data.sha.substring(0, 7),
-      date: new Date(data.commit.committer.date).getTime(),
-      branch: environment,
-      commitUrl: data.html_url,
-    };
-  } catch (error) {
-    log.error("Failed to fetch version data", error);
-    return {
-      version: "unknown",
-      date: Date.now(),
-      branch: "development",
-      commitUrl: "#",
-    };
-  }
+  return {
+    version: sha ? sha.slice(0, 7) : "unknown",
+    date: Number(process.env.NEXT_PUBLIC_BUILD_TIME) || Date.now(),
+    branch: isTestingDeploy() ? "testing" : railwayEnv || "development",
+    commitUrl: sha
+      ? `https://github.com/JBChangelogs/JailbreakChangelogs/commit/${sha}`
+      : "#",
+  };
 }

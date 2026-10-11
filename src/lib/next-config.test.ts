@@ -15,7 +15,9 @@ test("deployment protection uses the commit SHA when Railway has no deployment I
     ["", "commit-456", "commit-456"],
     [undefined, undefined, undefined],
   ]) {
-    const exports = {} as { default: { deploymentId?: string } };
+    const exports = {} as {
+      default: { deploymentId?: string; env: Record<string, string> };
+    };
     runInNewContext(source, {
       exports,
       process: {
@@ -27,5 +29,11 @@ test("deployment protection uses the commit SHA when Railway has no deployment I
       require: () => ({ withSentryConfig: (config: unknown) => config }),
     });
     expect(exports.default.deploymentId).toBe(expected);
+    expect(exports.default.env.NEXT_PUBLIC_BUILD_COMMIT_SHA).toBe(
+      commitSha || "",
+    );
+    expect(Number(exports.default.env.NEXT_PUBLIC_BUILD_TIME)).toBeGreaterThan(
+      0,
+    );
   }
 });

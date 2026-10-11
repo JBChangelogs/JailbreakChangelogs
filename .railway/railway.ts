@@ -4,7 +4,6 @@ import { defineRailway, github, group, preserve, project, service } from "railwa
 export const partial = "FrontEnd";
 
 const sharedEnv = {
-  GITHUB_API_COMMITS_URL: preserve(),
   GITHUB_TOKEN: preserve(),
   NEXT_PUBLIC_API_URL: preserve(),
   NEXT_PUBLIC_ENABLE_AI_SUMMARY: preserve(),

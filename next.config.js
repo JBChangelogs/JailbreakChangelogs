@@ -2,6 +2,8 @@ import { withSentryConfig } from "@sentry/nextjs/config";
 
 const nextConfig = {
   env: {
+    NEXT_PUBLIC_BUILD_COMMIT_SHA: process.env.RAILWAY_GIT_COMMIT_SHA || "",
+    NEXT_PUBLIC_BUILD_TIME: Date.now().toString(),
     NEXT_PUBLIC_SENTRY_ENVIRONMENT:
       process.env.RAILWAY_ENVIRONMENT_NAME || process.env.NODE_ENV,
   },
