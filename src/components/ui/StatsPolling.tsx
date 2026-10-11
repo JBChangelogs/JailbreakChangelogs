@@ -71,7 +71,7 @@ function StatTile({
   value: number;
 }) {
   return (
-    <div className="border-border-card bg-secondary-bg rounded-lg border p-5">
+    <div className="border-border-card bg-secondary-bg rounded-lg border px-5 py-3">
       <div className="text-secondary-text flex items-center gap-2">
         <Icon icon={icon} className="h-5 w-5" aria-hidden="true" />
         <span className="text-base font-semibold">{label}</span>
@@ -89,7 +89,7 @@ export function StatsSkeleton() {
       {[0, 1, 2, 3].map((i) => (
         <div
           key={i}
-          className="border-border-card bg-secondary-bg rounded-lg border p-5"
+          className="border-border-card bg-secondary-bg rounded-lg border px-5 py-3"
         >
           <div className="bg-button-secondary mb-3 h-5 w-36 animate-pulse rounded"></div>
           <div className="bg-button-secondary h-9 w-40 animate-pulse rounded"></div>
