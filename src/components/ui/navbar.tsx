@@ -258,7 +258,7 @@ export const NavbarModern = ({
   const { isPending: wsTogglePending, toggleConnection: toggleWsConnection } =
     useWsConnectionPending(wsConnected);
 
-  const { resolvedTheme } = useTheme();
+  const { theme } = useTheme();
   // Auth resolves from cache in an effect, which can run before this Suspense
   // boundary hydrates; render the server's logged-out shape until mounted
   const [mounted, setMounted] = React.useState(false);
@@ -339,8 +339,8 @@ export const NavbarModern = ({
             <Image
               src={
                 isCollabPage
-                  ? `/logos/collab/h/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}_Halloween.webp`
-                  : "/logos/h/JBCL_Halloween_Logo_Long-Form-Halloween.webp"
+                  ? `/logos/collab${theme === "og" ? "/og" : "/h"}/JBCL_X_TC_Logo_Long_Transparent_${theme === "dark" || theme === "og" ? "Dark" : "Light"}${theme === "og" ? "" : "_Halloween"}.webp`
+                  : `/logos${theme === "og" ? "/og" : "/h"}/${theme === "og" ? "JBCL_Long_Transparent" : "JBCL_Halloween_Logo_Long-Form-Halloween"}.webp`
               }
               alt="Jailbreak Changelogs Logo"
               width={isCollabPage ? 148 : 256}
