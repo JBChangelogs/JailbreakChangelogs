@@ -962,13 +962,13 @@ export default function UserProfileClient({
                       <div className="min-w-0 md:contents">
                         <h1
                           ref={profileIdentityRef}
-                          className="text-primary-text max-w-full min-w-0 truncate text-3xl font-bold tracking-tight md:text-4xl"
+                          className="text-primary-text max-w-full min-w-0 text-3xl font-bold tracking-tight wrap-anywhere md:truncate md:text-4xl"
                         >
                           {user.global_name && user.global_name !== "None"
                             ? user.global_name
                             : user.username}
                         </h1>
-                        <p className="text-secondary-text mt-1 truncate text-sm md:order-3 md:mt-0 md:w-full">
+                        <p className="text-secondary-text mt-1 text-sm wrap-anywhere md:order-3 md:mt-0 md:w-full md:truncate">
                           @{user.username}
                         </p>
                       </div>
