@@ -67,7 +67,7 @@ import {
 } from "@/utils/items/itemUnlockPresentation";
 import { createLogger } from "@/services/logger";
 import Link from "next/link";
-import { useTheme } from "@/contexts/ThemeContext";
+import SiteLogo from "@/components/ui/SiteLogo";
 import { tabSlideVariants, tabSlideTransition } from "@/utils/ui/tabAnimations";
 
 const log = createLogger("UI");
@@ -162,13 +162,11 @@ const ItemDetailsTabs = React.memo(
 interface ItemMediaColumnProps {
   item: ItemDetails;
   favoriteButtonSlot?: React.ReactNode;
-  resolvedTheme: string | undefined;
 }
 
 const ItemMediaColumn = React.memo(function ItemMediaColumn({
   item,
   favoriteButtonSlot,
-  resolvedTheme,
 }: ItemMediaColumnProps) {
   const isBlueBird = item.id === 919;
   const [isPlaying, setIsPlaying] = useState(false);
@@ -352,8 +350,8 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
       <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-0.5 shadow-lg">
         <div className="bg-tertiary-bg rounded-md p-4 text-center">
           <div className="mb-3 flex justify-center">
-            <Image
-              src={`/logos/collab/h/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}_Halloween.webp`}
+            <SiteLogo
+              collaboration
               alt="Jailbreak Changelogs x Trading Core"
               width={220}
               height={48}
@@ -412,7 +410,6 @@ export default function ItemDetailsClient({
   favoriteButtonSlot,
 }: ItemDetailsClientProps) {
   "use memo";
-  const { resolvedTheme } = useTheme();
 
   const [visibleLength, setVisibleLength] = useState(500);
   const [mounted, setMounted] = useState(false);
@@ -515,7 +512,6 @@ export default function ItemDetailsClient({
           <ItemMediaColumn
             item={item}
             favoriteButtonSlot={favoriteButtonSlot}
-            resolvedTheme={resolvedTheme}
           />
 
           {/* Right column - Details */}

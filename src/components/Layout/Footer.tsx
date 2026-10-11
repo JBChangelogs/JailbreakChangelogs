@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, Suspense } from "react";
-import Image from "next/image";
+import SiteLogo from "@/components/ui/SiteLogo";
 import Link from "next/link";
 import { Icon } from "../ui/IconWrapper";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
@@ -53,8 +53,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               className="inline-block"
               aria-label="Jailbreak Changelogs home"
             >
-              <Image
-                src="/logos/h/JBCL_Halloween_Logo_Long-Form-Halloween.webp"
+              <SiteLogo
                 alt="Jailbreak Changelogs"
                 width={256}
                 height={58}

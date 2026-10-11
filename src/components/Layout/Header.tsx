@@ -10,7 +10,7 @@ import {
 } from "@tanstack/react-query";
 
 const log = createLogger("UI");
-import Image from "next/image";
+import SiteLogo from "@/components/ui/SiteLogo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -33,7 +33,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { canOverrideExperiments } from "@/utils/api/experiments";
 import { ExperimentOverridesBadge } from "@/components/Experiments/ExperimentOverridesIndicator";
 import type { UserData } from "@/types/auth";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
 import { Spinner } from "@/components/ui/Spinner";
 import {
@@ -500,7 +499,6 @@ export default function Header() {
   } = useAuthContext();
   const { isPending: wsTogglePending, toggleConnection: toggleWsConnection } =
     useWsConnectionPending(wsConnected);
-  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const showAuth = mounted && !isLoading && isAuthenticated;
@@ -832,19 +830,14 @@ export default function Header() {
               <div className="flex items-center justify-between px-4 py-2">
                 <div className="flex items-center">
                   <Link href="/" style={{ display: "block" }}>
-                    <Image
-                      src={
-                        isCollabPage
-                          ? `/logos/collab/h/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}_Halloween.webp`
-                          : "/logos/h/JBCL_Halloween_Logo_Long-Form-Halloween.webp"
-                      }
+                    <SiteLogo
+                      collaboration={isCollabPage}
                       alt="Jailbreak Changelogs Logo"
                       width={isCollabPage ? 148 : 256}
                       height={isCollabPage ? 48 : 58}
                       quality={90}
                       fetchPriority="high"
                       loading="eager"
-                      unoptimized={false}
                       className="h-9 w-auto sm:h-12"
                     />
                   </Link>

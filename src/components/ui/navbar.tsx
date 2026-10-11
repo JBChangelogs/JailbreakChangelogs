@@ -8,14 +8,13 @@ import { usePathname } from "next/navigation";
 import { navigationSections } from "@/utils/ui/navigation-menu";
 import NavigationLayoutShortcut from "@/components/Layout/NavigationLayoutShortcut";
 import { getNavigationSection } from "@/utils/ui/navigation";
-import Image from "next/image";
+import SiteLogo from "@/components/ui/SiteLogo";
 import { NavigationMenu as NavigationMenu } from "radix-ui";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { canOverrideExperiments } from "@/utils/api/experiments";
 import { ExperimentOverridesBadge } from "@/components/Experiments/ExperimentOverridesIndicator";
-import { useTheme } from "@/contexts/ThemeContext";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import dynamic from "next/dynamic";
@@ -258,7 +257,6 @@ export const NavbarModern = ({
   const { isPending: wsTogglePending, toggleConnection: toggleWsConnection } =
     useWsConnectionPending(wsConnected);
 
-  const { resolvedTheme } = useTheme();
   // Auth resolves from cache in an effect, which can run before this Suspense
   // boundary hydrates; render the server's logged-out shape until mounted
   const [mounted, setMounted] = React.useState(false);
@@ -336,12 +334,8 @@ export const NavbarModern = ({
             </TooltipContent>
           </Tooltip>
           <Link href="/" style={{ display: "block" }}>
-            <Image
-              src={
-                isCollabPage
-                  ? `/logos/collab/h/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}_Halloween.webp`
-                  : "/logos/h/JBCL_Halloween_Logo_Long-Form-Halloween.webp"
-              }
+            <SiteLogo
+              collaboration={isCollabPage}
               alt="Jailbreak Changelogs Logo"
               width={isCollabPage ? 148 : 256}
               height={isCollabPage ? 48 : 58}

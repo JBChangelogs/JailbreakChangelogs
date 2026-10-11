@@ -13,6 +13,22 @@
   }
 }
 
+:root.catppuccin .header-logo {
+  filter: hue-rotate(45deg) saturate(0.55);
+}
+
+:root.catppuccin-latte .header-logo {
+  filter: hue-rotate(45deg);
+}
+
+:root.halloween .header-logo {
+  filter: hue-rotate(135deg) saturate(1.8);
+}
+
+:root.future-tone .header-logo {
+  filter: hue-rotate(100deg);
+}
+
 /* NitroPay CCPA link styling in footer */
 .ccpa-footer [data-ccpa-link] a,
 .ccpa-footer [data-ccpa-link] a span {
