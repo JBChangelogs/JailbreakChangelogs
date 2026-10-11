@@ -1,22 +1,14 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 
 interface ErrorProps {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }
 
-export default function Error({ error, reset }: ErrorProps) {
-  const router = useRouter();
-
-  const handleRetry = () => {
-    router.refresh();
-    reset();
-  };
-
+export default function Error({ error, retry }: ErrorProps) {
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
@@ -37,7 +29,7 @@ export default function Error({ error, reset }: ErrorProps) {
 
             <div className="space-y-4">
               <button
-                onClick={handleRetry}
+                onClick={retry}
                 className="w-full rounded-lg bg-[#FFB636] px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-[#FFA500]"
               >
                 Try again

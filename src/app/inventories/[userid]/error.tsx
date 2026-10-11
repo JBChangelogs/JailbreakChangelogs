@@ -3,7 +3,6 @@
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { createLogger } from "@/services/logger";
@@ -12,21 +11,14 @@ const log = createLogger("UI");
 
 export default function Error({
   error,
-  reset,
+  retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
-  const router = useRouter();
-
   useEffect(() => {
     log.error("Inventory error", error);
   }, [error]);
-
-  const handleRetry = () => {
-    router.refresh();
-    reset();
-  };
 
   return (
     <section className="bg-primary-bg">
@@ -47,7 +39,7 @@ export default function Error({
               <Button
                 variant="secondary"
                 size="md"
-                onClick={handleRetry}
+                onClick={retry}
                 className="w-full sm:w-auto"
               >
                 <Icon icon="heroicons-outline:arrow-path" className="h-5 w-5" />

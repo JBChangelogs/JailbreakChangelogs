@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { createLogger } from "@/services/logger";
 import { Button } from "@/components/ui/button";
@@ -11,21 +10,14 @@ const log = createLogger("UI");
 
 export default function Error({
   error,
-  reset,
+  retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
-  const router = useRouter();
-
   useEffect(() => {
     log.error("Changelog details error", error);
   }, [error]);
-
-  const handleRetry = () => {
-    router.refresh();
-    reset();
-  };
 
   return (
     <main className="mb-8 min-h-screen">
@@ -57,7 +49,7 @@ export default function Error({
                 : "An unexpected error occurred while loading the changelog details."}
             </p>
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
-              <Button size="lg" onClick={handleRetry}>
+              <Button size="lg" onClick={retry}>
                 Try again
               </Button>
               <Button asChild size="lg" variant="secondary">
