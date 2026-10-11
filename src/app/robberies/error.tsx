@@ -1,5 +1,7 @@
 "use client";
 
+import { captureException } from "@sentry/nextjs";
+
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect } from "react";
 import Link from "next/link";
@@ -20,6 +22,7 @@ export default function Error({
   const router = useRouter();
 
   useEffect(() => {
+    captureException(error);
     log.error("Robbery tracker error", error);
   }, [error]);
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { captureException } from "@sentry/nextjs";
+
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,6 +21,7 @@ export default function Error({
   const router = useRouter();
 
   useEffect(() => {
+    captureException(error);
     log.error("Changelog details error", error);
   }, [error]);
 

@@ -19,6 +19,7 @@ const sharedEnv = {
   NEXT_PUBLIC_LATEST_SEASON: preserve(),
   NEXT_PUBLIC_ROBBERY_TRACKER_AUTH_REQUIRED: preserve(),
   NEXT_PUBLIC_SCANNING_API_URL: preserve(),
+  NEXT_PUBLIC_SENTRY_DSN: preserve(),
   NEXT_PUBLIC_SUBMISSIONS_URL: preserve(),
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: preserve(),
   NEXT_PUBLIC_WS_URL: preserve(),
@@ -26,6 +27,9 @@ const sharedEnv = {
   NEXT_TELEMETRY_DISABLED: preserve(),
   RAILWAY_INTERNAL_API_URL: preserve(),
   RAILWAY_TOKEN: preserve(),
+  SENTRY_AUTH_TOKEN: preserve(),
+  SENTRY_ORG: preserve(),
+  SENTRY_PROJECT: preserve(),
   TURNSTILE_SECRET_KEY: preserve(),
   VGY_ME_USERKEY: preserve(),
 };

@@ -1,4 +1,10 @@
+import { withSentryConfig } from "@sentry/nextjs/config";
+
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_SENTRY_ENVIRONMENT:
+      process.env.RAILWAY_ENVIRONMENT_NAME || process.env.NODE_ENV,
+  },
   output: "standalone",
   // The railway SDK dynamically imports tsx/esbuild (IaC tooling), which
   // breaks when bundled — load it from node_modules at runtime instead.
@@ -310,4 +316,16 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  release: {
+    name: process.env.SENTRY_RELEASE || process.env.RAILWAY_GIT_COMMIT_SHA,
+  },
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+  widenClientFileUpload: true,
+  silent: !process.env.CI,
+});
