@@ -24,6 +24,8 @@ const sharedEnv = {
   NEXT_PUBLIC_WS_URL: preserve(),
   NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: preserve(),
   NEXT_TELEMETRY_DISABLED: preserve(),
+  OTEL_LOGS_EXPORTER: "none",
+  OTEL_METRICS_EXPORTER: "none",
   RAILWAY_INTERNAL_API_URL: preserve(),
   RAILWAY_TOKEN: preserve(),
   TURNSTILE_SECRET_KEY: preserve(),
@@ -43,6 +45,7 @@ function frontend(testing: boolean) {
     start: "HOSTNAME=:: node .next/standalone/server.js",
     healthcheck: "/api/healthcheck",
     healthcheckTimeout: 30,
+    tracing: { enabled: true, autoInstrumentation: false },
     deploy: {
       drainingSeconds: 20,
       overlapSeconds: 30,
