@@ -281,11 +281,7 @@ export default async function Home() {
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Button asChild size="lg">
-                  <a
-                    href="roblox://experiences/start?placeId=606849621"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href="roblox://experiences/start?placeId=606849621">
                     Play Jailbreak Now
                   </a>
                 </Button>
