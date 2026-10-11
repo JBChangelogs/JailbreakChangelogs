@@ -11,7 +11,7 @@ import { formatRelativeDate } from "@/utils/helpers/timestamp";
 export const useRealTimeRelativeDate = (
   timestamp: string | number | null | undefined,
 ) => {
-  const [, setTick] = useState(() => Date.now());
+  const [tick, setTick] = useState<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isVisibleRef = useRef<boolean>(true);
 
@@ -26,6 +26,8 @@ export const useRealTimeRelativeDate = (
         setTick(Date.now());
       }
     };
+
+    updateTick();
 
     // Handle visibility changes to pause updates when not visible
     const handleVisibilityChange = () => {
@@ -51,7 +53,7 @@ export const useRealTimeRelativeDate = (
     };
   }, [timestamp]);
 
-  if (!timestamp) {
+  if (!timestamp || tick === null) {
     return "";
   }
 

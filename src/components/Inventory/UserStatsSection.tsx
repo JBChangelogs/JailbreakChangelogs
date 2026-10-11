@@ -106,7 +106,7 @@ const formatNumber = (num: number) => {
     const value = Math.floor(num / 100) / 10;
     return (value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)) + "K";
   }
-  return num.toLocaleString();
+  return num.toLocaleString("en-US");
 };
 
 const formatMoney = (money: number) => {
@@ -120,7 +120,7 @@ const formatMoney = (money: number) => {
     const value = Math.floor(money / 100) / 10;
     return `$${value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)}K`;
   }
-  return `$${money.toLocaleString()}`;
+  return `$${money.toLocaleString("en-US")}`;
 };
 
 const formatPreciseMoney = (money: number) => {
@@ -134,7 +134,7 @@ const formatPreciseMoney = (money: number) => {
     const value = Math.floor(money / 100) / 10;
     return `$${value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)}K`;
   }
-  return `$${money.toLocaleString()}`;
+  return `$${money.toLocaleString("en-US")}`;
 };
 
 const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -166,6 +166,8 @@ export default function UserStatsSection({
     isAuthenticated && Boolean(user?.roblox_id) && user?.roblox_id === userId;
   const [isScanHistoryModalOpen, setIsScanHistoryModalOpen] = useState(false);
   const [isMetadataExpanded, setIsMetadataExpanded] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const createdRelativeTime = useRealTimeRelativeDate(
     currentData?.created_at || 0,
   );
@@ -293,7 +295,7 @@ export default function UserStatsSection({
               {(activeFilteredStats
                 ? activeFilteredStats.itemCount
                 : totalItemsCount
-              ).toLocaleString()}
+              ).toLocaleString("en-US")}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -324,7 +326,9 @@ export default function UserStatsSection({
                     const dupeOriginal = (currentData.duplicates || []).filter(
                       (item) => item.isOriginalOwner,
                     ).length;
-                    return (regularOriginal + dupeOriginal).toLocaleString();
+                    return (regularOriginal + dupeOriginal).toLocaleString(
+                      "en-US",
+                    );
                   })()}
             </TooltipContent>
           </Tooltip>
@@ -352,7 +356,9 @@ export default function UserStatsSection({
                 const dupeNonOriginal = (currentData.duplicates || []).filter(
                   (item) => !item.isOriginalOwner,
                 ).length;
-                return (regularNonOriginal + dupeNonOriginal).toLocaleString();
+                return (regularNonOriginal + dupeNonOriginal).toLocaleString(
+                  "en-US",
+                );
               })()}
             </TooltipContent>
           </Tooltip>
@@ -376,7 +382,7 @@ export default function UserStatsSection({
                 {(activeFilteredStats
                   ? activeFilteredStats.dupedItemCount
                   : duplicatesCount
-                ).toLocaleString()}
+                ).toLocaleString("en-US")}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -390,7 +396,7 @@ export default function UserStatsSection({
               </p>
             </TooltipTrigger>
             <TooltipContent side="top">
-              Money: ${currentData.money.toLocaleString()}
+              Money: ${currentData.money.toLocaleString("en-US")}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -455,7 +461,7 @@ export default function UserStatsSection({
                 {(activeFilteredStats
                   ? activeFilteredStats.inventoryValue
                   : totalCashValue
-                ).toLocaleString()}
+                ).toLocaleString("en-US")}
               </TooltipContent>
             </Tooltip>
           )}
@@ -505,7 +511,7 @@ export default function UserStatsSection({
                 {(activeFilteredStats
                   ? activeFilteredStats.networth
                   : totalNetworth
-                ).toLocaleString()}
+                ).toLocaleString("en-US")}
               </TooltipContent>
             </Tooltip>
           )}
@@ -561,7 +567,7 @@ export default function UserStatsSection({
                   {(activeFilteredStats
                     ? activeFilteredStats.dupedValue
                     : totalDupedValue
-                  ).toLocaleString()}
+                  ).toLocaleString("en-US")}
                 </TooltipContent>
               </Tooltip>
             )}
@@ -739,9 +745,9 @@ export default function UserStatsSection({
                       First scanned on:
                     </span>
                     <span className="text-primary-text font-medium">
-                      {formatDate(currentData.created_at)}
+                      {mounted ? formatDate(currentData.created_at) : "…"}
                       <span className="text-secondary-text ml-1 text-xs">
-                        ({createdRelativeTime})
+                        {createdRelativeTime && `(${createdRelativeTime})`}
                       </span>
                     </span>
                   </div>
@@ -750,9 +756,9 @@ export default function UserStatsSection({
                       Last scanned on:
                     </span>
                     <span className="text-primary-text font-medium">
-                      {formatDate(currentData.updated_at)}
+                      {mounted ? formatDate(currentData.updated_at) : "…"}
                       <span className="text-secondary-text ml-1 text-xs">
-                        ({updatedRelativeTime})
+                        {updatedRelativeTime && `(${updatedRelativeTime})`}
                       </span>
                     </span>
                   </div>
@@ -775,7 +781,7 @@ export default function UserStatsSection({
                         </span>
                       ) : queuePosition ? (
                         <span className="text-xs">
-                          #{queuePosition.position.toLocaleString()}
+                          #{queuePosition.position.toLocaleString("en-US")}
                         </span>
                       ) : (
                         <span className="text-secondary-text text-xs">
