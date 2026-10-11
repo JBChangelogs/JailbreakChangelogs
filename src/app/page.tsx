@@ -10,6 +10,7 @@ import {
 import { Icon } from "../components/ui/IconWrapper";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
+import PlayJailbreakButton from "@/components/Home/PlayJailbreakButton";
 import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
 import CountUpNumber from "@/components/Home/CountUpNumber";
 import { Button } from "@/components/ui/button";
@@ -280,11 +281,7 @@ export default async function Home() {
                 item tracking, dupe detection, and more.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Button asChild size="lg">
-                  <a href="roblox://experiences/start?placeId=606849621">
-                    Play Jailbreak Now
-                  </a>
-                </Button>
+                <PlayJailbreakButton />
                 <Button asChild variant="heroOutline" size="lg">
                   <a
                     href="https://discord.jailbreakchangelogs.com"
