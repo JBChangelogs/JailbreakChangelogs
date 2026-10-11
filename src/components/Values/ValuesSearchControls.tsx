@@ -33,6 +33,7 @@ import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
 import { useRouter } from "nextjs-toploader/app";
 import { usePartialItems } from "@/hooks/usePartialItems";
 import type { PartialItem } from "@/utils/api/api";
+import { filterByTypes } from "@/utils/trading/values";
 import ValuesSearchSuggestions, {
   VALUES_SUGGESTIONS_ID,
   getItemHref,
@@ -120,8 +121,10 @@ export default function ValuesSearchControls({
     () => filterGroups.flatMap((group) => group.options.map((o) => o.value)),
     [],
   );
-  const selectedTypeFilters = selectedFilterSorts.filter((value) =>
-    typeFilterValues.includes(value),
+  const selectedTypeFilters = useMemo(
+    () =>
+      selectedFilterSorts.filter((value) => typeFilterValues.includes(value)),
+    [selectedFilterSorts, typeFilterValues],
   );
   const filterLabel = getFilterSortsButtonLabel(selectedTypeFilters);
 
@@ -142,10 +145,22 @@ export default function ValuesSearchControls({
   );
 
   const suggestions = useMemo(
-    () => (isItemIdSearch ? [] : getItemSuggestions(partialItems, searchTerm)),
-    [isItemIdSearch, partialItems, searchTerm],
+    () =>
+      isItemIdSearch
+        ? []
+        : getItemSuggestions(
+            partialItems && filterByTypes(partialItems, selectedTypeFilters),
+            searchTerm,
+          ),
+    [isItemIdSearch, partialItems, selectedTypeFilters, searchTerm],
   );
   const showSuggestions = isSuggestionsOpen && suggestions.length > 0;
+  const showFilterHint =
+    isSuggestionsOpen &&
+    !isItemIdSearch &&
+    suggestions.length === 0 &&
+    selectedTypeFilters.length > 0 &&
+    getItemSuggestions(partialItems, searchTerm).length > 0;
 
   const goToItem = (item: PartialItem) => {
     skipSearchCommitRef.current = true;
@@ -285,6 +300,19 @@ export default function ValuesSearchControls({
                     onHighlight={setHighlightedIndex}
                     onSelect={goToItem}
                   />
+                )}
+                {showFilterHint && (
+                  <div className="border-border-card bg-secondary-bg text-secondary-text absolute top-full left-0 z-40 mt-1 flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm shadow-lg">
+                    <span>No matches in {filterLabel}</span>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => onClearFilterSorts(typeFilterValues)}
+                      className="text-link hover:text-link-hover shrink-0 cursor-pointer font-medium"
+                    >
+                      Clear filters
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
