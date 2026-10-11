@@ -964,6 +964,10 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
     --theme-cursor-icon: url("/cursors/future-tone.svg");
   }
 
+  :root.og {
+    --theme-cursor-icon: url("/cursors/clock-3.svg");
+  }
+
   :root[data-theme-cursor="on"] .theme-cursor-icon {
     display: block;
   }
