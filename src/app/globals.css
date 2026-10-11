@@ -29,6 +29,10 @@
   filter: hue-rotate(100deg);
 }
 
+:root.og .header-logo {
+  filter: hue-rotate(-30deg) saturate(0.7) brightness(0.9);
+}
+
 /* NitroPay CCPA link styling in footer */
 .ccpa-footer [data-ccpa-link] a,
 .ccpa-footer [data-ccpa-link] a span {
@@ -825,6 +829,60 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --color-highlight: #f93627;
 }
 
+:root.og {
+  --color-primary-bg: #2e3944;
+  --color-secondary-bg: #212a31;
+  --color-tertiary-bg: #222936;
+  --color-overlay-bg: #11141bd9;
+  --color-newsletter-bg: #1c212c;
+
+  --color-primary-text: #d3d9d4;
+  --color-secondary-text: #94a3b8;
+  --color-tertiary-text: #748d92;
+  --color-quaternary-text: #475569;
+  --color-card-paragraph: #94a3b8;
+  --color-status-success: #11ac78;
+
+  --color-border-primary: #3b4658;
+  --color-border-card: #3e5281;
+  --color-border-secondary: #1e293b;
+  --color-border-tertiary: #111827;
+  --color-border-focus: #5A64EA;
+  --color-border-error: #ef4444;
+
+  --color-card-tag-bg: #2563eb;
+  --color-card-highlight: #5A64EA;
+  --color-card-shadow: #00000066;
+
+  --color-link: #60a5fa;
+  --color-link-hover: #93c5fd;
+  --color-link-active: #5A64EA;
+  --color-link-visited: #94a3b8;
+
+  --color-button-info: #146a8b;
+  --color-button-info-hover: #2563eb;
+  --color-button-info-active: #1d4ed8;
+  --color-button-info-disabled: #334155;
+  --color-button-success: #10b981;
+  --color-button-success-hover: #059669;
+  --color-button-danger: #ef4444;
+  --color-button-danger-hover: #dc2626;
+  --color-button-secondary: #2d3748;
+  --color-button-secondary-hover: #4a5568;
+  --color-form-button: #5A64EA;
+
+  --color-form-input: #11141b;
+  --color-form-input-focus: #1c212c;
+  --color-form-input-disabled: #1e293b;
+  --color-form-placeholder: #475569;
+  --color-form-error: #ef4444;
+  --color-form-success: #10b981;
+
+  --color-highlight: #124e66;
+  --color-secondary: #475569;
+  --color-tertiary: #10b981;
+}
+
 :root.halloween {
   --color-primary-bg: #140f10;
   --color-secondary-bg: #1d1517;
@@ -924,6 +982,10 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
 
   :root.future-tone {
     --theme-cursor-icon: url("/cursors/future-tone.svg");
+  }
+
+  :root.og {
+    --theme-cursor-icon: url("/cursors/clock-3.svg");
   }
 
   :root[data-theme-cursor="on"] .theme-cursor-icon {

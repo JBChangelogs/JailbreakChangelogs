@@ -14,6 +14,7 @@ const THEMES = [
   "catppuccin",
   "catppuccin-latte",
   "future-tone",
+  "og",
 ] as const;
 export type Theme = (typeof THEMES)[number];
 /** For visitors who haven't picked a theme; THEME_INIT_SCRIPT matches it. */

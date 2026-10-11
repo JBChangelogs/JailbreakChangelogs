@@ -164,6 +164,7 @@ Use these existing filters as starting points:
 | Muted purple (Catppuccin Mocha) | `hue-rotate(45deg) saturate(0.55)` |
 | Red (Halloween) | `hue-rotate(135deg) saturate(1.8)` |
 | Pink (Future Tone) | `hue-rotate(100deg)` |
+| Muted teal (OG) | `hue-rotate(-30deg) saturate(0.7) brightness(0.9)` |
 
 For example, a theme with ID `purple` could use:
 
@@ -177,11 +178,23 @@ There is no direct hex-color-to-angle mapping: the filter transforms the existin
 
 1. Run `bun dev`, open `http://localhost:5500`, and select your theme.
 2. Inspect the logo in browser DevTools. In the Styles panel, edit its filter temporarily; try angles from `0deg` to `360deg` in roughly `15deg` steps, then fine-tune the closest result.
-3. Add `saturate()` if needed. `1` keeps the resulting saturation, values below `1` soften it, and values above `1` intensify it. Keep the same filter order as the examples above.
+3. Add `saturate()` if needed. `1` keeps the resulting saturation, values below `1` soften it, and values above `1` intensify it. OG also uses `brightness(0.9)` to give the white highlights a light gray tone. Keep the same filter order as the examples above.
 4. Copy the chosen filter into the theme's `.header-logo` rule in `src/app/globals.css`. DevTools edits are temporary.
 5. Check the desktop header, mobile header, and footer against the theme backgrounds, including the white highlights and black outlines. Also check the collaboration header on `/values` and the partnership banner on an item detail page: the JBCL side should follow the theme, Trading Core's colors should stay unchanged, and the neutral “X” should remain visible on light and dark backgrounds.
 
 For a palette PR, include screenshots of the theme picker, header, and footer, and state the chosen logo filter or that the original blue is intentional. Also include a few varied pages so reviewers can assess the palette across the site: for example, the homepage, a values table or item detail page, and a changelog or settings page. Show desktop and mobile layouts, including text, cards, buttons, links, and form controls where available. Run `bun run check` before submitting.
+
+### Logo examples across themes
+
+These full-resolution sheets are reference snapshots of the standalone and collaboration logos using the themes available when they were exported. Use them as color references when choosing a filter for a new palette. They are saved examples; theme changes do not regenerate them automatically.
+
+[Download the standalone logo sheet (4000 × 8000)](.github/images/theme-logos/JBCL_Logo_All_Theme_Variants.png).
+
+![Standalone JBCL logo theme reference sheet](.github/images/theme-logos/JBCL_Logo_All_Theme_Variants.png)
+
+[Download the collaboration logo sheet (4000 × 11200)](.github/images/theme-logos/JBCL_Collab_Logo_All_Theme_Variants.png).
+
+![JBCL and Trading Core collaboration logo theme reference sheet](.github/images/theme-logos/JBCL_Collab_Logo_All_Theme_Variants.png)
 
 ## Make a Pull Request
 

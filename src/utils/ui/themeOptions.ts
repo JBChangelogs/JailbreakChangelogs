@@ -36,6 +36,19 @@ export const THEME_OPTIONS: {
     },
   },
   {
+    value: "og",
+    label: "OG",
+    icon: "lucide:clock-3",
+    preview: {
+      page: "#2e3944",
+      card: "#212a31",
+      text: "#d3d9d4",
+      muted: "#94a3b8",
+      button: "#146a8b",
+      link: "#60a5fa",
+    },
+  },
+  {
     value: "catppuccin-latte",
     label: "Catppuccin Latte",
     icon: "lucide:cat",

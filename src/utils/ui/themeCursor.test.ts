@@ -17,6 +17,7 @@ test("cursor preference restores before hydration without changing the saved the
     "catppuccin",
     "catppuccin-latte",
     "future-tone",
+    "og",
   ]) {
     for (const saved of [null, "true", "false", "invalid"]) {
       const classes = new Set<string>();

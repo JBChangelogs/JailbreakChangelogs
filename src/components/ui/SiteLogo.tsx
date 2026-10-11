@@ -31,7 +31,7 @@ export default function SiteLogo({
       alt={props.alt}
       className={cn(
         props.className,
-        collaboration ? "[clip-path:inset(0_0_0_55%)]" : "header-logo",
+        collaboration ? "[clip-path:inset(0_0_0_35%)]" : "header-logo",
       )}
     />
   );
@@ -49,7 +49,7 @@ export default function SiteLogo({
         quality={props.quality}
         loading={props.loading}
         fetchPriority={props.fetchPriority}
-        className="header-logo pointer-events-none [clip-path:inset(0_45%_0_0)]"
+        className="header-logo pointer-events-none [clip-path:inset(0_65%_0_0)]"
       />
     </span>
   );

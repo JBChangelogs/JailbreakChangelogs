@@ -61,7 +61,7 @@ test("collaboration logo keeps the partner unfiltered and uses a decorative clip
       `/logos/collab/JBCL_Collab_${tone === "dark" ? "Dark" : "Light"}.webp`,
     );
     expect(base.props.className).toBe(
-      "h-12 w-auto [clip-path:inset(0_0_0_55%)]",
+      "h-12 w-auto [clip-path:inset(0_0_0_35%)]",
     );
     expect(base.props.alt).toBe("JBCL x Trading Core");
     expect(overlay.props.src).toBe(base.props.src);
@@ -69,7 +69,7 @@ test("collaboration logo keeps the partner unfiltered and uses a decorative clip
       fill: true,
       alt: "",
       "aria-hidden": "true",
-      className: "header-logo pointer-events-none [clip-path:inset(0_45%_0_0)]",
+      className: "header-logo pointer-events-none [clip-path:inset(0_65%_0_0)]",
     });
   }
 });
