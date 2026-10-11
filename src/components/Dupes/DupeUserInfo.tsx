@@ -150,11 +150,11 @@ export default function DupeUserInfo({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="text-primary-text cursor-help text-2xl font-bold">
-                  {dupeItemsCount.toLocaleString()}
+                  {dupeItemsCount.toLocaleString("en-US")}
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                Dupe items found: {dupeItemsCount.toLocaleString()}
+                Dupe items found: {dupeItemsCount.toLocaleString("en-US")}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -173,15 +173,15 @@ export default function DupeUserInfo({
                         ? `${(totalDupedValue / 1000000).toFixed(1)}M`
                         : totalDupedValue >= 1000
                           ? `${(totalDupedValue / 1000).toFixed(1)}K`
-                          : totalDupedValue.toLocaleString()}
+                          : totalDupedValue.toLocaleString("en-US")}
                   </span>
                   <span className="hidden sm:inline">
-                    ${totalDupedValue.toLocaleString()}
+                    ${totalDupedValue.toLocaleString("en-US")}
                   </span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                Total duped value: ${totalDupedValue.toLocaleString()}
+                Total duped value: ${totalDupedValue.toLocaleString("en-US")}
               </TooltipContent>
             </Tooltip>
           </div>

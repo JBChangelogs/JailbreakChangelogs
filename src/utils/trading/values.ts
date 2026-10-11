@@ -544,7 +544,7 @@ export const formatFullValue = (value: string | null | undefined): string => {
   }
 
   // Format with commas
-  return fullNumber.toLocaleString();
+  return fullNumber.toLocaleString("en-US");
 };
 
 /**
@@ -613,7 +613,7 @@ const formatSinglePrice = (price: string): string => {
   }
 
   // Format with commas
-  return fullNumber.toLocaleString();
+  return fullNumber.toLocaleString("en-US");
 };
 
 /**

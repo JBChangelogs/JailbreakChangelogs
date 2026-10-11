@@ -254,7 +254,7 @@ export default function DupeItemCard({
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              Monthly unique: {item.uniqueCirculation.toLocaleString()}
+              Monthly unique: {item.uniqueCirculation.toLocaleString("en-US")}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -268,7 +268,9 @@ export default function DupeItemCard({
             </TooltipTrigger>
             <TooltipContent>
               Monthly traded:{" "}
-              {item.timesTraded ? item.timesTraded.toLocaleString() : "N/A"}
+              {item.timesTraded
+                ? item.timesTraded.toLocaleString("en-US")
+                : "N/A"}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -284,13 +286,17 @@ export default function DupeItemCard({
                   {dupedValue > 0 ? formatCurrencyValue(dupedValue) : "N/A"}
                 </span>
                 <span className="hidden sm:inline">
-                  {dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
+                  {dupedValue > 0
+                    ? `$${dupedValue.toLocaleString("en-US")}`
+                    : "N/A"}
                 </span>
               </div>
             </TooltipTrigger>
             <TooltipContent>
               Duped value:{" "}
-              {dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
+              {dupedValue > 0
+                ? `$${dupedValue.toLocaleString("en-US")}`
+                : "N/A"}
             </TooltipContent>
           </Tooltip>
         </div>

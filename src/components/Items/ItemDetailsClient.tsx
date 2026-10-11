@@ -415,6 +415,8 @@ export default function ItemDetailsClient({
   const { resolvedTheme } = useTheme();
 
   const [visibleLength, setVisibleLength] = useState(500);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [tabParam, setTabParam] = useQueryState("tab", {
     defaultValue: "",
     history: "push",
@@ -608,7 +610,9 @@ export default function ItemDetailsClient({
                       <div className="text-secondary-text text-xs">
                         by Badimo •{" "}
                         {currentItem.metadata.LastUpdated
-                          ? `updated ${formatCustomDate(currentItem.metadata.LastUpdated)}`
+                          ? mounted
+                            ? `updated ${formatCustomDate(currentItem.metadata.LastUpdated)}`
+                            : "updated …"
                           : "unknown date"}
                       </div>
                       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -619,7 +623,9 @@ export default function ItemDetailsClient({
                               Times Traded
                             </div>
                             <div className="text-primary-text text-lg font-semibold">
-                              {currentItem.metadata.TimesTraded.toLocaleString()}
+                              {currentItem.metadata.TimesTraded.toLocaleString(
+                                "en-US",
+                              )}
                             </div>
                           </div>
                         )}
@@ -644,7 +650,9 @@ export default function ItemDetailsClient({
                               </Tooltip>
                             </div>
                             <div className="text-primary-text text-lg font-semibold">
-                              {currentItem.metadata.UniqueCirculation.toLocaleString()}
+                              {currentItem.metadata.UniqueCirculation.toLocaleString(
+                                "en-US",
+                              )}
                             </div>
                           </div>
                         )}
@@ -655,7 +663,9 @@ export default function ItemDetailsClient({
                               Demand Multiple
                             </div>
                             <div className="text-primary-text text-lg font-semibold">
-                              {currentItem.metadata.DemandMultiple.toLocaleString()}
+                              {currentItem.metadata.DemandMultiple.toLocaleString(
+                                "en-US",
+                              )}
                             </div>
                           </div>
                         )}
@@ -686,7 +696,7 @@ export default function ItemDetailsClient({
                     ) : currentScanCount === null ? (
                       <span aria-label="Scan count unavailable">—</span>
                     ) : (
-                      currentScanCount.toLocaleString()
+                      currentScanCount.toLocaleString("en-US")
                     )}
                   </div>
                 </div>

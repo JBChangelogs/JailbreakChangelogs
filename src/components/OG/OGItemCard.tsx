@@ -250,11 +250,11 @@ export default function OGItemCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-primary-text cursor-help text-xl font-bold">
-                {item.uniqueCirculation.toLocaleString()}
+                {item.uniqueCirculation.toLocaleString("en-US")}
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              Monthly unique: {item.uniqueCirculation.toLocaleString()}
+              Monthly unique: {item.uniqueCirculation.toLocaleString("en-US")}
             </TooltipContent>
           </Tooltip>
         </div>

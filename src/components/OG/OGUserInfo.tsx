@@ -140,7 +140,7 @@ export default function OGUserInfo({
           <div className="text-center sm:text-right">
             <div className="text-secondary-text text-sm">{itemsLabel}</div>
             <div className="text-primary-text text-2xl font-bold">
-              {(originalItemsCount || 0).toLocaleString()}
+              {(originalItemsCount || 0).toLocaleString("en-US")}
             </div>
           </div>
         </div>

@@ -104,9 +104,7 @@ export const useOptimizedRealTimeRelativeDate = (
   timestamp: string | number | null | undefined,
   id: string,
 ) => {
-  const [relativeTime, setRelativeTime] = useState<string>(() =>
-    timestamp ? formatRelativeDate(timestamp) : "",
-  );
+  const [relativeTime, setRelativeTime] = useState("");
 
   useEffect(() => {
     setRelativeTime(timestamp ? formatRelativeDate(timestamp) : "");

@@ -242,7 +242,7 @@ export default function AboutTab({
             <div>
               <dt className="text-secondary-text">Member number</dt>
               <dd className="text-primary-text mt-1 font-medium">
-                #{user.usernumber.toLocaleString()}
+                #{user.usernumber.toLocaleString("en-US")}
               </dd>
             </div>
             {user.created_at && (

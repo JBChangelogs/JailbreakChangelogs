@@ -72,8 +72,8 @@ const BountyRangeFilter = memo(function BountyRangeFilter({
 }: BountyRangeFilterProps) {
   const SNAP_DISTANCE = 2_500;
   const [localRange, setLocalRange] = useState<[number, number]>(range);
-  const [minInput, setMinInput] = useState(range[0].toLocaleString());
-  const [maxInput, setMaxInput] = useState(range[1].toLocaleString());
+  const [minInput, setMinInput] = useState(range[0].toLocaleString("en-US"));
+  const [maxInput, setMaxInput] = useState(range[1].toLocaleString("en-US"));
 
   const stripCommas = (value: string) => value.replace(/,/g, "");
 
@@ -96,13 +96,13 @@ const BountyRangeFilter = memo(function BountyRangeFilter({
 
   useEffect(() => {
     setLocalRange(range);
-    setMinInput(range[0].toLocaleString());
-    setMaxInput(range[1].toLocaleString());
+    setMinInput(range[0].toLocaleString("en-US"));
+    setMaxInput(range[1].toLocaleString("en-US"));
   }, [range]);
 
   useEffect(() => {
-    setMinInput(localRange[0].toLocaleString());
-    setMaxInput(localRange[1].toLocaleString());
+    setMinInput(localRange[0].toLocaleString("en-US"));
+    setMaxInput(localRange[1].toLocaleString("en-US"));
   }, [localRange]);
 
   const maybeSnapToMark = (value: number): number => {
@@ -147,7 +147,7 @@ const BountyRangeFilter = memo(function BountyRangeFilter({
               const nextRange: [number, number] = [val, localRange[1]];
               setLocalRange(nextRange);
               onCommit(nextRange);
-              setMinInput(val.toLocaleString());
+              setMinInput(val.toLocaleString("en-US"));
             }}
             className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
             placeholder="Min"
@@ -170,17 +170,17 @@ const BountyRangeFilter = memo(function BountyRangeFilter({
               const nextRange: [number, number] = [localRange[0], val];
               setLocalRange(nextRange);
               onCommit(nextRange);
-              setMaxInput(val.toLocaleString());
+              setMaxInput(val.toLocaleString("en-US"));
             }}
             className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
             placeholder="Max"
           />
         </div>
         <span className="text-secondary-text text-[11px] whitespace-nowrap">
-          {localRange[0].toLocaleString()} -{" "}
+          {localRange[0].toLocaleString("en-US")} -{" "}
           {localRange[1] >= BOUNTY_RANGE_MAX
-            ? `${BOUNTY_RANGE_MAX.toLocaleString()}+`
-            : localRange[1].toLocaleString()}
+            ? `${BOUNTY_RANGE_MAX.toLocaleString("en-US")}+`
+            : localRange[1].toLocaleString("en-US")}
         </span>
       </div>
 
@@ -294,7 +294,8 @@ function BountyTrackerContent() {
     [],
   );
 
-  const formatBountyAmount = (amount: number) => `$${amount.toLocaleString()}`;
+  const formatBountyAmount = (amount: number) =>
+    `$${amount.toLocaleString("en-US")}`;
 
   // Filter and sort bounties
   const filteredBounties = useMemo(() => {

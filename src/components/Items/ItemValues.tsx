@@ -67,7 +67,7 @@ function ItemValues({
                 }`}
               >
                 {cashChange.difference > 0 ? "+" : "-"}
-                {Math.abs(cashChange.difference).toLocaleString()}
+                {Math.abs(cashChange.difference).toLocaleString("en-US")}
               </span>
             )}
           </div>
@@ -91,7 +91,7 @@ function ItemValues({
                 }`}
               >
                 {dupedChange.difference > 0 ? "+" : "-"}
-                {Math.abs(dupedChange.difference).toLocaleString()}
+                {Math.abs(dupedChange.difference).toLocaleString("en-US")}
               </span>
             )}
           </div>

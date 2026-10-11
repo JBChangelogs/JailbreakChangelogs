@@ -269,7 +269,7 @@ function ItemCard({
         return `${(diff / 1000).toFixed(diff % 1000 === 0 ? 0 : 2)}k`;
       return diff.toString();
     }
-    return diff.toLocaleString();
+    return diff.toLocaleString("en-US");
   };
 
   return (

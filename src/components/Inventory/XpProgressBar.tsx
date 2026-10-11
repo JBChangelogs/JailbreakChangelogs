@@ -107,7 +107,7 @@ export default function XpProgressBar({
   };
   const mobileSecondaryText =
     mobileSecondaryTextMode === "xp"
-      ? `${currentXpInLevel.toLocaleString()}/${xpRequiredForNextLevel.toLocaleString()} XP`
+      ? `${currentXpInLevel.toLocaleString("en-US")}/${xpRequiredForNextLevel.toLocaleString("en-US")} XP`
       : `SEASON ${season?.season || "?"}`;
 
   return (
@@ -138,8 +138,8 @@ export default function XpProgressBar({
           <div className="hidden sm:block">
             <div className="absolute top-1/2 left-2 -translate-y-1/2">
               <span className="text-primary-text text-sm font-bold">
-                {currentXpInLevel.toLocaleString()}/
-                {xpRequiredForNextLevel.toLocaleString()}
+                {currentXpInLevel.toLocaleString("en-US")}/
+                {xpRequiredForNextLevel.toLocaleString("en-US")}
               </span>
             </div>
 
@@ -177,8 +177,8 @@ export default function XpProgressBar({
           <div className="hidden sm:block">
             <div className="absolute top-1/2 left-2 -translate-y-1/2">
               <span className="text-form-button-text text-sm font-bold">
-                {currentXpInLevel.toLocaleString()}/
-                {xpRequiredForNextLevel.toLocaleString()}
+                {currentXpInLevel.toLocaleString("en-US")}/
+                {xpRequiredForNextLevel.toLocaleString("en-US")}
               </span>
             </div>
 

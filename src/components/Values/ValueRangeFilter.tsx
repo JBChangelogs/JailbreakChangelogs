@@ -17,8 +17,12 @@ export function ValueRangeFilter({
   // Local state for the slider visual position to ensure 60fps movement
   const [localRange, setLocalRange] = useState(rangeValue);
   // Local state for numerical inputs to allow typing
-  const [minInput, setMinInput] = useState(rangeValue[0].toLocaleString());
-  const [maxInput, setMaxInput] = useState(rangeValue[1].toLocaleString());
+  const [minInput, setMinInput] = useState(
+    rangeValue[0].toLocaleString("en-US"),
+  );
+  const [maxInput, setMaxInput] = useState(
+    rangeValue[1].toLocaleString("en-US"),
+  );
 
   // Helper to strip commas
   const stripCommas = (str: string) => str.replace(/,/g, "");
@@ -26,14 +30,14 @@ export function ValueRangeFilter({
   // Sync internal states when rangeValue changes (e.g. from parent reset or clear)
   useEffect(() => {
     setLocalRange(rangeValue);
-    setMinInput(rangeValue[0].toLocaleString());
-    setMaxInput(rangeValue[1].toLocaleString());
+    setMinInput(rangeValue[0].toLocaleString("en-US"));
+    setMaxInput(rangeValue[1].toLocaleString("en-US"));
   }, [rangeValue]);
 
   // Also sync inputs when localRange changes from slider movement
   useEffect(() => {
-    setMinInput(localRange[0].toLocaleString());
-    setMaxInput(localRange[1].toLocaleString());
+    setMinInput(localRange[0].toLocaleString("en-US"));
+    setMaxInput(localRange[1].toLocaleString("en-US"));
   }, [localRange]);
 
   const sliderMarks = useMemo(() => {
@@ -99,7 +103,7 @@ export function ValueRangeFilter({
                   const newRange = [val, localRange[1]];
                   setLocalRange(newRange);
                   onCommit(newRange);
-                  setMinInput(val.toLocaleString());
+                  setMinInput(val.toLocaleString("en-US"));
                 }}
                 className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
                 aria-label="Minimum value"
@@ -123,7 +127,7 @@ export function ValueRangeFilter({
                   const newRange = [localRange[0], val];
                   setLocalRange(newRange);
                   onCommit(newRange);
-                  setMaxInput(val.toLocaleString());
+                  setMaxInput(val.toLocaleString("en-US"));
                 }}
                 className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
                 aria-label="Maximum value"
@@ -131,10 +135,10 @@ export function ValueRangeFilter({
               />
             </div>
             <span className="text-secondary-text text-[11px] whitespace-nowrap">
-              {localRange[0].toLocaleString()} -{" "}
+              {localRange[0].toLocaleString("en-US")} -{" "}
               {localRange[1] >= maxValueRange
-                ? `${maxValueRange.toLocaleString()}+`
-                : localRange[1].toLocaleString()}
+                ? `${maxValueRange.toLocaleString("en-US")}+`
+                : localRange[1].toLocaleString("en-US")}
             </span>
           </div>
         </div>

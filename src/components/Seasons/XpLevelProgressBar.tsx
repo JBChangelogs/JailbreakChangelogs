@@ -90,8 +90,8 @@ export default function XpLevelProgressBar({
         {/* XP Text Overlay */}
         <div className="absolute top-1/2 left-2 -translate-y-1/2">
           <span className="text-sm font-bold">
-            {xpRequiredForThisLevel.toLocaleString()}/
-            {xpRequiredForThisLevel.toLocaleString()}
+            {xpRequiredForThisLevel.toLocaleString("en-US")}/
+            {xpRequiredForThisLevel.toLocaleString("en-US")}
           </span>
         </div>
 
@@ -135,8 +135,10 @@ export default function XpLevelProgressBar({
 
       {/* Additional Info */}
       <div className="text-secondary-text mt-1 flex flex-col gap-1 text-xs sm:flex-row sm:justify-between">
-        <span>This Level: {xpRequiredForThisLevel.toLocaleString()} XP</span>
-        <span>Total: {totalXpForLevel.toLocaleString()} XP</span>
+        <span>
+          This Level: {xpRequiredForThisLevel.toLocaleString("en-US")} XP
+        </span>
+        <span>Total: {totalXpForLevel.toLocaleString("en-US")} XP</span>
       </div>
     </div>
   );

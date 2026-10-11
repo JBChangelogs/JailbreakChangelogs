@@ -203,7 +203,7 @@ export default function XpCalculatorForm({
             XP progress within{" "}
             <span className="font-bold">Level {currentLevel}</span> (0-
             <span className="font-bold">
-              {maxXpForCurrentLevel.toLocaleString()} XP
+              {maxXpForCurrentLevel.toLocaleString("en-US")} XP
             </span>{" "}
             needed to reach{" "}
             <span className="font-bold">Level {currentLevel + 1}</span>)

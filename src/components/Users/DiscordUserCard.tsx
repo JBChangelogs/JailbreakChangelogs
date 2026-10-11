@@ -169,7 +169,7 @@ export default function DiscordUserCard({
             </>
           ) : (
             <>
-              <span>Member #{user.usernumber.toLocaleString()}</span>
+              <span>Member #{user.usernumber.toLocaleString("en-US")}</span>
               {joined > 0 && (
                 <>
                   <span aria-hidden="true">·</span>

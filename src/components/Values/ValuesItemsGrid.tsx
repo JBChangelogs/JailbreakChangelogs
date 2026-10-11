@@ -178,10 +178,10 @@ export default function ValuesItemsGrid({
             const isDefaultRange =
               appliedMinValue === 0 && appliedMaxValue >= MAX_VALUE_RANGE;
             const rangeText = !isDefaultRange
-              ? ` in range ${appliedMinValue.toLocaleString()} - ${
+              ? ` in range ${appliedMinValue.toLocaleString("en-US")} - ${
                   appliedMaxValue >= MAX_VALUE_RANGE
-                    ? `${MAX_VALUE_RANGE.toLocaleString()}+`
-                    : appliedMaxValue.toLocaleString()
+                    ? `${MAX_VALUE_RANGE.toLocaleString("en-US")}+`
+                    : appliedMaxValue.toLocaleString("en-US")
                 }`
               : "";
 
