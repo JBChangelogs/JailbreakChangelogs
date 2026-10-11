@@ -25,7 +25,6 @@ const sharedEnv = {
   NEXT_PUBLIC_WS_URL: preserve(),
   NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: preserve(),
   NEXT_TELEMETRY_DISABLED: preserve(),
-  NODE_OPTIONS: preserve(),
   RAILWAY_INTERNAL_API_URL: preserve(),
   RAILWAY_TOKEN: preserve(),
   SENTRY_AUTH_TOKEN: preserve(),
