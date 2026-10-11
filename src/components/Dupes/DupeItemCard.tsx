@@ -327,7 +327,7 @@ export default function DupeItemCard({
                 href={`https://www.roblox.com/users/${robloxId}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-link hover:text-link-hover text-center wrap-break-word transition-colors hover:underline"
+                className="text-link hover:text-link-hover min-w-0 text-center wrap-anywhere transition-colors hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
                 {getUsername(robloxId)}

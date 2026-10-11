@@ -342,13 +342,15 @@ export default function OGItemCard({
                 href={`https://www.roblox.com/users/${item.user_id}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-link hover:text-link-hover text-center wrap-break-word transition-colors hover:underline"
+                className="text-link hover:text-link-hover min-w-0 text-center transition-colors hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="inline-flex items-center gap-2">
-                  {getUsername(item.user_id)}
+                <span className="inline-flex max-w-full items-center gap-2">
+                  <span className="min-w-0 wrap-anywhere">
+                    {getUsername(item.user_id)}
+                  </span>
                   {getHasVerifiedBadge && getHasVerifiedBadge(item.user_id) && (
-                    <VerifiedBadgeIcon className="h-4 w-4" />
+                    <VerifiedBadgeIcon className="h-4 w-4 shrink-0" />
                   )}
                 </span>
               </a>
