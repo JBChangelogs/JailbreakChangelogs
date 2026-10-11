@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { captureException } from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 
@@ -12,10 +11,6 @@ interface ErrorProps {
 
 export default function Error({ error, reset }: ErrorProps) {
   const router = useRouter();
-
-  React.useEffect(() => {
-    captureException(error);
-  }, [error]);
 
   const handleRetry = () => {
     router.refresh();

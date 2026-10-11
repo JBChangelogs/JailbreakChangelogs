@@ -1,11 +1,7 @@
-import { withSentryConfig } from "@sentry/nextjs/config";
-
 const nextConfig = {
   env: {
     NEXT_PUBLIC_BUILD_COMMIT_SHA: process.env.RAILWAY_GIT_COMMIT_SHA || "",
     NEXT_PUBLIC_BUILD_TIME: Date.now().toString(),
-    NEXT_PUBLIC_SENTRY_ENVIRONMENT:
-      process.env.RAILWAY_ENVIRONMENT_NAME || process.env.NODE_ENV,
   },
   output: "standalone",
   // The railway SDK dynamically imports tsx/esbuild (IaC tooling), which
@@ -319,17 +315,4 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  applicationKey: "jailbreak-changelogs",
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  release: {
-    name: process.env.SENTRY_RELEASE || process.env.RAILWAY_GIT_COMMIT_SHA,
-  },
-  sourcemaps: {
-    disable: !process.env.SENTRY_AUTH_TOKEN,
-  },
-  widenClientFileUpload: true,
-  silent: !process.env.CI,
-});
+export default nextConfig;

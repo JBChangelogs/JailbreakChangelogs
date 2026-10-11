@@ -26,7 +26,6 @@ test("deployment protection uses the commit SHA when Railway has no deployment I
           RAILWAY_GIT_COMMIT_SHA: commitSha,
         },
       },
-      require: () => ({ withSentryConfig: (config: unknown) => config }),
     });
     expect(exports.default.deploymentId).toBe(expected);
     expect(exports.default.env.NEXT_PUBLIC_BUILD_COMMIT_SHA).toBe(

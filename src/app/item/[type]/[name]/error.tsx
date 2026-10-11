@@ -1,7 +1,5 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
-
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect } from "react";
 import Link from "next/link";
@@ -22,7 +20,6 @@ export default function ItemError({
   const router = useRouter();
 
   useEffect(() => {
-    captureException(error);
     log.error("Item details page error", error);
   }, [error]);
 
