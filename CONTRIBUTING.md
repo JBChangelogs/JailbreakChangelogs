@@ -188,13 +188,8 @@ For a palette PR, include screenshots of the theme picker, header, and footer, a
 
 These full-resolution sheets are reference snapshots of the standalone and collaboration logos using the themes available when they were exported. Use them as color references when choosing a filter for a new palette. They are saved examples; theme changes do not regenerate them automatically.
 
-[Download the standalone logo sheet (4000 × 8000)](.github/images/theme-logos/JBCL_Logo_All_Theme_Variants.png).
-
-![Standalone JBCL logo theme reference sheet](.github/images/theme-logos/JBCL_Logo_All_Theme_Variants.png)
-
-[Download the collaboration logo sheet (4000 × 11200)](.github/images/theme-logos/JBCL_Collab_Logo_All_Theme_Variants.png).
-
-![JBCL and Trading Core collaboration logo theme reference sheet](.github/images/theme-logos/JBCL_Collab_Logo_All_Theme_Variants.png)
+- [Download the standalone logo sheet (4000 × 8000)](https://assets.jailbreakchangelogs.com/assets/theme-previews/JBCL_Logo_All_Theme_Variants.png).
+- [Download the collaboration logo sheet (4000 × 11200)](https://assets.jailbreakchangelogs.com/assets/theme-previews/JBCL_Collab_Logo_All_Theme_Variants.png).
 
 ## Make a Pull Request
 
