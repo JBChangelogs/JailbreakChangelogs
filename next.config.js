@@ -317,6 +317,7 @@ const nextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
+  applicationKey: "jailbreak-changelogs",
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,

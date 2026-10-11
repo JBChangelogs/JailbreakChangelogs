@@ -3,6 +3,11 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { ModuleKind, transpileModule } from "typescript";
 import { sentryOptions } from "./sentry-options";
+import {
+  thirdPartyErrorFilterIntegration,
+  type ErrorEvent,
+  type Client,
+} from "@sentry/core";
 
 test("Sentry sends events only in production with a configured DSN", () => {
   const source = transpileModule(
@@ -53,6 +58,8 @@ test("Sentry reports crashes without forwarding other signals or request secrets
 
 test("Sentry initializes before hydration and records navigation without URL parameters", () => {
   const calls: unknown[] = [];
+  const integrations: ReturnType<typeof thirdPartyErrorFilterIntegration>[] =
+    [];
   const exports = {} as {
     onRouterTransitionStart: (url: string, type: string) => void;
   };
@@ -69,13 +76,44 @@ test("Sentry initializes before hydration and records navigation without URL par
       require: (name: string) =>
         name === "@sentry/nextjs"
           ? {
+              thirdPartyErrorFilterIntegration: (
+                options: Parameters<typeof thirdPartyErrorFilterIntegration>[0],
+              ) => {
+                const applicationKey =
+                  readFileSync(
+                    new URL("../../next.config.js", import.meta.url),
+                    "utf8",
+                  ).match(/applicationKey: "([^"]+)"/)?.[1] ?? "";
+                expect(options.filterKeys).toEqual([applicationKey]);
+                const integration = thirdPartyErrorFilterIntegration(options);
+                integrations.push(integration);
+                return integration;
+              },
               init: (options: unknown) => calls.push(options),
               addBreadcrumb: (crumb: unknown) => calls.push(crumb),
             }
           : { sentryOptions },
     },
   );
-  expect(calls).toEqual([sentryOptions]);
+  expect(calls).toEqual([{ ...sentryOptions, integrations }]);
+  const adFrame = { filename: "https://s.nitropay.com/ads-2263.js", lineno: 2 };
+  const appFrame = {
+    filename: "https://jailbreakchangelogs.com/_next/static/chunks/app.js",
+    lineno: 1,
+    module_metadata: {
+      "_sentryBundlerPluginAppKey:jailbreak-changelogs": true,
+    },
+  };
+  for (const frames of [[adFrame], [appFrame], [adFrame, appFrame]]) {
+    const event: ErrorEvent = {
+      type: undefined,
+      exception: { values: [{ stacktrace: { frames } }] },
+    };
+    expect(integrations[0].processEvent!(event, {}, {} as Client)).toBe(
+      frames.includes(appFrame) ? event : null,
+    );
+  }
+
   exports.onRouterTransitionStart("/inventories/123?token=secret#scan", "push");
   expect(calls[1]).toEqual({
     category: "navigation",
