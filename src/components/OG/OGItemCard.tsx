@@ -21,6 +21,7 @@ import {
 } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { formatFullValue } from "@/utils/trading/values";
+import { hasItemValue } from "@/utils/items/itemValue";
 import { hasSeason, unlockLevel } from "@/utils/items/season";
 import {
   formatUnlockLevelBadge,
@@ -267,10 +268,9 @@ export default function OGItemCard({
               <TooltipTrigger asChild>
                 <div className="text-primary-text cursor-help text-xl font-bold">
                   <span className="sm:hidden">
-                    {itemData.cash_value === null ||
-                    itemData.cash_value === "N/A"
-                      ? "N/A"
-                      : itemData.cash_value}
+                    {hasItemValue(itemData.cash_value)
+                      ? itemData.cash_value
+                      : "N/A"}
                   </span>
                   <span className="hidden sm:inline">
                     {formatFullValue(itemData.cash_value)}
@@ -292,10 +292,9 @@ export default function OGItemCard({
               <TooltipTrigger asChild>
                 <div className="text-primary-text cursor-help text-xl font-bold">
                   <span className="sm:hidden">
-                    {itemData.duped_value === null ||
-                    itemData.duped_value === "N/A"
-                      ? "N/A"
-                      : itemData.duped_value}
+                    {hasItemValue(itemData.duped_value)
+                      ? itemData.duped_value
+                      : "N/A"}
                   </span>
                   <span className="hidden sm:inline">
                     {formatFullValue(itemData.duped_value)}

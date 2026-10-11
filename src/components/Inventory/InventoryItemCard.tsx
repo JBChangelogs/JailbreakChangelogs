@@ -262,10 +262,9 @@ export default function InventoryItemCard({
               <TooltipTrigger asChild>
                 <div className="text-primary-text cursor-help text-xl font-bold">
                   <span className="sm:hidden">
-                    {itemData.cash_value === null ||
-                    itemData.cash_value === "N/A"
-                      ? "N/A"
-                      : itemData.cash_value}
+                    {hasItemValue(itemData.cash_value)
+                      ? itemData.cash_value
+                      : "N/A"}
                   </span>
                   <span className="hidden sm:inline">
                     {formatFullValue(itemData.cash_value)}
