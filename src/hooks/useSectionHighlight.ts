@@ -58,7 +58,7 @@ export function useSectionHighlight() {
       setTimeout(() => {
         el.scrollIntoView({
           behavior: "smooth",
-          block: "center",
+          block: "start",
         });
       }, 100);
     }
