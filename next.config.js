@@ -11,7 +11,8 @@ const nextConfig = {
   serverExternalPackages: ["railway"],
   compress: true,
   poweredByHeader: false,
-  deploymentId: process.env.RAILWAY_DEPLOYMENT_ID,
+  deploymentId:
+    process.env.RAILWAY_DEPLOYMENT_ID || process.env.RAILWAY_GIT_COMMIT_SHA,
   compiler: {
     removeConsole: {
       exclude: ["error"],
