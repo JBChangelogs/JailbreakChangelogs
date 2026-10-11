@@ -8,19 +8,19 @@ export default function Loading() {
 
         {/* Timeline Header Skeleton */}
         <div className="border-border-card bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
-          <div className="bg-secondary-bg mb-4 h-8 w-80 animate-pulse rounded"></div>
-          <div className="bg-secondary-bg mb-4 h-4 w-full animate-pulse rounded"></div>
-          <div className="bg-secondary-bg mb-4 h-4 w-3/4 animate-pulse rounded"></div>
+          <div className="bg-quaternary-bg/70 mb-4 h-8 w-80 animate-pulse rounded"></div>
+          <div className="bg-quaternary-bg/70 mb-4 h-4 w-full animate-pulse rounded"></div>
+          <div className="bg-quaternary-bg/70 mb-4 h-4 w-3/4 animate-pulse rounded"></div>
 
           <div className="flex flex-col gap-4 sm:flex-row">
-            <div className="bg-secondary-bg h-10 w-32 animate-pulse rounded"></div>
+            <div className="bg-quaternary-bg/70 h-10 w-32 animate-pulse rounded"></div>
           </div>
         </div>
 
         {/* Timeline Content Skeleton */}
         <div className="relative">
           {/* Vertical timeline line skeleton */}
-          <div className="bg-border-border-card hover:border-border-focus absolute top-0 bottom-0 left-0 w-1 md:left-1/2 md:-translate-x-1/2"></div>
+          <div className="bg-border-card hover:border-border-focus absolute top-0 bottom-0 left-0 w-1 md:left-1/2 md:-translate-x-1/2"></div>
 
           <div className="space-y-16">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -30,7 +30,7 @@ export default function Loading() {
               >
                 {/* Connector line skeleton */}
                 <div
-                  className={`bg-border-border-card hover:border-border-focus absolute top-1/2 h-0.5 w-1/2 ${i % 2 === 0 ? "left-0" : "right-0"}`}
+                  className={`bg-border-card hover:border-border-focus absolute top-1/2 h-0.5 w-1/2 ${i % 2 === 0 ? "left-0" : "right-0"}`}
                 ></div>
 
                 {/* Card skeleton */}
@@ -39,15 +39,15 @@ export default function Loading() {
                 >
                   <div className="border-border-card bg-secondary-bg hover:border-border-focus overflow-hidden rounded-lg border">
                     {/* Image skeleton */}
-                    <div className="bg-secondary-bg relative aspect-video w-full animate-pulse"></div>
+                    <div className="bg-quaternary-bg/70 relative aspect-video w-full animate-pulse"></div>
 
                     {/* Content skeleton */}
                     <div className="p-3">
                       <div className="flex flex-col gap-0.5">
                         {/* Title skeleton */}
-                        <div className="bg-secondary-bg h-6 w-3/4 animate-pulse rounded"></div>
+                        <div className="bg-quaternary-bg/70 h-6 w-3/4 animate-pulse rounded"></div>
                         {/* Subtitle skeleton */}
-                        <div className="bg-secondary-bg h-4 w-1/2 animate-pulse rounded"></div>
+                        <div className="bg-quaternary-bg/70 h-4 w-1/2 animate-pulse rounded"></div>
                       </div>
                     </div>
                   </div>
