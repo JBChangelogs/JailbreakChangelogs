@@ -272,6 +272,7 @@ test("accepted trade cards use the message content column and one row timestamp"
         if (name === "react")
           return {
             useRef: (current: unknown) => ({ current }),
+            useState: (initial: unknown) => [initial, () => {}],
             useEffect: () => {},
           };
         if (name === "@/hooks/useMediaQuery")

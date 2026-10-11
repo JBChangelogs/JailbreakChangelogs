@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Dispatch, RefObject, SetStateAction } from "react";
 import Link from "next/link";
 import Twemoji from "react-twemoji";
@@ -126,6 +126,7 @@ export function MessageRow({
   handleEditMessage,
 }: MessageRowProps) {
   const isMobile = useMediaQuery("(max-width: 1023px)");
+  const [isMobileSheetOpen, setMobileSheetOpen] = useState(false);
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
   const cancelLongPress = () => {
@@ -374,6 +375,19 @@ export function MessageRow({
           id={`message-${domId}`}
           className="group/message"
           data-message-row
+          onClick={(event) => {
+            if (
+              isMobile &&
+              !isSending &&
+              !deletingMessageId &&
+              !editingMessageId &&
+              canOpenActions &&
+              !(event.target as HTMLElement).closest(
+                "a,button,textarea,input,select,[role='menuitem']",
+              )
+            )
+              setActiveMessageId(message.id);
+          }}
           onPointerDown={(event) => {
             if (
               !isMobile ||
@@ -408,9 +422,6 @@ export function MessageRow({
           }}
           onPointerUp={cancelLongPress}
           onPointerCancel={cancelLongPress}
-          onContextMenu={(event) => {
-            if (isMobile) event.preventDefault();
-          }}
         >
           {showDaySeparator && typeof message.createdAt === "number" && (
             <ChatEvent className="items-center gap-2 py-2">
@@ -600,6 +611,7 @@ export function MessageRow({
                   <div className="flex w-full items-start gap-2">
                     <div className="min-w-0 flex-1">
                       <ChatEventContent
+                        data-message-content
                         className={cn(
                           "wrap-break-word whitespace-pre-wrap",
                           message.status === "pending"
@@ -650,12 +662,23 @@ export function MessageRow({
               {editingMessageId !== message.id && canOpenActions && (
                 <Button
                   variant="ghost"
-                  className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:right-0 lg:hidden"
+                  className={
+                    isMessageMenuActive
+                      ? "absolute top-0 right-0 !size-8 lg:hidden"
+                      : "sr-only focus:not-sr-only focus:absolute focus:top-0 focus:right-0 lg:hidden"
+                  }
+                  aria-label="Message actions"
                   aria-haspopup="dialog"
                   disabled={isSending || !!deletingMessageId}
-                  onClick={() => setActiveMessageId(message.id)}
+                  onClick={() => {
+                    setActiveMessageId(message.id);
+                    setMobileSheetOpen(true);
+                  }}
                 >
-                  Message actions
+                  <Icon
+                    icon="heroicons:ellipsis-horizontal"
+                    className="!size-4"
+                  />
                 </Button>
               )}
               {editingMessageId !== message.id && canOpenActions && (
@@ -722,8 +745,11 @@ export function MessageRow({
         </ContextMenuContent>
       )}
       <Sheet
-        open={isMobile && isMessageMenuActive && canOpenActions}
+        open={
+          isMobile && isMessageMenuActive && canOpenActions && isMobileSheetOpen
+        }
         onOpenChange={(open) => {
+          setMobileSheetOpen(open);
           if (!open) setActiveMessageId(null);
         }}
       >
@@ -743,7 +769,12 @@ export function MessageRow({
           <SheetTitle id={`message-actions-${domId}`} className="sr-only">
             Message actions
           </SheetTitle>
-          <div onClick={() => setActiveMessageId(null)}>
+          <div
+            onClick={() => {
+              setMobileSheetOpen(false);
+              setActiveMessageId(null);
+            }}
+          >
             {renderMenuItems(MessageSheetAction, true)}
           </div>
         </SheetContent>

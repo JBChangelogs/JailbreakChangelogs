@@ -44,6 +44,16 @@ function harness(mobile: boolean) {
         refs[index] ??= { current: initial };
         return refs[index];
       },
+      useState: (initial: unknown) => {
+        const index = cursor++;
+        refs[index] ??= initial;
+        return [
+          refs[index],
+          (value: unknown) => {
+            refs[index] = value;
+          },
+        ];
+      },
       useEffect: (effect: () => () => void) => cleanups.push(effect()),
     },
     "@/hooks/useMediaQuery": { useMediaQuery: () => mobile },
@@ -119,7 +129,7 @@ function harness(mobile: boolean) {
   };
 }
 
-test("mobile actions require a long press; scrolling, short taps and unmount cancel it", () => {
+test("mobile holds reveal actions without opening the sheet; scrolling and unmount cancel it", () => {
   const h = harness(true);
   const tree = h.render();
   const row = tree.find((node) => "data-message-row" in node.props)!;
@@ -140,6 +150,11 @@ test("mobile actions require a long press; scrolling, short taps and unmount can
   row.props.onPointerDown!(event);
   h.flush();
   expect(h.active()).toBe("message");
+  expect(h.render().find((node) => node.type === "Sheet")!.props.open).toBe(
+    false,
+  );
+  h.render().find((node) => node.props["aria-label"] === "Message actions")!
+    .props.onClick!();
   const sheet = h.render().find((node) => node.type === "Sheet")!;
   expect(sheet.props.open).toBe(true);
   const content = h.render().find((node) => node.type === "SheetContent")!;
@@ -183,11 +198,49 @@ test("mobile actions require a long press; scrolling, short taps and unmount can
   expect(
     tree.find((node) => node.type === "ChatEvent")!.props.onClick,
   ).toBeUndefined();
-  expect(row.props.onClick).toBeUndefined();
   row.props.onPointerDown!(event);
   h.unmount();
   h.flush();
   expect(h.active()).toBeNull();
+});
+
+test("tapping or holding sent and received text reveals only the action button and preserves selection", () => {
+  for (const senderId of ["me", "them"]) {
+    const h = harness(true);
+    h.props.message.senderId = senderId;
+    const tree = h.render();
+    const row = tree.find((node) => "data-message-row" in node.props)!;
+    const content = tree.find((node) => "data-message-content" in node.props)!;
+    row.props.onPointerDown!({
+      pointerType: "touch",
+      clientX: 20,
+      clientY: 20,
+      target: {
+        closest: () => null,
+      },
+    });
+    h.flush();
+    expect(h.active()).toBe("message");
+    expect(row.props.onContextMenu).toBeUndefined();
+    const action = h
+      .render()
+      .find((node) => node.props["aria-label"] === "Message actions")!;
+    expect(action.props.className).not.toContain("sr-only");
+    expect(h.render().find((node) => node.type === "Sheet")!.props.open).toBe(
+      false,
+    );
+    h.props.setActiveMessageId(null);
+    row.props.onClick!({ target: { closest: () => null } });
+    expect(h.active()).toBe("message");
+    expect(h.render().find((node) => node.type === "Sheet")!.props.open).toBe(
+      false,
+    );
+    expect(content).toBeDefined();
+    action.props.onClick!();
+    expect(h.render().find((node) => node.type === "Sheet")!.props.open).toBe(
+      true,
+    );
+  }
 });
 
 test("desktop toolbar uses existing reply and edit actions; sending disables actions without revealing the toolbar", () => {
@@ -272,6 +325,8 @@ test("selecting Reply in the mobile sheet sets the reply target before dismissin
     target: { closest: () => null },
   });
   h.flush();
+  h.render().find((node) => node.props["aria-label"] === "Message actions")!
+    .props.onClick!();
   const tree = h.render();
   tree.find(
     (node) =>
@@ -280,8 +335,12 @@ test("selecting Reply in the mobile sheet sets the reply target before dismissin
         (child) => child.props.icon === "heroicons-outline:reply",
       ),
   )!.props.onClick!();
-  tree.find((node) => node.type === "div" && node.props.onClick)!.props
-    .onClick!();
+  tree.find(
+    (node) =>
+      node.type === "div" &&
+      node.props.onClick &&
+      !("data-message-row" in node.props),
+  )!.props.onClick!();
   expect(h.replies).toEqual([h.props.message]);
   expect(h.active()).toBeNull();
 });
@@ -298,6 +357,7 @@ test("pending messages and interactive targets cannot open mobile actions; delet
   tree.find((node) => "data-message-row" in node.props)!.props.onPointerDown!(
     event,
   );
+  tree.find((node) => "data-message-row" in node.props)!.props.onClick!(event);
   h.flush();
   expect(h.active()).toBeNull();
   tree.find(
@@ -312,6 +372,9 @@ test("pending messages and interactive targets cannot open mobile actions; delet
   tree = h.render();
   const textEvent = { ...event, target: { closest: () => null } };
   tree.find((node) => "data-message-row" in node.props)!.props.onPointerDown!(
+    textEvent,
+  );
+  tree.find((node) => "data-message-row" in node.props)!.props.onClick!(
     textEvent,
   );
   h.flush();

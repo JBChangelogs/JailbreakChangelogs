@@ -4,9 +4,24 @@ import * as React from "react";
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const ContextMenu = ContextMenuPrimitive.Root;
-const ContextMenuTrigger = ContextMenuPrimitive.Trigger;
+const ContextMenuTrigger = React.forwardRef<
+  React.ComponentRef<typeof ContextMenuPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Trigger>
+>(({ disabled, style, ...props }, ref) => {
+  const isMobile = useMediaQuery("(max-width: 1023px)");
+  return (
+    <ContextMenuPrimitive.Trigger
+      {...props}
+      ref={ref}
+      disabled={isMobile || disabled}
+      style={{ WebkitTouchCallout: "default", ...style }}
+    />
+  );
+});
+ContextMenuTrigger.displayName = "ContextMenuTrigger";
 
 const ContextMenuContent = React.forwardRef<
   React.ComponentRef<typeof ContextMenuPrimitive.Content>,
