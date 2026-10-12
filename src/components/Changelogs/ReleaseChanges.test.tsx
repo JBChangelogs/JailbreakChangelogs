@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
-import ReleaseChanges, { ReleaseTimelineEntry } from "./ReleaseChanges";
+import ReleaseChanges from "./ReleaseChanges";
+import { ReleaseTimelineEntry } from "./ReleaseTimelineEntry";
 
 test("previews five changes with full counts, keeps notes and sanitizes release HTML", () => {
   const content = `### Features\n${Array.from({ length: 6 }, (_, i) => `* Change ${i + 1}`).join("\n")}\n\nRead the migration guide.\n\n<script>alert('unsafe')</script>`;

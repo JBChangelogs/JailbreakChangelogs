@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site";
 import { getCachedChangelogEntries } from "@/lib/changelog-parser";
-import { ReleaseTimelineEntry } from "@/components/Changelogs/ReleaseChanges";
+import { ReleaseTimelineEntry } from "@/components/Changelogs/ReleaseTimelineEntry";
 import WhatsNewToggle from "@/components/Changelogs/WhatsNewToggle";
 
 export const metadata: Metadata = {
