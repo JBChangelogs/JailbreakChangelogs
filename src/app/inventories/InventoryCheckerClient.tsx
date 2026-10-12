@@ -1098,25 +1098,6 @@ export default function InventoryCheckerClient({
                 fetchQueuePosition={fetchQueuePosition}
               />
 
-              {effectiveActiveTab === 0 && robloxId && (
-                <InventoryFeaturePreview
-                  networthData={networthData}
-                  itemsData={itemsData}
-                  inventoryData={currentData}
-                  isOwnInventory={isOwnInventory}
-                  ownerName={
-                    deferredRobloxUsers[robloxId]?.displayName ||
-                    deferredRobloxUsers[robloxId]?.name
-                  }
-                  tabs={tabIndex}
-                  onExplore={(event, index, section) => {
-                    pendingSectionRef.current = section ?? null;
-                    handleTabChange(event, index);
-                    document.getElementById(`inventory-tab-${index}`)?.focus();
-                  }}
-                />
-              )}
-
               {/* Tabbed Interface */}
               <div className="mt-6">
                 <InventoryOverflowTabs
@@ -1131,6 +1112,27 @@ export default function InventoryCheckerClient({
                   hasTrades={Boolean(robloxId)}
                   robloxId={robloxId}
                 />
+
+                {effectiveActiveTab === 0 && robloxId && (
+                  <InventoryFeaturePreview
+                    networthData={networthData}
+                    itemsData={itemsData}
+                    inventoryData={currentData}
+                    isOwnInventory={isOwnInventory}
+                    ownerName={
+                      deferredRobloxUsers[robloxId]?.displayName ||
+                      deferredRobloxUsers[robloxId]?.name
+                    }
+                    tabs={tabIndex}
+                    onExplore={(event, index, section) => {
+                      pendingSectionRef.current = section ?? null;
+                      handleTabChange(event, index);
+                      document
+                        .getElementById(`inventory-tab-${index}`)
+                        ?.focus();
+                    }}
+                  />
+                )}
 
                 {/* Tab Content */}
                 <div className="mt-4">
