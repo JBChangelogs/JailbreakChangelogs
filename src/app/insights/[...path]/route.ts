@@ -14,16 +14,28 @@ function resolveClientIp(request: NextRequest): string | null {
 }
 
 async function proxy(request: NextRequest, path: string[]) {
-  const upstreamUrl = new URL(`${RYBBIT_API_BASE}/${path.join("/")}`);
+  // Railway's public ingress replaces visitor IP headers on server-to-server requests.
+  const apiBase = process.env.RYBBIT_API_URL || RYBBIT_API_BASE;
+  const upstreamUrl = new URL(`${apiBase}/${path.join("/")}`);
   upstreamUrl.search = request.nextUrl.search;
 
   const clientIp = resolveClientIp(request);
 
   const headers = new Headers();
-  const contentType = request.headers.get("content-type");
-  if (contentType) headers.set("content-type", contentType);
-  const userAgent = request.headers.get("user-agent");
-  if (userAgent) headers.set("user-agent", userAgent);
+  for (const name of [
+    "content-type",
+    "user-agent",
+    "accept",
+    "accept-language",
+    "accept-encoding",
+    "sec-fetch-site",
+    "sec-fetch-mode",
+    "sec-fetch-dest",
+    "sec-fetch-user",
+  ]) {
+    const value = request.headers.get(name);
+    if (value) headers.set(name, value);
+  }
   if (clientIp) {
     headers.set("x-forwarded-for", clientIp);
     headers.set("x-real-ip", clientIp);
