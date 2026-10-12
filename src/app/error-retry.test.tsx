@@ -22,6 +22,7 @@ const paths = readdirSync(new URL("./", import.meta.url), { recursive: true })
 for (const path of paths) {
   test(`${path} retries through Next.js without a separate refresh or reset`, () => {
     const calls: string[] = [];
+    const reports: unknown[][] = [];
     const exports = {} as { default: (props: unknown) => Node };
     const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
     runInNewContext(
@@ -32,7 +33,8 @@ for (const path of paths) {
         exports,
         process: { env: { NODE_ENV: "production" } },
         require: (name: string) => {
-          if (name === "react") return { useEffect: () => {} };
+          if (name === "react")
+            return { useEffect: (effect: () => void) => effect() };
           if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
           if (name === "next/navigation") {
             return {
@@ -51,6 +53,14 @@ for (const path of paths) {
           if (name === "@/utils/analytics/rybbit") {
             return { trackEvent: () => {} };
           }
+          if (name === "@/utils/analytics/reportAppError") {
+            return {
+              reportAppError: (...args: unknown[]) => {
+                reports.push(args);
+                return () => {};
+              },
+            };
+          }
           if (name === "@/services/logger") {
             return { createLogger: () => ({ error: () => {} }) };
           }
@@ -58,13 +68,15 @@ for (const path of paths) {
         },
       },
     );
+    const error = new Error("Temporary API failure");
     const tree = nodes(
       exports.default({
-        error: new Error("Temporary API failure"),
+        error,
         retry: () => calls.push("retry"),
         reset: () => calls.push("reset"),
       }),
     );
+    expect(reports).toEqual([[error, path.slice(0, -"/error.tsx".length)]]);
     const retryButton = tree.find(
       (node) =>
         (node.type === "Button" || node.type === "button") &&

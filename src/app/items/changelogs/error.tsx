@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { reportAppError } from "@/utils/analytics/reportAppError";
 import { createLogger } from "@/services/logger";
 import { trackEvent } from "@/utils/analytics/rybbit";
 
@@ -16,6 +17,7 @@ export default function Error({
   useEffect(() => {
     log.error("Values changelogs error", error);
     trackEvent("Error", { message: error.message });
+    return reportAppError(error, "items/changelogs");
   }, [error]);
 
   return (

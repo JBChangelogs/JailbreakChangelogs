@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
+import { reportAppError } from "@/utils/analytics/reportAppError";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -18,6 +19,7 @@ export default function Error({
 }) {
   useEffect(() => {
     log.error("Bot page error", error);
+    return reportAppError(error, "bot");
   }, [error]);
 
   return (

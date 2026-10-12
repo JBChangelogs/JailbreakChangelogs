@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
+import { reportAppError } from "@/utils/analytics/reportAppError";
 import { createLogger } from "@/services/logger";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +18,7 @@ export default function Error({
 }) {
   useEffect(() => {
     log.error("Changelog details error", error);
+    return reportAppError(error, "values/changelogs/[id]");
   }, [error]);
 
   return (

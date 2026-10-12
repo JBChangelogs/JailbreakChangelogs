@@ -20,6 +20,10 @@ declare global {
     };
 
     rybbit?: {
+      error?: (
+        error: Error,
+        properties?: Record<string, string | number | boolean>,
+      ) => void;
       pageview: () => void;
       event: (
         name: string,

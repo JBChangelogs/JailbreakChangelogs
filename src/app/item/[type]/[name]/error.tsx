@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
+import { reportAppError } from "@/utils/analytics/reportAppError";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -18,6 +19,7 @@ export default function ItemError({
 }) {
   useEffect(() => {
     log.error("Item details page error", error);
+    return reportAppError(error, "item/[type]/[name]");
   }, [error]);
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import { reportAppError } from "@/utils/analytics/reportAppError";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 
 interface ErrorProps {
@@ -9,6 +10,8 @@ interface ErrorProps {
 }
 
 export default function Error({ error, retry }: ErrorProps) {
+  useEffect(() => reportAppError(error, "seasons/will-i-make-it"), [error]);
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
