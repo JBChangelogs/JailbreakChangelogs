@@ -58,7 +58,7 @@ export default function ReportFalseDupeModal({
     try {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        `/v2/items/${encodeURIComponent(item.id)}/duplicate-reports`,
+        `/v2/items/${item.item_id}/duplicate-reports`,
       );
       const response = await fetch(url, {
         method: "POST",
