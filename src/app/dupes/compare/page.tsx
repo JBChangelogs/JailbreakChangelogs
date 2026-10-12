@@ -9,11 +9,28 @@ import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<{ id?: string }>;
+  searchParams: Promise<{
+    id?: string;
+    itemId?: string;
+    title?: string;
+    category?: string;
+    originalOwner?: string;
+  }>;
 }
 
 export default async function DupeComparisonPage({ searchParams }: PageProps) {
-  const { id } = await searchParams;
+  const { id, itemId, title, category, originalOwner } = await searchParams;
+  const catalogId = Number(itemId);
+  const reportItem = title
+    ? {
+        title,
+        categoryTitle: category,
+        item_id:
+          Number.isSafeInteger(catalogId) && catalogId > 0
+            ? catalogId
+            : undefined,
+      }
+    : undefined;
 
   if (!id) {
     notFound();
@@ -42,7 +59,11 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
 
         <NitroRailFallbackAd adId="np-rail-left-dupe-compare-fallback" />
 
-        <DupeComparisonLoader id={id} />
+        <DupeComparisonLoader
+          id={id}
+          reportItem={reportItem}
+          originalOwner={originalOwner}
+        />
         <DupeFinderFAQ />
       </div>
     </>

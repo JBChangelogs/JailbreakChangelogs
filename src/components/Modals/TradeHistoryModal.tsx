@@ -20,6 +20,7 @@ import { RobloxUser } from "@/types";
 import { formatShortDateTime } from "@/utils/helpers/timestamp";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 
 interface TradeHistoryEntry {
   UserId: number;
@@ -27,6 +28,8 @@ interface TradeHistoryEntry {
 }
 
 interface Item {
+  item_id?: number;
+  info?: { title: string; value: string }[];
   title: string;
   categoryTitle?: string;
   history?: TradeHistoryEntry[] | string;
@@ -224,7 +227,7 @@ export default function TradeHistoryModal({
                 className="w-full shrink-0 sm:w-auto"
               >
                 <a
-                  href={`/dupes/compare?id=${encodeURIComponent(item.id)}`}
+                  href={getDupeComparisonUrl(item)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

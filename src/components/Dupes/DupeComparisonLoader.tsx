@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import type { DuplicateVariantsResponse } from "@/types";
 import { useBatchItems } from "@/hooks/useBatchItems";
 import { createLogger } from "@/services/logger";
@@ -9,19 +8,22 @@ import {
   INVENTORY_API_SOURCE_HEADER,
   INVENTORY_API_URL,
 } from "@/utils/api/api";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import DupeComparisonClient from "./DupeComparisonClient";
+import DupeComparisonNotFound from "./DupeComparisonNotFound";
 
 const log = createLogger("UI");
 
 interface DupeComparisonLoaderProps {
   id: string;
+  reportItem?: { item_id?: number; title: string; categoryTitle?: string };
+  originalOwner?: string;
 }
 
 export default function DupeComparisonLoader({
   id,
+  reportItem,
+  originalOwner,
 }: DupeComparisonLoaderProps) {
   const variantsQuery = useQuery({
     queryKey: ["duplicate-variants", id],
@@ -96,31 +98,11 @@ export default function DupeComparisonLoader({
   if (!variantsQuery.isSuccess) return null;
 
   return (
-    <div className="border-border-card bg-secondary-bg rounded-lg border">
-      <div className="space-y-4 p-5">
-        <div className="flex items-start gap-3">
-          <div className="bg-secondary-text/10 mt-0.5 shrink-0 rounded-full p-2">
-            <Icon
-              icon="heroicons:magnifying-glass"
-              className="text-secondary-text h-5 w-5"
-            />
-          </div>
-          <div>
-            <p className="text-primary-text font-medium">
-              Comparison not found
-            </p>
-            <p className="text-secondary-text mt-0.5 text-sm">
-              This duplicate comparison can&apos;t be found.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="secondary" size="sm">
-            <Link href="/dupes">Search Dupes</Link>
-          </Button>
-        </div>
-      </div>
-    </div>
+    <DupeComparisonNotFound
+      key={id}
+      id={id}
+      reportItem={reportItem}
+      originalOwner={originalOwner}
+    />
   );
 }

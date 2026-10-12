@@ -1,6 +1,7 @@
 "use client";
 
 import type { CatalogValues } from "@/hooks/usePartialItems";
+import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 
@@ -391,7 +392,7 @@ export default function InventoryItemCard({
         <div className="mt-3 flex flex-col items-center gap-1 text-center text-xs">
           <span className="text-secondary-text">This item may be duped.</span>
           <Link
-            href={`/dupes/compare?id=${encodeURIComponent(item.id)}`}
+            href={getDupeComparisonUrl(item)}
             className="text-link hover:text-link-hover font-bold hover:underline"
             onClick={(e) => e.stopPropagation()}
           >

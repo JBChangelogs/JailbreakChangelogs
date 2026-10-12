@@ -138,6 +138,9 @@ export default function ReportFalseDupeModal({
             </span>
           )}
         </div>
+        <p className="text-secondary-text text-sm [overflow-wrap:anywhere]">
+          Item instance ID: {item.id}
+        </p>
         <label
           htmlFor="false-dupe-report-reason"
           className="text-primary-text block text-sm font-medium"
