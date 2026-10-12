@@ -24,7 +24,7 @@ export default function ItemError({
 
   return (
     <section className="bg-primary-bg">
-      <div className="container mx-auto py-12">
+      <div className="container mx-auto px-6 py-12">
         <div className="min-h-[calc(100vh-8rem)] lg:flex lg:items-center lg:gap-12">
           <div className="w-full lg:w-1/2">
             <p className="text-secondary-text text-sm font-medium">
