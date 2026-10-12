@@ -12,11 +12,8 @@ interface DupeItemsGridProps {
   filteredItems: DupeFinderItem[];
   getUserAvatar: (userId: string) => string;
   getUsername: (userId: string) => string;
-  getDupedValueForItem: (
-    itemData: CatalogValues,
-    dupeItem: DupeFinderItem,
-  ) => number;
   onCardClick: (item: DupeFinderItem) => void;
+  onReport: (item: DupeFinderItem) => void;
   isLoading?: boolean;
   itemCounts: Map<string, number>;
   duplicateOrders: Map<string, number>;
@@ -28,8 +25,8 @@ export default function DupeItemsGrid({
   filteredItems,
   getUserAvatar,
   getUsername,
-  getDupedValueForItem,
   onCardClick,
+  onReport,
   isLoading = false,
   itemCounts,
   duplicateOrders,
@@ -137,8 +134,8 @@ export default function DupeItemsGrid({
                 itemData={itemData}
                 getUserAvatar={getUserAvatar}
                 getUsername={getUsername}
-                getDupedValueForItem={getDupedValueForItem}
                 onCardClick={onCardClick}
+                onReport={onReport}
                 duplicateNumber={duplicateNumber}
                 isDuplicate={isDuplicate}
                 robloxId={robloxId}

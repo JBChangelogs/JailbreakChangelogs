@@ -81,9 +81,9 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         </div>
         <div className="bg-button-info/10 border-border-card text-primary-text mb-6 rounded-lg border p-4 text-sm">
           If you believe an item is incorrectly flagged, you can report the
-          false dupe after reviewing its variants. Select the item, choose
-          &quot;Compare Variants,&quot; then use &quot;Report False Dupe&quot;
-          on the comparison page.
+          false dupe after reviewing its ownership histories. Choose
+          &quot;Variants&quot; on the card to open the histories in a new tab,
+          or &quot;Dupe check&quot; to run a check and report from its results.
         </div>
 
         <NitroRailFallbackAd adId="np-rail-left-dupe-detail-fallback" />

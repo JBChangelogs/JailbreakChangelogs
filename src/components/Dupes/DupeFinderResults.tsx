@@ -10,7 +10,9 @@ import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
 import DupeSearchInput from "./DupeSearchInput";
-import { getDupedValueForItem } from "@/utils/trading/dupeUtils";
+import ReportFalseDupeModal from "./ReportFalseDupeModal";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { useCatalogValues } from "@/hooks/usePartialItems";
 import {
   compareItemsByValue,
@@ -35,6 +37,21 @@ export default function DupeFinderResults({
   items,
   originalSearchTerm,
 }: DupeFinderResultsProps) {
+  const { isAuthenticated, setLoginModal } = useAuthContext();
+  const [reportItem, setReportItem] = useState<DupeFinderItem | null>(null);
+  const reportOwner =
+    reportItem?.info?.find((entry) => entry.title === "Original Owner")
+      ?.value || robloxId;
+
+  const openReport = (item: DupeFinderItem) => {
+    if (!isAuthenticated) {
+      toast.info("You must be logged in to report a false dupe.");
+      setLoginModal({ open: true });
+      return;
+    }
+    setReportItem(item);
+  };
+
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -321,10 +338,9 @@ export default function DupeFinderResults({
                 className="text-button-info shrink-0 text-lg"
               />
               <span className="font-medium">
-                Helpful Tip: Click on any item card to view its ownership
-                history. If you suspect an item is a false dupe, click the
-                &quot;Compare Variants&quot; button inside the ownership history
-                modal.
+                Check a dupe directly on its card or compare ownership
+                histories. You can report a false dupe from the check results or
+                comparison.
               </span>
             </div>
           </div>
@@ -334,8 +350,8 @@ export default function DupeFinderResults({
           filteredItems={filteredAndSortedItems}
           getUserAvatar={getUserAvatar}
           getUsername={getUsername}
-          getDupedValueForItem={getDupedValueForItem}
           onCardClick={handleCardClick}
+          onReport={openReport}
           itemCounts={itemCounts}
           duplicateOrders={duplicateOrders}
           itemsData={items}
@@ -344,6 +360,18 @@ export default function DupeFinderResults({
       </div>
 
       {/* Modals */}
+      {reportItem && (
+        <ReportFalseDupeModal
+          open
+          onClose={() => setReportItem(null)}
+          item={reportItem}
+          originalOwner={{
+            id: reportOwner,
+            displayName: getUserDisplay(reportOwner),
+          }}
+          onReportResolved={() => setReportItem(null)}
+        />
+      )}
       {showHistoryModal && selectedItem && (
         <TradeHistoryModal
           isOpen={showHistoryModal}

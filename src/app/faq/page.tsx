@@ -167,7 +167,7 @@ const faqs: FAQ[] = [
     category: "trading",
     question: "How can I report an item that was incorrectly marked as duped?",
     answer:
-      'Open the <a href="/dupes" class="text-link hover:text-link-hover underline">Dupe Finder</a>, select the incorrectly flagged item, and click <strong>Compare Variants</strong>. On the comparison page, review both ownership histories, use <strong>Report False Dupe</strong>, explain why the detection is incorrect, and submit the report. You must be logged in with Discord.',
+      'Open the <a href="/dupes" class="text-link hover:text-link-hover underline">Dupe Finder</a>, select the incorrectly flagged item, and click <strong>Variants</strong>. On the comparison page, review both ownership histories, use <strong>Report False Dupe</strong>, explain why the detection is incorrect, and submit the report. You must be logged in with Discord.',
   },
   {
     category: "trading",

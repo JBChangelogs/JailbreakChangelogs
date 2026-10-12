@@ -6,8 +6,19 @@ import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { useState } from "react";
 import { Spinner } from "@/components/ui/Spinner";
+import { Icon } from "@/components/ui/IconWrapper";
 import { DupeFinderItem } from "@/types";
-import { formatCurrencyValue } from "@/utils/trading/currency";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
+import { checkDupe, type DupeCheckResult } from "@/utils/api/dupeCheck";
 import {
   getItemImagePath,
   isVideoItem,
@@ -36,18 +47,19 @@ import {
 
 import { bangers } from "@/app/fonts";
 import ItemSignatures from "@/components/Items/ItemSignatures";
-import { formatMonthDayYear } from "@/utils/helpers/timestamp";
+import {
+  formatMonthDayYear,
+  formatShortDateTime,
+  formatRelativeDate,
+} from "@/utils/helpers/timestamp";
 
 interface DupeItemCardProps {
   item: DupeFinderItem;
   itemData: CatalogValues;
   getUserAvatar: (userId: string) => string;
   getUsername: (userId: string) => string;
-  getDupedValueForItem: (
-    itemData: CatalogValues,
-    dupeItem: DupeFinderItem,
-  ) => number;
   onCardClick: (item: DupeFinderItem) => void;
+  onReport: (item: DupeFinderItem) => void;
   duplicateNumber?: number;
   isDuplicate?: boolean;
   robloxId: string;
@@ -61,8 +73,8 @@ export default function DupeItemCard({
   itemData,
   getUserAvatar,
   getUsername,
-  getDupedValueForItem,
   onCardClick,
+  onReport,
   duplicateNumber,
   isDuplicate = false,
   robloxId,
@@ -71,7 +83,51 @@ export default function DupeItemCard({
 }: DupeItemCardProps) {
   const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
-  const dupedValue = getDupedValueForItem(itemData, item);
+  const [checking, setChecking] = useState(false);
+  const [checkResult, setCheckResult] = useState<DupeCheckResult | null>(null);
+  const [checkError, setCheckError] = useState<string | null>(null);
+  const [checkOpen, setCheckOpen] = useState(false);
+  const [explainedCheck, setExplainedCheck] = useState<string | null>(null);
+  const originalOwner =
+    item.info?.find((entry) => entry.title === "Original Owner")?.value ||
+    robloxId;
+
+  const runCheck = async () => {
+    if (checking) return;
+    setCheckOpen(true);
+    setExplainedCheck(null);
+    setChecking(true);
+    setCheckError(null);
+    setCheckResult(null);
+    try {
+      setCheckResult(await checkDupe(originalOwner, item.item_id));
+    } catch (error) {
+      setCheckError(
+        error instanceof Error ? error.message : "Unable to check this dupe.",
+      );
+    } finally {
+      setChecking(false);
+    }
+  };
+  const checkDetails = checkResult
+    ? [
+        {
+          label: "History change",
+          description: "Whether the history difference exceeds 30%.",
+          flagged: checkResult.ratio > 0.3,
+        },
+        {
+          label: "Pattern analysis",
+          description: "Trading patterns associated with duplicated items.",
+          flagged: checkResult.check,
+        },
+        {
+          label: "Dupe threshold",
+          description: "Whether this check flags the item as duplicated.",
+          flagged: checkResult.is_duped,
+        },
+      ]
+    : [];
   const displayedSeason = itemData.season ?? undefined;
   const displayedLevel = unlockLevel(itemData.level);
   const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
@@ -81,28 +137,13 @@ export default function DupeItemCard({
     displayedLevel,
   );
 
-  // Helper function to format numbers with commas
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat().format(num);
-  };
-
-  /* oxlint-disable jsx-a11y/prefer-tag-over-role */
   return (
     <div
-      className={`text-primary-text relative flex cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
+      className={`text-primary-text relative flex flex-col rounded-lg border p-3 ${
         isDupedItem
           ? "bg-button-danger/10 border-button-danger"
           : "border-border-card bg-tertiary-bg"
       }`}
-      onClick={() => onCardClick(item)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onCardClick(item);
-        }
-      }}
     >
       {/* Duplicate Indicator */}
       {isDuplicate && duplicateNumber && (
@@ -121,7 +162,6 @@ export default function DupeItemCard({
         >
           <Link
             href={`/item/${encodeURIComponent(item.categoryTitle)}/${encodeURIComponent(item.title)}`}
-            onClick={(e) => e.stopPropagation()}
             className="hover:text-link-hover transition-colors"
             prefetch={false}
           >
@@ -241,114 +281,290 @@ export default function DupeItemCard({
         <ItemSignatures signs={item.Sign} />
       </div>
 
-      {/* Statistics */}
-      <div className="flex flex-1 flex-col justify-center space-y-2 text-center">
-        <div>
-          <div className="text-secondary-text text-sm">MONTHLY UNIQUE</div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="text-primary-text cursor-help text-xl font-bold">
-                {item.uniqueCirculation
-                  ? formatNumber(item.uniqueCirculation)
-                  : "N/A"}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              Monthly unique: {item.uniqueCirculation.toLocaleString("en-US")}
-            </TooltipContent>
-          </Tooltip>
-        </div>
-        <div>
-          <div className="text-secondary-text text-sm">MONTHLY TRADED</div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="text-primary-text cursor-help text-xl font-bold">
-                {item.timesTraded ? formatNumber(item.timesTraded) : "N/A"}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              Monthly traded:{" "}
-              {item.timesTraded
-                ? item.timesTraded.toLocaleString("en-US")
-                : "N/A"}
-            </TooltipContent>
-          </Tooltip>
-        </div>
-        <div>
-          <div className="text-secondary-text text-sm">DUPED VALUE</div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className="text-primary-text cursor-help text-xl font-bold"
-                aria-label={`Duped value: ${dupedValue > 0 ? formatCurrencyValue(dupedValue) : "Not available"}`}
-              >
-                <span className="sm:hidden">
-                  {dupedValue > 0 ? formatCurrencyValue(dupedValue) : "N/A"}
-                </span>
-                <span className="hidden sm:inline">
-                  {dupedValue > 0
-                    ? `$${dupedValue.toLocaleString("en-US")}`
-                    : "N/A"}
-                </span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              Duped value:{" "}
-              {dupedValue > 0
-                ? `$${dupedValue.toLocaleString("en-US")}`
-                : "N/A"}
-            </TooltipContent>
-          </Tooltip>
-        </div>
-        <div>
-          <div className="text-secondary-text text-sm">{ownerLabel}</div>
-          <div className="text-xl font-bold">
-            <div className="flex items-center justify-center gap-2">
-              <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
-                {avatarError ? (
-                  <DefaultAvatar name={getUsername(robloxId)} />
-                ) : (
-                  <>
-                    {isAvatarLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Spinner className="h-4 w-4" />
-                      </div>
-                    )}
-                    <Image
-                      src={getUserAvatar(robloxId)}
-                      alt="Original Owner Avatar"
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                      onLoad={() => setIsAvatarLoading(false)}
-                      onError={() => {
-                        setIsAvatarLoading(false);
-                        setAvatarError(true);
-                      }}
-                    />
-                  </>
+      <div className="flex flex-1 flex-col gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+            {avatarError ? (
+              <DefaultAvatar name={getUsername(originalOwner)} />
+            ) : (
+              <>
+                {isAvatarLoading && (
+                  <Spinner className="absolute inset-0 m-auto h-4 w-4" />
                 )}
-              </div>
-              <a
-                href={`https://www.roblox.com/users/${robloxId}/profile`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:text-link-hover min-w-0 text-center wrap-anywhere transition-colors hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {getUsername(robloxId)}
-              </a>
-            </div>
+                <Image
+                  src={getUserAvatar(originalOwner)}
+                  alt="Original owner avatar"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  onLoad={() => setIsAvatarLoading(false)}
+                  onError={() => {
+                    setIsAvatarLoading(false);
+                    setAvatarError(true);
+                  }}
+                />
+              </>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-secondary-text text-xs">{ownerLabel}</p>
+            <a
+              href={`https://www.roblox.com/users/${originalOwner}/profile`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-link hover:text-link-hover block truncate text-sm font-semibold hover:underline"
+              title={getUsername(originalOwner)}
+            >
+              {getUsername(originalOwner)}
+            </a>
           </div>
         </div>
-        <div>
-          <div className="text-secondary-text text-sm">LOGGED ON</div>
-          <div className="text-primary-text text-xl font-bold">
-            {formatMonthDayYear(item.logged_at)}
-          </div>
+        <p className="text-secondary-text text-xs">
+          Logged {formatMonthDayYear(item.logged_at)}
+        </p>
+        <div className="mt-auto grid grid-cols-3 gap-2">
+          <Button
+            type="button"
+            size="sm"
+            disabled={checking}
+            className="h-auto! min-h-8 min-w-0 px-2! py-1 text-center text-xs! leading-4 whitespace-normal"
+            onClick={() => void runCheck()}
+          >
+            {checking ? "Checking..." : "Dupe check"}
+          </Button>
+          <Button
+            asChild
+            size="sm"
+            variant="secondary"
+            className="h-auto! min-h-8 min-w-0 px-2! py-1 text-center text-xs! leading-4 whitespace-normal"
+          >
+            <Link
+              href={getDupeComparisonUrl(item)}
+              prefetch={false}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="View variant ownership histories in a new tab"
+            >
+              Variants
+            </Link>
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            className="h-auto! min-h-8 min-w-0 px-2! py-1 text-center text-xs! leading-4 whitespace-normal"
+            onClick={() => onCardClick(item)}
+          >
+            History
+          </Button>
         </div>
       </div>
+      <Dialog open={checkOpen} onOpenChange={setCheckOpen}>
+        <DialogContent className="w-[calc(100%_-_2rem)] max-w-xl" showClose>
+          <DialogHeader className="pr-5 text-left">
+            <DialogTitle>Dupe check: {item.title}</DialogTitle>
+            <DialogDescription className="wrap-anywhere">
+              Original owner:{" "}
+              <span className="text-primary-text font-medium">
+                {getUsername(originalOwner)}
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div aria-live="polite" aria-busy={checking}>
+            {checking ? (
+              <div className="text-secondary-text flex items-center gap-3 py-6 text-sm">
+                <Spinner className="h-5 w-5 shrink-0" />
+                Checking the recorded ownership history...
+              </div>
+            ) : checkError ? (
+              <p
+                className="border-status-error/30 bg-status-error/10 text-status-error rounded-lg border p-3 text-sm"
+                role="alert"
+              >
+                {checkError}
+              </p>
+            ) : checkResult ? (
+              <div className="mt-4 space-y-3">
+                <div
+                  className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2 ${checkResult.is_duped ? "border-status-error/30 bg-status-error/10" : "border-border-card bg-tertiary-bg"}`}
+                >
+                  <p
+                    className={`text-sm font-semibold ${checkResult.is_duped ? "text-status-error" : "text-primary-text"}`}
+                  >
+                    {checkResult.is_duped
+                      ? "Flagged as duped"
+                      : "Not flagged by this check"}
+                  </p>
+                  <p className="text-secondary-text text-sm">
+                    History difference:{" "}
+                    <span className="text-primary-text font-semibold tabular-nums">
+                      {(checkResult.ratio * 100).toFixed(2)}%
+                    </span>
+                  </p>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-primary-text flex items-center gap-1.5 text-sm font-semibold">
+                        Check details
+                        <span title="Hover, focus, or tap a check for its explanation">
+                          <Icon
+                            icon="heroicons:information-circle"
+                            className="text-secondary-text h-4 w-4"
+                            aria-hidden="true"
+                          />
+                          <span className="sr-only">
+                            Hover, focus, or tap a check for its explanation.
+                          </span>
+                        </span>
+                      </h3>
+                      <span className="bg-button-info/10 text-primary-text rounded-md px-2 py-1 text-sm font-medium tabular-nums">
+                        {`Checks flagged: ${checkDetails.filter((detail) => detail.flagged).length}/${checkDetails.length}`}
+                      </span>
+                    </div>
+                    <ul className="space-y-2">
+                      {checkDetails.map((detail) => (
+                        <li key={detail.label}>
+                          <Tooltip
+                            open={explainedCheck === detail.label}
+                            onOpenChange={(open) =>
+                              setExplainedCheck(open ? detail.label : null)
+                            }
+                          >
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                className="focus-visible:ring-border-focus flex w-full items-center gap-2 rounded text-left text-sm focus-visible:ring-2 focus-visible:outline-none"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  setExplainedCheck(
+                                    explainedCheck === detail.label
+                                      ? null
+                                      : detail.label,
+                                  );
+                                }}
+                                aria-label={`${detail.label}: ${detail.flagged ? "Flagged" : "Not flagged"}. Show explanation`}
+                              >
+                                <Icon
+                                  icon={
+                                    detail.flagged
+                                      ? "heroicons:exclamation-circle"
+                                      : "heroicons:minus-circle"
+                                  }
+                                  className={`h-4 w-4 shrink-0 ${detail.flagged ? "text-status-error" : "text-secondary-text"}`}
+                                  aria-hidden="true"
+                                />
+                                <span className="text-primary-text min-w-0 flex-1 font-medium">
+                                  {detail.label}
+                                </span>
+                                <span
+                                  className={
+                                    detail.flagged
+                                      ? "text-status-error"
+                                      : "text-secondary-text"
+                                  }
+                                >
+                                  {detail.flagged ? "Flagged" : "Not flagged"}
+                                </span>
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-64">
+                              {detail.description}
+                            </TooltipContent>
+                          </Tooltip>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <dl className="divide-border-card border-border-card divide-y rounded-lg border px-3 text-sm">
+                    <div className="py-2">
+                      <dt className="text-secondary-text mb-1 text-sm">
+                        Dupe logged
+                      </dt>
+                      <dd className="text-primary-text text-sm">
+                        {checkResult.dupe_logged_at > 0 ? (
+                          <>
+                            {formatShortDateTime(checkResult.dupe_logged_at)}
+                            <span className="text-secondary-text mt-0.5 block">
+                              ({formatRelativeDate(checkResult.dupe_logged_at)})
+                            </span>
+                          </>
+                        ) : (
+                          "Not available"
+                        )}
+                      </dd>
+                    </div>
+                    <div className="py-2">
+                      <dt className="text-secondary-text mb-1 text-sm">
+                        Original logged
+                      </dt>
+                      <dd className="text-primary-text text-sm">
+                        {checkResult.original_logged_at > 0 ? (
+                          <>
+                            {formatShortDateTime(
+                              checkResult.original_logged_at,
+                            )}
+                            <span className="text-secondary-text mt-0.5 block">
+                              (
+                              {formatRelativeDate(
+                                checkResult.original_logged_at,
+                              )}
+                              )
+                            </span>
+                          </>
+                        ) : (
+                          "Not available"
+                        )}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+                <p className="text-secondary-text text-sm">
+                  Check the variants before reporting a false dupe.
+                </p>
+              </div>
+            ) : null}
+          </div>
+          <DialogFooter className="mt-4 grid grid-cols-2 gap-2 sm:space-x-0">
+            {checkResult && (
+              <Button asChild size="sm">
+                <Link
+                  href={getDupeComparisonUrl(item)}
+                  prefetch={false}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="View variant ownership histories in a new tab"
+                >
+                  Variants
+                </Link>
+              </Button>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="h-auto! min-h-8 min-w-0 px-2! py-1 leading-tight whitespace-normal"
+              onClick={() => {
+                setCheckOpen(false);
+                onReport(item);
+              }}
+            >
+              Report false dupe
+            </Button>
+            {checkError && (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="h-auto! min-h-8 min-w-0 px-2! py-1 leading-tight whitespace-normal"
+                onClick={() => void runCheck()}
+              >
+                Try again
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-  /* oxlint-enable jsx-a11y/prefer-tag-over-role */
 }

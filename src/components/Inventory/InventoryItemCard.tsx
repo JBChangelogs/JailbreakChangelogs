@@ -393,10 +393,13 @@ export default function InventoryItemCard({
           <span className="text-secondary-text">This item may be duped.</span>
           <Link
             href={getDupeComparisonUrl(item)}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View variant ownership histories in a new tab"
             className="text-link hover:text-link-hover font-bold hover:underline"
             onClick={(e) => e.stopPropagation()}
           >
-            Compare Variants
+            Variants
           </Link>
         </div>
       )}

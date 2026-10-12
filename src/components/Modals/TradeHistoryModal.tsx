@@ -230,8 +230,9 @@ export default function TradeHistoryModal({
                   href={getDupeComparisonUrl(item)}
                   target="_blank"
                   rel="noopener noreferrer"
+                  title="View variant ownership histories in a new tab"
                 >
-                  Compare Variants
+                  Variants
                 </a>
               </Button>
             </div>
