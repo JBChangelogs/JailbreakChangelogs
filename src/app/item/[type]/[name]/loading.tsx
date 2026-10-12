@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function Loading() {
   return (
     <main className="min-h-screen py-8">
-      <div className="container mx-auto max-w-6xl px-4">
+      <div className="container mx-auto px-4">
         {/* Breadcrumb skeleton */}
         <div className="mb-4 flex items-center gap-2">
           <Skeleton
