@@ -399,7 +399,7 @@ export default function InventoryItemCard({
             className="text-link hover:text-link-hover font-bold hover:underline"
             onClick={(e) => e.stopPropagation()}
           >
-            Variants
+            Comparison
           </Link>
         </div>
       )}

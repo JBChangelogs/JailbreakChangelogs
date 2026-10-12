@@ -232,7 +232,7 @@ export default function TradeHistoryModal({
                   rel="noopener noreferrer"
                   title="View variant ownership histories in a new tab"
                 >
-                  Variants
+                  Comparison
                 </a>
               </Button>
             </div>

@@ -345,7 +345,7 @@ export default function DupeItemCard({
               rel="noopener noreferrer"
               title="View variant ownership histories in a new tab"
             >
-              Variants
+              Comparison
             </Link>
           </Button>
           <Button
@@ -520,7 +520,7 @@ export default function DupeItemCard({
                   </dl>
                 </div>
                 <p className="text-secondary-text text-sm">
-                  Check the variants before reporting a false dupe.
+                  Review the comparison before reporting a false dupe.
                 </p>
               </div>
             ) : null}
@@ -535,7 +535,7 @@ export default function DupeItemCard({
                   rel="noopener noreferrer"
                   title="View variant ownership histories in a new tab"
                 >
-                  Variants
+                  Comparison
                 </Link>
               </Button>
             )}
