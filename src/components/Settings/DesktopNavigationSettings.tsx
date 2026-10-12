@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, useSyncExternalStore } from "react";
+import { useId, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Switch } from "@/components/ui/switch";
@@ -116,21 +116,6 @@ export default function DesktopNavigationSettings() {
     () => false,
   );
   const canSwitchNavigation = useMediaQuery("(min-width: 1536px)");
-  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
-
-  // Where switching isn't available, cycle the preview as an example, or
-  // show both layouts side by side when motion is reduced.
-  const [demo, setDemo] = useState<DesktopNavigation>("sidebar");
-  useEffect(() => {
-    if (canSwitchNavigation || reducedMotion) return;
-    const interval = window.setInterval(
-      () =>
-        setDemo((current) => (current === "sidebar" ? "top-bar" : "sidebar")),
-      1800,
-    );
-    return () => window.clearInterval(interval);
-  }, [canSwitchNavigation, reducedMotion]);
-  const previewLayout = canSwitchNavigation ? mode : demo;
 
   return (
     <div className="space-y-5">
@@ -151,8 +136,7 @@ export default function DesktopNavigationSettings() {
         <span className="text-primary-text font-medium">
           Larger screen required.
         </span>{" "}
-        You can change this on screens 1536px wide or larger. The preview shows
-        both layouts.
+        You can change this on screens 1536px wide or larger.
       </p>
 
       <div className="grid items-center gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
@@ -190,14 +174,7 @@ export default function DesktopNavigationSettings() {
             </label>
           ))}
         </div>
-        {!canSwitchNavigation && reducedMotion ? (
-          <div className="grid gap-3">
-            <LayoutPreview layout="sidebar" />
-            <LayoutPreview layout="top-bar" />
-          </div>
-        ) : (
-          <LayoutPreview layout={previewLayout} />
-        )}
+        <LayoutPreview layout={mode} />
       </div>
 
       <div className="border-border-card flex items-center justify-between gap-4 border-t pt-5">
