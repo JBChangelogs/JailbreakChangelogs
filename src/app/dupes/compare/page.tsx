@@ -4,7 +4,6 @@ import DupeComparisonLoader from "@/components/Dupes/DupeComparisonLoader";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { notFound } from "next/navigation";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
-import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 
 export const dynamic = "force-dynamic";
 
@@ -52,9 +51,6 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
 
         <div className="mb-8">
           <h1 className="page-heading">Duplicate Comparison</h1>
-          <p className="text-secondary-text mt-2">
-            Comparing item variants to verify duplicates.
-          </p>
         </div>
 
         <NitroRailFallbackAd adId="np-rail-left-dupe-compare-fallback" />
@@ -64,7 +60,6 @@ export default async function DupeComparisonPage({ searchParams }: PageProps) {
           reportItem={reportItem}
           originalOwner={originalOwner}
         />
-        <DupeFinderFAQ />
       </div>
     </>
   );

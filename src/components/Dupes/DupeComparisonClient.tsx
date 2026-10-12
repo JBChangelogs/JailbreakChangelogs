@@ -5,19 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { DupeFinderItem, Item, RobloxUser } from "@/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import ReportFalseDupeModal from "@/components/Dupes/ReportFalseDupeModal";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {
-  CategoryIconBadge,
-  getCategoryColor,
-} from "@/utils/items/categoryIcons";
-import { formatCustomDate, formatProfileDate } from "@/utils/helpers/timestamp";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { formatProfileDate } from "@/utils/helpers/timestamp";
 import TradeHistoryList from "./TradeHistoryList";
-import DupeOwnerItemSearch from "./DupeOwnerItemSearch";
 import {
   getItemImagePath,
   isVideoItem,
@@ -68,16 +63,16 @@ function VariantColumn({
         {title}
       </h2>
 
-      <div className="bg-secondary-bg border-border-card relative flex flex-col rounded-lg border p-4">
+      <div className="bg-secondary-bg border-border-card flex flex-col gap-3 rounded-lg border p-3 lg:flex-row lg:items-center lg:justify-between">
         {/* Owner Info */}
-        <div className="my-4 flex flex-col items-center gap-2 text-center">
+        <div className="min-w-0 space-y-1">
           <div className="text-secondary-text text-xs font-bold tracking-wider uppercase">
             Current Owner
           </div>
           <Link
             href={item.user_id ? `/inventories/${item.user_id}` : "#"}
             prefetch={false}
-            className="group flex items-center gap-2"
+            className="group flex min-w-0 items-center gap-2"
           >
             <div className="bg-tertiary-bg border-border-card relative h-10 w-10 shrink-0 overflow-hidden rounded-full border transition-colors">
               <Image
@@ -88,11 +83,11 @@ function VariantColumn({
                 className="rounded-full"
               />
             </div>
-            <div className="text-left">
-              <div className="text-link group-hover:text-link-hover font-bold transition-colors">
+            <div className="min-w-0 text-left">
+              <div className="text-link group-hover:text-link-hover truncate font-bold transition-colors">
                 {getUserDisplay(item.user_id || "")}
               </div>
-              <div className="text-secondary-text text-xs">
+              <div className="text-secondary-text truncate text-xs">
                 @{getUsername(item.user_id || "")}
               </div>
             </div>
@@ -100,11 +95,11 @@ function VariantColumn({
         </div>
 
         {/* Logged Date */}
-        <div className="border-border-card mt-2 border-t pt-3 text-center">
+        <div className="border-border-card border-t pt-2 lg:shrink-0 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-3 lg:text-right">
           <div className="text-secondary-text mb-1 text-xs uppercase">
             Logged On
           </div>
-          <div className="text-primary-text font-bold">
+          <div className="text-primary-text text-sm font-medium">
             {formatProfileDate(item.logged_at)}
           </div>
         </div>
@@ -131,8 +126,6 @@ export default function DupeComparisonClient({
   duplicateItem,
   itemsData,
 }: DupeComparisonClientProps) {
-  const [selectedItem, setSelectedItem] = useState<DupeFinderItem | null>(null);
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportState, setReportState] = useState<
     "submitted" | "already_reported" | null
@@ -166,15 +159,6 @@ export default function DupeComparisonClient({
   ].filter(Boolean) as string[];
 
   const { robloxUsers } = useBatchUserData(userIds);
-
-  const getUsername = (userId: string) => {
-    return robloxUsers[userId]?.name || userId;
-  };
-
-  const closeHistoryModal = () => {
-    setShowHistoryModal(false);
-    setSelectedItem(null);
-  };
 
   const sharedItemData = itemsData.find(
     (data) => data.id === duplicateItem.item_id,
@@ -244,6 +228,8 @@ export default function DupeComparisonClient({
     );
   }
 
+  const categoryIcon = getCategoryIcon(duplicateItem.categoryTitle);
+
   return (
     <div className="space-y-8">
       {/* Back Button */}
@@ -260,24 +246,12 @@ export default function DupeComparisonClient({
       )}
 
       {/* Shared Summary Header */}
-      <div className="bg-secondary-bg border-border-card mx-auto max-w-7xl rounded-xl border p-6 text-center shadow-sm">
-        <div className="mb-6 flex flex-col items-center gap-6 md:flex-row md:items-center md:text-left">
+      <div className="bg-secondary-bg border-border-card mx-auto max-w-7xl rounded-xl border p-4 sm:p-6">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:gap-6">
           <div
-            className="bg-secondary-bg border-border-card relative w-full shrink-0 overflow-hidden rounded-lg border md:w-64"
+            className="bg-secondary-bg border-border-card relative w-full shrink-0 overflow-hidden rounded-lg border md:w-80 lg:w-96"
             style={{ aspectRatio: "854 / 480" }}
           >
-            <div className="absolute top-2 left-2 z-10">
-              <CategoryIconBadge
-                type={duplicateItem.categoryTitle}
-                isLimited={sharedItemData.is_limited === 1}
-                isSeasonal={
-                  sharedItemData.is_seasonal === 1 ||
-                  sharedItemData.season != null
-                }
-                preferItemType={true}
-                className="h-5 w-5"
-              />
-            </div>
             {!["Brakes"].includes(duplicateItem.categoryTitle) ? (
               isVideoItem(duplicateItem.title) ? (
                 <video
@@ -343,16 +317,16 @@ export default function DupeComparisonClient({
               />
             )}
           </div>
-          <div className="flex-1">
+          <div className="min-w-0 flex-1 space-y-4">
             <Link
               href={`/item/${encodeURIComponent(duplicateItem.categoryTitle)}/${encodeURIComponent(duplicateItem.title)}`}
-              className="group mb-3 inline-flex items-center justify-center gap-3 transition-opacity md:justify-start"
+              className="group mb-2 inline-flex transition-opacity"
             >
-              <h2 className="text-primary-text group-hover:text-link-hover text-3xl font-bold transition-colors">
+              <h2 className="text-primary-text group-hover:text-link-hover text-3xl font-bold wrap-anywhere transition-colors">
                 {sharedItemData.name}
               </h2>
             </Link>
-            <div className="mb-2 flex flex-wrap items-center justify-center gap-2 md:justify-start">
+            <div className="flex flex-wrap items-center gap-2">
               <span
                 className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                 style={{
@@ -360,140 +334,51 @@ export default function DupeComparisonClient({
                   backgroundColor: `${getCategoryColor(duplicateItem.categoryTitle)}22`,
                 }}
               >
+                {categoryIcon && (
+                  <categoryIcon.Icon
+                    className="h-3 w-3"
+                    style={{
+                      color: getCategoryColor(duplicateItem.categoryTitle),
+                    }}
+                  />
+                )}
                 {duplicateItem.categoryTitle}
               </span>
-              {sharedItemData.is_limited === 1 && (
-                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                  <Icon icon="mdi:clock" className="h-3 w-3 text-[#ffd700]" />
-                  Limited
-                </span>
-              )}
-              {sharedItemData.season != null && (
-                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                  <Icon
-                    icon="noto-v1:snowflake"
-                    className="h-3 w-3 text-[#40c0e7]"
-                  />
-                  Seasonal
-                </span>
-              )}
             </div>
-            {sharedItemData.metadata &&
-              Object.keys(sharedItemData.metadata).length > 0 && (
-                <div className="bg-tertiary-bg border-border-card mt-5 rounded-md border p-4">
-                  <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
-                    Official Trading Metrics
-                  </div>
-                  <div className="text-secondary-text text-xs">
-                    by Badimo •{" "}
-                    {sharedItemData.metadata.LastUpdated
-                      ? `updated ${formatCustomDate(sharedItemData.metadata.LastUpdated)}`
-                      : "unknown date"}
-                  </div>
-                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                    {typeof sharedItemData.metadata.TimesTraded ===
-                      "number" && (
-                      <div className="border-border-card bg-secondary-bg rounded-md border p-3">
-                        <div className="text-secondary-text text-xs">
-                          Times Traded
-                        </div>
-                        <div className="text-primary-text text-lg font-semibold">
-                          {sharedItemData.metadata.TimesTraded.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
-                    {typeof sharedItemData.metadata.UniqueCirculation ===
-                      "number" && (
-                      <div className="border-border-card bg-secondary-bg rounded-md border p-3">
-                        <div className="text-secondary-text text-xs">
-                          Unique Circulation
-                        </div>
-                        <div className="text-primary-text text-lg font-semibold">
-                          {sharedItemData.metadata.UniqueCirculation.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
-                    {typeof sharedItemData.metadata.DemandMultiple ===
-                      "number" && (
-                      <div className="border-border-card bg-secondary-bg rounded-md border p-3">
-                        <div className="text-secondary-text text-xs">
-                          Demand Multiple
-                        </div>
-                        <div className="text-primary-text text-lg font-semibold">
-                          {sharedItemData.metadata.DemandMultiple.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+            <p className="text-secondary-text text-sm">
+              Showing two copies. Item 1 may change as more duplicates are
+              found.
+            </p>
+            {reportState ? (
+              <div className="text-primary-text flex items-start gap-2 text-sm">
+                <Icon
+                  icon="mdi:check-circle-outline"
+                  className="text-button-success mt-0.5 size-5 shrink-0"
+                />
+                <div>
+                  <p className="font-semibold">
+                    {reportState === "submitted"
+                      ? "False dupe report received"
+                      : "False dupe already reported"}
+                  </p>
+                  <p className="text-secondary-text mt-1">
+                    This item is queued for review. You don&apos;t need to
+                    submit another report.
+                  </p>
                 </div>
-              )}
-          </div>
-        </div>
-        <div className="bg-button-info/10 border-border-card text-secondary-text mx-auto flex max-w-7xl items-start gap-4 rounded-lg border p-4 text-sm shadow-sm">
-          <div>
-            <span className="text-primary-text font-bold">Note:</span> We only
-            show 2 copies here. Item 1 can change over time as more duplicates
-            are found.
-          </div>
-        </div>
-
-        {reportState ? (
-          <div className="border-button-success/30 bg-button-success/10 mx-auto mt-4 flex max-w-7xl items-start gap-3 rounded-lg border p-4 text-left">
-            <Icon
-              icon="mdi:check-circle-outline"
-              className="text-button-success mt-0.5 size-5 shrink-0"
-            />
-            <div>
-              <p className="text-primary-text text-sm font-semibold">
-                {reportState === "submitted"
-                  ? "False dupe report received"
-                  : "False dupe already reported"}
-              </p>
-              <p className="text-secondary-text mt-1 text-sm">
-                This item is queued for review. You don&apos;t need to submit
-                another report.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-tertiary-bg/50 border-border-card mx-auto mt-4 flex max-w-7xl flex-col items-start justify-between gap-3 rounded-lg border p-4 text-left sm:flex-row sm:items-center">
-            <div className="flex items-start gap-3">
-              <Icon
-                icon="mdi:flag-outline"
-                className="text-secondary-text mt-0.5 size-5 shrink-0"
-              />
-              <div>
-                <p className="text-primary-text text-sm font-semibold">
-                  Think we flagged this item as a dupe by mistake?
-                </p>
-                <p className="text-secondary-text mt-1 text-sm">
-                  Review both ownership histories below. If the histories
-                  don&apos;t support the dupe detection, report it as a false
-                  dupe.
-                </p>
               </div>
-            </div>
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              className="w-full shrink-0 sm:w-auto"
-              onClick={openReportModal}
-            >
-              Report False Dupe
-            </Button>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                className="w-full shrink-0 sm:w-auto"
+                onClick={openReportModal}
+              >
+                Report False Dupe
+              </Button>
+            )}
           </div>
-        )}
-
-        {originalOwnerId && (
-          <DupeOwnerItemSearch
-            ownerId={originalOwnerId}
-            ownerDisplayName={
-              robloxUsers[originalOwnerId]?.displayName ||
-              robloxUsers[originalOwnerId]?.name
-            }
-          />
-        )}
+        </div>
       </div>
 
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2">
@@ -513,17 +398,6 @@ export default function DupeComparisonClient({
         />
       </div>
 
-      {showHistoryModal && selectedItem && (
-        <TradeHistoryModal
-          isOpen={showHistoryModal}
-          onClose={closeHistoryModal}
-          item={selectedItem}
-          username={
-            selectedItem.user_id ? getUsername(selectedItem.user_id) : undefined
-          }
-          usersData={robloxUsers}
-        />
-      )}
       <ReportFalseDupeModal
         open={reportModalOpen}
         onClose={() => setReportModalOpen(false)}
