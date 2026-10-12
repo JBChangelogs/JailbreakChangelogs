@@ -3,7 +3,7 @@ export default function Loading() {
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pb-16">
         <div className="space-y-12">
           <div className="text-center">
             <div className="border-border-card bg-secondary-bg text-secondary-text inline-flex h-8 items-center rounded-full border px-4 text-sm">

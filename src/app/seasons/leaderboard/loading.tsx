@@ -2,7 +2,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 
 export default function SeasonLeaderboardLoading() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pb-16">
       <Breadcrumb />
 
       <div className="mb-8">
