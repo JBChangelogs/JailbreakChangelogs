@@ -136,7 +136,7 @@ export default function DupeOwnerItemSearch({
             {isLoading ? (
               <li className="text-secondary-text flex items-center gap-2 px-4 py-3 text-sm">
                 <Spinner className="h-4 w-4" />
-                Searching...
+                <span>Searching...</span>
               </li>
             ) : results.length === 0 ? (
               <li className="text-secondary-text px-4 py-3 text-sm">

@@ -92,7 +92,7 @@ export function RateLimitBanner({
           />
         </g>
       </svg>
-      {label && `${label} `}Try again in{" "}
+      {label && <span>{`${label} `}</span>}Try again in{" "}
       <span className="font-semibold tabular-nums">{formatted}</span>
     </div>
   );

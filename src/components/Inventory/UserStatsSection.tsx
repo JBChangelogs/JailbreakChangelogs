@@ -747,7 +747,9 @@ export default function UserStatsSection({
                     <span className="text-primary-text font-medium">
                       {mounted ? formatDate(currentData.created_at) : "…"}
                       <span className="text-secondary-text ml-1 text-xs">
-                        {createdRelativeTime && `(${createdRelativeTime})`}
+                        {createdRelativeTime && (
+                          <span>{`(${createdRelativeTime})`}</span>
+                        )}
                       </span>
                     </span>
                   </div>
@@ -758,7 +760,9 @@ export default function UserStatsSection({
                     <span className="text-primary-text font-medium">
                       {mounted ? formatDate(currentData.updated_at) : "…"}
                       <span className="text-secondary-text ml-1 text-xs">
-                        {updatedRelativeTime && `(${updatedRelativeTime})`}
+                        {updatedRelativeTime && (
+                          <span>{`(${updatedRelativeTime})`}</span>
+                        )}
                       </span>
                     </span>
                   </div>

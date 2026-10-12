@@ -116,7 +116,7 @@ export function ChatHeaderPanel({
               ) : (
                 <span className="inline-flex items-center gap-1">
                   <Spinner className="h-3 w-3" />
-                  Loading...
+                  <span>Loading...</span>
                 </span>
               )}
             </p>

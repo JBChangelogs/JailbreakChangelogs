@@ -209,12 +209,12 @@ export function CommentForm() {
                 {isSubmittingComment ? (
                   <>
                     <Spinner className="h-3.5 w-3.5" />
-                    Posting...
+                    <span>Posting...</span>
                   </>
                 ) : (
                   <>
                     <Icon icon="heroicons:paper-airplane-solid" inline={true} />
-                    Post
+                    <span>Post</span>
                   </>
                 )}
               </Button>

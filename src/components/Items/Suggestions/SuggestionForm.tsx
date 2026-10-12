@@ -878,7 +878,7 @@ export function SuggestionForm({
                 {submitting ? (
                   <>
                     <Spinner className="h-4 w-4" />
-                    Submitting...
+                    <span>Submitting...</span>
                   </>
                 ) : (
                   <>
@@ -887,7 +887,7 @@ export function SuggestionForm({
                       className="h-4 w-4"
                       inline
                     />
-                    Submit Suggestion
+                    <span>Submit Suggestion</span>
                   </>
                 )}
               </Button>
@@ -1122,7 +1122,7 @@ export function SuggestionForm({
                 {submitting ? (
                   <>
                     <Spinner className="h-4 w-4" />
-                    Submitting...
+                    <span>Submitting...</span>
                   </>
                 ) : (
                   <>
@@ -1131,7 +1131,7 @@ export function SuggestionForm({
                       className="h-4 w-4"
                       inline
                     />
-                    Confirm & Submit
+                    <span>Confirm & Submit</span>
                   </>
                 )}
               </Button>

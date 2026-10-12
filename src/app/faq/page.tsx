@@ -355,10 +355,12 @@ export default function FAQPage() {
         {(searchQuery || activeCategory !== "all") && (
           <p className="text-secondary-text mb-4 text-sm">
             {filteredFaqs.length === 0 ? (
-              "No results found"
+              <span>No results found</span>
             ) : (
               <>
-                Showing {filteredFaqs.length} of {faqs.length} questions
+                <span>
+                  Showing {filteredFaqs.length} of {faqs.length} questions
+                </span>
                 {searchQuery && (
                   <span>
                     {" "}

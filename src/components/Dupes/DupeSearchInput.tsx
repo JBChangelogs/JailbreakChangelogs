@@ -327,7 +327,7 @@ export default function DupeSearchInput({
               {isSuggestionsLoading ? (
                 <li className="text-secondary-text flex items-center gap-2 px-4 py-3 text-sm">
                   <Spinner className="h-4 w-4" />
-                  Searching...
+                  <span>Searching...</span>
                 </li>
               ) : suggestions.length === 0 ? (
                 <li role="option" aria-selected={false}>

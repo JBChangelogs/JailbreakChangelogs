@@ -977,7 +977,7 @@ export default function MessagesInbox() {
                       <div className="pointer-events-none absolute inset-x-0 top-2 z-10 flex justify-center">
                         <div className="bg-tertiary-bg border-border-card text-secondary-text flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
                           <Spinner className="h-3 w-3" />
-                          Loading older messages
+                          <span>Loading older messages</span>
                         </div>
                       </div>
                     )}

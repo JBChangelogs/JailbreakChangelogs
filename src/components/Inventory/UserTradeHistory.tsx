@@ -317,14 +317,15 @@ function TradeItem({
           <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded-md px-2 text-[10px] leading-none font-bold sm:h-6 sm:px-2.5 sm:text-xs">
             {valueState === "loading" ? (
               <>
-                <Spinner className="mr-1 h-3 w-3" /> Loading
+                <Spinner className="mr-1 h-3 w-3" />
+                <span>Loading</span>
               </>
             ) : valueState === "error" ? (
-              "Unavailable"
+              <span>Unavailable</span>
             ) : currentValue === null ? (
-              "N/A"
+              <span>N/A</span>
             ) : (
-              formatTradeValue(currentValue)
+              <span>{formatTradeValue(currentValue)}</span>
             )}
           </span>
         </div>
@@ -614,7 +615,8 @@ export default function UserTradeHistory({
     return (
       <div className="border-border-card bg-secondary-bg flex min-h-52 items-center justify-center rounded-lg border">
         <div className="text-secondary-text flex items-center gap-2 text-sm">
-          <Spinner className="h-5 w-5" /> Loading trade history...
+          <Spinner className="h-5 w-5" />
+          <span>Loading trade history...</span>
         </div>
       </div>
     );
@@ -831,7 +833,8 @@ export default function UserTradeHistory({
               <div className="border-border-card bg-secondary-bg border-t p-4">
                 {detailState?.state === "loading" ? (
                   <div className="text-secondary-text flex min-h-28 items-center justify-center gap-2 text-sm">
-                    <Spinner className="h-4 w-4" /> Loading trade details...
+                    <Spinner className="h-4 w-4" />
+                    <span>Loading trade details...</span>
                   </div>
                 ) : detailState?.state === "error" ? (
                   <div className="py-4 text-center">
@@ -858,8 +861,8 @@ export default function UserTradeHistory({
                     {detail.status === "completed" &&
                       valueState === "loading" && (
                         <div className="border-border-card bg-tertiary-bg text-secondary-text mb-4 flex min-h-28 items-center justify-center gap-2 rounded-lg border p-3 text-sm">
-                          <Spinner className="h-4 w-4" /> Loading current
-                          values...
+                          <Spinner className="h-4 w-4" />
+                          <span>Loading current values...</span>
                         </div>
                       )}
                     {valueState === "error" && (
@@ -899,7 +902,9 @@ export default function UserTradeHistory({
                               </p>
                               <p className="text-primary-text truncate text-lg font-bold sm:text-xl">
                                 {formatTradeValue(ownerGaveValues.total)}
-                                {ownerGaveValues.missingCount > 0 && "+"}
+                                {ownerGaveValues.missingCount > 0 && (
+                                  <span>+</span>
+                                )}
                               </p>
                             </div>
 
@@ -922,7 +927,9 @@ export default function UserTradeHistory({
                               </p>
                               <p className="text-primary-text truncate text-lg font-bold sm:text-xl">
                                 {formatTradeValue(ownerReceivedValues.total)}
-                                {ownerReceivedValues.missingCount > 0 && "+"}
+                                {ownerReceivedValues.missingCount > 0 && (
+                                  <span>+</span>
+                                )}
                               </p>
                             </div>
                           </div>

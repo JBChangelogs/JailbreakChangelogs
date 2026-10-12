@@ -165,7 +165,7 @@ export default function DiscordUserCard({
                 aria-hidden="true"
                 className="size-3.5"
               />
-              Private profile
+              <span>Private profile</span>
             </>
           ) : (
             <>

@@ -63,21 +63,27 @@ const UpdateStatisticsCard: React.FC<UpdateStatisticsCardProps> = ({
               <p key={year}>
                 {isCurrentYear(year) ? (
                   <>
-                    As of {currentDateString}, {year}, there{" "}
-                    {count === 1 ? "is" : "are"} a total of{" "}
+                    <span>
+                      As of {currentDateString}, {year}, there{" "}
+                      {count === 1 ? "is" : "are"} a total of{" "}
+                    </span>
                     <span className="text-primary-text font-semibold">
                       {count}
                     </span>{" "}
-                    {count === 1 ? "update" : "updates"} in {year}.
+                    <span>
+                      {count === 1 ? "update" : "updates"} in {year}.
+                    </span>
                   </>
                 ) : (
                   <>
-                    There were a total of{" "}
+                    <span>There were a total of </span>
                     <span className="text-primary-text font-semibold">
                       {count}
                     </span>{" "}
-                    recorded {count === 1 ? "update" : "updates"} released in{" "}
-                    {year}.
+                    <span>
+                      recorded {count === 1 ? "update" : "updates"} released in{" "}
+                      {year}.
+                    </span>
                   </>
                 )}
               </p>

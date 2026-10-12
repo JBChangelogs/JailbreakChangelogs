@@ -200,11 +200,11 @@ export default function OgOwnedSection({
               helperContent={
                 unverifiableCount > 0 ? (
                   <>
-                    Unverifiable:{" "}
+                    <span>Unverifiable: </span>
                     <span className="text-primary-text font-mono font-semibold tabular-nums">
                       {formatInventoryCount(unverifiableCount)}
                     </span>{" "}
-                    assumed owned. Hidden from missing list.
+                    <span>assumed owned. Hidden from missing list.</span>
                     <button
                       type="button"
                       onClick={onViewUnverifiable}

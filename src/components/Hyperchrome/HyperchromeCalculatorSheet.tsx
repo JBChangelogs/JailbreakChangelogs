@@ -458,19 +458,21 @@ export default function HyperchromeCalculatorModal({
                     >
                       {isSmallServer ? (
                         <>
-                          After{" "}
+                          <span>After </span>
                           <span className="font-black">
                             {resultTipRobberies}
                           </span>{" "}
-                          robberies, your pity reaches{" "}
-                          <span className="font-black">66%</span> in Small
-                          Servers.
+                          <span>robberies, your pity reaches </span>
+                          <span className="font-black">66%</span>
+                          <span> in Small Servers.</span>
                         </>
                       ) : (
                         <>
-                          Big/Public servers don&apos;t speed up pity
-                          progression; they simply use a different pity scale
-                          than Small/Private servers.
+                          <span>
+                            Big/Public servers don&apos;t speed up pity
+                            progression; they simply use a different pity scale
+                            than Small/Private servers.
+                          </span>
                         </>
                       )}
                     </div>

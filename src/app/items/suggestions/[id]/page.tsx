@@ -1484,10 +1484,10 @@ export default function ValueSuggestionDetailPage() {
                                   {editSaving ? (
                                     <>
                                       <Spinner className="h-3.5 w-3.5" />
-                                      Saving...
+                                      <span>Saving...</span>
                                     </>
                                   ) : (
-                                    "Save"
+                                    <span>Save</span>
                                   )}
                                 </Button>
                               </div>
@@ -1623,8 +1623,9 @@ export default function ValueSuggestionDetailPage() {
                             </span>
                             <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
                               Common Trades
-                              {!!suggestion.common_trades?.length &&
-                                ` (${suggestion.common_trades.length})`}
+                              {!!suggestion.common_trades?.length && (
+                                <span>{` (${suggestion.common_trades.length})`}</span>
+                              )}
                             </h2>
                           </div>
                           {isAuthenticated &&
@@ -1673,7 +1674,7 @@ export default function ValueSuggestionDetailPage() {
                               {tradeItemsLoading && tradeItems.length === 0 ? (
                                 <div className="text-secondary-text flex items-center gap-2 py-3 text-sm">
                                   <Spinner className="h-4 w-4" />
-                                  Loading tradable items...
+                                  <span>Loading tradable items...</span>
                                 </div>
                               ) : (
                                 <CommonTradesEditor
@@ -1710,10 +1711,10 @@ export default function ValueSuggestionDetailPage() {
                                   {editSaving ? (
                                     <>
                                       <Spinner className="h-3.5 w-3.5" />
-                                      Saving...
+                                      <span>Saving...</span>
                                     </>
                                   ) : (
-                                    "Save common trades"
+                                    <span>Save common trades</span>
                                   )}
                                 </Button>
                               </div>

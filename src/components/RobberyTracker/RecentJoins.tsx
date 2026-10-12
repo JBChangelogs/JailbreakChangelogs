@@ -217,7 +217,7 @@ export default function RecentJoins({
         <div className="border-border-card border-t px-4 py-3">
           {loading && !loaded && (
             <div className="text-secondary-text flex items-center gap-2 text-sm">
-              <Spinner className="h-4 w-4" /> Loading joins...
+              <Spinner className="h-4 w-4" /> <span>Loading joins...</span>
             </div>
           )}
           {error && !loaded && (

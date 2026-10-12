@@ -374,12 +374,12 @@ export default function AppClient({
                     {access.isFetching ? (
                       <>
                         <Spinner />
-                        Checking…
+                        <span>Checking…</span>
                       </>
                     ) : access.isError ? (
-                      "Retry"
+                      <span>Retry</span>
                     ) : (
-                      "Check again"
+                      <span>Check again</span>
                     )}
                   </Button>
                 </>

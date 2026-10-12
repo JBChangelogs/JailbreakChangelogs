@@ -380,12 +380,12 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
               {isSubmittingComment ? (
                 <>
                   <Spinner className="h-3.5 w-3.5" />
-                  Posting...
+                  <span>Posting...</span>
                 </>
               ) : (
                 <>
                   <Icon icon="heroicons:paper-airplane-solid" inline={true} />
-                  Reply
+                  <span>Reply</span>
                 </>
               )}
             </Button>
@@ -834,10 +834,10 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                           {updatingCommentId === comment.id ? (
                             <>
                               <Spinner className="h-3.5 w-3.5" />
-                              Updating...
+                              <span>Updating...</span>
                             </>
                           ) : (
-                            "Update"
+                            <span>Update</span>
                           )}
                         </Button>
                       </div>
@@ -937,7 +937,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                   className="h-4 w-4"
                                   inline={true}
                                 />
-                                Show less
+                                <span>Show less</span>
                               </>
                             ) : (
                               <>
@@ -946,7 +946,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                   className="h-4 w-4"
                                   inline={true}
                                 />
-                                Read more
+                                <span>Read more</span>
                               </>
                             )}
                           </Button>
@@ -1572,10 +1572,10 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                     {updatingCommentId === reply.id ? (
                                       <>
                                         <Spinner className="h-3.5 w-3.5" />{" "}
-                                        Updating...
+                                        <span>Updating...</span>
                                       </>
                                     ) : (
-                                      "Update"
+                                      <span>Update</span>
                                     )}
                                   </Button>
                                 </div>

@@ -184,7 +184,7 @@ export default function MostScannedLeaderboardClient({
     <div className="mt-8">
       <h2 className="text-primary-text mb-4 text-xl font-bold">
         Most Scanned Players ({filteredLeaderboard.length}
-        {searchTerm && ` of ${initialLeaderboard.length}`})
+        {searchTerm && <span>{` of ${initialLeaderboard.length}`}</span>})
       </h2>
 
       {/* Search Input */}

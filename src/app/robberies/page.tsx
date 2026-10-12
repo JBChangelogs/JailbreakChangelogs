@@ -1240,19 +1240,19 @@ function RobberyTrackerContent() {
             <div className="flex flex-wrap items-center gap-3 text-sm">
               <span className="text-primary-text font-semibold">
                 {hasActiveRobberyFilters ? (
-                  <>
+                  <span>
                     Showing {robberyStats.total} of {robberyStats.baselineTotal}{" "}
                     {robberyStats.baselineTotal === 1
                       ? robberyStats.nounSingular
                       : robberyStats.nounPlural}
-                  </>
+                  </span>
                 ) : (
-                  <>
+                  <span>
                     {robberyStats.total}{" "}
                     {robberyStats.total === 1
                       ? robberyStats.nounSingular
                       : robberyStats.nounPlural}
-                  </>
+                  </span>
                 )}
               </span>
               {!(robberiesDisplayMode === "grouped" && !isPowerComboMode) && (
@@ -1274,10 +1274,11 @@ function RobberyTrackerContent() {
                 <span className="text-secondary-text">Location:</span>
                 <span className="text-primary-text font-medium">
                   {visibleCountryLabels.join(", ")}
-                  {hiddenCountryLabelCount > 0 &&
-                    ` +${hiddenCountryLabelCount} other ${
+                  {hiddenCountryLabelCount > 0 && (
+                    <span>{` +${hiddenCountryLabelCount} other ${
                       hiddenCountryLabelCount === 1 ? "country" : "countries"
-                    }`}
+                    }`}</span>
+                  )}
                 </span>
               </div>
             )}
@@ -1631,18 +1632,18 @@ function RobberyTrackerContent() {
                   </h3>
                   <p className="text-secondary-text">
                     {selectedRobberyTypes.length > 0 && !searchQuery ? (
-                      <>
+                      <span>
                         No robberies logged yet for the selected type
                         {selectedRobberyTypes.length > 1 ? "s" : ""}
-                      </>
+                      </span>
                     ) : selectedRobberyTypes.length > 0 && searchQuery ? (
-                      <>No robberies match your filters and search</>
+                      <span>No robberies match your filters and search</span>
                     ) : searchQuery ? (
-                      <>Try adjusting your search query</>
+                      <span>Try adjusting your search query</span>
                     ) : hasActiveRobberyFilters ? (
-                      <>No robberies found for your current filters</>
+                      <span>No robberies found for your current filters</span>
                     ) : (
-                      <>Waiting for robbery data...</>
+                      <span>Waiting for robbery data...</span>
                     )}
                   </p>
                   <StatusPageAction />

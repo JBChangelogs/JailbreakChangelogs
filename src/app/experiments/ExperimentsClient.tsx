@@ -623,7 +623,7 @@ export default function ExperimentsClient() {
                               : forced
                                 ? `Forced ${variantLabel(forced)} · default is ${variantLabel(assignments[key])}`
                                 : `Default · ${variantLabel(assignments[key])}`}
-                            {noOff && " · No Off variant to force"}
+                            {noOff && <span> · No Off variant to force</span>}
                           </p>
                         </div>
                         <div

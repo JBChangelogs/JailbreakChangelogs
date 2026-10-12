@@ -895,15 +895,17 @@ export default function InventoryCheckerClient({
                       {scanWebSocket.status === "connecting" ? (
                         <>
                           <Spinner className="h-4 w-4" />
-                          Connecting...
+                          <span>Connecting...</span>
                         </>
                       ) : scanWebSocket.status === "scanning" ? (
                         <>
                           <Spinner className="h-4 w-4" />
-                          {getScanActiveButtonLabel(
-                            scanWebSocket.phase,
-                            scanWebSocket.message,
-                          )}
+                          <span>
+                            {getScanActiveButtonLabel(
+                              scanWebSocket.phase,
+                              scanWebSocket.message,
+                            )}
+                          </span>
                         </>
                       ) : scanWebSocket.status === "completed" ? (
                         <>
@@ -920,7 +922,7 @@ export default function InventoryCheckerClient({
                               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
-                          Scan Complete
+                          <span>Scan Complete</span>
                         </>
                       ) : scanWebSocket.status === "error" ? (
                         <>
@@ -937,7 +939,7 @@ export default function InventoryCheckerClient({
                               d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
                             />
                           </svg>
-                          Scan Failed
+                          <span>Scan Failed</span>
                         </>
                       ) : (
                         <>
@@ -954,9 +956,11 @@ export default function InventoryCheckerClient({
                               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
-                          {!ENABLE_WS_SCAN
-                            ? "Scanning Disabled"
-                            : "Request a Scan"}
+                          <span>
+                            {!ENABLE_WS_SCAN
+                              ? "Scanning Disabled"
+                              : "Request a Scan"}
+                          </span>
                         </>
                       )}
                     </Button>

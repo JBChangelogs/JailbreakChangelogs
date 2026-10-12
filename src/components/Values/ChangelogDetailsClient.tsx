@@ -1096,7 +1096,7 @@ export default function ChangelogDetailsClient({
                                                     className="h-4 w-4"
                                                     inline={true}
                                                   />
-                                                  Show less
+                                                  <span>Show less</span>
                                                 </>
                                               ) : (
                                                 <>
@@ -1105,7 +1105,7 @@ export default function ChangelogDetailsClient({
                                                     className="h-4 w-4"
                                                     inline={true}
                                                   />
-                                                  Read more
+                                                  <span>Read more</span>
                                                 </>
                                               )}
                                             </button>
@@ -1189,7 +1189,7 @@ export default function ChangelogDetailsClient({
                                                     className="h-4 w-4"
                                                     inline={true}
                                                   />
-                                                  Show less
+                                                  <span>Show less</span>
                                                 </>
                                               ) : (
                                                 <>
@@ -1198,7 +1198,7 @@ export default function ChangelogDetailsClient({
                                                     className="h-4 w-4"
                                                     inline={true}
                                                   />
-                                                  Read more
+                                                  <span>Read more</span>
                                                 </>
                                               )}
                                             </button>
@@ -1229,19 +1229,22 @@ export default function ChangelogDetailsClient({
             <div className="text-primary-text py-8 text-center">
               <p className="mb-2 text-lg font-medium">No changes found</p>
               <p className="text-secondary-text text-sm">
-                {searchQuery && `No changes match "${displayQuery}"`}
-                {searchQuery &&
-                  (selectedType || selectedSuggestionType) &&
-                  " and "}
-                {selectedType &&
-                  `No changes found for item type "${selectedType}"`}
-                {selectedType && selectedSuggestionType && " and "}
-                {selectedSuggestionType &&
-                  `No changes found for suggestion type "${selectedSuggestionType.replace(/_/g, " ")}"`}
-                {!searchQuery &&
-                  !selectedType &&
-                  !selectedSuggestionType &&
-                  "No changes available in this changelog"}
+                {searchQuery && (
+                  <span>{`No changes match "${displayQuery}"`}</span>
+                )}
+                {searchQuery && (selectedType || selectedSuggestionType) && (
+                  <span> and </span>
+                )}
+                {selectedType && (
+                  <span>{`No changes found for item type "${selectedType}"`}</span>
+                )}
+                {selectedType && selectedSuggestionType && <span> and </span>}
+                {selectedSuggestionType && (
+                  <span>{`No changes found for suggestion type "${selectedSuggestionType.replace(/_/g, " ")}"`}</span>
+                )}
+                {!searchQuery && !selectedType && !selectedSuggestionType && (
+                  <span>No changes available in this changelog</span>
+                )}
               </p>
               {(searchQuery || selectedType || selectedSuggestionType) && (
                 <Button onClick={clearSearch} className="mt-3">

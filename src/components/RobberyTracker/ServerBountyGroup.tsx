@@ -204,7 +204,7 @@ export default function ServerBountyGroup({
               ) : (
                 <span className="inline-flex items-center gap-2">
                   <Spinner className="h-3.5 w-3.5" />
-                  Loading...
+                  <span>Loading...</span>
                 </span>
               )}
             </span>

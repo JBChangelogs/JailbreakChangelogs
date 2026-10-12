@@ -197,7 +197,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
       ) : isSearching ? (
         <div className="border-tertiary-bg bg-secondary-bg text-secondary-text absolute z-10 mt-1 flex w-full items-center justify-center gap-2 rounded-lg border p-4 text-center">
           <Spinner className="h-4 w-4" />
-          Searching...
+          <span>Searching...</span>
         </div>
       ) : (
         searchQuery && (

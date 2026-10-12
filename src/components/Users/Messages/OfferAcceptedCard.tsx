@@ -94,7 +94,7 @@ export function OfferAcceptedCard({
           ) : (
             <span className="flex items-center gap-2">
               <Spinner className="h-3.5 w-3.5" />
-              Loading offer details…
+              <span>Loading offer details…</span>
             </span>
           )}
         </p>

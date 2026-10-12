@@ -215,7 +215,7 @@ export default function AboutTab({
                               className="h-4 w-4"
                               inline={true}
                             />
-                            Show less
+                            <span>Show less</span>
                           </>
                         ) : (
                           <>
@@ -224,7 +224,7 @@ export default function AboutTab({
                               className="h-4 w-4"
                               inline={true}
                             />
-                            Read more
+                            <span>Read more</span>
                           </>
                         )}
                       </button>

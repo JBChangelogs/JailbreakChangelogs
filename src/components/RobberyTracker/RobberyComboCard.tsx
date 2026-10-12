@@ -191,7 +191,7 @@ function RobberyComboCard({
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
                   <Spinner className="h-3.5 w-3.5" />
-                  Loading region...
+                  <span>Loading region...</span>
                 </span>
               )}
             </span>

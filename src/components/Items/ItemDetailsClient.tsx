@@ -579,7 +579,7 @@ export default function ItemDetailsClient({
               <div className="text-secondary-text mt-2 text-sm">
                 {currentItem.last_updated ? (
                   <>
-                    Last updated:{" "}
+                    <span>Last updated: </span>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="cursor-help">{relativeTime}</span>
@@ -590,7 +590,7 @@ export default function ItemDetailsClient({
                     </Tooltip>
                   </>
                 ) : (
-                  <>Last updated: Never</>
+                  <span>Last updated: Never</span>
                 )}
               </div>
 
