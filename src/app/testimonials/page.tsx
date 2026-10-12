@@ -4,7 +4,6 @@ import SubmitTestimonialButton from "@/components/Testimonials/SubmitTestimonial
 import TestimonialsClient from "@/components/Testimonials/TestimonialsClient";
 import { fetchTestimonials } from "@/components/Testimonials/testimonialsData";
 import { BASE_API_URL } from "@/utils/api/api";
-import ShareTestimonialLink from "@/components/Testimonials/ShareTestimonialLink";
 import { FeaturedBadimoTestimonial } from "@/components/Testimonials/TestimonialsSection";
 
 type PageProps = {
@@ -34,29 +33,19 @@ export default async function TestimonialsPage({ searchParams }: PageProps) {
           </h1>
           <p className="text-secondary-text mx-auto max-w-3xl text-lg">
             What players, content creators, and the game&apos;s own developers
-            say about Jailbreak Changelogs. <ShareTestimonialLink />
+            say about Jailbreak Changelogs.
           </p>
+          <div
+            id="share-testimonial"
+            className="mt-4 flex min-h-10 scroll-mt-24 items-center justify-center"
+          >
+            <SubmitTestimonialButton />
+          </div>
         </div>
         <FeaturedBadimoTestimonial />
         <Suspense>
           <TestimonialsClient initialPage={page} initialData={initialData} />
         </Suspense>
-        <div
-          id="share-testimonial"
-          className="border-border-card bg-secondary-bg mx-auto flex max-w-2xl scroll-mt-24 flex-col items-center gap-4 rounded-2xl border p-6 text-center sm:flex-row sm:justify-between sm:text-left"
-        >
-          <div>
-            <p className="text-primary-text font-bold">
-              Enjoy using Jailbreak Changelogs?
-            </p>
-            <p className="text-secondary-text text-sm">
-              Share your experience with the community.
-            </p>
-          </div>
-          <div className="flex min-h-10 shrink-0 items-center">
-            <SubmitTestimonialButton />
-          </div>
-        </div>
       </div>
     </main>
   );
