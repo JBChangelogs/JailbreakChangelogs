@@ -200,17 +200,17 @@ export default function AppClient({
             </h2>
             {latest && (
               <p className="text-secondary-text mt-2 text-sm">
-                Version {latest.version}
+                <span>Version {latest.version}</span>
                 {latest.releasedAt && (
-                  <>
-                    {" · Released "}
+                  <span>
+                    <span> · Released </span>
                     <time
                       dateTime={new Date(latest.releasedAt).toISOString()}
                       suppressHydrationWarning
                     >
                       {formatMonthDayYear(latest.releasedAt)}
                     </time>
-                  </>
+                  </span>
                 )}
               </p>
             )}
@@ -272,10 +272,7 @@ export default function AppClient({
                               aria-hidden="true"
                               className="size-5"
                             />
-                            <span>
-                              Download for {option}
-                              {option === "Linux" ? " (AppImage)" : ""}
-                            </span>
+                            <span>{`Download for ${option}${option === "Linux" ? " (AppImage)" : ""}`}</span>
                           </a>
                         </Button>
                         <p className="text-secondary-text mt-2 text-center text-xs">
@@ -289,7 +286,9 @@ export default function AppClient({
                                 aria-hidden="true"
                                 className="size-3.5"
                               />
-                              Seeing &ldquo;Windows protected your PC&rdquo;?
+                              <span>
+                                Seeing &ldquo;Windows protected your PC&rdquo;?
+                              </span>
                             </PopoverTrigger>
                             <PopoverContent
                               side="top"
@@ -336,7 +335,7 @@ export default function AppClient({
                               />
                               <span className="text-primary-text font-medium">
                                 <span className="sr-only">Download for </span>
-                                {option}
+                                <span>{option}</span>
                               </span>
                               <span className="text-secondary-text ml-auto text-xs">
                                 {fileDetails(option)}

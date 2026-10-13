@@ -67,7 +67,7 @@ export default function DupeUserInfo({
           <div className="min-w-0 flex-1">
             <h3 className="text-primary-text text-lg font-bold wrap-break-word">
               <span className="inline-flex items-center gap-2">
-                {getUserDisplay(robloxId)}
+                <span>{getUserDisplay(robloxId)}</span>
                 {getHasVerifiedBadge(robloxId) && (
                   <VerifiedBadgeIcon className="h-4 w-4" />
                 )}
@@ -90,7 +90,7 @@ export default function DupeUserInfo({
                       className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                     >
                       <DiscordIcon className="h-3.5 w-3.5 shrink-0" />
-                      Discord
+                      <span>Discord</span>
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent>Discord profile</TooltipContent>
@@ -107,7 +107,7 @@ export default function DupeUserInfo({
                     className="bg-quaternary-bg border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                   >
                     <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
-                    Roblox
+                    <span>Roblox</span>
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>Roblox profile</TooltipContent>
@@ -129,7 +129,7 @@ export default function DupeUserInfo({
                         height={16}
                         className="h-3.5 w-3.5 shrink-0"
                       />
-                      Website
+                      <span>Website</span>
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent>JBCL profile</TooltipContent>

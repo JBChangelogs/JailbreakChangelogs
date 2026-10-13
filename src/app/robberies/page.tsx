@@ -1633,8 +1633,7 @@ function RobberyTrackerContent() {
                   <p className="text-secondary-text">
                     {selectedRobberyTypes.length > 0 && !searchQuery ? (
                       <span>
-                        No robberies logged yet for the selected type
-                        {selectedRobberyTypes.length > 1 ? "s" : ""}
+                        {`No robberies logged yet for the selected type${selectedRobberyTypes.length > 1 ? "s" : ""}`}
                       </span>
                     ) : selectedRobberyTypes.length > 0 && searchQuery ? (
                       <span>No robberies match your filters and search</span>

@@ -759,7 +759,7 @@ export default function ChangelogDetailsClient({
                               />
                             ) : null;
                           })()}
-                          {change.item.type}
+                          <span>{change.item.type}</span>
                         </span>
                       </div>
                     </div>
@@ -951,7 +951,9 @@ export default function ChangelogDetailsClient({
                                   className="h-4 w-4"
                                   inline
                                 />
-                                {isExpanded ? "Show Less" : "Read More"}
+                                <span>
+                                  {isExpanded ? "Show Less" : "Read More"}
+                                </span>
                               </button>
                             )}
                           </div>

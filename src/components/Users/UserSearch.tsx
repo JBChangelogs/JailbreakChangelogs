@@ -189,24 +189,29 @@ export default function UserSearch() {
 
               if (queryFromUrl) {
                 return (
-                  <>
-                    Found{" "}
+                  <span>
+                    <span>Found </span>
                     {isLoading ? (
                       <InlineSpinner />
                     ) : (
-                      usersCount.toLocaleString()
-                    )}{" "}
-                    {isLoading ? "users" : usersCount === 1 ? "user" : "users"}{" "}
-                    matching &quot;{displayQuery}&quot;
-                  </>
+                      <span>{usersCount.toLocaleString()}</span>
+                    )}
+                    <span>
+                      {` ${isLoading ? "users" : usersCount === 1 ? "user" : "users"} matching "${displayQuery}"`}
+                    </span>
+                  </span>
                 );
               }
 
               return (
-                <>
-                  Total Users:{" "}
-                  {isLoading ? <InlineSpinner /> : total.toLocaleString()}
-                </>
+                <span>
+                  <span>Total Users: </span>
+                  {isLoading ? (
+                    <InlineSpinner />
+                  ) : (
+                    <span>{total.toLocaleString()}</span>
+                  )}
+                </span>
               );
             })()}
           </span>

@@ -153,7 +153,7 @@ export default function OGItemCard({
                 />
               ) : null;
             })()}
-            {item.categoryTitle}
+            <span>{item.categoryTitle}</span>
           </span>
         </div>
       </div>

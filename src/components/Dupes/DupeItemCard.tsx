@@ -185,7 +185,7 @@ export default function DupeItemCard({
                 />
               ) : null;
             })()}
-            {item.categoryTitle}
+            <span>{item.categoryTitle}</span>
           </span>
           {isDupedItem && (
             <span className="border-button-danger bg-button-danger text-form-button-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
@@ -484,13 +484,15 @@ export default function DupeItemCard({
                       <dd className="text-primary-text text-sm">
                         {checkResult.dupe_logged_at > 0 ? (
                           <>
-                            {formatShortDateTime(checkResult.dupe_logged_at)}
+                            <span>
+                              {formatShortDateTime(checkResult.dupe_logged_at)}
+                            </span>
                             <span className="text-secondary-text mt-0.5 block">
                               ({formatRelativeDate(checkResult.dupe_logged_at)})
                             </span>
                           </>
                         ) : (
-                          "Not available"
+                          <span>Not available</span>
                         )}
                       </dd>
                     </div>
@@ -501,9 +503,11 @@ export default function DupeItemCard({
                       <dd className="text-primary-text text-sm">
                         {checkResult.original_logged_at > 0 ? (
                           <>
-                            {formatShortDateTime(
-                              checkResult.original_logged_at,
-                            )}
+                            <span>
+                              {formatShortDateTime(
+                                checkResult.original_logged_at,
+                              )}
+                            </span>
                             <span className="text-secondary-text mt-0.5 block">
                               (
                               {formatRelativeDate(
@@ -513,7 +517,7 @@ export default function DupeItemCard({
                             </span>
                           </>
                         ) : (
-                          "Not available"
+                          <span>Not available</span>
                         )}
                       </dd>
                     </div>

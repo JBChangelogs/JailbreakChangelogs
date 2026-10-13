@@ -30,11 +30,11 @@ export default function InlineTeamPlayers({
     >
       <Icon icon="heroicons-outline:users" className="h-4 w-4 shrink-0" />
       <span className="text-primary-text font-medium tabular-nums">
-        {criminalsCount} Criminal{criminalsCount === 1 ? "" : "s"}
+        {`${criminalsCount} Criminal${criminalsCount === 1 ? "" : "s"}`}
       </span>
       <span className="text-tertiary-text">•</span>
       <span className="text-primary-text font-medium tabular-nums">
-        {copsCount} Cop{copsCount === 1 ? "" : "s"}
+        {`${copsCount} Cop${copsCount === 1 ? "" : "s"}`}
       </span>
     </div>
   );

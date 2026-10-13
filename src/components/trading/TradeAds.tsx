@@ -1410,8 +1410,7 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
                   className="h-4 w-4"
                   inline={true}
                 />
-                Filter
-                {advancedFilterCount > 0 ? ` (${advancedFilterCount})` : ""}
+                <span>{`Filter${advancedFilterCount > 0 ? ` (${advancedFilterCount})` : ""}`}</span>
               </Button>
               {hasActiveFilters && (
                 <button
@@ -1552,12 +1551,7 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
               (displayTradeAds.length > 0 || hasActiveFilters) && (
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-secondary-text">
-                    Showing {displayTradeAds.length}
-                    {apiTotalCount !== null && !hasActiveFilters
-                      ? ` of ${apiTotalCount}`
-                      : ""}{" "}
-                    {displayTradeAds.length === 1 ? "trade ad" : "trade ads"}
-                    {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
+                    {`Showing ${displayTradeAds.length}${apiTotalCount !== null && !hasActiveFilters ? ` of ${apiTotalCount}` : ""} ${displayTradeAds.length === 1 ? "trade ad" : "trade ads"}${activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}`}
                   </p>
                 </div>
               )}
@@ -1675,12 +1669,7 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
           <>
             <div className="mb-4 flex items-center justify-between">
               <p className="text-secondary-text">
-                Showing {filteredUserTradeAds.length}{" "}
-                {!hasActiveFilters && userTradeAdsTotalCount > 0
-                  ? `of ${userTradeAdsTotalCount} `
-                  : ""}
-                {filteredUserTradeAds.length === 1 ? "trade ad" : "trade ads"}
-                {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
+                {`Showing ${filteredUserTradeAds.length} ${!hasActiveFilters && userTradeAdsTotalCount > 0 ? `of ${userTradeAdsTotalCount} ` : ""}${filteredUserTradeAds.length === 1 ? "trade ad" : "trade ads"}${activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}`}
               </p>
             </div>
             {isUserTradeAdsLoading ? (
