@@ -15,6 +15,7 @@ interface CategoryPieDataEntry {
 
 interface CategoryPieCardProps {
   title: string;
+  description?: string;
   chartConfig: ChartConfig;
   data: CategoryPieDataEntry[];
   renderCharts: boolean;
@@ -30,6 +31,7 @@ interface CategoryPieCardProps {
 
 export default function CategoryPieCard({
   title,
+  description,
   chartConfig,
   data,
   renderCharts,
@@ -46,6 +48,11 @@ export default function CategoryPieCard({
       <div className="mb-2 text-center">
         <div className="text-primary-text text-lg font-semibold">{title}</div>
       </div>
+      {description && (
+        <p className="text-secondary-text mb-3 text-center text-base leading-relaxed">
+          {description}
+        </p>
+      )}
 
       {renderCharts &&
         (isEmpty ? (

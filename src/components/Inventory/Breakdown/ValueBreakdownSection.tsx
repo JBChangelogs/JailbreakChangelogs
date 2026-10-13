@@ -44,7 +44,7 @@ export default function ValueBreakdownSection({
   const isInventory = layoutVariant === "inventory";
 
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+    <div className="border-border-card/60 grid grid-cols-1 gap-6 border-t pt-8 xl:grid-cols-12">
       <div
         className={isInventory ? "space-y-6 xl:col-span-8" : "xl:col-span-8"}
       >
@@ -93,7 +93,7 @@ export default function ValueBreakdownSection({
                 className={isInventory ? "mb-4" : undefined}
               />
 
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-2 md:grid-cols-2">
                 {sortedEntries.map(([category, percentage]) => {
                   const categoryIcon = getCategoryIcon(category);
                   return (

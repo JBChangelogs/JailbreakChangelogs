@@ -93,14 +93,9 @@ export default function CollectionProgressSection({
                     ? typeProgress
                         .filter((entry) => entry.total > 0)
                         .map((entry) => {
-                          const totalCompletion = typeProgress.reduce(
-                            (sum, next) =>
-                              sum + (next.total > 0 ? next.percentage : 0),
-                            0,
-                          );
                           const width =
-                            totalCompletion > 0
-                              ? (entry.percentage / totalCompletion) * 100
+                            overallProgress.owned > 0
+                              ? (entry.owned / overallProgress.owned) * 100
                               : 0;
 
                           return {
@@ -187,7 +182,7 @@ export default function CollectionProgressSection({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-2 md:grid-cols-2">
                 {typeProgress.map((entry) => {
                   const categoryIcon = getCategoryIcon(entry.type);
                   return (
@@ -209,9 +204,19 @@ export default function CollectionProgressSection({
                             }}
                           />
                         )}
-                        <span className="text-primary-text font-medium">
-                          {entry.type}
-                        </span>
+                        <div>
+                          <span className="text-primary-text block font-medium">
+                            {entry.type}
+                          </span>
+                          {entry.type.trim().toLowerCase() ===
+                            "hyperchrome" && (
+                            <span className="text-secondary-text block text-sm">
+                              {countLowerLevels
+                                ? "Lower levels included"
+                                : "Owned levels only"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex flex-col items-end">
                         <span className="text-primary-text text-sm font-semibold">
@@ -226,105 +231,6 @@ export default function CollectionProgressSection({
                   );
                 })}
               </div>
-
-              <fieldset aria-describedby={`${modeId}-help`}>
-                <legend className="text-primary-text mb-2 text-lg font-semibold">
-                  Hyperchrome collection mode
-                </legend>
-                <p
-                  id={`${modeId}-help`}
-                  className="text-secondary-text mb-3 text-base leading-relaxed"
-                >
-                  This updates the missing-items list and your collection
-                  completion percentage. OG ownership is unchanged.
-                </p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="flex cursor-pointer items-start gap-2">
-                    <input
-                      type="radio"
-                      name={modeId}
-                      value="lower-levels"
-                      checked={countLowerLevels}
-                      onChange={() => onCountLowerLevelsChange(true)}
-                      className="accent-button-info mt-0.5 h-4 w-4 shrink-0"
-                    />
-                    <span>
-                      <span className="text-primary-text block text-base font-medium">
-                        Count lower levels
-                      </span>
-                      <span className="text-secondary-text block text-base leading-relaxed">
-                        For each color, your highest level counts its lower
-                        levels too. Higher levels remain missing.
-                      </span>
-                    </span>
-                  </label>
-                  <label className="flex cursor-pointer items-start gap-2">
-                    <input
-                      type="radio"
-                      name={modeId}
-                      value="every-level"
-                      checked={!countLowerLevels}
-                      onChange={() => onCountLowerLevelsChange(false)}
-                      className="accent-button-info mt-0.5 h-4 w-4 shrink-0"
-                    />
-                    <span>
-                      <span className="text-primary-text block text-base font-medium">
-                        Count owned levels only
-                      </span>
-                      <span className="text-secondary-text block text-base leading-relaxed">
-                        Each Hyperchrome level counts separately. Owning a
-                        higher level doesn&apos;t count its lower levels.
-                      </span>
-                    </span>
-                  </label>
-                </div>
-                <div
-                  role="status"
-                  aria-atomic="true"
-                  className="mt-4 space-y-1"
-                >
-                  <p className="text-primary-text text-base font-semibold">
-                    {formatInventoryCount(overallProgress.owned)}/
-                    {formatInventoryCount(overallProgress.total)} collected
-                    {" · "}
-                    {formatInventoryCount(overallProgress.missingCount)} missing
-                    {" · "}
-                    {formatPercentage(overallProgress.percentage)}% complete
-                  </p>
-                  <p className="text-secondary-text text-base leading-relaxed">
-                    {countLowerLevels
-                      ? creditedHyperchromeLevels > 0
-                        ? `${formatInventoryCount(creditedHyperchromeLevels)} lower Hyperchrome ${creditedHyperchromeLevels === 1 ? "level" : "levels"} counted toward completion.`
-                        : "No additional lower Hyperchrome levels to count for this inventory."
-                      : "Only Hyperchrome levels currently in your inventory count toward completion."}
-                  </p>
-                </div>
-              </fieldset>
-
-              <SearchableInventoryListSection
-                title="Trackable Missing Items"
-                items={missingItemsAll}
-                searchPlaceholder="Search missing items..."
-                filterAriaLabel="Filter missing items by type"
-                clearAriaLabel="Clear missing item search"
-                emptyMessage="You have every item in this filter."
-                noResultsMessage="No missing items match your search."
-              />
-
-              {unverifiableItemsAll.length > 0 && (
-                <SearchableInventoryListSection
-                  title="Unverifiable Items"
-                  description="Inventory scans can’t confirm these items."
-                  items={unverifiableItemsAll}
-                  searchPlaceholder="Search unverifiable items..."
-                  filterAriaLabel="Filter unverifiable items by type"
-                  clearAriaLabel="Clear unverifiable item search"
-                  emptyMessage="No unverifiable items found."
-                  noResultsMessage="No unverifiable items match your search."
-                  sectionRef={unverifiableSectionRef}
-                  sectionId="unverifiable-items"
-                />
-              )}
             </div>
           )}
         </div>
@@ -332,12 +238,13 @@ export default function CollectionProgressSection({
 
       <div className="xl:col-span-4">
         <CategoryPieCard
-          title="Collection Progress Pie Chart"
+          title="Collected Items by Category"
+          description="Slices represent unique collected items per category."
           chartConfig={collectionChartConfig}
           data={collectionChartData}
           renderCharts={renderCharts}
-          isEmpty={overallProgress.missingCount === 0}
-          emptyMessage="No missing items."
+          isEmpty={overallProgress.owned === 0}
+          emptyMessage="No collected items."
           tooltipWidth="wide"
           renderTooltipRows={(payload) => {
             const payloadData = payload as
@@ -376,6 +283,105 @@ export default function CollectionProgressSection({
           }}
         />
       </div>
+      {overallProgress.total > 0 && (
+        <div className="space-y-4 xl:col-span-12">
+          <fieldset aria-describedby={`${modeId}-help`}>
+            <legend className="text-primary-text mb-2 text-lg font-semibold">
+              Hyperchrome collection mode
+            </legend>
+            <p
+              id={`${modeId}-help`}
+              className="text-secondary-text mb-3 text-base leading-relaxed"
+            >
+              This updates the missing-items list and your collection completion
+              percentage. OG ownership is unchanged.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex cursor-pointer items-start gap-2">
+                <input
+                  type="radio"
+                  name={modeId}
+                  value="lower-levels"
+                  checked={countLowerLevels}
+                  onChange={() => onCountLowerLevelsChange(true)}
+                  className="accent-button-info mt-0.5 h-4 w-4 shrink-0"
+                />
+                <span>
+                  <span className="text-primary-text block text-base font-medium">
+                    Count lower levels
+                  </span>
+                  <span className="text-secondary-text block text-base leading-relaxed">
+                    For each color, your highest level counts its lower levels
+                    too. Higher levels remain missing.
+                  </span>
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-2">
+                <input
+                  type="radio"
+                  name={modeId}
+                  value="every-level"
+                  checked={!countLowerLevels}
+                  onChange={() => onCountLowerLevelsChange(false)}
+                  className="accent-button-info mt-0.5 h-4 w-4 shrink-0"
+                />
+                <span>
+                  <span className="text-primary-text block text-base font-medium">
+                    Count owned levels only
+                  </span>
+                  <span className="text-secondary-text block text-base leading-relaxed">
+                    Each Hyperchrome level counts separately. Owning a higher
+                    level doesn&apos;t count its lower levels.
+                  </span>
+                </span>
+              </label>
+            </div>
+            <div role="status" aria-atomic="true" className="mt-4 space-y-1">
+              <p className="text-primary-text text-base font-semibold">
+                {formatInventoryCount(overallProgress.owned)}/
+                {formatInventoryCount(overallProgress.total)} collected
+                {" · "}
+                {formatInventoryCount(overallProgress.missingCount)} missing
+                {" · "}
+                {formatPercentage(overallProgress.percentage)}% complete
+              </p>
+              <p className="text-secondary-text text-base leading-relaxed">
+                {countLowerLevels
+                  ? creditedHyperchromeLevels > 0
+                    ? `${formatInventoryCount(creditedHyperchromeLevels)} lower Hyperchrome ${creditedHyperchromeLevels === 1 ? "level" : "levels"} counted toward completion.`
+                    : "No additional lower Hyperchrome levels to count for this inventory."
+                  : "Only Hyperchrome levels currently in your inventory count toward completion."}
+              </p>
+            </div>
+          </fieldset>
+
+          <SearchableInventoryListSection
+            title="Trackable Missing Items"
+            items={missingItemsAll}
+            searchPlaceholder="Search missing items..."
+            filterAriaLabel="Filter missing items by type"
+            clearAriaLabel="Clear missing item search"
+            emptyMessage="You have every item in this filter."
+            noResultsMessage="No missing items match your search."
+          />
+
+          {unverifiableItemsAll.length > 0 && (
+            <SearchableInventoryListSection
+              title="Unverifiable Items"
+              collapsible
+              description="Inventory scans can’t confirm these items."
+              items={unverifiableItemsAll}
+              searchPlaceholder="Search unverifiable items..."
+              filterAriaLabel="Filter unverifiable items by type"
+              clearAriaLabel="Clear unverifiable item search"
+              emptyMessage="No unverifiable items found."
+              noResultsMessage="No unverifiable items match your search."
+              sectionRef={unverifiableSectionRef}
+              sectionId="unverifiable-items"
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

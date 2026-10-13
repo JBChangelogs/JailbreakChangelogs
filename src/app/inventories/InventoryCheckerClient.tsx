@@ -372,6 +372,8 @@ export default function InventoryCheckerClient({
       return;
     const target = document.getElementById(pendingSectionRef.current);
     if (!target) return;
+    const disclosure = target.querySelector<HTMLDetailsElement>("details");
+    if (disclosure) disclosure.open = true;
     pendingSectionRef.current = null;
     const headerHeight =
       Number.parseFloat(

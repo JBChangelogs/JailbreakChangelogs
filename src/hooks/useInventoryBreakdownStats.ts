@@ -355,7 +355,7 @@ export const useInventoryBreakdownStats = (
 
   const collectionChartConfig = {
     value: {
-      label: "Completion",
+      label: "Collected",
       color: "var(--chart-1)",
     },
   } satisfies ChartConfig;
@@ -363,10 +363,10 @@ export const useInventoryBreakdownStats = (
   const collectionChartData = useMemo(
     () =>
       typeProgress
-        .filter((entry) => entry.total > 0)
+        .filter((entry) => entry.owned > 0)
         .map((entry) => ({
           category: entry.type,
-          value: entry.percentage,
+          value: entry.owned,
           owned: entry.owned,
           total: entry.total,
           missingCount: entry.missingCount,

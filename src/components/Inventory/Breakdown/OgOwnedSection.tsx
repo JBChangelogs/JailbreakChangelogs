@@ -32,7 +32,7 @@ export default function OgOwnedSection({
   onViewUnverifiable,
 }: OgOwnedSectionProps) {
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+    <div className="border-border-card/60 grid grid-cols-1 gap-6 border-t pt-8 xl:grid-cols-12">
       <div className="space-y-6 xl:col-span-8">
         <div>
           <div className="mb-3">
@@ -125,7 +125,7 @@ export default function OgOwnedSection({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-2 md:grid-cols-2">
               {typeProgress.map((entry) => {
                 const categoryIcon = getCategoryIcon(entry.type);
                 const ogPct =
@@ -166,41 +166,13 @@ export default function OgOwnedSection({
                 );
               })}
             </div>
-
-            <SearchableInventoryListSection
-              title="Trackable Missing OG Items"
-              items={ogMissingItemsAll}
-              searchPlaceholder="Search missing OG items..."
-              filterAriaLabel="Filter non-OG items by type"
-              clearAriaLabel="Clear non-OG item search"
-              emptyMessage="This player is the original owner of every item in Jailbreak."
-              noResultsMessage="No items match your search."
-              helperContent={
-                unverifiableCount > 0 ? (
-                  <>
-                    <span>Unverifiable: </span>
-                    <span className="text-primary-text font-mono font-semibold tabular-nums">
-                      {formatInventoryCount(unverifiableCount)}
-                    </span>{" "}
-                    <span>assumed owned. Hidden from missing list.</span>
-                    <button
-                      type="button"
-                      onClick={onViewUnverifiable}
-                      className="text-link hover:text-link-hover ml-2 cursor-pointer underline underline-offset-2"
-                    >
-                      View list
-                    </button>
-                  </>
-                ) : undefined
-              }
-            />
           </div>
         </div>
       </div>
 
       <div className="xl:col-span-4">
         <CategoryPieCard
-          title="OG Owned Pie Chart"
+          title="OG Items by Category"
           chartConfig={ogChartConfig}
           data={ogChartData}
           renderCharts={renderCharts}
@@ -233,6 +205,35 @@ export default function OgOwnedSection({
               </>
             );
           }}
+        />
+      </div>
+      <div className="xl:col-span-12">
+        <SearchableInventoryListSection
+          title="Trackable Missing OG Items"
+          items={ogMissingItemsAll}
+          searchPlaceholder="Search missing OG items..."
+          filterAriaLabel="Filter non-OG items by type"
+          clearAriaLabel="Clear non-OG item search"
+          emptyMessage="This player is the original owner of every item in Jailbreak."
+          noResultsMessage="No items match your search."
+          helperContent={
+            unverifiableCount > 0 ? (
+              <>
+                <span>Unverifiable: </span>
+                <span className="text-primary-text font-mono font-semibold tabular-nums">
+                  {formatInventoryCount(unverifiableCount)}
+                </span>{" "}
+                <span>assumed owned. Hidden from missing list.</span>
+                <button
+                  type="button"
+                  onClick={onViewUnverifiable}
+                  className="text-link hover:text-link-hover ml-2 cursor-pointer underline underline-offset-2"
+                >
+                  View list
+                </button>
+              </>
+            ) : undefined
+          }
         />
       </div>
     </div>

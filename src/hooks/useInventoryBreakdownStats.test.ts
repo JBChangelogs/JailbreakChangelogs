@@ -161,6 +161,10 @@ test("Hyperchrome modes update completion and missing levels without changing in
   expect(combined.ogOwnedProgress.ogOwned).toBe(3);
   expect(combined.typeProgress[0].owned).toBe(7);
   expect(combined.collectionChartData[0].owned).toBe(7);
+  expect(combined.collectionChartData[0].value).toBe(7);
+  expect(
+    combined.collectionChartData.reduce((sum, entry) => sum + entry.value, 0),
+  ).toBe(combined.overallProgress.owned);
   countLowerLevels = false;
   const separate = stats();
   expect(separate.creditedHyperchromeLevels).toBe(0);

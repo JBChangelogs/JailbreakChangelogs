@@ -19,7 +19,17 @@ test("both Hyperchrome choices explain completion and appear before the missing-
           missingCount: countLowerLevels ? 1 : 2,
           percentage: countLowerLevels ? 80 : 60,
         }}
-        typeProgress={[]}
+        typeProgress={[
+          {
+            type: "HyperChrome",
+            total: 5,
+            owned: countLowerLevels ? 4 : 3,
+            ogOwned: 1,
+            missing: [],
+            missingCount: countLowerLevels ? 1 : 2,
+            percentage: countLowerLevels ? 80 : 60,
+          },
+        ]}
         unverifiableCount={1}
         missingItemsAll={[
           { id: 547, name: "HyperBlue Level 1", type: "HyperChrome" },
@@ -63,6 +73,16 @@ test("both Hyperchrome choices explain completion and appear before the missing-
       "1 unverifiable items are assumed owned and excluded from this list.",
     );
     expect(markup).toContain("View list");
+    expect(markup).toContain(
+      mode ? "Lower levels included" : "Owned levels only",
+    );
+    const disclosure = markup.match(/<details\b[^>]*>[\s\S]*?<\/details>/)![0];
+    expect(disclosure).not.toMatch(/<details\b[^>]*\bopen\b/);
+    expect(disclosure).toMatch(
+      /<summary\b[^>]*>[\s\S]*?Unverifiable Items[\s\S]*?Inventory scans can’t confirm these items\.[\s\S]*?<\/summary>/,
+    );
+    expect(disclosure).toContain("Show items");
+    expect(disclosure).toContain("Hide items");
     expect(markup).toContain('role="status"');
     const text = markup.replace(/<[^>]*>/g, "");
     expect(text).toContain(

@@ -39,6 +39,7 @@ interface SearchableInventoryListSectionProps {
   helperContent?: ReactNode;
   sectionRef?: React.RefObject<HTMLDivElement | null>;
   sectionId?: string;
+  collapsible?: boolean;
 }
 
 const SearchableInventoryListSection = memo(
@@ -54,6 +55,7 @@ const SearchableInventoryListSection = memo(
     helperContent,
     sectionRef,
     sectionId,
+    collapsible = false,
   }: SearchableInventoryListSectionProps) {
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -89,27 +91,28 @@ const SearchableInventoryListSection = memo(
       );
     }, [deferredSearchTerm, items, typeFilter]);
 
-    return (
-      <div
-        ref={sectionRef}
-        id={sectionId}
-        className="border-border-card bg-tertiary-bg rounded-lg border p-3"
-      >
-        <div className="mb-2 flex items-center gap-1.5">
-          <div className="text-primary-text text-lg font-semibold">
-            {title} ({formatInventoryCount(items.length)})
-          </div>
-        </div>
+    const heading = (
+      <span className="text-primary-text mb-2 block text-lg font-semibold">
+        {title} ({formatInventoryCount(items.length)})
+      </span>
+    );
+    const header = (
+      <>
+        {heading}
         {description && (
-          <p className="text-secondary-text mb-2 text-base leading-relaxed">
+          <span className="text-secondary-text mb-2 block text-base leading-relaxed">
             {description}
-          </p>
+          </span>
         )}
         {helperContent ? (
           <div className="text-secondary-text mb-2 text-base leading-relaxed">
             {helperContent}
           </div>
         ) : null}
+      </>
+    );
+    const content = (
+      <>
         <div className="mb-2">
           <div className="flex w-full flex-col gap-4 sm:flex-row">
             <div className="relative w-full sm:w-2/3">
@@ -238,6 +241,42 @@ const SearchableInventoryListSection = memo(
               ))}
             </ol>
           </div>
+        )}
+      </>
+    );
+    return (
+      <div
+        ref={sectionRef}
+        id={sectionId}
+        className="border-border-card bg-tertiary-bg rounded-lg border p-3"
+      >
+        {collapsible ? (
+          <details className="group">
+            <summary className="hover:bg-secondary-bg focus-visible:ring-border-focus -m-3 cursor-pointer list-none rounded-lg p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+              <span className="flex items-start justify-between gap-3">
+                {heading}
+                <span className="text-link inline-flex shrink-0 items-center gap-2 text-base font-medium whitespace-nowrap">
+                  <span className="group-open:hidden">Show items</span>
+                  <span className="hidden group-open:inline">Hide items</span>
+                  <Icon
+                    icon="heroicons:chevron-down"
+                    className="h-5 w-5 transition-transform group-open:rotate-180"
+                  />
+                </span>
+              </span>
+              {description && (
+                <span className="text-secondary-text block text-base leading-relaxed">
+                  {description}
+                </span>
+              )}
+            </summary>
+            <div className="mt-3">{content}</div>
+          </details>
+        ) : (
+          <>
+            {header}
+            {content}
+          </>
         )}
       </div>
     );

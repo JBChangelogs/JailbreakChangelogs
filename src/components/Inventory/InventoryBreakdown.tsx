@@ -44,6 +44,8 @@ export default function InventoryBreakdown({
   const scrollToUnverifiableSection = () => {
     const target = unverifiableSectionRef.current;
     if (!target) return;
+    const disclosure = target.querySelector<HTMLDetailsElement>("details");
+    if (disclosure) disclosure.open = true;
 
     const rectTop = target.getBoundingClientRect().top;
     const absoluteTop = rectTop + window.scrollY;
@@ -56,6 +58,9 @@ export default function InventoryBreakdown({
     const extraPadding = 12;
     const top = Math.max(0, absoluteTop - headerHeight - extraPadding);
     window.scrollTo({ top, behavior: "smooth" });
+    target
+      .querySelector<HTMLInputElement>("input")
+      ?.focus({ preventScroll: true });
   };
 
   if (!stats.latestData || !stats.latestData.percentages) {
@@ -69,7 +74,7 @@ export default function InventoryBreakdown({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <OverviewStatsCard
         totalItems={stats.totalItems}
         networth={stats.networth}
@@ -125,7 +130,7 @@ export default function InventoryBreakdown({
 
       <ValueBreakdownSection
         title="Inventory Breakdown"
-        pieTitle="Inventory Breakdown Pie Chart"
+        pieTitle="Inventory Value by Category"
         description="Clean item value by category."
         percentages={stats.percentages ?? {}}
         categoryValues={stats.categoryValues}
@@ -143,7 +148,7 @@ export default function InventoryBreakdown({
         stats.sortedDuplicateEntries.length > 0 && (
           <ValueBreakdownSection
             title="Duplicate Inventory Breakdown"
-            pieTitle="Duplicate Inventory Breakdown Pie Chart"
+            pieTitle="Duped Value by Category"
             description="Duped item value by category."
             percentages={Object.fromEntries(stats.sortedDuplicateEntries)}
             categoryValues={stats.duplicateCategoryValues}
