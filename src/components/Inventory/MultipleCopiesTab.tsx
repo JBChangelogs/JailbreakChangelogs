@@ -47,31 +47,6 @@ type SortOrder =
   | "alpha-asc"
   | "alpha-desc";
 
-const getLeaderboardRowStyle = (rank: number) => {
-  if (rank === 1) {
-    return {
-      backgroundColor: "hsl(45 100% 32% / 0.28)",
-      borderColor: "hsl(45 100% 50% / 0.5)",
-    };
-  }
-
-  if (rank === 2) {
-    return {
-      backgroundColor: "hsl(0 0% 70% / 0.22)",
-      borderColor: "hsl(0 0% 75% / 0.5)",
-    };
-  }
-
-  if (rank === 3) {
-    return {
-      backgroundColor: "hsl(30 100% 28% / 0.28)",
-      borderColor: "hsl(30 100% 50% / 0.5)",
-    };
-  }
-
-  return null;
-};
-
 const getLeaderboardRankBadgeStyle = (rank: number) => {
   if (rank === 1) {
     return {
@@ -407,8 +382,7 @@ export default function DuplicatesTab({
 
   return (
     <div>
-      {/* Stats Summary */}
-      <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6">
+      <div className="mb-6">
         <h2 className="text-primary-text mb-4 text-xl font-semibold">
           Top Items by Copies
         </h2>
@@ -512,7 +486,7 @@ export default function DuplicatesTab({
           filteredLeaderboardItems.length > 0 && (
             <div
               ref={parentRef}
-              className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-96 scrollbar-thin scrollbar-track-transparent overflow-y-auto rounded-lg"
+              className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-96 scrollbar-thin scrollbar-track-transparent overflow-y-auto"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "var(--color-border-primary) transparent",
@@ -534,7 +508,6 @@ export default function DuplicatesTab({
                         leaderboardItem.title === item.title,
                     );
                   const rank = originalIndex + 1;
-                  const leaderboardRowStyle = getLeaderboardRowStyle(rank);
                   const leaderboardRankBadgeStyle =
                     getLeaderboardRankBadgeStyle(rank);
 
@@ -551,14 +524,7 @@ export default function DuplicatesTab({
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
                     >
-                      <div
-                        className={`mb-3 flex items-center justify-between rounded-lg border p-3 transition-colors ${
-                          rank <= 3
-                            ? "hover:!bg-quaternary-bg isolate overflow-hidden"
-                            : "border-border-card bg-tertiary-bg hover:bg-quaternary-bg"
-                        }`}
-                        style={leaderboardRowStyle ?? undefined}
-                      >
+                      <div className="border-border-card/60 hover:bg-tertiary-bg flex items-center justify-between border-b px-3 py-3 transition-colors">
                         <div className="flex min-w-0 flex-1 items-center gap-3">
                           <span
                             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
