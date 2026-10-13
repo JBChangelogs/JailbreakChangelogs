@@ -45,7 +45,7 @@ export default function CategoryProgressBar({
         ))
       ) : (
         <div className="bg-tertiary-bg flex h-full w-full items-center justify-center">
-          <span className="text-secondary-text text-xs">{emptyMessage}</span>
+          <span className="text-secondary-text text-sm">{emptyMessage}</span>
         </div>
       )}
     </div>

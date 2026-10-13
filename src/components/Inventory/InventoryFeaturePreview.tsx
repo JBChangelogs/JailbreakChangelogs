@@ -207,6 +207,13 @@ export default function InventoryFeaturePreview({
                       {formatInventoryCount(progress.missingCount)}{" "}
                       {progress.missingCount === 1 ? "item" : "items"} missing
                     </p>
+                    <p className="text-secondary-text mt-1 text-xs">
+                      Hyperchromes:{" "}
+                      {stats.countLowerLevels
+                        ? "lower levels count"
+                        : "count owned levels only"}
+                      .
+                    </p>
                     {stats.unverifiableCount > 0 && (
                       <p className="text-secondary-text mt-1 text-[13px]">
                         {formatInventoryCount(stats.unverifiableCount)}{" "}

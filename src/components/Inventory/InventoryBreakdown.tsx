@@ -95,6 +95,9 @@ export default function InventoryBreakdown({
       ) : (
         <>
           <CollectionProgressSection
+            countLowerLevels={stats.countLowerLevels}
+            creditedHyperchromeLevels={stats.creditedHyperchromeLevels}
+            onCountLowerLevelsChange={stats.setCountLowerLevels}
             overallProgress={stats.overallProgress}
             typeProgress={stats.typeProgress}
             unverifiableCount={stats.unverifiableCount}
@@ -123,12 +126,7 @@ export default function InventoryBreakdown({
       <ValueBreakdownSection
         title="Inventory Breakdown"
         pieTitle="Inventory Breakdown Pie Chart"
-        tooltipContent={
-          <>
-            How your clean inventory&apos;s total value is distributed across
-            item categories.
-          </>
-        }
+        description="Clean item value by category."
         percentages={stats.percentages ?? {}}
         categoryValues={stats.categoryValues}
         sortedEntries={stats.sortedCategoryEntries}
@@ -146,12 +144,7 @@ export default function InventoryBreakdown({
           <ValueBreakdownSection
             title="Duplicate Inventory Breakdown"
             pieTitle="Duplicate Inventory Breakdown Pie Chart"
-            tooltipContent={
-              <>
-                How your duplicated items&apos; total value is distributed
-                across item categories.
-              </>
-            }
+            description="Duped item value by category."
             percentages={Object.fromEntries(stats.sortedDuplicateEntries)}
             categoryValues={stats.duplicateCategoryValues}
             sortedEntries={stats.sortedDuplicateEntries}

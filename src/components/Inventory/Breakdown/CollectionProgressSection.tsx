@@ -1,11 +1,5 @@
-import type { RefObject } from "react";
+import { useId, type RefObject } from "react";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import { Icon } from "@/components/ui/IconWrapper";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   formatInventoryCount,
   formatPercentage,
@@ -18,6 +12,9 @@ import type { useInventoryBreakdownStats } from "@/hooks/useInventoryBreakdownSt
 type InventoryBreakdownStats = ReturnType<typeof useInventoryBreakdownStats>;
 
 interface CollectionProgressSectionProps {
+  countLowerLevels: boolean;
+  creditedHyperchromeLevels: number;
+  onCountLowerLevelsChange: (value: boolean) => void;
   overallProgress: InventoryBreakdownStats["overallProgress"];
   typeProgress: InventoryBreakdownStats["typeProgress"];
   unverifiableCount: number;
@@ -31,6 +28,9 @@ interface CollectionProgressSectionProps {
 }
 
 export default function CollectionProgressSection({
+  countLowerLevels,
+  creditedHyperchromeLevels,
+  onCountLowerLevelsChange,
   overallProgress,
   typeProgress,
   unverifiableCount,
@@ -42,39 +42,37 @@ export default function CollectionProgressSection({
   unverifiableSectionRef,
   onViewUnverifiable,
 }: CollectionProgressSectionProps) {
+  const modeId = useId();
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
       <div className="space-y-6 xl:col-span-8">
-        <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="mb-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-1.5">
-              <h4 className="text-primary-text text-sm font-semibold">
+              <h4 className="text-primary-text text-lg font-semibold">
                 Collection Progress
               </h4>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Icon
-                    icon="material-symbols:info-outline"
-                    className="text-secondary-text h-4 w-4 cursor-help"
-                    inline={true}
-                  />
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-62.5">
-                  How many of the {overallProgress.total} items in Jailbreak you
-                  own. Unverifiable items are assumed owned.
-                </TooltipContent>
-              </Tooltip>
             </div>
+            <span className="text-secondary-text text-base leading-relaxed">
+              Hyperchromes:{" "}
+              {countLowerLevels
+                ? "lower levels count"
+                : "count owned levels only"}
+            </span>
           </div>
+          <p className="text-secondary-text mb-1 text-base leading-relaxed">
+            Completion counts unique items using the Hyperchrome mode selected
+            below.
+          </p>
 
           {overallProgress.total === 0 ? (
             <div className="py-6 text-center">
-              <p className="text-secondary-text text-sm">No items found.</p>
+              <p className="text-secondary-text text-base">No items found.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {unverifiableCount > 0 && (
-                <div className="text-secondary-text text-xs">
+                <div className="text-secondary-text text-base leading-relaxed">
                   Unverifiable:{" "}
                   <span className="text-primary-text font-mono font-semibold tabular-nums">
                     {formatInventoryCount(unverifiableCount)}
@@ -111,7 +109,7 @@ export default function CollectionProgressSection({
                             widthPercent: width,
                             color: getCategoryColor(entry.type),
                             tooltip: (
-                              <div className="grid min-w-48 gap-1.5 text-xs">
+                              <div className="grid min-w-48 gap-1.5 text-sm">
                                 <div className="flex items-center gap-1.5">
                                   <span
                                     className="h-2.5 w-2.5 rounded-xs"
@@ -127,7 +125,7 @@ export default function CollectionProgressSection({
                                 </div>
                                 <div className="flex items-center justify-between">
                                   <span className="text-secondary-text">
-                                    Owned
+                                    Collected
                                   </span>
                                   <span className="text-primary-text font-mono font-medium tabular-nums">
                                     {formatInventoryCount(entry.owned)}/
@@ -162,28 +160,28 @@ export default function CollectionProgressSection({
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                  <div className="text-secondary-text mb-1 text-xs">
-                    Unique Owned
+                  <div className="text-secondary-text mb-1 text-sm">
+                    Unique Collected
                   </div>
-                  <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                  <div className="text-primary-text font-mono text-xl font-bold tabular-nums">
                     {formatInventoryCount(overallProgress.owned)}/
                     {formatInventoryCount(overallProgress.total)}
                   </div>
                 </div>
                 <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                  <div className="text-secondary-text mb-1 text-xs">
+                  <div className="text-secondary-text mb-1 text-sm">
                     Unique Missing
                   </div>
-                  <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                  <div className="text-primary-text font-mono text-xl font-bold tabular-nums">
                     {formatInventoryCount(overallProgress.missingCount)}/
                     {formatInventoryCount(overallProgress.total)}
                   </div>
                 </div>
                 <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                  <div className="text-secondary-text mb-1 text-xs">
+                  <div className="text-secondary-text mb-1 text-sm">
                     Completion
                   </div>
-                  <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                  <div className="text-primary-text font-mono text-xl font-bold tabular-nums">
                     {formatPercentage(overallProgress.percentage)}%
                   </div>
                 </div>
@@ -195,7 +193,7 @@ export default function CollectionProgressSection({
                   return (
                     <div
                       key={entry.type}
-                      className="border-border-card bg-tertiary-bg flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
+                      className="border-border-card/60 flex items-center justify-between gap-3 border-b py-3 text-base"
                     >
                       <div className="flex items-center gap-2">
                         {categoryIcon ? (
@@ -216,10 +214,10 @@ export default function CollectionProgressSection({
                         </span>
                       </div>
                       <div className="flex flex-col items-end">
-                        <span className="text-primary-text text-xs font-semibold">
+                        <span className="text-primary-text text-sm font-semibold">
                           {formatPercentage(entry.percentage)}%
                         </span>
-                        <span className="text-primary-text font-mono text-xs font-semibold tabular-nums">
+                        <span className="text-primary-text font-mono text-sm font-semibold tabular-nums">
                           {formatInventoryCount(entry.owned)}/
                           {formatInventoryCount(entry.total)}
                         </span>
@@ -229,39 +227,94 @@ export default function CollectionProgressSection({
                 })}
               </div>
 
+              <fieldset aria-describedby={`${modeId}-help`}>
+                <legend className="text-primary-text mb-2 text-lg font-semibold">
+                  Hyperchrome collection mode
+                </legend>
+                <p
+                  id={`${modeId}-help`}
+                  className="text-secondary-text mb-3 text-base leading-relaxed"
+                >
+                  This updates the missing-items list and your collection
+                  completion percentage. OG ownership is unchanged.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="flex cursor-pointer items-start gap-2">
+                    <input
+                      type="radio"
+                      name={modeId}
+                      value="lower-levels"
+                      checked={countLowerLevels}
+                      onChange={() => onCountLowerLevelsChange(true)}
+                      className="accent-button-info mt-0.5 h-4 w-4 shrink-0"
+                    />
+                    <span>
+                      <span className="text-primary-text block text-base font-medium">
+                        Count lower levels
+                      </span>
+                      <span className="text-secondary-text block text-base leading-relaxed">
+                        For each color, your highest level counts its lower
+                        levels too. Higher levels remain missing.
+                      </span>
+                    </span>
+                  </label>
+                  <label className="flex cursor-pointer items-start gap-2">
+                    <input
+                      type="radio"
+                      name={modeId}
+                      value="every-level"
+                      checked={!countLowerLevels}
+                      onChange={() => onCountLowerLevelsChange(false)}
+                      className="accent-button-info mt-0.5 h-4 w-4 shrink-0"
+                    />
+                    <span>
+                      <span className="text-primary-text block text-base font-medium">
+                        Count owned levels only
+                      </span>
+                      <span className="text-secondary-text block text-base leading-relaxed">
+                        Each Hyperchrome level counts separately. Owning a
+                        higher level doesn&apos;t count its lower levels.
+                      </span>
+                    </span>
+                  </label>
+                </div>
+                <div
+                  role="status"
+                  aria-atomic="true"
+                  className="mt-4 space-y-1"
+                >
+                  <p className="text-primary-text text-base font-semibold">
+                    {formatInventoryCount(overallProgress.owned)}/
+                    {formatInventoryCount(overallProgress.total)} collected
+                    {" · "}
+                    {formatInventoryCount(overallProgress.missingCount)} missing
+                    {" · "}
+                    {formatPercentage(overallProgress.percentage)}% complete
+                  </p>
+                  <p className="text-secondary-text text-base leading-relaxed">
+                    {countLowerLevels
+                      ? creditedHyperchromeLevels > 0
+                        ? `${formatInventoryCount(creditedHyperchromeLevels)} lower Hyperchrome ${creditedHyperchromeLevels === 1 ? "level" : "levels"} counted toward completion.`
+                        : "No additional lower Hyperchrome levels to count for this inventory."
+                      : "Only Hyperchrome levels currently in your inventory count toward completion."}
+                  </p>
+                </div>
+              </fieldset>
+
               <SearchableInventoryListSection
                 title="Trackable Missing Items"
-                tooltipContent={
-                  <>
-                    Items not in your inventory that can be confirmed missing.
-                    Excludes unverifiable items.
-                  </>
-                }
                 items={missingItemsAll}
                 searchPlaceholder="Search missing items..."
                 filterAriaLabel="Filter missing items by type"
                 clearAriaLabel="Clear missing item search"
                 emptyMessage="You have every item in this filter."
                 noResultsMessage="No missing items match your search."
-                helperContent={
-                  unverifiableCount > 0 ? (
-                    <>
-                      {formatInventoryCount(unverifiableCount)} unverifiable
-                      items are assumed owned and excluded from this list.
-                    </>
-                  ) : undefined
-                }
               />
 
               {unverifiableItemsAll.length > 0 && (
                 <SearchableInventoryListSection
                   title="Unverifiable Items"
-                  tooltipContent={
-                    <>
-                      Items that inventory scans can&apos;t detect. They are
-                      assumed owned and excluded from the missing list.
-                    </>
-                  }
+                  description="Inventory scans can’t confirm these items."
                   items={unverifiableItemsAll}
                   searchPlaceholder="Search unverifiable items..."
                   filterAriaLabel="Filter unverifiable items by type"
@@ -306,7 +359,7 @@ export default function CollectionProgressSection({
                   </span>
                 </div>
                 <div className="flex w-full items-center justify-between">
-                  <span className="text-secondary-text">Owned</span>
+                  <span className="text-secondary-text">Collected</span>
                   <span className="text-primary-text font-mono font-medium tabular-nums">
                     {formatInventoryCount(payloadData?.owned || 0)}/
                     {formatInventoryCount(payloadData?.total || 0)}

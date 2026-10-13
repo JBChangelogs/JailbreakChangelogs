@@ -7,7 +7,6 @@ export default function Loading() {
     <main className="mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         <Breadcrumb loading />
-        {/* Page introduction */}
         <div className="mb-6">
           <Skeleton className="mb-4 h-9 w-72" />
           <Skeleton className="mb-2 h-5 w-full" />
@@ -20,7 +19,6 @@ export default function Loading() {
           </div>
         </div>
 
-        {/* Categories and trading guides */}
         <div className="mb-6">
           <Skeleton className="mb-2 h-7 w-48" />
           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">

@@ -1,10 +1,4 @@
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import { Icon } from "@/components/ui/IconWrapper";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   formatInventoryCount,
   formatPercentage,
@@ -40,24 +34,15 @@ export default function OgOwnedSection({
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
       <div className="space-y-6 xl:col-span-8">
-        <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-          <div className="mb-3 flex items-center gap-1.5">
-            <h4 className="text-primary-text text-sm font-semibold">
+        <div>
+          <div className="mb-3">
+            <h4 className="text-primary-text text-lg font-semibold">
               OG Owned
             </h4>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Icon
-                  icon="material-symbols:info-outline"
-                  className="text-secondary-text h-4 w-4 cursor-help"
-                  inline={true}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-62.5">
-                Items where this player is the original owner in
-                Jailbreak&apos;s records, regardless of trading history.
-              </TooltipContent>
-            </Tooltip>
+            <p className="text-secondary-text mt-1 text-base leading-relaxed">
+              Items currently in this inventory where this player is recorded as
+              the original owner.
+            </p>
           </div>
 
           <div className="space-y-4">
@@ -73,7 +58,7 @@ export default function OgOwnedSection({
                           (entry.ogOwned / ogOwnedProgress.ogOwned) * 100,
                         color: getCategoryColor(entry.type),
                         tooltip: (
-                          <div className="grid min-w-48 gap-1.5 text-xs">
+                          <div className="grid min-w-48 gap-1.5 text-sm">
                             <div className="flex items-center gap-1.5">
                               <span
                                 className="h-2.5 w-2.5 rounded-xs"
@@ -115,26 +100,26 @@ export default function OgOwnedSection({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                <div className="text-secondary-text mb-1 text-xs">OG Owned</div>
-                <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                <div className="text-secondary-text mb-1 text-sm">OG Owned</div>
+                <div className="text-primary-text font-mono text-xl font-bold tabular-nums">
                   {formatInventoryCount(ogOwnedProgress.ogOwned)}/
                   {formatInventoryCount(ogOwnedProgress.total)}
                 </div>
               </div>
               <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                <div className="text-secondary-text mb-1 text-xs">
+                <div className="text-secondary-text mb-1 text-sm">
                   OG Missing
                 </div>
-                <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                <div className="text-primary-text font-mono text-xl font-bold tabular-nums">
                   {formatInventoryCount(ogOwnedProgress.ogMissing)}/
                   {formatInventoryCount(ogOwnedProgress.total)}
                 </div>
               </div>
               <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                <div className="text-secondary-text mb-1 text-xs">
+                <div className="text-secondary-text mb-1 text-sm">
                   Completion
                 </div>
-                <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                <div className="text-primary-text font-mono text-xl font-bold tabular-nums">
                   {formatPercentage(ogOwnedProgress.percentage)}%
                 </div>
               </div>
@@ -148,7 +133,7 @@ export default function OgOwnedSection({
                 return (
                   <div
                     key={entry.type}
-                    className="border-border-card bg-tertiary-bg flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
+                    className="border-border-card/60 flex items-center justify-between gap-3 border-b py-3 text-base"
                   >
                     <div className="flex items-center gap-2">
                       {categoryIcon ? (
@@ -169,10 +154,10 @@ export default function OgOwnedSection({
                       </span>
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className="text-primary-text text-xs font-semibold">
+                      <span className="text-primary-text text-sm font-semibold">
                         {formatPercentage(ogPct)}%
                       </span>
-                      <span className="text-primary-text font-mono text-xs font-semibold tabular-nums">
+                      <span className="text-primary-text font-mono text-sm font-semibold tabular-nums">
                         {formatInventoryCount(entry.ogOwned)}/
                         {formatInventoryCount(entry.total)}
                       </span>
@@ -184,13 +169,6 @@ export default function OgOwnedSection({
 
             <SearchableInventoryListSection
               title="Trackable Missing OG Items"
-              tooltipContent={
-                <>
-                  Items in Jailbreak where this player is not the original
-                  owner, including items not in their inventory. Excludes
-                  unverifiable items.
-                </>
-              }
               items={ogMissingItemsAll}
               searchPlaceholder="Search missing OG items..."
               filterAriaLabel="Filter non-OG items by type"

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useHyperchromeCollectionMode } from "@/hooks/useHyperchromeCollectionMode";
 import { getCategoryColor } from "@/utils/items/categoryIcons";
 import type { UserNetworthData } from "@/utils/api/api";
 import type { ChartConfig } from "@/components/ui/chart";
@@ -16,6 +17,8 @@ export const useInventoryBreakdownStats = (
   inventoryData: InventoryData,
   catalogItems: PartialItem[],
 ) => {
+  const { countLowerLevels, setCountLowerLevels } =
+    useHyperchromeCollectionMode();
   // Get the latest networth data
   const latestData =
     networthData && networthData.length > 0 ? networthData[0] : null;
@@ -58,6 +61,17 @@ export const useInventoryBreakdownStats = (
   } satisfies ChartConfig;
 
   const duplicateCategoryValues = useMemo(() => {
+    const duplicateTotal = latestData?.duplicates_value;
+    if (duplicateTotal != null && latestData?.duplicates_percentages) {
+      return Object.fromEntries(
+        Object.entries(latestData.duplicates_percentages).map(
+          ([category, percentage]) => [
+            category,
+            (percentage / 100) * duplicateTotal,
+          ],
+        ),
+      );
+    }
     if (!inventoryData.duplicates || inventoryData.duplicates.length === 0) {
       return {};
     }
@@ -87,7 +101,7 @@ export const useInventoryBreakdownStats = (
     });
 
     return nextCategoryValues;
-  }, [inventoryData.duplicates, itemsData]);
+  }, [inventoryData.duplicates, itemsData, latestData]);
 
   const ownedItemIds = useMemo(() => {
     const ids = new Set<number>();
@@ -135,9 +149,43 @@ export const useInventoryBreakdownStats = (
 
   const effectiveOwnedItemIds = useMemo(() => {
     const ids = new Set<number>(ownedItemIds);
+    if (countLowerLevels) {
+      const hyperchromes = eligibleItems.flatMap((item) => {
+        const match = item.name.match(
+          /^(Hyper(?:Blue|Diamond|Green|Orange|Pink|Purple|Red|Yellow)) Level ([1-5])$/,
+        );
+        return item.type?.trim().toLowerCase() === "hyperchrome" && match
+          ? [{ id: item.id, color: match[1], level: Number(match[2]) }]
+          : [];
+      });
+      const highestLevels = new Map<string, number>();
+      for (const item of hyperchromes) {
+        if (ownedItemIds.has(item.id)) {
+          highestLevels.set(
+            item.color,
+            Math.max(highestLevels.get(item.color) ?? 0, item.level),
+          );
+        }
+      }
+      for (const item of hyperchromes) {
+        if (item.level <= (highestLevels.get(item.color) ?? 0))
+          ids.add(item.id);
+      }
+    }
     UNVERIFIABLE_COLLECTION_ITEM_IDS.forEach((id) => ids.add(id));
     return ids;
-  }, [ownedItemIds]);
+  }, [ownedItemIds, eligibleItems, countLowerLevels]);
+
+  const creditedHyperchromeLevels = useMemo(
+    () =>
+      eligibleItems.filter(
+        (item) =>
+          effectiveOwnedItemIds.has(item.id) &&
+          !ownedItemIds.has(item.id) &&
+          !UNVERIFIABLE_COLLECTION_ITEM_IDS.has(item.id),
+      ).length,
+    [effectiveOwnedItemIds, ownedItemIds, eligibleItems],
+  );
 
   const effectiveOgOwnedItemIds = useMemo(() => {
     const ids = new Set<number>(ogOwnedItemIds);
@@ -265,10 +313,7 @@ export const useInventoryBreakdownStats = (
     (sum, v) => sum + v,
     0,
   );
-  const duplicatesValue =
-    clientDuplicatesTotal > 0
-      ? clientDuplicatesTotal
-      : latestData?.duplicates_value;
+  const duplicatesValue = latestData?.duplicates_value ?? clientDuplicatesTotal;
   const clientDuplicatesPercentages = useMemo<Record<string, number>>(
     () =>
       clientDuplicatesTotal > 0
@@ -353,6 +398,9 @@ export const useInventoryBreakdownStats = (
   );
 
   return {
+    countLowerLevels,
+    setCountLowerLevels,
+    creditedHyperchromeLevels,
     latestData,
     categoryValues,
     sortedCategoryEntries,

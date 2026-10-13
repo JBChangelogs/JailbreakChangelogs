@@ -19,11 +19,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   formatInventoryCount,
   secondaryFilterDropdownContentClassName,
   secondaryFilterDropdownTriggerClassName,
@@ -34,7 +29,7 @@ import {
 
 interface SearchableInventoryListSectionProps {
   title: string;
-  tooltipContent: ReactNode;
+  description?: string;
   items: InventoryListEntry[];
   searchPlaceholder: string;
   filterAriaLabel: string;
@@ -49,7 +44,7 @@ interface SearchableInventoryListSectionProps {
 const SearchableInventoryListSection = memo(
   function SearchableInventoryListSection({
     title,
-    tooltipContent,
+    description,
     items,
     searchPlaceholder,
     filterAriaLabel,
@@ -101,24 +96,17 @@ const SearchableInventoryListSection = memo(
         className="border-border-card bg-tertiary-bg rounded-lg border p-3"
       >
         <div className="mb-2 flex items-center gap-1.5">
-          <div className="text-primary-text text-sm font-semibold">
+          <div className="text-primary-text text-lg font-semibold">
             {title} ({formatInventoryCount(items.length)})
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Icon
-                icon="material-symbols:info-outline"
-                className="text-secondary-text h-4 w-4 cursor-help"
-                inline={true}
-              />
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-62.5">
-              {tooltipContent}
-            </TooltipContent>
-          </Tooltip>
         </div>
+        {description && (
+          <p className="text-secondary-text mb-2 text-base leading-relaxed">
+            {description}
+          </p>
+        )}
         {helperContent ? (
-          <div className="text-secondary-text mb-2 text-xs">
+          <div className="text-secondary-text mb-2 text-base leading-relaxed">
             {helperContent}
           </div>
         ) : null}
@@ -176,7 +164,7 @@ const SearchableInventoryListSection = memo(
                   >
                     <DropdownMenuRadioItem
                       value="all"
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-base"
                     >
                       All types
                     </DropdownMenuRadioItem>
@@ -184,7 +172,7 @@ const SearchableInventoryListSection = memo(
                       <DropdownMenuRadioItem
                         key={type}
                         value={type}
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-base"
                       >
                         {type}
                       </DropdownMenuRadioItem>
@@ -195,18 +183,18 @@ const SearchableInventoryListSection = memo(
             </div>
           </div>
           {(searchTerm.trim() || typeFilter !== "all") && (
-            <div className="text-secondary-text mt-1 text-xs">
+            <div className="text-secondary-text mt-1 text-sm">
               Showing {formatInventoryCount(filteredItems.length)} of{" "}
               {formatInventoryCount(items.length)}
             </div>
           )}
         </div>
         {items.length === 0 ? (
-          <p className="text-secondary-text text-sm">{emptyMessage}</p>
+          <p className="text-secondary-text text-base">{emptyMessage}</p>
         ) : filteredItems.length === 0 ? (
-          <p className="text-secondary-text text-sm">{noResultsMessage}</p>
+          <p className="text-secondary-text text-base">{noResultsMessage}</p>
         ) : (
-          <div className="max-h-65 scrollbar-thin overflow-auto pr-1 text-sm">
+          <div className="max-h-65 scrollbar-thin overflow-auto pr-1 text-base">
             <ol className="divide-border-card/60 space-y-0 divide-y">
               {filteredItems.map((item, idx) => (
                 <li
@@ -214,13 +202,13 @@ const SearchableInventoryListSection = memo(
                   className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center sm:gap-3"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="text-secondary-text w-10 shrink-0 text-right font-mono text-xs font-medium tabular-nums">
+                    <span className="text-secondary-text w-10 shrink-0 text-right font-mono text-sm font-medium tabular-nums">
                       {idx + 1}.
                     </span>
                     <Link
                       href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
                       prefetch={false}
-                      className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-semibold transition-colors"
+                      className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-base font-semibold transition-colors"
                     >
                       {" "}
                       {item.name}
@@ -228,7 +216,7 @@ const SearchableInventoryListSection = memo(
                   </div>
                   <div className="flex justify-end sm:ml-auto">
                     <span
-                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-sm leading-none font-medium backdrop-blur-xl"
                       style={{
                         borderColor: getCategoryColor(item.type),
                         backgroundColor: `${getCategoryColor(item.type)}22`,

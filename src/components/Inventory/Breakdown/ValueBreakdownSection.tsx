@@ -1,12 +1,5 @@
-import type { ReactNode } from "react";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import { Icon } from "@/components/ui/IconWrapper";
 import type { ChartConfig } from "@/components/ui/chart";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   formatNetworth,
   formatPercentage,
@@ -24,7 +17,7 @@ interface ValueChartEntry {
 interface ValueBreakdownSectionProps {
   title: string;
   pieTitle: string;
-  tooltipContent: ReactNode;
+  description: string;
   percentages: Record<string, number>;
   categoryValues: Record<string, number>;
   sortedEntries: [string, number][];
@@ -38,7 +31,7 @@ interface ValueBreakdownSectionProps {
 export default function ValueBreakdownSection({
   title,
   pieTitle,
-  tooltipContent,
+  description,
   percentages,
   categoryValues,
   sortedEntries,
@@ -55,33 +48,12 @@ export default function ValueBreakdownSection({
       <div
         className={isInventory ? "space-y-6 xl:col-span-8" : "xl:col-span-8"}
       >
-        <div
-          className={
-            isInventory
-              ? "border-border-card bg-secondary-bg rounded-lg border p-4"
-              : "border-border-card bg-secondary-bg space-y-4 rounded-lg border p-4"
-          }
-        >
-          <div
-            className={
-              isInventory
-                ? "mb-3 flex items-center gap-1.5"
-                : "flex items-center gap-1.5"
-            }
-          >
-            <h4 className="text-primary-text text-sm font-semibold">{title}</h4>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Icon
-                  icon="material-symbols:info-outline"
-                  className="text-secondary-text h-4 w-4 cursor-help"
-                  inline={true}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-62.5">
-                {tooltipContent}
-              </TooltipContent>
-            </Tooltip>
+        <div className={isInventory ? undefined : "space-y-4"}>
+          <div className={isInventory ? "mb-3" : undefined}>
+            <h4 className="text-primary-text text-lg font-semibold">{title}</h4>
+            <p className="text-secondary-text mt-1 text-base leading-relaxed">
+              {description}
+            </p>
           </div>
           {Object.keys(percentages).length > 0 ? (
             <>
@@ -92,7 +64,7 @@ export default function ValueBreakdownSection({
                   widthPercent: percentage,
                   color: getCategoryColor(category),
                   tooltip: (
-                    <div className="grid min-w-40 gap-1.5 text-xs">
+                    <div className="grid min-w-40 gap-1.5 text-sm">
                       <div className="flex items-center gap-1.5">
                         <span
                           className="h-2.5 w-2.5 rounded-xs"
@@ -127,7 +99,7 @@ export default function ValueBreakdownSection({
                   return (
                     <div
                       key={category}
-                      className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg flex items-center justify-between gap-3 rounded-lg border p-3 text-sm transition-colors"
+                      className="border-border-card/60 flex items-center justify-between gap-3 border-b py-3 text-base"
                     >
                       <div className="flex items-center gap-2">
                         {categoryIcon ? (
@@ -148,10 +120,10 @@ export default function ValueBreakdownSection({
                         </span>
                       </div>
                       <div className="flex flex-col items-end">
-                        <span className="text-primary-text text-xs font-semibold">
+                        <span className="text-primary-text text-sm font-semibold">
                           {formatPercentage(percentage)}%
                         </span>
-                        <span className="text-primary-text text-sm font-semibold">
+                        <span className="text-primary-text text-lg font-semibold">
                           ${formatNetworth(categoryValues[category] || 0)}
                         </span>
                       </div>

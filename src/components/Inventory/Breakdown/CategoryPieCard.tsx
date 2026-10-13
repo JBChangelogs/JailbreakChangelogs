@@ -44,13 +44,13 @@ export default function CategoryPieCard({
       style={{ top: "calc(var(--header-height, 0px) + 16px)" }}
     >
       <div className="mb-2 text-center">
-        <div className="text-primary-text text-sm font-semibold">{title}</div>
+        <div className="text-primary-text text-lg font-semibold">{title}</div>
       </div>
 
       {renderCharts &&
         (isEmpty ? (
           <div className="py-10 text-center">
-            <p className="text-secondary-text text-sm">{emptyMessage}</p>
+            <p className="text-secondary-text text-base">{emptyMessage}</p>
           </div>
         ) : (
           <>
@@ -74,7 +74,7 @@ export default function CategoryPieCard({
 
                         return (
                           <div
-                            className={`flex ${tooltipWidth === "wide" ? "min-w-48" : "min-w-40"} flex-col gap-1.5 text-xs`}
+                            className={`flex ${tooltipWidth === "wide" ? "min-w-48" : "min-w-40"} flex-col gap-1.5 text-sm`}
                           >
                             <div className="flex items-center gap-1.5">
                               <span
@@ -115,7 +115,7 @@ export default function CategoryPieCard({
               {data.map((entry) => (
                 <div
                   key={entry.category}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-base"
                 >
                   <span
                     className="h-3 w-3 shrink-0 rounded-full"
