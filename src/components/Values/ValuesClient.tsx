@@ -436,7 +436,7 @@ export default function ValuesClient() {
 
   return (
     <ValuesErrorBoundary>
-      <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-5">
+      <div className="mb-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex-1">
             <div className="mb-2 flex items-center justify-between">
@@ -476,7 +476,9 @@ export default function ValuesClient() {
             className="w-full self-center lg:self-start"
           />
         </div>
+      </div>
 
+      <div className="mb-6">
         <CategoryIcons
           onSelect={handleCategorySelect}
           selectedFilters={selectedFilterSorts}

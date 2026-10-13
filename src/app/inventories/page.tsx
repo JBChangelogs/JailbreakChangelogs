@@ -61,7 +61,6 @@ export default async function InventoriesPage() {
 
         <p className="text-secondary-text mb-3">
           Enter a username or Roblox ID to check their Jailbreak inventory.
-          Connect your Roblox account to access your own inventory.
         </p>
         <div className="mb-6">
           <RelatedInventoryPages current="inventories" />

@@ -3,11 +3,11 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 export default function Loading() {
   return (
     <main className="min-h-screen">
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4 pb-8">
         <Breadcrumb loading={true} />
 
         {/* Timeline Header Skeleton */}
-        <div className="border-border-card bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
+        <div className="mb-6">
           <div className="bg-quaternary-bg/70 mb-4 h-8 w-80 animate-pulse rounded"></div>
           <div className="bg-quaternary-bg/70 mb-4 h-4 w-full animate-pulse rounded"></div>
           <div className="bg-quaternary-bg/70 mb-4 h-4 w-3/4 animate-pulse rounded"></div>

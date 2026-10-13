@@ -31,7 +31,7 @@ const SeasonHeader: React.FC<SeasonHeaderProps> = ({
   nextSeason,
 }) => {
   return (
-    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
+    <div className="mb-6">
       <div className="mb-2">
         <h2 className="page-heading">Roblox Jailbreak Season Archives</h2>
       </div>

@@ -196,23 +196,30 @@ export default function HyperchromeCalculatorModal({
   if (!mounted) {
     if (asPage) {
       return (
-        <div className="border-border-card bg-secondary-bg flex w-full flex-col rounded-lg border p-6 shadow-lg">
-          <div className="bg-button-secondary mb-4 h-5 w-48 animate-pulse rounded" />
+        <div className="space-y-6">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-6 shadow-lg">
+            <div className="bg-button-secondary mb-4 h-5 w-48 animate-pulse rounded" />
 
-          <div className="mb-4 space-y-2">
+            <div className="mb-4 space-y-2">
+              <div className="bg-button-secondary h-4 w-full animate-pulse rounded" />
+              <div className="bg-button-secondary h-4 w-5/6 animate-pulse rounded" />
+              <div className="bg-button-secondary h-4 w-2/3 animate-pulse rounded" />
+            </div>
+
+            <div className="mb-4 space-y-3">
+              <div className="bg-button-secondary border-border-card h-12 w-full animate-pulse rounded border" />
+              <div className="bg-button-secondary border-border-card h-12 w-full animate-pulse rounded border" />
+            </div>
+
+            <div className="space-y-3">
+              <div className="bg-button-secondary border-border-card h-24 w-full animate-pulse rounded border" />
+              <div className="bg-button-secondary border-border-card h-24 w-full animate-pulse rounded border" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="bg-button-secondary h-6 w-48 animate-pulse rounded" />
             <div className="bg-button-secondary h-4 w-full animate-pulse rounded" />
             <div className="bg-button-secondary h-4 w-5/6 animate-pulse rounded" />
-            <div className="bg-button-secondary h-4 w-2/3 animate-pulse rounded" />
-          </div>
-
-          <div className="mb-4 space-y-3">
-            <div className="bg-button-secondary border-border-card h-12 w-full animate-pulse rounded border" />
-            <div className="bg-button-secondary border-border-card h-12 w-full animate-pulse rounded border" />
-          </div>
-
-          <div className="space-y-3">
-            <div className="bg-button-secondary border-border-card h-24 w-full animate-pulse rounded border" />
-            <div className="bg-button-secondary border-border-card h-24 w-full animate-pulse rounded border" />
           </div>
         </div>
       );
@@ -233,593 +240,588 @@ export default function HyperchromeCalculatorModal({
     ? "text-primary-text text-base font-bold tracking-wider uppercase"
     : "text-primary-text text-sm font-bold tracking-wider uppercase";
 
-  const calculatorContent = (
+  const calculatorControls = (
     <>
-      {!asPage && (
-        <div className="modal-header text-primary-text flex shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
-          <span>Hyperchrome Pity Calculator</span>
+      <div className="mb-4">
+        <span id="level-label" className={inputLabelClass}>
+          Current Hyperchrome Level
+        </span>
+        <div
+          className={
+            asPage
+              ? "text-primary-text mb-2 text-sm"
+              : "text-primary-text mb-2 text-xs"
+          }
+        >
+          Level 0 means you have no hyperchrome yet.
         </div>
-      )}
-
-      <div className="flex flex-1 flex-col overflow-y-auto p-6">
-        <div className="mb-4">
-          <span id="level-label" className={inputLabelClass}>
-            Current Hyperchrome Level
-          </span>
-          <div
-            className={
-              asPage
-                ? "text-primary-text mb-2 text-sm"
-                : "text-primary-text mb-2 text-xs"
-            }
-          >
-            Level 0 means you have no hyperchrome yet.
-          </div>
-          <div
-            role="radiogroup"
-            aria-labelledby="level-label"
-            className="grid grid-cols-5 gap-2"
-          >
-            {[0, 1, 2, 3, 4].map((lvl) => (
-              <button
-                key={lvl}
-                type="button"
-                role="radio"
-                aria-checked={level === String(lvl)}
-                onClick={() => setLevel(String(lvl))}
-                className={cn(
-                  "cursor-pointer rounded-lg border py-2.5 text-sm font-bold transition-all duration-150 focus-visible:ring-border-focus focus-visible:ring-2 focus-visible:outline-none",
-                  level === String(lvl)
-                    ? "border-button-info bg-button-info text-form-button-text shadow-sm"
-                    : "border-border-card bg-tertiary-bg text-primary-text hover:border-button-info/50",
-                )}
-              >
-                {lvl}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <label
-            htmlFor="pity"
-            className={
-              asPage
-                ? "text-primary-text mb-2 block text-sm tracking-wider uppercase"
-                : "text-primary-text mb-2 block text-xs tracking-wider uppercase"
-            }
-          >
-            Current {isSmallServer ? "Small" : "Big"} Server Pity
-          </label>
-          <div className="flex items-center gap-3">
-            <input
-              type="text"
-              id="pity"
-              inputMode="decimal"
-              autoComplete="off"
-              className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus-visible:ring-border-focus w-24 shrink-0 rounded-lg border p-3 text-sm font-medium shadow-sm transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none"
-              placeholder="0"
-              value={pity}
-              onChange={(e) => setPity(sanitizeDecimalInput(e.target.value))}
-            />
-            <Slider
-              value={[Math.min(100, Math.max(0, Number(pity) || 0))]}
-              min={0}
-              max={100}
-              step={0.1}
-              onValueChange={([v]) => setPity(String(v))}
-              aria-label={`Current ${isSmallServer ? "small" : "big"} server pity percent`}
-              className="flex-1"
-            />
-            <span className="text-secondary-text shrink-0 text-sm font-semibold">
-              %
-            </span>
-          </div>
-          <div className={helperTextClass}>
-            {isSmallServer
-              ? "Reaching 66% in a small server is equivalent to 100% in a big server, guaranteeing an instant level-up!"
-              : "Big server pity is the baseline; reaching 100% guarantees an instant level-up."}
-          </div>
-          <div
-            className={
-              asPage
-                ? "text-primary-text mt-1 text-sm"
-                : "text-primary-text mt-1 text-xs"
-            }
-          >
-            Pity percentages are server-mode specific (small and big % values
-            are not 1:1 comparable).
-          </div>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center justify-between gap-2 sm:justify-start">
-              <span
-                className={
-                  asPage
-                    ? "text-primary-text text-sm tracking-wider whitespace-nowrap uppercase"
-                    : "text-primary-text text-xs tracking-wider whitespace-nowrap uppercase"
-                }
-              >
-                Small Server
-              </span>
-              <Switch
-                checked={isSmallServer}
-                onCheckedChange={setIsSmallServer}
-                aria-label="Toggle small server mode"
-              ></Switch>
-            </div>
-            <Button
-              size="md"
+        <div
+          role="radiogroup"
+          aria-labelledby="level-label"
+          className="grid grid-cols-5 gap-2"
+        >
+          {[0, 1, 2, 3, 4].map((lvl) => (
+            <button
+              key={lvl}
               type="button"
-              onClick={handleCalculate}
-              data-rybbit-event="Hyper Pity Calculate"
-              className="w-full sm:w-auto"
+              role="radio"
+              aria-checked={level === String(lvl)}
+              onClick={() => setLevel(String(lvl))}
+              className={cn(
+                "cursor-pointer rounded-lg border py-2.5 text-sm font-bold transition-all duration-150 focus-visible:ring-border-focus focus-visible:ring-2 focus-visible:outline-none",
+                level === String(lvl)
+                  ? "border-button-info bg-button-info text-form-button-text shadow-sm"
+                  : "border-border-card bg-tertiary-bg text-primary-text hover:border-button-info/50",
+              )}
             >
-              Calculate
-            </Button>
-          </div>
+              {lvl}
+            </button>
+          ))}
         </div>
+      </div>
 
-        <div className="mb-4">
-          {hasCalculated && resultOtherPity && (
-            <div className="mb-4">
-              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
-                <div className="mb-3 flex items-center justify-between">
+      <div className="mb-4">
+        <label
+          htmlFor="pity"
+          className={
+            asPage
+              ? "text-primary-text mb-2 block text-sm tracking-wider uppercase"
+              : "text-primary-text mb-2 block text-xs tracking-wider uppercase"
+          }
+        >
+          Current {isSmallServer ? "Small" : "Big"} Server Pity
+        </label>
+        <div className="flex items-center gap-3">
+          <input
+            type="text"
+            id="pity"
+            inputMode="decimal"
+            autoComplete="off"
+            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus-visible:ring-border-focus w-24 shrink-0 rounded-lg border p-3 text-sm font-medium shadow-sm transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none"
+            placeholder="0"
+            value={pity}
+            onChange={(e) => setPity(sanitizeDecimalInput(e.target.value))}
+          />
+          <Slider
+            value={[Math.min(100, Math.max(0, Number(pity) || 0))]}
+            min={0}
+            max={100}
+            step={0.1}
+            onValueChange={([v]) => setPity(String(v))}
+            aria-label={`Current ${isSmallServer ? "small" : "big"} server pity percent`}
+            className="flex-1"
+          />
+          <span className="text-secondary-text shrink-0 text-sm font-semibold">
+            %
+          </span>
+        </div>
+        <div className={helperTextClass}>
+          {isSmallServer
+            ? "Reaching 66% in a small server is equivalent to 100% in a big server, guaranteeing an instant level-up!"
+            : "Big server pity is the baseline; reaching 100% guarantees an instant level-up."}
+        </div>
+        <div
+          className={
+            asPage
+              ? "text-primary-text mt-1 text-sm"
+              : "text-primary-text mt-1 text-xs"
+          }
+        >
+          Pity percentages are server-mode specific (small and big % values are
+          not 1:1 comparable).
+        </div>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-between gap-2 sm:justify-start">
+            <span
+              className={
+                asPage
+                  ? "text-primary-text text-sm tracking-wider whitespace-nowrap uppercase"
+                  : "text-primary-text text-xs tracking-wider whitespace-nowrap uppercase"
+              }
+            >
+              Small Server
+            </span>
+            <Switch
+              checked={isSmallServer}
+              onCheckedChange={setIsSmallServer}
+              aria-label="Toggle small server mode"
+            ></Switch>
+          </div>
+          <Button
+            size="md"
+            type="button"
+            onClick={handleCalculate}
+            data-rybbit-event="Hyper Pity Calculate"
+            className="w-full sm:w-auto"
+          >
+            Calculate
+          </Button>
+        </div>
+      </div>
+
+      <div className="mb-4">
+        {hasCalculated && resultOtherPity && (
+          <div className="mb-4">
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div
+                  className={
+                    asPage
+                      ? "text-primary-text text-base font-bold tracking-wider uppercase"
+                      : "text-primary-text text-sm font-bold tracking-wider uppercase"
+                  }
+                >
+                  Result
+                </div>
+                <div
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
+                    isSmallServer
+                      ? "text-primary-text bg-amber-500/10"
+                      : "text-primary-text bg-blue-500/10"
+                  }`}
+                >
+                  {isSmallServer
+                    ? "Small Server (0-8 Players)"
+                    : "Big Server (9+ Players)"}
+                </div>
+              </div>
+
+              <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-5">
+                  <div className="mb-2 flex items-center justify-center gap-3">
+                    <div
+                      className={
+                        asPage
+                          ? "text-primary-text text-5xl font-black"
+                          : "text-primary-text text-4xl font-black"
+                      }
+                    >
+                      {resultRobberiesNeeded}
+                    </div>
+                    <div
+                      className={
+                        asPage
+                          ? "text-secondary-text text-xl font-bold"
+                          : "text-secondary-text text-lg font-bold"
+                      }
+                    >
+                      robberies
+                    </div>
+                  </div>
                   <div
                     className={
                       asPage
-                        ? "text-primary-text text-base font-bold tracking-wider uppercase"
-                        : "text-primary-text text-sm font-bold tracking-wider uppercase"
+                        ? "text-primary-text text-center text-base font-medium"
+                        : "text-primary-text text-center text-sm font-medium"
                     }
                   >
-                    Result
+                    remaining to reach{" "}
+                    <span className="font-black">
+                      HyperChrome Level {Math.min(resultLevel + 1, 5)}
+                    </span>
+                    <br />
+                    <span
+                      className={
+                        asPage
+                          ? "text-secondary-text mt-1 inline-block text-sm font-normal"
+                          : "text-secondary-text mt-1 inline-block text-[13px] font-normal"
+                      }
+                    >
+                      (from your current pity, staying in{" "}
+                      {isSmallServer ? "Small Servers" : "Big Servers"})
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+                  <div className="mb-2 flex items-center gap-2">
+                    <Icon
+                      icon="emojione:light-bulb"
+                      className="text-warning shrink-0 text-2xl"
+                    />
+                    <span
+                      className={
+                        asPage
+                          ? "text-warning text-base font-bold tracking-wide"
+                          : "text-warning text-sm font-bold tracking-wide"
+                      }
+                    >
+                      Helpful Tip
+                    </span>
                   </div>
                   <div
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
-                      isSmallServer
-                        ? "text-primary-text bg-amber-500/10"
-                        : "text-primary-text bg-blue-500/10"
-                    }`}
+                    className={
+                      asPage
+                        ? "text-primary-text text-sm leading-relaxed"
+                        : "text-primary-text text-[13px] leading-relaxed"
+                    }
                   >
-                    {isSmallServer
-                      ? "Small Server (0-8 Players)"
-                      : "Big Server (9+ Players)"}
-                  </div>
-                </div>
-
-                <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-5">
-                    <div className="mb-2 flex items-center justify-center gap-3">
-                      <div
-                        className={
-                          asPage
-                            ? "text-primary-text text-5xl font-black"
-                            : "text-primary-text text-4xl font-black"
-                        }
-                      >
-                        {resultRobberiesNeeded}
-                      </div>
-                      <div
-                        className={
-                          asPage
-                            ? "text-secondary-text text-xl font-bold"
-                            : "text-secondary-text text-lg font-bold"
-                        }
-                      >
-                        robberies
-                      </div>
-                    </div>
-                    <div
-                      className={
-                        asPage
-                          ? "text-primary-text text-center text-base font-medium"
-                          : "text-primary-text text-center text-sm font-medium"
-                      }
-                    >
-                      remaining to reach{" "}
-                      <span className="font-black">
-                        HyperChrome Level {Math.min(resultLevel + 1, 5)}
-                      </span>
-                      <br />
-                      <span
-                        className={
-                          asPage
-                            ? "text-secondary-text mt-1 inline-block text-sm font-normal"
-                            : "text-secondary-text mt-1 inline-block text-[13px] font-normal"
-                        }
-                      >
-                        (from your current pity, staying in{" "}
-                        {isSmallServer ? "Small Servers" : "Big Servers"})
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-                    <div className="mb-2 flex items-center gap-2">
-                      <Icon
-                        icon="emojione:light-bulb"
-                        className="text-warning shrink-0 text-2xl"
-                      />
-                      <span
-                        className={
-                          asPage
-                            ? "text-warning text-base font-bold tracking-wide"
-                            : "text-warning text-sm font-bold tracking-wide"
-                        }
-                      >
-                        Helpful Tip
-                      </span>
-                    </div>
-                    <div
-                      className={
-                        asPage
-                          ? "text-primary-text text-sm leading-relaxed"
-                          : "text-primary-text text-[13px] leading-relaxed"
-                      }
-                    >
-                      {isSmallServer ? (
-                        <>
-                          <span>After </span>
-                          <span className="font-black">
-                            {resultTipRobberies}
-                          </span>{" "}
-                          <span>robberies, your pity reaches </span>
-                          <span className="font-black">66%</span>
-                          <span> in Small Servers.</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>
-                            Big/Public servers don&apos;t speed up pity
-                            progression; they simply use a different pity scale
-                            than Small/Private servers.
-                          </span>
-                        </>
-                      )}
-                    </div>
-                    <div
-                      className={
-                        asPage
-                          ? "text-primary-text/90 mt-2 text-sm leading-relaxed"
-                          : "text-primary-text/90 mt-2 text-[13px] leading-relaxed"
-                      }
-                    >
-                      {isSmallServer
-                        ? "Switch to a Big Server (9+ Players) at that point to guarantee an instant level-up."
-                        : "However, Big/Public servers provide 1.5x luck for obtaining hyperchromes naturally (without relying on pity)."}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4">
-                  <div className="mb-3 flex items-center gap-3">
-                    <div className="relative h-14 w-14 shrink-0">
-                      <Image
-                        src="https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/jars/HyperChrome_Wildcard.webp"
-                        alt="HyperChrome Wildcard"
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <div>
-                      <div
-                        className={
-                          asPage
-                            ? "text-primary-text text-lg font-bold"
-                            : "text-primary-text text-base font-bold"
-                        }
-                      >
-                        VP / Mansion Wildcard (Random Color)
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border-border-card bg-tertiary-bg mb-3 rounded-lg border p-5">
-                    <div className="mb-2 flex items-center justify-center gap-3">
-                      <div
-                        className={
-                          asPage
-                            ? "text-primary-text text-5xl font-black"
-                            : "text-primary-text text-4xl font-black"
-                        }
-                      >
-                        {resultRobberiesNeeded}
-                      </div>
-                      <div
-                        className={
-                          asPage
-                            ? "text-secondary-text text-xl font-bold"
-                            : "text-secondary-text text-lg font-bold"
-                        }
-                      >
-                        VP defeats
-                      </div>
-                    </div>
-                    <div
-                      className={
-                        asPage
-                          ? "text-primary-text text-center text-base font-medium"
-                          : "text-primary-text text-center text-sm font-medium"
-                      }
-                    >
-                      remaining to guarantee{" "}
-                      <span className="font-black">HyperChrome Wildcard</span>
-                      <br />
-                      <span
-                        className={
-                          asPage
-                            ? "text-secondary-text mt-1 inline-block text-sm font-normal"
-                            : "text-secondary-text mt-1 inline-block text-[13px] font-normal"
-                        }
-                      >
-                        (from your current pity, staying in{" "}
-                        {isSmallServer
-                          ? "Small/Private Servers"
-                          : "Big/Public Servers"}
-                        )
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                      <div className="text-secondary-text mb-1 text-[11px] uppercase">
-                        Big/Public Guarantee
-                      </div>
-                      <div className="text-primary-text text-2xl font-black">
-                        {HYPERCHROME_PITY_PUBLIC[resultLevel]}
-                      </div>
-                      <div className="text-secondary-text text-xs">
-                        total from 0% pity
-                      </div>
-                    </div>
-                    <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
-                      <div className="text-secondary-text mb-1 text-[11px] uppercase">
-                        Small/Private Guarantee
-                      </div>
-                      <div className="text-primary-text text-2xl font-black">
-                        {HYPERCHROME_PITY_SMALL[resultLevel]}
-                      </div>
-                      <div className="text-secondary-text text-xs">
-                        total from 0% pity
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className={
-                    asPage
-                      ? "text-primary-text flex flex-col items-center gap-1 text-center text-sm font-medium"
-                      : "text-primary-text flex flex-col items-center gap-1 text-center text-xs font-medium"
-                  }
-                >
-                  <div>
-                    Based on Level {resultLevel} with {resultPity}%{" "}
-                    {isSmallServer ? "Small Server" : "Big Server"} Pity
-                  </div>
-                  <div className="text-primary-text/70 mt-1">
                     {isSmallServer ? (
                       <>
-                        Equivalent to{" "}
-                        {(
-                          (((resultPity / 100) *
-                            HYPERCHROME_PITY_SMALL[resultLevel]) /
-                            HYPERCHROME_PITY_PUBLIC[resultLevel]) *
-                          100
-                        ).toFixed(2)}
-                        % Big Server Pity
+                        <span>After </span>
+                        <span className="font-black">
+                          {resultTipRobberies}
+                        </span>{" "}
+                        <span>robberies, your pity reaches </span>
+                        <span className="font-black">66%</span>
+                        <span> in Small Servers.</span>
                       </>
                     ) : (
                       <>
-                        Equivalent to{" "}
-                        {(
-                          (((resultPity / 100) *
-                            HYPERCHROME_PITY_PUBLIC[resultLevel]) /
-                            HYPERCHROME_PITY_SMALL[resultLevel]) *
-                          100
-                        ).toFixed(2)}
-                        % Small Server Pity
+                        <span>
+                          Big/Public servers don&apos;t speed up pity
+                          progression; they simply use a different pity scale
+                          than Small/Private servers.
+                        </span>
                       </>
                     )}
                   </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {hasCalculated && resultOtherPity && (
-            <div className="mb-4">
-              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
-                <div className={cn(sectionTitleClass, "mb-3")}>
-                  Alternative Level Calculations
-                </div>
-                <div
-                  className={
-                    asPage
-                      ? "text-primary-text mb-4 text-sm font-medium"
-                      : "text-primary-text mb-4 text-xs font-medium"
-                  }
-                >
-                  If you trade to a different level, here&apos;s what your
-                  public pity would be:
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {[1, 2, 3, 4].map((lvlNum) => {
-                    // Always show public/big server pity here as it's the standard for trading
-                    const currentPityBase = isSmallServer
-                      ? HYPERCHROME_PITY_SMALL[resultLevel]
-                      : HYPERCHROME_PITY_PUBLIC[resultLevel];
-                    const robberiesDone = (resultPity / 100) * currentPityBase;
-                    const publicPity =
-                      (robberiesDone / HYPERCHROME_PITY_PUBLIC[lvlNum]) * 100;
-                    const isGuaranteed = publicPity >= 100;
-                    const cappedPct = Math.min(publicPity, 100);
-                    const barColor =
-                      cappedPct >= 66
-                        ? "var(--color-form-success)"
-                        : cappedPct >= 33
-                          ? "var(--color-warning)"
-                          : "var(--color-button-danger)";
-
-                    return (
-                      <div
-                        key={lvlNum}
-                        className="border-border-card bg-secondary-bg flex flex-col gap-2 rounded-lg border p-3"
-                      >
-                        <div className="text-secondary-text text-[11px] font-semibold tracking-wider uppercase">
-                          Level {lvlNum}
-                        </div>
-                        <div
-                          className="text-2xl font-black"
-                          style={{ color: barColor }}
-                        >
-                          {isGuaranteed ? "100%" : `${publicPity.toFixed(2)}%`}
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <div className="bg-button-secondary h-1.5 w-full overflow-hidden rounded-full">
-                            <div
-                              className="h-full rounded-full"
-                              style={{
-                                width: `${cappedPct}%`,
-                                backgroundColor: barColor,
-                              }}
-                            />
-                          </div>
-                          <div className="text-secondary-text text-xs">
-                            {isGuaranteed
-                              ? "Guaranteed next roll"
-                              : "Public pity"}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className={sectionTitleClass}>Pities and Chances</div>
-          <div className={`text-primary-text mt-3 space-y-2 ${bodyTextClass}`}>
-            <p>
-              <span className="font-semibold">HyperChromes</span> are the rarest
-              rewards from the bonus roulette. They come in{" "}
-              <span className="text-link">8 different colors</span>, with most
-              major robberies yielding a different color.
-            </p>
-            <p>
-              Players start with a Level 1 HyperChrome after their first
-              successful roll, which can level up to a maximum of Level 5 as
-              they roll more of that color. The chance of getting one is below
-              1% at base rates and depends on its current level. Level 5
-              HyperChromes cannot be leveled further.
-            </p>
-            <p>
-              Upon failing to obtain or evolve a HyperChrome, their pity to that
-              color is increased by a small percentage (the higher the level,
-              the smaller the percentage). The pity to a HyperColor can be
-              viewed as a percentage underneath the bonus roll, provided it is
-              above 10%, otherwise, no number is shown. If their pity reaches
-              100% or above, the player is guaranteed to obtain or evolve their
-              HyperChrome.
-            </p>
-            <p>
-              Officially, production chance per roll varies by level, and pity
-              to 100% is calculated as{" "}
-              <span className="font-semibold">chance denominator x 1.25</span>.
-              Small/private servers run at{" "}
-              <span className="font-semibold">66% odds</span>, so they require
-              more rolls for the same pity.
-            </p>
-            <p>
-              Upon successfully obtaining or evolving a HyperChrome from a bonus
-              roll (either through chance or through pity), the player&apos;s
-              pity for that color is reset to 0. Trading for a HyperChrome does
-              not reset the pity.
-            </p>
-            <p className="text-primary-text">
-              Below is a table containing the approximate probabilities and
-              pities for each level. The odds are lesser and pities require more
-              in small (0-8 players) and private servers.
-            </p>
-          </div>
-          <div className="mt-3 overflow-x-auto">
-            <table
-              className={`text-primary-text min-w-full ${asPage ? "text-sm" : "text-xs"}`}
-            >
-              <thead className="text-secondary-text">
-                <tr className="border-border-card border-b">
-                  <th className="px-2 py-2 text-left font-semibold">Level</th>
-                  <th className="px-2 py-2 text-left font-semibold">
-                    Chance per Roll
-                  </th>
-                  <th className="px-2 py-2 text-left font-semibold">
-                    Approx. %
-                  </th>
-                  <th className="px-2 py-2 text-left font-semibold">Pity</th>
-                  <th className="px-2 py-2 text-left font-semibold">
-                    Pity (Small/Private)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {referenceRows.map((row) => (
-                  <tr
-                    key={row.level}
-                    className="border-border-card/60 border-b last:border-b-0"
+                  <div
+                    className={
+                      asPage
+                        ? "text-primary-text/90 mt-2 text-sm leading-relaxed"
+                        : "text-primary-text/90 mt-2 text-[13px] leading-relaxed"
+                    }
                   >
-                    <td className="px-2 py-2 font-semibold">{row.level}</td>
-                    <td className="px-2 py-2">{row.chancePerRoll}</td>
-                    <td className="px-2 py-2">{row.approxPercent}</td>
-                    <td className="px-2 py-2">{row.pity}</td>
-                    <td className="px-2 py-2">{row.smallPity}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                    {isSmallServer
+                      ? "Switch to a Big Server (9+ Players) at that point to guarantee an instant level-up."
+                      : "However, Big/Public servers provide 1.5x luck for obtaining hyperchromes naturally (without relying on pity)."}
+                  </div>
+                </div>
+              </div>
 
-        <div className="mb-4">
-          <div className={sectionTitleClass}>Hyperchrome Colors by Robbery</div>
-          <div className={`text-primary-text mt-2 ${bodyTextClass}`}>
-            Each robbery drops a specific HyperChrome color.
-          </div>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {hyperchromeRobberyImages.map((item) => {
-              const imageSrc = `https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/jars/${item.name}.webp`;
-              return (
-                <div
-                  key={item.name}
-                  className="flex items-center gap-3 rounded-lg border-2 p-3 text-left sm:p-4"
-                  style={{
-                    borderColor:
-                      hyperchromeBorderColors[item.name] ?? "#ffffff1a",
-                    backgroundColor:
-                      hyperchromeBgColors[item.name] ?? "transparent",
-                  }}
-                >
-                  <div className="relative h-12 w-12 shrink-0 sm:h-14 sm:w-14">
+              <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="relative h-14 w-14 shrink-0">
                     <Image
-                      src={imageSrc}
-                      alt={item.name}
+                      src="https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/jars/HyperChrome_Wildcard.webp"
+                      alt="HyperChrome Wildcard"
                       fill
                       className="object-contain"
                     />
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-primary-text text-sm font-semibold sm:text-base">
-                      {item.name}
-                    </div>
-                    <div className="text-secondary-text text-xs leading-snug sm:text-sm">
-                      {item.robbery}
+                  <div>
+                    <div
+                      className={
+                        asPage
+                          ? "text-primary-text text-lg font-bold"
+                          : "text-primary-text text-base font-bold"
+                      }
+                    >
+                      VP / Mansion Wildcard (Random Color)
                     </div>
                   </div>
                 </div>
-              );
-            })}
+
+                <div className="border-border-card bg-tertiary-bg mb-3 rounded-lg border p-5">
+                  <div className="mb-2 flex items-center justify-center gap-3">
+                    <div
+                      className={
+                        asPage
+                          ? "text-primary-text text-5xl font-black"
+                          : "text-primary-text text-4xl font-black"
+                      }
+                    >
+                      {resultRobberiesNeeded}
+                    </div>
+                    <div
+                      className={
+                        asPage
+                          ? "text-secondary-text text-xl font-bold"
+                          : "text-secondary-text text-lg font-bold"
+                      }
+                    >
+                      VP defeats
+                    </div>
+                  </div>
+                  <div
+                    className={
+                      asPage
+                        ? "text-primary-text text-center text-base font-medium"
+                        : "text-primary-text text-center text-sm font-medium"
+                    }
+                  >
+                    remaining to guarantee{" "}
+                    <span className="font-black">HyperChrome Wildcard</span>
+                    <br />
+                    <span
+                      className={
+                        asPage
+                          ? "text-secondary-text mt-1 inline-block text-sm font-normal"
+                          : "text-secondary-text mt-1 inline-block text-[13px] font-normal"
+                      }
+                    >
+                      (from your current pity, staying in{" "}
+                      {isSmallServer
+                        ? "Small/Private Servers"
+                        : "Big/Public Servers"}
+                      )
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
+                    <div className="text-secondary-text mb-1 text-[11px] uppercase">
+                      Big/Public Guarantee
+                    </div>
+                    <div className="text-primary-text text-2xl font-black">
+                      {HYPERCHROME_PITY_PUBLIC[resultLevel]}
+                    </div>
+                    <div className="text-secondary-text text-xs">
+                      total from 0% pity
+                    </div>
+                  </div>
+                  <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
+                    <div className="text-secondary-text mb-1 text-[11px] uppercase">
+                      Small/Private Guarantee
+                    </div>
+                    <div className="text-primary-text text-2xl font-black">
+                      {HYPERCHROME_PITY_SMALL[resultLevel]}
+                    </div>
+                    <div className="text-secondary-text text-xs">
+                      total from 0% pity
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={
+                  asPage
+                    ? "text-primary-text flex flex-col items-center gap-1 text-center text-sm font-medium"
+                    : "text-primary-text flex flex-col items-center gap-1 text-center text-xs font-medium"
+                }
+              >
+                <div>
+                  Based on Level {resultLevel} with {resultPity}%{" "}
+                  {isSmallServer ? "Small Server" : "Big Server"} Pity
+                </div>
+                <div className="text-primary-text/70 mt-1">
+                  {isSmallServer ? (
+                    <>
+                      Equivalent to{" "}
+                      {(
+                        (((resultPity / 100) *
+                          HYPERCHROME_PITY_SMALL[resultLevel]) /
+                          HYPERCHROME_PITY_PUBLIC[resultLevel]) *
+                        100
+                      ).toFixed(2)}
+                      % Big Server Pity
+                    </>
+                  ) : (
+                    <>
+                      Equivalent to{" "}
+                      {(
+                        (((resultPity / 100) *
+                          HYPERCHROME_PITY_PUBLIC[resultLevel]) /
+                          HYPERCHROME_PITY_SMALL[resultLevel]) *
+                        100
+                      ).toFixed(2)}
+                      % Small Server Pity
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
+        )}
+
+        {hasCalculated && resultOtherPity && (
+          <div className="mb-4">
+            <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
+              <div className={cn(sectionTitleClass, "mb-3")}>
+                Alternative Level Calculations
+              </div>
+              <div
+                className={
+                  asPage
+                    ? "text-primary-text mb-4 text-sm font-medium"
+                    : "text-primary-text mb-4 text-xs font-medium"
+                }
+              >
+                If you trade to a different level, here&apos;s what your public
+                pity would be:
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[1, 2, 3, 4].map((lvlNum) => {
+                  // Always show public/big server pity here as it's the standard for trading
+                  const currentPityBase = isSmallServer
+                    ? HYPERCHROME_PITY_SMALL[resultLevel]
+                    : HYPERCHROME_PITY_PUBLIC[resultLevel];
+                  const robberiesDone = (resultPity / 100) * currentPityBase;
+                  const publicPity =
+                    (robberiesDone / HYPERCHROME_PITY_PUBLIC[lvlNum]) * 100;
+                  const isGuaranteed = publicPity >= 100;
+                  const cappedPct = Math.min(publicPity, 100);
+                  const barColor =
+                    cappedPct >= 66
+                      ? "var(--color-form-success)"
+                      : cappedPct >= 33
+                        ? "var(--color-warning)"
+                        : "var(--color-button-danger)";
+
+                  return (
+                    <div
+                      key={lvlNum}
+                      className="border-border-card bg-secondary-bg flex flex-col gap-2 rounded-lg border p-3"
+                    >
+                      <div className="text-secondary-text text-[11px] font-semibold tracking-wider uppercase">
+                        Level {lvlNum}
+                      </div>
+                      <div
+                        className="text-2xl font-black"
+                        style={{ color: barColor }}
+                      >
+                        {isGuaranteed ? "100%" : `${publicPity.toFixed(2)}%`}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <div className="bg-button-secondary h-1.5 w-full overflow-hidden rounded-full">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${cappedPct}%`,
+                              backgroundColor: barColor,
+                            }}
+                          />
+                        </div>
+                        <div className="text-secondary-text text-xs">
+                          {isGuaranteed
+                            ? "Guaranteed next roll"
+                            : "Public pity"}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+
+  const calculatorInformation = (
+    <>
+      <div className="mb-4">
+        <h2 className={sectionTitleClass}>Pities and Chances</h2>
+        <div className={`text-primary-text mt-3 space-y-2 ${bodyTextClass}`}>
+          <p>
+            <span className="font-semibold">HyperChromes</span> are the rarest
+            rewards from the bonus roulette. They come in{" "}
+            <span className="text-link">8 different colors</span>, with most
+            major robberies yielding a different color.
+          </p>
+          <p>
+            Players start with a Level 1 HyperChrome after their first
+            successful roll, which can level up to a maximum of Level 5 as they
+            roll more of that color. The chance of getting one is below 1% at
+            base rates and depends on its current level. Level 5 HyperChromes
+            cannot be leveled further.
+          </p>
+          <p>
+            Upon failing to obtain or evolve a HyperChrome, their pity to that
+            color is increased by a small percentage (the higher the level, the
+            smaller the percentage). The pity to a HyperColor can be viewed as a
+            percentage underneath the bonus roll, provided it is above 10%,
+            otherwise, no number is shown. If their pity reaches 100% or above,
+            the player is guaranteed to obtain or evolve their HyperChrome.
+          </p>
+          <p>
+            Officially, production chance per roll varies by level, and pity to
+            100% is calculated as{" "}
+            <span className="font-semibold">chance denominator x 1.25</span>.
+            Small/private servers run at{" "}
+            <span className="font-semibold">66% odds</span>, so they require
+            more rolls for the same pity.
+          </p>
+          <p>
+            Upon successfully obtaining or evolving a HyperChrome from a bonus
+            roll (either through chance or through pity), the player&apos;s pity
+            for that color is reset to 0. Trading for a HyperChrome does not
+            reset the pity.
+          </p>
+          <p className="text-primary-text">
+            Below is a table containing the approximate probabilities and pities
+            for each level. The odds are lesser and pities require more in small
+            (0-8 players) and private servers.
+          </p>
+        </div>
+        <div className="mt-3 overflow-x-auto">
+          <table
+            className={`text-primary-text min-w-full ${asPage ? "text-sm" : "text-xs"}`}
+          >
+            <thead className="text-secondary-text">
+              <tr className="border-border-card border-b">
+                <th className="px-2 py-2 text-left font-semibold">Level</th>
+                <th className="px-2 py-2 text-left font-semibold">
+                  Chance per Roll
+                </th>
+                <th className="px-2 py-2 text-left font-semibold">Approx. %</th>
+                <th className="px-2 py-2 text-left font-semibold">Pity</th>
+                <th className="px-2 py-2 text-left font-semibold">
+                  Pity (Small/Private)
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {referenceRows.map((row) => (
+                <tr
+                  key={row.level}
+                  className="border-border-card/60 border-b last:border-b-0"
+                >
+                  <td className="px-2 py-2 font-semibold">{row.level}</td>
+                  <td className="px-2 py-2">{row.chancePerRoll}</td>
+                  <td className="px-2 py-2">{row.approxPercent}</td>
+                  <td className="px-2 py-2">{row.pity}</td>
+                  <td className="px-2 py-2">{row.smallPity}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <div className={sectionTitleClass}>Hyperchrome Colors by Robbery</div>
+        <div className={`text-primary-text mt-2 ${bodyTextClass}`}>
+          Each robbery drops a specific HyperChrome color.
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {hyperchromeRobberyImages.map((item) => {
+            const imageSrc = `https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/jars/${item.name}.webp`;
+            return (
+              <div
+                key={item.name}
+                className="flex items-center gap-3 rounded-lg border-2 p-3 text-left sm:p-4"
+                style={{
+                  borderColor:
+                    hyperchromeBorderColors[item.name] ?? "#ffffff1a",
+                  backgroundColor:
+                    hyperchromeBgColors[item.name] ?? "transparent",
+                }}
+              >
+                <div className="relative h-12 w-12 shrink-0 sm:h-14 sm:w-14">
+                  <Image
+                    src={imageSrc}
+                    alt={item.name}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-primary-text text-sm font-semibold sm:text-base">
+                    {item.name}
+                  </div>
+                  <div className="text-secondary-text text-xs leading-snug sm:text-sm">
+                    {item.robbery}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </>
@@ -827,8 +829,11 @@ export default function HyperchromeCalculatorModal({
 
   if (asPage) {
     return (
-      <div className="border-border-card bg-secondary-bg flex w-full flex-col rounded-lg border shadow-lg">
-        {calculatorContent}
+      <div className="space-y-6">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-6 shadow-lg">
+          {calculatorControls}
+        </div>
+        <section>{calculatorInformation}</section>
       </div>
     );
   }
@@ -846,7 +851,13 @@ export default function HyperchromeCalculatorModal({
         side="right"
         className="bg-secondary-bg flex h-full w-full max-w-180 flex-col p-0 shadow-lg"
       >
-        {calculatorContent}
+        <div className="modal-header text-primary-text flex shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
+          <span>Hyperchrome Pity Calculator</span>
+        </div>
+        <div className="flex flex-1 flex-col overflow-y-auto p-6">
+          {calculatorControls}
+          {calculatorInformation}
+        </div>
       </SheetContent>
     </Sheet>
   );

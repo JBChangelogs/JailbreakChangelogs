@@ -1,9 +1,9 @@
 "use client";
 
-import ExplorePageLinks, {
-  type ExploreLink,
-} from "@/components/Layout/ExplorePageLinks";
+import ExplorePageLinks from "@/components/Layout/ExplorePageLinks";
+import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function RelatedInventoryPages({
@@ -19,33 +19,52 @@ export default function RelatedInventoryPages({
     { key: "dupes", href: "/dupes", title: "Dupe Finder" },
     { key: "values", href: "/values", title: "Value List" },
   ] as const;
-  const links: ExploreLink[] = pages
+  const links = pages
     .filter((page) => page.key !== current)
     .map(({ href, title }) => ({ href, title }));
-
-  if (isAuthenticated && user?.roblox_id) {
-    links.push(
-      {
-        href: `/inventories/${user.roblox_id}`,
-        title: "My Inventory",
-        prefetch: false,
-      },
-      { href: `/og/${user.roblox_id}`, title: "My OG Items" },
-    );
-  }
+  const personalPages = [
+    { key: "inventories", title: "View My Inventory" },
+    { key: "og", title: "View My OG Items" },
+  ];
+  if (current === "og") personalPages.reverse();
 
   return (
-    <ExplorePageLinks
-      label="Related inventory pages"
-      links={links.filter((link) => link.href !== pathname)}
-      action={
-        current === "inventories" && isAuthenticated && !user?.roblox_id
-          ? {
-              title: "Connect Roblox Account",
-              onClick: () => setLoginModal({ open: true, tab: "roblox" }),
-            }
-          : undefined
-      }
-    />
+    <div className="flex flex-col items-start gap-3 lg:flex-row lg:items-center lg:gap-6">
+      {isAuthenticated && user?.roblox_id && (
+        <div className="flex flex-wrap gap-2 lg:shrink-0">
+          {personalPages
+            .filter((page) => pathname !== `/${page.key}/${user.roblox_id}`)
+            .map((page, index) => {
+              const href = `/${page.key}/${user.roblox_id}`;
+              return (
+                <Button
+                  key={page.key}
+                  asChild
+                  variant={index === 0 ? "default" : "secondary"}
+                >
+                  <Link
+                    href={href}
+                    prefetch={page.key === "inventories" ? false : undefined}
+                  >
+                    {page.title}
+                  </Link>
+                </Button>
+              );
+            })}
+        </div>
+      )}
+      {current === "inventories" && isAuthenticated && !user?.roblox_id && (
+        <Button
+          type="button"
+          onClick={() => setLoginModal({ open: true, tab: "roblox" })}
+        >
+          Connect Roblox Account
+        </Button>
+      )}
+      <ExplorePageLinks
+        label="Related inventory pages"
+        links={links.filter((link) => link.href !== pathname)}
+      />
+    </div>
   );
 }

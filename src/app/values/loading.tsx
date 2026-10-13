@@ -1,41 +1,41 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import ItemCardSkeleton from "@/components/Items/ItemCardSkeleton";
+import Breadcrumb from "@/components/Layout/Breadcrumb";
 
 export default function Loading() {
   return (
     <main className="mb-8 min-h-screen">
       <div className="container mx-auto px-4">
-        {/* Single card matching ValuesClient's header card */}
-        <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
+        <Breadcrumb loading />
+        {/* Page introduction */}
+        <div className="mb-6">
           <Skeleton className="mb-4 h-9 w-72" />
           <Skeleton className="mb-2 h-5 w-full" />
           <Skeleton className="mb-4 h-5 w-4/5" />
 
-          {/* Buttons */}
-          <div className="mb-4 flex flex-wrap gap-2">
-            <Skeleton className="h-9 w-28 rounded-md" />
-            <Skeleton className="h-9 w-44 rounded-md" />
-            <Skeleton className="h-9 w-36 rounded-md" />
+          <div className="flex flex-wrap gap-5">
+            <Skeleton className="h-5 w-44" />
+            <Skeleton className="h-5 w-36" />
+            <Skeleton className="h-4 w-40" />
           </div>
+        </div>
 
-          {/* Suggestions banner */}
-          <Skeleton className="mb-4 h-12 w-full rounded-lg" />
-
-          {/* Last updated */}
-          <Skeleton className="mb-6 h-4 w-56" />
-
-          {/* Category icons */}
-          <div className="flex flex-wrap gap-2">
-            {[...Array(8)].map((_, i) => (
-              <Skeleton key={i} className="h-14 w-24 rounded-lg" />
+        {/* Categories and trading guides */}
+        <div className="mb-6">
+          <Skeleton className="mb-2 h-7 w-48" />
+          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            {Array.from({ length: 12 }, (_, i) => (
+              <Skeleton key={i} className="h-10 rounded-lg" />
             ))}
           </div>
+          <Skeleton className="h-12 w-full rounded-lg" />
         </div>
 
         {/* Search and filter controls */}
         <div className="mb-8 flex flex-col gap-4 lg:flex-row">
           <Skeleton className="h-12 w-full rounded-lg lg:w-1/3" />
           <Skeleton className="h-12 w-full rounded-lg lg:flex-1" />
+          <Skeleton className="h-12 w-full rounded-lg lg:w-1/3" />
         </div>
 
         {/* Items grid */}

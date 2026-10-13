@@ -6,7 +6,7 @@ export default function Loading() {
       <div className="container mx-auto px-4">
         <div className="space-y-6">
           {/* Header Skeleton */}
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+          <div>
             <Skeleton style={{ width: "60%", height: 40 }} />
             <Skeleton style={{ width: "40%", height: 24 }} className="mt-2" />
             <div className="mt-4">

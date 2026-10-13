@@ -75,7 +75,7 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
   );
 
   return (
-    <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+    <div>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <div className="flex-1">
           <h1 className="page-heading mb-2">Changelog #{changelog.id}</h1>

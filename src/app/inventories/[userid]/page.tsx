@@ -64,9 +64,12 @@ export default async function InventoryCheckerPage({
 
         <ExperimentalFeatureBanner className="mb-6" />
 
-        <div className="mb-3 flex items-center gap-3">
+        <div className="mb-2 flex items-center gap-3">
           <h1 className="page-heading">Inventory Checker</h1>
         </div>
+        <p className="text-secondary-text mb-3">
+          Enter a username or Roblox ID to check their Jailbreak inventory.
+        </p>
         <div className="mb-6">
           <RelatedInventoryPages current="inventories" />
         </div>

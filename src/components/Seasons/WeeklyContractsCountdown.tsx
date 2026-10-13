@@ -156,9 +156,9 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
   }, [nextResetUnix, nextDailyResetUnix]);
 
   return (
-    <div className="border-border-card bg-secondary-bg relative overflow-hidden rounded-2xl border p-6">
+    <div>
       {/* Main Content */}
-      <div className="relative z-10">
+      <div>
         {/* Header */}
         <div className="mb-6 text-center">
           <h2 className="text-primary-text mb-2 text-3xl font-bold tracking-wide">

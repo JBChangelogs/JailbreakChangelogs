@@ -8,6 +8,12 @@ export default function ServersPage() {
     <main className="text-primary-text min-h-screen">
       <div className="container mx-auto mb-8 px-4">
         <Breadcrumb />
+        <div className="mb-6">
+          <h1 className="page-heading mb-2">Private Servers</h1>
+          <p className="text-secondary-text">
+            Browse Roblox Jailbreak private servers shared by the community.
+          </p>
+        </div>
         <VIPServerNotice className="mb-6" />
         <p className="border-border-card bg-secondary-bg text-secondary-text mb-6 rounded-lg border px-4 py-3 text-sm">
           Looking for a public server instead? The{" "}

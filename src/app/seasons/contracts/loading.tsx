@@ -1,13 +1,23 @@
+import Breadcrumb from "@/components/Layout/Breadcrumb";
+
 export default function Loading() {
   const teams = ["Criminal", "Police"] as const;
 
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 pb-16">
+        <Breadcrumb loading />
         <div className="space-y-12">
-          <div className="text-center">
-            <div className="border-border-card bg-secondary-bg text-secondary-text inline-flex h-8 items-center rounded-full border px-4 text-sm">
-              <div className="bg-tertiary-bg h-4 w-44 animate-pulse rounded" />
+          <div>
+            <div className="mb-6 flex flex-col items-center gap-3">
+              <div className="bg-tertiary-bg h-9 w-72 animate-pulse rounded" />
+              <div className="bg-tertiary-bg h-6 w-56 animate-pulse rounded" />
+              <div className="bg-tertiary-bg h-5 w-full animate-pulse rounded" />
+              <div className="bg-tertiary-bg h-8 w-40 animate-pulse rounded-lg" />
+            </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="border-border-card bg-tertiary-bg h-48 animate-pulse rounded-xl border p-4" />
+              <div className="border-border-card bg-tertiary-bg h-48 animate-pulse rounded-xl border p-4" />
             </div>
           </div>
 

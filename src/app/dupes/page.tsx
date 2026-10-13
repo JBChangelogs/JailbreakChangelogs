@@ -58,8 +58,8 @@ export default async function DupeFinderPage() {
         </div>
 
         <p className="text-secondary-text mb-3">
-          Enter a Roblox ID or username to check for any duped items associated
-          with that name.
+          Enter a username or Roblox ID to check whether a Jailbreak item is
+          duped.
         </p>
         <div className="mb-6">
           <RelatedInventoryPages current="dupes" />

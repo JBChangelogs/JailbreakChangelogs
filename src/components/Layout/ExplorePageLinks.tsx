@@ -10,11 +10,9 @@ export interface ExploreLink {
 export default function ExplorePageLinks({
   links,
   label = "Related pages",
-  action,
 }: {
   links: ExploreLink[];
   label?: string;
-  action?: { title: string; onClick: () => void };
 }) {
   return (
     <nav
@@ -37,20 +35,6 @@ export default function ExplorePageLinks({
           />
         </Link>
       ))}
-      {action && (
-        <button
-          type="button"
-          onClick={action.onClick}
-          className="text-link hover:text-link-hover inline-flex items-center gap-1 font-medium underline-offset-4 hover:underline"
-        >
-          {action.title}
-          <Icon
-            icon="heroicons:arrow-up-right"
-            className="h-3.5 w-3.5"
-            inline
-          />
-        </button>
-      )}
     </nav>
   );
 }
