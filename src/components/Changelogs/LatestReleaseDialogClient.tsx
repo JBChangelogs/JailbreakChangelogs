@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePageSettled } from "@/hooks/usePageSettled";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -47,6 +48,7 @@ export default function LatestReleaseDialogClient({
   const pathname = usePathname();
   const { isAuthenticated, isLoading } = useAuthContext();
   const [open, setOpen] = useState(false);
+  const pageSettled = usePageSettled();
   const [preview, setPreview] = useState<ReleasePreview | null>(null);
   const { disabled, preferencesSynced, setDisabled } = useWhatsNewPreference();
 
@@ -91,15 +93,7 @@ export default function LatestReleaseDialogClient({
         if (safeLocalStorage.getItem(LAST_SEEN_RELEASE_KEY) === latest.slug)
           return;
         setPreview(latest);
-        const show = () => {
-          if (!controller.signal.aborted) setOpen(true);
-        };
-        const idle = () =>
-          "requestIdleCallback" in window
-            ? window.requestIdleCallback(show, { timeout: 2000 })
-            : setTimeout(show, 200);
-        if (document.readyState === "complete") idle();
-        else window.addEventListener("load", idle, { once: true });
+        setOpen(true);
       })
       .catch(() => {});
 
@@ -129,7 +123,10 @@ export default function LatestReleaseDialogClient({
   if (!preview) return null;
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && dismiss()}>
+    <Dialog
+      open={open && pageSettled}
+      onOpenChange={(nextOpen) => !nextOpen && dismiss()}
+    >
       <DialogContent
         showClose
         data-whats-new-dialog

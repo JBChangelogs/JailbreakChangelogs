@@ -8,6 +8,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { usePageSettled } from "@/hooks/usePageSettled";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -42,8 +43,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   closeOnConfirm = true,
   children,
 }) => {
+  const pageSettled = usePageSettled();
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={isOpen && pageSettled}
+      onOpenChange={(open) => !open && onClose()}
+    >
       <DialogContent
         showClose
         aria-describedby={undefined}
