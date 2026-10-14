@@ -110,7 +110,7 @@
     "lint-staged": "^17.6.0",
     "oxfmt": "~0.72.0",
     "oxlint": "^1.87.0",
-    "postcss": "^8.5.29",
+    "postcss": "^8.5.30",
     "release-it": "^20.2.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
