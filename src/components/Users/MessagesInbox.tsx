@@ -1039,11 +1039,11 @@ export default function MessagesInbox() {
                             aria-label="New messages"
                             className="flex items-center gap-2 py-2"
                           >
-                            <span className="border-status-error flex-1 border-t" />
+                            <span className="bg-status-error h-px flex-1" />
                             <span className="text-status-error min-w-max text-xs font-semibold">
                               New messages
                             </span>
-                            <span className="border-status-error flex-1 border-t" />
+                            <span className="bg-status-error h-px flex-1" />
                           </div>
                         )}
                         <MessageRow

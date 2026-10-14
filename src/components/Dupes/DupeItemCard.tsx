@@ -344,9 +344,9 @@ export default function DupeItemCard({
               prefetch={false}
               target="_blank"
               rel="noopener noreferrer"
-              title="View variant ownership histories in a new tab"
+              title="Compare copies’ trade histories in a new tab"
             >
-              Comparison
+              Compare histories
             </Link>
           </Button>
           <Button
@@ -508,9 +508,9 @@ export default function DupeItemCard({
                   prefetch={false}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="View variant ownership histories in a new tab"
+                  title="Compare copies’ trade histories in a new tab"
                 >
-                  Comparison
+                  Compare histories
                 </Link>
               </Button>
             )}

@@ -338,8 +338,8 @@ export default function DupeFinderResults({
                 className="text-button-info shrink-0 text-lg"
               />
               <span className="font-medium">
-                Check a dupe directly on its card or compare ownership
-                histories. You can report a false dupe from the check results or
+                Check a dupe directly on its card or compare trade histories.
+                You can report a false dupe from the check results or
                 comparison.
               </span>
             </div>

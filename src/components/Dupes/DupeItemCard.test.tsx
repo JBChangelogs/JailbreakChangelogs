@@ -167,7 +167,7 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   expect(histories).toEqual([item]);
   expect(reports).toEqual([]);
   const compare = elements.find(
-    (element) => element.props.children === "Comparison",
+    (element) => element.props.children === "Compare histories",
   )!;
   expect(compare.props.href).toBe(getDupeComparisonUrl(item));
   expect(compare.props.target).toBe("_blank");
@@ -265,8 +265,9 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   const dialog = flatten(checked).find((element) => element.type === "Dialog")!;
   expect(dialog.props.open).toBe(true);
   expect(
-    flatten(checked).find((element) => element.props.children === "Comparison")
-      ?.props.href,
+    flatten(checked).find(
+      (element) => element.props.children === "Compare histories",
+    )?.props.href,
   ).toBe(getDupeComparisonUrl(item));
   const footer = flatten(dialog).find(
     (element) => element.type === "DialogFooter",
@@ -280,7 +281,7 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
     flatten(footer).some((element) => element.props.children === "Close"),
   ).toBe(false);
   const evidence = flatten(footer).find(
-    (element) => element.props.children === "Comparison",
+    (element) => element.props.children === "Compare histories",
   )!;
   expect(evidence.props.target).toBe("_blank");
   expect(evidence.props.rel).toBe("noopener noreferrer");

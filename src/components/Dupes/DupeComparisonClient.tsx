@@ -11,8 +11,14 @@ import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import { formatProfileDate } from "@/utils/helpers/timestamp";
-import TradeHistoryList from "./TradeHistoryList";
+import {
+  formatMonthDayYear,
+  formatProfileDate,
+} from "@/utils/helpers/timestamp";
+import TradeHistoryList, {
+  OriginalOwnerCard,
+  TradeHistoryAvatar,
+} from "./TradeHistoryList";
 import {
   getItemImagePath,
   isVideoItem,
@@ -29,19 +35,29 @@ interface DupeComparisonClientProps {
 }
 
 interface VariantColumnProps {
-  title: string;
   item: DupeFinderItem;
-  splitIndex: number;
+  splitIndex?: number;
+  startIndex?: number;
   robloxUsers: Record<string, { name?: string; displayName?: string }>;
   usersData: Record<string, RobloxUser>;
+  showOriginalOwner: boolean;
 }
 
+// Index of the first transfer card TradeHistoryList renders. Capped histories
+// lose the sender of their oldest kept trade, so the list skips that card.
+const firstCard = (item: DupeFinderItem, from = 0) =>
+  Math.max(from, (item.history?.length ?? 0) >= 50 ? 1 : 0);
+
+const shownTrades = (item: DupeFinderItem, from = 0) =>
+  (item.history ?? []).slice(firstCard(item, from) + 1);
+
 function VariantColumn({
-  title,
   item,
   splitIndex,
+  startIndex,
   robloxUsers,
   usersData,
+  showOriginalOwner,
 }: VariantColumnProps) {
   const getUserAvatar = (userId: string) => {
     return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
@@ -57,17 +73,15 @@ function VariantColumn({
     );
   };
 
+  const trades = shownTrades(item, startIndex);
+
   return (
     <div className="space-y-4">
-      <h2 className="text-primary-text text-center text-xl font-bold">
-        {title}
-      </h2>
-
       <div className="bg-secondary-bg border-border-card flex flex-col gap-3 rounded-lg border p-3 lg:flex-row lg:items-center lg:justify-between">
         {/* Owner Info */}
         <div className="min-w-0 space-y-1">
           <div className="text-secondary-text text-xs font-bold tracking-wider uppercase">
-            Current Owner
+            Last recorded owner
           </div>
           <Link
             href={item.user_id ? `/inventories/${item.user_id}` : "#"}
@@ -75,12 +89,9 @@ function VariantColumn({
             className="group flex min-w-0 items-center gap-2"
           >
             <div className="bg-tertiary-bg border-border-card relative h-10 w-10 shrink-0 overflow-hidden rounded-full border transition-colors">
-              <Image
-                src={getUserAvatar(item.user_id || "")}
-                alt="Owner Avatar"
-                width={40}
-                height={40}
-                className="rounded-full"
+              <TradeHistoryAvatar
+                avatarUrl={getUserAvatar(item.user_id || "")}
+                name={getUserDisplay(item.user_id || "")}
               />
             </div>
             <div className="min-w-0 text-left">
@@ -97,7 +108,7 @@ function VariantColumn({
         {/* Logged Date */}
         <div className="border-border-card border-t pt-2 lg:shrink-0 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-3 lg:text-right">
           <div className="text-secondary-text mb-1 text-xs uppercase">
-            Logged On
+            Last recorded
           </div>
           <div className="text-primary-text text-sm font-medium">
             {formatProfileDate(item.logged_at)}
@@ -107,15 +118,21 @@ function VariantColumn({
 
       <div className="border-border-card mt-4 border-t pt-4">
         <h3 className="text-primary-text mb-3 text-lg font-bold">
-          Ownership History ({item.history?.length || 0})
+          {startIndex === undefined ? "Trade history" : "After the split"}
+          <span className="text-secondary-text block text-sm font-normal sm:ml-2 sm:inline">
+            {trades.length} {trades.length === 1 ? "trade" : "trades"}
+            {trades.length > 0 &&
+              ` · ${formatMonthDayYear(trades[0].TradeTime)} → ${formatMonthDayYear(trades[trades.length - 1].TradeTime)}`}
+          </span>
         </h3>
-        <div className="max-h-175 overflow-y-auto pr-1">
-          <TradeHistoryList
-            history={item.history || []}
-            splitIndex={splitIndex}
-            usersData={usersData}
-          />
-        </div>
+        <TradeHistoryList
+          history={item.history || []}
+          splitIndex={splitIndex}
+          startIndex={startIndex}
+          usersData={usersData}
+          showOriginalOwner={showOriginalOwner}
+          showRecordNotes={false}
+        />
       </div>
     </div>
   );
@@ -185,24 +202,23 @@ export default function DupeComparisonClient({
       return 0;
     }
 
-    const timeToIndex1 = new Map<number, number>();
     const timeToIndex2 = new Map<number, number>();
-
-    history1.forEach((entry, idx) => {
-      timeToIndex1.set(entry.TradeTime, idx);
-    });
 
     history2.forEach((entry, idx) => {
       timeToIndex2.set(entry.TradeTime, idx);
     });
 
-    let lastCommonIndex = 0;
+    let lastCommonIndex = -1;
 
     for (let i = history1.length - 1; i >= 0; i--) {
       const entry1 = history1[i];
       const idx2 = timeToIndex2.get(entry1.TradeTime);
 
       if (idx2 !== undefined && history2[idx2].UserId === entry1.UserId) {
+        // A shared original owner alone cannot locate a split in capped histories.
+        if (i === 0 && (history1.length >= 50 || history2.length >= 50)) {
+          return -1;
+        }
         lastCommonIndex = i + 1; // Split point is AFTER this trade
         break;
       }
@@ -219,6 +235,54 @@ export default function DupeComparisonClient({
     ogItem.history || [],
     duplicateItem.history || [],
   );
+
+  const leftOrigin = duplicateItem.history?.[0];
+  const rightOrigin = ogItem.history?.[0];
+  const sharedOrigin =
+    leftOrigin &&
+    rightOrigin &&
+    leftOrigin.UserId === rightOrigin.UserId &&
+    leftOrigin.TradeTime === rightOrigin.TradeTime
+      ? leftOrigin
+      : undefined;
+  const copyName = (item: DupeFinderItem) => {
+    const user = robloxUsers[item.user_id || ""];
+    return `${user?.displayName || user?.name || item.user_id || "Unknown"}'s copy`;
+  };
+  const cappedCopies = [duplicateItem, ogItem]
+    .filter((item) => (item.history?.length ?? 0) >= 50)
+    .map(copyName);
+  const userName = (id?: number | string) => {
+    const user = id === undefined ? undefined : robloxUsers[String(id)];
+    return user?.displayName || user?.name || String(id);
+  };
+  const leftTrunk = selectedSplitIndex - 1 - firstCard(duplicateItem);
+  const rightTrunk = variantSplitIndex - 1 - firstCard(ogItem);
+  const trunk =
+    leftTrunk >= rightTrunk
+      ? { item: duplicateItem, split: selectedSplitIndex, cards: leftTrunk }
+      : { item: ogItem, split: variantSplitIndex, cards: rightTrunk };
+  const hasTrunk = trunk.cards > 0;
+  const lastShared = trunk.item.history?.[trunk.split - 1];
+  const sharedTrades = selectedSplitIndex - 1;
+  const summary =
+    hasTrunk && lastShared
+      ? {
+          title: `${trunk.cards} shared ${trunk.cards === 1 ? "trade" : "trades"}, then split at ${userName(lastShared.UserId)}`,
+          detail: "",
+        }
+      : sharedTrades === 0
+        ? {
+            title: "The histories split right after the original owner",
+            detail: "No later trades are shared between the two copies.",
+          }
+        : {
+            title: "The recorded histories don't overlap",
+            detail:
+              cappedCopies.length > 0
+                ? `Shared trades may be cut off: ${cappedCopies.join(" and ")} ${cappedCopies.length === 1 ? "only keeps" : "only keep"} the latest 49.`
+                : "",
+          };
 
   if (!sharedItemData) {
     return (
@@ -346,8 +410,8 @@ export default function DupeComparisonClient({
               </span>
             </div>
             <p className="text-secondary-text text-sm">
-              Showing two copies. Item 1 may change as more duplicates are
-              found.
+              Comparing {copyName(duplicateItem)} with {copyName(ogItem)}. The
+              first copy may change as more duplicates are found.
             </p>
             {reportState ? (
               <div className="text-primary-text flex items-start gap-2 text-sm">
@@ -381,20 +445,55 @@ export default function DupeComparisonClient({
         </div>
       </div>
 
+      <div className="mx-auto max-w-7xl space-y-3">
+        {sharedOrigin && (
+          <OriginalOwnerCard
+            entry={sharedOrigin}
+            user={robloxUsers[sharedOrigin.UserId.toString()]}
+          />
+        )}
+        <div className="bg-secondary-bg border-border-card rounded-lg border p-4 text-center">
+          <p className="text-primary-text font-semibold">{summary.title}</p>
+          {summary.detail && (
+            <p className="text-secondary-text mt-1 text-sm">{summary.detail}</p>
+          )}
+          {hasTrunk && (
+            <details className="mt-3 text-left">
+              <summary className="text-link hover:text-link-hover cursor-pointer text-center text-sm font-medium">
+                Show the {trunk.cards} shared{" "}
+                {trunk.cards === 1 ? "trade" : "trades"}
+              </summary>
+              <div className="mt-3">
+                <TradeHistoryList
+                  history={trunk.item.history || []}
+                  endIndex={trunk.split - 1}
+                  cardBg="bg-tertiary-bg"
+                  usersData={robloxUsers}
+                  showOriginalOwner={false}
+                  showRecordNotes={false}
+                />
+              </div>
+            </details>
+          )}
+        </div>
+      </div>
+
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2">
         <VariantColumn
-          title="Item 1"
           item={duplicateItem}
           splitIndex={selectedSplitIndex}
+          startIndex={hasTrunk ? selectedSplitIndex - 1 : undefined}
           robloxUsers={robloxUsers}
           usersData={robloxUsers}
+          showOriginalOwner={!sharedOrigin}
         />
         <VariantColumn
-          title="Item 2"
           item={ogItem}
           splitIndex={variantSplitIndex}
+          startIndex={hasTrunk ? variantSplitIndex - 1 : undefined}
           robloxUsers={robloxUsers}
           usersData={robloxUsers}
+          showOriginalOwner={!sharedOrigin}
         />
       </div>
 
