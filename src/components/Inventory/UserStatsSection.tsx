@@ -732,7 +732,7 @@ export default function UserStatsSection({
                 isMetadataExpanded ? "max-h-125" : "max-h-0"
               }`}
             >
-              <div className="border-border-card border-t px-4 py-3">
+              <div className="border-border-card border-t p-4">
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span className="text-secondary-text">Scan Count:</span>
