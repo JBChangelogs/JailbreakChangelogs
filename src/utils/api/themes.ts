@@ -19,6 +19,9 @@ const fetchThemes = unstable_cache(
     const response = await fetch(`${BASE_API_URL}/v2/themes`, {
       headers: { "User-Agent": "JailbreakChangelogs-Themes/1.0" },
       cache: "no-store",
+      // Every page waits on this when nothing is cached, so a hung API
+      // falls back to the built-in theme instead of stalling renders.
+      signal: AbortSignal.timeout(5000),
     });
     if (!response.ok) throw new Error(`GET /v2/themes: ${response.status}`);
     const themes = sanitizeThemes(await response.json());

@@ -52,10 +52,12 @@ export const FALLBACK_THEMES: SiteTheme[] = [
 
 // The API validates these too; they're checked again because the values are
 // written into a <style> tag, where one bad value could break out of it.
-const SLUG = /^[a-z0-9-]{1,32}$/;
+// A slug becomes a class selector, which can't start with a digit.
+const SLUG = /^[a-z][a-z0-9-]{0,31}$/;
 const VAR_KEY = /^--[a-z0-9-]+$/;
 const CSS_VALUE = /^[^{};<>\\\u0000-\u001f]{1,200}$/;
-const CSS_BANNED = /url\(|expression\(|@import/i;
+// "/*" would comment out every rule after it in the shared <style> tag.
+const CSS_BANNED = /url\(|expression\(|@import|\/\*/i;
 const CURSOR_URL = /^\/[A-Za-z0-9/_.-]+$|^https:\/\/[^\s"'()<>\\]+$/;
 
 const safeValue = (value: unknown): value is string =>
@@ -123,6 +125,14 @@ export function toThemeOptions(themes: SiteTheme[]): ThemeOption[] {
   }));
 }
 
+// JSON for an inline <script>: escapes what could close the tag or end a JS
+// string, so the script is safe whatever strings it's given.
+const scriptJson = (value: unknown) =>
+  JSON.stringify(value).replace(
+    /[<>/\u2028\u2029]/g,
+    (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`,
+  );
+
 /**
  * Applies the saved theme and cursor before React hydrates, so the page
  * doesn't flash the default theme. ThemeProvider applies them the same way.
@@ -132,7 +142,7 @@ export function themeInitScript(
   defaultTheme: string,
 ): string {
   const schemes = Object.fromEntries(options.map((o) => [o.value, o.scheme]));
-  return `(function(){try{var d=document.documentElement;d.dataset.themeCursor=localStorage.getItem('theme-cursor-enabled')==='true'?'on':'off';var s=${JSON.stringify(schemes)};var t=localStorage.getItem('theme');if(!Object.prototype.hasOwnProperty.call(s,t))t=${JSON.stringify(defaultTheme)};d.classList.add(t);d.dataset.scheme=s[t];}catch(e){}})();`;
+  return `(function(){try{var d=document.documentElement;d.dataset.themeCursor=localStorage.getItem('theme-cursor-enabled')==='true'?'on':'off';var s=${scriptJson(schemes)};var t=localStorage.getItem('theme');if(!Object.prototype.hasOwnProperty.call(s,t))t=${scriptJson(defaultTheme)};d.classList.add(t);d.dataset.scheme=s[t];}catch(e){}})();`;
 }
 
 const SHORTCUT_HIDDEN_KEY = "theme-shortcut-hidden";
