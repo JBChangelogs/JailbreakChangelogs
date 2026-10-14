@@ -1,27 +1,20 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import { debounce } from "@/utils/helpers/debounce";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
+import type { ThemeOption } from "@/utils/ui/themeOptions";
 
-/** "halloween" is the temporary seasonal theme (see globals.css). */
-const THEMES = [
-  "halloween",
-  "dark",
-  "light",
-  "amoled",
-  "catppuccin",
-  "catppuccin-latte",
-  "future-tone",
-  "og",
-] as const;
-export type Theme = (typeof THEMES)[number];
-/** For visitors who haven't picked a theme; THEME_INIT_SCRIPT matches it. */
-const DEFAULT_THEME: Theme = "halloween";
-
-const isTheme = (value: unknown): value is Theme =>
-  THEMES.includes(value as Theme);
+/** A theme slug; the dashboard manages the list. */
+export type Theme = string;
 
 // Spamming the toggle shouldn't spam the realtime WS with one
 // "set_preference" message per click — wait for clicks to settle first.
@@ -36,12 +29,17 @@ interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   resolvedTheme: "light" | "dark";
+  /** Every enabled theme, in picker order. */
+  themes: ThemeOption[];
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return DEFAULT_THEME;
+function getInitialTheme(
+  isTheme: (value: unknown) => value is Theme,
+  defaultTheme: Theme,
+): Theme {
+  if (typeof window === "undefined") return defaultTheme;
 
   const savedTheme = safeLocalStorage.getItem("theme");
 
@@ -51,18 +49,33 @@ function getInitialTheme(): Theme {
     ).matches;
     const migratedTheme = prefersDark ? "dark" : "light";
     safeLocalStorage.setItem("theme", migratedTheme);
-    return migratedTheme;
+    return isTheme(migratedTheme) ? migratedTheme : defaultTheme;
   } else if (isTheme(savedTheme)) {
     return savedTheme;
   }
 
-  return DEFAULT_THEME;
+  return defaultTheme;
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({
+  children,
+  themes,
+  defaultTheme,
+}: {
+  children: React.ReactNode;
+  themes: ThemeOption[];
+  /** For visitors who haven't picked a theme; the init script matches it. */
+  defaultTheme: Theme;
+}) {
   const [theme, setThemeState] = useState<Theme | null>(null);
-  const resolvedTheme: "light" | "dark" =
-    theme === "light" || theme === "catppuccin-latte" ? "light" : "dark";
+  const isTheme = useCallback(
+    (value: unknown): value is Theme =>
+      themes.some((option) => option.value === value),
+    [themes],
+  );
+  const resolvedTheme =
+    themes.find((option) => option.value === (theme ?? defaultTheme))?.scheme ??
+    "dark";
 
   // Timestamp of the last user-initiated change. Incoming WS echoes arriving
   // within THEME_SYNC_BLOCK_MS of this are ignored to prevent stale echoes
@@ -85,18 +98,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setThemeState(cached);
       return;
     }
-    const savedTheme = getInitialTheme();
+    const savedTheme = getInitialTheme(isTheme, defaultTheme);
     setThemeState(savedTheme);
-  }, []);
+  }, [isTheme, defaultTheme]);
 
   useEffect(() => {
     if (theme === null) return;
     const root = document.documentElement;
-    root.classList.remove(...THEMES);
+    root.classList.remove(...themes.map((option) => option.value));
     root.classList.add(theme);
-    if (theme === "catppuccin-latte") root.classList.add("light");
+    root.dataset.scheme = resolvedTheme;
     safeLocalStorage.setItem("theme", theme);
-  }, [theme]);
+  }, [theme, themes, resolvedTheme]);
 
   // Apply incoming preference syncs from other devices without re-broadcasting.
   // Skip any echo that arrives while a local change is still in-flight.
@@ -119,14 +132,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         setThemeState(incoming);
       } else {
         safeLocalStorage.removeItem("theme");
-        setThemeState(DEFAULT_THEME);
+        setThemeState(defaultTheme);
       }
     };
     const handlePreferenceDeleted = (e: Event) => {
       const { key } = (e as CustomEvent<{ key: string }>).detail;
       if (key !== "theme" || isBlocked()) return;
       safeLocalStorage.removeItem("theme");
-      setThemeState(DEFAULT_THEME);
+      setThemeState(defaultTheme);
     };
     window.addEventListener("realtimePreference", handlePreferenceUpdate);
     window.addEventListener("realtimePreferences", handlePreferences);
@@ -142,7 +155,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         handlePreferenceDeleted,
       );
     };
-  }, []);
+  }, [isTheme, defaultTheme]);
 
   // User-initiated theme change — apply locally right away, stamp the change
   // time so WS echoes can't revert it, and debounce the actual WS dispatch.
@@ -155,7 +168,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider
-      value={{ theme: theme ?? DEFAULT_THEME, setTheme, resolvedTheme }}
+      value={{
+        theme: theme ?? defaultTheme,
+        setTheme,
+        resolvedTheme,
+        themes,
+      }}
     >
       {children}
     </ThemeContext.Provider>

@@ -168,7 +168,7 @@ const liveTrackers = [
 ] as const;
 
 const heroQuickCardClass =
-  "group relative block overflow-hidden rounded-2xl border border-white/20 bg-black/35 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-black/40 [.light_&]:border-white/15 [.light_&]:bg-white/[0.04] [.light_&]:backdrop-blur-sm [.light_&]:hover:border-white/25 [.light_&]:hover:bg-white/[0.08]";
+  "group relative block overflow-hidden rounded-2xl border border-white/20 bg-black/35 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-black/40 [[data-scheme=light]_&]:border-white/15 [[data-scheme=light]_&]:bg-white/[0.04] [[data-scheme=light]_&]:backdrop-blur-sm [[data-scheme=light]_&]:hover:border-white/25 [[data-scheme=light]_&]:hover:bg-white/[0.08]";
 
 const platformGroupClass =
   "rounded-2xl border border-border-card bg-secondary-bg p-5";

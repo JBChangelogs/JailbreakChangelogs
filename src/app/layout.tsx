@@ -18,6 +18,12 @@ import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
 import OfflineNavigationRecovery from "@/components/Layout/OfflineNavigationRecovery";
 import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
+import { getThemes } from "@/utils/api/themes";
+import {
+  themeInitScript,
+  themesCss,
+  toThemeOptions,
+} from "@/utils/ui/themeOptions";
 import ThemeCursor from "@/components/Settings/ThemeCursor";
 import { TwemojiProvider } from "@/contexts/TwemojiContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -90,14 +96,31 @@ export async function generateMetadata(): Promise<Metadata> {
   return withDiscordEmbed(metadata, `/`);
 }
 
-const THEME_INIT_SCRIPT = `(function(){try{document.documentElement.dataset.themeCursor=localStorage.getItem('theme-cursor-enabled')==='true'?'on':'off';var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'&&t!=='amoled'&&t!=='catppuccin'&&t!=='catppuccin-latte'&&t!=='future-tone'&&t!=='og')t='halloween';document.documentElement.classList.add(t);if(t==='catppuccin-latte')document.documentElement.classList.add('light');}catch(e){}})();`;
-
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isMaintenanceMode } = await checkMaintenanceMode();
+  const [{ isMaintenanceMode }, { themes, defaultTheme }] = await Promise.all([
+    checkMaintenanceMode(),
+    getThemes(),
+  ]);
+  const themeOptions = toThemeOptions(themes);
+  const themeHead = (
+    <>
+      {/* The dashboard's themes; each applies with its slug on <html> */}
+      <style
+        id="site-themes"
+        dangerouslySetInnerHTML={{ __html: themesCss(themes) }}
+      />
+      {/* Apply saved theme class before React hydrates to prevent FOUC */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: themeInitScript(themeOptions, defaultTheme),
+        }}
+      />
+    </>
+  );
   const githubUrl = getGitHubUrl();
   const isRailwayDeployed = ["production", "testing"].includes(
     process.env.RAILWAY_ENVIRONMENT_NAME ?? "",
@@ -110,8 +133,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <head>
-          {/* Apply saved theme class before React hydrates to prevent FOUC */}
-          <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+          {themeHead}
           <script
             data-cfasync="false"
             dangerouslySetInnerHTML={{ __html: DESKTOP_NAVIGATION_INIT_SCRIPT }}
@@ -169,7 +191,10 @@ export default async function RootLayout({
               </div>
             </div>
           </noscript>
-          <CustomThemeProvider>
+          <CustomThemeProvider
+            themes={themeOptions}
+            defaultTheme={defaultTheme}
+          >
             <ThemeCursor />
             <TwemojiProvider>
               <QueryProvider>
@@ -257,8 +282,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Apply saved theme class before React hydrates to prevent FOUC */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {themeHead}
         <script
           data-cfasync="false"
           dangerouslySetInnerHTML={{ __html: DESKTOP_NAVIGATION_INIT_SCRIPT }}
@@ -318,7 +342,7 @@ export default async function RootLayout({
             </div>
           </div>
         </noscript>
-        <CustomThemeProvider>
+        <CustomThemeProvider themes={themeOptions} defaultTheme={defaultTheme}>
           <ThemeCursor />
           <TwemojiProvider>
             <QueryProvider>

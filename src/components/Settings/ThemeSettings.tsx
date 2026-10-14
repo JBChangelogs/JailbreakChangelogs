@@ -34,10 +34,9 @@ import {
   getThemeShortcutHidden,
   setThemeShortcutHidden,
   subscribeThemeShortcut,
-  THEME_OPTIONS,
+  type ThemeOption,
+  type ThemePreview as Preview,
 } from "@/utils/ui/themeOptions";
-
-type Preview = (typeof THEME_OPTIONS)[number]["preview"];
 
 /**
  * The theme's colors: dots for its main colors on its page background, each
@@ -91,8 +90,6 @@ function ThemePreview({
     </span>
   );
 }
-
-type ThemeOption = (typeof THEME_OPTIONS)[number];
 
 /** One theme's radio card: its colors above, its name below. */
 function ThemeCard({
@@ -158,12 +155,14 @@ function ThemeCard({
  * carousel's edge aren't missed. Picking one also scrolls the carousel to it.
  */
 function AllThemesPopover({
+  themes,
   name,
   theme,
   onPick,
   className,
   variant = "ghost",
 }: {
+  themes: ThemeOption[];
   name: string;
   theme: string;
   onPick: (index: number) => void;
@@ -179,7 +178,7 @@ function AllThemesPopover({
           <Icon icon="lucide:layout-grid" aria-hidden="true" />
           All themes
           <span className="bg-button-info/15 text-link rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums">
-            {THEME_OPTIONS.length}
+            {themes.length}
           </span>
         </Button>
       </PopoverTrigger>
@@ -192,7 +191,7 @@ function AllThemesPopover({
           aria-label="All themes"
           className="grid grid-cols-2 gap-2 p-1 sm:grid-cols-3"
         >
-          {THEME_OPTIONS.map((option, index) => (
+          {themes.map((option, index) => (
             <ThemeCard
               key={option.value}
               compact
@@ -215,7 +214,7 @@ function AllThemesPopover({
 export default function ThemeSettings() {
   const id = useId();
   const { isAuthenticated } = useAuthContext();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, themes } = useTheme();
   const cursorEnabled = useSyncExternalStore(
     subscribeThemeCursor,
     getThemeCursorEnabled,
@@ -228,7 +227,7 @@ export default function ThemeSettings() {
   );
   const [carousel, setCarousel] = useState<CarouselApi>();
   const pickTheme = (index: number) => {
-    setTheme(THEME_OPTIONS[index].value);
+    setTheme(themes[index].value);
     carousel?.scrollTo(index);
   };
 
@@ -240,7 +239,7 @@ export default function ThemeSettings() {
         opts={{
           align: "start",
           dragFree: true,
-          startIndex: THEME_OPTIONS.findIndex(({ value }) => value === theme),
+          startIndex: themes.findIndex(({ value }) => value === theme),
         }}
         onKeyDownCapture={undefined}
         setApi={setCarousel}
@@ -251,6 +250,7 @@ export default function ThemeSettings() {
           </h3>
           <div className="col-start-2 row-start-1 flex gap-2 sm:row-span-2">
             <AllThemesPopover
+              themes={themes}
               name={`${id}-theme-all`}
               theme={theme}
               onPick={pickTheme}
@@ -279,7 +279,7 @@ export default function ThemeSettings() {
           aria-labelledby={`${id}-label`}
           className="-ml-3 py-1"
         >
-          {THEME_OPTIONS.map((option) => (
+          {themes.map((option) => (
             <CarouselItem
               key={option.value}
               className="basis-[85%] pl-3 sm:basis-[200px]"
@@ -295,6 +295,7 @@ export default function ThemeSettings() {
         </CarouselContent>
         {/* On mobile there's no room beside the arrows, so it goes here. */}
         <AllThemesPopover
+          themes={themes}
           name={`${id}-theme-all-mobile`}
           theme={theme}
           onPick={pickTheme}
