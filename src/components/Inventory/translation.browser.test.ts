@@ -261,6 +261,7 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
       "<Preview",
     );
     const notes = readComponent("../../app/app/AppReleaseNotes.tsx");
+    const dupeGrid = readComponent("../Dupes/DupeItemsGrid.tsx");
     const directory = mkdtempSync(join(tmpdir(), "translation-test-"));
     try {
       const entry = join(directory, "fixture.js");
@@ -290,6 +291,10 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
         const TabsList = Tabs;
         const TabsTrigger = ({children}) => <button>{children}</button>;
         const Preview = () => <div/>;
+        const Pagination = () => null;
+        const DupeItemCard = () => <div/>;
+        let catalogPending = false;
+        const useCatalogValues = () => ({data: undefined, isPending: catalogPending, isError: !catalogPending, refetch() {}});
         const formatMonthDayYear = () => "Oct 14";
         const getBrowserDownloadPlatform = () => "Linux";
         const appAccessKey = () => [];
@@ -300,6 +305,15 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
         const useQuery = () => ({data: appPhase === "granted", isPending: false, isError: false, isFetching: false, refetch() {}});
         ${notes}
         ${app}
+        ${dupeGrid}
+        function DupeGridRetry({busy}) {
+          catalogPending = busy;
+          return <DupeItemsGrid filteredItems={[{id: "1", item_id: 1}]} itemsData={[]} itemCounts={new Map()} duplicateOrders={new Map()} robloxId="1"/>;
+        }
+        function DupeGridEmpty({busy}) {
+          catalogPending = false;
+          return <DupeItemsGrid filteredItems={busy ? [] : [{id: "1", item_id: 1}]} itemsData={[]} itemCounts={new Map()} duplicateOrders={new Map()} robloxId="1"/>;
+        }
         const changes = [
           {slug: "new", version: "2", date: "2026-10-14", content: "## New\\n- A **new** feature and details"},
           {slug: "old", version: "1", date: "2026-10-13", content: "## Fixed\\n- Fixed [a link](https://example.com)"}
@@ -366,6 +380,8 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
           await check(Application, true);
           await check(AppAccess, false);
           await check(AppAccess, true);
+          await check(DupeGridRetry, false);
+          await check(DupeGridEmpty, false);
           const releaseSwitching = await checkReleaseSwitching();
           const routeLabels = [];
           for (const [index, Component] of routeCases.entries()) {

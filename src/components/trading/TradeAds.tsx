@@ -30,7 +30,10 @@ import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { userInventoryQueryOptions } from "@/utils/api/userInventoryQuery";
+import {
+  isInventoryNotFound,
+  userInventoryQueryOptions,
+} from "@/utils/api/userInventoryQuery";
 import {
   isCustomTradeItem,
   tradeItemIdsEqual,
@@ -1089,6 +1092,7 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
                 onItemsInputModeChange={setItemsInputMode}
                 inventoryStatus={inventoryStatus}
                 inventoryError={inventoryError}
+                inventoryNotFound={isInventoryNotFound(inventoryRequestError)}
                 inventoryCopies={
                   shouldUseInventoryItems ? inventoryCopies : undefined
                 }
@@ -1647,6 +1651,7 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
               onItemsInputModeChange={setItemsInputMode}
               inventoryStatus={inventoryStatus}
               inventoryError={inventoryError}
+              inventoryNotFound={isInventoryNotFound(inventoryRequestError)}
               inventoryCopies={
                 shouldUseInventoryItems ? inventoryCopies : undefined
               }

@@ -92,7 +92,7 @@ export default function DupeItemsGrid({
   if (itemQuery.isError && !itemQuery.data) {
     return (
       <div className="text-secondary-text py-8 text-center">
-        Couldn&apos;t load item details.{" "}
+        <span>Couldn&apos;t load item details. </span>
         <button
           type="button"
           className="text-link underline"

@@ -21,6 +21,12 @@ import type { Components } from "react-markdown";
 import { createLogger } from "@/services/logger";
 // RE-ADD: voting — import { toast } from "sonner";
 import Link from "next/link";
+import Image from "next/image";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -465,13 +471,29 @@ export default function ItemSuggestionsTab({
               <div className="space-y-3 p-4">
                 {/* Title + badges */}
                 <div className="space-y-2">
-                  <Link
-                    href={`/items/suggestions/${suggestion.id}`}
-                    prefetch={false}
-                    className="text-primary-text group-hover:text-link text-base font-bold transition-colors"
-                  >
-                    Suggestion #{suggestion.id}
-                  </Link>
+                  <div className="flex items-center gap-1.5">
+                    <Link
+                      href={`/items/suggestions/${suggestion.id}`}
+                      prefetch={false}
+                      className="text-primary-text group-hover:text-link text-base font-bold transition-colors"
+                    >
+                      Suggestion #{suggestion.id}
+                    </Link>
+                    {suggestion.is_vt === 1 && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Image
+                            src="https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_vt.svg"
+                            alt="Value Team"
+                            width={20}
+                            height={20}
+                            className="shrink-0"
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>Value Team Suggestion</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     <span
                       className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
