@@ -2,6 +2,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+html[data-tab-style="filled"] [data-slot="tabs-list"] {
+  border: 1px solid var(--color-border-card);
+  background: var(--color-tertiary-bg);
+  padding: 2px;
+}
+
+html[data-tab-style="filled"] [data-slot="tabs-indicator"] {
+  display: none;
+}
+
+html[data-tab-style="filled"] [data-slot="tabs-trigger"][data-state="active"] {
+  background: var(--color-button-info);
+  color: var(--color-form-button-text);
+}
+
 @utility page-heading {
   @apply text-primary-text text-3xl leading-tight font-bold;
 }

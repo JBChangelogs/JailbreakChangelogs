@@ -7,6 +7,7 @@ import Script from "next/script";
 import Image from "next/image";
 import "./globals.css";
 import { DESKTOP_NAVIGATION_INIT_SCRIPT } from "@/utils/ui/desktopNavigation";
+import { TAB_STYLE_INIT_SCRIPT } from "@/utils/ui/tabStyle";
 import Header from "@/components/Layout/Header";
 import HideOnAccessDenied from "@/components/Layout/HideOnAccessDenied";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
@@ -136,7 +137,9 @@ export default async function RootLayout({
           {themeHead}
           <script
             data-cfasync="false"
-            dangerouslySetInnerHTML={{ __html: DESKTOP_NAVIGATION_INIT_SCRIPT }}
+            dangerouslySetInnerHTML={{
+              __html: DESKTOP_NAVIGATION_INIT_SCRIPT + TAB_STYLE_INIT_SCRIPT,
+            }}
           />
           {/* Rybbit Analytics */}
           {isRailwayDeployed && (
@@ -285,7 +288,9 @@ export default async function RootLayout({
         {themeHead}
         <script
           data-cfasync="false"
-          dangerouslySetInnerHTML={{ __html: DESKTOP_NAVIGATION_INIT_SCRIPT }}
+          dangerouslySetInnerHTML={{
+            __html: DESKTOP_NAVIGATION_INIT_SCRIPT + TAB_STYLE_INIT_SCRIPT,
+          }}
         />
         {/* Preconnect to external asset domains */}
         <link rel="preconnect" href="https://assets.jailbreakchangelogs.com" />

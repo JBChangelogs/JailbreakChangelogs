@@ -25,6 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import TabStyleSettings from "@/components/Settings/TabStyleSettings";
 import {
   getThemeCursorEnabled,
   setThemeCursorEnabled,
@@ -303,6 +304,8 @@ export default function ThemeSettings() {
           className="w-full sm:hidden"
         />
       </Carousel>
+
+      <TabStyleSettings />
 
       <div className="flex items-center justify-between gap-4">
         <div>

@@ -42,6 +42,7 @@ import {
   syncDesktopNavigationPreferences,
 } from "@/utils/ui/desktopNavigation";
 import { trackDesktopNavigationUsage } from "@/utils/analytics/rybbit";
+import { syncTabStylePreferences } from "@/utils/ui/tabStyle";
 import DesktopSidebar from "./DesktopSidebar";
 import { navigationSections } from "@/utils/ui/navigation-menu";
 import { getNavigationHref, getNavigationSection } from "@/utils/ui/navigation";
@@ -477,6 +478,7 @@ export default function Header() {
     () => false,
   );
   useEffect(syncDesktopNavigationPreferences, []);
+  useEffect(syncTabStylePreferences, []);
   useEffect(trackDesktopNavigationUsage, []);
   const [openNavSection, setOpenNavSection] = useState<string>("updates");
   const toggleNavSection = useCallback(

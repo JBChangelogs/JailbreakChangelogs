@@ -123,6 +123,7 @@ const TabsList = React.forwardRef<
     return (
       <TabsPrimitive.List
         ref={setRefs(listRef, ref)}
+        data-slot="tabs-list"
         className={cn(
           "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto overflow-y-hidden bg-transparent p-0 [-webkit-overflow-scrolling:touch]",
           fullWidth && "w-full min-w-0 gap-0",
@@ -134,6 +135,7 @@ const TabsList = React.forwardRef<
         {!hideIndicator && (
           <div
             aria-hidden="true"
+            data-slot="tabs-indicator"
             className="bg-border-primary/60 pointer-events-none absolute inset-x-0 bottom-0 h-px"
           />
         )}
@@ -141,6 +143,7 @@ const TabsList = React.forwardRef<
         {!hideIndicator && (
           <div
             aria-hidden="true"
+            data-slot="tabs-indicator"
             className={cn(
               "bg-border-focus pointer-events-none absolute bottom-0 h-0.5 transition-[transform,width,opacity] duration-200 ease-out",
               indicator.visible ? "opacity-100" : "opacity-0",
@@ -169,6 +172,7 @@ const TabsTrigger = React.forwardRef<
 >(({ className, fullWidth = false, onMouseDown, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
+    data-slot="tabs-trigger"
     onMouseDown={(event) => {
       // Radix focuses the trigger programmatically on mousedown, which can
       // match :focus-visible and show the keyboard ring on a mouse click.
