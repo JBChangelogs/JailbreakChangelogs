@@ -84,7 +84,7 @@ test("both Hyperchrome choices explain completion and appear before the missing-
     expect(disclosure).toContain("Show items");
     expect(disclosure).toContain("Hide items");
     expect(markup).toContain('role="status"');
-    const text = markup.replace(/<[^>]*>/g, "");
+    const text = markup.split(/<[^>]*>/).join("");
     expect(text).toContain(
       mode
         ? "4/5 collected · 1 missing · 80.00% complete"
