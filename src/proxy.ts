@@ -75,6 +75,8 @@ function isAllowedWithoutTesterRole(request: NextRequest): boolean {
   if (pathname === "/access-denied") return true;
   if (pathname === "/api/healthcheck") return true;
   if (pathname === "/api/health") return true;
+  // Called by the API; the route checks its own secret.
+  if (pathname === "/api/revalidate-themes") return true;
   if (pathname.startsWith("/api/auth/")) return true;
   if (pathname.startsWith("/api/oauth/")) return true;
   if (/\.[^/]+$/.test(pathname)) return true;

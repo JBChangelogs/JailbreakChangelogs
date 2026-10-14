@@ -13,7 +13,6 @@ import {
 import {
   getThemeShortcutHidden,
   subscribeThemeShortcut,
-  themeOption,
 } from "@/utils/ui/themeOptions";
 
 // The Display card, where the theme picker sits first.
@@ -32,7 +31,7 @@ export const ThemeShortcut = ({
   className,
   size = "md",
 }: ThemeShortcutProps) => {
-  const { theme } = useTheme();
+  const { theme, themes } = useTheme();
   const hidden = useSyncExternalStore(
     subscribeThemeShortcut,
     getThemeShortcutHidden,
@@ -40,7 +39,8 @@ export const ThemeShortcut = ({
   );
   if (hidden) return null;
 
-  const { icon, label } = themeOption(theme);
+  const { icon, label } =
+    themes.find((option) => option.value === theme) ?? themes[0];
   return (
     <Tooltip>
       <TooltipTrigger asChild>
