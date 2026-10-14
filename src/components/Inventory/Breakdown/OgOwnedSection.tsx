@@ -32,7 +32,7 @@ export default function OgOwnedSection({
   onViewUnverifiable,
 }: OgOwnedSectionProps) {
   return (
-    <div className="border-border-card/60 grid grid-cols-1 gap-6 border-t pt-8 xl:grid-cols-12">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
       <div className="space-y-6 xl:col-span-8">
         <div>
           <div className="mb-3">

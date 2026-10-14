@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import type { UserNetworthData } from "@/utils/api/api";
 import type { Item } from "@/types";
 import type { InventoryData } from "@/app/inventories/types";
@@ -10,6 +11,7 @@ import OverviewStatsCard from "@/components/Inventory/Breakdown/OverviewStatsCar
 import ValueBreakdownSection from "@/components/Inventory/Breakdown/ValueBreakdownSection";
 import { useInventoryBreakdownStats } from "@/hooks/useInventoryBreakdownStats";
 import { usePartialItems } from "@/hooks/usePartialItems";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface InventoryBreakdownProps {
   networthData: UserNetworthData[];
@@ -40,8 +42,12 @@ export default function InventoryBreakdown({
   );
 
   const unverifiableSectionRef = useRef<HTMLDivElement>(null);
+  const [progressTab, setProgressTab] = useState("collection");
 
   const scrollToUnverifiableSection = () => {
+    if (progressTab !== "collection") {
+      flushSync(() => setProgressTab("collection"));
+    }
     const target = unverifiableSectionRef.current;
     if (!target) return;
     const disclosure = target.querySelector<HTMLDetailsElement>("details");
@@ -98,34 +104,55 @@ export default function InventoryBreakdown({
           </button>
         </div>
       ) : (
-        <>
-          <CollectionProgressSection
-            countLowerLevels={stats.countLowerLevels}
-            creditedHyperchromeLevels={stats.creditedHyperchromeLevels}
-            onCountLowerLevelsChange={stats.setCountLowerLevels}
-            overallProgress={stats.overallProgress}
-            typeProgress={stats.typeProgress}
-            unverifiableCount={stats.unverifiableCount}
-            missingItemsAll={stats.missingItemsAll}
-            unverifiableItemsAll={stats.unverifiableItemsAll}
-            collectionChartConfig={stats.collectionChartConfig}
-            collectionChartData={stats.collectionChartData}
-            renderCharts={renderCharts}
-            unverifiableSectionRef={unverifiableSectionRef}
-            onViewUnverifiable={scrollToUnverifiableSection}
-          />
-
-          <OgOwnedSection
-            ogOwnedProgress={stats.ogOwnedProgress}
-            typeProgress={stats.typeProgress}
-            ogMissingItemsAll={stats.ogMissingItemsAll}
-            unverifiableCount={stats.unverifiableCount}
-            ogChartConfig={stats.ogChartConfig}
-            ogChartData={stats.ogChartData}
-            renderCharts={renderCharts}
-            onViewUnverifiable={scrollToUnverifiableSection}
-          />
-        </>
+        <Tabs value={progressTab} onValueChange={setProgressTab}>
+          <TabsList fullWidth aria-label="Collection ownership">
+            <TabsTrigger fullWidth value="collection">
+              Collection Progress
+            </TabsTrigger>
+            <TabsTrigger fullWidth value="og-owned">
+              OG Owned
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent
+            value="collection"
+            forceMount
+            hidden={progressTab !== "collection"}
+            className="mt-6"
+          >
+            <CollectionProgressSection
+              countLowerLevels={stats.countLowerLevels}
+              creditedHyperchromeLevels={stats.creditedHyperchromeLevels}
+              onCountLowerLevelsChange={stats.setCountLowerLevels}
+              overallProgress={stats.overallProgress}
+              typeProgress={stats.typeProgress}
+              unverifiableCount={stats.unverifiableCount}
+              missingItemsAll={stats.missingItemsAll}
+              unverifiableItemsAll={stats.unverifiableItemsAll}
+              collectionChartConfig={stats.collectionChartConfig}
+              collectionChartData={stats.collectionChartData}
+              renderCharts={renderCharts}
+              unverifiableSectionRef={unverifiableSectionRef}
+              onViewUnverifiable={scrollToUnverifiableSection}
+            />
+          </TabsContent>
+          <TabsContent
+            value="og-owned"
+            forceMount
+            hidden={progressTab !== "og-owned"}
+            className="mt-6"
+          >
+            <OgOwnedSection
+              ogOwnedProgress={stats.ogOwnedProgress}
+              typeProgress={stats.typeProgress}
+              ogMissingItemsAll={stats.ogMissingItemsAll}
+              unverifiableCount={stats.unverifiableCount}
+              ogChartConfig={stats.ogChartConfig}
+              ogChartData={stats.ogChartData}
+              renderCharts={renderCharts}
+              onViewUnverifiable={scrollToUnverifiableSection}
+            />
+          </TabsContent>
+        </Tabs>
       )}
 
       <ValueBreakdownSection
