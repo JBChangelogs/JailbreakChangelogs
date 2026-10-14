@@ -372,7 +372,7 @@ export default async function Home() {
                         </span>
                       </div>
                       <p className="text-primary-text text-2xl leading-none font-bold md:text-3xl">
-                        {stat.prefix ?? ""}
+                        <span>{stat.prefix ?? ""}</span>
                         {stat.valueStr ?? (
                           <CountUpNumber
                             value={stat.value}

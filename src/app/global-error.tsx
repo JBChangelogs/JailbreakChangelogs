@@ -28,24 +28,63 @@ export default function GlobalError({
           style={{
             minHeight: "100vh",
             display: "grid",
-            placeContent: "center",
-            padding: "0 24px",
+            alignItems: "center",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+            gap: 48,
+            maxWidth: 1024,
+            margin: "0 auto",
+            padding: "24px",
           }}
         >
-          <h1>This page couldn’t load</h1>
-          <p>Reload to try again, or go back.</p>
-          <div style={{ display: "flex", gap: 12 }}>
-            <button onClick={() => window.location.reload()}>Reload</button>
-            <button
-              onClick={() => {
-                if (window.history.length > 1) window.history.back();
-                else window.location.assign("/");
-              }}
-            >
-              Back
-            </button>
+          <div>
+            <h1 style={{ fontSize: 30, fontWeight: 600 }}>
+              This page couldn’t load
+            </h1>
+            <p>Reload to try again, or go back.</p>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                style={{
+                  background: "#292929",
+                  color: "#ededed",
+                  border: 0,
+                  borderRadius: 8,
+                  padding: "10px 16px",
+                  cursor: "pointer",
+                }}
+                onClick={() => window.location.reload()}
+              >
+                Reload
+              </button>
+              <button
+                style={{
+                  background: "#ededed",
+                  color: "#0a0a0a",
+                  border: 0,
+                  borderRadius: 8,
+                  padding: "10px 16px",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  if (window.history.length > 1) window.history.back();
+                  else window.location.assign("/");
+                }}
+              >
+                Back
+              </button>
+            </div>
+            {error.digest && <p>Error reference: {error.digest}</p>}
           </div>
-          {error.digest && <p>Error reference: {error.digest}</p>}
+          <div
+            role="img"
+            aria-label="Error illustration"
+            style={{
+              width: "100%",
+              aspectRatio: "1500 / 700",
+              backgroundColor: "currentColor",
+              mask: "url(/assets/images/404.png) center / contain no-repeat",
+            }}
+          />
         </main>
         {process.env.NODE_ENV === "production" && (
           <Script

@@ -385,11 +385,11 @@ const ServerList: React.FC = () => {
   const listHeader = (
     <div className="mb-4 flex items-center justify-between gap-3 px-4 lg:px-0">
       <p className="text-secondary-text flex items-center gap-2 text-sm">
-        {queryFromUrl ? "Matching servers" : "Total servers"}:
+        <span>{`${queryFromUrl ? "Matching servers" : "Total servers"}:`}</span>
         {loading ? (
           <Spinner className="h-4 w-4" />
         ) : (
-          totalServers.toLocaleString()
+          <span>{totalServers.toLocaleString()}</span>
         )}
       </p>
       <div className="flex shrink-0 items-center gap-2">
@@ -754,7 +754,9 @@ const ServerList: React.FC = () => {
                     }
                     className="text-link hover:text-link-hover mt-2 cursor-pointer text-xs"
                   >
-                    {isRulesExpanded ? "Show less" : "Read full rules"}
+                    <span>
+                      {isRulesExpanded ? "Show less" : "Read full rules"}
+                    </span>
                   </button>
                 )}
               </div>

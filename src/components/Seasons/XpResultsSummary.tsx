@@ -307,9 +307,9 @@ export default function XpResultsSummary({
           >
             <div className="mb-3">
               <h4 className="text-primary-text font-semibold">
-                Non-Season Pass Owner
+                <span>Non-Season Pass Owner</span>
                 <span className="text-secondary-text ml-2 text-sm font-normal">
-                  ({xpMode === "normal" ? "Normal XP" : "Double XP Weekend"})
+                  {`(${xpMode === "normal" ? "Normal XP" : "Double XP Weekend"})`}
                 </span>
               </h4>
             </div>
@@ -319,12 +319,11 @@ export default function XpResultsSummary({
                   <div className="mb-2 flex items-center justify-center gap-2">
                     <span className="text-lg">{getStatusIcon(true)}</span>
                     <div className="text-primary-text text-xl font-bold">
-                      {currentResults.noPass.days}{" "}
-                      {currentResults.noPass.days === 1 ? "day" : "days"}
+                      {`${currentResults.noPass.days} ${currentResults.noPass.days === 1 ? "day" : "days"}`}
                     </div>
                   </div>
                   <div className="text-secondary-text text-sm">
-                    Complete by: {currentResults.noPass.completionDate}
+                    {`Complete by: ${currentResults.noPass.completionDate}`}
                   </div>
                   <div className="text-secondary-text mt-1 text-xs">
                     Results may vary (±1 day)
@@ -339,7 +338,7 @@ export default function XpResultsSummary({
                     </div>
                   </div>
                   <div className="text-secondary-text text-sm">
-                    Would complete: {currentResults.noPass?.completionDate}
+                    {`Would complete: ${currentResults.noPass?.completionDate ?? ""}`}
                   </div>
                   <div className="mt-1 text-xs text-red-400">
                     Past season end date
@@ -359,9 +358,9 @@ export default function XpResultsSummary({
           >
             <div className="mb-3">
               <h4 className="text-primary-text font-semibold">
-                Season Pass Owner
+                <span>Season Pass Owner</span>
                 <span className="text-secondary-text ml-2 text-sm font-normal">
-                  ({xpMode === "normal" ? "Normal XP" : "Double XP Weekend"})
+                  {`(${xpMode === "normal" ? "Normal XP" : "Double XP Weekend"})`}
                 </span>
               </h4>
             </div>
@@ -371,12 +370,11 @@ export default function XpResultsSummary({
                   <div className="mb-2 flex items-center justify-center gap-2">
                     <span className="text-lg">{getStatusIcon(true)}</span>
                     <div className="text-primary-text text-xl font-bold">
-                      {currentResults.withPass.days}{" "}
-                      {currentResults.withPass.days === 1 ? "day" : "days"}
+                      {`${currentResults.withPass.days} ${currentResults.withPass.days === 1 ? "day" : "days"}`}
                     </div>
                   </div>
                   <div className="text-secondary-text text-sm">
-                    Complete by: {currentResults.withPass.completionDate}
+                    {`Complete by: ${currentResults.withPass.completionDate}`}
                   </div>
                   <div className="text-secondary-text mt-1 text-xs">
                     Results may vary (±1 day)
@@ -391,7 +389,7 @@ export default function XpResultsSummary({
                     </div>
                   </div>
                   <div className="text-secondary-text text-sm">
-                    Would complete: {currentResults.withPass?.completionDate}
+                    {`Would complete: ${currentResults.withPass?.completionDate ?? ""}`}
                   </div>
                   <div className="mt-1 text-xs text-red-400">
                     Past season end date

@@ -47,7 +47,7 @@ export function CommentHeader() {
           changelogTitle
         ) : (
           <>
-            {changelogTitle}{" "}
+            <span>{changelogTitle} </span>
             <span className="text-secondary-text">({itemType})</span>
           </>
         )}
@@ -58,8 +58,10 @@ export function CommentHeader() {
           icon="heroicons:information-circle"
           className="mt-0.5 h-3.5 w-3.5 shrink-0"
         />
-        Comments are posted by users and are not verified. Some information may
-        be incorrect or misleading
+        <span>
+          Comments are posted by users and are not verified. Some information
+          may be incorrect or misleading
+        </span>
       </p>
       {/* Sort row */}
       <div className="mt-2 flex justify-end">

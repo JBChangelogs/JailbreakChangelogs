@@ -80,8 +80,8 @@ export default function XpLevelProgressBar({
       {/* Mobile Layout - Stack vertically on small screens */}
       <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
         <div className="text-xs leading-tight font-bold">
-          <div className="text-center">LEVEL {level}</div>
-          <div className="text-center text-[10px]">SEASON {season.season}</div>
+          <div className="text-center">{`LEVEL ${level}`}</div>
+          <div className="text-center text-[10px]">{`SEASON ${season.season}`}</div>
         </div>
       </div>
 
@@ -90,19 +90,18 @@ export default function XpLevelProgressBar({
         {/* XP Text Overlay */}
         <div className="absolute top-1/2 left-2 -translate-y-1/2">
           <span className="text-sm font-bold">
-            {xpRequiredForThisLevel.toLocaleString("en-US")}/
-            {xpRequiredForThisLevel.toLocaleString("en-US")}
+            {`${xpRequiredForThisLevel.toLocaleString("en-US")}/${xpRequiredForThisLevel.toLocaleString("en-US")}`}
           </span>
         </div>
 
         {/* Level Info - Centered */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <span className="text-sm font-bold">LEVEL {level}</span>
+          <span className="text-sm font-bold">{`LEVEL ${level}`}</span>
         </div>
 
         {/* Season Info - Right Side */}
         <div className="absolute top-1/2 right-2 -translate-y-1/2">
-          <span className="text-sm font-bold">SEASON {season.season}</span>
+          <span className="text-sm font-bold">{`SEASON ${season.season}`}</span>
         </div>
       </div>
     </>
@@ -136,9 +135,9 @@ export default function XpLevelProgressBar({
       {/* Additional Info */}
       <div className="text-secondary-text mt-1 flex flex-col gap-1 text-xs sm:flex-row sm:justify-between">
         <span>
-          This Level: {xpRequiredForThisLevel.toLocaleString("en-US")} XP
+          {`This Level: ${xpRequiredForThisLevel.toLocaleString("en-US")} XP`}
         </span>
-        <span>Total: {totalXpForLevel.toLocaleString("en-US")} XP</span>
+        <span>{`Total: ${totalXpForLevel.toLocaleString("en-US")} XP`}</span>
       </div>
     </div>
   );

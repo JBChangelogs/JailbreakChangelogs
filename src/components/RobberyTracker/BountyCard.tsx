@@ -78,8 +78,7 @@ export default function BountyCard({
           <div className="mb-3">
             <div className="text-secondary-text mb-2 flex items-center gap-2 text-sm font-medium">
               <Icon icon="heroicons:cube" className="h-4 w-4" />
-              Inventory ({bounty.inventory.length}{" "}
-              {bounty.inventory.length === 1 ? "item" : "items"})
+              <span>{`Inventory (${bounty.inventory.length} ${bounty.inventory.length === 1 ? "item" : "items"})`}</span>
             </div>
             <div className="bg-secondary-bg flex flex-wrap gap-1.5 rounded-lg p-2">
               {bounty.inventory.map((item, index) => (
@@ -114,7 +113,7 @@ export default function BountyCard({
                 className="mt-2 w-full"
               >
                 <Icon icon="heroicons-outline:users" className="h-4 w-4" />
-                View {players.length} Players
+                <span>{`View ${players.length} Players`}</span>
               </Button>
             )}
           </div>

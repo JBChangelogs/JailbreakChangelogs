@@ -112,13 +112,12 @@ export default function ServerBountyGroup({
                 className="h-4 w-4 shrink-0"
               />
               <span className="text-secondary-text text-sm font-medium">
-                {bounties.length}{" "}
-                {bounties.length === 1 ? "Bounty" : "Bounties"}
+                {`${bounties.length} ${bounties.length === 1 ? "Bounty" : "Bounties"}`}
               </span>
 
               <span className="text-tertiary-text text-sm">•</span>
               <span className="text-secondary-text text-sm font-medium">
-                {copCount} {copCount === 1 ? "Cop" : "Cops"}
+                {`${copCount} ${copCount === 1 ? "Cop" : "Cops"}`}
               </span>
             </div>
           </div>
@@ -177,11 +176,13 @@ export default function ServerBountyGroup({
                   icon="heroicons:arrow-top-right-on-square"
                   className="h-3.5 w-3.5"
                 />
-                {isJoining
-                  ? "Joining..."
-                  : isLastJoined
-                    ? "Rejoin Server"
-                    : "Join Server"}
+                <span>
+                  {isJoining
+                    ? "Joining..."
+                    : isLastJoined
+                      ? "Rejoin Server"
+                      : "Join Server"}
+                </span>
               </Button>
             )}
           </div>

@@ -338,13 +338,13 @@ export default function ModernPricingSection() {
                         </span>
                       </div>
                     ) : (
-                      <>
-                        {purchase.price}
+                      <div className="flex items-center gap-2">
+                        <span>{purchase.price}</span>
                         <span className="text-secondary-text text-base font-normal">
                           {" "}
                           USD
                         </span>
-                      </>
+                      </div>
                     )}
                   </h4>
 

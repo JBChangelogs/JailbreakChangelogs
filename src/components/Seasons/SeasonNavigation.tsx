@@ -61,7 +61,7 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
                   value={item.season.toString()}
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
-                  Season {item.season} - {item.title}
+                  <span>{`Season ${item.season} - ${item.title}`}</span>
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>

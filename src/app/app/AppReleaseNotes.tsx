@@ -81,9 +81,9 @@ function ReleaseSections({
                     remarkPlugins={[remarkGfm]}
                     components={{
                       // Each block is one list item; render just its text.
-                      ul: ({ children }) => <>{children}</>,
-                      li: ({ children }) => <>{children}</>,
-                      p: ({ children }) => <>{children}</>,
+                      ul: ({ children }) => <span>{children}</span>,
+                      li: ({ children }) => <span>{children}</span>,
+                      p: ({ children }) => <span>{children}</span>,
                       a: ({ href, children }) => (
                         <a
                           href={href}
@@ -194,7 +194,7 @@ export function AppReleaseNotes({ changes }: { changes: ChangelogEntry[] }) {
           rel="noopener noreferrer"
           className="text-link hover:text-link-hover inline-flex items-center gap-1 text-sm font-medium transition-colors"
         >
-          All releases on GitHub
+          <span>All releases on GitHub</span>
           <Icon
             icon="lucide:external-link"
             aria-hidden="true"
@@ -228,7 +228,7 @@ export function AppReleaseNotes({ changes }: { changes: ChangelogEntry[] }) {
                   rel="noopener noreferrer"
                   className="text-link hover:text-link-hover ml-auto inline-flex items-center gap-1 text-xs font-medium"
                 >
-                  View on GitHub
+                  <span>View on GitHub</span>
                   <Icon
                     icon="lucide:external-link"
                     aria-hidden="true"

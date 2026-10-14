@@ -135,10 +135,7 @@ export function ValueRangeFilter({
               />
             </div>
             <span className="text-secondary-text text-[11px] whitespace-nowrap">
-              {localRange[0].toLocaleString("en-US")} -{" "}
-              {localRange[1] >= maxValueRange
-                ? `${maxValueRange.toLocaleString("en-US")}+`
-                : localRange[1].toLocaleString("en-US")}
+              {`${localRange[0].toLocaleString("en-US")} - ${localRange[1] >= maxValueRange ? `${maxValueRange.toLocaleString("en-US")}+` : localRange[1].toLocaleString("en-US")}`}
             </span>
           </div>
         </div>

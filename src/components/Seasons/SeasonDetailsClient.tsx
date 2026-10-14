@@ -194,7 +194,7 @@ export default function SeasonDetailsClient({
             {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
             <div className="sm:col-span-12 xl:col-span-8">
               <h1 className="page-heading border-secondary-text mb-2 border-b pb-2">
-                Season {season.season} / {season.title}
+                {`Season ${season.season} / ${season.title}`}
               </h1>
               <p className="text-secondary-text mb-4">{season.description}</p>
 
@@ -360,7 +360,7 @@ export default function SeasonDetailsClient({
                         </div>
                       </div>
                       <p className="text-secondary-text text-sm">
-                        Requirement: {reward.requirement}
+                        {`Requirement: ${reward.requirement}`}
                       </p>
                     </div>
                   ))}

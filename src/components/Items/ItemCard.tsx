@@ -684,8 +684,7 @@ function ItemCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="cursor-help">
-                    Last updated:{" "}
-                    {formatLastUpdated(currentItemData.last_updated)}
+                    {`Last updated: ${formatLastUpdated(currentItemData.last_updated)}`}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>

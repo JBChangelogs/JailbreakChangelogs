@@ -76,7 +76,12 @@ for (const path of paths) {
         reset: () => calls.push("reset"),
       }),
     );
-    expect(reports).toEqual([[error, path.slice(0, -"/error.tsx".length)]]);
+    expect(reports).toEqual([
+      [
+        error,
+        path === "error.tsx" ? "root" : path.slice(0, -"/error.tsx".length),
+      ],
+    ]);
     const retryButton = tree.find(
       (node) =>
         (node.type === "Button" || node.type === "button") &&

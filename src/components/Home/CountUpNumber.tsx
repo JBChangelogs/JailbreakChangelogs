@@ -20,6 +20,7 @@ export default function CountUpNumber({
 
   return (
     <NumberFlow
+      translate="no"
       value={displayValue}
       format={{
         minimumFractionDigits: decimals,

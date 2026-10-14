@@ -528,7 +528,7 @@ export default function ValuesSearchControls({
                 className="h-4 w-4"
                 inline={true}
               />
-              Filter
+              <span>Filter</span>
               <Icon
                 icon={
                   showAdvancedFilters
@@ -559,7 +559,7 @@ export default function ValuesSearchControls({
                 }}
               >
                 <Icon icon={option.icon} style={{ color: option.iconColor }} />
-                {option.label}
+                <span>{option.label}</span>
               </Button>
             ))}
           </div>
