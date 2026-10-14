@@ -41,7 +41,7 @@ const downloads = {
   },
 };
 const allPlatforms = ["Windows", "macOS", "Linux"] as const;
-const previewOrigin = "https://assets.jailbreakchangelogs.com";
+const previewOrigin = "https://app-preview.jailbreakchangelogs.com";
 
 // Things the website can't do, in the app's own wording.
 const appOnly = [
@@ -397,7 +397,7 @@ export default function AppClient({
         <div className="mt-6 overflow-hidden rounded-2xl">
           <iframe
             ref={previewRef}
-            src={`${previewOrigin}/app/preview.html?theme=${encodeURIComponent(theme)}`}
+            src={`${previewOrigin}/?theme=${encodeURIComponent(theme)}`}
             className="block w-full border-0 bg-transparent"
             style={{
               height:
