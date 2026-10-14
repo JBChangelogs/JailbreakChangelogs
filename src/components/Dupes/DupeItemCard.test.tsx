@@ -185,6 +185,7 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   expect(JSON.stringify(loading)).toContain(
     "Checking the recorded ownership history...",
   );
+  expect(JSON.stringify(loading)).not.toContain("Report false dupe");
   await new Promise((resolve) => setTimeout(resolve, 0));
   expect(checks).toEqual([["123", 49]]);
   stateIndex = 0;
@@ -195,10 +196,10 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   expect(
     flatten(checked).find((element) => element.type === "DialogContent")?.props
       .className,
-  ).toContain("max-w-xl");
+  ).toContain("max-w-3xl");
   expect(
     flatten(checked).filter((element) => element.type === "TooltipContent"),
-  ).toHaveLength(3);
+  ).toHaveLength(0);
   expect(JSON.stringify(checked)).not.toContain(
     "Review the recorded history for this",
   );
@@ -206,30 +207,18 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   expect(JSON.stringify(checked)).toContain("Relative 1791835200");
   expect(JSON.stringify(checked)).toContain("Relative 1791748800");
   expect(JSON.stringify(checked)).not.toContain("Confidence");
-  const explanationButton = flatten(checked).find(
-    (element) =>
-      element.type === "button" &&
-      String(element.props["aria-label"]).startsWith("History change:"),
-  )!;
-  explanationButton.props.onClick!({ preventDefault: () => {} });
-  stateIndex = 0;
-  const explained = exports.default(props);
-  expect(
-    flatten(explained).filter(
-      (element) => element.type === "Tooltip" && element.props.open === true,
-    ),
-  ).toHaveLength(1);
-  flatten(explained).find(
-    (element) =>
-      element.type === "button" &&
-      String(element.props["aria-label"]).startsWith("History change:"),
-  )!.props.onClick!({ preventDefault: () => {} });
-  stateIndex = 0;
-  expect(
-    flatten(exports.default(props)).filter(
-      (element) => element.type === "Tooltip" && element.props.open === true,
-    ),
-  ).toHaveLength(0);
+  for (const description of [
+    "Whether the history difference exceeds 30%.",
+    "Trading patterns associated with duplicated items.",
+    "Whether this check flags the item as duplicated.",
+  ]) {
+    expect(
+      flatten(checked).some(
+        (element) =>
+          element.type === "p" && element.props.children === description,
+      ),
+    ).toBe(true);
+  }
   expect(JSON.stringify(checked)).toContain("Date 1791835200");
   expect(JSON.stringify(checked)).toContain("Date 1791748800");
   const detailRow = (tree: Element, label: string) =>
@@ -282,8 +271,8 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   const footer = flatten(dialog).find(
     (element) => element.type === "DialogFooter",
   )!;
-  expect(footer.props.className).toContain("grid grid-cols-2");
-  expect(footer.props.className).not.toContain("sm:grid-cols-3");
+  expect(footer.props.className).toContain("flex flex-col");
+  expect(footer.props.className).toContain("sm:flex-row sm:justify-end");
   expect(
     flatten(footer).filter((element) => element.type === "Button"),
   ).toHaveLength(2);
@@ -314,6 +303,37 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
     flatten(exports.default(props)).find((element) => element.type === "Dialog")
       ?.props.open,
   ).toBe(false);
+  for (const flaggedCount of [0, 1, 2, 3]) {
+    result = {
+      ...result,
+      ratio: flaggedCount >= 1 ? 0.45 : 0,
+      check: flaggedCount >= 2,
+      is_duped: flaggedCount >= 3,
+    };
+    button("Dupe check").props.onClick!();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    stateIndex = 0;
+    const scoredCard = exports.default(props);
+    const scored = JSON.stringify(scoredCard);
+    expect(scored).toContain(`Checks flagged: ${flaggedCount}/3`);
+    expect(scored.includes("Report false dupe")).toBe(flaggedCount < 3);
+    expect(
+      scored.includes("Review the comparison before reporting a false dupe."),
+    ).toBe(flaggedCount < 3);
+    const scoredFooter = flatten(scoredCard).find(
+      (element) => element.type === "DialogFooter",
+    )!;
+    expect(scoredFooter.props.className).toContain(
+      "sm:flex-row sm:justify-end",
+    );
+    expect(
+      flatten(scoredFooter).filter((element) => element.type === "Button"),
+    ).toHaveLength(flaggedCount < 3 ? 2 : 1);
+    const comparisonButton = flatten(scoredFooter).find(
+      (element) => element.type === "Button" && element.props.asChild,
+    )!;
+    expect(comparisonButton.props.className).toBe("w-full sm:w-auto");
+  }
   checkFails = true;
   button("Dupe check").props.onClick!();
   await new Promise((resolve) => setTimeout(resolve, 0));

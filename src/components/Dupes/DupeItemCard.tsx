@@ -87,7 +87,6 @@ export default function DupeItemCard({
   const [checkResult, setCheckResult] = useState<DupeCheckResult | null>(null);
   const [checkError, setCheckError] = useState<string | null>(null);
   const [checkOpen, setCheckOpen] = useState(false);
-  const [explainedCheck, setExplainedCheck] = useState<string | null>(null);
   const originalOwner =
     item.info?.find((entry) => entry.title === "Original Owner")?.value ||
     robloxId;
@@ -95,7 +94,6 @@ export default function DupeItemCard({
   const runCheck = async () => {
     if (checking) return;
     setCheckOpen(true);
-    setExplainedCheck(null);
     setChecking(true);
     setCheckError(null);
     setCheckResult(null);
@@ -128,6 +126,9 @@ export default function DupeItemCard({
         },
       ]
     : [];
+  const canReport =
+    !checking &&
+    (!checkResult || checkDetails.some((detail) => !detail.flagged));
   const displayedSeason = itemData.season ?? undefined;
   const displayedLevel = unlockLevel(itemData.level);
   const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
@@ -360,7 +361,7 @@ export default function DupeItemCard({
         </div>
       </div>
       <Dialog open={checkOpen} onOpenChange={setCheckOpen}>
-        <DialogContent className="w-[calc(100%_-_2rem)] max-w-xl" showClose>
+        <DialogContent className="w-[calc(100%_-_2rem)] max-w-3xl" showClose>
           <DialogHeader className="pr-5 text-left">
             <DialogTitle>Dupe check: {item.title}</DialogTitle>
             <DialogDescription className="wrap-anywhere">
@@ -402,82 +403,50 @@ export default function DupeItemCard({
                     </span>
                   </p>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-3">
                   <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
                     <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-primary-text flex items-center gap-1.5 text-sm font-semibold">
+                      <h3 className="text-primary-text text-sm font-semibold">
                         Check details
-                        <span title="Hover, focus, or tap a check for its explanation">
-                          <Icon
-                            icon="heroicons:information-circle"
-                            className="text-secondary-text h-4 w-4"
-                            aria-hidden="true"
-                          />
-                          <span className="sr-only">
-                            Hover, focus, or tap a check for its explanation.
-                          </span>
-                        </span>
                       </h3>
                       <span className="bg-button-info/10 text-primary-text rounded-md px-2 py-1 text-sm font-medium tabular-nums">
                         {`Checks flagged: ${checkDetails.filter((detail) => detail.flagged).length}/${checkDetails.length}`}
                       </span>
                     </div>
-                    <ul className="space-y-2">
+                    <ul className="divide-border-card divide-y">
                       {checkDetails.map((detail) => (
-                        <li key={detail.label}>
-                          <Tooltip
-                            open={explainedCheck === detail.label}
-                            onOpenChange={(open) =>
-                              setExplainedCheck(open ? detail.label : null)
-                            }
-                          >
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                className="focus-visible:ring-border-focus flex w-full items-center gap-2 rounded text-left text-sm focus-visible:ring-2 focus-visible:outline-none"
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  setExplainedCheck(
-                                    explainedCheck === detail.label
-                                      ? null
-                                      : detail.label,
-                                  );
-                                }}
-                                aria-label={`${detail.label}: ${detail.flagged ? "Flagged" : "Not flagged"}. Show explanation`}
-                              >
-                                <Icon
-                                  icon={
-                                    detail.flagged
-                                      ? "heroicons:exclamation-circle"
-                                      : "heroicons:minus-circle"
-                                  }
-                                  className={`h-4 w-4 shrink-0 ${detail.flagged ? "text-status-error" : "text-secondary-text"}`}
-                                  aria-hidden="true"
-                                />
-                                <span className="text-primary-text min-w-0 flex-1 font-medium">
-                                  {detail.label}
-                                </span>
-                                <span
-                                  className={
-                                    detail.flagged
-                                      ? "text-status-error"
-                                      : "text-secondary-text"
-                                  }
-                                >
-                                  {detail.flagged ? "Flagged" : "Not flagged"}
-                                </span>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-64">
-                              {detail.description}
-                            </TooltipContent>
-                          </Tooltip>
+                        <li
+                          key={detail.label}
+                          className="py-3 first:pt-0 last:pb-0"
+                        >
+                          <div className="flex items-center gap-2 text-sm">
+                            <Icon
+                              icon={
+                                detail.flagged
+                                  ? "heroicons:exclamation-circle"
+                                  : "heroicons:minus-circle"
+                              }
+                              className={`h-4 w-4 shrink-0 ${detail.flagged ? "text-status-error" : "text-secondary-text"}`}
+                              aria-hidden="true"
+                            />
+                            <span className="text-primary-text min-w-0 flex-1 font-medium">
+                              {detail.label}
+                            </span>
+                            <span
+                              className={`shrink-0 ${detail.flagged ? "text-status-error" : "text-secondary-text"}`}
+                            >
+                              {detail.flagged ? "Flagged" : "Not flagged"}
+                            </span>
+                          </div>
+                          <p className="text-secondary-text mt-1 pl-6 text-sm">
+                            {detail.description}
+                          </p>
                         </li>
                       ))}
                     </ul>
                   </div>
-                  <dl className="divide-border-card border-border-card divide-y rounded-lg border px-3 text-sm">
-                    <div className="py-2">
+                  <dl className="divide-border-card border-border-card grid divide-y rounded-lg border text-sm sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+                    <div className="px-3 py-2">
                       <dt className="text-secondary-text mb-1 text-sm">
                         Dupe logged
                       </dt>
@@ -496,7 +465,7 @@ export default function DupeItemCard({
                         )}
                       </dd>
                     </div>
-                    <div className="py-2">
+                    <div className="px-3 py-2">
                       <dt className="text-secondary-text mb-1 text-sm">
                         Original logged
                       </dt>
@@ -523,15 +492,17 @@ export default function DupeItemCard({
                     </div>
                   </dl>
                 </div>
-                <p className="text-secondary-text text-sm">
-                  Review the comparison before reporting a false dupe.
-                </p>
+                {canReport && (
+                  <p className="text-secondary-text text-sm">
+                    Review the comparison before reporting a false dupe.
+                  </p>
+                )}
               </div>
             ) : null}
           </div>
-          <DialogFooter className="mt-4 grid grid-cols-2 gap-2 sm:space-x-0">
+          <DialogFooter className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end sm:space-x-0">
             {checkResult && (
-              <Button asChild size="sm">
+              <Button asChild size="sm" className="w-full sm:w-auto">
                 <Link
                   href={getDupeComparisonUrl(item)}
                   prefetch={false}
@@ -543,24 +514,26 @@ export default function DupeItemCard({
                 </Link>
               </Button>
             )}
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              className="h-auto! min-h-8 min-w-0 px-2! py-1 leading-tight whitespace-normal"
-              onClick={() => {
-                setCheckOpen(false);
-                onReport(item);
-              }}
-            >
-              Report false dupe
-            </Button>
+            {canReport && (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="h-auto! min-h-8 w-full min-w-0 px-2! py-1 leading-tight whitespace-normal sm:w-auto"
+                onClick={() => {
+                  setCheckOpen(false);
+                  onReport(item);
+                }}
+              >
+                Report false dupe
+              </Button>
+            )}
             {checkError && (
               <Button
                 type="button"
                 size="sm"
                 variant="secondary"
-                className="h-auto! min-h-8 min-w-0 px-2! py-1 leading-tight whitespace-normal"
+                className="h-auto! min-h-8 w-full min-w-0 px-2! py-1 leading-tight whitespace-normal sm:w-auto"
                 onClick={() => void runCheck()}
               >
                 Try again
