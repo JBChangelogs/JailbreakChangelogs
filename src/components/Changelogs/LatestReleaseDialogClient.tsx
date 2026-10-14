@@ -91,7 +91,15 @@ export default function LatestReleaseDialogClient({
         if (safeLocalStorage.getItem(LAST_SEEN_RELEASE_KEY) === latest.slug)
           return;
         setPreview(latest);
-        setOpen(true);
+        const show = () => {
+          if (!controller.signal.aborted) setOpen(true);
+        };
+        const idle = () =>
+          "requestIdleCallback" in window
+            ? window.requestIdleCallback(show, { timeout: 2000 })
+            : setTimeout(show, 200);
+        if (document.readyState === "complete") idle();
+        else window.addEventListener("load", idle, { once: true });
       })
       .catch(() => {});
 

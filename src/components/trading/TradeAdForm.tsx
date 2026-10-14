@@ -44,6 +44,7 @@ import {
   tradeItemIdsEqual,
 } from "@/utils/trading/tradeItems";
 import TradeItemPickerV2 from "./TradeItemPickerV2";
+import { InventoryLoadErrorNotice } from "@/components/Inventory/InventoryLoadErrorNotice";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -70,6 +71,7 @@ interface TradeAdFormProps {
   onItemsInputModeChange?: (mode: "values" | "inventory") => void;
   inventoryStatus?: "idle" | "loading" | "loaded" | "error";
   inventoryError?: string | null;
+  inventoryNotFound?: boolean;
   inventoryCopies?: Record<number, number>;
   favoriteIds?: number[];
   onToggleFavorite?: (
@@ -132,6 +134,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   onItemsInputModeChange,
   inventoryStatus = "idle",
   inventoryError = null,
+  inventoryNotFound = false,
   inventoryCopies,
   favoriteIds,
   onToggleFavorite,
@@ -1513,11 +1516,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               isInventoryMode &&
               !inventoryModeGate &&
               inventoryStatus === "error" && (
-                <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
-                  <p className="text-secondary-text text-sm">
-                    {inventoryError || "Failed to load inventory items."}
-                  </p>
-                </div>
+                <InventoryLoadErrorNotice
+                  notFound={inventoryNotFound}
+                  message={inventoryError}
+                  onUseValuesList={() => onItemsInputModeChange?.("values")}
+                  className="mt-6"
+                />
               )}
 
             {showItemSourceTabs &&

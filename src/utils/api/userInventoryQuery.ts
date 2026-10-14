@@ -15,6 +15,9 @@ export class InventoryRequestError extends Error {
   }
 }
 
+export const isInventoryNotFound = (error: unknown): boolean =>
+  error instanceof InventoryRequestError && error.status === 404;
+
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
 

@@ -38,7 +38,11 @@ import { DefaultAvatar } from "@/utils/ui/avatar";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { INVENTORY_API_URL } from "@/utils/api/api";
-import { userInventoryQueryOptions } from "@/utils/api/userInventoryQuery";
+import {
+  isInventoryNotFound,
+  userInventoryQueryOptions,
+} from "@/utils/api/userInventoryQuery";
+import { InventoryLoadErrorNotice } from "@/components/Inventory/InventoryLoadErrorNotice";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -780,11 +784,11 @@ export function MakeOfferDialog({
                 {shouldUseInventoryItems &&
                   !inventoryModeGate &&
                   inventoryStatus === "error" && (
-                    <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
-                      <p className="text-secondary-text text-sm">
-                        {inventoryError || "Failed to load inventory items."}
-                      </p>
-                    </div>
+                    <InventoryLoadErrorNotice
+                      notFound={isInventoryNotFound(rawInventoryQuery.error)}
+                      message={inventoryError}
+                      onUseValuesList={() => setItemsInputMode("values")}
+                    />
                   )}
 
                 {shouldUseInventoryItems &&

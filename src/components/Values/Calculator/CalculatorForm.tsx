@@ -18,7 +18,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { userInventoryQueryOptions } from "@/utils/api/userInventoryQuery";
+import {
+  isInventoryNotFound,
+  userInventoryQueryOptions,
+} from "@/utils/api/userInventoryQuery";
+import { InventoryLoadErrorNotice } from "@/components/Inventory/InventoryLoadErrorNotice";
 import { useUserFavorites } from "@/hooks/useUserFavorites";
 import {
   getCachedPreference,
@@ -1046,11 +1050,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                   </div>
                 </div>
               ) : inventoryStatus === "error" ? (
-                <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                  <p className="text-secondary-text text-sm">
-                    {inventoryError || "Failed to load inventory items."}
-                  </p>
-                </div>
+                <InventoryLoadErrorNotice
+                  notFound={isInventoryNotFound(rawInventoryQuery.error)}
+                  message={inventoryError}
+                  onUseValuesList={() => onItemsInputModeChange?.("picker")}
+                />
               ) : inventoryItems.length === 0 ? (
                 <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
                   <p className="text-secondary-text text-sm">
