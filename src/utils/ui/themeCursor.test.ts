@@ -2,22 +2,24 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { ModuleKind, transpileModule } from "typescript";
+import { themeInitScript, type ThemeOption } from "./themeOptions";
 
-const initScript = readFileSync(
-  new URL("../../app/layout.tsx", import.meta.url),
-  "utf8",
-).match(/const THEME_INIT_SCRIPT = `([^`]+)`;/)![1];
+const options = (
+  [
+    ["halloween", "dark"],
+    ["dark", "dark"],
+    ["catppuccin-latte", "light"],
+  ] as const
+).map(([value, scheme]) => ({ value, scheme }) as ThemeOption);
+const initScript = themeInitScript(options, "halloween");
 
 test("cursor preference restores before hydration without changing the saved theme", () => {
   for (const theme of [
     "halloween",
     "dark",
-    "light",
-    "amoled",
-    "catppuccin",
     "catppuccin-latte",
-    "future-tone",
-    "og",
+    "removed",
+    null,
   ]) {
     for (const saved of [null, "true", "false", "invalid"]) {
       const classes = new Set<string>();
@@ -34,8 +36,12 @@ test("cursor preference restores before hydration without changing the saved the
         },
       });
       expect(dataset.themeCursor).toBe(saved === "true" ? "on" : "off");
-      expect(classes.has(theme)).toBe(true);
-      if (theme === "catppuccin-latte") expect(classes.has("light")).toBe(true);
+      const applied =
+        theme === "removed" || theme === null ? "halloween" : theme;
+      expect(classes).toEqual(new Set([applied]));
+      expect(dataset.scheme).toBe(
+        applied === "catppuccin-latte" ? "light" : "dark",
+      );
     }
   }
   expect(() =>

@@ -23,13 +23,17 @@ test("mounting preserves saved themes before and after effects replay", () => {
     let stored = saved;
     const writes: string[] = [];
     const classes = new Set([saved]);
-    if (saved === "catppuccin-latte") classes.add("light");
+    const dataset: Record<string, string> = {};
     const applied: string[] = [];
     const slots: unknown[] = [];
     let cursor = 0;
     let pending: (() => void)[] = [];
     const exports = {} as {
-      ThemeProvider: (props: { children: null }) => {
+      ThemeProvider: (props: {
+        children: null;
+        themes: { value: string; scheme: string }[];
+        defaultTheme: string;
+      }) => {
         props: {
           value: {
             theme: string;
@@ -45,6 +49,7 @@ test("mounting preserves saved themes before and after effects replay", () => {
       exports,
       document: {
         documentElement: {
+          dataset,
           classList: {
             remove: (...names: string[]) =>
               names.forEach((name) => classes.delete(name)),
@@ -61,6 +66,11 @@ test("mounting preserves saved themes before and after effects replay", () => {
         if (name === "react")
           return {
             createContext: () => ({ Provider: "provider" }),
+            useCallback: (callback: unknown) => {
+              const index = cursor++;
+              if (!(index in slots)) slots[index] = callback;
+              return slots[index];
+            },
             useState: (initial: unknown) => {
               const index = cursor++;
               if (!(index in slots)) slots[index] = initial;
@@ -107,7 +117,26 @@ test("mounting preserves saved themes before and after effects replay", () => {
     const render = () => {
       cursor = 0;
       pending = [];
-      return exports.ThemeProvider({ children: null }).props.value;
+      return exports.ThemeProvider({
+        children: null,
+        themes: [
+          "halloween",
+          "light",
+          "dark",
+          "amoled",
+          "catppuccin",
+          "catppuccin-latte",
+          "future-tone",
+          "og",
+        ].map((value) => ({
+          value,
+          scheme:
+            value === "light" || value === "catppuccin-latte"
+              ? "light"
+              : "dark",
+        })),
+        defaultTheme: "halloween",
+      }).props.value;
     };
     render();
     const mountEffects = [...pending];
@@ -126,6 +155,7 @@ test("mounting preserves saved themes before and after effects replay", () => {
       saved === "light" || saved === "catppuccin-latte" ? "light" : "dark",
     );
     expect(writes).toEqual([saved]);
+    expect(dataset.scheme).toBe(restored.resolvedTheme);
     expect(classes.has("halloween")).toBe(false);
 
     restored.setTheme("dark");

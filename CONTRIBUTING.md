@@ -141,19 +141,25 @@ import { Icon } from "@/components/ui/IconWrapper";
 
 ## Theme and palette contributions
 
-For a new theme, keep these files in sync:
+Themes aren't stored in this repo. Maintainers manage them from the dashboard, and the site loads them from the API (`GET /v2/themes`), so the website and the desktop app both pick up a new theme without a code change or deploy. To contribute a theme, you write it as JSON, preview it locally, and send it to us; you don't need to open a pull request.
 
-1. Add its ID to `THEMES` in `src/contexts/ThemeContext.tsx`.
-2. Add a `:root.<theme-id>` palette in `src/app/globals.css`, following an existing theme's color variables.
-3. Add its label, icon, and preview colors to `src/utils/ui/themeOptions.ts`. Preview colors should match the CSS palette.
-4. Add its ID to the saved-theme validation in `THEME_INIT_SCRIPT` in `src/app/layout.tsx`, so the theme applies before hydration.
-5. Update the theme cases in `src/contexts/ThemeContext.test.tsx` and `src/utils/ui/themeCursor.test.ts`. If it is a light theme, update the light-theme handling in the context and initialization script too.
+1. Copy an existing theme from [`/v2/themes`](https://api.jailbreakchangelogs.com/v2/themes) as a starting point. Pick one with the same `scheme` (`dark` or `light`) as yours.
+2. Change its fields:
+   - `slug`: the theme's ID, which becomes a CSS class. Lowercase letters, numbers, and hyphens; it must start with a letter.
+   - `label`: the name shown in the theme picker.
+   - `icon`: an [Iconify](https://icon-sets.iconify.design/) name, such as `lucide:moon`.
+   - `scheme`: `dark` or `light`, so browser controls, toasts, and light-only styles match.
+   - `vars`: every `--color-*` variable. Keep all of them, even unchanged ones, so nothing falls back to the dark theme's colors. Values can be any CSS color, including `color-mix()` and `var(--color-…)`; `{ } ; < > \`, `url(`, and `/*` are rejected.
+   - `logo_filter`: the logo's CSS filter, or `null` for the original blue (see below).
+   - `cursor_url` and `cursor_size`: the image for the optional theme cursor, or `null`. Include the image in your submission and we'll host it.
+3. Preview it locally: run `bun dev`, and in `getThemes()` in `src/utils/api/themes.ts`, temporarily add your theme to the list, for example `themes = [...themes, ...sanitizeThemes([yourTheme])]`. Then select it in the theme picker. Don't commit this change.
+4. [Submit an issue](https://jailbreakchangelogs.com?report-issue) or post in our [Discord server](https://discord.jailbreakchangelogs.com) with your theme's JSON and the screenshots listed below.
 
 ### Matching the logo to a palette
 
-The header and footer share `public/logos/JBCL_Header.webp` through `src/components/ui/SiteLogo.tsx` and the `.header-logo` CSS class. The collaboration version uses `public/logos/collab/JBCL_Collab_Dark.webp` or `JBCL_Collab_Light.webp`; only the JBCL side receives the same filter. The image's original accent is blue. New themes keep that blue unless you add a filter rule in `src/app/globals.css`; a new image is not needed.
+The header and footer share `public/logos/JBCL_Header.webp` through `src/components/ui/SiteLogo.tsx` and the `.header-logo` CSS class. The collaboration version uses `public/logos/collab/JBCL_Collab_Dark.webp` or `JBCL_Collab_Light.webp`; only the JBCL side receives the same filter. The image's original accent is blue. New themes keep that blue unless their `logo_filter` is set; a new image is not needed.
 
-One theme filter rule updates both the standalone JBCL logo and the JBCL side of the collaboration logo. Keep Trading Core's blue and orange unchanged. The neutral “X” stays white on dark backgrounds and black on light backgrounds. Dark and AMOLED use the same unfiltered blue artwork in both logo versions; their different backgrounds can make the colors appear different.
+One `logo_filter` updates both the standalone JBCL logo and the JBCL side of the collaboration logo. Keep Trading Core's blue and orange unchanged. The neutral “X” stays white on dark backgrounds and black on light backgrounds. Dark and AMOLED use the same unfiltered blue artwork in both logo versions; their different backgrounds can make the colors appear different.
 
 Use these existing filters as starting points:
 
@@ -166,12 +172,10 @@ Use these existing filters as starting points:
 | Pink (Future Tone) | `hue-rotate(100deg)` |
 | Muted teal (OG) | `hue-rotate(-30deg) saturate(0.7) brightness(0.9)` |
 
-For example, a theme with ID `purple` could use:
+For example, a purple theme could use:
 
-```css
-:root.purple .header-logo {
-  filter: hue-rotate(45deg);
-}
+```json
+"logo_filter": "hue-rotate(45deg)"
 ```
 
 There is no direct hex-color-to-angle mapping: the filter transforms the existing image colors, rather than replacing them with your palette's accent. Choose the value by previewing it:
@@ -179,10 +183,10 @@ There is no direct hex-color-to-angle mapping: the filter transforms the existin
 1. Run `bun dev`, open `http://localhost:5500`, and select your theme.
 2. Inspect the logo in browser DevTools. In the Styles panel, edit its filter temporarily; try angles from `0deg` to `360deg` in roughly `15deg` steps, then fine-tune the closest result.
 3. Add `saturate()` if needed. `1` keeps the resulting saturation, values below `1` soften it, and values above `1` intensify it. OG also uses `brightness(0.9)` to give the white highlights a light gray tone. Keep the same filter order as the examples above.
-4. Copy the chosen filter into the theme's `.header-logo` rule in `src/app/globals.css`. DevTools edits are temporary.
+4. Copy the chosen filter into your theme's `logo_filter`. DevTools edits are temporary.
 5. Check the desktop header, mobile header, and footer against the theme backgrounds, including the white highlights and black outlines. Also check the collaboration header on `/values` and the partnership banner on an item detail page: the JBCL side should follow the theme, Trading Core's colors should stay unchanged, and the neutral “X” should remain visible on light and dark backgrounds.
 
-For a palette PR, include screenshots of the theme picker, header, and footer, and state the chosen logo filter or that the original blue is intentional. Also include a few varied pages so reviewers can assess the palette across the site: for example, the homepage, a values table or item detail page, and a changelog or settings page. Show desktop and mobile layouts, including text, cards, buttons, links, and form controls where available. Run `bun run check` before submitting.
+With your theme, include screenshots of the theme picker, header, and footer, and state the chosen logo filter or that the original blue is intentional. Also include a few varied pages so reviewers can assess the palette across the site: for example, the homepage, a values table or item detail page, and a changelog or settings page. Show desktop and mobile layouts, including text, cards, buttons, links, and form controls where available.
 
 ### Logo examples across themes
 
