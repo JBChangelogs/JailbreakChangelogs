@@ -19,7 +19,7 @@ interface TradeHistoryListProps {
   showRecordNotes?: boolean;
   startIndex?: number;
   endIndex?: number;
-  cardBg?: string;
+  nested?: boolean;
 }
 
 type ResolvedUsers = Record<
@@ -32,13 +32,13 @@ function ChainCard({
   toUser,
   users,
   isFirst = false,
-  cardBg = "bg-secondary-bg",
+  nested = false,
 }: {
   fromUser: DupeFinderHistoryEntry;
   toUser: DupeFinderHistoryEntry;
   users: ResolvedUsers;
   isFirst?: boolean;
-  cardBg?: string;
+  nested?: boolean;
 }) {
   const fromId = fromUser.UserId.toString();
   const toId = toUser.UserId.toString();
@@ -53,12 +53,14 @@ function ChainCard({
       className={`flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center ${
         isFirst
           ? "border-[#FFD700] bg-[#FFD700]/10"
-          : `border-border-card ${cardBg}`
+          : `border-border-card ${nested ? "bg-tertiary-bg" : "bg-secondary-bg"}`
       }`}
     >
       <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
         <div className="flex items-center gap-2">
-          <div className="border-border-card bg-tertiary-bg relative h-10 w-10 shrink-0 overflow-hidden rounded-full border">
+          <div
+            className={`border-border-card relative h-10 w-10 shrink-0 overflow-hidden rounded-full border ${nested ? "bg-quaternary-bg" : "bg-tertiary-bg"}`}
+          >
             <TradeHistoryAvatar
               avatarUrl={getUserAvatar(fromId)}
               name={getDisplayName(fromId)}
@@ -112,7 +114,9 @@ function ChainCard({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="border-border-card bg-tertiary-bg relative h-10 w-10 shrink-0 overflow-hidden rounded-full border">
+          <div
+            className={`border-border-card relative h-10 w-10 shrink-0 overflow-hidden rounded-full border ${nested ? "bg-quaternary-bg" : "bg-tertiary-bg"}`}
+          >
             <TradeHistoryAvatar
               avatarUrl={getUserAvatar(toId)}
               name={getDisplayName(toId)}
@@ -254,7 +258,7 @@ export default function TradeHistoryList({
   showRecordNotes = true,
   startIndex = 0,
   endIndex,
-  cardBg,
+  nested,
 }: TradeHistoryListProps) {
   const tradeHistoryUserIds = useMemo(() => {
     if (!history || !Array.isArray(history)) {
@@ -358,7 +362,7 @@ export default function TradeHistoryList({
                 fromUser={owner}
                 toUser={owners[i + 1]}
                 users={finalUsers}
-                cardBg={cardBg}
+                nested={nested}
               />
             </div>
           );

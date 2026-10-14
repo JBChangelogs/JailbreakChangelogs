@@ -453,21 +453,32 @@ export default function DupeComparisonClient({
           />
         )}
         <div className="bg-secondary-bg border-border-card rounded-lg border p-4 text-center">
-          <p className="text-primary-text font-semibold">{summary.title}</p>
+          <p className="text-primary-text text-lg font-semibold">
+            {summary.title}
+          </p>
           {summary.detail && (
             <p className="text-secondary-text mt-1 text-sm">{summary.detail}</p>
           )}
           {hasTrunk && (
-            <details className="mt-3 text-left">
-              <summary className="text-link hover:text-link-hover cursor-pointer text-center text-sm font-medium">
-                Show the {trunk.cards} shared{" "}
-                {trunk.cards === 1 ? "trade" : "trades"}
+            <details className="group mt-3 text-left">
+              <summary className="border-border-card text-primary-text hover:bg-tertiary-bg mx-auto flex w-fit cursor-pointer list-none items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors [&::-webkit-details-marker]:hidden">
+                <span>
+                  <span className="group-open:hidden">Show</span>
+                  <span className="hidden group-open:inline">
+                    Hide
+                  </span> the{" "}
+                  {trunk.cards} shared {trunk.cards === 1 ? "trade" : "trades"}
+                </span>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className="size-4 transition-transform group-open:rotate-180"
+                />
               </summary>
               <div className="mt-3">
                 <TradeHistoryList
                   history={trunk.item.history || []}
                   endIndex={trunk.split - 1}
-                  cardBg="bg-tertiary-bg"
+                  nested
                   usersData={robloxUsers}
                   showOriginalOwner={false}
                   showRecordNotes={false}
