@@ -309,11 +309,10 @@ export default function DupeComparisonClient({
         </div>
       )}
 
-      {/* Shared Summary Header */}
-      <div className="bg-secondary-bg border-border-card mx-auto max-w-7xl rounded-xl border p-4 sm:p-6">
-        <div className="flex flex-col gap-5 md:flex-row md:items-center md:gap-6">
+      <div className="grid grid-cols-1 items-center gap-4 lg:grid-cols-2 lg:gap-6">
+        <div className="flex items-center gap-4 sm:gap-6">
           <div
-            className="bg-secondary-bg border-border-card relative w-full shrink-0 overflow-hidden rounded-lg border md:w-80 lg:w-96"
+            className="bg-secondary-bg border-border-card relative w-40 shrink-0 overflow-hidden rounded-lg border sm:w-56"
             style={{ aspectRatio: "854 / 480" }}
           >
             {!["Brakes"].includes(duplicateItem.categoryTitle) ? (
@@ -381,12 +380,12 @@ export default function DupeComparisonClient({
               />
             )}
           </div>
-          <div className="min-w-0 flex-1 space-y-4">
+          <div className="min-w-0 flex-1 space-y-2">
             <Link
               href={`/item/${encodeURIComponent(duplicateItem.categoryTitle)}/${encodeURIComponent(duplicateItem.title)}`}
               className="group mb-2 inline-flex transition-opacity"
             >
-              <h2 className="text-primary-text group-hover:text-link-hover text-3xl font-bold wrap-anywhere transition-colors">
+              <h2 className="text-primary-text group-hover:text-link-hover text-2xl font-bold wrap-anywhere transition-colors sm:text-3xl">
                 {sharedItemData.name}
               </h2>
             </Link>
@@ -409,10 +408,6 @@ export default function DupeComparisonClient({
                 {duplicateItem.categoryTitle}
               </span>
             </div>
-            <p className="text-secondary-text text-sm">
-              Comparing {copyName(duplicateItem)} with {copyName(ogItem)}. The
-              first copy may change as more duplicates are found.
-            </p>
             {reportState ? (
               <div className="text-primary-text flex items-start gap-2 text-sm">
                 <Icon
@@ -435,7 +430,7 @@ export default function DupeComparisonClient({
               <Button
                 type="button"
                 size="sm"
-                className="w-full shrink-0 sm:w-auto"
+                className="shrink-0"
                 onClick={openReportModal}
               >
                 Report False Dupe
@@ -443,53 +438,55 @@ export default function DupeComparisonClient({
             )}
           </div>
         </div>
-      </div>
-
-      <div className="mx-auto max-w-7xl space-y-3">
         {sharedOrigin && (
           <OriginalOwnerCard
             entry={sharedOrigin}
             user={robloxUsers[sharedOrigin.UserId.toString()]}
           />
         )}
-        <div className="bg-secondary-bg border-border-card rounded-lg border p-4 text-center">
+      </div>
+
+      {hasTrunk ? (
+        <details className="group bg-secondary-bg border-border-card rounded-lg border p-4">
+          <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+            <p className="text-primary-text text-lg font-semibold">
+              {summary.title}
+            </p>
+            <span className="border-border-card text-primary-text group-hover:bg-tertiary-bg flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors">
+              <span>
+                <span className="group-open:hidden">Show</span>
+                <span className="hidden group-open:inline">Hide</span> the{" "}
+                {trunk.cards} shared {trunk.cards === 1 ? "trade" : "trades"}
+              </span>
+              <Icon
+                icon="heroicons:chevron-down"
+                className="size-4 transition-transform group-open:rotate-180"
+              />
+            </span>
+          </summary>
+          <div className="mt-4">
+            <TradeHistoryList
+              history={trunk.item.history || []}
+              endIndex={trunk.split - 1}
+              nested
+              usersData={robloxUsers}
+              showOriginalOwner={false}
+              showRecordNotes={false}
+            />
+          </div>
+        </details>
+      ) : (
+        <div className="bg-secondary-bg border-border-card rounded-lg border p-4">
           <p className="text-primary-text text-lg font-semibold">
             {summary.title}
           </p>
           {summary.detail && (
             <p className="text-secondary-text mt-1 text-sm">{summary.detail}</p>
           )}
-          {hasTrunk && (
-            <details className="group mt-3 text-left">
-              <summary className="border-border-card text-primary-text hover:bg-tertiary-bg mx-auto flex w-fit cursor-pointer list-none items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors [&::-webkit-details-marker]:hidden">
-                <span>
-                  <span className="group-open:hidden">Show</span>
-                  <span className="hidden group-open:inline">
-                    Hide
-                  </span> the{" "}
-                  {trunk.cards} shared {trunk.cards === 1 ? "trade" : "trades"}
-                </span>
-                <Icon
-                  icon="heroicons:chevron-down"
-                  className="size-4 transition-transform group-open:rotate-180"
-                />
-              </summary>
-              <div className="mt-3">
-                <TradeHistoryList
-                  history={trunk.item.history || []}
-                  endIndex={trunk.split - 1}
-                  nested
-                  usersData={robloxUsers}
-                  showOriginalOwner={false}
-                  showRecordNotes={false}
-                />
-              </div>
-            </details>
-          )}
         </div>
-      </div>
+      )}
 
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <VariantColumn
           item={duplicateItem}
           splitIndex={selectedSplitIndex}
