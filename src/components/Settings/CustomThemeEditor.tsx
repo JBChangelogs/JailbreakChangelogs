@@ -1168,10 +1168,10 @@ export default function CustomThemeEditor({
             <DialogDescription>
               Your latest changes haven&apos;t been saved.
             </DialogDescription>
+            <p className="text-secondary-text hidden text-xs [@media(hover:hover)_and_(pointer:fine)]:block">
+              Tip: hold Shift when you click the X to skip this.
+            </p>
           </DialogHeader>
-          <p className="text-secondary-text text-xs">
-            Tip: hold Shift when you click the X to skip this.
-          </p>
           <DialogFooter className="mt-2 flex-wrap gap-2">
             <Button
               variant="ghost"
