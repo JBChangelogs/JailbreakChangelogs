@@ -51,7 +51,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import {
+  BottomPanelHeader,
+  useBottomPanel,
+} from "@/components/ui/bottom-panel";
 
 function MessageSheetAction({
   className,
@@ -125,7 +128,8 @@ export function MessageRow({
   handleRetryFailedMessage,
   handleEditMessage,
 }: MessageRowProps) {
-  const isMobile = useMediaQuery("(max-width: 1023px)");
+  const bottomPanel = useBottomPanel("message actions", "(max-width: 1023px)");
+  const { isMobile } = bottomPanel;
   const [isMobileSheetOpen, setMobileSheetOpen] = useState(false);
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
@@ -754,9 +758,13 @@ export function MessageRow({
         }}
       >
         <SheetContent
-          side="bottom"
+          side={bottomPanel.sheet.side}
+          style={bottomPanel.sheet.style}
           overlayClassName="bg-black/20 backdrop-blur-none"
-          className="bg-secondary-bg max-h-[80dvh] overflow-y-auto rounded-t-2xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))] outline-none"
+          className={cn(
+            "bg-secondary-bg flex flex-col gap-0 p-0 pb-[max(1rem,env(safe-area-inset-bottom))] outline-none",
+            bottomPanel.sheet.className,
+          )}
           aria-describedby={undefined}
           aria-labelledby={`message-actions-${domId}`}
           tabIndex={-1}
@@ -765,18 +773,25 @@ export function MessageRow({
             (event.target as HTMLElement).focus();
           }}
         >
-          <div className="bg-border-card mx-auto mb-4 h-1 w-10 rounded-full" />
-          <SheetTitle id={`message-actions-${domId}`} className="sr-only">
-            Message actions
-          </SheetTitle>
-          <div
-            onClick={() => {
-              setMobileSheetOpen(false);
-              setActiveMessageId(null);
-            }}
+          <BottomPanelHeader
+            handle={bottomPanel.handle}
+            showCloseButton={false}
           >
-            {renderMenuItems(MessageSheetAction, true)}
-          </div>
+            <SheetTitle id={`message-actions-${domId}`} className="sr-only">
+              Message actions
+            </SheetTitle>
+          </BottomPanelHeader>
+          {!bottomPanel.collapsed && (
+            <div
+              className="min-h-0 overflow-y-auto px-4"
+              onClick={() => {
+                setMobileSheetOpen(false);
+                setActiveMessageId(null);
+              }}
+            >
+              {renderMenuItems(MessageSheetAction, true)}
+            </div>
+          )}
         </SheetContent>
       </Sheet>
     </ContextMenu>

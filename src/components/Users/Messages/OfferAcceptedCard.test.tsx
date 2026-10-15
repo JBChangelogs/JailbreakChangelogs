@@ -275,8 +275,8 @@ test("accepted trade cards use the message content column and one row timestamp"
             useState: (initial: unknown) => [initial, () => {}],
             useEffect: () => {},
           };
-        if (name === "@/hooks/useMediaQuery")
-          return { useMediaQuery: () => false };
+        if (name === "@/components/ui/bottom-panel")
+          return { useBottomPanel: () => ({ isMobile: false }) };
         if (name === "@/utils/messages/parsing")
           return { asId, parseOfferAcceptedMetadata };
         if (name === "@/utils/messages/invites")

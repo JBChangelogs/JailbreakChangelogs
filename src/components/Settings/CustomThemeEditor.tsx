@@ -69,7 +69,10 @@ import {
   withDefaultColors,
 } from "@/utils/ui/themeColors";
 import { cn } from "@/lib/utils";
-import { useBottomPanel } from "@/components/ui/bottom-panel";
+import {
+  BottomPanelHeader,
+  useBottomPanel,
+} from "@/components/ui/bottom-panel";
 import { colorKeysAt } from "@/utils/ui/elementColors";
 
 let canvas: CanvasRenderingContext2D | null | undefined;
@@ -577,9 +580,12 @@ export default function CustomThemeEditor({
         )}
       >
         {isMobile ? (
-          <div className="shrink-0 px-4 pt-1 pb-3">
-            {bottomPanel.handle}
-            <div className="flex items-center gap-2">
+          <>
+            <BottomPanelHeader
+              handle={bottomPanel.handle}
+              closeLabel="Close the editor"
+              onClose={(event) => cancel(event.shiftKey)}
+            >
               <SheetTitle className="min-w-0 flex-1 truncate text-base">
                 {savedTheme ? "Edit theme" : "New theme"}
               </SheetTitle>
@@ -590,19 +596,11 @@ export default function CustomThemeEditor({
               >
                 {saving ? "Saving…" : "Save"}
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Close the editor"
-                onClick={(event) => cancel(event.shiftKey)}
-              >
-                <Icon icon="lucide:x" aria-hidden="true" />
-              </Button>
-            </div>
+            </BottomPanelHeader>
             <SheetDescription className="sr-only">
               Your changes show on the page above as you go.
             </SheetDescription>
-          </div>
+          </>
         ) : (
           <>
             <Button

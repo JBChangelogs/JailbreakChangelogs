@@ -1,8 +1,48 @@
 "use client";
 
-import { useRef, useState } from "react";
+import {
+  useRef,
+  useState,
+  type ReactNode,
+  type MouseEventHandler,
+} from "react";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
+
+export function BottomPanelHeader({
+  handle,
+  children,
+  showCloseButton = true,
+  onClose,
+  closeLabel = "Close panel",
+}: {
+  handle: ReactNode;
+  children: ReactNode;
+  showCloseButton?: boolean;
+  onClose?: MouseEventHandler<HTMLButtonElement>;
+  closeLabel?: string;
+}) {
+  return (
+    <div className="shrink-0 px-4 pt-1 pb-3">
+      {handle}
+      <div className="flex items-center gap-2">
+        {children}
+        {showCloseButton && (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={closeLabel}
+            onClick={onClose}
+          >
+            <Icon icon="lucide:x" aria-hidden="true" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const PANEL_SIZES = ["bar", "half", "full"] as const;
 type PanelSize = (typeof PANEL_SIZES)[number];
@@ -18,8 +58,11 @@ const PANEL_HEIGHT: Record<PanelSize, string> = {
  * the pointer and it stays where it's let go; a tap snaps to the next size.
  * Spread `sheet` on SheetContent and render `handle` at its top.
  */
-export function useBottomPanel(label: string) {
-  const isMobile = useMediaQuery("(max-width: 639px)");
+export function useBottomPanel(
+  label: string,
+  mediaQuery = "(max-width: 639px)",
+) {
+  const isMobile = useMediaQuery(mediaQuery);
   const [panel, setPanel] = useState<PanelSize>("half");
   const dragRef = useRef<{
     startY: number;
