@@ -526,9 +526,9 @@ export default function CustomThemeEditor({
 
   // The page itself is the preview: the draft shows on it while editing,
   // and closing (saved or not) puts back the theme in use.
-  useEffect(() => endCustomThemePreview, []);
+  useEffect(() => () => endCustomThemePreview("editor"), []);
   useEffect(() => {
-    if (current) previewCustomTheme(current);
+    if (current) previewCustomTheme("editor", current);
   });
 
   return (

@@ -5,6 +5,7 @@ import {
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import {
   fetchSharedTheme,
+  sanitizeCustomTheme,
   ThemeApiError,
   type CustomTheme,
 } from "@/utils/api/userThemes";
@@ -61,7 +62,8 @@ export function getCustomTheme(): CustomTheme | null {
   if (current === undefined) {
     try {
       const saved = JSON.parse(safeLocalStorage.getItem(STORAGE_KEY) ?? "null");
-      current = saved?.vars && saved.share_code ? saved : null;
+      current =
+        saved?.vars && saved.share_code ? sanitizeCustomTheme(saved) : null;
     } catch {
       current = null;
     }
@@ -91,33 +93,46 @@ export function applyCustomTheme(theme: CustomTheme | null) {
   root.dataset.customTheme = theme.share_code;
 }
 
-// The theme being previewed, if any. While set, it stays on the page even
-// when the saved theme is reapplied (say, refreshed after page load).
-let previewing: CustomTheme | null = null;
-// The page's light/dark marker from before a preview, to put back after.
+// Themes being previewed, by who shows them (the editor, a shared-theme
+// sheet). Both can be open; the one opened last shows, and closing one
+// falls back to the other. While any is set it stays on the page, even when
+// the saved theme is reapplied (say, refreshed after page load).
+const previews = new Map<string, CustomTheme>();
+const topPreview = () => [...previews.values()].pop() ?? null;
+// The page's light/dark marker from before any preview, to put back after.
 let schemeBeforePreview: string | undefined;
 
 /** The previewed theme's light/dark, so ThemeContext doesn't overwrite it. */
-export const getPreviewScheme = () => previewing?.scheme;
+export const getPreviewScheme = () => topPreview()?.scheme;
 
-/**
- * Shows a theme on the whole page without using it, for the editor's live
- * preview. Saves nothing; endCustomThemePreview puts the page back.
- */
-export function previewCustomTheme(
-  theme: Pick<CustomTheme, "scheme" | "vars" | "logo_filter">,
-) {
-  const root = document.documentElement;
-  schemeBeforePreview ??= root.dataset.scheme ?? "";
-  previewing = { share_code: "preview", label: "", ...theme };
-  applyCustomTheme(previewing);
-  root.dataset.scheme = theme.scheme;
+function showTopPreview() {
+  const top = topPreview();
+  if (!top) return;
+  applyCustomTheme(top);
+  document.documentElement.dataset.scheme = top.scheme;
 }
 
-/** Ends a preview: back to the custom theme in use, if any (it may have just been saved). */
-export function endCustomThemePreview() {
-  if (!previewing) return;
-  previewing = null;
+/**
+ * Shows a theme on the whole page without using it, on behalf of `owner`.
+ * Saves nothing; endCustomThemePreview(owner) puts the page back. Updating
+ * an owner's preview keeps its place, so it doesn't jump ahead of others.
+ */
+export function previewCustomTheme(
+  owner: string,
+  theme: Pick<CustomTheme, "scheme" | "vars" | "logo_filter">,
+) {
+  schemeBeforePreview ??= document.documentElement.dataset.scheme ?? "";
+  previews.set(owner, { share_code: "preview", label: "", ...theme });
+  showTopPreview();
+}
+
+/**
+ * Ends `owner`'s preview: back to another open preview, or else to the
+ * custom theme in use (it may have just been saved).
+ */
+export function endCustomThemePreview(owner: string) {
+  if (!previews.delete(owner)) return;
+  if (previews.size) return showTopPreview();
   const active = getCustomTheme();
   applyCustomTheme(active);
   document.documentElement.dataset.scheme =
@@ -135,17 +150,20 @@ export function setCustomTheme(
 ) {
   const previousCode = getCustomTheme()?.share_code ?? null;
   if (sync) loadToken++;
-  current = theme && {
-    share_code: theme.share_code,
-    label: theme.label,
-    scheme: theme.scheme,
-    vars: theme.vars,
-    logo_filter: theme.logo_filter,
-    icon: theme.icon ?? null,
-  };
+  // Sanitized again here: every way a theme gets used goes through this.
+  current =
+    theme &&
+    sanitizeCustomTheme({
+      share_code: theme.share_code,
+      label: theme.label,
+      scheme: theme.scheme,
+      vars: theme.vars,
+      logo_filter: theme.logo_filter,
+      icon: theme.icon ?? null,
+    });
   if (current) safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(current));
   else safeLocalStorage.removeItem(STORAGE_KEY);
-  applyCustomTheme(previewing ?? current);
+  applyCustomTheme(topPreview() ?? current);
   window.dispatchEvent(new Event(CHANGED_EVENT));
   if (!sync || previousCode === (current?.share_code ?? null)) return;
   sendPreference(current?.share_code ?? null);

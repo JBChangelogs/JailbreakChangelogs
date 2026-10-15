@@ -1,6 +1,10 @@
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
-import { sanitizeThemes, type SiteTheme } from "@/utils/ui/themeOptions";
+import {
+  safeValue,
+  sanitizeThemes,
+  type SiteTheme,
+} from "@/utils/ui/themeOptions";
 
 /** A custom color theme: colors, a logo filter and an optional icon. */
 export interface CustomTheme {
@@ -71,21 +75,57 @@ async function request<T>(
   return data as T;
 }
 
-export const listMyThemes = () =>
-  request<{ themes: UserTheme[]; limit: number }>("/v2/users/me/themes");
+const VAR_KEY = /^--[a-z0-9-]+$/;
+const ICON = /^[a-z0-9-]+:[a-z0-9-]+$/;
 
-export const createMyTheme = (theme: CustomThemeInput) =>
-  request<UserTheme>("/v2/users/me/themes", {
-    method: "POST",
-    body: JSON.stringify(theme),
-  });
+/**
+ * Keeps only what's safe to apply: the same checks site themes get. Custom
+ * themes come from other people (shared codes, synced preferences), and a
+ * value like url(...) would load a remote resource on every page.
+ */
+export function sanitizeCustomTheme<T extends CustomTheme>(theme: T): T {
+  return {
+    ...theme,
+    scheme: theme.scheme === "light" ? "light" : "dark",
+    vars: Object.fromEntries(
+      Object.entries(theme.vars ?? {}).filter(
+        ([key, value]) => VAR_KEY.test(key) && safeValue(value),
+      ),
+    ),
+    logo_filter: safeValue(theme.logo_filter) ? theme.logo_filter : null,
+    icon:
+      typeof theme.icon === "string" && ICON.test(theme.icon)
+        ? theme.icon
+        : null,
+  };
+}
+
+export const listMyThemes = async () => {
+  const data = await request<{ themes: UserTheme[]; limit: number }>(
+    "/v2/users/me/themes",
+  );
+  return { ...data, themes: data.themes.map(sanitizeCustomTheme) };
+};
+
+export const createMyTheme = async (theme: CustomThemeInput) =>
+  sanitizeCustomTheme(
+    await request<UserTheme>("/v2/users/me/themes", {
+      method: "POST",
+      body: JSON.stringify(theme),
+    }),
+  );
 
 /** `vars` replaces the whole map, so send every color. */
-export const updateMyTheme = (id: number, theme: Partial<CustomThemeInput>) =>
-  request<UserTheme>(`/v2/users/me/themes/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify(theme),
-  });
+export const updateMyTheme = async (
+  id: number,
+  theme: Partial<CustomThemeInput>,
+) =>
+  sanitizeCustomTheme(
+    await request<UserTheme>(`/v2/users/me/themes/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(theme),
+    }),
+  );
 
 export const deleteMyTheme = (id: number) =>
   request<{ success: boolean }>(`/v2/users/me/themes/${id}`, {
@@ -93,11 +133,13 @@ export const deleteMyTheme = (id: number) =>
   });
 
 /** Public; works signed out. Pass the server's API URL when called on the server. */
-export const fetchSharedTheme = (code: string, baseUrl?: string) =>
-  request<SharedTheme>(
-    `/v2/themes/shared/${encodeURIComponent(code)}`,
-    {},
-    baseUrl,
+export const fetchSharedTheme = async (code: string, baseUrl?: string) =>
+  sanitizeCustomTheme(
+    await request<SharedTheme>(
+      `/v2/themes/shared/${encodeURIComponent(code)}`,
+      {},
+      baseUrl,
+    ),
   );
 
 /** The site's themes with their colors, for starting a custom theme from one. */

@@ -83,12 +83,12 @@ export default function SharedThemeDialog() {
   // The whole site shows the shared theme while the sheet is open.
   const previewing = code !== null && !!theme;
   useEffect(() => {
-    if (previewing) previewCustomTheme(theme);
+    if (previewing) previewCustomTheme("shared", theme);
   }, [previewing, theme]);
 
   const close = () => {
     setCode(null);
-    endCustomThemePreview();
+    endCustomThemePreview("shared");
   };
 
   if (code === null) return null;
@@ -184,7 +184,13 @@ export default function SharedThemeDialog() {
                 it anywhere; closing this puts your own theme back.
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button variant="secondary" size="sm" onClick={saveCopy}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={saveCopy}
+                  // A second click mid-save would make a duplicate theme.
+                  disabled={saving}
+                >
                   <Icon icon="lucide:copy" aria-hidden="true" />
                   {saving ? "Saving…" : "Save a copy"}
                 </Button>
