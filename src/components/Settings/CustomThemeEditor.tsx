@@ -565,6 +565,10 @@ export default function CustomThemeEditor({
         side={bottomPanel.sheet.side}
         hideOverlay
         onInteractOutside={(event) => event.preventDefault()}
+        // Escape while picking only ends the pick (see the picker's onKey).
+        onEscapeKeyDown={(event) => {
+          if (picking) event.preventDefault();
+        }}
         data-theme-editor=""
         style={bottomPanel.sheet.style}
         className={cn(
