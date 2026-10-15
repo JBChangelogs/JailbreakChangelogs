@@ -12,8 +12,8 @@ const log = createLogger("API");
 export async function pollBotsData() {
   try {
     const [botsData, queueInfo] = await Promise.all([
-      fetchConnectedBots({ includePrivate: false }),
-      fetchQueueInfo({ includePrivate: false }),
+      fetchConnectedBots({ includePrivate: true }),
+      fetchQueueInfo({ includePrivate: true }),
     ]);
 
     return {
