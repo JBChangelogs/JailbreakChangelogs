@@ -14,6 +14,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Icon } from "@/components/ui/IconWrapper";
+import { useBottomPanel } from "@/components/ui/bottom-panel";
+import { cn } from "@/lib/utils";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -92,6 +94,10 @@ export default function SharedThemeDialog() {
     endCustomThemePreview("shared");
   };
 
+  // On phones, a bottom panel so the page shows the theme above it.
+  const bottomPanel = useBottomPanel("the theme preview");
+  const { isMobile, collapsed } = bottomPanel;
+
   if (code === null) return null;
   const inUse = !!theme && customTheme?.share_code === theme.share_code;
   const creatorName =
@@ -137,108 +143,150 @@ export default function SharedThemeDialog() {
     }
   };
 
+  const title = theme
+    ? theme.label
+    : isLoading
+      ? "Loading theme…"
+      : "Theme not found";
+  const description = theme ? (
+    <>
+      Shared theme
+      {creatorName && (
+        <>
+          {" by "}
+          <Link href={`/users/${theme.user_id}`} className="text-link">
+            {creatorName}
+          </Link>
+        </>
+      )}
+      {" · "}
+      <span className="font-mono">{theme.share_code}</span>
+    </>
+  ) : isLoading ? (
+    "Getting the shared theme."
+  ) : (
+    "This theme code doesn't exist, or its owner deleted it."
+  );
+  const useButton = theme && (
+    <Button
+      size="sm"
+      disabled={inUse}
+      onClick={() => {
+        setCustomTheme(theme);
+        rememberSharedTheme(theme.share_code);
+        toast.success(`Using ${theme.label}`, {
+          description: "Pick another theme in Settings anytime.",
+        });
+        close();
+      }}
+    >
+      <Icon icon="lucide:paintbrush" aria-hidden="true" />
+      {inUse ? "In use" : "Use this theme"}
+    </Button>
+  );
+
   return (
     <Sheet open onOpenChange={(open) => !open && close()} modal={false}>
       {/* Not modal and no overlay, so the site stays usable in the theme;
           clicks on it don't close the sheet. */}
       <SheetContent
+        side={bottomPanel.sheet.side}
         hideOverlay
         onInteractOutside={(event) => event.preventDefault()}
-        className="bg-secondary-bg @container flex h-full w-full flex-col gap-0 p-0 sm:max-w-md"
+        style={bottomPanel.sheet.style}
+        className={cn(
+          "bg-secondary-bg @container flex w-full flex-col gap-0 p-0",
+          isMobile ? bottomPanel.sheet.className : "h-full sm:max-w-md",
+        )}
       >
-        {!theme ? (
-          <SheetHeader className="px-6 pt-6 pb-4">
-            <SheetTitle>
-              {isLoading ? "Loading theme…" : "Theme not found"}
-            </SheetTitle>
+        {isMobile ? (
+          // Like the editor's panel: the main button and X in the top row.
+          <div className="shrink-0 px-4 pt-1 pb-3">
+            {bottomPanel.handle}
+            <div className="flex items-center gap-2">
+              <SheetTitle className="min-w-0 flex-1 truncate text-base">
+                {title}
+              </SheetTitle>
+              {useButton}
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Close the preview"
+                onClick={close}
+              >
+                <Icon icon="lucide:x" aria-hidden="true" />
+              </Button>
+            </div>
+            <SheetDescription
+              className={cn(
+                "text-secondary-text mt-1 text-xs",
+                collapsed && "sr-only",
+              )}
+            >
+              {description}
+            </SheetDescription>
+          </div>
+        ) : (
+          <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
+            <SheetTitle>{title}</SheetTitle>
             <SheetDescription className="text-secondary-text">
-              {isLoading
-                ? "Getting the shared theme."
-                : "This theme code doesn't exist, or its owner deleted it."}
+              {description}
             </SheetDescription>
           </SheetHeader>
-        ) : (
-          <>
-            <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
-              <SheetTitle>{theme.label}</SheetTitle>
-              <SheetDescription className="text-secondary-text">
-                Shared theme
-                {creatorName && (
-                  <>
-                    {" by "}
-                    <Link
-                      href={`/users/${theme.user_id}`}
-                      className="text-link"
-                    >
-                      {creatorName}
-                    </Link>
-                  </>
-                )}
-                {" · "}
-                <span className="font-mono">{theme.share_code}</span>
-              </SheetDescription>
-            </SheetHeader>
-
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-2">
-              <p className="text-secondary-text text-sm">
-                You&apos;re trying this theme on. Browse around the site to see
-                it anywhere; closing this puts your own theme back.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={saveCopy}
-                  // A second click mid-save would make a duplicate theme.
-                  disabled={saving}
-                >
-                  <Icon icon="lucide:copy" aria-hidden="true" />
-                  {saving ? "Saving…" : "Save a copy"}
-                </Button>
-                <Button variant="secondary" size="sm" onClick={copyLink}>
-                  <Icon icon="lucide:link" aria-hidden="true" />
-                  Copy link
-                </Button>
-              </div>
-              <details>
-                <summary className="text-link cursor-pointer text-sm font-medium">
-                  All colors
-                </summary>
-                <p className="text-secondary-text mt-1 mb-2 text-xs">
-                  Things the page might not show right now.
-                </p>
-                <CustomThemePreview
-                  vars={theme.vars}
-                  scheme={theme.scheme}
-                  logoFilter={theme.logo_filter}
-                />
-              </details>
-            </div>
-          </>
         )}
 
-        <div className="border-border-card flex shrink-0 justify-end gap-2 border-t px-6 py-4">
-          <Button variant="ghost" size="sm" onClick={close}>
-            Close
-          </Button>
-          {theme && (
-            <Button
-              size="sm"
-              disabled={inUse}
-              onClick={() => {
-                setCustomTheme(theme);
-                rememberSharedTheme(theme.share_code);
-                toast.success(`Using ${theme.label}`, {
-                  description: "Pick another theme in Settings anytime.",
-                });
-                close();
-              }}
-            >
-              <Icon icon="lucide:paintbrush" aria-hidden="true" />
-              {inUse ? "In use" : "Use this theme"}
+        {theme && (
+          <div
+            className={cn(
+              "min-h-0 flex-1 space-y-4 overflow-y-auto py-2",
+              isMobile ? "px-4 pb-4" : "px-6",
+              collapsed && "hidden",
+            )}
+          >
+            <p className="text-secondary-text text-sm">
+              You&apos;re trying this theme on. Browse around the site to see it
+              anywhere; closing this puts your own theme back.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={saveCopy}
+                // A second click mid-save would make a duplicate theme.
+                disabled={saving}
+              >
+                <Icon icon="lucide:copy" aria-hidden="true" />
+                {saving ? "Saving…" : "Save a copy"}
+              </Button>
+              <Button variant="secondary" size="sm" onClick={copyLink}>
+                <Icon icon="lucide:link" aria-hidden="true" />
+                Copy link
+              </Button>
+            </div>
+            <details>
+              <summary className="text-link cursor-pointer text-sm font-medium">
+                All colors
+              </summary>
+              <p className="text-secondary-text mt-1 mb-2 text-xs">
+                Things the page might not show right now.
+              </p>
+              <CustomThemePreview
+                vars={theme.vars}
+                scheme={theme.scheme}
+                logoFilter={theme.logo_filter}
+              />
+            </details>
+          </div>
+        )}
+
+        {!isMobile && (
+          <div className="border-border-card mt-auto flex shrink-0 justify-end gap-2 border-t px-6 py-4">
+            <Button variant="ghost" size="sm" onClick={close}>
+              Close
             </Button>
-          )}
-        </div>
+            {useButton}
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );

@@ -30,6 +30,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useBottomPanel } from "@/components/ui/bottom-panel";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -209,6 +210,20 @@ function AllThemesSheet({
   variant?: "ghost" | "secondary";
 }) {
   const [open, setOpen] = useState(false);
+  // On phones, a bottom panel over the page, so picks show above it.
+  const bottomPanel = useBottomPanel("all themes");
+  const { isMobile } = bottomPanel;
+  const closeButton = (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label="Close all themes"
+      onClick={() => setOpen(false)}
+      className={isMobile ? undefined : "absolute top-3 right-3"}
+    >
+      <Icon icon="lucide:x" aria-hidden="true" />
+    </Button>
+  );
   // Editing from here opens the editor sheet; this one closes so it doesn't
   // sit underneath, blocking the page the editor previews on.
   useEffect(
@@ -232,18 +247,52 @@ function AllThemesSheet({
           {items.length}
         </span>
       </Button>
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="bg-secondary-bg flex h-full w-full flex-col sm:max-w-lg">
-          <SheetHeader className="shrink-0">
-            <SheetTitle>All themes</SheetTitle>
-            <SheetDescription className="text-secondary-text">
-              Pick one to try it on the page.
-            </SheetDescription>
-          </SheetHeader>
+      <Sheet open={open} onOpenChange={setOpen} modal={!isMobile}>
+        <SheetContent
+          side={bottomPanel.sheet.side}
+          hideOverlay={isMobile}
+          // The page stays usable under the panel; only the X closes it.
+          onInteractOutside={
+            isMobile ? (event) => event.preventDefault() : undefined
+          }
+          style={bottomPanel.sheet.style}
+          className={cn(
+            "bg-secondary-bg flex w-full flex-col gap-0 p-0",
+            isMobile ? bottomPanel.sheet.className : "h-full sm:max-w-lg",
+          )}
+        >
+          {isMobile ? (
+            <div className="shrink-0 px-4 pt-1 pb-3">
+              {bottomPanel.handle}
+              <div className="flex items-center gap-2">
+                <SheetTitle className="min-w-0 flex-1 truncate text-base">
+                  All themes
+                </SheetTitle>
+                {closeButton}
+              </div>
+              <SheetDescription className="sr-only">
+                Pick one to try it on the page above.
+              </SheetDescription>
+            </div>
+          ) : (
+            <>
+              {closeButton}
+              <SheetHeader className="shrink-0 px-6 pt-6 pb-4">
+                <SheetTitle>All themes</SheetTitle>
+                <SheetDescription className="text-secondary-text">
+                  Pick one to try it on the page.
+                </SheetDescription>
+              </SheetHeader>
+            </>
+          )}
           <div
             role="radiogroup"
             aria-label="All themes"
-            className="-mx-1 min-h-0 flex-1 space-y-5 overflow-y-auto px-1 py-1"
+            className={cn(
+              "min-h-0 flex-1 space-y-5 overflow-y-auto pt-1",
+              isMobile ? "px-4 pb-4" : "px-6 pb-6",
+              bottomPanel.collapsed && "hidden",
+            )}
           >
             {(
               [
