@@ -67,10 +67,10 @@ export default function SeasonContractsPage() {
           <div className="flex min-h-[60vh] items-center justify-center">
             <div className="border-border-card bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
               <div className="mb-8">
-                <div className="bg-button-info/20 border-button-info/30 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
+                <div className="bg-icon-tile-bg border-button-info/30 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
                   <Icon
                     icon="line-md:calendar"
-                    className="text-button-info h-10 w-10"
+                    className="text-icon-tile h-10 w-10"
                   />
                 </div>
               </div>
@@ -125,10 +125,10 @@ export default function SeasonContractsPage() {
           <div className="flex min-h-[60vh] items-center justify-center">
             <div className="border-border-card bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
               <div className="mb-8">
-                <div className="bg-button-info/20 border-button-info/30 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
+                <div className="bg-icon-tile-bg border-button-info/30 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
                   <Icon
                     icon="line-md:document"
-                    className="text-button-info h-10 w-10"
+                    className="text-icon-tile h-10 w-10"
                   />
                 </div>
               </div>

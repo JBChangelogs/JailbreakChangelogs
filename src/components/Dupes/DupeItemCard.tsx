@@ -189,7 +189,7 @@ export default function DupeItemCard({
             <span>{item.categoryTitle}</span>
           </span>
           {isDupedItem && (
-            <span className="border-button-danger bg-button-danger text-form-button-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
+            <span className="border-button-danger bg-button-danger text-button-danger-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
               Duped
             </span>
           )}
@@ -225,7 +225,7 @@ export default function DupeItemCard({
                   </span>
                 )}
                 {hasDisplayedLevel && (
-                  <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+                  <span className="bg-status-success text-button-success-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                     {formatUnlockLevelBadge(displayedLevel)}
                   </span>
                 )}

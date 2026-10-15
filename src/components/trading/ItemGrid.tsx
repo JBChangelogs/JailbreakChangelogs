@@ -261,7 +261,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                       ) : item.isOG ? (
                         <OgBadge compact />
                       ) : (
-                        <span className="bg-status-success text-form-button-text inline-flex h-5 items-center justify-center rounded-md px-2 text-[10px] leading-none font-semibold">
+                        <span className="bg-status-success text-button-success-text inline-flex h-5 items-center justify-center rounded-md px-2 text-[10px] leading-none font-semibold">
                           Clean
                         </span>
                       )}
@@ -346,7 +346,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                     className="group/remove focus-visible:outline-status-error absolute inset-0 z-10 cursor-pointer rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed"
                   >
                     <span className="pointer-events-none absolute inset-x-2.5 top-2.5 flex aspect-video items-center justify-center rounded-lg bg-black/50 opacity-0 transition-opacity group-hover/remove:opacity-100 group-focus-visible/remove:opacity-100">
-                      <span className="bg-status-error/90 text-form-button-text flex h-11 w-11 items-center justify-center rounded-full">
+                      <span className="bg-status-error/90 text-button-danger-text flex h-11 w-11 items-center justify-center rounded-full">
                         <Icon icon="heroicons:x-mark" className="h-6 w-6" />
                       </span>
                     </span>

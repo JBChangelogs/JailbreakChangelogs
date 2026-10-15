@@ -47,8 +47,7 @@ test("theme CSS keeps safe values and drops anything that could escape the style
   });
   expect(safe.cursor_url).toBeNull();
   expect(themesCss([safe])).toBe(
-    ":root.future-tone{color-scheme:dark;--color-primary-bg:#0f5a5e;--color-link:color-mix(in srgb, #8839ef 85%, black);}" +
-      ":root.future-tone .header-logo{filter:hue-rotate(100deg)}" +
+    ":root.future-tone{color-scheme:dark;--color-primary-bg:#0f5a5e;--color-link:color-mix(in srgb, #8839ef 85%, black);--logo-filter:hue-rotate(100deg);}" +
       ":root.future-tone .theme-cursor-icon{width:24px;height:24px}",
   );
 });

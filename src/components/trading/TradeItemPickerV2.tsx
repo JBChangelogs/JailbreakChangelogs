@@ -1018,9 +1018,9 @@ export default function TradeItemPickerV2({
                               className={`focus-visible:outline-border-focus cursor-pointer rounded-md px-2 py-1 text-[10px] leading-none font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
                                 condition === option
                                   ? option === "clean"
-                                    ? "bg-status-success text-form-button-text"
+                                    ? "bg-status-success text-button-success-text"
                                     : option === "duped"
-                                      ? "bg-status-error text-form-button-text"
+                                      ? "bg-status-error text-button-danger-text"
                                       : "bg-[#FFD700] text-black"
                                   : "text-primary-text hover:bg-quaternary-bg"
                               }`}
@@ -1162,14 +1162,14 @@ export default function TradeItemPickerV2({
                       <button
                         type="button"
                         onClick={addToOfferingSide}
-                        className="bg-status-success text-form-button-text cursor-pointer rounded-md py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+                        className="bg-status-success text-button-success-text cursor-pointer rounded-md py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
                       >
                         Offer
                       </button>
                       <button
                         type="button"
                         onClick={addToRequestingSide}
-                        className="bg-status-error text-form-button-text cursor-pointer rounded-md py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+                        className="bg-status-error text-button-danger-text cursor-pointer rounded-md py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
                       >
                         Request
                       </button>

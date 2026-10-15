@@ -117,7 +117,7 @@ export default function OGItemCard({
 
       {/* OG Badge */}
       {isOriginalOwner && !isDuplicate && (
-        <div className="bg-status-success text-form-button-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
+        <div className="bg-status-success text-button-success-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
           OG
         </div>
       )}
@@ -187,7 +187,7 @@ export default function OGItemCard({
                   </span>
                 )}
                 {hasDisplayedLevel && (
-                  <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+                  <span className="bg-status-success text-button-success-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                     {formatUnlockLevelBadge(displayedLevel)}
                   </span>
                 )}

@@ -431,7 +431,7 @@ export default function AppClient({
             >
               <span
                 aria-hidden="true"
-                className="bg-button-info/10 text-link inline-flex size-10 items-center justify-center rounded-lg"
+                className="bg-icon-tile-bg text-icon-tile inline-flex size-10 items-center justify-center rounded-lg"
               >
                 <Icon icon={icon} className="size-5" />
               </span>

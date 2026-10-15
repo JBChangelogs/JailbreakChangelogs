@@ -18,7 +18,6 @@ import { ExperimentOverridesBadge } from "@/components/Experiments/ExperimentOve
 import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import dynamic from "next/dynamic";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   Tooltip,
   TooltipContent,
@@ -54,7 +53,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
-import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
 
 const NavDropdownItem = ({
   href,
@@ -94,7 +92,7 @@ const NavDropdownItem = ({
         <div className="text-primary-text flex flex-wrap items-center gap-1.5 text-sm leading-tight font-semibold transition-colors">
           {title}
           {badge && (
-            <span className="bg-button-info/20 text-link rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
+            <span className="bg-menu-badge-bg text-menu-badge-text rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
               {badge === "coming-soon"
                 ? "Soon"
                 : badge === "live"
@@ -131,7 +129,6 @@ export const NavbarModern = ({
   setUtmModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const pathname = usePathname();
-  const isXlUp = useMediaQuery("(min-width: 1280px)");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const setUserMenuOpenWithCallback = React.useCallback(
     (open: boolean) => {
@@ -140,7 +137,6 @@ export const NavbarModern = ({
     },
     [onUserMenuOpenChange],
   );
-  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
 
   const isCollabPage = useIsCollabPage();
   const [navMenuValue, setNavMenuValue] = useState("");
@@ -266,15 +262,6 @@ export const NavbarModern = ({
   const isAuthenticated = mounted && isAuthenticatedRaw;
   const userData = isAuthenticated ? authUser : null;
   const shouldShowSupportButton = (userData?.premiumtype ?? 0) <= 0;
-
-  useToastRuntimeRightOffset({
-    enabled: isXlUp,
-    rightOffset: notificationMenuOpen
-      ? "500px"
-      : userMenuOpen
-        ? "272px"
-        : "16px",
-  });
 
   const handleLogout = async () => {
     try {
@@ -498,7 +485,6 @@ export const NavbarModern = ({
             setUnreadCount={setUnreadCount}
             isAuthenticated={isAuthenticated}
             variant="desktop"
-            onOpenChange={setNotificationMenuOpen}
           />
 
           {/* Messages button (desktop) */}
@@ -562,6 +548,7 @@ export const NavbarModern = ({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
+                data-toast-avoid=""
                 align="end"
                 className="bg-secondary-bg z-[2147483647] w-64 rounded-lg p-1 shadow-lg"
               >

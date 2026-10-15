@@ -192,10 +192,10 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       }}
                       className={`focus-visible:outline-border-focus relative z-20 inline-flex h-5 items-center justify-center rounded-md px-2 text-[10px] leading-none font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
                         selectedType === "duped"
-                          ? "bg-status-error text-form-button-text"
+                          ? "bg-status-error text-button-danger-text"
                           : item.isOG
                             ? "text-primary-text border border-[#FFD700]/50 bg-[#FFD700]/10"
-                            : "bg-status-success text-form-button-text"
+                            : "bg-status-success text-button-success-text"
                       } ${
                         !hasDupedValue || !onValueTypeChange
                           ? "cursor-default"

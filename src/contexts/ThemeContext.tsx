@@ -7,11 +7,21 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import { debounce } from "@/utils/helpers/debounce";
 import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 import type { ThemeOption } from "@/utils/ui/themeOptions";
+import type { CustomTheme } from "@/utils/api/userThemes";
+import {
+  getCustomTheme,
+  getPreviewScheme,
+  setCustomTheme,
+  subscribeCustomTheme,
+  syncCustomThemePreferences,
+} from "@/utils/ui/customTheme";
+import { syncRecentThemesPreferences } from "@/utils/ui/recentThemes";
 
 /** A theme slug; the dashboard manages the list. */
 export type Theme = string;
@@ -31,6 +41,8 @@ interface ThemeContextType {
   resolvedTheme: "light" | "dark";
   /** Every enabled theme, in picker order. */
   themes: ThemeOption[];
+  /** A user-made theme drawn over `theme`, or null. Picking a site theme clears it. */
+  customTheme: CustomTheme | null;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -73,7 +85,13 @@ export function ThemeProvider({
       themes.some((option) => option.value === value),
     [themes],
   );
+  const customTheme = useSyncExternalStore(
+    subscribeCustomTheme,
+    getCustomTheme,
+    () => null,
+  );
   const resolvedTheme =
+    customTheme?.scheme ??
     themes.find((option) => option.value === (theme ?? defaultTheme))?.scheme ??
     "dark";
 
@@ -107,9 +125,13 @@ export function ThemeProvider({
     const root = document.documentElement;
     root.classList.remove(...themes.map((option) => option.value));
     root.classList.add(theme);
-    root.dataset.scheme = resolvedTheme;
+    // A previewed theme (editor, shared link) keeps its own light/dark.
+    root.dataset.scheme = getPreviewScheme() ?? resolvedTheme;
     safeLocalStorage.setItem("theme", theme);
   }, [theme, themes, resolvedTheme]);
+
+  useEffect(syncCustomThemePreferences, []);
+  useEffect(syncRecentThemesPreferences, []);
 
   // Apply incoming preference syncs from other devices without re-broadcasting.
   // Skip any echo that arrives while a local change is still in-flight.
@@ -160,6 +182,7 @@ export function ThemeProvider({
   // User-initiated theme change — apply locally right away, stamp the change
   // time so WS echoes can't revert it, and debounce the actual WS dispatch.
   const setTheme = (newTheme: Theme) => {
+    if (getCustomTheme()) setCustomTheme(null);
     if (newTheme === theme) return;
     lastUserChangeRef.current = Date.now();
     setThemeState(newTheme);
@@ -173,6 +196,7 @@ export function ThemeProvider({
         setTheme,
         resolvedTheme,
         themes,
+        customTheme,
       }}
     >
       {children}

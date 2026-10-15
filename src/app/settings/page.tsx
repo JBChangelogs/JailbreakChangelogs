@@ -12,6 +12,7 @@ import { AppearancePreview } from "@/components/Settings/AppearancePreview";
 import { BackgroundSettings } from "@/components/Settings/BackgroundSettings";
 import DesktopNavigationSettings from "@/components/Settings/DesktopNavigationSettings";
 import ThemeSettings from "@/components/Settings/ThemeSettings";
+import TabStyleSettings from "@/components/Settings/TabStyleSettings";
 import SettingsCard from "@/components/Settings/SettingsCard";
 import SupporterHistorySection from "@/components/Settings/SupporterHistorySection";
 import PurchasedGiftsSection from "@/components/Settings/PurchasedGiftsSection";
@@ -150,37 +151,51 @@ export default function SettingsPage() {
     }
   };
 
+  const isOwner = userData?.flags?.some((f) => f.flag === "is_owner") ?? false;
+  // Themes first, since the header's theme button opens that card.
   const displaySettings = (
-    <SettingsCard
-      id="display"
-      title="Display"
-      icon="material-symbols:settings-rounded"
-      isOwner={userData?.flags?.some((f) => f.flag === "is_owner") ?? false}
-      highlightStyle={getSectionHighlightStyle("display")}
-      scrollRef={(el) => scrollHighlightedSectionIntoView("display", el)}
-      onCopyLink={() => copySectionLink("display", "Display")}
-    >
-      {/* First, since the header's theme button opens this card. */}
-      <ThemeSettings />
-      <div className="border-border-card mt-5 border-t pt-5">
-        <DesktopNavigationSettings />
-      </div>
-      <div className="border-border-card mt-5 border-t pt-5">
-        <SettingToggle
-          name="twemoji_enabled"
-          value={twemojiEnabled}
-          description="Use Twemoji for emojis instead of your browser's native emoji set"
-          displayName="Twemoji Emojis"
-          onChange={(_name, value) => {
-            setTwemojiEnabled(value);
-            toast.success("Setting Updated", {
-              description: `"${formatSettingName("twemoji_enabled")}" has been ${value ? "enabled" : "disabled"}.`,
-            });
-          }}
-          userData={userData}
-        />
-      </div>
-    </SettingsCard>
+    <>
+      <SettingsCard
+        id="themes"
+        title="Themes"
+        icon="material-symbols:palette"
+        isOwner={isOwner}
+        highlightStyle={getSectionHighlightStyle("themes")}
+        scrollRef={(el) => scrollHighlightedSectionIntoView("themes", el)}
+        onCopyLink={() => copySectionLink("themes", "Themes")}
+      >
+        <ThemeSettings />
+      </SettingsCard>
+      <SettingsCard
+        id="display"
+        title="Display"
+        icon="material-symbols:settings-rounded"
+        isOwner={isOwner}
+        highlightStyle={getSectionHighlightStyle("display")}
+        scrollRef={(el) => scrollHighlightedSectionIntoView("display", el)}
+        onCopyLink={() => copySectionLink("display", "Display")}
+      >
+        <TabStyleSettings />
+        <div className="border-border-card mt-5 border-t pt-5">
+          <DesktopNavigationSettings />
+        </div>
+        <div className="border-border-card mt-5 border-t pt-5">
+          <SettingToggle
+            name="twemoji_enabled"
+            value={twemojiEnabled}
+            description="Use Twemoji for emojis instead of your browser's native emoji set"
+            displayName="Twemoji Emojis"
+            onChange={(_name, value) => {
+              setTwemojiEnabled(value);
+              toast.success("Setting Updated", {
+                description: `"${formatSettingName("twemoji_enabled")}" has been ${value ? "enabled" : "disabled"}.`,
+              });
+            }}
+            userData={userData}
+          />
+        </div>
+      </SettingsCard>
+    </>
   );
 
   if (loading) {
@@ -222,11 +237,14 @@ export default function SettingsPage() {
   const hasAppearance = sortedCategories.some(
     (cat) => cat.name === "appearance",
   );
-  const displayNavItem = {
-    id: "display",
-    title: "Display",
-    icon: "material-symbols:settings-rounded",
-  };
+  const displayNavItems = [
+    { id: "themes", title: "Themes", icon: "material-symbols:palette" },
+    {
+      id: "display",
+      title: "Display",
+      icon: "material-symbols:settings-rounded",
+    },
+  ];
 
   const sortedSupporterGifts = [...supporterGifts].sort((a, b) => {
     if (a.level !== b.level) return b.level - a.level;
@@ -251,7 +269,7 @@ export default function SettingsPage() {
               Navigation
             </p>
             {[
-              ...(hasAppearance ? [] : [displayNavItem]),
+              ...(hasAppearance ? [] : displayNavItems),
               ...sortedCategories.flatMap((cat) => [
                 {
                   id: cat.name,
@@ -261,7 +279,7 @@ export default function SettingsPage() {
                       ? "heroicons:lock-closed"
                       : "heroicons:sparkles",
                 },
-                ...(cat.name === "appearance" ? [displayNavItem] : []),
+                ...(cat.name === "appearance" ? displayNavItems : []),
               ]),
               {
                 id: "notifications",
@@ -416,7 +434,7 @@ export default function SettingsPage() {
                               isHighlighted
                                 ? {
                                     backgroundColor:
-                                      "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                                      "color-mix(in srgb, var(--color-button-info), transparent 88%)",
                                   }
                                 : undefined
                             }

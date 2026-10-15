@@ -105,9 +105,9 @@ const MoneyHistoryChart = ({
   if (history.length === 0) {
     return (
       <div className="bg-secondary-bg rounded-lg p-8 text-center">
-        <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
+        <div className="border-button-info/30 bg-icon-tile-bg mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
           <svg
-            className="text-button-info h-8 w-8"
+            className="text-icon-tile h-8 w-8"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

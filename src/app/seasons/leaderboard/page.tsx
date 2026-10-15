@@ -91,10 +91,10 @@ export default function SeasonLeaderboardPage() {
             <div className="flex min-h-[60vh] items-center justify-center">
               <div className="border-border-card bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
                 <div className="mb-8">
-                  <div className="border-button-info/30 bg-button-info/20 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
+                  <div className="border-button-info/30 bg-icon-tile-bg mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
                     <Icon
                       icon="line-md:list-3"
-                      className="text-button-info h-10 w-10"
+                      className="text-icon-tile h-10 w-10"
                     />
                   </div>
                 </div>

@@ -121,8 +121,8 @@ export default function BotPage() {
 
             <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 shadow-xl md:p-6">
               <div className="border-border-card mb-5 flex items-center gap-3 border-b pb-5">
-                <div className="bg-button-info/15 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
-                  <DiscordIcon className="text-link h-6 w-6" />
+                <div className="bg-icon-tile-bg flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                  <DiscordIcon className="text-icon-tile h-6 w-6" />
                 </div>
                 <div>
                   <h2 className="text-primary-text text-lg font-bold">
@@ -193,10 +193,10 @@ export default function BotPage() {
                 className="border-border-card bg-secondary-bg flex flex-col rounded-2xl border p-5 md:p-6"
               >
                 <div className="mb-4 flex items-center gap-3">
-                  <div className="bg-button-info/15 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg">
+                  <div className="bg-icon-tile-bg flex h-11 w-11 shrink-0 items-center justify-center rounded-lg">
                     <Icon
                       icon={icon}
-                      className="text-link h-6 w-6"
+                      className="text-icon-tile h-6 w-6"
                       inline={true}
                     />
                   </div>

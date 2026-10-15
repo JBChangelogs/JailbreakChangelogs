@@ -45,8 +45,8 @@ function ItemValues({
   return (
     <div className="border-border-card bg-secondary-bg hover:shadow-card-shadow mb-8 space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
       <div className="flex items-center gap-3">
-        <div className="bg-button-info/20 flex h-10 w-10 items-center justify-center rounded-lg">
-          <Icon icon="heroicons:banknotes" className="text-link h-6 w-6" />
+        <div className="bg-icon-tile-bg flex h-10 w-10 items-center justify-center rounded-lg">
+          <Icon icon="heroicons:banknotes" className="text-icon-tile h-6 w-6" />
         </div>
         <h3 className="text-primary-text text-2xl font-bold">Item Values</h3>
       </div>
@@ -62,8 +62,8 @@ function ItemValues({
               <span
                 className={`inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs leading-none font-semibold ${
                   cashChange.difference > 0
-                    ? "bg-status-success text-form-button-text"
-                    : "bg-status-error text-form-button-text"
+                    ? "bg-status-success text-button-success-text"
+                    : "bg-status-error text-button-danger-text"
                 }`}
               >
                 {cashChange.difference > 0 ? "+" : "-"}
@@ -86,8 +86,8 @@ function ItemValues({
               <span
                 className={`inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs leading-none font-semibold ${
                   dupedChange.difference > 0
-                    ? "bg-status-success text-form-button-text"
-                    : "bg-status-error text-form-button-text"
+                    ? "bg-status-success text-button-success-text"
+                    : "bg-status-error text-button-danger-text"
                 }`}
               >
                 {dupedChange.difference > 0 ? "+" : "-"}

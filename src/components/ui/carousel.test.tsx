@@ -124,8 +124,11 @@ test("horizontal wheels navigate slides without capturing vertical scrolling or 
   expect(emit(-100, 0, 250)).toBe(true);
   expect(moves).toEqual(["next", "previous"]);
   next = previous = false;
-  expect(emit(100, 0, 500)).toBe(false);
-  expect(emit(-100, 0, 500)).toBe(false);
+  // A gesture that reaches the end stays in the carousel...
+  expect(emit(100, 0, 400)).toBe(true);
+  // ...and a new one there scrolls the page.
+  expect(emit(100, 0, 1000)).toBe(false);
+  expect(emit(-100, 0, 1000)).toBe(false);
   expect(moves).toEqual(["next", "previous"]);
   cleanups.forEach((cleanup) => cleanup());
   expect(wheel).toBeUndefined();
@@ -145,10 +148,11 @@ test("horizontal wheels navigate slides without capturing vertical scrolling or 
   expect(distances.at(-1)).toBe(-300);
   expect(emit(1000)).toBe(true);
   expect(position).toBe(-500);
-  expect(emit(10)).toBe(false);
-  expect(emit(-1000)).toBe(true);
+  expect(emit(10, 0, 100)).toBe(true);
+  expect(emit(10, 0, 1000)).toBe(false);
+  expect(emit(-1000, 0, 2000)).toBe(true);
   expect(position).toBe(0);
-  expect(emit(-10)).toBe(false);
+  expect(emit(-10, 0, 3000)).toBe(false);
   expect(moves).toEqual(["next", "previous"]);
   cleanups.slice(-2).forEach((cleanup) => cleanup());
   expect(wheel).toBeUndefined();
