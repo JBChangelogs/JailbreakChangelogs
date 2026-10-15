@@ -73,12 +73,9 @@ export default function LoginModalView({
         </DialogDescription>
 
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList
-            fullWidth
-            className="border-border-primary mb-6 rounded-none border-b bg-transparent pb-0"
-          >
+          <TabsList fullWidth className="mb-6">
             {!onlyRoblox && (
-              <TabsTrigger value="discord" fullWidth className="pb-3">
+              <TabsTrigger value="discord" fullWidth>
                 <Image
                   src={
                     isDark
@@ -94,7 +91,7 @@ export default function LoginModalView({
               </TabsTrigger>
             )}
             {hasJbclToken && (
-              <TabsTrigger value="roblox" fullWidth className="pb-3">
+              <TabsTrigger value="roblox" fullWidth>
                 <Image
                   src={
                     isDark
