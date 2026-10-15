@@ -231,6 +231,7 @@ export function NotificationPopover({
                       }
                     }}
                     data-rybbit-event="Clear Notification History"
+                    aria-label="Clear history"
                     className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
                   >
                     <Icon

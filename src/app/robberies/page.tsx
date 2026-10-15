@@ -1399,7 +1399,6 @@ function RobberyTrackerContent() {
                         }}
                         variant={isSelected ? "default" : "secondary"}
                         size="sm"
-                        className="gap-2"
                       >
                         {isSelected && (
                           <Icon icon="heroicons:check" className="h-4 w-4" />
@@ -1442,7 +1441,6 @@ function RobberyTrackerContent() {
                         }}
                         variant={isActive ? "default" : "secondary"}
                         size="sm"
-                        className="gap-2"
                         title={preset.description}
                       >
                         {isActive && (

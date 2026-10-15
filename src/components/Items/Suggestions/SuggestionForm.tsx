@@ -873,7 +873,6 @@ export function SuggestionForm({
                   reason.length > maxChars ||
                   !commonTradesValid
                 }
-                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
               >
                 {submitting ? (
                   <>
@@ -1117,7 +1116,6 @@ export function SuggestionForm({
                 size="sm"
                 onClick={handleConfirmedSubmit}
                 disabled={submitting}
-                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
               >
                 {submitting ? (
                   <>

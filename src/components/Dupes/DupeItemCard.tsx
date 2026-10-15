@@ -328,7 +328,7 @@ export default function DupeItemCard({
             type="button"
             size="sm"
             disabled={checking}
-            className="h-auto! min-h-8 min-w-0 px-2! py-1 text-center text-xs! leading-4 whitespace-normal"
+            className="h-auto! min-h-8 min-w-0 py-1 text-center leading-4 whitespace-normal"
             onClick={() => void runCheck()}
           >
             {checking ? "Checking..." : "Dupe check"}
@@ -337,7 +337,7 @@ export default function DupeItemCard({
             asChild
             size="sm"
             variant="secondary"
-            className="h-auto! min-h-8 min-w-0 px-2! py-1 text-center text-xs! leading-4 whitespace-normal"
+            className="h-auto! min-h-8 min-w-0 py-1 text-center leading-4 whitespace-normal"
           >
             <Link
               href={getDupeComparisonUrl(item)}
@@ -353,7 +353,7 @@ export default function DupeItemCard({
             type="button"
             size="sm"
             variant="secondary"
-            className="h-auto! min-h-8 min-w-0 px-2! py-1 text-center text-xs! leading-4 whitespace-normal"
+            className="h-auto! min-h-8 min-w-0 py-1 text-center leading-4 whitespace-normal"
             onClick={() => onCardClick(item)}
           >
             History
@@ -519,7 +519,7 @@ export default function DupeItemCard({
                 type="button"
                 size="sm"
                 variant="secondary"
-                className="h-auto! min-h-8 w-full min-w-0 px-2! py-1 leading-tight whitespace-normal sm:w-auto"
+                className="w-full sm:w-auto"
                 onClick={() => {
                   setCheckOpen(false);
                   onReport(item);
@@ -533,7 +533,7 @@ export default function DupeItemCard({
                 type="button"
                 size="sm"
                 variant="secondary"
-                className="h-auto! min-h-8 w-full min-w-0 px-2! py-1 leading-tight whitespace-normal sm:w-auto"
+                className="w-full sm:w-auto"
                 onClick={() => void runCheck()}
               >
                 Try again

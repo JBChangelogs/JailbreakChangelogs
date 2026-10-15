@@ -367,7 +367,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                         variant="ghost"
                         disabled={neverExpires}
                         style={{ backgroundColor: "var(--color-tertiary-bg)" }}
-                        className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus hover:bg-tertiary-bg! active:bg-tertiary-bg! disabled:bg-tertiary-bg h-10 w-full justify-between rounded-md border px-3 py-2 font-normal disabled:cursor-not-allowed disabled:opacity-60"
+                        className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus hover:bg-tertiary-bg! active:bg-tertiary-bg! disabled:bg-tertiary-bg h-10 w-full justify-between rounded-md border py-2 font-normal disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <span>{format(expires ?? new Date(), "PPP")}</span>
                         <Icon icon="heroicons:chevron-down" />

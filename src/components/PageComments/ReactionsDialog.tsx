@@ -207,6 +207,7 @@ export function ReactionsDialog({
                                 <button
                                   type="button"
                                   onClick={() => handleUnreact(r.emoji)}
+                                  aria-label="Remove reaction"
                                   disabled={isRateLimited}
                                   className={`text-secondary-text hover:text-button-danger hover:bg-button-danger/10 shrink-0 rounded p-0.5 opacity-100 transition-colors lg:opacity-0 lg:group-hover:opacity-100 ${isRateLimited ? "cursor-not-allowed" : "cursor-pointer"}`}
                                 >

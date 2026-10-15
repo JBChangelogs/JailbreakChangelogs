@@ -948,7 +948,6 @@ export default function MyReports() {
                     aria-pressed={active}
                     variant={active ? "default" : "secondary"}
                     size="sm"
-                    className="gap-2"
                   >
                     {active && (
                       <Icon icon="heroicons:check" className="h-4 w-4" />

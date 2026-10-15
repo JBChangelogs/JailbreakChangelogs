@@ -103,12 +103,7 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-secondary-text hover:text-primary-text h-auto px-1.5 py-1 text-xs"
-        onClick={openModal}
-      >
+      <Button variant="ghost" size="xs" onClick={openModal}>
         <Icon icon="heroicons-outline:flag" className="h-4 w-4" />
         Report inaccurate description
       </Button>

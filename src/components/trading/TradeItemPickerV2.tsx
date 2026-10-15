@@ -11,6 +11,7 @@ import { TradeItem } from "@/types/trading";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
@@ -1159,20 +1160,22 @@ export default function TradeItemPickerV2({
                   )}
                   {showOfferRequestButtons && (
                     <div className="mt-2 grid grid-cols-2 gap-1.5">
-                      <button
+                      <Button
                         type="button"
+                        size="xs"
+                        variant="success"
                         onClick={addToOfferingSide}
-                        className="bg-status-success text-button-success-text cursor-pointer rounded-md py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
                       >
                         Offer
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
+                        size="xs"
+                        variant="destructive"
                         onClick={addToRequestingSide}
-                        className="bg-status-error text-button-danger-text cursor-pointer rounded-md py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
                       >
                         Request
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>

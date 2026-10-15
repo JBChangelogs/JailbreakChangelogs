@@ -315,7 +315,6 @@ export default function FavoritesTab({
                 }
                 variant="default"
                 size="sm"
-                className="flex items-center gap-1"
               >
                 {sortOrder === "newest" ? (
                   <Icon

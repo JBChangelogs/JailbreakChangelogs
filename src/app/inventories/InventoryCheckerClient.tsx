@@ -892,7 +892,6 @@ export default function InventoryCheckerClient({
                             : "default"
                       }
                       size="sm"
-                      className="gap-2"
                     >
                       {scanWebSocket.status === "connecting" ? (
                         <>

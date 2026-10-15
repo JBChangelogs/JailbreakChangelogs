@@ -179,7 +179,7 @@ export default function ValuesChangelogPage() {
                     )
                   }
                   size="sm"
-                  className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                  variant="secondary"
                 >
                   <Icon
                     icon={
