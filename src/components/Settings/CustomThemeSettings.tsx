@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -18,13 +18,21 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   deleteMyTheme,
+  fetchSharedTheme,
   listMyThemes,
+  ThemeApiError,
   type CustomTheme,
   type UserTheme,
 } from "@/utils/api/userThemes";
 import { openThemeEditor } from "@/utils/ui/themeEditor";
 import { setCustomTheme, SHARE_PARAM, shareUrl } from "@/utils/ui/customTheme";
 import { themePreview, type ThemeOption } from "@/utils/ui/themeOptions";
+import {
+  forgetSharedTheme,
+  getRecentThemes,
+  rememberSharedTheme,
+  subscribeRecentThemes,
+} from "@/utils/ui/recentThemes";
 
 /** A custom theme as a picker card's option. */
 export const customThemeOption = (theme: CustomTheme): ThemeOption => ({
@@ -58,7 +66,7 @@ export function useCustomThemeAccess() {
 }
 
 /**
- * The user's own custom themes plus a shared one in use, and the actions on
+ * The user's own custom themes plus shared ones they've used, and the actions on
  * them. Render `dialogs` once; the picker and controls share this state.
  */
 export function useCustomThemes() {
@@ -76,11 +84,57 @@ export function useCustomThemes() {
 
   const mine = data?.themes ?? [];
   const limit = data?.limit ?? 0;
-  // Someone else's theme in use isn't in the list, so it's added to show it.
+  // Someone else's themes aren't in the list: the one in use, and the ones
+  // used recently (synced), loaded by their codes.
+  const isMine = (code: string) => mine.some((t) => t.share_code === code);
   const sharedInUse =
-    customTheme && !mine.some((t) => t.share_code === customTheme.share_code)
-      ? customTheme
-      : null;
+    customTheme && !isMine(customTheme.share_code) ? customTheme : null;
+  // A shared theme in use joins the list, wherever it was picked. Waits for
+  // the user's own themes so one of theirs isn't taken for someone else's.
+  const sharedCode =
+    data || !isAuthenticated ? sharedInUse?.share_code : undefined;
+  useEffect(() => {
+    // Added, not moved: picking one from the list keeps its place.
+    if (sharedCode && !getRecentThemes().includes(sharedCode)) {
+      rememberSharedTheme(sharedCode);
+    }
+  }, [sharedCode]);
+  const recentCodes = useSyncExternalStore(
+    subscribeRecentThemes,
+    getRecentThemes,
+    () => [],
+  ).filter((code) => !isMine(code));
+  const recent = useQueries({
+    queries: recentCodes.map((code) => ({
+      queryKey: ["shared-theme", code],
+      queryFn: async () => {
+        try {
+          return await fetchSharedTheme(code);
+        } catch (err) {
+          // Deleted by its owner: drop it from the list.
+          if (err instanceof ThemeApiError && err.status === 404) {
+            forgetSharedTheme(code);
+          }
+          throw err;
+        }
+      },
+      // The one in use already loads with the page.
+      enabled: code !== sharedInUse?.share_code,
+      staleTime: 10 * 60 * 1000,
+      retry: false,
+    })),
+  });
+  // In the list's order; the one in use shows from this browser's copy.
+  const shared = [
+    ...(sharedInUse && !recentCodes.includes(sharedInUse.share_code)
+      ? [sharedInUse]
+      : []),
+    ...recentCodes.flatMap((code, i) => {
+      const theme =
+        code === sharedInUse?.share_code ? sharedInUse : recent[i].data;
+      return theme ? [theme] : [];
+    }),
+  ];
 
   const openEditor = (theme: UserTheme | "new") => {
     if (!checkAccess()) return;
@@ -138,7 +192,8 @@ export function useCustomThemes() {
     isAuthenticated,
     mine,
     limit,
-    sharedInUse,
+    shared,
+    inUse: (code: string) => customTheme?.share_code === code,
     openEditor,
     copyLink,
     askDelete: setDeleting,
@@ -238,13 +293,29 @@ export function CustomThemeMenu({
                 </DropdownMenuItem>
               </>
             ) : (
-              <DropdownMenuItem
-                className={item}
-                onSelect={() => openShared(theme.share_code)}
-              >
-                <Icon icon="lucide:eye" aria-hidden="true" className="size-4" />
-                Preview and save a copy
-              </DropdownMenuItem>
+              <>
+                <DropdownMenuItem
+                  className={item}
+                  onSelect={() => openShared(theme.share_code)}
+                >
+                  <Icon
+                    icon="lucide:eye"
+                    aria-hidden="true"
+                    className="size-4"
+                  />
+                  Preview and save a copy
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className={item}
+                  onSelect={() => {
+                    forgetSharedTheme(theme.share_code);
+                    if (custom.inUse(theme.share_code)) setCustomTheme(null);
+                  }}
+                >
+                  <Icon icon="lucide:x" aria-hidden="true" className="size-4" />
+                  Remove from list
+                </DropdownMenuItem>
+              </>
             )}
           </DropdownMenuContent>
         </DropdownMenu>

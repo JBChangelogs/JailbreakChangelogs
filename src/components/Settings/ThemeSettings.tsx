@@ -295,7 +295,7 @@ export default function ThemeSettings() {
   const { isAuthenticated } = useAuthContext();
   const { theme, setTheme, themes, customTheme } = useTheme();
   const custom = useCustomThemes();
-  // Site themes, then a shared theme in use, then the user's own. No site
+  // Site themes, then shared ones (in use, then recent), then the user's own. No site
   // theme shows as picked while a custom theme draws over it.
   const allItems: PickerItem[] = [
     ...themes.map((option) => ({
@@ -304,15 +304,12 @@ export default function ThemeSettings() {
       checked: !customTheme && theme === option.value,
       pick: () => setTheme(option.value),
     })),
-    ...[
-      ...(custom.sharedInUse ? [custom.sharedInUse] : []),
-      ...custom.mine,
-    ].map((t) => ({
+    ...[...custom.shared, ...custom.mine].map((t) => ({
       key: `custom:${t.share_code}`,
       option: customThemeOption(t),
       checked: customTheme?.share_code === t.share_code,
       pick: () => setCustomTheme(t),
-      badge: t === custom.sharedInUse ? "Shared" : "Custom",
+      badge: custom.shared.includes(t) ? "Shared" : "Custom",
       wrap: (card: React.ReactNode) => (
         <CustomThemeMenu theme={t} custom={custom}>
           {card}

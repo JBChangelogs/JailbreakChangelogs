@@ -20,6 +20,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useCustomThemeAccess } from "@/components/Settings/CustomThemeSettings";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
 import { createMyTheme, fetchSharedTheme } from "@/utils/api/userThemes";
+import { rememberSharedTheme } from "@/utils/ui/recentThemes";
 import {
   endCustomThemePreview,
   parseShareCode,
@@ -226,6 +227,7 @@ export default function SharedThemeDialog() {
               disabled={inUse}
               onClick={() => {
                 setCustomTheme(theme);
+                rememberSharedTheme(theme.share_code);
                 toast.success(`Using ${theme.label}`, {
                   description: "Pick another theme in Settings anytime.",
                 });

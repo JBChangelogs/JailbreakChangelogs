@@ -121,6 +121,8 @@ test("mounting preserves saved themes before and after effects replay", () => {
             subscribeCustomTheme: () => () => {},
             syncCustomThemePreferences: () => () => {},
           };
+        if (name.endsWith("recentThemes"))
+          return { syncRecentThemesPreferences: () => () => {} };
         throw new Error(`Unexpected import: ${name}`);
       },
     });

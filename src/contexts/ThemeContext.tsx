@@ -21,6 +21,7 @@ import {
   subscribeCustomTheme,
   syncCustomThemePreferences,
 } from "@/utils/ui/customTheme";
+import { syncRecentThemesPreferences } from "@/utils/ui/recentThemes";
 
 /** A theme slug; the dashboard manages the list. */
 export type Theme = string;
@@ -130,6 +131,7 @@ export function ThemeProvider({
   }, [theme, themes, resolvedTheme]);
 
   useEffect(syncCustomThemePreferences, []);
+  useEffect(syncRecentThemesPreferences, []);
 
   // Apply incoming preference syncs from other devices without re-broadcasting.
   // Skip any echo that arrives while a local change is still in-flight.
