@@ -675,11 +675,14 @@ export function MessageRow({
               {editingMessageId !== message.id && canOpenActions && (
                 <Button
                   variant="ghost"
-                  className={
+                  className={cn(
                     isMessageMenuActive
-                      ? "absolute top-0 right-0 !size-8 lg:hidden"
-                      : "sr-only focus:not-sr-only focus:absolute focus:top-0 focus:right-0 lg:hidden"
-                  }
+                      ? "absolute right-0 !size-8 lg:hidden"
+                      : "sr-only focus:not-sr-only focus:absolute focus:right-0 lg:hidden",
+                    isGroupedWithPrevious
+                      ? "top-1/2 -translate-y-1/2"
+                      : "top-0",
+                  )}
                   aria-label="Message actions"
                   aria-haspopup="dialog"
                   disabled={isSending || !!deletingMessageId}

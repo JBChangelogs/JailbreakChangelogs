@@ -230,6 +230,31 @@ test("mobile holds reveal actions without opening the sheet; scrolling and unmou
   expect(h.active()).toBeNull();
 });
 
+test("grouped message actions are vertically centered while primary messages keep their header alignment", () => {
+  for (const grouped of [false, true]) {
+    const h = harness(true);
+    if (grouped) {
+      h.props.messages = [
+        { ...h.props.message, id: "previous", createdAt: 0 },
+        h.props.message,
+      ];
+      h.props.index = 1;
+    }
+    h.render().find((node) => "data-message-row" in node.props)!.props.onClick!(
+      {
+        target: { closest: () => null },
+      },
+    );
+    const tree = h.render();
+    expect(tree.some((node) => node.type === "ChatEventTitle")).toBe(!grouped);
+    const actions = tree.find(
+      (node) => node.props["aria-label"] === "Message actions",
+    )!;
+    expect(actions.props.className).toContain(grouped ? "top-1/2" : "top-0");
+    expect(actions.props.className?.includes("-translate-y-1/2")).toBe(grouped);
+  }
+});
+
 test("tapping or holding sent and received text reveals only the action button and preserves selection", () => {
   for (const senderId of ["me", "them"]) {
     const h = harness(true);
