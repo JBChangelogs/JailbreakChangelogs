@@ -127,7 +127,7 @@ export function useBottomPanel(
     }
     // A drag stays where it was let go, unless that's about the bar.
     if (height < 100) {
-      snapTo("bar");
+      snapTo(initialSize === "content" ? "content" : "bar");
       return;
     }
     setDragHeight(height);
