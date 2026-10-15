@@ -128,13 +128,18 @@ export function MessageRow({
   handleRetryFailedMessage,
   handleEditMessage,
 }: MessageRowProps) {
+  const [isMobileSheetOpen, setMobileSheetOpen] = useState(false);
+  const closeMessageActions = () => {
+    setMobileSheetOpen(false);
+    setActiveMessageId(null);
+  };
   const bottomPanel = useBottomPanel(
     "message actions",
     "(max-width: 1023px)",
     "content",
+    closeMessageActions,
   );
   const { isMobile } = bottomPanel;
-  const [isMobileSheetOpen, setMobileSheetOpen] = useState(false);
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
   const cancelLongPress = () => {
@@ -788,10 +793,7 @@ export function MessageRow({
           {!bottomPanel.collapsed && (
             <div
               className="min-h-0 overflow-y-auto px-4"
-              onClick={() => {
-                setMobileSheetOpen(false);
-                setActiveMessageId(null);
-              }}
+              onClick={closeMessageActions}
             >
               {renderMenuItems(MessageSheetAction, true)}
             </div>

@@ -58,11 +58,13 @@ const PANEL_HEIGHT: Record<PanelSize, string> = {
  * slim bar, half height, or nearly full. Dragging the handle moves it with
  * the pointer and it stays where it's let go; a tap snaps to the next size.
  * Spread `sheet` on SheetContent and render `handle` at its top.
+ * With onDismiss, dragging slides the panel down to close instead of resizing.
  */
 export function useBottomPanel(
   label: string,
   mediaQuery = "(max-width: 639px)",
   initialSize: PanelSize = "half",
+  onDismiss?: () => void,
 ) {
   const isMobile = useMediaQuery(mediaQuery);
   const [panel, setPanel] = useState<PanelSize>(initialSize);
@@ -74,6 +76,7 @@ export function useBottomPanel(
   const [dragging, setDragging] = useState(false);
   // Where a drag left it, in px; null while at one of the three sizes.
   const [dragHeight, setDragHeight] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
 
   const startDrag = (event: React.PointerEvent<HTMLElement>) => {
     const sheet = event.currentTarget.closest<HTMLElement>('[role="dialog"]');
@@ -89,6 +92,10 @@ export function useBottomPanel(
   const moveDrag = (event: React.PointerEvent) => {
     const drag = dragRef.current;
     if (!drag) return;
+    if (onDismiss) {
+      setDragOffset(Math.max(0, event.clientY - drag.startY));
+      return;
+    }
     const height = Math.min(
       Math.max(drag.startHeight - (event.clientY - drag.startY), 72),
       window.innerHeight * 0.92,
@@ -101,6 +108,13 @@ export function useBottomPanel(
     setDragging(false);
     if (!drag) return;
     const moved = event.clientY - drag.startY;
+    if (onDismiss) {
+      setDragOffset(0);
+      if (event.type !== "pointercancel" && moved > drag.startHeight / 2) {
+        onDismiss();
+      }
+      return;
+    }
     const height = drag.panel.getBoundingClientRect().height;
     // Snapping hands the height back to the size classes; a free drag keeps
     // the inline height it already has (state follows to keep it).
@@ -137,7 +151,11 @@ export function useBottomPanel(
   const handle = (
     <button
       type="button"
-      aria-label={`Resize ${label} (now ${panel === "content" ? "content height" : panel === "bar" ? "a bar" : panel === "half" ? "half height" : "full height"})`}
+      aria-label={
+        onDismiss
+          ? `Close ${label} (drag down or press Enter)`
+          : `Resize ${label} (now ${panel === "content" ? "content height" : panel === "bar" ? "a bar" : panel === "half" ? "half height" : "full height"})`
+      }
       onPointerDown={startDrag}
       onPointerMove={moveDrag}
       onPointerUp={endDrag}
@@ -145,6 +163,10 @@ export function useBottomPanel(
       onKeyDown={(event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
+        if (onDismiss) {
+          onDismiss();
+          return;
+        }
         const at = PANEL_SIZES.indexOf(panel === "content" ? "bar" : panel);
         setDragHeight(null);
         setPanel(PANEL_SIZES[at === 2 ? 1 : at + 1]);
@@ -158,16 +180,23 @@ export function useBottomPanel(
   return {
     isMobile,
     /** At the bar and not being dragged: only the top row shows. */
-    collapsed: isMobile && panel === "bar" && !dragging,
+    collapsed: isMobile && panel === "bar" && dragHeight === null && !dragging,
     handle,
     sheet: isMobile
       ? {
           side: "bottom" as const,
-          style: dragHeight !== null ? { height: dragHeight } : undefined,
+          style: onDismiss
+            ? { transform: `translateY(${dragOffset}px)` }
+            : dragHeight !== null
+              ? { height: dragHeight }
+              : undefined,
           className: cn(
             "max-h-[92dvh] rounded-t-2xl",
             dragHeight === null && PANEL_HEIGHT[panel],
-            !dragging && "transition-[height] duration-200 ease-out",
+            !dragging &&
+              (onDismiss
+                ? "transition-transform duration-200 ease-out"
+                : "transition-[height] duration-200 ease-out"),
           ),
         }
       : { side: "right" as const, style: undefined, className: "" },

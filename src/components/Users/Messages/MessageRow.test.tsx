@@ -29,6 +29,7 @@ function nodes(value: unknown): Node[] {
 }
 
 function harness(mobile: boolean) {
+  let dismissPanel: () => void;
   const refs: unknown[] = [];
   let cursor = 0;
   let timerId = 0;
@@ -58,8 +59,14 @@ function harness(mobile: boolean) {
     },
     "@/components/ui/bottom-panel": {
       BottomPanelHeader: "BottomPanelHeader",
-      useBottomPanel: (_label: string, _query: string, initialSize: string) => {
+      useBottomPanel: (
+        _label: string,
+        _query: string,
+        initialSize: string,
+        onDismiss: () => void,
+      ) => {
         expect(initialSize).toBe("content");
+        dismissPanel = onDismiss;
         return {
           isMobile: mobile,
           collapsed: false,
@@ -127,6 +134,7 @@ function harness(mobile: boolean) {
     edits,
     deletes,
     active: () => active,
+    dismissPanel: () => dismissPanel(),
     render: () => {
       cursor = 0;
       props.activeMessageId = active;
@@ -202,7 +210,7 @@ test("mobile holds reveal actions without opening the sheet; scrolling and unmou
   expect(panelFocused).toBe(true);
   expect(content.props.tabIndex).toBe(-1);
   expect(String(content.props.className).split(" ")).toContain("outline-none");
-  sheet.props.onOpenChange!(false);
+  h.dismissPanel();
   expect(h.active()).toBeNull();
   expect(
     h
