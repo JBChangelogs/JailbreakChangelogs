@@ -2,9 +2,6 @@
 // sheets) would cover them or crowd them. Those surfaces carry
 // data-toast-avoid; the toaster measures them and moves toasts beside them.
 
-/** Marks a surface that toasts should sit beside, not on. */
-export const TOAST_AVOID = { "data-toast-avoid": "" } as const;
-
 /**
  * How far from the right edge toasts go: just left of the leftmost surface
  * on the right half of the screen. When there isn't room for a toast beside
