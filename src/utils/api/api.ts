@@ -1511,12 +1511,6 @@ export async function fetchInventoryData(robloxId: string) {
       });
     }
 
-    // Scanner account IDs are operational metadata and must not cross the
-    // server/client boundary with public inventory data.
-    if (data && typeof data === "object") {
-      delete data.bot_id;
-    }
-
     return data;
   } catch (err) {
     // console.error("[SERVER] Error fetching inventory data:", err);

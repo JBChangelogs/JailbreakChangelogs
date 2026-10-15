@@ -14,6 +14,7 @@ test("inventory stats initially match across timezones and number locales", () =
   };
   const stub = () => null;
   const numberLocale = { value: "en-US" };
+  let botName: string | undefined = "Scanner Bot";
   runInNewContext(
     `const originalNumberFormat = Number.prototype.toLocaleString;
      Number.prototype.toLocaleString = function(locales, options) {
@@ -39,6 +40,12 @@ test("inventory stats initially match across timezones and number locales", () =
         if (id === "react/jsx-runtime") return jsxRuntime;
         if (id.endsWith("useRealTimeRelativeDate"))
           return { useRealTimeRelativeDate };
+        if (id.endsWith("useRobloxDataQuery"))
+          return {
+            useRobloxUserDataQuery: () => ({
+              data: { usersData: { "456": { displayName: botName } } },
+            }),
+          };
         if (id.endsWith("timestamp")) return { formatMessageDate };
         if (id === "@tanstack/react-query")
           return { useQuery: () => ({ data: undefined }) };
@@ -79,6 +86,7 @@ test("inventory stats initially match across timezones and number locales", () =
       gamepasses: [],
       has_season_pass: false,
       job_id: "job",
+      bot_id: "456" as string | undefined,
       scan_id: "scan",
       scan_count: 1,
       created_at: 1791686596,
@@ -107,6 +115,17 @@ test("inventory stats initially match across timezones and number locales", () =
     );
     expect(browserInitial).toBe(server);
     expect(server).toContain("1,234");
+    expect(server).toContain("Last scanned by:");
+    expect(server).toContain("https://www.roblox.com/users/456/profile");
+    expect(server).toContain("Scanner Bot");
+    botName = undefined;
+    expect(
+      renderToStaticMarkup(React.createElement(exports.default, props)),
+    ).toContain("Bot 456");
+    props.currentData.bot_id = undefined;
+    expect(
+      renderToStaticMarkup(React.createElement(exports.default, props)),
+    ).not.toContain("Last scanned by:");
   } finally {
     if (oldTimezone === undefined) delete process.env.TZ;
     else process.env.TZ = oldTimezone;

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
+import { useRobloxUserDataQuery } from "@/hooks/useRobloxDataQuery";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { INVENTORY_API_URL } from "@/utils/api/api";
 import XpProgressBar from "./XpProgressBar";
@@ -175,6 +176,9 @@ export default function UserStatsSection({
     currentData?.updated_at || 0,
   );
   const tradeNote = (currentData?.trade_note?.note || "").trim();
+  const botId = currentData?.bot_id;
+  const { data: botRobloxData } = useRobloxUserDataQuery(botId || null);
+  const botUser = botId ? botRobloxData?.usersData?.[botId] : null;
 
   const scanHistoryQuery = useQuery({
     queryKey: ["inventory-scan-history", userId],
@@ -766,6 +770,24 @@ export default function UserStatsSection({
                       </span>
                     </span>
                   </div>
+
+                  {botId && (
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="text-secondary-text">
+                        Last scanned by:
+                      </span>
+                      <a
+                        href={`https://www.roblox.com/users/${botId}/profile`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-text hover:text-link font-medium transition-colors"
+                      >
+                        {botUser?.displayName ||
+                          botUser?.name ||
+                          `Bot ${botId}`}
+                      </a>
+                    </div>
+                  )}
 
                   {/* Queue Position */}
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
