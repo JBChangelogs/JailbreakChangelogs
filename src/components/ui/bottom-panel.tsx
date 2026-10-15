@@ -45,11 +45,12 @@ export function BottomPanelHeader({
 }
 
 const PANEL_SIZES = ["bar", "half", "full"] as const;
-type PanelSize = (typeof PANEL_SIZES)[number];
+type PanelSize = (typeof PANEL_SIZES)[number] | "content";
 const PANEL_HEIGHT: Record<PanelSize, string> = {
   bar: "h-auto",
   half: "h-[50dvh]",
   full: "h-[92dvh]",
+  content: "h-auto",
 };
 
 /**
@@ -61,9 +62,10 @@ const PANEL_HEIGHT: Record<PanelSize, string> = {
 export function useBottomPanel(
   label: string,
   mediaQuery = "(max-width: 639px)",
+  initialSize: PanelSize = "half",
 ) {
   const isMobile = useMediaQuery(mediaQuery);
-  const [panel, setPanel] = useState<PanelSize>("half");
+  const [panel, setPanel] = useState<PanelSize>(initialSize);
   const dragRef = useRef<{
     startY: number;
     startHeight: number;
@@ -135,7 +137,7 @@ export function useBottomPanel(
   const handle = (
     <button
       type="button"
-      aria-label={`Resize ${label} (now ${panel === "bar" ? "a bar" : panel === "half" ? "half height" : "full height"})`}
+      aria-label={`Resize ${label} (now ${panel === "content" ? "content height" : panel === "bar" ? "a bar" : panel === "half" ? "half height" : "full height"})`}
       onPointerDown={startDrag}
       onPointerMove={moveDrag}
       onPointerUp={endDrag}
@@ -143,7 +145,7 @@ export function useBottomPanel(
       onKeyDown={(event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
-        const at = PANEL_SIZES.indexOf(panel);
+        const at = PANEL_SIZES.indexOf(panel === "content" ? "bar" : panel);
         setDragHeight(null);
         setPanel(PANEL_SIZES[at === 2 ? 1 : at + 1]);
       }}

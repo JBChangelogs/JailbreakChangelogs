@@ -58,12 +58,15 @@ function harness(mobile: boolean) {
     },
     "@/components/ui/bottom-panel": {
       BottomPanelHeader: "BottomPanelHeader",
-      useBottomPanel: () => ({
-        isMobile: mobile,
-        collapsed: false,
-        handle: jsx("button", { children: "Resize message actions" }),
-        sheet: { side: "bottom", className: "h-[50dvh]" },
-      }),
+      useBottomPanel: (_label: string, _query: string, initialSize: string) => {
+        expect(initialSize).toBe("content");
+        return {
+          isMobile: mobile,
+          collapsed: false,
+          handle: jsx("button", { children: "Resize message actions" }),
+          sheet: { side: "bottom", className: "h-auto" },
+        };
+      },
     },
     "@/lib/utils": { cn },
     "@/utils/messages/formatting": formatting,
@@ -168,7 +171,7 @@ test("mobile holds reveal actions without opening the sheet; scrolling and unmou
   const content = h.render().find((node) => node.type === "SheetContent")!;
   expect(content.props.overlayClassName).toBe("bg-black/20 backdrop-blur-none");
   expect(content.props.side).toBe("bottom");
-  expect(content.props.className).toContain("h-[50dvh]");
+  expect(content.props.className).toContain("h-auto");
   const header = h.render().find((node) => node.type === "BottomPanelHeader")!;
   expect(header.props.showCloseButton).toBe(false);
   expect(nodes(header.props.handle)[0].props.children).toBe(

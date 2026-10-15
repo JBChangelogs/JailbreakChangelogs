@@ -128,7 +128,11 @@ export function MessageRow({
   handleRetryFailedMessage,
   handleEditMessage,
 }: MessageRowProps) {
-  const bottomPanel = useBottomPanel("message actions", "(max-width: 1023px)");
+  const bottomPanel = useBottomPanel(
+    "message actions",
+    "(max-width: 1023px)",
+    "content",
+  );
   const { isMobile } = bottomPanel;
   const [isMobileSheetOpen, setMobileSheetOpen] = useState(false);
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
