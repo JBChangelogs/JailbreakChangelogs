@@ -1162,7 +1162,7 @@ export default function TradeItemPickerV2({
                     <div className="mt-2 grid grid-cols-2 gap-1.5">
                       <Button
                         type="button"
-                        size="xs"
+                        size="sm"
                         variant="success"
                         onClick={addToOfferingSide}
                       >
@@ -1170,7 +1170,7 @@ export default function TradeItemPickerV2({
                       </Button>
                       <Button
                         type="button"
-                        size="xs"
+                        size="sm"
                         variant="destructive"
                         onClick={addToRequestingSide}
                       >
