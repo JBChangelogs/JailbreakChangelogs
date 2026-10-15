@@ -504,10 +504,10 @@ export default async function Home() {
                   prefetch={false}
                   className="group border-border-card bg-tertiary-bg hover:border-border-focus flex items-start gap-4 rounded-xl border p-4 transition-colors"
                 >
-                  <div className="bg-button-info/15 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg">
+                  <div className="bg-icon-tile-bg flex h-11 w-11 shrink-0 items-center justify-center rounded-lg">
                     <Icon
                       icon={tracker.icon}
-                      className="text-link h-6 w-6"
+                      className="text-icon-tile h-6 w-6"
                       inline={true}
                     />
                   </div>
@@ -548,10 +548,10 @@ export default async function Home() {
                       prefetch={false}
                       className={platformRowClass}
                     >
-                      <div className="bg-button-info/15 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                      <div className="bg-icon-tile-bg mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
                         <Icon
                           icon={item.icon}
-                          className="text-link h-4 w-4"
+                          className="text-icon-tile h-4 w-4"
                           inline={true}
                         />
                       </div>

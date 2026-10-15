@@ -141,6 +141,7 @@ export function setCustomTheme(
     scheme: theme.scheme,
     vars: theme.vars,
     logo_filter: theme.logo_filter,
+    icon: theme.icon ?? null,
   };
   if (current) safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(current));
   else safeLocalStorage.removeItem(STORAGE_KEY);

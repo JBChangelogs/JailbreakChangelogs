@@ -99,10 +99,10 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
     <div className="border-border-card bg-secondary-bg hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="bg-button-info/20 flex h-8 w-8 items-center justify-center rounded-lg">
+          <div className="bg-icon-tile-bg flex h-10 w-10 items-center justify-center rounded-lg">
             <Icon
               icon="heroicons-outline:sparkles"
-              className="text-link h-5 w-5"
+              className="text-icon-tile h-6 w-6"
             />
           </div>
           <h3 className="text-primary-text text-xl font-semibold">
@@ -171,10 +171,10 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
         </div>
       ) : !similarItems || similarItems.length === 0 ? (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-          <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
+          <div className="border-button-info/30 bg-icon-tile-bg mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
             <Icon
               icon="heroicons-outline:sparkles"
-              className="text-button-info h-8 w-8"
+              className="text-icon-tile h-8 w-8"
             />
           </div>
           <h4 className="text-primary-text mb-2 text-lg font-semibold">

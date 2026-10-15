@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
+import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   Tooltip,
@@ -31,7 +32,7 @@ export const ThemeShortcut = ({
   className,
   size = "md",
 }: ThemeShortcutProps) => {
-  const { theme, themes } = useTheme();
+  const { theme, themes, customTheme } = useTheme();
   const hidden = useSyncExternalStore(
     subscribeThemeShortcut,
     getThemeShortcutHidden,
@@ -39,8 +40,14 @@ export const ThemeShortcut = ({
   );
   if (hidden) return null;
 
-  const { icon, label } =
-    themes.find((option) => option.value === theme) ?? themes[0];
+  // A custom theme in use shows its own icon and name.
+  const site = themes.find((option) => option.value === theme) ?? themes[0];
+  const { icon, label } = customTheme
+    ? {
+        icon: customTheme.icon ?? DEFAULT_THEME_ICON,
+        label: customTheme.label,
+      }
+    : site;
   return (
     <Tooltip>
       <TooltipTrigger asChild>

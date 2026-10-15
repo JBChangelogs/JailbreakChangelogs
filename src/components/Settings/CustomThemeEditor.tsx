@@ -1,9 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ColorSwatch } from "@/components/ui/color-picker";
 import {
   Sheet,
@@ -16,6 +25,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -24,13 +35,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parseThemeCss, themeToCss } from "@/utils/ui/themeCss";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
+import ThemeIconPicker from "@/components/Settings/ThemeIconPicker";
+import { ThemeCard } from "@/components/Settings/ThemeSettings";
+import { customThemeOption } from "@/components/Settings/CustomThemeSettings";
+import { useAuthContext } from "@/contexts/AuthContext";
 import LogoFilterBuilder, {
   matchLogoFilter,
 } from "@/components/Settings/LogoFilterBuilder";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   createMyTheme,
+  fetchSharedTheme,
   fetchSiteThemes,
+  listMyThemes,
   ThemeApiError,
   updateMyTheme,
   type CustomThemeInput,
@@ -39,6 +56,7 @@ import {
 import {
   endCustomThemePreview,
   getCustomTheme,
+  parseShareCode,
   previewCustomTheme,
   setCustomTheme,
 } from "@/utils/ui/customTheme";
@@ -48,9 +66,10 @@ import {
   colorGroup,
   colorName,
   MAIN_COLORS,
-  withButtonTextColors,
+  withDefaultColors,
 } from "@/utils/ui/themeColors";
 import { cn } from "@/lib/utils";
+import { colorKeysAt } from "@/utils/ui/elementColors";
 
 let canvas: CanvasRenderingContext2D | null | undefined;
 
@@ -125,7 +144,7 @@ function ThemeColor({
 
 const fromSiteTheme = (theme: SiteTheme): Omit<CustomThemeInput, "label"> => ({
   scheme: theme.scheme,
-  vars: withButtonTextColors({ ...theme.vars }),
+  vars: withDefaultColors({ ...theme.vars }),
   logo_filter: theme.logo_filter,
 });
 
@@ -136,18 +155,26 @@ const segment =
  * Creates a theme, or edits `theme`. New themes start from the site theme in
  * use; "Start from" swaps every color for another site theme's.
  */
+/** Why the editor closed: saved, cancelled, or cancelled to go to settings. */
+export type EditorCloseReason = "saved" | "cancelled" | "cancelled-to-settings";
+
 export default function CustomThemeEditor({
   theme,
   open,
-  onOpenChange,
+  onClose,
   onSaved,
 }: {
   theme?: UserTheme;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: (reason: EditorCloseReason) => void;
   onSaved: (theme: UserTheme) => void;
 }) {
-  const { theme: siteTheme } = useTheme();
+  const onSettings = usePathname() === "/settings";
+  // The theme as last saved here; a new theme has one after its first save,
+  // so later saves update it instead of making another.
+  const [savedTheme, setSavedTheme] = useState(theme);
+  const [askDiscard, setAskDiscard] = useState(false);
+  const { theme: siteTheme, customTheme } = useTheme();
   const { data: siteThemes } = useQuery({
     queryKey: ["site-themes"],
     queryFn: fetchSiteThemes,
@@ -159,13 +186,20 @@ export default function CustomThemeEditor({
       ? {
           label: theme.label,
           scheme: theme.scheme,
-          vars: withButtonTextColors({ ...theme.vars }),
+          vars: withDefaultColors({ ...theme.vars }),
           logo_filter: theme.logo_filter,
+          icon: theme.icon ?? null,
         }
       : null,
   );
   const [saving, setSaving] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+  // Colors show one group at a time ("Main" first), or search results.
+  const [colorTab, setColorTab] = useState("Main");
+  const [colorSearch, setColorSearch] = useState("");
+  // Colors of an element picked on the page or in "All colors"; shown on
+  // their own until cleared.
+  const [picked, setPicked] = useState<string[] | null>(null);
+  const [picking, setPicking] = useState(false);
   // Colors picked in the preview, ringed for a moment.
   const [highlighted, setHighlighted] = useState<string[]>([]);
   useEffect(() => {
@@ -174,10 +208,28 @@ export default function CustomThemeEditor({
     return () => clearTimeout(timeout);
   }, [highlighted]);
 
-  // A new theme copies the site theme in use once the list has loaded.
+  // A new theme starts from the theme on screen, so the page doesn't shift
+  // color when the editor opens: the custom theme in use (its colors only,
+  // not its name or icon), or else the site theme once the list has loaded.
   const base = siteThemes?.find((t) => t.slug === siteTheme) ?? siteThemes?.[0];
+  const start: Omit<CustomThemeInput, "label"> | null = customTheme
+    ? {
+        scheme: customTheme.scheme,
+        vars: withDefaultColors({ ...customTheme.vars }),
+        logo_filter: customTheme.logo_filter,
+        icon: null,
+      }
+    : base
+      ? fromSiteTheme(base)
+      : null;
   const current: CustomThemeInput | null =
-    draft ?? (base ? { label: "My theme", ...fromSiteTheme(base) } : null);
+    draft ?? (start ? { label: "My theme", ...start } : null);
+  // What the theme was when the editor opened or last saved, to tell
+  // whether closing would lose changes.
+  const snapshot = current && JSON.stringify(current);
+  const baselineRef = useRef<string | null>(null);
+  if (baselineRef.current === null && snapshot) baselineRef.current = snapshot;
+  const dirty = snapshot !== baselineRef.current;
   const update = (change: Partial<CustomThemeInput>) =>
     current && setDraft({ ...current, ...change });
 
@@ -192,7 +244,8 @@ export default function CustomThemeEditor({
   // theme starts matched if its logo already is.
   // "css" shows the theme as editable CSS. Until it's edited, the text
   // follows the theme; once edited, Apply or Reset decides.
-  const [mode, setMode] = useState<"visual" | "css">("visual");
+  const [mode, setMode] = useState<"visual" | "css" | "import">("visual");
+  const [importInput, setImportInput] = useState("");
   const [cssDraft, setCssDraft] = useState<string | null>(null);
   const [cssErrors, setCssErrors] = useState<string[]>([]);
   const [matchLogo, setMatchLogo] = useState(
@@ -236,25 +289,34 @@ export default function CustomThemeEditor({
     }
   };
 
-  const save = async () => {
-    if (!current) return;
-    const input = { ...current, label: current.label.trim() };
+  // Saves without closing. Returns the saved theme, or null if it failed.
+  const save = async (): Promise<UserTheme | null> => {
+    if (!current || saving) return null;
+    // icon is sent only when it changed, so themes without one save on
+    // API versions that don't know the field yet.
+    const { icon = null, ...rest } = current;
+    const input =
+      icon !== (savedTheme?.icon ?? null)
+        ? { ...rest, icon, label: rest.label.trim() }
+        : { ...rest, label: rest.label.trim() };
     if (!input.label) {
       toast.error("Give your theme a name.");
-      return;
+      return null;
     }
     setSaving(true);
     try {
-      const saved = theme
-        ? await updateMyTheme(theme.id, input)
+      const saved = savedTheme
+        ? await updateMyTheme(savedTheme.id, input)
         : await createMyTheme(input);
       // Editing the theme in use updates it on screen too.
       if (getCustomTheme()?.share_code === saved.share_code) {
         setCustomTheme(saved);
       }
-      toast.success(theme ? "Theme saved" : "Theme created");
+      toast.success(savedTheme ? "Theme saved" : "Theme created");
+      setSavedTheme(saved);
+      baselineRef.current = JSON.stringify(current);
       onSaved(saved);
-      onOpenChange(false);
+      return saved;
     } catch (err) {
       toast.error("Couldn't save your theme", {
         description:
@@ -264,18 +326,43 @@ export default function CustomThemeEditor({
               ? err.message
               : undefined,
       });
+      return null;
     } finally {
       setSaving(false);
     }
   };
 
+  // Closing (the X, or Escape) is immediate when nothing changed since
+  // opening or the last save, or with Shift held; otherwise it asks first.
+  // A save this session counts as "saved", so the host can offer settings.
+  const cancel = (skipPrompt = false) => {
+    if (skipPrompt || !dirty)
+      onClose(savedTheme !== theme ? "saved" : "cancelled");
+    else setAskDiscard(true);
+  };
+
+  // Ctrl+S / Cmd+S saves without closing.
+  const saveRef = useRef(save);
+  saveRef.current = save;
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        void saveRef.current();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   const mainKeys = new Set(MAIN_COLORS.map(([key]) => key));
 
-  // From the preview: open "More colors" if needed, then bring the first
-  // picked color into view and ring all of them.
+  // From the page or the preview: show just those colors, bring them into
+  // view and ring them.
   const pickColors = (keys: string[]) => {
     setMode("visual");
-    if (keys.some((key) => !mainKeys.has(key))) setMoreOpen(true);
+    setColorSearch("");
+    setPicked(keys);
     setHighlighted(keys);
     setTimeout(() => {
       document
@@ -286,6 +373,156 @@ export default function CustomThemeEditor({
   const otherColors = current
     ? Object.keys(current.vars).filter((key) => !mainKeys.has(key))
     : [];
+  const colorGroups = [
+    {
+      name: "Main",
+      keys: MAIN_COLORS.map(([key]) => key).filter(
+        (key) => current && key in current.vars,
+      ),
+    },
+    ...COLOR_GROUPS.map((name) => ({
+      name,
+      keys: otherColors.filter((key) => colorGroup(key) === name),
+    })).filter((group) => group.keys.length),
+  ];
+  const search = colorSearch.trim().toLowerCase();
+  const shownColors = picked
+    ? picked.filter((key) => current && key in current.vars)
+    : search
+      ? Object.keys(current?.vars ?? {}).filter(
+          (key) =>
+            colorName(key).toLowerCase().includes(search) ||
+            key.includes(search),
+        )
+      : (colorGroups.find((group) => group.name === colorTab) ?? colorGroups[0])
+          .keys;
+
+  // The element picker, like devtools': hovering outlines an element on
+  // the page and names its colors; clicking opens those colors here.
+  useEffect(() => {
+    if (!picking || !current) return;
+    const known = new Set(Object.keys(current.vars));
+    const outline = document.createElement("div");
+    outline.className =
+      "pointer-events-none fixed z-[2147483646] hidden bg-button-info/10 outline-2 outline-offset-1 outline-button-info";
+    const label = document.createElement("div");
+    label.className =
+      "pointer-events-none fixed z-[2147483647] hidden max-w-80 rounded-md bg-black/85 px-2 py-1 text-[11px] font-medium text-white shadow-md";
+    const cursor = document.createElement("style");
+    cursor.textContent = "*{cursor:crosshair !important}";
+    document.body.append(outline, label);
+    document.head.append(cursor);
+
+    const hitAt = (target: EventTarget | null) => {
+      const el = target instanceof Element ? target : null;
+      // The editor itself isn't pickable.
+      if (!el || el.closest("[data-theme-editor]")) return null;
+      return colorKeysAt(el, known);
+    };
+    const onMove = (event: MouseEvent) => {
+      const hit = hitAt(event.target);
+      outline.classList.toggle("hidden", !hit);
+      label.classList.toggle("hidden", !hit);
+      if (!hit) return;
+      const box = hit.el.getBoundingClientRect();
+      Object.assign(outline.style, {
+        // Follows the element's own corners, so rounded cards outline cleanly.
+        borderRadius: getComputedStyle(hit.el).borderRadius,
+        left: `${box.left}px`,
+        top: `${box.top}px`,
+        width: `${box.width}px`,
+        height: `${box.height}px`,
+      });
+      label.textContent = hit.keys.map(colorName).join(" · ");
+      Object.assign(label.style, {
+        left: `${Math.max(4, box.left)}px`,
+        top: `${box.top > 28 ? box.top - 26 : box.bottom + 4}px`,
+      });
+    };
+    // Clicks pick instead of following links or pressing buttons.
+    const block = (event: Event) => {
+      if (!hitAt(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    const onClick = (event: MouseEvent) => {
+      const hit = hitAt(event.target);
+      if (!hit) return;
+      block(event);
+      setPicking(false);
+      pickColors(hit.keys);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPicking(false);
+    };
+    document.addEventListener("mousemove", onMove, true);
+    document.addEventListener("pointerdown", block, true);
+    document.addEventListener("mousedown", block, true);
+    document.addEventListener("click", onClick, true);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      outline.remove();
+      label.remove();
+      cursor.remove();
+      document.removeEventListener("mousemove", onMove, true);
+      document.removeEventListener("pointerdown", block, true);
+      document.removeEventListener("mousedown", block, true);
+      document.removeEventListener("click", onClick, true);
+      document.removeEventListener("keydown", onKey, true);
+    };
+    // Started fresh per pick: the colors a theme has don't change mid-pick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picking]);
+
+  // Import: a valid code or link loads that theme into the draft as soon
+  // as it's typed, once per theme, so the page shows it right away.
+  const importCode = mode === "import" ? parseShareCode(importInput) : null;
+  const imported = useQuery({
+    queryKey: ["shared-theme", importCode],
+    queryFn: () => fetchSharedTheme(importCode!),
+    enabled: !!importCode,
+    retry: false,
+    staleTime: 60_000,
+  });
+  const importedRef = useRef<string | null>(null);
+  // The user's other saved themes, as one-click imports.
+  const { user } = useAuthContext();
+  const { data: myThemes } = useQuery({
+    queryKey: ["my-themes", user?.id],
+    queryFn: listMyThemes,
+    enabled: open && mode === "import" && !!user,
+  });
+  const importableThemes = (myThemes?.themes ?? []).filter(
+    (t) => t.share_code !== savedTheme?.share_code,
+  );
+  const pasteImport = async () => {
+    try {
+      setImportInput(await navigator.clipboard.readText());
+    } catch {
+      toast.error("Couldn't read your clipboard", {
+        description: "Paste into the box instead.",
+      });
+    }
+  };
+  useEffect(() => {
+    const loaded = imported.data;
+    if (!loaded || !current || importedRef.current === loaded.share_code) {
+      return;
+    }
+    importedRef.current = loaded.share_code;
+    setMatchLogo(false);
+    setCssDraft(null);
+    setDraft({
+      // A new theme takes the imported name; an existing one keeps its own.
+      label: savedTheme ? current.label : loaded.label,
+      scheme: loaded.scheme,
+      vars: withDefaultColors({ ...loaded.vars }),
+      logo_filter: loaded.logo_filter,
+      icon: loaded.icon ?? null,
+    });
+    // current and theme are read when a new theme arrives, not tracked.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imported.data]);
 
   // The page itself is the preview: the draft shows on it while editing,
   // and closing (saved or not) puts back the theme in use.
@@ -295,16 +532,27 @@ export default function CustomThemeEditor({
   });
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
+    <Sheet open={open} onOpenChange={(next) => !next && cancel()} modal={false}>
       {/* Not modal and no overlay: the user browses the site with the draft
           applied. Clicks on the page don't close it, so work isn't lost. */}
       <SheetContent
         hideOverlay
         onInteractOutside={(event) => event.preventDefault()}
+        data-theme-editor=""
         className="bg-secondary-bg @container flex h-full w-full flex-col gap-0 p-0 sm:max-w-xl"
       >
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Close the editor"
+          title="Close (Shift+click to skip unsaved changes)"
+          onClick={(event) => cancel(event.shiftKey)}
+          className="absolute top-3 right-3"
+        >
+          <Icon icon="lucide:x" aria-hidden="true" />
+        </Button>
         <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
-          <SheetTitle>{theme ? "Edit theme" : "New theme"}</SheetTitle>
+          <SheetTitle>{savedTheme ? "Edit theme" : "New theme"}</SheetTitle>
           <SheetDescription className="text-secondary-text">
             Browse the site to see your theme anywhere. Changes show as you go.
           </SheetDescription>
@@ -320,11 +568,20 @@ export default function CustomThemeEditor({
             <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 pt-2 pb-6">
               <Tabs
                 value={mode}
-                onValueChange={(value) => setMode(value as "visual" | "css")}
+                onValueChange={(value) =>
+                  setMode(value as "visual" | "css" | "import")
+                }
               >
-                <TabsList>
-                  <TabsTrigger value="visual">Visual</TabsTrigger>
-                  <TabsTrigger value="css">CSS</TabsTrigger>
+                <TabsList fullWidth>
+                  <TabsTrigger value="visual" fullWidth>
+                    Visual
+                  </TabsTrigger>
+                  <TabsTrigger value="css" fullWidth>
+                    CSS
+                  </TabsTrigger>
+                  <TabsTrigger value="import" fullWidth>
+                    Import
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
               <div className="flex flex-wrap items-end gap-3">
@@ -365,6 +622,10 @@ export default function CustomThemeEditor({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <ThemeIconPicker
+                  value={current.icon ?? null}
+                  onChange={(icon) => update({ icon })}
+                />
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -398,62 +659,118 @@ export default function CustomThemeEditor({
 
               {mode === "visual" ? (
                 <>
-                  <div>
-                    <h3 className="text-primary-text mb-2 text-sm font-medium">
+                  <div className="space-y-3">
+                    <h3 className="text-primary-text text-sm font-medium">
                       Colors
                     </h3>
-                    <div className="grid gap-2 @md:grid-cols-2">
-                      {MAIN_COLORS.filter(([key]) => key in current.vars).map(
-                        ([key]) => (
-                          <ThemeColor
-                            key={key}
-                            colorKey={key}
-                            value={current.vars[key]}
-                            vars={current.vars}
-                            highlighted={highlighted.includes(key)}
-                            onChange={(value) => setColor(key, value)}
-                          />
-                        ),
-                      )}
+                    <div className="flex flex-wrap gap-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="secondary"
+                            size="md"
+                            className="min-w-40 flex-1 justify-between"
+                          >
+                            <span className="flex items-center gap-2">
+                              {
+                                (
+                                  colorGroups.find(
+                                    (g) => g.name === colorTab,
+                                  ) ?? colorGroups[0]
+                                ).name
+                              }
+                              <span className="tabular-nums opacity-70">
+                                {
+                                  (
+                                    colorGroups.find(
+                                      (g) => g.name === colorTab,
+                                    ) ?? colorGroups[0]
+                                  ).keys.length
+                                }
+                              </span>
+                            </span>
+                            <Icon
+                              icon="lucide:chevron-down"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) overflow-y-auto rounded-xl border p-1 shadow-lg"
+                        >
+                          <DropdownMenuRadioGroup
+                            value={colorTab}
+                            onValueChange={(value) => {
+                              setColorTab(value);
+                              setColorSearch("");
+                              setPicked(null);
+                            }}
+                          >
+                            {colorGroups.map((g) => (
+                              <DropdownMenuRadioItem
+                                key={g.name}
+                                value={g.name}
+                                className="focus:bg-quaternary-bg focus:text-primary-text flex cursor-pointer justify-between gap-3 rounded-lg py-2 text-sm"
+                              >
+                                {g.name}
+                                <span className="text-secondary-text tabular-nums">
+                                  {g.keys.length}
+                                </span>
+                              </DropdownMenuRadioItem>
+                            ))}
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <Input
+                        value={colorSearch}
+                        onChange={(event) => {
+                          setColorSearch(event.target.value);
+                          setPicked(null);
+                        }}
+                        placeholder="Search colors"
+                        aria-label="Search colors"
+                        className="min-w-40 flex-1"
+                      />
+                      <Button
+                        variant={picking ? "default" : "secondary"}
+                        size="md"
+                        aria-pressed={picking}
+                        onClick={() => setPicking(!picking)}
+                      >
+                        <Icon icon="lucide:pipette" aria-hidden="true" />
+                        {picking ? "Click on the page…" : "Pick"}
+                      </Button>
                     </div>
-                    <details
-                      className="mt-3"
-                      open={moreOpen}
-                      onToggle={(event) =>
-                        setMoreOpen(event.currentTarget.open)
-                      }
-                    >
-                      <summary className="text-link cursor-pointer text-sm font-medium">
-                        More colors ({otherColors.length})
-                      </summary>
-                      <div className="mt-3 space-y-4">
-                        {COLOR_GROUPS.map((group) => {
-                          const keys = otherColors.filter(
-                            (key) => colorGroup(key) === group,
-                          );
-                          if (!keys.length) return null;
-                          return (
-                            <div key={group}>
-                              <h4 className="text-secondary-text mb-2 text-xs font-semibold tracking-wide uppercase">
-                                {group}
-                              </h4>
-                              <div className="grid gap-2 @md:grid-cols-2">
-                                {keys.map((key) => (
-                                  <ThemeColor
-                                    key={key}
-                                    colorKey={key}
-                                    value={current.vars[key]}
-                                    vars={current.vars}
-                                    highlighted={highlighted.includes(key)}
-                                    onChange={(value) => setColor(key, value)}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
+                    {picked && (
+                      <div className="bg-button-info/10 text-secondary-text flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs">
+                        Colors on what you picked
+                        <button
+                          type="button"
+                          onClick={() => setPicked(null)}
+                          className="text-link cursor-pointer font-medium"
+                        >
+                          Show all
+                        </button>
                       </div>
-                    </details>
+                    )}
+                    <div className="grid gap-2 @md:grid-cols-2">
+                      {shownColors.map((key) => (
+                        <ThemeColor
+                          key={key}
+                          colorKey={key}
+                          value={current.vars[key]}
+                          vars={current.vars}
+                          highlighted={highlighted.includes(key)}
+                          onChange={(value) => setColor(key, value)}
+                        />
+                      ))}
+                    </div>
+                    {search && !shownColors.length && (
+                      <p className="text-secondary-text text-sm">
+                        No colors match &ldquo;{colorSearch.trim()}&rdquo;.
+                      </p>
+                    )}
                   </div>
 
                   {/* Its own card, so the logo controls read as one setting. */}
@@ -482,6 +799,125 @@ export default function CustomThemeEditor({
                     />
                   </div>
                 </>
+              ) : mode === "import" ? (
+                <div className="space-y-5">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-icon-tile-bg flex size-10 shrink-0 items-center justify-center rounded-lg">
+                      <Icon
+                        icon="lucide:download"
+                        aria-hidden="true"
+                        className="text-icon-tile size-5"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-primary-text text-sm font-medium">
+                        Import a theme
+                      </h3>
+                      <p className="text-secondary-text text-xs">
+                        Paste a theme code or share link. It loads into this
+                        theme right away.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        value={importInput}
+                        onChange={(event) => setImportInput(event.target.value)}
+                        placeholder="Theme code or share link"
+                        aria-label="Theme code or share link"
+                        spellCheck={false}
+                        autoComplete="off"
+                        autoFocus
+                      />
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        onClick={() => void pasteImport()}
+                      >
+                        <Icon
+                          icon="lucide:clipboard-paste"
+                          aria-hidden="true"
+                        />
+                        Paste
+                      </Button>
+                    </div>
+                    {importInput.trim() && !imported.data && (
+                      <p
+                        className={cn(
+                          "text-xs",
+                          imported.isError || !importCode
+                            ? "text-status-error"
+                            : "text-secondary-text",
+                        )}
+                      >
+                        {!importCode
+                          ? "That isn't a theme code or link."
+                          : imported.isLoading
+                            ? "Loading the theme…"
+                            : "No theme has that code, or its owner deleted it."}
+                      </p>
+                    )}
+                  </div>
+
+                  {imported.data && (
+                    <div className="border-border-card bg-tertiary-bg/40 flex items-center gap-4 rounded-xl border p-3">
+                      <div className="w-36 shrink-0">
+                        <ThemeCard
+                          compact
+                          option={customThemeOption(imported.data)}
+                          name="import-loaded"
+                          checked
+                          onChange={() => {}}
+                        />
+                      </div>
+                      <div className="min-w-0 space-y-1">
+                        <p className="text-status-success flex items-center gap-1.5 text-xs font-medium">
+                          <Icon icon="lucide:check" aria-hidden="true" />
+                          Loaded into your theme
+                        </p>
+                        <p className="text-primary-text truncate font-medium">
+                          {imported.data.label}
+                        </p>
+                        <p className="text-secondary-text font-mono text-xs">
+                          {imported.data.share_code}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setMode("visual")}
+                          className="text-link cursor-pointer text-xs font-medium"
+                        >
+                          Change its colors
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {importableThemes.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-primary-text text-sm font-medium">
+                        Or start from one of yours
+                      </h3>
+                      <div
+                        role="radiogroup"
+                        aria-label="Your themes"
+                        className="grid grid-cols-2 gap-2 @md:grid-cols-3"
+                      >
+                        {importableThemes.map((t) => (
+                          <ThemeCard
+                            key={t.share_code}
+                            compact
+                            option={customThemeOption(t)}
+                            name="import-mine"
+                            checked={importCode === t.share_code}
+                            onChange={() => setImportInput(t.share_code)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -554,15 +990,59 @@ export default function CustomThemeEditor({
           </>
         )}
 
-        <div className="border-border-card flex shrink-0 justify-end gap-2 border-t px-6 py-4">
-          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={save} size="sm" disabled={!current || saving}>
-            {saving ? "Saving…" : theme ? "Save" : "Create theme"}
+        <div className="border-border-card shrink-0 border-t px-6 py-4">
+          <Button
+            size="md"
+            onClick={() => void save()}
+            disabled={!current || saving}
+            title="Save (Ctrl+S)"
+            className="w-full"
+          >
+            {saving ? "Saving…" : "Save"}
           </Button>
         </div>
       </SheetContent>
+
+      <Dialog open={askDiscard} onOpenChange={setAskDiscard}>
+        <DialogContent className="max-w-md rounded-lg p-6" showClose>
+          <DialogHeader>
+            <DialogTitle>Discard your changes?</DialogTitle>
+            <DialogDescription>
+              Your latest changes haven&apos;t been saved.
+            </DialogDescription>
+          </DialogHeader>
+          <p className="text-secondary-text text-xs">
+            Tip: hold Shift when you click the X to skip this.
+          </p>
+          <DialogFooter className="mt-2 flex-wrap gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setAskDiscard(false);
+                onClose("cancelled");
+              }}
+            >
+              Discard
+            </Button>
+            {!onSettings && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setAskDiscard(false);
+                  onClose("cancelled-to-settings");
+                }}
+              >
+                Discard and go to settings
+              </Button>
+            )}
+            <Button size="sm" onClick={() => setAskDiscard(false)}>
+              Keep editing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   );
 }

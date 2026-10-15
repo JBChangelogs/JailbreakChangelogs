@@ -195,6 +195,7 @@ export function NotificationPopover({
       )}
 
       <PopoverContent
+        data-toast-avoid=""
         align={isDesktop ? "end" : "center"}
         className={cn(
           "overflow-hidden rounded-2xl p-0",

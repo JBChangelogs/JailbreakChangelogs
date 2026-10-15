@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { colorName, withButtonTextColors } from "@/utils/ui/themeColors";
+import { colorName, withDefaultColors } from "@/utils/ui/themeColors";
 
 /** A group of related samples, in the order things appear on the site. */
 function Section({
@@ -135,7 +135,7 @@ export default function CustomThemePreview({
       style={
         {
           // Older themes lack the newer text colors; the page's would leak in.
-          ...withButtonTextColors(vars),
+          ...withDefaultColors(vars),
           "--logo-filter": logoFilter || "none",
           colorScheme: scheme,
         } as CSSProperties

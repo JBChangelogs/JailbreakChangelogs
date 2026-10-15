@@ -358,7 +358,7 @@ export default function MyIssues() {
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                      <span className="bg-button-info/10 text-button-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                      <span className="bg-icon-tile-bg text-icon-tile flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         <Icon icon="heroicons:flag" className="h-4.5 w-4.5" />
                       </span>
                       <div>

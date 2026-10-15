@@ -164,6 +164,12 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
      a theme sets them, so orange buttons can have dark text and red ones light. */
   --color-button-danger-text: var(--color-form-button-text);
   --color-button-success-text: var(--color-form-button-text);
+  /* Tinted tiles behind feature icons (homepage, bot page) and the Live/New/Soon
+     badges in menus; they follow the buttons and links unless a theme sets them. */
+  --color-icon-tile-bg: color-mix(in srgb, var(--color-button-info) 15%, transparent);
+  --color-icon-tile: var(--color-link);
+  --color-menu-badge-bg: color-mix(in srgb, var(--color-button-info) 20%, transparent);
+  --color-menu-badge-text: var(--color-link);
 
   /* Form Elements */
   --color-form-input: hsl(240, 8%, 9%); /* Input field backgrounds */

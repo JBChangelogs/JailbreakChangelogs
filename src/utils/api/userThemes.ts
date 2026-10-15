@@ -2,7 +2,7 @@ import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { sanitizeThemes, type SiteTheme } from "@/utils/ui/themeOptions";
 
-/** A custom color theme. Only colors: no cursor, icon or slug. */
+/** A custom color theme: colors, a logo filter and an optional icon. */
 export interface CustomTheme {
   /** 8 characters; anyone can look the theme up with it. */
   share_code: string;
@@ -10,6 +10,8 @@ export interface CustomTheme {
   scheme: "dark" | "light";
   vars: Record<string, string>;
   logo_filter: string | null;
+  /** An Iconify name, or null for the default palette. Older themes lack it. */
+  icon?: string | null;
 }
 
 /** One of the signed-in user's own themes. */
@@ -25,7 +27,7 @@ export interface SharedTheme extends CustomTheme {
 
 export type CustomThemeInput = Pick<
   CustomTheme,
-  "label" | "scheme" | "vars" | "logo_filter"
+  "label" | "scheme" | "vars" | "logo_filter" | "icon"
 >;
 
 /** An error from the themes API, with its code such as "supporter_required". */

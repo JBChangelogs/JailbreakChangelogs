@@ -24,6 +24,10 @@ const MAIN_NAMES = new Map<string, string>([
   ...MAIN_COLORS,
   ["--color-button-danger-text", "Danger button text"],
   ["--color-button-success-text", "Success button text"],
+  ["--color-icon-tile-bg", "Icon tile background"],
+  ["--color-icon-tile", "Icon tile icon"],
+  ["--color-menu-badge-bg", "Menu badge background"],
+  ["--color-menu-badge-text", "Menu badge text"],
 ]);
 
 /** "--color-card-tag-bg" → "Card tag bg", unless it has a plain name above. */
@@ -37,6 +41,8 @@ export function colorName(key: string): string {
 /** The group a color sits under in the editor's "More colors". */
 export function colorGroup(key: string): string {
   const name = key.replace(/^--color-/, "");
+  if (name.startsWith("icon-tile") || name.startsWith("menu-badge"))
+    return "Icons and menu badges";
   if (name.startsWith("badge-")) return "Badges";
   if (name.startsWith("supporter-")) return "Supporters";
   if (name.startsWith("button-") || name.startsWith("form-button"))
@@ -61,26 +67,44 @@ export const COLOR_GROUPS = [
   "Buttons",
   "Forms",
   "Status and accents",
+  "Icons and menu badges",
   "Badges",
   "Supporters",
   "Overlays",
 ];
 
-// Added after themes existed, so older themes may not have them. They start
-// as the theme's button text, as they do in globals.css.
-const BUTTON_TEXT_COLORS = [
-  "--color-button-danger-text",
-  "--color-button-success-text",
+// Colors added after themes existed, so older themes may not have them.
+// Each starts where globals.css starts it: from the theme's own colors.
+const NEWER_COLORS: [
+  key: string,
+  from: (vars: Record<string, string>) => string | undefined,
+][] = [
+  ["--color-button-danger-text", (v) => v["--color-form-button-text"]],
+  ["--color-button-success-text", (v) => v["--color-form-button-text"]],
+  ["--color-icon-tile", (v) => v["--color-link"]],
+  ["--color-menu-badge-text", (v) => v["--color-link"]],
+  [
+    "--color-icon-tile-bg",
+    (v) =>
+      v["--color-button-info"] &&
+      `color-mix(in srgb, ${v["--color-button-info"]} 15%, transparent)`,
+  ],
+  [
+    "--color-menu-badge-bg",
+    (v) =>
+      v["--color-button-info"] &&
+      `color-mix(in srgb, ${v["--color-button-info"]} 20%, transparent)`,
+  ],
 ];
 
-/** The theme's colors, with the newer button text colors filled in if missing. */
-export function withButtonTextColors(
+/** The theme's colors, with the newer ones filled in if missing. */
+export function withDefaultColors(
   vars: Record<string, string>,
 ): Record<string, string> {
-  const text = vars["--color-form-button-text"];
-  if (!text) return vars;
-  const missing = BUTTON_TEXT_COLORS.filter((key) => !(key in vars));
-  return missing.length
-    ? { ...vars, ...Object.fromEntries(missing.map((key) => [key, text])) }
-    : vars;
+  const filled = { ...vars };
+  for (const [key, from] of NEWER_COLORS) {
+    const value = key in vars ? undefined : from(vars);
+    if (value) filled[key] = value;
+  }
+  return filled;
 }

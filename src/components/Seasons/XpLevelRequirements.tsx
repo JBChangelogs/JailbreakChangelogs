@@ -79,10 +79,10 @@ export default function XpLevelRequirements({
   return (
     <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
       <div className="mb-6 flex items-center gap-3">
-        <div className="bg-button-info/10 flex h-10 w-10 items-center justify-center rounded-lg">
+        <div className="bg-icon-tile-bg flex h-10 w-10 items-center justify-center rounded-lg">
           <Icon
             icon="heroicons:bolt"
-            className="text-link h-6 w-6"
+            className="text-icon-tile h-6 w-6"
             inline={true}
           />
         </div>

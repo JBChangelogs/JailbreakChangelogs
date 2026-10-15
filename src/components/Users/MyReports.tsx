@@ -518,7 +518,7 @@ function ReportContext({ report }: { report: Report }) {
           : "";
       return (
         <div className={`${contextClassName} flex items-center gap-3 py-1`}>
-          <div className="bg-button-info/10 text-button-info flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+          <div className="bg-icon-tile-bg text-icon-tile flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
             <Icon icon="heroicons:identification" className="h-4 w-4" />
           </div>
           <div className="min-w-0">
@@ -1078,7 +1078,7 @@ export default function MyReports() {
                   >
                     <div className="relative z-10 flex flex-wrap items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                        <span className="bg-button-info/10 text-button-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                        <span className="bg-icon-tile-bg text-icon-tile flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                           <Icon icon="heroicons:flag" className="h-4.5 w-4.5" />
                         </span>
                         <div className="min-w-0">

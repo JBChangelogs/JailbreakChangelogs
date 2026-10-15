@@ -1412,7 +1412,7 @@ export default function ValueSuggestionDetailPage() {
                       <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
                         <div className="border-border-card bg-tertiary-bg/30 flex items-center justify-between gap-4 border-b px-5 py-4">
                           <div className="flex min-w-0 items-center gap-3">
-                            <span className="bg-button-info/10 text-link flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                            <span className="bg-icon-tile-bg text-icon-tile flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                               <Icon
                                 icon="material-symbols:format-quote-rounded"
                                 className="h-5 w-5"

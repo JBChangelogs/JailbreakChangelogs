@@ -4,7 +4,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Spinner } from "@/components/ui/Spinner";
 import { useSonnerTwemoji } from "@/hooks/useSonnerTwemoji";
 import { Toaster as Sonner } from "sonner";
-import type { CSSProperties } from "react";
+import { useEffect, type CSSProperties } from "react";
+import { toastRightOffset } from "@/utils/ui/toastAvoidance";
 import { Icon } from "@/components/ui/IconWrapper";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
@@ -54,6 +55,46 @@ function mergeToastClassNames(
 const Toaster = ({ toastOptions, style, icons, ...props }: ToasterProps) => {
   const { resolvedTheme } = useTheme();
   useSonnerTwemoji();
+
+  // Keep toasts beside open right-hand surfaces (data-toast-avoid), such as
+  // header popovers and sheets, instead of on top of them. Measured, so it
+  // follows their real size and position as they open, move and close.
+  useEffect(() => {
+    const root = document.documentElement;
+    let frame = 0;
+    const update = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const surfaces = [...document.querySelectorAll("[data-toast-avoid]")]
+          .map((el) => el.getBoundingClientRect())
+          .filter((box) => box.width > 0 && box.height > 0);
+        root.style.setProperty(
+          "--toast-runtime-right",
+          `${toastRightOffset(surfaces, window.innerWidth)}px`,
+        );
+      });
+    };
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-state", "data-toast-avoid"],
+    });
+    // Sheets slide in, so measure again once they settle.
+    window.addEventListener("resize", update);
+    document.addEventListener("animationend", update, true);
+    document.addEventListener("transitionend", update, true);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+      document.removeEventListener("animationend", update, true);
+      document.removeEventListener("transitionend", update, true);
+      root.style.removeProperty("--toast-runtime-right");
+    };
+  }, []);
 
   return (
     <Sonner

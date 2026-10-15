@@ -17,10 +17,10 @@ export default function MoneyLeaderboardPage() {
   return (
     <main className="text-primary-text flex min-h-screen items-center justify-center px-4">
       <div className="flex max-w-md flex-col items-center gap-6 text-center">
-        <div className="bg-button-info/10 flex h-20 w-20 items-center justify-center rounded-full">
+        <div className="bg-icon-tile-bg flex h-20 w-20 items-center justify-center rounded-full">
           <Icon
             icon="mdi:podium"
-            className="text-link h-10 w-10"
+            className="text-icon-tile h-10 w-10"
             inline={true}
           />
         </div>

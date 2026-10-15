@@ -133,7 +133,7 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
                           {item.badge === "live" && (
                             <span
                               className={cn(
-                                "bg-button-info/20 text-link shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase",
+                                "bg-menu-badge-bg text-menu-badge-text shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase",
                                 labelClassName,
                               )}
                             >

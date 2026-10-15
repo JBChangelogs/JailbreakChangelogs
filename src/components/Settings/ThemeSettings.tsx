@@ -183,8 +183,12 @@ interface PickerItem {
   pick: () => void;
   /** Set on custom themes only. */
   badge?: string;
-  menu?: React.ReactNode;
+  /** Wraps a custom theme's card with its menu (also on right-click). */
+  wrap?: (card: React.ReactNode) => React.ReactNode;
 }
+
+const withMenu = (item: PickerItem, card: React.ReactNode) =>
+  item.wrap ? item.wrap(card) : card;
 
 /**
  * Every theme at once in a side sheet, grouped into site and custom themes,
@@ -258,18 +262,16 @@ function AllThemesSheet({
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {group.map(({ item, index }) => (
-                      <div key={item.key} className="relative">
-                        <ThemeCard
-                          option={item.option}
-                          name={name}
-                          checked={item.checked}
-                          badge={item.badge}
-                          onChange={() => onPick(index)}
-                        />
-                        {item.menu && (
-                          <div className="absolute top-2 right-2">
-                            {item.menu}
-                          </div>
+                      <div key={item.key}>
+                        {withMenu(
+                          item,
+                          <ThemeCard
+                            option={item.option}
+                            name={name}
+                            checked={item.checked}
+                            badge={item.badge}
+                            onChange={() => onPick(index)}
+                          />,
                         )}
                       </div>
                     ))}
@@ -311,7 +313,11 @@ export default function ThemeSettings() {
       checked: customTheme?.share_code === t.share_code,
       pick: () => setCustomTheme(t),
       badge: t === custom.sharedInUse ? "Shared" : "Custom",
-      menu: <CustomThemeMenu theme={t} custom={custom} />,
+      wrap: (card: React.ReactNode) => (
+        <CustomThemeMenu theme={t} custom={custom}>
+          {card}
+        </CustomThemeMenu>
+      ),
     })),
   ];
   const cursorEnabled = useSyncExternalStore(
@@ -395,21 +401,20 @@ export default function ThemeSettings() {
           {items.map((item) => (
             <CarouselItem
               key={item.key}
-              className="relative basis-[85%] pl-3 sm:basis-[200px]"
+              className="basis-[85%] pl-3 sm:basis-[200px]"
             >
-              <ThemeCard
-                option={item.option}
-                name={`${id}-theme`}
-                checked={item.checked}
-                badge={item.badge}
-                onChange={() => {
-                  userPickedRef.current = true;
-                  item.pick();
-                }}
-              />
-              {/* Beside the card, not in it, so opening it doesn't pick the theme. */}
-              {item.menu && (
-                <div className="absolute top-2 right-2">{item.menu}</div>
+              {withMenu(
+                item,
+                <ThemeCard
+                  option={item.option}
+                  name={`${id}-theme`}
+                  checked={item.checked}
+                  badge={item.badge}
+                  onChange={() => {
+                    userPickedRef.current = true;
+                    item.pick();
+                  }}
+                />,
               )}
             </CarouselItem>
           ))}

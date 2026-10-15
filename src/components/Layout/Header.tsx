@@ -11,7 +11,6 @@ import {
 
 const log = createLogger("UI");
 import SiteLogo from "@/components/ui/SiteLogo";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
@@ -78,7 +77,6 @@ import {
   fetchUnreadNotificationCount,
 } from "@/utils/api/api";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
-import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
 import {
   NotificationPopover,
   UnreadBadge,
@@ -180,7 +178,7 @@ const MobileNavItem = ({
       {label}
     </span>
     {badge && (
-      <span className="bg-button-info/20 text-link ml-auto shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
+      <span className="bg-menu-badge-bg text-menu-badge-text ml-auto shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
         {badge}
       </span>
     )}
@@ -469,7 +467,6 @@ const MobileDrawer = memo(function MobileDrawer({
 
 export default function Header() {
   const queryClient = useQueryClient();
-  const isXlUp = useMediaQuery("(min-width: 1280px)");
   const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const sidebarCollapsed = useSyncExternalStore(
@@ -487,7 +484,6 @@ export default function Header() {
     [],
   );
   const [utmModalOpen, setUtmModalOpen] = useState(false);
-  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const hasWsUnreadSeedRef = useRef(false);
   const seenRealtimeMessageIdsRef = useRef(new Set<string>());
   const notificationCountRefreshTimeoutRef = useRef<number | null>(null);
@@ -671,11 +667,6 @@ export default function Header() {
     };
   }, [isAuthenticated, authUser?.id, queryClient]);
 
-  useToastRuntimeRightOffset({
-    enabled: !isXlUp,
-    rightOffset: mobileOpen || notificationMenuOpen ? "256px" : "16px",
-  });
-
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -852,7 +843,6 @@ export default function Header() {
                     setUnreadCount={setUnreadCount}
                     isAuthenticated={isAuthenticated}
                     variant="mobile"
-                    onOpenChange={setNotificationMenuOpen}
                   />
                   {showAuth && (
                     <Link

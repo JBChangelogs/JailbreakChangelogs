@@ -1,12 +1,11 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Input } from "@/components/ui/input";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   DropdownMenu,
@@ -14,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -23,19 +23,14 @@ import {
   type UserTheme,
 } from "@/utils/api/userThemes";
 import { openThemeEditor } from "@/utils/ui/themeEditor";
-import {
-  parseShareCode,
-  setCustomTheme,
-  SHARE_PARAM,
-  shareUrl,
-} from "@/utils/ui/customTheme";
+import { setCustomTheme, SHARE_PARAM, shareUrl } from "@/utils/ui/customTheme";
 import { themePreview, type ThemeOption } from "@/utils/ui/themeOptions";
 
 /** A custom theme as a picker card's option. */
 export const customThemeOption = (theme: CustomTheme): ThemeOption => ({
   value: theme.share_code,
   label: theme.label,
-  icon: "lucide:palette",
+  icon: theme.icon ?? DEFAULT_THEME_ICON,
   scheme: theme.scheme,
   preview: themePreview(theme.vars),
 });
@@ -169,72 +164,92 @@ function useOpenSharedTheme() {
 export function CustomThemeMenu({
   theme,
   custom,
+  children,
 }: {
   theme: CustomTheme;
   custom: CustomThemesState;
+  /** The theme's card; right-clicking it opens the menu too. */
+  children: React.ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
   const own = custom.mine.find((t) => t.share_code === theme.share_code);
   const openShared = useOpenSharedTheme();
   const item =
     "focus:bg-quaternary-bg focus:text-primary-text flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm";
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          aria-label={`Options for ${theme.label}`}
-          className="bg-secondary-bg/80 text-primary-text hover:bg-quaternary-bg focus-visible:ring-border-focus border-border-card flex size-7 cursor-pointer items-center justify-center rounded-md border backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <Icon icon="lucide:ellipsis" aria-hidden="true" className="size-4" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="border-border-card bg-secondary-bg text-primary-text min-w-44 rounded-xl border p-1 shadow-lg"
-      >
-        <DropdownMenuItem
-          className={item}
-          onSelect={() => void custom.copyLink(theme.share_code)}
-        >
-          <Icon icon="lucide:link" aria-hidden="true" className="size-4" />
-          Copy share link
-        </DropdownMenuItem>
-        {own ? (
-          <>
+    <div
+      className="relative h-full"
+      onContextMenu={(event) => {
+        event.preventDefault();
+        setOpen(true);
+      }}
+    >
+      {children}
+      {/* Beside the card, not in it, so opening it doesn't pick the theme. */}
+      <div className="absolute top-2 right-2">
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label={`Options for ${theme.label}`}
+              className="bg-secondary-bg/80 text-primary-text hover:bg-quaternary-bg focus-visible:ring-border-focus border-border-card flex size-7 cursor-pointer items-center justify-center rounded-md border backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <Icon
+                icon="lucide:ellipsis"
+                aria-hidden="true"
+                className="size-4"
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="border-border-card bg-secondary-bg text-primary-text min-w-44 rounded-xl border p-1 shadow-lg"
+          >
             <DropdownMenuItem
               className={item}
-              onSelect={() => custom.openEditor(own)}
+              onSelect={() => void custom.copyLink(theme.share_code)}
             >
-              <Icon
-                icon="lucide:pencil"
-                aria-hidden="true"
-                className="size-4"
-              />
-              Edit
+              <Icon icon="lucide:link" aria-hidden="true" className="size-4" />
+              Copy share link
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className={`${item} text-status-error focus:text-status-error`}
-              onSelect={() => custom.askDelete(own)}
-            >
-              <Icon
-                icon="lucide:trash-2"
-                aria-hidden="true"
-                className="size-4"
-              />
-              Delete
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <DropdownMenuItem
-            className={item}
-            onSelect={() => openShared(theme.share_code)}
-          >
-            <Icon icon="lucide:eye" aria-hidden="true" className="size-4" />
-            Preview and save a copy
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            {own ? (
+              <>
+                <DropdownMenuItem
+                  className={item}
+                  onSelect={() => custom.openEditor(own)}
+                >
+                  <Icon
+                    icon="lucide:pencil"
+                    aria-hidden="true"
+                    className="size-4"
+                  />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className={`${item} text-status-error focus:text-status-error`}
+                  onSelect={() => custom.askDelete(own)}
+                >
+                  <Icon
+                    icon="lucide:trash-2"
+                    aria-hidden="true"
+                    className="size-4"
+                  />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            ) : (
+              <DropdownMenuItem
+                className={item}
+                onSelect={() => openShared(theme.share_code)}
+              >
+                <Icon icon="lucide:eye" aria-hidden="true" className="size-4" />
+                Preview and save a copy
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 }
 
@@ -247,59 +262,27 @@ export default function CustomThemeControls({
 }: {
   custom: CustomThemesState;
 }) {
-  const id = useId();
-  const openShared = useOpenSharedTheme();
-  const [input, setInput] = useState("");
-
-  const openSharedCode = (event: React.FormEvent) => {
-    event.preventDefault();
-    const code = parseShareCode(input);
-    if (!code) {
-      toast.error("That isn't a theme code or link", {
-        description: "Codes are 8 letters and numbers, like K7QM4XRP.",
-      });
-      return;
-    }
-    setInput("");
-    openShared(code);
-  };
-
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <p className="text-secondary-text text-sm">
         <span className="text-primary-text font-medium">Custom themes</span>
-        {" · "}Make your own or use a shared one.
+        {" · "}Make your own, or import one someone shared.
       </p>
-      <div className="flex flex-col gap-2 sm:flex-row md:shrink-0">
-        <form onSubmit={openSharedCode} className="flex min-w-0 flex-1 gap-2">
-          <label htmlFor={`${id}-code`} className="sr-only">
-            Theme code or share link
-          </label>
-          <Input
-            id={`${id}-code`}
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            placeholder="Theme code or link"
-            spellCheck={false}
-            autoComplete="off"
-            className="min-w-0 md:w-48"
-          />
-          <Button type="submit" variant="secondary" size="md">
-            Preview
-          </Button>
-        </form>
-        {custom.isAuthenticated && (
-          <Button size="md" onClick={() => custom.openEditor("new")}>
-            <Icon icon="lucide:plus" aria-hidden="true" />
-            New theme
-            {custom.limit > 0 && (
-              <span className="tabular-nums opacity-80">
-                {custom.mine.length}/{custom.limit}
-              </span>
-            )}
-          </Button>
-        )}
-      </div>
+      {custom.isAuthenticated && (
+        <Button
+          size="md"
+          onClick={() => custom.openEditor("new")}
+          className="md:shrink-0"
+        >
+          <Icon icon="lucide:plus" aria-hidden="true" />
+          New theme
+          {custom.limit > 0 && (
+            <span className="tabular-nums opacity-80">
+              {custom.mine.length}/{custom.limit}
+            </span>
+          )}
+        </Button>
+      )}
     </div>
   );
 }
