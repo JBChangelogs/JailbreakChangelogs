@@ -69,6 +69,7 @@ import {
   withDefaultColors,
 } from "@/utils/ui/themeColors";
 import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { colorKeysAt } from "@/utils/ui/elementColors";
 
 let canvas: CanvasRenderingContext2D | null | undefined;
@@ -155,6 +156,14 @@ const segment =
  * Creates a theme, or edits `theme`. New themes start from the site theme in
  * use; "Start from" swaps every color for another site theme's.
  */
+const PANEL_SIZES = ["bar", "half", "full"] as const;
+type PanelSize = (typeof PANEL_SIZES)[number];
+const PANEL_HEIGHT: Record<PanelSize, string> = {
+  bar: "h-auto",
+  half: "h-[50dvh]",
+  full: "h-[92dvh]",
+};
+
 /** Why the editor closed: saved, cancelled, or cancelled to go to settings. */
 export type EditorCloseReason = "saved" | "cancelled" | "cancelled-to-settings";
 
@@ -174,6 +183,80 @@ export default function CustomThemeEditor({
   // so later saves update it instead of making another.
   const [savedTheme, setSavedTheme] = useState(theme);
   const [askDiscard, setAskDiscard] = useState(false);
+  // Phones get a bottom panel instead of a full-screen side sheet, so the
+  // page stays visible: a slim bar to browse, half height, or nearly full.
+  const isMobile = useMediaQuery("(max-width: 639px)");
+  const [panel, setPanel] = useState<PanelSize>("half");
+  // Dragging the handle moves the panel with the pointer; letting go
+  // settles on the nearest size. A tap steps up, or from full back down.
+  const dragRef = useRef<{
+    startY: number;
+    startHeight: number;
+    panel: HTMLElement;
+  } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  // Where a drag left it, in px; null while at one of the three sizes.
+  const [dragHeight, setDragHeight] = useState<number | null>(null);
+  const startDrag = (event: React.PointerEvent<HTMLElement>) => {
+    const sheet = event.currentTarget.closest<HTMLElement>(
+      "[data-theme-editor]",
+    );
+    if (!sheet) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = {
+      startY: event.clientY,
+      startHeight: sheet.getBoundingClientRect().height,
+      panel: sheet,
+    };
+    setDragging(true);
+  };
+  const moveDrag = (event: React.PointerEvent) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    const height = Math.min(
+      Math.max(drag.startHeight - (event.clientY - drag.startY), 72),
+      window.innerHeight * 0.92,
+    );
+    drag.panel.style.height = `${height}px`;
+  };
+  const endDrag = (event: React.PointerEvent) => {
+    const drag = dragRef.current;
+    dragRef.current = null;
+    setDragging(false);
+    if (!drag) return;
+    const moved = event.clientY - drag.startY;
+    const height = drag.panel.getBoundingClientRect().height;
+    // Snapping hands the height back to the size classes; a free drag keeps
+    // the inline height it already has (state follows to keep it).
+    const snapTo = (size: PanelSize) => {
+      drag.panel.style.height = "";
+      setDragHeight(null);
+      setPanel(size);
+    };
+    const sizes = {
+      bar: 72,
+      half: window.innerHeight * 0.5,
+      full: window.innerHeight * 0.92,
+    };
+    const nearest = PANEL_SIZES.reduce((best, size) =>
+      Math.abs(sizes[size] - height) < Math.abs(sizes[best] - height)
+        ? size
+        : best,
+    );
+    // A tap snaps: one size up from the nearest, or from full back down.
+    if (Math.abs(moved) < 6) {
+      const at = PANEL_SIZES.indexOf(nearest);
+      snapTo(PANEL_SIZES[at === 2 ? 1 : at + 1]);
+      return;
+    }
+    // A drag stays where it was let go, unless that's about the bar.
+    if (height < 100) {
+      snapTo("bar");
+      return;
+    }
+    setDragHeight(height);
+    setPanel(nearest);
+  };
   const { theme: siteTheme, customTheme } = useTheme();
   const { data: siteThemes } = useQuery({
     queryKey: ["site-themes"],
@@ -246,8 +329,10 @@ export default function CustomThemeEditor({
   // follows the theme; once edited, Apply or Reset decides.
   const [mode, setMode] = useState<"visual" | "css" | "import">("visual");
   const [importInput, setImportInput] = useState("");
+  const importInputRef = useRef<HTMLInputElement>(null);
   const [cssDraft, setCssDraft] = useState<string | null>(null);
   const [cssErrors, setCssErrors] = useState<string[]>([]);
+  const cssGutterRef = useRef<HTMLPreElement>(null);
   const [matchLogo, setMatchLogo] = useState(
     () =>
       !!theme?.logo_filter &&
@@ -270,6 +355,18 @@ export default function CustomThemeEditor({
       toast.success("CSS copied");
     } catch {
       toast.error("Couldn't copy the CSS");
+    }
+  };
+
+  const cssText = cssDraft ?? (current ? themeToCss(current) : "");
+  const pasteCss = async () => {
+    try {
+      setCssDraft(await navigator.clipboard.readText());
+      setCssErrors([]);
+    } catch {
+      toast.error("Couldn't read your clipboard", {
+        description: "Paste into the box instead.",
+      });
     }
   };
 
@@ -485,6 +582,13 @@ export default function CustomThemeEditor({
     staleTime: 60_000,
   });
   const importedRef = useRef<string | null>(null);
+  // Ready to paste into on desktop. Not on phones: it would pop up the
+  // keyboard, and scrolling to the field jumped the panel to its bottom.
+  useEffect(() => {
+    if (mode === "import" && !isMobile) {
+      importInputRef.current?.focus({ preventScroll: true });
+    }
+  }, [mode, isMobile]);
   // The user's other saved themes, as one-click imports.
   const { user } = useAuthContext();
   const { data: myThemes } = useQuery({
@@ -536,29 +640,90 @@ export default function CustomThemeEditor({
       {/* Not modal and no overlay: the user browses the site with the draft
           applied. Clicks on the page don't close it, so work isn't lost. */}
       <SheetContent
+        side={isMobile ? "bottom" : "right"}
         hideOverlay
         onInteractOutside={(event) => event.preventDefault()}
         data-theme-editor=""
-        className="bg-secondary-bg @container flex h-full w-full flex-col gap-0 p-0 sm:max-w-xl"
+        style={
+          isMobile && dragHeight !== null ? { height: dragHeight } : undefined
+        }
+        className={cn(
+          "bg-secondary-bg @container flex w-full flex-col gap-0 p-0",
+          isMobile
+            ? cn(
+                "max-h-[92dvh] rounded-t-2xl",
+                dragHeight === null && PANEL_HEIGHT[panel],
+                !dragging && "transition-[height] duration-200 ease-out",
+              )
+            : "h-full sm:max-w-xl",
+        )}
       >
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Close the editor"
-          title="Close (Shift+click to skip unsaved changes)"
-          onClick={(event) => cancel(event.shiftKey)}
-          className="absolute top-3 right-3"
-        >
-          <Icon icon="lucide:x" aria-hidden="true" />
-        </Button>
-        <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
-          <SheetTitle>{savedTheme ? "Edit theme" : "New theme"}</SheetTitle>
-          <SheetDescription className="text-secondary-text">
-            Browse the site to see your theme anywhere. Changes show as you go.
-          </SheetDescription>
-        </SheetHeader>
+        {isMobile ? (
+          <div className="shrink-0 px-4 pt-1 pb-3">
+            <button
+              type="button"
+              aria-label={`Resize the editor (now ${panel === "bar" ? "a bar" : panel === "half" ? "half height" : "full height"})`}
+              onPointerDown={startDrag}
+              onPointerMove={moveDrag}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                const at = PANEL_SIZES.indexOf(panel);
+                setPanel(PANEL_SIZES[at === 2 ? 1 : at + 1]);
+              }}
+              className="flex h-6 w-full cursor-grab touch-none items-center justify-center"
+            >
+              <span className="bg-border-primary h-1.5 w-12 rounded-full" />
+            </button>
+            <div className="flex items-center gap-2">
+              <SheetTitle className="min-w-0 flex-1 truncate text-base">
+                {savedTheme ? "Edit theme" : "New theme"}
+              </SheetTitle>
+              <Button
+                size="sm"
+                onClick={() => void save()}
+                disabled={!current || saving}
+              >
+                {saving ? "Saving…" : "Save"}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Close the editor"
+                onClick={(event) => cancel(event.shiftKey)}
+              >
+                <Icon icon="lucide:x" aria-hidden="true" />
+              </Button>
+            </div>
+            <SheetDescription className="sr-only">
+              Your changes show on the page above as you go.
+            </SheetDescription>
+          </div>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Close the editor"
+              title="Close (Shift+click to skip unsaved changes)"
+              onClick={(event) => cancel(event.shiftKey)}
+              className="absolute top-3 right-3"
+            >
+              <Icon icon="lucide:x" aria-hidden="true" />
+            </Button>
+            <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
+              <SheetTitle>{savedTheme ? "Edit theme" : "New theme"}</SheetTitle>
+              <SheetDescription className="text-secondary-text">
+                Browse the site to see your theme anywhere. Changes show as you
+                go.
+              </SheetDescription>
+            </SheetHeader>
+          </>
+        )}
 
-        {!current ? (
+        {isMobile && panel === "bar" && !dragging ? null : !current ? (
           <p className="text-secondary-text px-6 py-8 text-sm">
             Loading colors…
           </p>
@@ -825,11 +990,11 @@ export default function CustomThemeEditor({
                       <Input
                         value={importInput}
                         onChange={(event) => setImportInput(event.target.value)}
+                        ref={importInputRef}
                         placeholder="Theme code or share link"
                         aria-label="Theme code or share link"
                         spellCheck={false}
                         autoComplete="off"
-                        autoFocus
                       />
                       <Button
                         variant="secondary"
@@ -919,12 +1084,40 @@ export default function CustomThemeEditor({
                   )}
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-secondary-text text-xs">
-                      Copy the theme, or paste CSS and apply it.
-                    </p>
-                    <div className="flex gap-2">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-icon-tile-bg flex size-10 shrink-0 items-center justify-center rounded-lg">
+                      <Icon
+                        icon="lucide:code"
+                        aria-hidden="true"
+                        className="text-icon-tile size-5"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-primary-text text-sm font-medium">
+                        Edit as CSS
+                      </h3>
+                      <p className="text-secondary-text text-xs">
+                        Copy your theme, or paste CSS and apply it. Only the
+                        theme&apos;s colors, color-scheme and --logo-filter are
+                        read.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {cssDraft === null ? (
+                      <span className="text-status-success flex items-center gap-1.5 text-xs font-medium">
+                        <Icon icon="lucide:check" aria-hidden="true" />
+                        Matches your theme
+                      </span>
+                    ) : (
+                      <span className="text-warning flex items-center gap-1.5 text-xs font-medium">
+                        <Icon icon="lucide:pencil" aria-hidden="true" />
+                        Edited, not applied
+                      </span>
+                    )}
+                    <div className="ml-auto flex flex-wrap gap-2">
                       <Button
                         variant="secondary"
                         size="sm"
@@ -933,40 +1126,102 @@ export default function CustomThemeEditor({
                         <Icon icon="lucide:copy" aria-hidden="true" />
                         Copy
                       </Button>
-                      {cssDraft !== null && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setCssDraft(null);
-                            setCssErrors([]);
-                          }}
-                        >
-                          Reset
-                        </Button>
-                      )}
                       <Button
+                        variant="secondary"
                         size="sm"
-                        disabled={cssDraft === null}
-                        onClick={applyCss}
+                        onClick={() => void pasteCss()}
                       >
-                        Apply
+                        <Icon
+                          icon="lucide:clipboard-paste"
+                          aria-hidden="true"
+                        />
+                        Paste
                       </Button>
+                      {cssDraft !== null && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setCssDraft(null);
+                              setCssErrors([]);
+                            }}
+                          >
+                            Reset
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={applyCss}
+                            title="Apply (Ctrl+Enter)"
+                          >
+                            Apply
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <Textarea
-                    value={cssDraft ?? themeToCss(current)}
-                    onChange={(event) => setCssDraft(event.target.value)}
-                    spellCheck={false}
-                    aria-label="Theme CSS"
-                    className="border-border-card bg-tertiary-bg text-primary-text focus-visible:ring-button-info min-h-80 font-mono text-xs"
-                  />
+
+                  {/* Line numbers beside the text, scrolled along with it. */}
+                  <div className="border-border-card bg-tertiary-bg focus-within:border-button-info flex overflow-hidden rounded-lg border transition-colors">
+                    <pre
+                      ref={cssGutterRef}
+                      aria-hidden="true"
+                      className={cn(
+                        "text-quaternary-text border-border-card shrink-0 overflow-hidden border-r py-2 pr-2 pl-3 text-right font-mono text-xs leading-5 select-none",
+                        isMobile ? "h-56" : "h-96",
+                      )}
+                    >
+                      {Array.from(
+                        { length: cssText.split("\n").length },
+                        (_, i) => i + 1,
+                      ).join("\n")}
+                    </pre>
+                    <Textarea
+                      value={cssText}
+                      onChange={(event) => setCssDraft(event.target.value)}
+                      onScroll={(event) => {
+                        if (cssGutterRef.current) {
+                          cssGutterRef.current.scrollTop =
+                            event.currentTarget.scrollTop;
+                        }
+                      }}
+                      onKeyDown={(event) => {
+                        if (
+                          (event.ctrlKey || event.metaKey) &&
+                          event.key === "Enter"
+                        ) {
+                          event.preventDefault();
+                          applyCss();
+                        }
+                      }}
+                      spellCheck={false}
+                      wrap="off"
+                      aria-label="Theme CSS"
+                      className={cn(
+                        "text-primary-text min-h-0 flex-1 resize-none rounded-none border-0 bg-transparent px-3 py-2 font-mono text-xs leading-5 shadow-none focus-visible:ring-0 md:text-xs",
+                        isMobile ? "h-56" : "h-96",
+                      )}
+                    />
+                  </div>
+                  <p className="text-tertiary-text text-xs">
+                    Ctrl+Enter applies. Lines that aren&apos;t theme colors are
+                    skipped and listed.
+                  </p>
+
                   {cssErrors.length > 0 && (
-                    <ul className="text-status-error space-y-0.5 text-xs">
-                      {cssErrors.map((error) => (
-                        <li key={error}>{error}</li>
-                      ))}
-                    </ul>
+                    <div className="border-status-error/30 bg-status-error/10 rounded-lg border p-3">
+                      <p className="text-status-error mb-1 flex items-center gap-1.5 text-xs font-medium">
+                        <Icon icon="lucide:triangle-alert" aria-hidden="true" />
+                        {cssErrors.length === 1
+                          ? "1 line was skipped"
+                          : `${cssErrors.length} lines were skipped`}
+                      </p>
+                      <ul className="text-secondary-text list-disc space-y-0.5 pl-5 text-xs">
+                        {cssErrors.map((error) => (
+                          <li key={error}>{error}</li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                 </div>
               )}
@@ -990,17 +1245,20 @@ export default function CustomThemeEditor({
           </>
         )}
 
-        <div className="border-border-card shrink-0 border-t px-6 py-4">
-          <Button
-            size="md"
-            onClick={() => void save()}
-            disabled={!current || saving}
-            title="Save (Ctrl+S)"
-            className="w-full"
-          >
-            {saving ? "Saving…" : "Save"}
-          </Button>
-        </div>
+        {/* On phones, Save sits in the panel's top row instead. */}
+        {!isMobile && (
+          <div className="border-border-card shrink-0 border-t px-6 py-4">
+            <Button
+              size="md"
+              onClick={() => void save()}
+              disabled={!current || saving}
+              title="Save (Ctrl+S)"
+              className="w-full"
+            >
+              {saving ? "Saving…" : "Save"}
+            </Button>
+          </div>
+        )}
       </SheetContent>
 
       <Dialog open={askDiscard} onOpenChange={setAskDiscard}>
