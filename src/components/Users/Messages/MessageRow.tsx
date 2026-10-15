@@ -141,6 +141,7 @@ export function MessageRow({
   );
   const { isMobile } = bottomPanel;
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didLongPressRef = useRef(false);
   const touchStartRef = useRef({ x: 0, y: 0 });
   const cancelLongPress = () => {
     if (longPressRef.current !== null) clearTimeout(longPressRef.current);
@@ -389,6 +390,10 @@ export function MessageRow({
           className="group/message"
           data-message-row
           onClick={(event) => {
+            if (didLongPressRef.current) {
+              didLongPressRef.current = false;
+              return;
+            }
             if (
               isMobile &&
               !isSending &&
@@ -399,9 +404,12 @@ export function MessageRow({
                 "a,button,textarea,input,select,[role='menuitem']",
               )
             )
-              setActiveMessageId(message.id);
+              setActiveMessageId((current) =>
+                current === message.id ? null : message.id,
+              );
           }}
           onPointerDown={(event) => {
+            didLongPressRef.current = false;
             if (
               !isMobile ||
               event.pointerType === "mouse" ||
@@ -421,6 +429,7 @@ export function MessageRow({
             touchStartRef.current = { x: event.clientX, y: event.clientY };
             longPressRef.current = setTimeout(() => {
               longPressRef.current = null;
+              didLongPressRef.current = true;
               setActiveMessageId(message.id);
             }, 500);
           }}

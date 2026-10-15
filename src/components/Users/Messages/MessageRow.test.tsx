@@ -121,8 +121,10 @@ function harness(mobile: boolean) {
     replyingToMessage: null,
     editingMessageId: null,
     deletingMessageId: null,
-    setActiveMessageId: (id: string | null) => {
-      active = id;
+    setActiveMessageId: (
+      value: string | null | ((current: string | null) => string | null),
+    ) => {
+      active = typeof value === "function" ? value(active) : value;
     },
     setReplyingToMessage: (value: unknown) => replies.push(value),
     setEditingMessageId: (value: unknown) => edits.push(value),
@@ -280,6 +282,9 @@ test("tapping or holding sent and received text reveals only the action button a
     expect(h.render().find((node) => node.type === "Sheet")!.props.open).toBe(
       false,
     );
+    row.props.onPointerUp!();
+    row.props.onClick!({ target: { closest: () => null } });
+    expect(h.active()).toBe("message");
     h.props.setActiveMessageId(null);
     row.props.onClick!({ target: { closest: () => null } });
     expect(h.active()).toBe("message");
@@ -292,6 +297,36 @@ test("tapping or holding sent and received text reveals only the action button a
       true,
     );
   }
+});
+
+test("tapping a selected message clears its actions and a long press release keeps them selected", () => {
+  const h = harness(true);
+  const row = () =>
+    h.render().find((node) => "data-message-row" in node.props)!;
+  const click = () => row().props.onClick!({ target: { closest: () => null } });
+  click();
+  expect(h.active()).toBe("message");
+  click();
+  expect(h.active()).toBeNull();
+  expect(
+    h.render().find((node) => node.props["aria-label"] === "Message actions")!
+      .props.className,
+  ).toContain("sr-only");
+  h.props.setActiveMessageId("other-message");
+  click();
+  expect(h.active()).toBe("message");
+  row().props.onPointerDown!({
+    pointerType: "touch",
+    clientX: 20,
+    clientY: 20,
+    target: { closest: () => null },
+  });
+  h.flush();
+  row().props.onPointerUp!();
+  click();
+  expect(h.active()).toBe("message");
+  click();
+  expect(h.active()).toBeNull();
 });
 
 test("desktop toolbar uses existing reply and edit actions; sending disables actions without revealing the toolbar", () => {
