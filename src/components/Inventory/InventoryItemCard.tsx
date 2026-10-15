@@ -182,7 +182,7 @@ export default function InventoryItemCard({
                   </span>
                 )}
                 {hasDisplayedLevel && (
-                  <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+                  <span className="bg-status-success text-button-success-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
                     {formatUnlockLevelBadge(displayedLevel)}
                   </span>
                 )}

@@ -15,8 +15,8 @@ import {
   subscribeThemeShortcut,
 } from "@/utils/ui/themeOptions";
 
-// The Display card, where the theme picker sits first.
-const THEME_SETTINGS_HREF = "/settings?highlight=display#display";
+// The Themes card in settings.
+const THEME_SETTINGS_HREF = "/settings?highlight=themes#themes";
 
 interface ThemeShortcutProps {
   className?: string;

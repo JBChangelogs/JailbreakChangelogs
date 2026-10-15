@@ -25,7 +25,7 @@ export function useSectionHighlight() {
       setShowHighlight(false);
       setHighlightSetting(null);
       void setHighlightParam(null);
-    }, 10000);
+    }, 3000);
 
     return () => {
       window.clearTimeout(timer);
@@ -45,8 +45,11 @@ export function useSectionHighlight() {
   const getSectionHighlightStyle = (sectionId: string) =>
     highlightSetting === sectionId && showHighlight
       ? {
+          // A light touch: a faint tint and an accent border, not a full fill.
           backgroundColor:
-            "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+            "color-mix(in srgb, var(--color-button-info), transparent 94%)",
+          borderColor:
+            "color-mix(in srgb, var(--color-button-info), transparent 50%)",
         }
       : undefined;
 

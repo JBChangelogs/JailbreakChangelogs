@@ -19,6 +19,11 @@ type CarouselProps = {
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
+  /**
+   * Also scroll a horizontal carousel with a plain (vertical) mouse wheel.
+   * The page still scrolls once the carousel reaches its end.
+   */
+  verticalWheel?: boolean;
 };
 
 type CarouselContextProps = {
@@ -52,6 +57,7 @@ const Carousel = React.forwardRef<
       opts,
       setApi,
       plugins,
+      verticalWheel = false,
       className,
       children,
       ...props
@@ -103,10 +109,20 @@ const Carousel = React.forwardRef<
 
       const viewport = api.rootNode();
       let lastScroll = -Infinity;
+      // When the carousel last took a wheel event. A gesture that reaches the
+      // end keeps going to the carousel; only a new one passes to the page.
+      let lastHandled = -Infinity;
+      const GESTURE_GAP_MS = 300;
       const onWheel = (event: WheelEvent) => {
-        if (event.ctrlKey || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
-          return;
-        }
+        if (event.ctrlKey) return;
+        const vertical = Math.abs(event.deltaX) <= Math.abs(event.deltaY);
+        if (vertical && !verticalWheel) return;
+        const delta = vertical ? event.deltaY : event.deltaX;
+        const midGesture = event.timeStamp - lastHandled < GESTURE_GAP_MS;
+        const handle = () => {
+          event.preventDefault();
+          lastHandled = event.timeStamp;
+        };
 
         if (opts?.dragFree) {
           const engine = api.internalEngine();
@@ -117,24 +133,30 @@ const Carousel = React.forwardRef<
                 ? viewport.clientWidth
                 : 1;
           const target = engine.target.get();
-          const destination = target - event.deltaX * unit;
+          const destination = target - delta * unit;
           const distance =
             (engine.options.loop
               ? destination
               : engine.limit.constrain(destination)) - target;
-          if (!distance) return;
+          if (!distance) {
+            if (midGesture) handle();
+            return;
+          }
 
-          event.preventDefault();
+          handle();
           // Embla 8's public API only scrolls to slides; use its engine for pixels.
           engine.scrollBody.useBaseFriction().useBaseDuration();
           engine.scrollTo.distance(distance, false);
           return;
         }
 
-        const forward = event.deltaX > 0;
-        if (forward ? !api.canScrollNext() : !api.canScrollPrev()) return;
+        const forward = delta > 0;
+        if (forward ? !api.canScrollNext() : !api.canScrollPrev()) {
+          if (midGesture) handle();
+          return;
+        }
 
-        event.preventDefault();
+        handle();
         // Wheel gestures emit many events; space out slide changes.
         if (event.timeStamp - lastScroll < 250) return;
         lastScroll = event.timeStamp;
@@ -144,7 +166,7 @@ const Carousel = React.forwardRef<
 
       viewport.addEventListener("wheel", onWheel, { passive: false });
       return () => viewport.removeEventListener("wheel", onWheel);
-    }, [api, orientation, opts?.dragFree]);
+    }, [api, orientation, opts?.dragFree, verticalWheel]);
 
     React.useEffect(() => {
       if (!api || !setApi) {

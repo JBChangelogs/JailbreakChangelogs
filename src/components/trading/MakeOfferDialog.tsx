@@ -101,10 +101,10 @@ const TradeTotalsPills = ({ items }: { items: TradeItem[] }) => {
       <span className="border-border-card bg-quaternary-bg text-primary-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
         Total: {formatTradeValue(cashTotal + dupedTotal)}
       </span>
-      <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
+      <span className="border-status-success/20 bg-status-success/80 text-button-success-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
         Cash: {formatTradeValue(cashTotal)}
       </span>
-      <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
+      <span className="border-status-error/20 bg-status-error/80 text-button-danger-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
         Duped: {formatTradeValue(dupedTotal)}
       </span>
     </div>

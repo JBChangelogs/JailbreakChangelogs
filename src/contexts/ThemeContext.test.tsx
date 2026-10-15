@@ -66,6 +66,8 @@ test("mounting preserves saved themes before and after effects replay", () => {
         if (name === "react")
           return {
             createContext: () => ({ Provider: "provider" }),
+            useSyncExternalStore: (_subscribe: unknown, get: () => unknown) =>
+              get(),
             useCallback: (callback: unknown) => {
               const index = cursor++;
               if (!(index in slots)) slots[index] = callback;
@@ -110,6 +112,15 @@ test("mounting preserves saved themes before and after effects replay", () => {
         if (name.endsWith("debounce")) return { debounce: () => () => {} };
         if (name.endsWith("realtimePreferencesCache"))
           return { getCachedPreference: () => undefined };
+        // No custom theme in use, so the site theme is what's applied.
+        if (name.endsWith("customTheme"))
+          return {
+            getCustomTheme: () => null,
+            getPreviewScheme: () => undefined,
+            setCustomTheme: () => {},
+            subscribeCustomTheme: () => () => {},
+            syncCustomThemePreferences: () => () => {},
+          };
         throw new Error(`Unexpected import: ${name}`);
       },
     });

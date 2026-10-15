@@ -328,9 +328,9 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
                         className={`shrink-0 cursor-pointer rounded-md border px-1.5 py-1 text-[10px] font-medium capitalize transition-colors ${
                           condition === option
                             ? option === "clean"
-                              ? "border-status-success bg-status-success text-form-button-text"
+                              ? "border-status-success bg-status-success text-button-success-text"
                               : option === "duped"
-                                ? "border-status-error bg-status-error text-form-button-text"
+                                ? "border-status-error bg-status-error text-button-danger-text"
                                 : "text-primary-text border-[#FFD700]/50 bg-[#FFD700]/10"
                             : "border-border-card bg-secondary-bg text-secondary-text hover:text-primary-text"
                         }`}

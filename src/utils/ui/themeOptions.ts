@@ -60,7 +60,8 @@ const CSS_VALUE = /^[^{};<>\\\u0000-\u001f]{1,200}$/;
 const CSS_BANNED = /url\(|expression\(|@import|\/\*/i;
 const CURSOR_URL = /^\/[A-Za-z0-9/_.-]+$|^https:\/\/[^\s"'()<>\\]+$/;
 
-const safeValue = (value: unknown): value is string =>
+/** Whether a value is safe to write into a <style> tag as a theme value. */
+export const safeValue = (value: unknown): value is string =>
   typeof value === "string" && CSS_VALUE.test(value) && !CSS_BANNED.test(value);
 
 /** Drops themes with bad slugs and any values that aren't safe as raw CSS. */
@@ -90,8 +91,10 @@ export function themesCss(themes: SiteTheme[]): string {
       const vars = Object.entries(t.vars)
         .map(([key, value]) => `${key}:${value};`)
         .join("");
-      let css = `${root}{color-scheme:${t.scheme};${vars}}`;
-      if (t.logo_filter) css += `${root} .header-logo{filter:${t.logo_filter}}`;
+      // The logo reads --logo-filter (globals.css), so a custom theme can set
+      // it inline like its colors.
+      const logo = t.logo_filter ? `--logo-filter:${t.logo_filter};` : "";
+      let css = `${root}{color-scheme:${t.scheme};${vars}${logo}}`;
       if (t.cursor_size)
         css += `${root} .theme-cursor-icon{width:${t.cursor_size}px;height:${t.cursor_size}px}`;
       if (t.cursor_url)
@@ -108,20 +111,23 @@ const resolve = (vars: Record<string, string>, key: string) => {
   return vars[value.match(/^var\((--[a-z0-9-]+)\)$/)?.[1] ?? ""] ?? value;
 };
 
+/** A theme's main colors, for the picker's preview dots. */
+export const themePreview = (vars: Record<string, string>): ThemePreview => ({
+  page: resolve(vars, "--color-primary-bg"),
+  card: resolve(vars, "--color-secondary-bg"),
+  text: resolve(vars, "--color-primary-text"),
+  muted: resolve(vars, "--color-secondary-text"),
+  button: resolve(vars, "--color-button-info"),
+  link: resolve(vars, "--color-link"),
+});
+
 export function toThemeOptions(themes: SiteTheme[]): ThemeOption[] {
   return themes.map(({ slug, label, icon, scheme, vars }) => ({
     value: slug,
     label,
     icon,
     scheme,
-    preview: {
-      page: resolve(vars, "--color-primary-bg"),
-      card: resolve(vars, "--color-secondary-bg"),
-      text: resolve(vars, "--color-primary-text"),
-      muted: resolve(vars, "--color-secondary-text"),
-      button: resolve(vars, "--color-button-info"),
-      link: resolve(vars, "--color-link"),
-    },
+    preview: themePreview(vars),
   }));
 }
 

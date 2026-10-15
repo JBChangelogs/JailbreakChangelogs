@@ -140,9 +140,9 @@ function ValueDifferenceBadge({
         value === null
           ? "border-border-card bg-quaternary-bg text-secondary-text"
           : value > 0
-            ? "border-status-success bg-status-success text-form-button-text"
+            ? "border-status-success bg-status-success text-button-success-text"
             : value < 0
-              ? "border-status-error bg-status-error text-form-button-text"
+              ? "border-status-error bg-status-error text-button-danger-text"
               : "border-border-card bg-quaternary-bg text-primary-text"
       }`}
       title={
@@ -238,7 +238,7 @@ function TradeItem({
               </span>
             )}
             {hasLevel && (
-              <span className="bg-status-success text-form-button-text inline-flex h-5 items-center rounded px-1.5 text-[10px] leading-none font-bold">
+              <span className="bg-status-success text-button-success-text inline-flex h-5 items-center rounded px-1.5 text-[10px] leading-none font-bold">
                 {formatUnlockLevelBadge(level)}
               </span>
             )}

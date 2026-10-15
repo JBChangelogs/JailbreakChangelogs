@@ -160,6 +160,10 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
     35%
   ); /* Form submit buttons - Darker for better contrast */
   --color-form-button-text: hsl(60, 100%, 100%); /* Text on form buttons */
+  /* Text on danger and success buttons and badges; same as button text unless
+     a theme sets them, so orange buttons can have dark text and red ones light. */
+  --color-button-danger-text: var(--color-form-button-text);
+  --color-button-success-text: var(--color-form-button-text);
 
   /* Form Elements */
   --color-form-input: hsl(240, 8%, 9%); /* Input field backgrounds */
@@ -289,6 +293,11 @@ body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close {
   --header-height-mobile: 4rem; /* Mobile header height (64px) */
   --header-height-desktop: 3rem; /* Desktop header height (48px) */
   --header-height: 0px; /* Dynamic header height, set by JS */
+}
+
+/* Each theme sets --logo-filter: site themes in their CSS, custom themes inline. */
+.header-logo {
+  filter: var(--logo-filter, none);
 }
 
 .theme-cursor-icon {

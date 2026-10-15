@@ -8,6 +8,7 @@ import Image from "next/image";
 import "./globals.css";
 import { DESKTOP_NAVIGATION_INIT_SCRIPT } from "@/utils/ui/desktopNavigation";
 import { TAB_STYLE_INIT_SCRIPT } from "@/utils/ui/tabStyle";
+import { CUSTOM_THEME_INIT_SCRIPT } from "@/utils/ui/customTheme";
 import Header from "@/components/Layout/Header";
 import HideOnAccessDenied from "@/components/Layout/HideOnAccessDenied";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
@@ -15,6 +16,8 @@ import Footer from "@/components/Layout/Footer";
 import VersionInfoWrapper from "@/components/Layout/VersionInfoWrapper";
 import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
 import LatestReleaseDialog from "@/components/Changelogs/LatestReleaseDialog";
+import SharedThemeDialog from "@/components/Settings/SharedThemeDialog";
+import ThemeEditorHost from "@/components/Settings/ThemeEditorHost";
 import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
 import OfflineNavigationRecovery from "@/components/Layout/OfflineNavigationRecovery";
@@ -138,7 +141,10 @@ export default async function RootLayout({
           <script
             data-cfasync="false"
             dangerouslySetInnerHTML={{
-              __html: DESKTOP_NAVIGATION_INIT_SCRIPT + TAB_STYLE_INIT_SCRIPT,
+              __html:
+                DESKTOP_NAVIGATION_INIT_SCRIPT +
+                TAB_STYLE_INIT_SCRIPT +
+                CUSTOM_THEME_INIT_SCRIPT,
             }}
           />
           {/* Rybbit Analytics */}
@@ -227,6 +233,10 @@ export default async function RootLayout({
                       <Suspense fallback={null}>
                         <LatestReleaseDialog />
                       </Suspense>
+                      <Suspense fallback={null}>
+                        <SharedThemeDialog />
+                        <ThemeEditorHost />
+                      </Suspense>
                       <AdErrorBoundary>
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
@@ -289,7 +299,10 @@ export default async function RootLayout({
         <script
           data-cfasync="false"
           dangerouslySetInnerHTML={{
-            __html: DESKTOP_NAVIGATION_INIT_SCRIPT + TAB_STYLE_INIT_SCRIPT,
+            __html:
+              DESKTOP_NAVIGATION_INIT_SCRIPT +
+              TAB_STYLE_INIT_SCRIPT +
+              CUSTOM_THEME_INIT_SCRIPT,
           }}
         />
         {/* Preconnect to external asset domains */}
@@ -375,6 +388,10 @@ export default async function RootLayout({
                   <RybbitIdentity />
                   <Suspense fallback={null}>
                     <LatestReleaseDialog />
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <SharedThemeDialog />
+                    <ThemeEditorHost />
                   </Suspense>
                   <NitroBottomAnchor />
                   <NitroVideoPlayer />
