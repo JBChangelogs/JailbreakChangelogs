@@ -22,6 +22,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import {
   getExperimentIndicatorPlacement,
   setExperimentIndicatorPlacement,
+  type ExperimentIndicatorPlacement,
 } from "@/utils/ui/experimentIndicator";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
@@ -45,9 +46,7 @@ import {
   type ExperimentOverrides,
 } from "@/utils/api/experiments";
 import { Icon } from "@/components/ui/IconWrapper";
-
-const segment =
-  "text-secondary-text has-checked:bg-button-info has-checked:text-form-button-text has-focus-visible:ring-border-focus has-disabled:cursor-not-allowed has-disabled:opacity-50 cursor-pointer rounded-md px-3 py-1 text-sm font-medium transition-colors has-focus-visible:ring-2";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 /** "item_fuzzy_searching" -> "Item Fuzzy Searching". */
 const experimentName = (key: string) =>
@@ -436,29 +435,22 @@ export default function ExperimentsClient() {
                   active.
                 </p>
               </div>
-              <div
-                role="radiogroup"
-                aria-labelledby="experiment-indicator-label"
-                className="border-border-card bg-tertiary-bg flex shrink-0 rounded-lg border p-0.5"
+              <Tabs
+                radio
+                value={indicatorPlacement}
+                onValueChange={(value) =>
+                  setExperimentIndicatorPlacement(
+                    value as ExperimentIndicatorPlacement,
+                  )
+                }
+                className="shrink-0"
               >
-                {(["floating", "header", "hidden"] as const).map((value) => (
-                  <label key={value} className={segment}>
-                    <input
-                      type="radio"
-                      name="experiment-indicator-placement"
-                      value={value}
-                      checked={indicatorPlacement === value}
-                      onChange={() => setExperimentIndicatorPlacement(value)}
-                      className="sr-only"
-                    />
-                    {value === "floating"
-                      ? "Floating"
-                      : value === "header"
-                        ? "Header"
-                        : "Hidden"}
-                  </label>
-                ))}
-              </div>
+                <TabsList aria-labelledby="experiment-indicator-label">
+                  <TabsTrigger value="floating">Floating</TabsTrigger>
+                  <TabsTrigger value="header">Header</TabsTrigger>
+                  <TabsTrigger value="hidden">Hidden</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
             <div className="border-border-card bg-secondary-bg mt-6 flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
               <div className="min-w-0">
@@ -626,52 +618,42 @@ export default function ExperimentsClient() {
                             {noOff && <span> · No Off variant to force</span>}
                           </p>
                         </div>
-                        <div
-                          role="radiogroup"
-                          aria-labelledby={`experiment-${key}`}
-                          className="border-border-card bg-tertiary-bg flex shrink-0 self-start rounded-lg border p-0.5 sm:self-auto"
+                        <Tabs
+                          radio
+                          value={forced ?? "default"}
+                          onValueChange={(value) => {
+                            const next = { ...overrides };
+                            if (value === "default") delete next[key];
+                            else next[key] = value as "treatment" | "control";
+                            updateOverrides(
+                              next,
+                              value === "default" ? "reset" : "toggle",
+                            );
+                          }}
+                          className="shrink-0 self-start sm:self-auto"
                         >
-                          {(
-                            [
-                              ["default", "Default"],
-                              ["treatment", "On"],
-                              ["control", "Off"],
-                            ] as const
-                          ).map(([value, label]) => (
-                            <label
-                              key={value}
-                              className={segment}
-                              title={
-                                value === "control" && noOff
-                                  ? "This experiment has no Off variant"
-                                  : undefined
-                              }
-                            >
-                              <input
-                                type="radio"
-                                name={`experiment-${key}-variant`}
+                          <TabsList aria-labelledby={`experiment-${key}`}>
+                            {(
+                              [
+                                ["default", "Default"],
+                                ["treatment", "On"],
+                                ["control", "Off"],
+                              ] as const
+                            ).map(([value, label]) => (
+                              <TabsTrigger
+                                key={value}
                                 value={value}
-                                checked={(forced ?? "default") === value}
                                 disabled={
                                   saving ||
                                   (!forceable && value !== "default") ||
                                   (value === "control" && noOff)
                                 }
-                                onChange={() => {
-                                  const next = { ...overrides };
-                                  if (value === "default") delete next[key];
-                                  else next[key] = value;
-                                  updateOverrides(
-                                    next,
-                                    value === "default" ? "reset" : "toggle",
-                                  );
-                                }}
-                                className="sr-only"
-                              />
-                              {label}
-                            </label>
-                          ))}
-                        </div>
+                              >
+                                {label}
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+                        </Tabs>
                       </li>
                     );
                   })}

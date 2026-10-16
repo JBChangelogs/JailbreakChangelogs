@@ -20,6 +20,7 @@ import {
 } from "@/utils/ui/accentColor";
 import { Icon } from "@/components/ui/IconWrapper";
 import { ColorSwatch } from "@/components/ui/color-picker";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DEFAULT_COLOR = "#2462cd";
 
@@ -28,9 +29,6 @@ const STYLE_NAMES: Record<AccentStyle, string> = {
   glass: "Glass",
   transparent: "Transparent",
 };
-
-const segment =
-  "text-secondary-text has-checked:bg-button-info has-checked:text-form-button-text has-focus-visible:ring-border-focus cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors has-focus-visible:ring-2";
 
 interface AccentColorSettingProps {
   /** The accent the profile shows right now, or null if none. */
@@ -126,29 +124,16 @@ export function AccentColorSetting({
           >
             Color
           </p>
-          <div
-            role="radiogroup"
-            aria-label="Fill"
-            className="border-border-card bg-tertiary-bg inline-flex rounded-lg border p-0.5"
+          <Tabs
+            radio
+            value={current.gradient ? "gradient" : "single"}
+            onValueChange={(value) => setGradient(value === "gradient")}
           >
-            {(
-              [
-                [false, "Single color"],
-                [true, "Gradient"],
-              ] as const
-            ).map(([gradient, label]) => (
-              <label key={label} className={segment}>
-                <input
-                  type="radio"
-                  name={`${id}-fill`}
-                  checked={!!current.gradient === gradient}
-                  onChange={() => setGradient(gradient)}
-                  className="sr-only"
-                />
-                {label}
-              </label>
-            ))}
-          </div>
+            <TabsList aria-label="Fill">
+              <TabsTrigger value="single">Single color</TabsTrigger>
+              <TabsTrigger value="gradient">Gradient</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="border-border-card bg-tertiary-bg flex flex-wrap items-center gap-2 rounded-xl border p-2 sm:flex-nowrap">
