@@ -323,6 +323,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
         {isHornItem(item.type) && (
           <button
             onClick={handleHornClick}
+            aria-label={isPlaying ? "Pause horn" : "Play horn"}
             className={`bg-primary-bg/50 absolute inset-0 flex items-center justify-center transition-opacity ${
               isHovered || isPlaying ? "opacity-100" : "opacity-0"
             }`}

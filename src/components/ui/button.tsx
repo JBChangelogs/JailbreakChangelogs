@@ -28,6 +28,7 @@ const buttonVariants = cva(
       // One scale: same weight and radius, with height, padding and text
       // growing together, so a small button looks like a smaller medium one.
       size: {
+        xs: "h-6! gap-1! rounded-md! px-2.5! text-xs! [&_svg]:size-3.5!",
         sm: "h-8! gap-1.5! px-3! text-sm! [&_svg]:size-4!",
         md: "h-10! px-4! text-sm! [&_svg]:size-4!",
         lg: "h-12! px-6! text-base! [&_svg]:size-5!",

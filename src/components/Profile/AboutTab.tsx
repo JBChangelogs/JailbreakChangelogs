@@ -137,8 +137,7 @@ export default function AboutTab({
                 <Button
                   variant="ghost"
                   onClick={() => setIsEditingBio(true)}
-                  size="sm"
-                  className="h-8 w-8 rounded-lg p-1"
+                  size="icon"
                   aria-label="Edit bio"
                 >
                   <Icon icon="heroicons:pencil" className="text-link h-5 w-5" />

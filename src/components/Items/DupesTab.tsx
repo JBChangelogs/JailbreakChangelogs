@@ -233,12 +233,13 @@ export default function DupesTab({ itemId }: DupesTabProps) {
             <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
               No dupers found matching &quot;{searchTerm}&quot;
             </p>
-            <button
+            <Button
+              type="button"
               onClick={() => setSearchTerm("")}
-              className="border-border-card bg-button-info text-form-button-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+              className="mt-4"
             >
               Clear search
-            </button>
+            </Button>
           </div>
         </div>
       )}

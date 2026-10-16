@@ -305,6 +305,9 @@ function ItemCard({
             <TooltipTrigger asChild>
               <button
                 onClick={handleFavoriteClick}
+                aria-label={
+                  isFavorited ? "Remove from favorites" : "Add to favorites"
+                }
                 className={`bg-secondary-bg/80 border-border-card hover:border-border-focus absolute top-2 left-2 z-20 cursor-pointer rounded-full border p-1.5 transition-opacity ${
                   isHovered ? "opacity-100" : "opacity-0"
                 } hover:bg-secondary-bg`}
@@ -343,6 +346,7 @@ function ItemCard({
               />
               <button
                 onClick={handleHornClick}
+                aria-label={isPlaying ? "Pause horn" : "Play horn"}
                 className={`bg-primary-bg/50 absolute inset-0 z-20 flex items-center justify-center transition-opacity ${
                   isHovered || isPlaying ? "opacity-100" : "opacity-0"
                 }`}

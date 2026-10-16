@@ -608,7 +608,6 @@ const ServerList: React.FC = () => {
                         <Button
                           variant="secondary"
                           size="sm"
-                          className="px-2"
                           aria-label="Server actions"
                         >
                           <Icon icon="heroicons:ellipsis-horizontal" />

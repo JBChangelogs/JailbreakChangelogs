@@ -197,7 +197,7 @@ export default function RecentJoins({
       <Button
         type="button"
         variant="ghost"
-        className="text-primary-text flex h-auto w-full items-center justify-between rounded-none px-4 py-3 text-left"
+        className="flex w-full items-center justify-between rounded-none py-3 text-left"
         aria-expanded={isOpen}
         onClick={() => {
           setIsOpen((open) => !open);

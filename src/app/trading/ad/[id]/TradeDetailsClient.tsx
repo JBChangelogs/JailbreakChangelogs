@@ -1048,8 +1048,8 @@ export default function TradeDetailsClient({
                       }
                       className={
                         offerState.status === "already_offered"
-                          ? "px-2 disabled:cursor-not-allowed disabled:opacity-100 sm:px-3"
-                          : "px-2 sm:px-3"
+                          ? "disabled:cursor-not-allowed disabled:opacity-100"
+                          : undefined
                       }
                       variant={
                         offerState.status === "already_offered"
@@ -1082,7 +1082,6 @@ export default function TradeDetailsClient({
                     disabled={isDeleting}
                     variant="destructive"
                     size="sm"
-                    className="px-2 sm:px-3"
                     aria-label={
                       isDeleting ? "Deleting trade ad" : "Delete trade ad"
                     }
@@ -1094,12 +1093,7 @@ export default function TradeDetailsClient({
                   </Button>
                 )}
                 {trade.message_id && (
-                  <Button
-                    asChild
-                    size="sm"
-                    className="px-2 sm:px-3"
-                    aria-label="View in Discord"
-                  >
+                  <Button asChild size="sm" aria-label="View in Discord">
                     <a
                       href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
                       target="_blank"
@@ -1515,9 +1509,8 @@ export default function TradeDetailsClient({
                                               trade.user?.id)) && (
                                             <Button
                                               type="button"
-                                              size="sm"
+                                              size="xs"
                                               variant="default"
-                                              className="h-6! rounded-md! px-2.5!"
                                               onClick={() => {
                                                 const targetId = isOwner
                                                   ? offerUser?.id
@@ -1539,9 +1532,8 @@ export default function TradeDetailsClient({
                                           <>
                                             <Button
                                               type="button"
-                                              size="sm"
+                                              size="xs"
                                               variant="success"
-                                              className="h-6! rounded-md! px-2.5!"
                                               disabled={!!offerResponseAction}
                                               onClick={() =>
                                                 void handleOfferResponse(
@@ -1563,9 +1555,8 @@ export default function TradeDetailsClient({
 
                                             <Button
                                               type="button"
-                                              size="sm"
+                                              size="xs"
                                               variant="destructive"
-                                              className="h-6! rounded-md! px-2.5!"
                                               disabled={!!offerResponseAction}
                                               onClick={() =>
                                                 void handleOfferResponse(
@@ -1589,9 +1580,8 @@ export default function TradeDetailsClient({
                                         {isOfferOwner && isPendingOffer && (
                                           <Button
                                             type="button"
-                                            size="sm"
+                                            size="xs"
                                             variant="destructive"
-                                            className="h-6! rounded-md! px-2.5!"
                                             disabled={isDeletingOffer}
                                             onClick={() =>
                                               setOfferDeleteConfirmId(offer.id)

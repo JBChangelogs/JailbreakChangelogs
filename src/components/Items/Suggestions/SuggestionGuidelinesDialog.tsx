@@ -107,11 +107,7 @@ export function SuggestionGuidelinesDialog({
         </div>
 
         <div className="border-border-card flex shrink-0 items-center justify-center border-t px-6 py-4 sm:justify-end">
-          <Button
-            onClick={onConfirm}
-            className="bg-button-info hover:bg-button-info-hover text-form-button-text"
-            size="sm"
-          >
+          <Button onClick={onConfirm} size="sm">
             I Understand
           </Button>
         </div>

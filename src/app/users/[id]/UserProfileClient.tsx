@@ -1107,6 +1107,7 @@ export default function UserProfileClient({
                               <Button
                                 variant="secondary"
                                 size="icon"
+                                aria-label="More actions"
                                 disabled={isBlockingAction}
                               >
                                 <Icon

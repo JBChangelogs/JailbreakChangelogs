@@ -304,13 +304,14 @@ export default function MyIssues() {
               Failed to load reported issues
             </p>
             <p className="text-secondary-text mt-1 text-sm">{error}</p>
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => void issuesQuery.refetch()}
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-4 rounded-lg px-4 py-2 text-sm font-medium"
+              className="mt-4"
             >
               Try Again
-            </button>
+            </Button>
           </div>
         ) : issues.length === 0 ? (
           <div className="border-border-card bg-secondary-bg rounded-2xl border p-10 text-center shadow-sm">

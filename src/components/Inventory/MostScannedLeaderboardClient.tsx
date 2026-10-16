@@ -330,7 +330,7 @@ export default function MostScannedLeaderboardClient({
                           </span>
                         </div>
                       </div>
-                      <Button asChild size="sm" className="shrink-0 text-xs">
+                      <Button asChild size="sm" className="shrink-0">
                         <Link
                           href={`/inventories/${user.user_id}`}
                           prefetch={false}

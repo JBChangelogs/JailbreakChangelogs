@@ -139,10 +139,7 @@ export function SuggestionResults({
                 Clear filters and sort
               </Button>
             ) : !isAuthenticated ? (
-              <Button
-                onClick={onLogin}
-                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
-              >
+              <Button onClick={onLogin}>
                 <Icon
                   icon="material-symbols:login-rounded"
                   className="h-4 w-4"
@@ -151,19 +148,12 @@ export function SuggestionResults({
                 Log In
               </Button>
             ) : !userHasRoblox ? (
-              <Button
-                onClick={onConnectRoblox}
-                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
-              >
+              <Button onClick={onConnectRoblox}>
                 <Icon icon="simple-icons:roblox" className="h-4 w-4" inline />
                 Connect Roblox
               </Button>
             ) : (
-              <Button
-                onClick={onOpenForm}
-                disabled={isBanned}
-                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
-              >
+              <Button onClick={onOpenForm} disabled={isBanned}>
                 <Icon
                   icon="material-symbols:add-rounded"
                   className="h-4 w-4"

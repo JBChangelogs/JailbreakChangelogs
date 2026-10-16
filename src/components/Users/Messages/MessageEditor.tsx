@@ -103,7 +103,7 @@ export function MessageEditor({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="text-secondary-text hover:text-primary-text !size-11 p-0 lg:!size-9"
+                    className="!size-11 p-0 lg:!size-9"
                     aria-label="Add an emoji to edited message"
                     disabled={isSending}
                     onPointerDown={() => {
@@ -160,7 +160,6 @@ export function MessageEditor({
       <div className="flex items-center gap-2 lg:hidden">
         <Button
           size="sm"
-          className="h-8 px-4 text-xs"
           onClick={() => void onSave(message.id, editContent)}
           disabled={isSending || !editContent.trim()}
         >
@@ -170,7 +169,6 @@ export function MessageEditor({
         <Button
           size="sm"
           variant="ghost"
-          className="text-secondary-text h-8 px-4 text-xs"
           onClick={onCancel}
           disabled={isSending}
         >
