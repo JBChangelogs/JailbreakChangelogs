@@ -11,7 +11,15 @@ function Icon(props: IconProps) {
   // global counter that differs between server and client, breaking hydration.
   // useId is stable across both; strip React's delimiter chars for url(#refs).
   const id = useId().replace(/[^a-zA-Z0-9]/g, "");
-  return <IconifyIcon id={id} ssr {...props} />;
+  // data-icon lets CSS find a kind of icon, e.g. dropdown arrows in globals.css.
+  return (
+    <IconifyIcon
+      id={id}
+      ssr
+      data-icon={typeof props.icon === "string" ? props.icon : undefined}
+      {...props}
+    />
+  );
 }
 
 export { Icon };

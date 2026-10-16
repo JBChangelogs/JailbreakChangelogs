@@ -742,8 +742,15 @@ export default function CustomThemeEditor({
                           setMatchLogo(false);
                           update(fromSiteTheme(t));
                         }}
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        // pl-[11px] + the menu's 1px border and p-1 = the button's px-4,
+                        // so each icon lines up under its icon.
+                        className="focus:bg-quaternary-bg focus:text-primary-text flex cursor-pointer items-center gap-2 rounded-lg py-2 pr-3 pl-[11px] text-sm"
                       >
+                        <Icon
+                          icon={t.icon}
+                          aria-hidden="true"
+                          className="text-secondary-text size-4 shrink-0"
+                        />
                         {t.label}
                       </DropdownMenuItem>
                     ))}

@@ -44,6 +44,23 @@ html[data-tab-style="filled"]
   background: transparent;
 }
 
+/* A dropdown's arrow points toward its menu: down while closed or opened
+   below, flipped up while the menu opens above (e.g. near the bottom of a
+   resized sheet). Only one menu is open at a time, so :has() finds its side. */
+[aria-haspopup="menu"] [data-icon="lucide:chevron-down"] {
+  transition: rotate 200ms ease-out;
+}
+html:has([role="menu"][data-side="top"])
+  [aria-haspopup="menu"][data-state="open"]
+  [data-icon="lucide:chevron-down"] {
+  rotate: 180deg;
+}
+@media (prefers-reduced-motion: reduce) {
+  [aria-haspopup="menu"] [data-icon="lucide:chevron-down"] {
+    transition: none;
+  }
+}
+
 @utility page-heading {
   @apply text-primary-text text-3xl leading-tight font-bold;
 }
