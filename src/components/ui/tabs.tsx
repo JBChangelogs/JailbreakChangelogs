@@ -236,7 +236,7 @@ const TabsList = React.forwardRef<
             className={cn(
               "bg-border-focus pointer-events-none absolute bottom-0 left-0 h-0.5 w-[max(0px,calc(var(--tab-width)-8px))] [transform:translateX(calc(var(--tab-left)+4px))]",
               indicator.animate &&
-                "transition-[transform,width,opacity] duration-200 ease-out motion-reduce:transition-none",
+                "transition-[transform,left,width,opacity] duration-200 ease-out motion-reduce:transition-none",
               indicator.visible ? "opacity-100" : "opacity-0",
             )}
             style={
