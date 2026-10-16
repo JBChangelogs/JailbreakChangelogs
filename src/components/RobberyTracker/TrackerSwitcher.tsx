@@ -21,9 +21,15 @@ export default function TrackerSwitcher({ className }: { className?: string }) {
 
   return (
     <Tabs value={pathname} className={className}>
-      <TabsList aria-label="Live trackers">
+      <TabsList aria-label="Live trackers" fullWidth className="w-full">
         {TRACKERS.map((tracker) => (
-          <TabsTrigger key={tracker.href} value={tracker.href} asChild>
+          <TabsTrigger
+            key={tracker.href}
+            value={tracker.href}
+            fullWidth
+            className="py-3 text-base font-semibold"
+            asChild
+          >
             <Link href={tracker.href}>{tracker.label}</Link>
           </TabsTrigger>
         ))}

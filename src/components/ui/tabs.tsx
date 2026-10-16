@@ -55,7 +55,8 @@ const TabsList = React.forwardRef<
       left: number;
       width: number;
       visible: boolean;
-    }>({ left: 0, width: 0, visible: false });
+      animate: boolean;
+    }>({ left: 0, width: 0, visible: false, animate: false });
 
     const updateIndicator = React.useCallback(() => {
       const el = listRef.current as unknown as HTMLElement | null;
@@ -70,8 +71,15 @@ const TabsList = React.forwardRef<
         return;
       }
 
-      const left = active.offsetLeft;
-      const width = active.offsetWidth;
+      // offsetLeft/offsetWidth round to whole pixels, which lets the filled
+      // pill spill into a neighbouring flex-1 tab, so measure fractionally.
+      const activeRect = active.getBoundingClientRect();
+      const left =
+        activeRect.left -
+        el.getBoundingClientRect().left -
+        el.clientLeft +
+        el.scrollLeft;
+      const width = activeRect.width;
 
       setIndicator((prev) => {
         if (
@@ -81,7 +89,8 @@ const TabsList = React.forwardRef<
         ) {
           return prev;
         }
-        return { left, width, visible: width > 0 };
+        // Only slide once it has been shown, so it doesn't sweep in from 0.
+        return { left, width, visible: width > 0, animate: prev.visible };
       });
     }, []);
 
@@ -135,23 +144,30 @@ const TabsList = React.forwardRef<
         {!hideIndicator && (
           <div
             aria-hidden="true"
-            data-slot="tabs-indicator"
+            data-slot="tabs-baseline"
             className="bg-border-primary/60 pointer-events-none absolute inset-x-0 bottom-0 h-px"
           />
         )}
         {children}
         {!hideIndicator && (
+          // Underline by default; globals.css turns it into a pill for the
+          // filled tab style, using the same --tab-left/--tab-width.
           <div
             aria-hidden="true"
             data-slot="tabs-indicator"
+            data-visible={indicator.visible || undefined}
             className={cn(
-              "bg-border-focus pointer-events-none absolute bottom-0 h-0.5 transition-[transform,width,opacity] duration-200 ease-out",
+              "bg-border-focus pointer-events-none absolute bottom-0 left-0 h-0.5 w-[max(0px,calc(var(--tab-width)-8px))] [transform:translateX(calc(var(--tab-left)+4px))]",
+              indicator.animate &&
+                "transition-[transform,width,opacity] duration-200 ease-out",
               indicator.visible ? "opacity-100" : "opacity-0",
             )}
-            style={{
-              width: `${Math.max(0, indicator.width - 8)}px`,
-              transform: `translateX(${indicator.left + 4}px)`,
-            }}
+            style={
+              {
+                "--tab-left": `${indicator.left}px`,
+                "--tab-width": `${indicator.width}px`,
+              } as React.CSSProperties
+            }
           />
         )}
       </TabsPrimitive.List>
@@ -180,7 +196,7 @@ const TabsTrigger = React.forwardRef<
       onMouseDown?.(event);
     }}
     className={cn(
-      "focus-visible:ring-border-focus text-secondary-text hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+      "focus-visible:ring-border-focus text-secondary-text data-[state=inactive]:hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-[color] focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
       fullWidth && "flex-1 px-2",
       className,
     )}

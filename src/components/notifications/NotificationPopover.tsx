@@ -258,19 +258,11 @@ export function NotificationPopover({
                 setPage(1);
               }}
             >
-              <TabsList className="w-full rounded-none border-0 p-0" fullWidth>
-                <TabsTrigger
-                  value="unread"
-                  fullWidth
-                  className="rounded-none data-[state=active]:shadow-none"
-                >
+              <TabsList className="w-full rounded-none border-0!" fullWidth>
+                <TabsTrigger value="unread" fullWidth>
                   Unread
                 </TabsTrigger>
-                <TabsTrigger
-                  value="history"
-                  fullWidth
-                  className="rounded-none data-[state=active]:shadow-none"
-                >
+                <TabsTrigger value="history" fullWidth>
                   History
                 </TabsTrigger>
               </TabsList>

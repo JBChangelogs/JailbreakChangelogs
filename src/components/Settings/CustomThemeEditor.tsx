@@ -152,9 +152,6 @@ const fromSiteTheme = (theme: SiteTheme): Omit<CustomThemeInput, "label"> => ({
   logo_filter: theme.logo_filter,
 });
 
-const segment =
-  "text-secondary-text has-checked:bg-button-info has-checked:text-form-button-text has-focus-visible:ring-border-focus cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors has-focus-visible:ring-2";
-
 /**
  * Creates a theme, or edits `theme`. New themes start from the site theme in
  * use; "Start from" swaps every color for another site theme's.
@@ -702,24 +699,17 @@ export default function CustomThemeEditor({
                     Matches scrollbars and other browser parts to your colors.
                   </p>
                 </div>
-                <div
-                  role="radiogroup"
-                  aria-label="Light or dark"
-                  className="border-border-card bg-tertiary-bg flex rounded-lg border p-1"
+                <Tabs
+                  value={current.scheme}
+                  onValueChange={(scheme) =>
+                    update({ scheme: scheme as "dark" | "light" })
+                  }
                 >
-                  {(["dark", "light"] as const).map((scheme) => (
-                    <label key={scheme} className={segment}>
-                      <input
-                        type="radio"
-                        name="custom-theme-scheme"
-                        checked={current.scheme === scheme}
-                        onChange={() => update({ scheme })}
-                        className="sr-only"
-                      />
-                      {scheme === "dark" ? "Dark" : "Light"}
-                    </label>
-                  ))}
-                </div>
+                  <TabsList aria-label="Light or dark">
+                    <TabsTrigger value="dark">Dark</TabsTrigger>
+                    <TabsTrigger value="light">Light</TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
 
               {mode === "visual" ? (

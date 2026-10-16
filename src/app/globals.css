@@ -6,15 +6,40 @@ html[data-tab-style="filled"] [data-slot="tabs-list"] {
   border: 1px solid var(--color-border-card);
   background: var(--color-tertiary-bg);
   padding: 2px;
+  /* Match the padding so the pill and a hovered neighbour don't touch. */
+  gap: 2px;
 }
 
-html[data-tab-style="filled"] [data-slot="tabs-indicator"] {
+html[data-tab-style="filled"] [data-slot="tabs-baseline"] {
   display: none;
+}
+
+/* The sliding indicator becomes the active pill, drawn behind the triggers. */
+html[data-tab-style="filled"] [data-slot="tabs-indicator"] {
+  top: 2px;
+  bottom: 2px;
+  height: auto;
+  width: var(--tab-width);
+  transform: translateX(var(--tab-left));
+  border-radius: var(--radius-md);
+  background: var(--color-button-info);
+}
+
+html[data-tab-style="filled"] [data-slot="tabs-trigger"] {
+  position: relative;
+  z-index: 1;
 }
 
 html[data-tab-style="filled"] [data-slot="tabs-trigger"][data-state="active"] {
   background: var(--color-button-info);
   color: var(--color-form-button-text);
+}
+
+/* Once the pill is measured it carries the background, so it can slide. */
+html[data-tab-style="filled"]
+  [data-slot="tabs-list"]:has(> [data-slot="tabs-indicator"][data-visible])
+  [data-slot="tabs-trigger"][data-state="active"] {
+  background: transparent;
 }
 
 @utility page-heading {
