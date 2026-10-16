@@ -4,6 +4,7 @@ import { useId, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Switch } from "@/components/ui/switch";
+import { SETTING_HIGHLIGHT } from "@/components/Settings/SettingsCard";
 import {
   getDesktopNavigation,
   getLayoutShortcutHidden,
@@ -139,7 +140,7 @@ export default function DesktopNavigationSettings() {
         You can change this on screens 1536px wide or larger.
       </p>
 
-      <div className="grid items-center gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+      <div className="grid items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <div
           role="radiogroup"
           aria-labelledby={`${id}-label`}
@@ -148,7 +149,7 @@ export default function DesktopNavigationSettings() {
           {LAYOUTS.map((layout) => (
             <label
               key={layout.value}
-              className="group border-border-card bg-tertiary-bg has-checked:border-button-info has-checked:bg-button-info/5 has-focus-visible:ring-link hover:border-border-focus/60 has-disabled:hover:border-border-card flex cursor-pointer items-start justify-between gap-3 rounded-xl border p-4 transition-colors has-focus-visible:ring-2 has-disabled:cursor-not-allowed has-disabled:opacity-70"
+              className="group border-border-card bg-tertiary-bg has-checked:border-button-info has-checked:bg-button-info/5 has-focus-visible:ring-link hover:border-border-focus/60 has-disabled:hover:border-border-card flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors has-focus-visible:ring-2 has-disabled:cursor-not-allowed has-disabled:opacity-70"
             >
               <input
                 type="radio"
@@ -159,6 +160,10 @@ export default function DesktopNavigationSettings() {
                 onChange={() => setDesktopNavigation(layout.value)}
                 className="sr-only"
               />
+              <span
+                aria-hidden="true"
+                className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info mt-1 size-4 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-tertiary-bg)]"
+              />
               <span>
                 <span className="text-primary-text block font-medium">
                   {layout.title}
@@ -167,17 +172,15 @@ export default function DesktopNavigationSettings() {
                   {layout.description}
                 </span>
               </span>
-              <span
-                aria-hidden="true"
-                className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info mt-1 size-4 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-tertiary-bg)]"
-              />
             </label>
           ))}
         </div>
         <LayoutPreview layout={mode} />
       </div>
 
-      <div className="border-border-card flex items-center justify-between gap-4 border-t pt-5">
+      <div
+        className={`${SETTING_HIGHLIGHT} flex items-center justify-between gap-4`}
+      >
         <div>
           <label
             htmlFor={`${id}-shortcut`}

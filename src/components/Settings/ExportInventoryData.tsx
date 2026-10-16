@@ -2,6 +2,7 @@ import { createLogger } from "@/services/logger";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { SettingRow } from "./SettingRow";
 import { getJbclToken } from "@/contexts/AuthContext";
 import { INVENTORY_API_URL } from "@/utils/api/api";
 import { readInventoryJobResponse } from "@/utils/api/inventoryJobResponse";
@@ -49,21 +50,22 @@ export const ExportInventoryData = ({ robloxId }: { robloxId?: string }) => {
   };
 
   return (
-    <div>
-      <div className="mb-6">
-        <h3 className="text-primary-text mb-2 text-lg font-bold">
-          Export Inventory Data
-        </h3>
-        <p className="text-secondary-text text-sm">
-          {robloxId
-            ? "Export your inventory data including scan history, duplicates, and networth history. The export process happens in the background."
-            : "Connect a Roblox account in Account Connections to export its inventory data."}
-        </p>
-      </div>
-
-      <Button onClick={handleExport} disabled={!robloxId || loading} size="md">
-        {loading ? "Scheduling Export..." : "Export Data"}
-      </Button>
-    </div>
+    <SettingRow
+      title="Export Inventory Data"
+      description={
+        robloxId
+          ? "Export your inventory data including scan history, duplicates, and networth history. The export process happens in the background."
+          : "Connect a Roblox account in Connections to export its inventory data."
+      }
+      action={
+        <Button
+          onClick={handleExport}
+          disabled={!robloxId || loading}
+          size="md"
+        >
+          {loading ? "Scheduling Export..." : "Export Data"}
+        </Button>
+      }
+    />
   );
 };

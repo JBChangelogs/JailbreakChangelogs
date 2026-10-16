@@ -11,6 +11,8 @@ import { Icon } from "@/components/ui/IconWrapper";
 const GROUPS = [
   {
     label: "Trading",
+    icon: "material-symbols:swap-horiz-rounded",
+    description: "Offers on your trade ads and how they turn out.",
     titles: [
       "new_trade_offer",
       "trade_offer_accepted",
@@ -20,6 +22,8 @@ const GROUPS = [
   },
   {
     label: "Comments and followers",
+    icon: "material-symbols:forum-rounded",
+    description: "Comments, replies and new followers.",
     titles: [
       "profile_comment",
       "inventory_comment",
@@ -29,6 +33,8 @@ const GROUPS = [
   },
   {
     label: "Inventory and items",
+    icon: "material-symbols:inventory-2-rounded",
+    description: "Inventory scans and changes to items.",
     titles: ["inventory_scanned", "holding_original_item", "item_updated"],
   },
 ];
@@ -60,11 +66,15 @@ export function NotificationTypeSettings({
     ...GROUPS,
     {
       label: "Other",
+      icon: "material-symbols:notifications-rounded",
+      description: "Everything else.",
       titles: prefs.map((p) => p.title).filter((t) => !known.has(t)),
     },
   ]
     .map((group) => ({
       label: group.label,
+      icon: group.icon,
+      description: group.description,
       prefs: prefs.filter((p) => group.titles.includes(p.title)),
     }))
     .filter((group) => group.prefs.length);
@@ -127,30 +137,37 @@ export function NotificationTypeSettings({
             return (
               <div
                 key={group.label}
-                className="border-border-card rounded-lg border"
+                className="border-border-card overflow-hidden rounded-lg border"
               >
-                <div className="flex items-center gap-3 px-3 py-2.5">
+                <div className="has-focus-visible:bg-tertiary-bg/60 hover:bg-tertiary-bg/60 flex items-center gap-3 p-3 transition-colors duration-200 motion-reduce:transition-none">
                   <button
                     type="button"
                     onClick={() => toggleOpen(group.label)}
                     aria-expanded={expanded}
                     aria-controls={panelId}
                     disabled={!!search}
-                    className="focus-visible:ring-border-focus flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-sm text-left focus-visible:ring-2 focus-visible:outline-none disabled:cursor-default"
+                    className="focus-visible:ring-border-focus flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-md text-left focus-visible:ring-2 focus-visible:outline-none disabled:cursor-default"
                   >
-                    <Icon
-                      icon="lucide:chevron-right"
-                      aria-hidden="true"
-                      className={`text-secondary-text size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-90" : ""}`}
-                    />
-                    <span className="flex min-w-0 flex-col sm:flex-row sm:items-center sm:gap-2">
-                      <span className="text-primary-text font-medium">
+                    <span className="bg-icon-tile-bg text-icon-tile flex size-10 shrink-0 items-center justify-center rounded-lg">
+                      <Icon
+                        icon={group.icon}
+                        aria-hidden="true"
+                        className="size-5"
+                      />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="text-primary-text block font-medium">
                         {group.label}
                       </span>
-                      <span className="text-secondary-text shrink-0 text-sm whitespace-nowrap">
-                        {enabledCount} of {all.length} on
+                      <span className="text-secondary-text mt-0.5 block text-sm">
+                        {group.description}
                       </span>
                     </span>
+                    <Icon
+                      icon="lucide:chevron-down"
+                      aria-hidden="true"
+                      className={`text-secondary-text size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`}
+                    />
                   </button>
                   <Switch
                     checked={enabledCount === all.length}
@@ -164,50 +181,53 @@ export function NotificationTypeSettings({
                     aria-label={`All ${group.label} notifications`}
                   />
                 </div>
-                {expanded && (
-                  <ul
-                    id={panelId}
-                    className="border-border-card border-t px-3 py-1"
-                  >
-                    {group.prefs.map((pref) => {
-                      const isHighlighted = pref.title === highlight;
-                      return (
-                        <li
-                          key={pref.title}
-                          className="-mx-3 rounded-lg px-3 py-2 pl-9 transition-colors duration-500"
-                          style={
-                            isHighlighted
-                              ? {
-                                  backgroundColor:
-                                    "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                                }
-                              : undefined
-                          }
-                          ref={(el) => {
-                            if (isHighlighted && el) {
-                              setTimeout(() => {
-                                el.scrollIntoView({
-                                  behavior: "smooth",
-                                  block: "center",
-                                });
-                              }, 100);
+                {/* Animated open/close, like the FAQ page. */}
+                <div
+                  id={panelId}
+                  className={`grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none ${expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+                >
+                  <div className="overflow-hidden" inert={!expanded}>
+                    <ul className="border-border-card border-t px-3 py-1">
+                      {group.prefs.map((pref) => {
+                        const isHighlighted = pref.title === highlight;
+                        return (
+                          <li
+                            key={pref.title}
+                            className="has-focus-visible:bg-tertiary-bg/60 hover:bg-tertiary-bg/60 -mx-3 rounded-lg px-3 py-2 pl-16 transition-colors duration-200 motion-reduce:transition-none"
+                            style={
+                              isHighlighted
+                                ? {
+                                    backgroundColor:
+                                      "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                                  }
+                                : undefined
                             }
-                          }}
-                        >
-                          <NotificationPreferenceToggle
-                            title={pref.title}
-                            enabled={pref.enabled}
-                            disabled={!!saving[pref.title]}
-                            onChange={(enabled) =>
-                              onToggle(pref.title, enabled)
-                            }
-                            userData={userData}
-                          />
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
+                            ref={(el) => {
+                              if (isHighlighted && el) {
+                                setTimeout(() => {
+                                  el.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center",
+                                  });
+                                }, 100);
+                              }
+                            }}
+                          >
+                            <NotificationPreferenceToggle
+                              title={pref.title}
+                              enabled={pref.enabled}
+                              disabled={!!saving[pref.title]}
+                              onChange={(enabled) =>
+                                onToggle(pref.title, enabled)
+                              }
+                              userData={userData}
+                            />
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
               </div>
             );
           })}

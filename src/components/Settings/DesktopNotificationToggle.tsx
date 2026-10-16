@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { SettingRow } from "@/components/Settings/SettingRow";
 import {
   getDesktopNotificationPermission,
   getDesktopNotificationsEnabled,
@@ -72,31 +73,21 @@ export function DesktopNotificationToggle() {
     : "Show browser notifications when the browser tab is not in view.";
 
   return (
-    <div className="mb-4 w-full">
-      <div
-        className={`mb-1 flex w-full items-center justify-between gap-4 ${
-          disabledReason ? "cursor-not-allowed opacity-75" : ""
-        }`}
-      >
-        <div className="flex min-w-0 flex-col">
-          <label
-            htmlFor="desktop-notifications-toggle"
-            className="text-primary-text text-base font-medium"
-          >
-            Desktop Notifications
-          </label>
-          <p className="text-secondary-text text-sm">{description}</p>
-        </div>
-
-        <div className="flex shrink-0 items-center gap-2">
+    <div className={`${disabledReason ? "opacity-75" : ""}`}>
+      <SettingRow
+        title="Desktop Notifications"
+        highlight
+        description={description}
+        action={
           <Switch
             id="desktop-notifications-toggle"
+            aria-label="Desktop notifications"
             checked={enabled}
             onCheckedChange={handleToggle}
             disabled={!!disabledReason && !enabled}
           />
-        </div>
-      </div>
+        }
+      />
     </div>
   );
 }

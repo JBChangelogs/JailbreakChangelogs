@@ -1,14 +1,7 @@
-import Image from "next/image";
 import type { SupporterHistoryEntry } from "@/types/auth";
-import { Button as CustomButton } from "@/components/ui/button";
-
-const BADGE_BASE_URL =
-  "https://assets.jailbreakchangelogs.com/assets/website_icons";
-const supporterIcons: Record<number, string> = {
-  1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
-  2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
-  3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
-};
+import { Button } from "@/components/ui/button";
+import { formatMonthDayYear } from "@/utils/helpers/timestamp";
+import { SupporterTierRow } from "./SupporterTierRow";
 
 interface SupporterHistorySectionProps {
   history: SupporterHistoryEntry[];
@@ -18,18 +11,7 @@ interface SupporterHistorySectionProps {
   onRemove: () => void;
 }
 
-const getSupporterTierLabel = (level: number) => {
-  switch (level) {
-    case 1:
-      return "Supporter Tier 1";
-    case 2:
-      return "Supporter Tier 2";
-    case 3:
-      return "Supporter Tier 3";
-    default:
-      return `Supporter Tier ${level}`;
-  }
-};
+const getSupporterTierLabel = (level: number) => `Supporter Tier ${level}`;
 
 const getSupporterHistoryKey = (entry: SupporterHistoryEntry, index: number) =>
   `${entry.level}-${entry.created_at}-${index}`;
@@ -46,33 +28,26 @@ export default function SupporterHistorySection({
       {history.map((entry, index) => {
         const isCurrentTier = currentLevel === entry.level;
         const isUpgrade = entry.level > currentLevel;
-
         return (
-          <div
+          <SupporterTierRow
             key={getSupporterHistoryKey(entry, index)}
-            className="bg-tertiary-bg border-border-card rounded-lg border p-4"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="mb-1 flex items-center gap-2">
-                  {supporterIcons[entry.level] && (
-                    <Image
-                      src={supporterIcons[entry.level]}
-                      alt={getSupporterTierLabel(entry.level)}
-                      width={18}
-                      height={18}
-                      className="object-contain"
-                    />
-                  )}
-                  <p className="text-primary-text text-sm font-semibold">
-                    {getSupporterTierLabel(entry.level)}
-                  </p>
-                </div>
-              </div>
-              {!isCurrentTier ? (
-                <CustomButton
+            level={entry.level}
+            name={getSupporterTierLabel(entry.level)}
+            detail={
+              entry.created_at
+                ? `Added ${formatMonthDayYear(entry.created_at)}`
+                : undefined
+            }
+            actions={
+              isCurrentTier ? (
+                <span className="bg-button-info/15 text-link inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold">
+                  Current
+                </span>
+              ) : (
+                <Button
                   type="button"
-                  size="sm"
+                  size="md"
+                  variant={isUpgrade ? "default" : "secondary"}
                   onClick={() => onUpdateLevel(entry.level)}
                   disabled={revertingLevel !== null}
                 >
@@ -83,35 +58,29 @@ export default function SupporterHistorySection({
                     : isUpgrade
                       ? "Upgrade"
                       : "Downgrade"}
-                </CustomButton>
-              ) : null}
-            </div>
-          </div>
+                </Button>
+              )
+            }
+          />
         );
       })}
       {currentLevel > 0 && (
-        <div className="bg-tertiary-bg border-border-card rounded-lg border p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="mb-1 flex items-center gap-2">
-                <p className="text-primary-text text-sm font-semibold">
-                  Free Tier
-                </p>
-              </div>
-              <p className="text-secondary-text text-xs">
-                Remove your current supporter tier.
-              </p>
-            </div>
-            <CustomButton
+        <SupporterTierRow
+          level={0}
+          name="Free Tier"
+          detail="Remove your current supporter tier."
+          actions={
+            <Button
               type="button"
-              size="sm"
+              size="md"
+              variant="secondary"
               onClick={onRemove}
               disabled={revertingLevel !== null}
             >
               {revertingLevel === 0 ? "Downgrading..." : "Downgrade"}
-            </CustomButton>
-          </div>
-        </div>
+            </Button>
+          }
+        />
       )}
     </div>
   );

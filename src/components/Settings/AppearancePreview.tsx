@@ -73,7 +73,7 @@ export function AppearancePreview({
 
   return (
     <div
-      className="border-border-card bg-secondary-bg mb-5 overflow-hidden rounded-xl border"
+      className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border"
       data-accent-cards={accent?.style}
       style={accent ? accentCardTheme(accent) : undefined}
     >

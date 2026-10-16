@@ -1,11 +1,6 @@
-import { Icon } from "@/components/ui/IconWrapper";
+import { CopyLinkButton } from "./CopyLinkButton";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { UserData } from "@/types/auth";
 
 export type NotificationPreferenceToggleProps = {
@@ -41,7 +36,7 @@ export function NotificationPreferenceToggle({
   };
 
   return (
-    <div className="w-full">
+    <div className="group/setting w-full">
       <div className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <label
@@ -51,20 +46,11 @@ export function NotificationPreferenceToggle({
             {humanizeTitle(title)}
           </label>
           {userData?.flags?.some((f) => f.flag === "is_owner") && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleCopyLink}
-                  className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                  aria-label="Copy highlight link"
-                >
-                  <Icon icon="heroicons:link" className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>Copy URL</p>
-              </TooltipContent>
-            </Tooltip>
+            <CopyLinkButton
+              label="Copy highlight link"
+              onClick={handleCopyLink}
+              scope="setting"
+            />
           )}
         </div>
         <Switch

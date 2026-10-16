@@ -1,12 +1,8 @@
+import { SETTING_HIGHLIGHT } from "./SettingsCard";
 import { UserData } from "@/types/auth";
-import { Icon } from "@/components/ui/IconWrapper";
+import { CopyLinkButton } from "./CopyLinkButton";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface SettingToggleProps {
   name: string;
@@ -35,7 +31,7 @@ export const SettingToggle = ({
   };
 
   return (
-    <div className="w-full">
+    <div className={`group/setting w-full ${SETTING_HIGHLIGHT}`}>
       <div
         className={`mb-1 flex w-full items-center justify-between gap-4 ${
           disabled ? "cursor-not-allowed" : ""
@@ -46,20 +42,11 @@ export const SettingToggle = ({
             {displayName}
           </label>
           {userData?.flags?.some((f) => f.flag === "is_owner") && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleCopyLink}
-                  className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                  aria-label="Copy highlight link"
-                >
-                  <Icon icon="heroicons:link" className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>Copy URL</p>
-              </TooltipContent>
-            </Tooltip>
+            <CopyLinkButton
+              label="Copy highlight link"
+              onClick={handleCopyLink}
+              scope="setting"
+            />
           )}
         </div>
         <Switch

@@ -22,6 +22,10 @@ import {
   useBottomPanel,
 } from "@/components/ui/bottom-panel";
 import { cn } from "@/lib/utils";
+import {
+  SETTING_HIGHLIGHT,
+  SETTINGS_LIST,
+} from "@/components/Settings/SettingsCard";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import CustomThemeControls, {
@@ -365,61 +369,72 @@ export default function ThemeSettings() {
   const current = allItems.find((item) => item.checked)?.option.label;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-        <div className="min-w-0">
-          <h3 className="text-primary-text font-medium">Theme</h3>
-          <p className="text-secondary-text mt-1 text-sm">
-            {current ? `Using ${current}.` : "Choose how the site looks."}
-            {isAuthenticated
-              ? " Syncs with your account."
-              : " Saved on this browser."}
-          </p>
+    <>
+      <div className={SETTINGS_LIST}>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="min-w-0">
+            <h3 className="text-primary-text font-medium">Theme</h3>
+            <p className="text-secondary-text mt-1 text-sm">
+              {current ? `Using ${current}.` : "Choose how the site looks."}
+              {isAuthenticated
+                ? " Syncs with your account."
+                : " Saved on this browser."}
+            </p>
+          </div>
+          <AllThemesSheet items={allItems} name={`${id}-theme`} />
         </div>
-        <AllThemesSheet items={allItems} name={`${id}-theme`} />
-      </div>
-      <CustomThemeControls custom={custom} />
+        <CustomThemeControls custom={custom} />
 
+        <div
+          className={cn(
+            SETTING_HIGHLIGHT,
+            "flex items-center justify-between gap-4",
+          )}
+        >
+          <div>
+            <label
+              htmlFor={`${id}-cursor`}
+              className="text-primary-text font-medium"
+            >
+              Use theme cursor
+            </label>
+            <p className="text-secondary-text mt-1 text-sm">
+              Match your cursor to your selected theme. Saved on this browser.
+            </p>
+          </div>
+          <Switch
+            id={`${id}-cursor`}
+            checked={cursorEnabled}
+            onCheckedChange={setThemeCursorEnabled}
+          />
+        </div>
+
+        <div
+          className={cn(
+            SETTING_HIGHLIGHT,
+            "flex items-center justify-between gap-4",
+          )}
+        >
+          <div>
+            <label
+              htmlFor={`${id}-shortcut`}
+              className="text-primary-text font-medium"
+            >
+              Theme button in header
+            </label>
+            <p className="text-secondary-text mt-1 text-sm">
+              Show a button in the header that opens these settings. Saved on
+              this browser.
+            </p>
+          </div>
+          <Switch
+            id={`${id}-shortcut`}
+            checked={!shortcutHidden}
+            onCheckedChange={(show) => setThemeShortcutHidden(!show)}
+          />
+        </div>
+      </div>
       {custom.dialogs}
-
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <label
-            htmlFor={`${id}-cursor`}
-            className="text-primary-text font-medium"
-          >
-            Use theme cursor
-          </label>
-          <p className="text-secondary-text mt-1 text-sm">
-            Match your cursor to your selected theme. Saved on this browser.
-          </p>
-        </div>
-        <Switch
-          id={`${id}-cursor`}
-          checked={cursorEnabled}
-          onCheckedChange={setThemeCursorEnabled}
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <label
-            htmlFor={`${id}-shortcut`}
-            className="text-primary-text font-medium"
-          >
-            Theme button in header
-          </label>
-          <p className="text-secondary-text mt-1 text-sm">
-            Show a button in the header that opens these settings. Saved on this
-            browser.
-          </p>
-        </div>
-        <Switch
-          id={`${id}-shortcut`}
-          checked={!shortcutHidden}
-          onCheckedChange={(show) => setThemeShortcutHidden(!show)}
-        />
-      </div>
-    </div>
+    </>
   );
 }

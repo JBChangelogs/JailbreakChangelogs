@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import Image from "next/image";
+import { SettingRow } from "./SettingRow";
 
 interface RobloxConnectionProps {
   userData: {
@@ -109,11 +110,35 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
 
   return (
     <div>
-      <div className="mb-6">
-        <h3 className="text-primary-text mb-2 text-lg font-bold">
-          Roblox Connection
-        </h3>
-        {userData.roblox_username ? (
+      <SettingRow
+        title="Roblox"
+        description={
+          userData.roblox_username
+            ? "Your Roblox account, for inventories and trading."
+            : "Connect your Roblox account for inventories and trading."
+        }
+        action={
+          userData.roblox_username ? (
+            <Button
+              variant="destructive"
+              onClick={handleOpen}
+              size="md"
+              disabled={isDisconnecting}
+            >
+              Disconnect Roblox
+            </Button>
+          ) : (
+            <Button
+              onClick={() => setLoginModal({ open: true, tab: "roblox" })}
+              size="md"
+            >
+              <Icon icon="heroicons:link" aria-hidden="true" />
+              Connect Roblox
+            </Button>
+          )
+        }
+      >
+        {userData.roblox_username && (
           <a
             href={
               userData.roblox_id
@@ -122,7 +147,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
             }
             target="_blank"
             rel="noopener noreferrer"
-            className="border-border-card bg-tertiary-bg hover:border-link mt-3 flex items-center gap-3 rounded-lg border p-3 transition-colors"
+            className="border-border-card bg-tertiary-bg hover:border-border-focus mt-3 flex items-center gap-3 rounded-lg border p-3 transition-colors"
           >
             {userData.roblox_avatar && (
               <Image
@@ -150,43 +175,8 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
               />
             )}
           </a>
-        ) : (
-          <p className="text-secondary-text text-sm">Not connected</p>
         )}
-      </div>
-
-      {userData.roblox_username ? (
-        <Button
-          variant="destructive"
-          onClick={handleOpen}
-          size="md"
-          disabled={isDisconnecting}
-        >
-          Disconnect Roblox
-        </Button>
-      ) : (
-        <Button
-          onClick={() => {
-            setLoginModal({ open: true, tab: "roblox" });
-          }}
-          size="md"
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-            />
-          </svg>
-          Connect Roblox Account
-        </Button>
-      )}
+      </SettingRow>
 
       <ConfirmDialog
         isOpen={open}
