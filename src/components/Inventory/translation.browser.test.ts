@@ -410,6 +410,7 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
         import {flushSync} from ${JSON.stringify(require.resolve("react-dom"))};
         import ReactMarkdown from ${JSON.stringify(require.resolve("react-markdown"))};
         import remarkGfm from ${JSON.stringify(require.resolve("remark-gfm"))};
+        import {translateSubtree, startTranslateObserver} from ${JSON.stringify(require.resolve("translation-resilience/simulator"))};
         import {parseChangelogSections} from ${JSON.stringify(new URL("../../lib/changelog-sections.ts", import.meta.url).pathname)};
         const {useEffect, useRef, useState, useSyncExternalStore} = React;
         const Spinner = () => <svg/>;
@@ -506,6 +507,32 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
           flushSync(() => root.unmount()); host.remove();
           return older && newest;
         }
+        async function checkTranslationResilience() {
+          const events = [];
+          window.rybbit = {event: name => events.push(name)};
+          await import(${JSON.stringify(new URL("../../instrumentation-client.ts", import.meta.url).pathname)});
+          let nativeErrorsPreserved = false;
+          try { document.createElement('div').removeChild(document.createTextNode('missing')); }
+          catch (error) { nativeErrorsPreserved = error.name === 'NotFoundError'; }
+          const host = document.createElement('div'); document.body.append(host);
+          const root = createRoot(host, {onUncaughtError: error => errors.push("translation resilience: " + String(error))});
+          function Counter({count, selected}) {
+            return <div>{selected && "Selected "}Lights: {count}<span>!</span></div>;
+          }
+          flushSync(() => root.render(<Counter count={1} selected/>));
+          const countNode = [...host.firstChild.childNodes].find(node => node.nodeValue === '1');
+          translateSubtree(host);
+          const originalDisplaced = !countNode.isConnected && !!host.querySelector('font');
+          const stop = startTranslateObserver(host);
+          await Promise.resolve();
+          flushSync(() => root.render(<Counter count={2} selected={false}/>));
+          await new Promise(resolve => setTimeout(resolve, 30));
+          const updated = host.textContent.includes('2') && !host.textContent.includes('1');
+          const removed = !host.textContent.includes('Selected');
+          stop();
+          flushSync(() => root.unmount()); host.remove();
+          return {nativeErrorsPreserved, originalDisplaced, updated, removed, events};
+        }
         (async () => {
           const inventory = await check(Inventory, true);
           const saving = await check(Save, false);
@@ -530,7 +557,8 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
             const expected = routeExpectations[index];
             routeLabels.push(!expected || (next.includes(expected[0]) && previous.includes(expected[1])));
           }
-          document.getElementById('result').textContent = JSON.stringify({errors, inventory, saving, saved, filtered, cleared, dupeDateAdded, dupeDateRemoved, originalDateAdded, originalDateRemoved, routeLabels, releaseSwitching});
+          const resilience = await checkTranslationResilience();
+          document.getElementById('result').textContent = JSON.stringify({resilience, errors, inventory, saving, saved, filtered, cleared, dupeDateAdded, dupeDateRemoved, originalDateAdded, originalDateRemoved, routeLabels, releaseSwitching});
         })();
       `;
       writeFileSync(
@@ -580,6 +608,13 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
         output.match(/<pre id="result">(.*?)<\/pre>/)?.[1] ?? "null",
       );
       expect(result).toEqual({
+        resilience: {
+          nativeErrorsPreserved: true,
+          originalDisplaced: true,
+          updated: true,
+          removed: true,
+          events: ["Page Translation Detected"],
+        },
         errors: [],
         inventory: "Trade HistoryNewest trades first",
         saving: "Updating...",
