@@ -18,16 +18,33 @@ interface TabsProps extends React.ComponentPropsWithoutRef<
 const Tabs = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.Root>,
   TabsProps
->(({ activationMode, radio = false, ...props }, ref) => (
-  <RadioContext.Provider value={radio ? { value: props.value } : null}>
-    <TabsPrimitive.Root
-      ref={ref}
-      // Arrow keys select radios, but only move focus between real tabs.
-      activationMode={activationMode ?? (radio ? "automatic" : "manual")}
-      {...props}
-    />
-  </RadioContext.Provider>
-));
+>(
+  (
+    { activationMode, radio = false, defaultValue, onValueChange, ...props },
+    ref,
+  ) => {
+    // Radios report which one is checked, so follow the selection even
+    // when it's uncontrolled (defaultValue).
+    const [uncontrolled, setUncontrolled] = React.useState(defaultValue);
+    return (
+      <RadioContext.Provider
+        value={radio ? { value: props.value ?? uncontrolled } : null}
+      >
+        <TabsPrimitive.Root
+          ref={ref}
+          // Arrow keys select radios, but only move focus between real tabs.
+          activationMode={activationMode ?? (radio ? "automatic" : "manual")}
+          defaultValue={defaultValue}
+          onValueChange={(value) => {
+            setUncontrolled(value);
+            onValueChange?.(value);
+          }}
+          {...props}
+        />
+      </RadioContext.Provider>
+    );
+  },
+);
 Tabs.displayName = "Tabs";
 
 const setRefs =
@@ -62,6 +79,7 @@ const TabsList = React.forwardRef<
       fullWidth = false,
       hideIndicator = false,
       children,
+      onKeyDown,
       ...props
     },
     ref,
@@ -155,6 +173,23 @@ const TabsList = React.forwardRef<
           role: "radiogroup",
           "aria-orientation": undefined,
         })}
+        onKeyDown={(event) => {
+          onKeyDown?.(event);
+          // Radix tabs only use Left/Right; radios also move with Up/Down.
+          // Focusing one selects it (automatic activation).
+          if (!radio || (event.key !== "ArrowUp" && event.key !== "ArrowDown"))
+            return;
+          const radios = [
+            ...event.currentTarget.querySelectorAll<HTMLElement>(
+              '[role="radio"]:not(:disabled)',
+            ),
+          ];
+          const index = radios.indexOf(event.target as HTMLElement);
+          if (index < 0) return;
+          event.preventDefault();
+          const step = event.key === "ArrowDown" ? 1 : -1;
+          radios[(index + step + radios.length) % radios.length].focus();
+        }}
         className={cn(
           "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto overflow-y-hidden bg-transparent p-0 [-webkit-overflow-scrolling:touch]",
           fullWidth && "w-full min-w-0 gap-0",

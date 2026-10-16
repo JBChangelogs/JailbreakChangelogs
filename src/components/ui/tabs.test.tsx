@@ -21,6 +21,22 @@ test("radio tabs use radio-group semantics with no tab panels", () => {
   expect(html).not.toMatch(/role="tab|aria-controls|aria-selected/);
 });
 
+test("uncontrolled radio tabs check the default value", () => {
+  const html = renderToStaticMarkup(
+    <Tabs radio defaultValue="b">
+      <TabsList aria-label="Pick">
+        <TabsTrigger value="a">A</TabsTrigger>
+        <TabsTrigger value="b">B</TabsTrigger>
+      </TabsList>
+    </Tabs>,
+  );
+  // Only B, the second radio, is checked.
+  expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
+  expect(html.indexOf('aria-checked="true"')).toBeGreaterThan(
+    html.indexOf(">A<"),
+  );
+});
+
 test("plain tabs keep tab semantics", () => {
   const html = render(false);
   expect(html).toContain('role="tablist"');
