@@ -1,3 +1,4 @@
+import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import { Suspense } from "react";
 import {
   fetchInventoryData,
@@ -95,7 +96,10 @@ async function InventoryDataFetcher({
     const userConnectionData =
       errorMessage?.includes("Inventory not found for this user.") &&
       /^\d+$/.test(actualRobloxId)
-        ? await fetchUserByRobloxId(actualRobloxId).catch((connectionError) => {
+        ? await fetchUserByRobloxId(
+            actualRobloxId,
+            await getServerVerificationHeaders(),
+          ).catch((connectionError) => {
             if (
               !(connectionError instanceof Error) ||
               !connectionError.message.startsWith("PRIVATE_PROFILE:")

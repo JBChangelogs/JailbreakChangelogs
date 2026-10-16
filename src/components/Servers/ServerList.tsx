@@ -96,6 +96,7 @@ const fetchServersPage = async (
     : `/v2/servers?${params.toString()}`;
   const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, path);
   const response = await fetch(url, {
+    credentials: "include",
     ...(query ? { cache: "no-store" as const } : {}),
     headers,
     signal,
@@ -142,6 +143,7 @@ const ServerList: React.FC = () => {
         "/v2/servers/sorts",
       );
       const response = await fetch(url, {
+        credentials: "include",
         headers,
         signal,
       });

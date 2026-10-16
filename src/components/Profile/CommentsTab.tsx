@@ -14,6 +14,7 @@ import Comment from "../ProfileComments/Comments";
 import { fetchCommentDetails } from "@/app/users/[id]/actions";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { changelogTimelineQueryOptions } from "@/hooks/useChangelogTimeline";
 
 interface CommentReaction {
   emoji: string;
@@ -137,46 +138,19 @@ export default function CommentsTab({
 
       if (changelogIds.length === 0) return {};
 
-      const results = await Promise.all(
-        changelogIds.map(async (id) => {
-          try {
-            const data = await queryClient.fetchQuery({
-              queryKey: ["changelog-detail", id],
-              queryFn: async ({ signal }) => {
-                const { url, headers } = buildApiFetchRequest(
-                  PUBLIC_API_URL,
-                  `/v2/changelogs/${id}`,
-                );
-                const response = await fetch(url, {
-                  credentials: "include",
-                  signal,
-                  headers: {
-                    ...headers,
-                    "User-Agent": "JailbreakChangelogs-Comments/1.0",
-                  },
-                });
-                if (!response.ok) return null;
-                return response.json();
-              },
-              staleTime: 60_000,
-              gcTime: 5 * 60_000,
-              retry: false,
-            });
-            if (!data) return null;
-            return { id, data };
-          } catch {
-            return null;
-          }
-        }),
-      );
-
-      return results.reduce(
-        (acc, entry) => {
-          if (entry) acc[entry.id] = entry.data;
-          return acc;
-        },
-        {} as Record<string, unknown>,
-      );
+      try {
+        const changelogs = await queryClient.fetchQuery(
+          changelogTimelineQueryOptions(),
+        );
+        const requestedIds = new Set(changelogIds);
+        return Object.fromEntries(
+          changelogs
+            .filter((changelog) => requestedIds.has(String(changelog.id)))
+            .map((changelog) => [String(changelog.id), changelog]),
+        );
+      } catch {
+        return {};
+      }
     },
     [queryClient],
   );

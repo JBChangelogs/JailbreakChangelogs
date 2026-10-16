@@ -1,3 +1,4 @@
+import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import { permanentRedirect, notFound } from "next/navigation";
 import { fetchItemById } from "@/utils/api/api";
 import NotFoundView from "@/components/Layout/NotFoundView";
@@ -18,7 +19,7 @@ export default async function ItemByIdPage({ params }: Props) {
     notFound();
   }
 
-  const item = await fetchItemById(type);
+  const item = await fetchItemById(type, await getServerVerificationHeaders());
 
   if (!item) {
     return (

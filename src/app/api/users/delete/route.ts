@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { BASE_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 import { getAuthToken } from "@/utils/api/routeAuth";
+import { getHumanVerificationHeaders } from "@/utils/api/verificationHeaders";
 
 const log = createLogger("API");
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   try {
     const token = await getAuthToken();
     if (!token)
@@ -13,7 +14,10 @@ export async function DELETE() {
 
     const resp = await fetch(`${BASE_API_URL}/v2/users/me`, {
       method: "DELETE",
-      headers: { Authorization: token },
+      headers: {
+        Authorization: token,
+        ...getHumanVerificationHeaders(request.cookies),
+      },
       cache: "no-store",
     });
 

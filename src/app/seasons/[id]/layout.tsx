@@ -1,3 +1,4 @@
+import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 import { fetchSeason, Reward } from "@/utils/api/api";
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const { id } = await params;
-    const season = await fetchSeason(id);
+    const season = await fetchSeason(id, await getServerVerificationHeaders());
 
     if (!season) {
       const metadata: Metadata = {

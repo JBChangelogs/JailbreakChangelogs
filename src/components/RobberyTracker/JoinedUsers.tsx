@@ -77,7 +77,7 @@ export default function JoinedUsers({
         PUBLIC_API_URL,
         `/v2/users/batch?ids=${userIds.map(encodeURIComponent).join(",")}`,
       );
-      const response = await fetch(url, { headers });
+      const response = await fetch(url, { headers, credentials: "include" });
       if (!response.ok) throw new Error("Could not load joined users");
       const results = (await response.json()) as UserData[];
       return Object.fromEntries(results.map((user) => [user.id, user]));

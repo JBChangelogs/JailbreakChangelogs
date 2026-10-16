@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { buildApiLinkUrl, getDevToken } from "@/utils/api/apiDevToken";
 
 export interface LoginModalController {
   tabValue: number;
@@ -58,17 +59,21 @@ export function useLoginModalController(): LoginModalController {
 
   const handleRobloxLogin = useCallback(() => {
     const tokenMatch = document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
-    if (!tokenMatch) {
+    const { isDevEnv, injectedToken } = getDevToken();
+    if (!tokenMatch && !(isDevEnv && injectedToken)) {
       toast.info("You must be logged in with Discord first", {
         duration: 3000,
       });
       return;
     }
 
-    const token = decodeURIComponent(tokenMatch[1]);
     const currentURL = new URL(window.location.href);
     currentURL.searchParams.set("auth_flow", "roblox-link");
-    const oauthRedirect = `${PUBLIC_API_URL}/oauth/roblox?redirect=${encodeURIComponent(currentURL.toString())}&owner=${encodeURIComponent(token)}`;
+    const oauthRedirect = buildApiLinkUrl(
+      PUBLIC_API_URL,
+      "/oauth/roblox",
+      currentURL.toString(),
+    );
 
     toast.loading("Redirecting to Roblox...", {
       duration: 2000,

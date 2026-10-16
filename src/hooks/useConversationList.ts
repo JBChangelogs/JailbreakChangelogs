@@ -115,6 +115,7 @@ export function useConversationList({
               `/v2/users/${encodeURIComponent(id)}?fields=${USER_LOOKUP_FIELDS}`,
             );
             const response = await fetch(url, {
+              credentials: "include",
               method: "GET",
               cache: "no-store",
               headers,
@@ -160,6 +161,7 @@ export function useConversationList({
               `/v2/users/batch?ids=${ids.map(encodeURIComponent).join(",")}`,
             );
             const response = await fetch(url, {
+              credentials: "include",
               method: "GET",
               cache: "no-store",
               headers,

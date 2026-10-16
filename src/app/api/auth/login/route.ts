@@ -1,7 +1,8 @@
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getHumanVerificationHeaders } from "@/utils/api/verificationHeaders";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { token } = (await request.json()) as { token?: string };
     if (!token || token === "undefined") {
@@ -14,7 +15,10 @@ export async function POST(request: Request) {
     const resp = await fetch(`${PUBLIC_API_URL}/v2/users/me`, {
       cache: "no-store",
       credentials: "include",
-      headers: { Authorization: token },
+      headers: {
+        Authorization: token,
+        ...getHumanVerificationHeaders(request.cookies),
+      },
     });
     if (!resp.ok) {
       return new Response(JSON.stringify({ message: "Invalid token" }), {

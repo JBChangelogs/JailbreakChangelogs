@@ -29,7 +29,7 @@ export async function fetchProfileData(
         .catch(() => []),
       fetchWithRetry(
         `${PUBLIC_API_URL}/v2/users/${userId}/description`,
-        undefined,
+        { credentials: "include" },
         {
           maxRetries: 2,
           initialDelayMs: 700,

@@ -1,6 +1,10 @@
 import { afterEach, expect, spyOn, test } from "bun:test";
 
 import { BASE_API_URL, fetchUserById, fetchUserByIdForMetadata } from "./api";
+import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
+import { createRequire } from "node:module";
+import { ModuleKind, transpileModule } from "typescript";
 
 const originalFetch = globalThis.fetch;
 
@@ -72,6 +76,7 @@ test("client profile requests use the public base and preserve access errors", a
     `${publicBase}/v2/users/${id}?nocache=false`,
   );
   expect(fetchMock.mock.calls[0]![1]?.redirect).toBe("error");
+  expect(fetchMock.mock.calls[0]![1]?.credentials).toBe("include");
 
   for (const [status, body, prefix] of [
     [403, { message: "This profile is private" }, "PRIVATE_PROFILE:"],
@@ -81,5 +86,34 @@ test("client profile requests use the public base and preserve access errors", a
   ] as const) {
     fetchMock.mockResolvedValueOnce(Response.json(body, { status }));
     await expect(fetchUserById(id, publicBase)).rejects.toThrow(prefix);
+  }
+});
+
+test("user list and search send cookies and preserve cancellation", async () => {
+  const exports = {} as typeof import("./api");
+  runInNewContext(
+    transpileModule(
+      readFileSync(new URL("./api.ts", import.meta.url), "utf8"),
+      {
+        compilerOptions: { module: ModuleKind.CommonJS },
+      },
+    ).outputText,
+    {
+      exports,
+      require: createRequire(import.meta.url),
+      process: { env: { NEXT_PUBLIC_API_URL: "https://api.example.com" } },
+      URLSearchParams,
+      fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args),
+    },
+  );
+  const signal = new AbortController().signal;
+  const fetchMock = spyOn(globalThis, "fetch")
+    .mockResolvedValueOnce(Response.json({ users: [] }))
+    .mockResolvedValueOnce(Response.json({ users: [] }));
+  await exports.fetchPaginatedUsers(1, 30, signal);
+  await exports.searchUsers("test-user", 30, signal);
+  for (const [, options] of fetchMock.mock.calls) {
+    expect(options?.credentials).toBe("include");
+    expect(options?.signal).toBe(signal);
   }
 });

@@ -1,3 +1,4 @@
+import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 import { fetchChangelog } from "@/utils/api/api";
@@ -19,7 +20,10 @@ export async function generateMetadata({
 
   try {
     const { id } = await params;
-    const changelog = await fetchChangelog(id);
+    const changelog = await fetchChangelog(
+      id,
+      await getServerVerificationHeaders(),
+    );
 
     const metadata: Metadata = {
       metadataBase: new URL("https://jailbreakchangelogs.com"),

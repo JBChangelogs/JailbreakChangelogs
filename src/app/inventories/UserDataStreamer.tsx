@@ -1,3 +1,4 @@
+import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import { Suspense } from "react";
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import { InventoryData } from "./types";
@@ -79,15 +80,17 @@ async function UserDataFetcher({
       includeDupeData: true,
       context: "INVENTORY",
     }),
-    fetchUserByRobloxId(robloxId).catch((error) => {
-      if (
-        !(error instanceof Error) ||
-        !error.message.startsWith("PRIVATE_PROFILE:")
-      ) {
-        log.error("Failed to fetch user connection data", error);
-      }
-      return null;
-    }),
+    fetchUserByRobloxId(robloxId, await getServerVerificationHeaders()).catch(
+      (error) => {
+        if (
+          !(error instanceof Error) ||
+          !error.message.startsWith("PRIVATE_PROFILE:")
+        ) {
+          log.error("Failed to fetch user connection data", error);
+        }
+        return null;
+      },
+    ),
   ]);
 
   return (

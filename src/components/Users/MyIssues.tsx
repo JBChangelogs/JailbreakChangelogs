@@ -132,7 +132,11 @@ export default function MyIssues() {
         PUBLIC_API_URL,
         "/v2/issues/sorts",
       );
-      const response = await fetch(url, { headers, signal });
+      const response = await fetch(url, {
+        headers,
+        signal,
+        credentials: "include",
+      });
       if (!response.ok)
         throw new Error(`Issue sorts request failed (${response.status})`);
       return parseSortGroups(await response.json()).flatMap(

@@ -1,23 +1,6 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { BASE_API_URL } from "@/utils/api/api";
 
 export async function POST() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("jbcl_token")?.value;
-
-  if (token) {
-    try {
-      await fetch(`${BASE_API_URL}/v2/users/me/session`, {
-        method: "DELETE",
-        headers: { Authorization: token },
-        cache: "no-store",
-      });
-    } catch {
-      // Ignore network errors on logout
-    }
-  }
-
   const response = NextResponse.json({ ok: true });
   const envName = process.env.RAILWAY_ENVIRONMENT_NAME;
   const useSharedDomainCookie =

@@ -728,7 +728,12 @@ export default function MyReports() {
         PUBLIC_API_URL,
         `/v2/users/batch?ids=${reportedIds.map(encodeURIComponent).join(",")}`,
       );
-      const response = await fetch(url, { cache: "no-store", headers, signal });
+      const response = await fetch(url, {
+        cache: "no-store",
+        headers,
+        signal,
+        credentials: "include",
+      });
       if (!response.ok) return [];
       return response.json();
     },

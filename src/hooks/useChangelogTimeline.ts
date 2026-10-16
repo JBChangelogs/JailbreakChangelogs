@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { Changelog, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
@@ -8,8 +8,8 @@ export class ChangelogRateLimitError extends Error {
   }
 }
 
-export function useChangelogTimeline() {
-  return useQuery({
+export function changelogTimelineQueryOptions() {
+  return queryOptions({
     queryKey: ["changelog-timeline"],
     queryFn: async ({ signal }): Promise<Changelog[]> => {
       if (!PUBLIC_API_URL) throw new Error("Missing PUBLIC_API_URL");
@@ -42,4 +42,8 @@ export function useChangelogTimeline() {
     retry: false,
     refetchOnWindowFocus: false,
   });
+}
+
+export function useChangelogTimeline() {
+  return useQuery(changelogTimelineQueryOptions());
 }

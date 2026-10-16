@@ -130,3 +130,43 @@ test("other production routes remain public and testing deployments keep their a
   ).toBe("https://jailbreakchangelogs.com/access-denied");
   expect(fetchMock).not.toHaveBeenCalled();
 });
+
+test("proxy forwards each visitor's verification cookie without forwarding stale session cookies", async () => {
+  process.env.NEXT_PUBLIC_API_URL = "https://api.example.com";
+  const fetchMock = spyOn(globalThis, "fetch");
+  for (const verification of ["visitor-one", "visitor-two", undefined]) {
+    const cookie = `jbcl_token=session; analytics=private${verification ? `; jbcl_verified_human=${verification}` : ""}`;
+    fetchMock.mockResolvedValueOnce(
+      Response.json({ flags: [{ flag: "is_tester", enabled: true }] }),
+    );
+    await proxy(
+      new NextRequest("https://jailbreakchangelogs.com/experiments", {
+        headers: { cookie },
+      }),
+    );
+    const options = fetchMock.mock.calls.at(-1)![1]!;
+    const headers = new Headers(options.headers);
+    expect(headers.get("Cookie")).toBe(
+      verification ? `jbcl_verified_human=${verification}` : null,
+    );
+    expect(headers.get("Authorization")).toBe("session");
+    expect(options.cache).toBe("no-store");
+
+    fetchMock.mockResolvedValueOnce(
+      Response.json({ name: "Test Item", type: "Vehicle" }),
+    );
+    const redirect = await proxy(
+      new NextRequest("https://jailbreakchangelogs.com/vehicle/123", {
+        headers: { cookie },
+      }),
+    );
+    expect(redirect.status).toBe(308);
+    const redirectHeaders = new Headers(
+      fetchMock.mock.calls.at(-1)![1]!.headers,
+    );
+    expect(redirectHeaders.get("Cookie")).toBe(
+      verification ? `jbcl_verified_human=${verification}` : null,
+    );
+    expect(redirectHeaders.has("Authorization")).toBe(false);
+  }
+});

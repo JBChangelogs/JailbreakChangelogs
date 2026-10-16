@@ -4,6 +4,7 @@ import SubmitTestimonialButton from "@/components/Testimonials/SubmitTestimonial
 import TestimonialsClient from "@/components/Testimonials/TestimonialsClient";
 import { fetchTestimonials } from "@/components/Testimonials/testimonialsData";
 import { BASE_API_URL } from "@/utils/api/api";
+import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import { FeaturedBadimoTestimonial } from "@/components/Testimonials/TestimonialsSection";
 
 type PageProps = {
@@ -21,6 +22,7 @@ export default async function TestimonialsPage({ searchParams }: PageProps) {
     page,
     undefined,
     BASE_API_URL,
+    await getServerVerificationHeaders(),
   ).catch(() => undefined);
 
   return (

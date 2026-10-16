@@ -1,3 +1,4 @@
+import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 import { fetchItem } from "@/utils/api/api";
@@ -162,7 +163,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   try {
     const { type, name } = await params;
-    const item = await fetchItem(type, name);
+    const item = await fetchItem(
+      type,
+      name,
+      await getServerVerificationHeaders(),
+    );
     if (!item) {
       const metadata: Metadata = {
         metadataBase: new URL("https://jailbreakchangelogs.com"),
@@ -291,7 +296,11 @@ export default async function ItemLayout({
   params: Promise<{ type: string; name: string }>;
 }) {
   const { type, name } = await params;
-  const item = await fetchItem(type, name);
+  const item = await fetchItem(
+    type,
+    name,
+    await getServerVerificationHeaders(),
+  );
   const faqJsonLdData = await generateFAQJsonLd(item);
   const breadcrumbJsonLdData = await generateBreadcrumbJsonLd(item, type);
 

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getDevToken } from "@/utils/api/apiDevToken";
 import { isTestingDeploy } from "@/utils/deployment";
+import { getHumanVerificationHeaders } from "@/utils/api/verificationHeaders";
 
 interface UserFlag {
   flag?: string | null;
@@ -107,7 +108,10 @@ function hasTestingAccess(user: ProxyUser | null): boolean {
   );
 }
 
-async function fetchCurrentUser(token: string): Promise<ProxyUser | null> {
+async function fetchCurrentUser(
+  token: string,
+  request: NextRequest,
+): Promise<ProxyUser | null> {
   const apiBaseUrl = getApiBaseUrl();
   if (!apiBaseUrl) return null;
 
@@ -117,6 +121,7 @@ async function fetchCurrentUser(token: string): Promise<ProxyUser | null> {
       headers: {
         Authorization: token,
         "User-Agent": "JailbreakChangelogs-Auth/1.0",
+        ...getHumanVerificationHeaders(request.cookies),
       },
     });
 
@@ -158,6 +163,7 @@ async function getLegacyItemRedirectResponse(
         headers: {
           "User-Agent": "JailbreakChangelogs-Proxy/1.0",
           Accept: "application/json",
+          ...getHumanVerificationHeaders(request.cookies),
         },
       },
     );
@@ -216,7 +222,7 @@ export async function proxy(request: NextRequest) {
   if (isTestingRestricted && isAccessDeniedPath) {
     const token = getSessionToken(request);
     if (token) {
-      const user = await fetchCurrentUser(token);
+      const user = await fetchCurrentUser(token, request);
       if (hasTestingAccess(user)) {
         return NextResponse.redirect(new URL("/", request.url));
       }
@@ -237,7 +243,7 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL(deniedPath, request.url));
     }
 
-    const user = await fetchCurrentUser(token);
+    const user = await fetchCurrentUser(token, request);
     if (!hasTestingAccess(user)) {
       if (request.nextUrl.pathname.startsWith("/api/")) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });

@@ -81,7 +81,7 @@ export async function fetchBanReferenceDetails(
     PUBLIC_API_URL,
     `/v2/ban-references/${encodeURIComponent(ref)}`,
   );
-  const response = await fetch(url, { headers });
+  const response = await fetch(url, { headers, credentials: "include" });
 
   if (response.status === 404) return null;
   if (!response.ok) {

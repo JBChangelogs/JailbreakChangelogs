@@ -108,6 +108,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     queryKey: ["comment-sorts"],
     queryFn: async ({ signal }): Promise<SortGroup[]> => {
       const response = await fetch(`${PUBLIC_API_URL}/v2/comments/sorts`, {
+        credentials: "include",
         signal,
       });
       if (!response.ok)

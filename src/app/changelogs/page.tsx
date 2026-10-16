@@ -27,7 +27,7 @@ export default function ChangelogsPage() {
           ...changelogsLatestHeaders,
           "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
         },
-        cache: "no-store",
+        cache: "no-cache",
       });
       if (!response.ok) {
         if (response.status === 429) {

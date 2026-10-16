@@ -40,10 +40,14 @@ interface OGSearchData {
 
 interface OGFinderDataStreamerProps {
   robloxId: string;
+  verificationHeaders?: Record<string, string>;
 }
 
 // Component that fetches OG search data
-async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
+async function OGFinderDataFetcher({
+  robloxId,
+  verificationHeaders,
+}: OGFinderDataStreamerProps) {
   // Check if the input is a username (not a number) or a Roblox ID
   const isUsername = !/^\d+$/.test(robloxId);
 
@@ -153,7 +157,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
       log.error("Failed to fetch main user data:", error);
       return {};
     }),
-    fetchUserByRobloxId(actualRobloxId).catch((error) => {
+    fetchUserByRobloxId(actualRobloxId, verificationHeaders).catch((error) => {
       if (
         !(error instanceof Error) ||
         !error.message.startsWith("PRIVATE_PROFILE:")
@@ -203,6 +207,12 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
 
 export default function OGFinderDataStreamer({
   robloxId,
+  verificationHeaders,
 }: OGFinderDataStreamerProps) {
-  return <OGFinderDataFetcher robloxId={robloxId} />;
+  return (
+    <OGFinderDataFetcher
+      robloxId={robloxId}
+      verificationHeaders={verificationHeaders}
+    />
+  );
 }

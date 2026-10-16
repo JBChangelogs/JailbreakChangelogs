@@ -59,7 +59,7 @@ import {
 import { UserData, UserFlag } from "@/types/auth";
 import type { ValueHistory } from "@/components/Items/ItemValueChart";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
-import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest, buildApiLinkUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");
@@ -281,6 +281,7 @@ export const fetchPaginatedUsers = async (
     `/v2/users?${params.toString()}`,
   );
   const response = await fetch(url, {
+    credentials: "include",
     headers,
     cache: "no-store",
     signal,
@@ -309,6 +310,7 @@ export const searchUsers = async (
     `/v2/users/search?${params.toString()}`,
   );
   const response = await fetch(url, {
+    credentials: "include",
     headers,
     cache: "no-store",
     signal,
@@ -390,6 +392,7 @@ export async function fetchUserById(id: string, baseUrl = BASE_API_URL) {
       `/v2/users/${id}?nocache=false`,
     );
     const response = await fetch(url, {
+      credentials: "include",
       redirect: "error",
       headers: {
         ...headers,
@@ -450,7 +453,10 @@ export async function fetchUserById(id: string, baseUrl = BASE_API_URL) {
   }
 }
 
-export async function fetchUserByIdForMetadata(id: string) {
+export async function fetchUserByIdForMetadata(
+  id: string,
+  verificationHeaders: Record<string, string> = {},
+) {
   if (typeof id !== "string" || !/^[0-9]+$/.test(id)) {
     throw new Error(`NOT_FOUND: User not found with id ${id}`);
   }
@@ -469,6 +475,7 @@ export async function fetchUserByIdForMetadata(id: string) {
         redirect: "error",
         headers: {
           "User-Agent": "JailbreakChangelogs-Metadata/1.0",
+          ...verificationHeaders,
         },
       },
     );
@@ -524,13 +531,18 @@ export async function fetchUserByIdForMetadata(id: string) {
   }
 }
 
-export async function fetchUserByRobloxId(robloxId: string) {
+export async function fetchUserByRobloxId(
+  robloxId: string,
+  verificationHeaders: Record<string, string> = {},
+) {
   try {
     const response = await fetch(
       `${BASE_API_URL}/v2/users/by-roblox-id/${robloxId}`,
       {
+        credentials: "include",
         headers: {
           "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
+          ...verificationHeaders,
         },
       },
     );
@@ -815,6 +827,7 @@ export async function fetchLastUpdated(items: Item[]) {
 export async function fetchItem(
   type: string,
   name: string,
+  verificationHeaders: Record<string, string> = {},
 ): Promise<ItemDetails | null> {
   try {
     const itemName = decodeURIComponent(name);
@@ -825,6 +838,7 @@ export async function fetchItem(
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
+          ...verificationHeaders,
         },
         next: { revalidate: 300 }, // Cache for 5 minutes
       },
@@ -845,13 +859,17 @@ export async function fetchItem(
   }
 }
 
-export async function fetchItemById(id: string): Promise<ItemDetails | null> {
+export async function fetchItemById(
+  id: string,
+  verificationHeaders: Record<string, string> = {},
+): Promise<ItemDetails | null> {
   try {
     const response = await fetchWithRetry(
       `${BASE_API_URL}/v2/items/${encodeURIComponent(id)}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
+          ...verificationHeaders,
         },
         next: { revalidate: 300 }, // Cache for 5 minutes
       },
@@ -888,7 +906,7 @@ export async function fetchItemByIdClient(
     const response = await fetch(url, {
       headers,
       credentials: "include",
-      cache: "no-store",
+      cache: "no-cache",
     });
 
     if (!response.ok) {
@@ -981,10 +999,14 @@ export async function fetchItemHistoryClient(
   }
 }
 
-export async function fetchChangelog(id: string): Promise<Changelog> {
+export async function fetchChangelog(
+  id: string,
+  verificationHeaders: Record<string, string> = {},
+): Promise<Changelog> {
   const response = await fetch(`${BASE_API_URL}/v2/changelogs/${id}`, {
     headers: {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
+      ...verificationHeaders,
     },
   });
   if (!response.ok) {
@@ -1197,11 +1219,15 @@ export async function fetchSeasonsList() {
   }
 }
 
-export async function fetchSeason(id: string) {
+export async function fetchSeason(
+  id: string,
+  verificationHeaders: Record<string, string> = {},
+) {
   try {
     const response = await fetch(`${BASE_API_URL}/v2/seasons/${id}`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
+        ...verificationHeaders,
       },
     });
 
@@ -2444,16 +2470,6 @@ export async function clearNotificationHistory(): Promise<boolean> {
   }
 }
 
-function getClientToken(): string | null {
-  const cookieMatch =
-    typeof document !== "undefined"
-      ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
-      : null;
-  return cookieMatch
-    ? decodeURIComponent(cookieMatch[1])
-    : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
-}
-
 export async function fetchEmailLinkedStatus(): Promise<{ linked: boolean }> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
@@ -2560,9 +2576,11 @@ export async function unlinkEmail(): Promise<{
 }
 
 export function getEmailLinkUrl(): string {
-  const token = getClientToken();
-  const redirectUrl = "https://jailbreakchangelogs.com/settings";
-  return `${PUBLIC_API_URL}/email/link?redirect=${encodeURIComponent(redirectUrl)}&owner=${token ?? ""}`;
+  return buildApiLinkUrl(
+    PUBLIC_API_URL,
+    "/email/link",
+    "https://jailbreakchangelogs.com/settings",
+  );
 }
 
 export interface HomepageStats {

@@ -1,6 +1,7 @@
 import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
 
 import OGFinderDataStreamer from "@/components/OG/OGFinderDataStreamer";
+import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import OGFinderClient from "@/components/OG/OGFinderClient";
 import OGFinderDescription from "@/components/OG/OGFinderDescription";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -66,7 +67,10 @@ export default async function OGFinderUserPage({
           <Suspense
             fallback={<OGFinderClient isLoading={true} robloxId={userid} />}
           >
-            <OGFinderDataStreamer robloxId={userid} />
+            <OGFinderDataStreamer
+              robloxId={userid}
+              verificationHeaders={await getServerVerificationHeaders()}
+            />
           </Suspense>
         </PremiumAwareLayout>
       </div>

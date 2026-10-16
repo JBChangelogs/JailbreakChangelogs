@@ -43,6 +43,18 @@ export const buildApiWsUrl = (
   return url.toString();
 };
 
+export function buildApiLinkUrl(
+  baseUrl: string | undefined,
+  path: string,
+  redirect: string,
+): string {
+  const url = new URL(
+    buildApiWsUrl(baseUrl, path, { tokenParamName: "owner" }),
+  );
+  url.searchParams.set("redirect", redirect);
+  return url.toString();
+}
+
 /**
  * Builds an API URL and returns it alongside an Authorization header when
  * enabled for local dev. Use this for regular fetch calls instead of

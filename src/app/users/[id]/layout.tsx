@@ -1,3 +1,4 @@
+import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import { withDiscordEmbed } from "@/lib/discord-embed";
 import { accentColorToHex } from "@/utils/ui/accentColor";
 import type { Viewport, Metadata } from "next";
@@ -16,7 +17,10 @@ export async function generateViewport({
   const { id } = await params;
 
   try {
-    const user = await fetchUserByIdForMetadata(id);
+    const user = await fetchUserByIdForMetadata(
+      id,
+      await getServerVerificationHeaders(),
+    );
     return {
       themeColor: formatAccentColor(
         user?.custom_accent_color ?? user?.accent_color,
@@ -56,7 +60,10 @@ export async function generateMetadata({
   const userId = id;
 
   try {
-    const user = await fetchUserByIdForMetadata(userId);
+    const user = await fetchUserByIdForMetadata(
+      userId,
+      await getServerVerificationHeaders(),
+    );
 
     if (!user) {
       const metadata: Metadata = {

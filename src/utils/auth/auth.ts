@@ -1,6 +1,8 @@
 import { toast } from "sonner";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import { createLogger } from "@/services/logger";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 const log = createLogger("AUTH");
 
@@ -16,17 +18,31 @@ export async function logout() {
   const logoutPromise = (async () => {
     log.info(`Logout initiated from: ${source}`);
 
-    // Create AbortController for request cancellation
-    const abortController = new AbortController();
-    const timeoutId = setTimeout(() => abortController.abort(), 10000);
+    let sessionRevoked = false;
+    try {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/v2/users/me/session",
+      );
+      const response = await fetch(url, {
+        method: "DELETE",
+        credentials: "include",
+        headers,
+        signal: AbortSignal.timeout(10_000),
+      });
+      sessionRevoked = response.ok || response.status === 401;
+      if (!sessionRevoked) {
+        log.warn("Session invalidation failed", { status: response.status });
+      }
+    } catch (error) {
+      log.warn("Session invalidation failed", error);
+    }
 
     try {
       const response = await fetch("/api/auth/logout", {
         method: "POST",
-        signal: abortController.signal,
+        signal: AbortSignal.timeout(10_000),
       });
-
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -35,15 +51,8 @@ export async function logout() {
       }
 
       clearAuthData("user-initiated logout");
+      return sessionRevoked;
     } catch (error) {
-      clearTimeout(timeoutId);
-      if (error instanceof Error && error.name === "AbortError") {
-        log.info("Logout request was aborted, clearing auth data locally");
-        clearAuthData("logout request aborted");
-        // Best-effort retry without a timeout so the cookie gets cleared even if the first request was slow
-        fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
-        return;
-      }
       log.error("Error during logout", error);
       throw error;
     }
@@ -51,14 +60,16 @@ export async function logout() {
 
   toast.promise(logoutPromise, {
     loading: "Logging you out...",
-    success: {
-      message: "Successfully logged out!",
-      description: "Your session has been cleared. Come back soon!",
-    },
+    success: (sessionRevoked) => ({
+      message: "Logged out of this browser",
+      description: sessionRevoked
+        ? "Your session has been invalidated."
+        : "We couldn't invalidate your session with the API. The session token may still be active.",
+    }),
     error: {
       message: "Logout failed",
       description:
-        "We couldn't clear your session on the server, but you have been logged out locally.",
+        "We couldn't clear your browser session. Please try logging out again.",
     },
   });
 

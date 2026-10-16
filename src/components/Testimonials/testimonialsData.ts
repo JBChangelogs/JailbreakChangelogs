@@ -56,12 +56,17 @@ export async function fetchTestimonials(
   page: number,
   signal?: AbortSignal,
   baseUrl: string | undefined = PUBLIC_API_URL,
+  verificationHeaders: Record<string, string> = {},
 ): Promise<TestimonialsPageData> {
   const { url, headers } = buildApiFetchRequest(
     baseUrl,
     `/v2/testimonials?page=${page}`,
   );
-  const response = await fetch(url, { headers, signal });
+  const response = await fetch(url, {
+    headers: { ...headers, ...verificationHeaders },
+    signal,
+    credentials: "include",
+  });
   if (!response.ok) {
     throw new Error(`Failed to load testimonials (${response.status})`);
   }

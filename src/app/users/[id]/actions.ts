@@ -10,7 +10,9 @@ const log = createLogger("API");
 
 async function fetchSeason(id: string) {
   try {
-    const response = await fetch(`${PUBLIC_API_URL}/v2/seasons/${id}`);
+    const response = await fetch(`${PUBLIC_API_URL}/v2/seasons/${id}`, {
+      credentials: "include",
+    });
     if (!response.ok) return null;
     return await response.json();
   } catch {
