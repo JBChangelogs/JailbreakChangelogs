@@ -436,6 +436,7 @@ export default function ExperimentsClient() {
                 </p>
               </div>
               <Tabs
+                radio
                 value={indicatorPlacement}
                 onValueChange={(value) =>
                   setExperimentIndicatorPlacement(
@@ -618,6 +619,7 @@ export default function ExperimentsClient() {
                           </p>
                         </div>
                         <Tabs
+                          radio
                           value={forced ?? "default"}
                           onValueChange={(value) => {
                             const next = { ...overrides };

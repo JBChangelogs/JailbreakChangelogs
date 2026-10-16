@@ -125,6 +125,7 @@ export function AccentColorSetting({
             Color
           </p>
           <Tabs
+            radio
             value={current.gradient ? "gradient" : "single"}
             onValueChange={(value) => setGradient(value === "gradient")}
           >

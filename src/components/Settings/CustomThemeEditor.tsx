@@ -700,6 +700,7 @@ export default function CustomThemeEditor({
                   </p>
                 </div>
                 <Tabs
+                  radio
                   value={current.scheme}
                   onValueChange={(scheme) =>
                     update({ scheme: scheme as "dark" | "light" })

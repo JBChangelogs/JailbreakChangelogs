@@ -5,11 +5,28 @@ import { Tabs as TabsPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
+// Set when the tabs pick a value instead of switching panels.
+const RadioContext = React.createContext<{ value?: string } | null>(null);
+
+interface TabsProps extends React.ComponentPropsWithoutRef<
+  typeof TabsPrimitive.Root
+> {
+  /** Tab looks with radio-group semantics, for value pickers with no panels. */
+  radio?: boolean;
+}
+
 const Tabs = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
->(({ activationMode = "manual", ...props }, ref) => (
-  <TabsPrimitive.Root ref={ref} activationMode={activationMode} {...props} />
+  TabsProps
+>(({ activationMode, radio = false, ...props }, ref) => (
+  <RadioContext.Provider value={radio ? { value: props.value } : null}>
+    <TabsPrimitive.Root
+      ref={ref}
+      // Arrow keys select radios, but only move focus between real tabs.
+      activationMode={activationMode ?? (radio ? "automatic" : "manual")}
+      {...props}
+    />
+  </RadioContext.Provider>
 ));
 Tabs.displayName = "Tabs";
 
@@ -49,6 +66,7 @@ const TabsList = React.forwardRef<
     },
     ref,
   ) => {
+    const radio = React.useContext(RadioContext);
     const listRef =
       React.useRef<React.ComponentRef<typeof TabsPrimitive.List>>(null);
     const [indicator, setIndicator] = React.useState<{
@@ -133,6 +151,10 @@ const TabsList = React.forwardRef<
       <TabsPrimitive.List
         ref={setRefs(listRef, ref)}
         data-slot="tabs-list"
+        {...(radio && {
+          role: "radiogroup",
+          "aria-orientation": undefined,
+        })}
         className={cn(
           "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto overflow-y-hidden bg-transparent p-0 [-webkit-overflow-scrolling:touch]",
           fullWidth && "w-full min-w-0 gap-0",
@@ -159,7 +181,7 @@ const TabsList = React.forwardRef<
             className={cn(
               "bg-border-focus pointer-events-none absolute bottom-0 left-0 h-0.5 w-[max(0px,calc(var(--tab-width)-8px))] [transform:translateX(calc(var(--tab-left)+4px))]",
               indicator.animate &&
-                "transition-[transform,width,opacity] duration-200 ease-out",
+                "transition-[transform,width,opacity] duration-200 ease-out motion-reduce:transition-none",
               indicator.visible ? "opacity-100" : "opacity-0",
             )}
             style={
@@ -185,24 +207,33 @@ interface TabsTriggerProps extends React.ComponentPropsWithoutRef<
 const TabsTrigger = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.Trigger>,
   TabsTriggerProps
->(({ className, fullWidth = false, onMouseDown, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    data-slot="tabs-trigger"
-    onMouseDown={(event) => {
-      // Radix focuses the trigger programmatically on mousedown, which can
-      // match :focus-visible and show the keyboard ring on a mouse click.
-      event.currentTarget.focus({ focusVisible: false });
-      onMouseDown?.(event);
-    }}
-    className={cn(
-      "focus-visible:ring-border-focus text-secondary-text data-[state=inactive]:hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-[color] focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-      fullWidth && "flex-1 px-2",
-      className,
-    )}
-    {...props}
-  />
-));
+>(({ className, fullWidth = false, onMouseDown, ...props }, ref) => {
+  const radio = React.useContext(RadioContext);
+  return (
+    <TabsPrimitive.Trigger
+      ref={ref}
+      data-slot="tabs-trigger"
+      {...(radio && {
+        role: "radio",
+        "aria-checked": radio.value === props.value,
+        "aria-selected": undefined,
+        "aria-controls": undefined,
+      })}
+      onMouseDown={(event) => {
+        // Radix focuses the trigger programmatically on mousedown, which can
+        // match :focus-visible and show the keyboard ring on a mouse click.
+        event.currentTarget.focus({ focusVisible: false });
+        onMouseDown?.(event);
+      }}
+      className={cn(
+        "focus-visible:ring-border-focus text-secondary-text data-[state=inactive]:hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-[color] focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+        fullWidth && "flex-1 px-2",
+        className,
+      )}
+      {...props}
+    />
+  );
+});
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
 const TabsContent = React.forwardRef<
