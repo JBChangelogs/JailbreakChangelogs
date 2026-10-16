@@ -690,7 +690,7 @@ export default function CustomThemeEditor({
                 />
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-2">
                 <div>
                   <h3 className="text-primary-text text-sm font-medium">
                     Light or dark
@@ -706,9 +706,13 @@ export default function CustomThemeEditor({
                     update({ scheme: scheme as "dark" | "light" })
                   }
                 >
-                  <TabsList aria-label="Light or dark">
-                    <TabsTrigger value="dark">Dark</TabsTrigger>
-                    <TabsTrigger value="light">Light</TabsTrigger>
+                  <TabsList aria-label="Light or dark" fullWidth>
+                    <TabsTrigger value="dark" fullWidth>
+                      Dark
+                    </TabsTrigger>
+                    <TabsTrigger value="light" fullWidth>
+                      Light
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
