@@ -291,7 +291,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         <div className="min-w-0" aria-live="polite">
           {isScanning ? (
             <p className="text-primary-text text-base font-semibold">
-              Scanning{lastFileName ? ` ${lastFileName}` : ""}...
+              <span>{`Scanning${lastFileName ? ` ${lastFileName}` : ""}...`}</span>
               <span className="text-secondary-text ml-2 text-sm font-normal">
                 This can take a few seconds
               </span>
@@ -304,7 +304,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
             </p>
           ) : (
             <p className="text-primary-text text-base font-semibold">
-              Scan a trade screenshot
+              <span>Scan a trade screenshot</span>
               <span className="text-secondary-text ml-2 text-sm font-normal">
                 — {helpText}
               </span>
@@ -313,9 +313,9 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
           <p className="text-secondary-text mt-1 text-sm">
             {isDragActive ? (
               isDragReject ? (
-                "Choose a PNG or JPG/JPEG image."
+                <span>Choose a PNG or JPG/JPEG image.</span>
               ) : (
-                "Release to upload your trade screenshot."
+                <span>Release to upload your trade screenshot.</span>
               )
             ) : (
               <>
@@ -325,7 +325,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
                 <span className="hidden [@media(min-width:768px)_and_(hover:hover)_and_(pointer:fine)]:inline">
                   Click, drop, or paste (Ctrl+V / ⌘V)
                 </span>
-                {` · ${acceptedTypesText}`}
+                <span>{` · ${acceptedTypesText}`}</span>
               </>
             )}
           </p>

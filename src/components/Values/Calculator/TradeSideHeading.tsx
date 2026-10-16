@@ -25,7 +25,7 @@ export function TradeSideHeading({
         {isGiving ? "You give" : "You receive"}
       </h3>
       <span className="text-secondary-text text-xs">
-        · {count} {count === 1 ? "item" : "items"}
+        {`· ${count} ${count === 1 ? "item" : "items"}`}
       </span>
       <span className="text-primary-text text-sm font-bold tabular-nums">
         {total.toLocaleString()}

@@ -45,9 +45,9 @@ export default function NewsTicker({
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              {announcement.message}
+              <span>{announcement.message}</span>
               {announcement.linkText && announcement.linkUrl && (
-                <>
+                <span>
                   {" "}
                   <Link
                     href={announcement.linkUrl}
@@ -58,7 +58,7 @@ export default function NewsTicker({
                   >
                     {announcement.linkText}
                   </Link>
-                </>
+                </span>
               )}
             </span>
           </div>

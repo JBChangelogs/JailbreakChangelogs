@@ -1757,9 +1757,11 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                   className="h-3.5 w-3.5"
                   inline={true}
                 />
-                {expandedReplies.has(comment.id)
-                  ? "Hide replies"
-                  : `View ${replyCount - 1} more ${replyCount - 1 === 1 ? "reply" : "replies"}`}
+                <span>
+                  {expandedReplies.has(comment.id)
+                    ? "Hide replies"
+                    : `View ${replyCount - 1} more ${replyCount - 1 === 1 ? "reply" : "replies"}`}
+                </span>
               </button>
             )}
           </>

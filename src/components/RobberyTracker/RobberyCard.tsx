@@ -248,7 +248,7 @@ function RobberyCard({
             <Icon icon="heroicons:map-pin" className="h-4 w-4 shrink-0" />
             <span className="text-primary-text truncate font-medium">
               {displayedRegionData ? (
-                `${displayedRegionData.city}, ${displayedRegionData.regionName}, ${displayedRegionData.country}`
+                <span>{`${displayedRegionData.city}, ${displayedRegionData.regionName}, ${displayedRegionData.country}`}</span>
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
                   <Spinner className="h-3.5 w-3.5" />
@@ -370,7 +370,9 @@ function RobberyCard({
                 }}
               >
                 <Icon icon="heroicons:arrow-top-right-on-square" />
-                {isJoining ? "Joining..." : isLastJoined ? "Rejoin" : "Join"}
+                <span>
+                  {isJoining ? "Joining..." : isLastJoined ? "Rejoin" : "Join"}
+                </span>
               </Button>
             </div>
           )}

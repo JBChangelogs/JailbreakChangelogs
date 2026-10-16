@@ -64,7 +64,12 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
     const originalDate = dupeCard
       .split('<dd className="text-primary-text text-sm">')[2]
       .split("</dd>")[0];
-    const readJsx = (path: string, tag: string, marker: string) => {
+    const readJsx = (
+      path: string,
+      tag: string,
+      marker: string,
+      first = false,
+    ) => {
       const source = ts.createSourceFile(
         path,
         readFileSync(new URL(path, import.meta.url), "utf8"),
@@ -75,6 +80,7 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
       let jsx = "";
       const visit = (node: ts.Node) => {
         if (
+          (!first || !jsx) &&
           ts.isJsxElement(node) &&
           node.openingElement.tagName.getText(source) === tag &&
           node.getText(source).includes(marker)
@@ -239,6 +245,139 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
           'const change = {item: {type: busy ? "Vehicle" : "Texture"}}; const getCategoryColor = () => "#ffffff"; const getCategoryIcon = () => ({Icon});',
         expected: ["Texture", "Vehicle"],
       },
+      {
+        jsx: readJsx(
+          "../Values/Calculator/ScanTradeFromImage.tsx",
+          "p",
+          "isDragActive ?",
+        ),
+        setup:
+          'const isDragActive = busy; const isDragReject = false; const acceptedTypesText = "PNG, JPG";',
+      },
+      {
+        jsx: readJsx(
+          "../Values/Calculator/ScanTradeFromImage.tsx",
+          "p",
+          "`Scanning${lastFileName",
+        ),
+        setup: 'const lastFileName = busy ? "trade.png" : "";',
+        expected: ["Scanning...", "Scanning trade.png..."],
+      },
+      {
+        jsx: readJsx(
+          "./UserProfileSection.tsx",
+          "p",
+          "scanErrorBanner.subtitle",
+        ),
+        setup:
+          'const scanErrorBanner = {title: "Scan failed", subtitle: busy ? "Try later" : ""};',
+      },
+      {
+        jsx: readJsx(
+          "./UserProfileSection.tsx",
+          "p",
+          "Checking queue position",
+        ),
+        setup:
+          'const isLoadingQueuePosition = busy; const queuePosition = {position: 2}; const scanWebSocket = {}; const queueStatusMessage = "";',
+      },
+      {
+        jsx: readJsx(
+          "../RobberyTracker/RobberyCard.tsx",
+          "Button",
+          "isJoining ?",
+        ),
+        setup:
+          'const isJoining = busy; const isLastJoined = false; const robbery = {marker_name: "Bank"}; const displayName = "Bank";',
+      },
+      {
+        jsx: readJsx(
+          "../RobberyTracker/RobberyComboCard.tsx",
+          "Button",
+          "isJoining ?",
+        ),
+        setup:
+          'const isJoining = busy; const isLastJoined = false; const comboLabel = "Combo";',
+      },
+      {
+        jsx: readJsx(
+          "../RobberyTracker/RobberyServerGroupCard.tsx",
+          "Button",
+          "isJoining ?",
+        ),
+        setup: "const isJoining = busy; const isLastJoined = false;",
+      },
+      {
+        jsx: readJsx(
+          "../PageComments/CommentReactions.tsx",
+          "span",
+          "r.count",
+          true,
+        ),
+        setup: 'const r = {emoji: "X", count: busy ? 2 : 1};',
+        expected: ["1 reaction", "2 reactions"],
+      },
+      {
+        jsx: readJsx(
+          "../PageComments/CommentReactions.tsx",
+          "span",
+          "remaining > 0",
+        ),
+        setup:
+          'const r = {emoji: "X"}; const nameStr = "Player"; const remaining = busy ? 2 : 0;',
+      },
+      {
+        jsx: readJsx(
+          "../Values/Calculator/TradeSideHeading.tsx",
+          "span",
+          "count === 1",
+        ),
+        setup: "const count = busy ? 2 : 1;",
+        expected: ["· 1 item", "· 2 items"],
+      },
+      {
+        jsx: readJsx("../Dupes/DupeUserInfo.tsx", "span", "totalDupedValue >="),
+        setup: "const totalDupedValue = busy ? 1000000 : 500;",
+        expected: ["$500", "$1.0M"],
+      },
+      {
+        jsx: readJsx("./UserStatsSection.tsx", "div", "Clean Inventory Value`"),
+        setup:
+          'const activeFilteredStats = busy; const filterLabel = "Original";',
+      },
+      {
+        jsx: readJsx(
+          "../RobberyTracker/RobberyCard.tsx",
+          "span",
+          "Loading region...",
+          true,
+        ),
+        setup:
+          'const displayedRegionData = busy ? {city: "Paris", regionName: "IDF", country: "France"} : null;',
+        expected: ["Loading region...", "Paris, IDF, France"],
+      },
+      {
+        jsx: readJsx(
+          "../RobberyTracker/RobberyComboCard.tsx",
+          "span",
+          "Loading region...",
+          true,
+        ),
+        setup:
+          'const regionData = busy ? {city: "Paris", regionName: "IDF", country: "France"} : null;',
+        expected: ["Loading region...", "Paris, IDF, France"],
+      },
+      {
+        jsx: readJsx(
+          "../RobberyTracker/RobberyServerGroupCard.tsx",
+          "span",
+          "Loading region...",
+          true,
+        ),
+        setup:
+          'const displayedRegionData = busy ? {city: "Paris", regionName: "IDF", country: "France"} : null;',
+        expected: ["Loading region...", "Paris, IDF, France"],
+      },
     ];
     const readComponent = (path: string) => {
       const text = readFileSync(new URL(path, import.meta.url), "utf8");
@@ -277,6 +416,7 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
         const InlineSpinner = () => <span><Spinner/></span>;
         const Icon = () => <svg/>;
         const VerifiedBadgeIcon = Icon;
+        const TwemojiText = ({children}) => <span>{children}</span>;
         const Button = ({children}) => <button>{children}</button>;
         const Tooltip = ({children}) => <>{children}</>;
         const TooltipTrigger = Tooltip;

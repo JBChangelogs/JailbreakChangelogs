@@ -32,25 +32,29 @@ export function CommentHeader() {
         id="comments-header"
         className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl"
       >
-        {totalComments === 1
-          ? "1 Comment for"
-          : `${totalComments} Comments for`}{" "}
-        {type === "changelog" ? (
-          `Changelog ${changelogId}: ${changelogTitle}`
-        ) : type === "season" ? (
-          `Season ${changelogId}: ${changelogTitle}`
-        ) : type === "tradev2" ? (
-          `Trade #${changelogId}`
-        ) : type === "inventory" ? (
-          changelogTitle
-        ) : type === "vsuggestion" ? (
-          changelogTitle
-        ) : (
-          <>
-            <span>{changelogTitle} </span>
-            <span className="text-secondary-text">({itemType})</span>
-          </>
-        )}
+        <span>
+          {totalComments === 1
+            ? "1 Comment for"
+            : `${totalComments} Comments for`}
+        </span>{" "}
+        <span>
+          {type === "changelog" ? (
+            `Changelog ${changelogId}: ${changelogTitle}`
+          ) : type === "season" ? (
+            `Season ${changelogId}: ${changelogTitle}`
+          ) : type === "tradev2" ? (
+            `Trade #${changelogId}`
+          ) : type === "inventory" ? (
+            changelogTitle
+          ) : type === "vsuggestion" ? (
+            changelogTitle
+          ) : (
+            <>
+              <span>{changelogTitle} </span>
+              <span className="text-secondary-text">({itemType})</span>
+            </>
+          )}
+        </span>
       </h2>
       {/* Disclaimer */}
       <p className="text-secondary-text mt-1 flex items-start gap-1 text-xs">
@@ -73,7 +77,7 @@ export function CommentHeader() {
                 type="button"
                 className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
               >
-                {getSortLabel(sortGroups, sortOrder)}
+                <span>{getSortLabel(sortGroups, sortOrder)}</span>
                 <Icon
                   icon="heroicons:chevron-down"
                   className="h-3.5 w-3.5 shrink-0"

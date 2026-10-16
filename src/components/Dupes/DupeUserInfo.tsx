@@ -166,14 +166,15 @@ export default function DupeUserInfo({
               <TooltipTrigger asChild>
                 <div className="text-primary-text cursor-help text-2xl font-bold">
                   <span className="sm:hidden">
-                    $
-                    {totalDupedValue >= 1000000000
-                      ? `${(totalDupedValue / 1000000000).toFixed(1)}B`
-                      : totalDupedValue >= 1000000
-                        ? `${(totalDupedValue / 1000000).toFixed(1)}M`
-                        : totalDupedValue >= 1000
-                          ? `${(totalDupedValue / 1000).toFixed(1)}K`
-                          : totalDupedValue.toLocaleString("en-US")}
+                    {`$${
+                      totalDupedValue >= 1000000000
+                        ? `${(totalDupedValue / 1000000000).toFixed(1)}B`
+                        : totalDupedValue >= 1000000
+                          ? `${(totalDupedValue / 1000000).toFixed(1)}M`
+                          : totalDupedValue >= 1000
+                            ? `${(totalDupedValue / 1000).toFixed(1)}K`
+                            : totalDupedValue.toLocaleString("en-US")
+                    }`}
                   </span>
                   <span className="hidden sm:inline">
                     ${totalDupedValue.toLocaleString("en-US")}

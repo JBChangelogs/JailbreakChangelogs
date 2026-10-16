@@ -57,7 +57,7 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
             </Button>
           </TooltipTrigger>
           <TooltipContent side="top">
-            <p>Mirror to {isOffering ? "You receive" : "You give"}</p>
+            <p>{`Mirror to ${isOffering ? "You receive" : "You give"}`}</p>
           </TooltipContent>
         </Tooltip>
       </div>

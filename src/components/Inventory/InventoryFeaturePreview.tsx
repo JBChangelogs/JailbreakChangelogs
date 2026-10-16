@@ -116,7 +116,7 @@ export default function InventoryFeaturePreview({
           aria-controls={featuresId}
           onClick={() => setFeaturesExpanded((expanded) => !expanded)}
         >
-          {featuresExpanded ? "Hide features" : "View features"}
+          <span>{featuresExpanded ? "Hide features" : "View features"}</span>
           <Icon
             icon="lucide:chevron-down"
             aria-hidden="true"

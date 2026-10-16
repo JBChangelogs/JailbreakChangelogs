@@ -84,8 +84,8 @@ export function CommentReactions({
     if (users.length === 0) {
       return (
         <span>
-          <TwemojiText tag="span">{r.emoji}</TwemojiText> {r.count} reaction
-          {r.count !== 1 ? "s" : ""}
+          <TwemojiText tag="span">{r.emoji}</TwemojiText>{" "}
+          <span>{`${r.count} ${r.count === 1 ? "reaction" : "reactions"}`}</span>
         </span>
       );
     }
@@ -109,9 +109,10 @@ export function CommentReactions({
           : names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
     return (
       <span>
-        <TwemojiText tag="span">{r.emoji}</TwemojiText> reacted by {nameStr}
+        <TwemojiText tag="span">{r.emoji}</TwemojiText>{" "}
+        <span>reacted by {nameStr}</span>
         {remaining > 0 && (
-          <>
+          <span>
             {" and "}
             <button
               type="button"
@@ -121,9 +122,9 @@ export function CommentReactions({
                 openDialog(r.emoji);
               }}
             >
-              {remaining} other{remaining !== 1 ? "s" : ""}
+              {`${remaining} ${remaining === 1 ? "other" : "others"}`}
             </button>
-          </>
+          </span>
         )}
       </span>
     );

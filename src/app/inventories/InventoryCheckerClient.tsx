@@ -1017,7 +1017,7 @@ export default function InventoryCheckerClient({
                         className="h-4 w-4"
                       />
                     )}
-                    Check queue position
+                    <span>Check queue position</span>
                   </button>
                 </div>
 

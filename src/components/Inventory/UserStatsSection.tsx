@@ -422,9 +422,11 @@ export default function UserStatsSection({
         {/* Inventory Value */}
         <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
-            {activeFilteredStats
-              ? `${filterLabel} Clean Inventory Value`
-              : "Clean Inventory Value"}
+            <span>
+              {activeFilteredStats
+                ? `${filterLabel} Clean Inventory Value`
+                : "Clean Inventory Value"}
+            </span>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Icon
@@ -474,7 +476,11 @@ export default function UserStatsSection({
         {/* Total Networth */}
         <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
-            {activeFilteredStats ? `${filterLabel} Networth` : "Total Networth"}
+            <span>
+              {activeFilteredStats
+                ? `${filterLabel} Networth`
+                : "Total Networth"}
+            </span>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Icon
@@ -528,9 +534,11 @@ export default function UserStatsSection({
             currentData.duplicates.length > 0)) && (
           <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
             <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
-              {activeFilteredStats
-                ? `${filterLabel} Duped Value`
-                : "Total Duped Value"}
+              <span>
+                {activeFilteredStats
+                  ? `${filterLabel} Duped Value`
+                  : "Total Duped Value"}
+              </span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Icon

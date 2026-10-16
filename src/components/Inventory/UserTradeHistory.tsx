@@ -375,8 +375,7 @@ function TradeSide({
   return (
     <div className="min-w-0">
       <h4 className="text-primary-text mb-2 text-sm font-semibold">
-        {label} {isPending && items.length === 0 ? "?" : items.length}{" "}
-        {items.length === 1 ? "item" : "items"}
+        {`${label} ${isPending && items.length === 0 ? "?" : items.length} ${items.length === 1 ? "item" : "items"}`}
       </h4>
       <div className="flex flex-wrap gap-2">
         {items.map((item, index) => (

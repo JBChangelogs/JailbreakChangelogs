@@ -22,9 +22,9 @@ export default function ServiceAvailabilityTicker({
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              {alert.message}
+              <span>{alert.message}</span>
               {alert.linkText && alert.linkUrl && (
-                <>
+                <span>
                   {" "}
                   <Link
                     href={alert.linkUrl}
@@ -35,7 +35,7 @@ export default function ServiceAvailabilityTicker({
                   >
                     {alert.linkText}
                   </Link>
-                </>
+                </span>
               )}
             </span>
           </div>

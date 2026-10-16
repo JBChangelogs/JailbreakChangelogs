@@ -322,7 +322,7 @@ export default function UserProfileSection({
                 <p className="text-button-danger min-w-0 flex-1 text-xs wrap-break-word">
                   <span className="font-medium">{scanErrorBanner.title}</span>
                   {scanErrorBanner.subtitle && (
-                    <> — {scanErrorBanner.subtitle}</>
+                    <span>{` — ${scanErrorBanner.subtitle}`}</span>
                   )}
                 </p>
               </div>
@@ -330,18 +330,17 @@ export default function UserProfileSection({
               <div className="mt-2 flex w-full flex-wrap items-center justify-center gap-2">
                 <p className="text-secondary-text min-w-0 flex-1 text-xs wrap-break-word">
                   {isLoadingQueuePosition ? (
-                    "Checking queue position..."
+                    <span>Checking queue position...</span>
                   ) : queuePosition ? (
                     <span className="text-primary-text font-medium">
-                      Queue Position: #{queuePosition.position.toLocaleString()}
+                      {`Queue Position: #${queuePosition.position.toLocaleString()}`}
                     </span>
                   ) : scanWebSocket.queuePosition !== undefined ? (
                     <span className="text-primary-text font-medium">
-                      Queue Position: #
-                      {scanWebSocket.queuePosition.toLocaleString()}
+                      {`Queue Position: #${scanWebSocket.queuePosition.toLocaleString()}`}
                     </span>
                   ) : (
-                    queueStatusMessage || "Not in scan queue"
+                    <span>{queueStatusMessage || "Not in scan queue"}</span>
                   )}
                 </p>
                 <button
@@ -355,7 +354,7 @@ export default function UserProfileSection({
                   ) : (
                     <Icon icon="material-symbols:refresh" className="h-4 w-4" />
                   )}
-                  Check queue position
+                  <span>Check queue position</span>
                 </button>
               </div>
             ))}
