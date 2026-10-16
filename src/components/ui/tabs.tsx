@@ -222,21 +222,23 @@ const TabsList = React.forwardRef<
           <div
             aria-hidden="true"
             data-slot="tabs-baseline"
-            className="bg-border-primary/60 pointer-events-none absolute inset-x-0 bottom-0 h-px"
+            className="bg-border-primary/60 pointer-events-none absolute inset-x-0 bottom-0 h-px transition-opacity duration-200 motion-reduce:transition-none"
           />
         )}
         {children}
         {!hideIndicator && (
           // Underline by default; globals.css turns it into a pill for the
-          // filled tab style, using the same --tab-* measurements.
+          // filled tab style, using the same --tab-* measurements. Both use
+          // the same properties (no transform), so switching styles morphs
+          // the underline into the pill instead of snapping.
           <div
             aria-hidden="true"
             data-slot="tabs-indicator"
             data-visible={indicator.visible || undefined}
             className={cn(
-              "bg-border-focus pointer-events-none absolute bottom-0 left-0 h-0.5 w-[max(0px,calc(var(--tab-width)-8px))] [transform:translateX(calc(var(--tab-left)+4px))]",
+              "bg-border-focus pointer-events-none absolute top-[calc(100%-2px)] left-[calc(var(--tab-left)+4px)] h-0.5 w-[max(0px,calc(var(--tab-width)-8px))] rounded-none",
               indicator.animate &&
-                "transition-[transform,left,width,opacity] duration-200 ease-out motion-reduce:transition-none",
+                "transition-[top,left,width,height,border-radius,background-color,opacity] duration-200 ease-out motion-reduce:transition-none",
               indicator.visible ? "opacity-100" : "opacity-0",
             )}
             style={
