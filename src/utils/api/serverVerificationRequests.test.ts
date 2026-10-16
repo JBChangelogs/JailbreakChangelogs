@@ -59,9 +59,8 @@ test("server API reads carry the current visitor's verification and preserve pub
   }
 });
 
-test("login and account deletion forward verification without replacing their selected session token", async () => {
+test("account deletion forwards verification without replacing its selected session token", async () => {
   for (const [path, method, token] of [
-    ["../../app/api/auth/login/route.ts", "POST", "new-session"],
     ["../../app/api/users/delete/route.ts", "DELETE", "existing-session"],
   ] as const) {
     const calls: RequestInit[] = [];
@@ -107,7 +106,6 @@ test("login and account deletion forward verification without replacing their se
             Cookie: `jbcl_token=stale-session; analytics=private${verification ? `; jbcl_verified_human=${verification}` : ""}`,
             "Content-Type": "application/json",
           },
-          ...(method === "POST" ? { body: JSON.stringify({ token }) } : {}),
         });
       expect((await exports[method]!(request())).status).toBe(200);
       const options = calls.at(-1)!;

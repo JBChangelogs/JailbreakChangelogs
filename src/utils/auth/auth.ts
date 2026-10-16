@@ -38,24 +38,8 @@ export async function logout() {
       log.warn("Session invalidation failed", error);
     }
 
-    try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-        signal: AbortSignal.timeout(10_000),
-      });
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        log.error("clear session failed", { status: response.status, body });
-        throw new Error("Failed to clear session");
-      }
-
-      clearAuthData("user-initiated logout");
-      return sessionRevoked;
-    } catch (error) {
-      log.error("Error during logout", error);
-      throw error;
-    }
+    clearAuthData("user-initiated logout");
+    return sessionRevoked;
   })();
 
   toast.promise(logoutPromise, {
@@ -78,6 +62,16 @@ export async function logout() {
 
 function clearAuthData(reason: string) {
   log.info(`Clearing auth data. Reason: ${reason}`);
+
+  const expiredCookie = "jbcl_token=; Path=/; Max-Age=0; SameSite=Lax";
+  document.cookie = expiredCookie;
+  const hostname = window.location.hostname;
+  if (
+    hostname === "jailbreakchangelogs.com" ||
+    hostname.endsWith(".jailbreakchangelogs.com")
+  ) {
+    document.cookie = `${expiredCookie}; Domain=.jailbreakchangelogs.com`;
+  }
 
   safeLocalStorage.removeItem("user");
   safeLocalStorage.removeItem("userid");

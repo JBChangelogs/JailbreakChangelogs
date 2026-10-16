@@ -16,7 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface LoginModalViewProps {
   showLoginModal: boolean;
   tabValue: number;
-  hasJbclToken: boolean;
+  canLinkRoblox: boolean;
   onlyRoblox: boolean;
   resolvedTheme: string | undefined;
   joinDiscord: boolean;
@@ -30,7 +30,7 @@ interface LoginModalViewProps {
 export default function LoginModalView({
   showLoginModal,
   tabValue,
-  hasJbclToken,
+  canLinkRoblox,
   onlyRoblox,
   resolvedTheme,
   joinDiscord,
@@ -40,7 +40,7 @@ export default function LoginModalView({
   onDiscordLogin,
   onRobloxLogin,
 }: LoginModalViewProps) {
-  const activeTab = tabValue === 1 && hasJbclToken ? "roblox" : "discord";
+  const activeTab = tabValue === 1 && canLinkRoblox ? "roblox" : "discord";
 
   const handleTabChange = (value: string) => {
     onTabChange({} as SyntheticEvent, value === "roblox" ? 1 : 0);
@@ -90,7 +90,7 @@ export default function LoginModalView({
                 />
               </TabsTrigger>
             )}
-            {hasJbclToken && (
+            {canLinkRoblox && (
               <TabsTrigger value="roblox" fullWidth>
                 <Image
                   src={
@@ -168,7 +168,7 @@ export default function LoginModalView({
             </TabsContent>
           )}
 
-          {hasJbclToken && (
+          {canLinkRoblox && (
             <TabsContent value="roblox">
               <p className="text-secondary-text mb-4 text-center text-sm">
                 Jailbreak Changelogs connects with Roblox to build your user

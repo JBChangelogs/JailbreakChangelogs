@@ -10,7 +10,7 @@ import { buildApiLinkUrl, getDevToken } from "@/utils/api/apiDevToken";
 export interface LoginModalController {
   tabValue: number;
   joinDiscord: boolean;
-  hasJbclToken: boolean;
+  canLinkRoblox: boolean;
   onlyRoblox: boolean;
   resolvedTheme: string | undefined;
   showLoginModal: boolean;
@@ -23,16 +23,23 @@ export interface LoginModalController {
 
 export function useLoginModalController(): LoginModalController {
   const [joinDiscord, setJoinDiscord] = useState(false);
-  const { showLoginModal, loginModalTab, loginModalOnlyRoblox, setLoginModal } =
-    useAuthContext();
+  const {
+    isAuthenticated,
+    user,
+    showLoginModal,
+    loginModalTab,
+    loginModalOnlyRoblox,
+    setLoginModal,
+  } = useAuthContext();
   const { resolvedTheme } = useTheme();
-  const hasJbclToken =
-    typeof document !== "undefined" &&
-    /(?:^|;\s*)jbcl_token=([^;]+)/.test(document.cookie);
-  const tabValue = hasJbclToken && loginModalTab === "roblox" ? 1 : 0;
+  const canLinkRoblox = isAuthenticated && Boolean(user) && !user?.roblox_id;
+  const tabValue =
+    canLinkRoblox && (loginModalOnlyRoblox || loginModalTab === "roblox")
+      ? 1
+      : 0;
 
   const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
-    if (!hasJbclToken) {
+    if (!canLinkRoblox) {
       return;
     }
 
@@ -60,7 +67,7 @@ export function useLoginModalController(): LoginModalController {
   const handleRobloxLogin = useCallback(() => {
     const tokenMatch = document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
     const { isDevEnv, injectedToken } = getDevToken();
-    if (!tokenMatch && !(isDevEnv && injectedToken)) {
+    if (!canLinkRoblox || (!tokenMatch && !(isDevEnv && injectedToken))) {
       toast.info("You must be logged in with Discord first", {
         duration: 3000,
       });
@@ -80,13 +87,13 @@ export function useLoginModalController(): LoginModalController {
     });
 
     window.location.href = oauthRedirect;
-  }, []);
+  }, [canLinkRoblox]);
 
   return {
     tabValue,
     joinDiscord,
-    hasJbclToken,
-    onlyRoblox: loginModalOnlyRoblox,
+    canLinkRoblox,
+    onlyRoblox: canLinkRoblox && loginModalOnlyRoblox,
     resolvedTheme,
     showLoginModal,
     setJoinDiscord,

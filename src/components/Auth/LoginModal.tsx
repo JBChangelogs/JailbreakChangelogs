@@ -11,7 +11,7 @@ function LoginModalInner() {
     <LoginModalView
       showLoginModal={controller.showLoginModal}
       tabValue={controller.tabValue}
-      hasJbclToken={controller.hasJbclToken}
+      canLinkRoblox={controller.canLinkRoblox}
       onlyRoblox={controller.onlyRoblox}
       resolvedTheme={controller.resolvedTheme}
       joinDiscord={controller.joinDiscord}

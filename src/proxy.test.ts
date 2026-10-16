@@ -35,15 +35,30 @@ test("local development signs in to experiments with the dev token", async () =>
   const fetchMock = spyOn(globalThis, "fetch").mockResolvedValueOnce(
     Response.json({ flags: [{ flag: "is_tester", enabled: true }] }),
   );
-  // Even with a leftover (possibly expired) session cookie.
   const response = await proxy(
-    new NextRequest("http://localhost:5500/experiments", {
-      headers: { cookie: "jbcl_token=stale" },
-    }),
+    new NextRequest("http://localhost:5500/experiments"),
   );
   expect(response.headers.get("x-middleware-next")).toBe("1");
   expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
     headers: { Authorization: "dev-token" },
+  });
+});
+
+test("local experiments access prefers the newly signed-in session over the env token", async () => {
+  process.env.NEXT_PUBLIC_RAILWAY_ENVIRONMENT_NAME = "development";
+  process.env.NEXT_PUBLIC_DEV_TOKEN = "revoked-env-token";
+  process.env.NEXT_PUBLIC_API_URL = "https://api.example.com";
+  const fetchMock = spyOn(globalThis, "fetch").mockResolvedValueOnce(
+    Response.json({ flags: [{ flag: "is_tester", enabled: true }] }),
+  );
+  const response = await proxy(
+    new NextRequest("http://localhost:5500/experiments", {
+      headers: { cookie: "jbcl_token=fresh-session" },
+    }),
+  );
+  expect(response.headers.get("x-middleware-next")).toBe("1");
+  expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+    headers: { Authorization: "fresh-session" },
   });
 });
 

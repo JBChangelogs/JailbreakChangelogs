@@ -2,7 +2,7 @@
 
 import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
-// import { PUBLIC_API_URL } from '@/utils/api/api';
+import { loginWithToken } from "./login";
 import { safeLocalStorage, safeSetJSON } from "@/utils/storage/safeStorage";
 import {
   normalizeMeResponse,
@@ -16,19 +16,7 @@ const ESCAPE_TIMEOUT = 2000; // 2 seconds
 
 async function validateToken(token: string) {
   try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    });
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      log.error("validate token failed", { status: response.status, body });
-      throw new Error("Failed to validate token");
-    }
-
-    const data = await response.json();
+    const data = await loginWithToken(token);
     return { success: true, data };
   } catch (error) {
     log.error("Error validating token", error);
@@ -79,8 +67,6 @@ export function useEscapeLogin() {
       safeSetJSON("user", userData);
       safeLocalStorage.setItem("userid", userData.id);
       safeLocalStorage.setItem("avatar", userData.avatar);
-
-      // Cookie is set by server route
 
       // Dispatch custom event for components to listen to
       window.dispatchEvent(

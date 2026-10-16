@@ -88,15 +88,11 @@ function isAllowedWithoutTesterRole(request: NextRequest): boolean {
   return false;
 }
 
-/**
- * The session token. Local dev signs in with NEXT_PUBLIC_DEV_TOKEN, which API
- * requests also send, so it wins over any leftover localhost cookie.
- */
 function getSessionToken(request: NextRequest): string | undefined {
-  const { isDevEnv, injectedToken } = getDevToken();
-  if (isDevEnv && injectedToken) return injectedToken;
   const token = request.cookies.get("jbcl_token")?.value;
-  return token && token !== "undefined" ? token : undefined;
+  if (token && token !== "undefined") return token;
+  const { isDevEnv, injectedToken } = getDevToken();
+  return isDevEnv ? injectedToken : undefined;
 }
 
 function hasTestingAccess(user: ProxyUser | null): boolean {

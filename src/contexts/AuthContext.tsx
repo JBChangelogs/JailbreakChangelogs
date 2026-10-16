@@ -17,6 +17,9 @@ import Image from "next/image";
 import { useRouter } from "nextjs-toploader/app";
 import { AuthState, UserData } from "@/types/auth";
 import { logout as authLogout, trackLogoutSource } from "@/utils/auth/auth";
+import { getJbclToken } from "@/utils/auth/sessionToken";
+import { loginWithToken } from "@/utils/auth/login";
+export { getJbclToken } from "@/utils/auth/sessionToken";
 import {
   safeGetJSON,
   safeSetJSON,
@@ -67,12 +70,6 @@ interface AuthContextType extends AuthState {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export function getJbclToken(): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
-  return match ? decodeURIComponent(match[1]) : null;
-}
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -533,14 +530,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!token) return;
     url.searchParams.delete("token");
     window.history.replaceState({}, "", url.toString());
-    fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    })
-      .then((res) => {
-        if (res.ok) void initializeAuth();
-      })
+    loginWithToken(token)
+      .then(() => initializeAuth())
       .catch((e) => log.error("Dev login fetch error", e));
   }, [initializeAuth]);
 

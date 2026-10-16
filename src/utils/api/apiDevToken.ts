@@ -1,4 +1,5 @@
 import { getExperimentHeader } from "@/utils/api/experiments";
+import { getJbclToken } from "@/utils/auth/sessionToken";
 
 type BuildApiUrlWithDevTokenOptions = {
   tokenParamName?: string;
@@ -12,17 +13,15 @@ export const getDevToken = (): {
     process.env.NEXT_PUBLIC_RAILWAY_ENVIRONMENT_NAME ||
     process.env.RAILWAY_ENVIRONMENT_NAME ||
     process.env.NODE_ENV;
+  const isDevEnv = envName === "development";
   return {
-    isDevEnv: envName === "development",
-    injectedToken: process.env.NEXT_PUBLIC_DEV_TOKEN,
+    isDevEnv,
+    injectedToken:
+      (isDevEnv ? getJbclToken() : null) || process.env.NEXT_PUBLIC_DEV_TOKEN,
   };
 };
 
-/**
- * Builds an API URL and, when enabled for local dev, appends a dev token query
- * param using env-provided values. Intended for WebSocket connections where
- * custom headers cannot be set by the browser.
- */
+// Browser WebSockets cannot set Authorization headers; local dev uses a URL token.
 export const buildApiWsUrl = (
   baseUrl: string | undefined,
   path: string,
