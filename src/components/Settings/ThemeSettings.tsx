@@ -1,23 +1,9 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useId, useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Switch } from "@/components/ui/switch";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi,
-} from "@/components/ui/carousel";
 import {
   Sheet,
   SheetContent,
@@ -122,7 +108,7 @@ export function ThemeCard({
   onChange: () => void;
   /** Marks a custom theme on its preview, e.g. "Custom" or "Shared". */
   badge?: string;
-  /** Smaller, for the All themes popover. */
+  /** Smaller, for the theme editor. */
   compact?: boolean;
 }) {
   return (
@@ -192,32 +178,26 @@ const withMenu = (item: PickerItem, card: React.ReactNode) =>
   item.wrap ? item.wrap(card) : card;
 
 /**
- * Every theme at once in a side sheet, grouped into site and custom themes,
- * so themes past the carousel's edge aren't missed. It stays open on a pick,
- * so themes can be compared; the carousel scrolls to the pick if hidden.
+ * Every theme at once in a side sheet, grouped into site and custom themes.
+ * It stays open on a pick, so themes can be compared on the page.
  */
 function AllThemesSheet({
   items,
   name,
-  onPick,
-  className,
-  variant = "ghost",
 }: {
   items: PickerItem[];
   name: string;
-  onPick: (index: number) => void;
-  className?: string;
-  variant?: "ghost" | "secondary";
 }) {
   const [open, setOpen] = useState(false);
-  // On phones, a bottom panel over the page, so picks show above it.
-  const bottomPanel = useBottomPanel("all themes");
+  // On phones, a bottom panel over the page, so picks show above it. It
+  // opens tall enough for every theme (up to 92dvh, scrolling past that).
+  const bottomPanel = useBottomPanel("themes", undefined, "content");
   const { isMobile } = bottomPanel;
   const closeButton = (
     <Button
       variant="ghost"
       size="icon"
-      aria-label="Close all themes"
+      aria-label="Close themes"
       onClick={() => setOpen(false)}
       className={isMobile ? undefined : "absolute top-3 right-3"}
     >
@@ -236,16 +216,10 @@ function AllThemesSheet({
 
   return (
     <>
-      <Button
-        variant={variant}
-        className={cn("gap-2", className)}
-        onClick={() => setOpen(true)}
-      >
-        <Icon icon="lucide:layout-grid" aria-hidden="true" />
-        All themes
-        <span className="bg-button-info/15 text-link rounded-full px-1.5 text-xs leading-5 font-semibold tabular-nums">
-          {items.length}
-        </span>
+      {/* Primary: a preset is the easy way to change the look. */}
+      <Button size="md" onClick={() => setOpen(true)}>
+        <Icon icon="lucide:palette" aria-hidden="true" />
+        Change theme
       </Button>
       <Sheet open={open} onOpenChange={setOpen} modal={!isMobile}>
         <SheetContent
@@ -266,7 +240,7 @@ function AllThemesSheet({
               {bottomPanel.handle}
               <div className="flex items-center gap-2">
                 <SheetTitle className="min-w-0 flex-1 truncate text-base">
-                  All themes
+                  Choose a theme
                 </SheetTitle>
                 {closeButton}
               </div>
@@ -278,7 +252,7 @@ function AllThemesSheet({
             <>
               {closeButton}
               <SheetHeader className="shrink-0 px-6 pt-6 pb-4">
-                <SheetTitle>All themes</SheetTitle>
+                <SheetTitle>Choose a theme</SheetTitle>
                 <SheetDescription className="text-secondary-text">
                   Pick one to try it on the page.
                 </SheetDescription>
@@ -287,7 +261,7 @@ function AllThemesSheet({
           )}
           <div
             role="radiogroup"
-            aria-label="All themes"
+            aria-label="Themes"
             className={cn(
               "min-h-0 flex-1 space-y-5 overflow-y-auto pt-1",
               isMobile ? "px-4 pb-4" : "px-6 pb-6",
@@ -300,9 +274,7 @@ function AllThemesSheet({
                 ["Custom themes", true],
               ] as const
             ).map(([heading, isCustom]) => {
-              const group = items
-                .map((item, index) => ({ item, index }))
-                .filter(({ item }) => !!item.badge === isCustom);
+              const group = items.filter((item) => !!item.badge === isCustom);
               if (!group.length) return null;
               return (
                 <section key={heading}>
@@ -310,7 +282,7 @@ function AllThemesSheet({
                     {heading}
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
-                    {group.map(({ item, index }) => (
+                    {group.map((item) => (
                       <div key={item.key}>
                         {withMenu(
                           item,
@@ -319,7 +291,7 @@ function AllThemesSheet({
                             name={name}
                             checked={item.checked}
                             badge={item.badge}
-                            onChange={() => onPick(index)}
+                            onChange={item.pick}
                           />,
                         )}
                       </div>
@@ -335,10 +307,7 @@ function AllThemesSheet({
   );
 }
 
-/** Theme picker with previews, plus the header theme button setting. */
-// A stable object: new options would make Embla re-initialize and jump.
-const CAROUSEL_OPTIONS = { align: "start", dragFree: true } as const;
-
+/** Theme picker (in a sheet), plus the cursor and header button settings. */
 export default function ThemeSettings() {
   const id = useId();
   const { isAuthenticated } = useAuthContext();
@@ -376,104 +345,23 @@ export default function ThemeSettings() {
     getThemeShortcutHidden,
     () => false,
   );
-  const [carousel, setCarousel] = useState<CarouselApi>();
-  // The theme in use leads the carousel. It can resolve after mount, so the
-  // lead follows it until the user picks; then the order stays put, so cards
-  // don't jump and the other themes stay where they were.
-  const userPickedRef = useRef(false);
-  const checkedKey = allItems.find((item) => item.checked)?.key;
-  const [leadKey, setLeadKey] = useState(checkedKey);
-  useEffect(() => {
-    if (!userPickedRef.current) setLeadKey(checkedKey);
-  }, [checkedKey]);
-  const lead = allItems.find((item) => item.key === leadKey);
-  const items = lead
-    ? [lead, ...allItems.filter((item) => item !== lead)]
-    : allItems;
-  const pickTheme = (index: number) => {
-    userPickedRef.current = true;
-    items[index].pick();
-    // From the "All themes" sheet: only scroll if the theme is out of view.
-    if (carousel && !carousel.slidesInView().includes(index)) {
-      carousel.scrollTo(index);
-    }
-  };
+  const current = allItems.find((item) => item.checked)?.option.label;
 
   return (
     <div className="space-y-6">
-      <Carousel
-        aria-labelledby={`${id}-label`}
-        className="space-y-4"
-        opts={CAROUSEL_OPTIONS}
-        verticalWheel
-        onKeyDownCapture={undefined}
-        setApi={setCarousel}
-      >
-        <div className="grid grid-cols-[1fr_auto] items-center gap-x-4">
-          <h3 id={`${id}-label`} className="text-primary-text font-medium">
-            Theme
-          </h3>
-          <div className="col-start-2 row-start-1 flex gap-2 sm:row-span-2">
-            <AllThemesSheet
-              items={items}
-              name={`${id}-theme-all`}
-              onPick={pickTheme}
-              className="hidden sm:inline-flex"
-            />
-            <CarouselPrevious
-              variant="ghost"
-              className="static translate-y-0"
-              aria-label="Previous themes"
-            />
-            <CarouselNext
-              variant="ghost"
-              className="static translate-y-0"
-              aria-label="Next themes"
-            />
-          </div>
-          <p className="text-secondary-text col-span-2 mt-1 text-sm sm:col-span-1 sm:col-start-1 sm:row-start-2">
-            Choose how the site looks.
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <div className="min-w-0">
+          <h3 className="text-primary-text font-medium">Theme</h3>
+          <p className="text-secondary-text mt-1 text-sm">
+            {current ? `Using ${current}.` : "Choose how the site looks."}
             {isAuthenticated
               ? " Syncs with your account."
               : " Saved on this browser."}
           </p>
         </div>
-        <CustomThemeControls custom={custom} />
-        <CarouselContent
-          role="radiogroup"
-          aria-labelledby={`${id}-label`}
-          className="-ml-3 py-1"
-        >
-          {items.map((item) => (
-            <CarouselItem
-              key={item.key}
-              className="basis-[85%] pl-3 sm:basis-[200px]"
-            >
-              {withMenu(
-                item,
-                <ThemeCard
-                  option={item.option}
-                  name={`${id}-theme`}
-                  checked={item.checked}
-                  badge={item.badge}
-                  onChange={() => {
-                    userPickedRef.current = true;
-                    item.pick();
-                  }}
-                />,
-              )}
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        {/* On mobile there's no room beside the arrows, so it goes here. */}
-        <AllThemesSheet
-          items={items}
-          name={`${id}-theme-all-mobile`}
-          onPick={pickTheme}
-          variant="secondary"
-          className="w-full sm:hidden"
-        />
-      </Carousel>
+        <AllThemesSheet items={allItems} name={`${id}-theme`} />
+      </div>
+      <CustomThemeControls custom={custom} />
 
       {custom.dialogs}
 

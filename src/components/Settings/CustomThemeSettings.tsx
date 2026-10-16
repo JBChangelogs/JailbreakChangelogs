@@ -334,19 +334,22 @@ export default function CustomThemeControls({
   custom: CustomThemesState;
 }) {
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      <p className="text-secondary-text text-sm">
-        <span className="text-primary-text font-medium">Custom themes</span>
-        {" · "}Make your own, or import one someone shared.
-      </p>
+    // Laid out like the other settings: title, description, button.
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+      <div className="min-w-0">
+        <h3 className="text-primary-text font-medium">Custom themes</h3>
+        <p className="text-secondary-text mt-1 text-sm">
+          Make your own, or import one someone shared.
+        </p>
+      </div>
       {custom.isAuthenticated && (
         <Button
           size="md"
+          variant="secondary"
           onClick={() => custom.openEditor("new")}
-          className="md:shrink-0"
         >
           <Icon icon="lucide:plus" aria-hidden="true" />
-          New theme
+          Create theme
           {custom.limit > 0 && (
             <span className="tabular-nums opacity-80">
               {custom.mine.length}/{custom.limit}
