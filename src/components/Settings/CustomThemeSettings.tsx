@@ -346,6 +346,7 @@ export default function CustomThemeControls({
         <Button
           size="md"
           variant="secondary"
+          className="w-full sm:w-auto"
           onClick={() => custom.openEditor("new")}
         >
           <Icon icon="lucide:plus" aria-hidden="true" />

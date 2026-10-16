@@ -44,6 +44,36 @@ export function BottomPanelHeader({
   );
 }
 
+/** Bottom padding for content under a floating BottomPanelFooter. */
+export const BOTTOM_PANEL_FOOTER_SPACE =
+  "pb-[calc(6.5rem+env(safe-area-inset-bottom))]";
+
+/**
+ * Actions pinned to the panel's foot, side by side. They float over the
+ * content, which fades out behind them so it's clear there's more below; pad
+ * that content with BOTTOM_PANEL_FOOTER_SPACE so its end scrolls clear. At
+ * the slim bar (`collapsed`) there's no content, so they sit in the flow.
+ */
+export function BottomPanelFooter({
+  collapsed,
+  children,
+}: {
+  collapsed: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex gap-2 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>*]:flex-1",
+        !collapsed &&
+          "from-secondary-bg via-secondary-bg/80 pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-50% to-transparent pt-10 [&>*]:pointer-events-auto",
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 const PANEL_SIZES = ["bar", "half", "full"] as const;
 type PanelSize = (typeof PANEL_SIZES)[number] | "content";
 const PANEL_HEIGHT: Record<PanelSize, string> = {

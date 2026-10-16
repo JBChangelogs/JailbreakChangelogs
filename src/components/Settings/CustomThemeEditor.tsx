@@ -73,6 +73,8 @@ import {
 } from "@/utils/ui/themeColors";
 import { cn } from "@/lib/utils";
 import {
+  BOTTOM_PANEL_FOOTER_SPACE,
+  BottomPanelFooter,
   BottomPanelHeader,
   useBottomPanel,
 } from "@/components/ui/bottom-panel";
@@ -627,21 +629,14 @@ export default function CustomThemeEditor({
       >
         {isMobile ? (
           <>
+            {/* Close and Save are in the footer, in thumb reach. */}
             <BottomPanelHeader
               handle={bottomPanel.handle}
-              closeLabel="Close the editor"
-              onClose={(event) => cancel(event.shiftKey)}
+              showCloseButton={false}
             >
               <SheetTitle className="min-w-0 flex-1 truncate text-base">
                 {savedTheme ? "Edit theme" : "New theme"}
               </SheetTitle>
-              <Button
-                size="sm"
-                onClick={() => void save()}
-                disabled={!current || saving}
-              >
-                {saving ? "Saving…" : "Save"}
-              </Button>
             </BottomPanelHeader>
             <SheetDescription className="sr-only">
               Your changes show on the page above as you go.
@@ -676,7 +671,12 @@ export default function CustomThemeEditor({
         ) : (
           <>
             {/* The settings scroll; the preview stays pinned below them. */}
-            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 pt-2 pb-6">
+            <div
+              className={cn(
+                "min-h-0 flex-1 space-y-6 overflow-y-auto px-6 pt-2",
+                isMobile ? BOTTOM_PANEL_FOOTER_SPACE : "pb-6",
+              )}
+            >
               <Tabs
                 value={mode}
                 onValueChange={(value) =>
@@ -695,8 +695,12 @@ export default function CustomThemeEditor({
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
+              {/* On phones: name and icon side by side, "Start from a theme"
+                  full width below them. */}
               <div className="flex flex-wrap items-end gap-3">
-                <label className="min-w-48 flex-1">
+                <label
+                  className={cn("flex-1", isMobile ? "min-w-0" : "min-w-48")}
+                >
                   <span className="text-primary-text text-sm font-medium">
                     Name
                   </span>
@@ -709,15 +713,27 @@ export default function CustomThemeEditor({
                 </label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" size="md">
-                      <Icon icon="lucide:copy" aria-hidden="true" />
-                      Start from a theme
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      className={cn(
+                        isMobile && "order-last w-full justify-between",
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Icon icon="lucide:copy" aria-hidden="true" />
+                        Start from a theme
+                      </span>
                       <Icon icon="lucide:chevron-down" aria-hidden="true" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="border-border-card bg-secondary-bg text-primary-text max-h-80 overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    className={cn(
+                      "border-border-card bg-secondary-bg text-primary-text max-h-80 overflow-y-auto rounded-xl border p-1 shadow-lg",
+                      // As wide as the full-width button on phones.
+                      isMobile && "w-(--radix-popper-anchor-width)",
+                    )}
                   >
                     {siteThemes?.map((t) => (
                       <DropdownMenuItem
@@ -1273,8 +1289,24 @@ export default function CustomThemeEditor({
           </>
         )}
 
-        {/* On phones, Save sits in the panel's top row instead. */}
-        {!isMobile && (
+        {isMobile ? (
+          <BottomPanelFooter collapsed={bottomPanel.collapsed}>
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={(event) => cancel(event.shiftKey)}
+            >
+              Close
+            </Button>
+            <Button
+              size="md"
+              onClick={() => void save()}
+              disabled={!current || saving}
+            >
+              {saving ? "Saving…" : "Save"}
+            </Button>
+          </BottomPanelFooter>
+        ) : (
           <div className="border-border-card shrink-0 border-t px-6 py-4">
             <Button
               size="md"

@@ -16,7 +16,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useBottomPanel } from "@/components/ui/bottom-panel";
+import {
+  BOTTOM_PANEL_FOOTER_SPACE,
+  BottomPanelFooter,
+  useBottomPanel,
+} from "@/components/ui/bottom-panel";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -193,13 +197,19 @@ function AllThemesSheet({
   // opens tall enough for every theme (up to 92dvh, scrolling past that).
   const bottomPanel = useBottomPanel("themes", undefined, "content");
   const { isMobile } = bottomPanel;
-  const closeButton = (
+  // An X in the corner on desktop; a full-width button pinned to the phone
+  // footer, where a lone X reads oddly.
+  const closeButton = isMobile ? (
+    <Button variant="secondary" size="md" onClick={() => setOpen(false)}>
+      Close
+    </Button>
+  ) : (
     <Button
       variant="ghost"
       size="icon"
       aria-label="Close themes"
       onClick={() => setOpen(false)}
-      className={isMobile ? undefined : "absolute top-3 right-3"}
+      className="absolute top-3 right-3"
     >
       <Icon icon="lucide:x" aria-hidden="true" />
     </Button>
@@ -217,7 +227,11 @@ function AllThemesSheet({
   return (
     <>
       {/* Primary: a preset is the easy way to change the look. */}
-      <Button size="md" onClick={() => setOpen(true)}>
+      <Button
+        size="md"
+        className="w-full sm:w-auto"
+        onClick={() => setOpen(true)}
+      >
         <Icon icon="lucide:palette" aria-hidden="true" />
         Change theme
       </Button>
@@ -236,14 +250,12 @@ function AllThemesSheet({
           )}
         >
           {isMobile ? (
+            // No X up here: Close is in the footer, in thumb reach.
             <div className="shrink-0 px-4 pt-1 pb-3">
               {bottomPanel.handle}
-              <div className="flex items-center gap-2">
-                <SheetTitle className="min-w-0 flex-1 truncate text-base">
-                  Choose a theme
-                </SheetTitle>
-                {closeButton}
-              </div>
+              <SheetTitle className="truncate text-base">
+                Choose a theme
+              </SheetTitle>
               <SheetDescription className="sr-only">
                 Pick one to try it on the page above.
               </SheetDescription>
@@ -264,7 +276,7 @@ function AllThemesSheet({
             aria-label="Themes"
             className={cn(
               "min-h-0 flex-1 space-y-5 overflow-y-auto pt-1",
-              isMobile ? "px-4 pb-4" : "px-6 pb-6",
+              isMobile ? cn("px-4", BOTTOM_PANEL_FOOTER_SPACE) : "px-6 pb-6",
               bottomPanel.collapsed && "hidden",
             )}
           >
@@ -301,6 +313,11 @@ function AllThemesSheet({
               );
             })}
           </div>
+          {isMobile && (
+            <BottomPanelFooter collapsed={bottomPanel.collapsed}>
+              {closeButton}
+            </BottomPanelFooter>
+          )}
         </SheetContent>
       </Sheet>
     </>
