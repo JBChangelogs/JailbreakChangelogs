@@ -176,11 +176,37 @@ const TabsList = React.forwardRef<
       const resizeObserver = new ResizeObserver(scheduleUpdate);
       resizeObserver.observe(el);
 
+      // Switching tab style animates the list's padding and border, moving
+      // the tabs; follow them every frame until the list settles.
+      let followId = 0;
+      const follow = () => {
+        updateIndicator();
+        followId = requestAnimationFrame(follow);
+      };
+      const onListTransitionRun = (event: TransitionEvent) => {
+        if (event.target === el && !followId) {
+          followId = requestAnimationFrame(follow);
+        }
+      };
+      const onListTransitionEnd = (event: TransitionEvent) => {
+        if (event.target !== el) return;
+        cancelAnimationFrame(followId);
+        followId = 0;
+        updateIndicator();
+      };
+      el.addEventListener("transitionrun", onListTransitionRun);
+      el.addEventListener("transitionend", onListTransitionEnd);
+      el.addEventListener("transitioncancel", onListTransitionEnd);
+
       window.addEventListener("resize", scheduleUpdate);
       return () => {
         if (rafId !== null) cancelAnimationFrame(rafId);
+        cancelAnimationFrame(followId);
         observer.disconnect();
         resizeObserver.disconnect();
+        el.removeEventListener("transitionrun", onListTransitionRun);
+        el.removeEventListener("transitionend", onListTransitionEnd);
+        el.removeEventListener("transitioncancel", onListTransitionEnd);
         window.removeEventListener("resize", scheduleUpdate);
       };
     }, [updateIndicator]);
@@ -211,7 +237,7 @@ const TabsList = React.forwardRef<
           radios[(index + step + radios.length) % radios.length].focus();
         }}
         className={cn(
-          "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto overflow-y-hidden bg-transparent p-0 [-webkit-overflow-scrolling:touch]",
+          "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto overflow-y-hidden border-0 border-transparent bg-transparent p-0 transition-[background-color,border-color,border-width,padding,gap] duration-200 ease-out motion-reduce:transition-none [-webkit-overflow-scrolling:touch]",
           fullWidth && "w-full min-w-0 gap-0",
           noBottomRadius ? "rounded-t-lg rounded-b-none" : "rounded-lg",
           className,
