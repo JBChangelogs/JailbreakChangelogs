@@ -1,4 +1,3 @@
-import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   safeValue,
@@ -50,7 +49,8 @@ export class ThemeApiError extends Error {
 async function request<T>(
   path: string,
   init: RequestInit = {},
-  baseUrl = PUBLIC_API_URL,
+  // Read per call (Next inlines it at build time), so tests can set it.
+  baseUrl = process.env.NEXT_PUBLIC_API_URL,
 ): Promise<T> {
   const { url, headers } = buildApiFetchRequest(baseUrl, path);
   const response = await fetch(url, {

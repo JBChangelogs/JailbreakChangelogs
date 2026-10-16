@@ -257,7 +257,7 @@ export default function CustomThemeEditor({
     return () => clearTimeout(timeout);
   }, [colorsKey]);
   const { user } = useAuthContext();
-  const { data: check } = useQuery({
+  const { data: check, isPlaceholderData } = useQuery({
     queryKey: ["theme-check", checkKey],
     queryFn: () => checkMyTheme(JSON.parse(checkKey)),
     enabled: open && !!user && !!checkKey,
@@ -272,8 +272,12 @@ export default function CustomThemeEditor({
       ? rejected.problems
       : (check?.problems ?? []);
   const problemGroups = groupProblems(problems);
-  // Only fixes worked out for the colors on screen now.
-  const fixes = checkKey === colorsKey ? (check?.fixes ?? {}) : {};
+  // Only fixes worked out for the colors on screen now: not while the last
+  // result stands in (debouncing, or keepPreviousData during a new check).
+  // The problem list may lag a moment instead of flickering; it only
+  // points at colors, while a stale fix would change them.
+  const fixes =
+    checkKey === colorsKey && !isPlaceholderData ? (check?.fixes ?? {}) : {};
 
   // The button color as #rrggbb, following a var(--color-x) value.
   const buttonHex = (vars: Record<string, string>) => {

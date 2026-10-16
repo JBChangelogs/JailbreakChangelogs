@@ -1,9 +1,16 @@
-import { afterEach, expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, test } from "bun:test";
 import { checkMyTheme, createMyTheme, ThemeApiError } from "./userThemes";
 
 const originalFetch = globalThis.fetch;
+const originalApiUrl = process.env.NEXT_PUBLIC_API_URL;
+// CI has no .env, so the API URL is set here rather than inherited.
+beforeEach(() => {
+  process.env.NEXT_PUBLIC_API_URL = "https://api.example.com";
+});
 afterEach(() => {
   globalThis.fetch = originalFetch;
+  if (originalApiUrl === undefined) delete process.env.NEXT_PUBLIC_API_URL;
+  else process.env.NEXT_PUBLIC_API_URL = originalApiUrl;
 });
 
 const theme = {
