@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +44,7 @@ import LogoFilterBuilder, {
 } from "@/components/Settings/LogoFilterBuilder";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
+  checkMyTheme,
   createMyTheme,
   fetchSharedTheme,
   fetchSiteThemes,
@@ -63,8 +64,10 @@ import {
 import type { SiteTheme } from "@/utils/ui/themeOptions";
 import {
   COLOR_GROUPS,
+  COLOR_VAR,
   colorGroup,
   colorName,
+  groupProblems,
   MAIN_COLORS,
   withDefaultColors,
 } from "@/utils/ui/themeColors";
@@ -198,6 +201,11 @@ export default function CustomThemeEditor({
       : null,
   );
   const [saving, setSaving] = useState(false);
+  // Problems from a save rejected as unreadable, for the colors it sent.
+  const [rejected, setRejected] = useState<{
+    colors: string;
+    problems: string[];
+  } | null>(null);
   // Colors show one group at a time ("Main" first), or search results.
   const [colorTab, setColorTab] = useState("Main");
   const [colorSearch, setColorSearch] = useState("");
@@ -237,6 +245,35 @@ export default function CustomThemeEditor({
   const dirty = snapshot !== baselineRef.current;
   const update = (change: Partial<CustomThemeInput>) =>
     current && setDraft({ ...current, ...change });
+
+  // Readability, checked by the API while colors change (debounced), so
+  // problems show before saving. Only scheme and colors affect it.
+  const colorsKey = current
+    ? JSON.stringify({ scheme: current.scheme, vars: current.vars })
+    : "";
+  const [checkKey, setCheckKey] = useState(colorsKey);
+  useEffect(() => {
+    const timeout = setTimeout(() => setCheckKey(colorsKey), 400);
+    return () => clearTimeout(timeout);
+  }, [colorsKey]);
+  const { user } = useAuthContext();
+  const { data: check } = useQuery({
+    queryKey: ["theme-check", checkKey],
+    queryFn: () => checkMyTheme(JSON.parse(checkKey)),
+    enabled: open && !!user && !!checkKey,
+    placeholderData: keepPreviousData,
+    staleTime: Infinity,
+    retry: false,
+  });
+  // A rejected save's list stands until the colors change; the check
+  // catches up after that.
+  const problems =
+    rejected?.colors === colorsKey
+      ? rejected.problems
+      : (check?.problems ?? []);
+  const problemGroups = groupProblems(problems);
+  // Only fixes worked out for the colors on screen now.
+  const fixes = checkKey === colorsKey ? (check?.fixes ?? {}) : {};
 
   // The button color as #rrggbb, following a var(--color-x) value.
   const buttonHex = (vars: Record<string, string>) => {
@@ -337,9 +374,18 @@ export default function CustomThemeEditor({
       onSaved(saved);
       return saved;
     } catch (err) {
+      const unreadable =
+        err instanceof ThemeApiError && err.code === "theme_unreadable";
+      if (unreadable) {
+        setRejected({
+          colors: colorsKey,
+          problems: err.problems.length ? err.problems : [err.message],
+        });
+      }
       toast.error("Couldn't save your theme", {
-        description:
-          err instanceof ThemeApiError && err.code === "supporter_required"
+        description: unreadable
+          ? "Some colors are hard to read. See the list in the editor."
+          : err instanceof ThemeApiError && err.code === "supporter_required"
             ? "Custom themes need Supporter II."
             : err instanceof Error
               ? err.message
@@ -512,7 +558,6 @@ export default function CustomThemeEditor({
     }
   }, [mode, isMobile]);
   // The user's other saved themes, as one-click imports.
-  const { user } = useAuthContext();
   const { data: myThemes } = useQuery({
     queryKey: ["my-themes", user?.id],
     queryFn: listMyThemes,
@@ -716,6 +761,82 @@ export default function CustomThemeEditor({
                   </TabsList>
                 </Tabs>
               </div>
+
+              {problemGroups.length > 0 && (
+                <div
+                  role="status"
+                  className="border-status-warning/30 bg-status-warning/10 rounded-lg border p-3"
+                >
+                  <p className="text-status-warning mb-2 flex items-center gap-1.5 text-xs font-medium">
+                    <Icon icon="lucide:triangle-alert" aria-hidden="true" />
+                    {problemGroups.length === 1
+                      ? "Fix 1 color to save."
+                      : `Fix ${problemGroups.length} colors to save.`}
+                  </p>
+                  <ul className="space-y-1.5 text-xs">
+                    {problemGroups.map(([key, items]) => {
+                      // Each opens the colors it names.
+                      const details = items.map(({ problem, keys }) => (
+                        <button
+                          key={problem}
+                          type="button"
+                          onClick={() => keys.length && pickColors(keys)}
+                          className="text-secondary-text hover:text-primary-text block cursor-pointer text-left"
+                        >
+                          {/* The API names vars; show the editor's names. */}
+                          {problem.replace(COLOR_VAR, colorName)}
+                        </button>
+                      ));
+                      const fix = fixes[key];
+                      return (
+                        <li key={key} className="flex items-start gap-2">
+                          {/* Centers the first line on the Fix button beside it. */}
+                          <div className={cn("min-w-0 flex-1", fix && "pt-2")}>
+                            {key && items.length > 1 ? (
+                              // One line per color; opening it also shows the color.
+                              <details>
+                                <summary
+                                  onClick={() => pickColors([key])}
+                                  className="text-primary-text cursor-pointer font-medium"
+                                >
+                                  {colorName(key)}
+                                  <span className="text-secondary-text font-normal">
+                                    {` · ${items.length} problems`}
+                                  </span>
+                                </summary>
+                                <div className="mt-1 space-y-0.5 pl-4">
+                                  {details}
+                                </div>
+                              </details>
+                            ) : (
+                              details
+                            )}
+                          </div>
+                          {fix && (
+                            // The API's nearest passing shade of this color.
+                            <Button
+                              size="sm"
+                              className="shrink-0"
+                              variant="secondary"
+                              aria-label={`Fix ${colorName(key)}`}
+                              onClick={() => {
+                                setColor(key, fix);
+                                pickColors([key]);
+                              }}
+                            >
+                              <Icon
+                                icon="lucide:wand-sparkles"
+                                aria-hidden="true"
+                              />
+                              Fix
+                            </Button>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
 
               {mode === "visual" ? (
                 <>
