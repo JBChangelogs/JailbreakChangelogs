@@ -90,9 +90,18 @@ const TabsList = React.forwardRef<
     const [indicator, setIndicator] = React.useState<{
       left: number;
       width: number;
+      top: number;
+      height: number;
       visible: boolean;
       animate: boolean;
-    }>({ left: 0, width: 0, visible: false, animate: false });
+    }>({
+      left: 0,
+      width: 0,
+      top: 0,
+      height: 0,
+      visible: false,
+      animate: false,
+    });
 
     const updateIndicator = React.useCallback(() => {
       const el = listRef.current as unknown as HTMLElement | null;
@@ -109,24 +118,35 @@ const TabsList = React.forwardRef<
 
       // offsetLeft/offsetWidth round to whole pixels, which lets the filled
       // pill spill into a neighbouring flex-1 tab, so measure fractionally.
+      // The filled pill also takes the tab's own top and height, so it sits
+      // exactly where the tab (and its centered text) is.
       const activeRect = active.getBoundingClientRect();
+      const listRect = el.getBoundingClientRect();
       const left =
-        activeRect.left -
-        el.getBoundingClientRect().left -
-        el.clientLeft +
-        el.scrollLeft;
+        activeRect.left - listRect.left - el.clientLeft + el.scrollLeft;
       const width = activeRect.width;
+      const top = activeRect.top - listRect.top - el.clientTop;
+      const height = activeRect.height;
 
       setIndicator((prev) => {
         if (
           prev.left === left &&
           prev.width === width &&
+          prev.top === top &&
+          prev.height === height &&
           prev.visible === width > 0
         ) {
           return prev;
         }
         // Only slide once it has been shown, so it doesn't sweep in from 0.
-        return { left, width, visible: width > 0, animate: prev.visible };
+        return {
+          left,
+          width,
+          top,
+          height,
+          visible: width > 0,
+          animate: prev.visible,
+        };
       });
     }, []);
 
@@ -208,7 +228,7 @@ const TabsList = React.forwardRef<
         {children}
         {!hideIndicator && (
           // Underline by default; globals.css turns it into a pill for the
-          // filled tab style, using the same --tab-left/--tab-width.
+          // filled tab style, using the same --tab-* measurements.
           <div
             aria-hidden="true"
             data-slot="tabs-indicator"
@@ -223,6 +243,8 @@ const TabsList = React.forwardRef<
               {
                 "--tab-left": `${indicator.left}px`,
                 "--tab-width": `${indicator.width}px`,
+                "--tab-top": `${indicator.top}px`,
+                "--tab-height": `${indicator.height}px`,
               } as React.CSSProperties
             }
           />
