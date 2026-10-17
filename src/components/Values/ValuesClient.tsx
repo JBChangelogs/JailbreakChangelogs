@@ -18,7 +18,7 @@ import {
   fetchItemsClientPage,
   ItemSearchQueryTooShortError,
   searchItemsClientPage,
-  fetchLastUpdated,
+  fetchLatestItem,
 } from "@/utils/api/api";
 import { useAuthContext, useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -33,9 +33,9 @@ import { useValuesFilterMode } from "@/hooks/useValuesFilterMode";
 import { useValuesRangePreference } from "@/hooks/useValuesRangePreference";
 import { filterOptions, getServerFilters } from "./valuesFilterOptions";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
-import { formatRelativeDate } from "@/utils/helpers/timestamp";
 import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 import RelatedValuePages from "./RelatedValuePages";
+import LatestItemUpdate, { LatestItemUpdateSkeleton } from "./LatestItemUpdate";
 
 const parseFilterSorts = (
   raw: string | null,
@@ -89,7 +89,16 @@ export default function ValuesClient() {
     () => valueSortGroups.flatMap((group) => group.options),
     [valueSortGroups],
   );
-  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
+  const {
+    data: latestItem,
+    isPending: isLatestItemPending,
+    refetch: refetchLatestItem,
+  } = useQuery({
+    queryKey: ["latest-item"],
+    queryFn: ({ signal }) => fetchLatestItem(signal),
+    staleTime: 60_000,
+    retry: false,
+  });
 
   const [clearSearchTrigger, setClearSearchTrigger] = useState(0);
 
@@ -376,24 +385,12 @@ export default function ValuesClient() {
   useEffect(() => {
     const handleRealtimeValues = () => {
       void refetch();
+      void refetchLatestItem();
     };
     window.addEventListener("realtimeValues", handleRealtimeValues);
     return () =>
       window.removeEventListener("realtimeValues", handleRealtimeValues);
-  }, [refetch]);
-
-  useEffect(() => {
-    if (!data) return;
-
-    let cancelled = false;
-    fetchLastUpdated(data.items).then((timestamp) => {
-      if (!cancelled) setLastUpdated(timestamp);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [data]);
+  }, [refetch, refetchLatestItem]);
 
   const handleCategorySelect = (filter: FilterSort) => {
     handleToggleFilterSort(filter);
@@ -458,17 +455,16 @@ export default function ValuesClient() {
               cosmetics.
             </p>
 
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <RelatedValuePages current="values" />
-              {lastUpdated && (
-                <p
-                  className="text-secondary-text text-xs"
-                  title={`Last updated ${formatClientDate(lastUpdated)}`}
-                >
-                  Updated {formatRelativeDate(lastUpdated)}
-                </p>
-              )}
-            </div>
+            <RelatedValuePages current="values" />
+            {(latestItem || isLatestItemPending) && (
+              <div className="mt-3">
+                {latestItem ? (
+                  <LatestItemUpdate item={latestItem} />
+                ) : (
+                  <LatestItemUpdateSkeleton />
+                )}
+              </div>
+            )}
           </div>
 
           <NitroInlineVideoPlayer
@@ -567,24 +563,4 @@ export default function ValuesClient() {
       </div>
     </ValuesErrorBoundary>
   );
-}
-
-function formatClientDate(timestamp: number): string {
-  if (!timestamp) return "";
-  const date = new Date(timestamp);
-
-  const dateStr = date.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
-  const timeStr = date.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-
-  return dateStr.replace(",", "") + " at " + timeStr;
 }

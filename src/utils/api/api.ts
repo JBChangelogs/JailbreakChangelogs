@@ -793,35 +793,20 @@ export async function searchItemsClientPage(
   };
 }
 
-export async function fetchLastUpdated(items: Item[]) {
-  try {
-    if (!items || items.length === 0) {
-      log.info("No items provided for last updated");
-      return null;
-    }
-
-    // Create an array of all items
-    const allItems = items;
-
-    // Sort all items by last_updated in descending order and get the most recent
-    const mostRecentItem = [...allItems].sort((a, b) => {
-      const aTime =
-        a.last_updated < 10000000000 ? a.last_updated * 1000 : a.last_updated;
-      const bTime =
-        b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
-      return bTime - aTime;
-    })[0];
-
-    // Return the raw timestamp (in ms)
-    const rawTimestamp =
-      mostRecentItem.last_updated < 10000000000
-        ? mostRecentItem.last_updated * 1000
-        : mostRecentItem.last_updated;
-    return rawTimestamp;
-  } catch (err) {
-    log.error("Error getting last updated time", err);
-    return null;
+export async function fetchLatestItem(signal?: AbortSignal): Promise<Item> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    "/v2/items/latest",
+  );
+  const response = await fetch(url, {
+    headers,
+    credentials: "include",
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch latest item (${response.status})`);
   }
+  return (await response.json()) as Item;
 }
 
 export async function fetchItem(
