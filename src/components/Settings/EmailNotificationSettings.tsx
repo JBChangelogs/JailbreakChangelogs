@@ -21,6 +21,11 @@ import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
 
+type EmailUpdateState = {
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+};
+
 /**
  * Whether the user's email is linked and its notifications are on. Shared by
  * the notification toggle and the email connection, which sit in different
@@ -88,14 +93,15 @@ function toastFailure({ status, data }: ApiResult, fallback: string) {
 /** The email notifications switch, under Delivery. */
 export const EmailNotificationSettings = ({
   userData,
+  loading,
+  setLoading,
 }: {
   userData: UserData | null;
-}) => {
+} & EmailUpdateState) => {
   const email = useEmailStatus(userData?.id);
-  const [loading, setLoading] = useState(false);
 
   const handleToggle = async (checked: boolean) => {
-    if (!userData) return;
+    if (!userData || loading) return;
     setLoading(true);
     try {
       const result = checked
@@ -159,12 +165,16 @@ export const EmailNotificationSettings = ({
 };
 
 /** Link or unlink an email, under Connections. */
-export const EmailConnection = ({ userData }: { userData: UserData }) => {
+export const EmailConnection = ({
+  userData,
+  loading,
+  setLoading,
+}: { userData: UserData } & EmailUpdateState) => {
   const email = useEmailStatus(userData.id);
-  const [loading, setLoading] = useState(false);
   const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
 
   const handleUnlinkConfirm = async () => {
+    if (loading) return;
     setLoading(true);
     try {
       const { ok, status, data } = await unlinkEmail();
@@ -236,6 +246,7 @@ export const EmailConnection = ({ userData }: { userData: UserData }) => {
         isOpen={showUnlinkConfirm}
         onClose={() => setShowUnlinkConfirm(false)}
         onConfirm={handleUnlinkConfirm}
+        confirmDisabled={loading}
         title="Unlink Email"
         message="Are you sure you want to unlink your email? You will stop receiving notifications."
         confirmText="Unlink"

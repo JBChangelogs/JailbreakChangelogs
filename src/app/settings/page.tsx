@@ -89,6 +89,7 @@ export default function SettingsPage() {
   // Banner and avatar uploads both run from the appearance preview.
   const [isPreviewUploading, setIsPreviewUploading] = useState(false);
   const [isBackgroundUploading, setIsBackgroundUploading] = useState(false);
+  const [isEmailUpdating, setIsEmailUpdating] = useState(false);
 
   // Derive state from props instead of setting in useEffect
   const userData = user;
@@ -588,7 +589,11 @@ export default function SettingsPage() {
             >
               <div className={SETTINGS_LIST}>
                 <DesktopNotificationToggle />
-                <EmailNotificationSettings userData={userData} />
+                <EmailNotificationSettings
+                  userData={userData}
+                  loading={isEmailUpdating}
+                  setLoading={setIsEmailUpdating}
+                />
 
                 <section>
                   <SettingsSubsectionHeading title="What to notify you about" />
@@ -650,7 +655,11 @@ export default function SettingsPage() {
             >
               <div className={SETTINGS_LIST}>
                 <RobloxConnection userData={userData} />
-                <EmailConnection userData={userData} />
+                <EmailConnection
+                  userData={userData}
+                  loading={isEmailUpdating}
+                  setLoading={setIsEmailUpdating}
+                />
               </div>
             </SettingsCard>
 
