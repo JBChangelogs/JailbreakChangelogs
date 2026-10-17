@@ -1,15 +1,12 @@
+import Link from "next/link";
 import { getSupporterGiftTierLabel } from "@/utils/auth/supporterAccess";
-import Image from "next/image";
 import type { SupporterGift } from "@/types/auth";
-import { Button as CustomButton } from "@/components/ui/button";
-
-const BADGE_BASE_URL =
-  "https://assets.jailbreakchangelogs.com/assets/website_icons";
-const supporterIcons: Record<number, string> = {
-  1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
-  2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
-  3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
-};
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
+import { formatMonthDayYear } from "@/utils/helpers/timestamp";
+import { SETTINGS_LIST } from "./SettingsCard";
+import { SettingRow } from "./SettingRow";
+import { SupporterTierRow } from "./SupporterTierRow";
 
 interface PurchasedGiftsSectionProps {
   gifts: SupporterGift[];
@@ -26,78 +23,74 @@ export default function PurchasedGiftsSection({
   onOpenGiftModal,
   onPurchaseGift,
 }: PurchasedGiftsSectionProps) {
-  if (gifts.length === 0) {
-    return (
-      <div className="flex flex-col gap-3">
-        <p className="text-secondary-text text-sm">No gifts purchased yet.</p>
-        <div className="flex justify-start">
-          <CustomButton type="button" size="sm" onClick={onPurchaseGift}>
-            Purchase Gift
-          </CustomButton>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-3">
-      <div className="max-h-[34rem] overflow-y-auto pr-1">
-        <div className="flex flex-col gap-3">
-          {gifts.map((gift) => (
-            <div
-              key={gift.id}
-              className="bg-tertiary-bg border-border-card rounded-lg border p-4"
-            >
-              <div className="flex flex-col gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-primary-text text-sm font-semibold">
-                      {getSupporterGiftTierLabel(gift.level)}
-                    </p>
-                    {supporterIcons[gift.level] && (
-                      <Image
-                        src={supporterIcons[gift.level]}
-                        alt={getSupporterGiftTierLabel(gift.level)}
-                        width={18}
-                        height={18}
-                        className="object-contain"
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <CustomButton
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => onRedeemForSelf(gift.share_id)}
-                    disabled={!!giftingIds[gift.share_id]}
-                  >
-                    {giftingIds[gift.share_id]
-                      ? "Processing..."
-                      : "Self Redeem"}
-                  </CustomButton>
-                  <CustomButton
-                    type="button"
-                    size="sm"
-                    onClick={() => onOpenGiftModal(gift)}
-                    disabled={!!giftingIds[gift.share_id]}
-                  >
-                    {giftingIds[gift.share_id]
-                      ? "Processing..."
-                      : "Gift to User"}
-                  </CustomButton>
-                </div>
-              </div>
-            </div>
-          ))}
+    <div className={SETTINGS_LIST}>
+      <SettingRow
+        title="Buy a gift"
+        description="Give Supporter to a friend, or keep it to redeem yourself later."
+        action={
+          <>
+            <Button variant="secondary" size="md" asChild>
+              <Link href="/supporting" prefetch={false}>
+                View benefits
+              </Link>
+            </Button>
+            <Button type="button" size="md" onClick={onPurchaseGift}>
+              Purchase Gift
+            </Button>
+          </>
+        }
+      />
+
+      {gifts.length === 0 ? (
+        <div className="border-border-card flex flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-8 text-center">
+          <Icon
+            icon="material-symbols:redeem-rounded"
+            aria-hidden="true"
+            className="text-secondary-text size-8"
+          />
+          <p className="text-primary-text text-sm font-medium">No gifts yet</p>
+          <p className="text-secondary-text max-w-sm text-sm">
+            Gifts you buy show up here, ready to redeem yourself or send to
+            someone.
+          </p>
         </div>
-      </div>
-      <div className="flex justify-start">
-        <CustomButton type="button" size="sm" onClick={onPurchaseGift}>
-          Purchase Gift
-        </CustomButton>
-      </div>
+      ) : (
+        <div className="max-h-[34rem] space-y-3 overflow-y-auto pr-1">
+          {gifts.map((gift) => {
+            const busy = !!giftingIds[gift.share_id];
+            return (
+              <SupporterTierRow
+                key={gift.id}
+                level={gift.level}
+                name={getSupporterGiftTierLabel(gift.level)}
+                detail={`Bought ${formatMonthDayYear(gift.created_at)}`}
+                actions={
+                  <>
+                    <Button
+                      type="button"
+                      size="md"
+                      variant="secondary"
+                      onClick={() => onRedeemForSelf(gift.share_id)}
+                      disabled={busy}
+                    >
+                      {busy ? "Processing..." : "Redeem"}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="md"
+                      onClick={() => onOpenGiftModal(gift)}
+                      disabled={busy}
+                    >
+                      {busy ? "Processing..." : "Gift to User"}
+                    </Button>
+                  </>
+                }
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

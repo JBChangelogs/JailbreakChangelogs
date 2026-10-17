@@ -93,7 +93,7 @@ export function AccentColorSetting({
   };
 
   return (
-    <div className="-mx-3 mb-1 space-y-5 rounded-lg px-3 py-2">
+    <div className="space-y-5">
       <div>
         <p className="text-primary-text text-base font-medium">Accent color</p>
         <p className="text-secondary-text text-sm">
@@ -116,25 +116,22 @@ export function AccentColorSetting({
         </p>
       </div>
 
-      <div role="group" aria-labelledby={`${id}-color`}>
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <p
-            id={`${id}-color`}
-            className="text-primary-text text-sm font-medium"
-          >
-            Color
-          </p>
-          <Tabs
-            radio
-            value={current.gradient ? "gradient" : "single"}
-            onValueChange={(value) => setGradient(value === "gradient")}
-          >
-            <TabsList aria-label="Fill">
-              <TabsTrigger value="single">Single color</TabsTrigger>
-              <TabsTrigger value="gradient">Gradient</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+      <div role="group" aria-label="Color" className="space-y-2">
+        {/* Full width and a touch taller, to match the color card below. */}
+        <Tabs
+          radio
+          value={current.gradient ? "gradient" : "single"}
+          onValueChange={(value) => setGradient(value === "gradient")}
+        >
+          <TabsList aria-label="Fill" fullWidth>
+            <TabsTrigger value="single" fullWidth className="py-2.5">
+              Single color
+            </TabsTrigger>
+            <TabsTrigger value="gradient" fullWidth className="py-2.5">
+              Gradient
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <div className="border-border-card bg-tertiary-bg flex flex-wrap items-center gap-2 rounded-xl border p-2 sm:flex-nowrap">
           <ColorSwatch

@@ -1,4 +1,7 @@
-import { getSupporterGiftTierLabel } from "@/utils/auth/supporterAccess";
+import {
+  getSupporterGiftTierLabel,
+  supporterBadgeUrl,
+} from "@/utils/auth/supporterAccess";
 import Image from "next/image";
 import Link from "next/link";
 import type { SupporterGift, UserData } from "@/types/auth";
@@ -14,14 +17,6 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Button as CustomButton } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
-
-const BADGE_BASE_URL =
-  "https://assets.jailbreakchangelogs.com/assets/website_icons";
-const supporterIcons: Record<number, string> = {
-  1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
-  2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
-  3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
-};
 
 interface GiftToUserDialogProps {
   open: boolean;
@@ -52,6 +47,7 @@ export default function GiftToUserDialog({
   onDismiss,
   onSubmit,
 }: GiftToUserDialogProps) {
+  const badge = activeGift ? supporterBadgeUrl(activeGift.level) : undefined;
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onDismiss()}>
       <DialogContent
@@ -85,9 +81,9 @@ export default function GiftToUserDialog({
             <div className="flex flex-col gap-4">
               {activeGift ? (
                 <div className="bg-tertiary-bg border-border-card flex items-center gap-3 rounded-lg border p-4">
-                  {supporterIcons[activeGift.level] && (
+                  {badge && (
                     <Image
-                      src={supporterIcons[activeGift.level]}
+                      src={badge}
                       alt={getSupporterGiftTierLabel(activeGift.level)}
                       width={24}
                       height={24}
@@ -174,9 +170,9 @@ export default function GiftToUserDialog({
                   Tier
                 </p>
                 <div className="bg-tertiary-bg border-border-card flex items-center gap-2 rounded-lg border p-3">
-                  {supporterIcons[activeGift.level] && (
+                  {badge && (
                     <Image
-                      src={supporterIcons[activeGift.level]}
+                      src={badge}
                       alt={getSupporterGiftTierLabel(activeGift.level)}
                       width={20}
                       height={20}

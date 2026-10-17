@@ -7,7 +7,7 @@ import { trackEvent } from "@/utils/analytics/rybbit";
 import { getJbclToken, useAuthContext } from "@/contexts/AuthContext";
 import { INVENTORY_API_URL } from "@/utils/api/api";
 import { readInventoryJobResponse } from "@/utils/api/inventoryJobResponse";
-import { SettingsSubsectionHeading } from "./SettingsSubsectionHeading";
+import { SettingRow } from "./SettingRow";
 
 const log = createLogger("UI");
 
@@ -71,26 +71,25 @@ export const DeleteInventoryData = ({
   };
 
   return (
-    <div className="rounded-lg">
-      <div className="mb-2">
-        <SettingsSubsectionHeading
-          title="Inventory Data Deletion"
-          onCopyLink={onCopyLink}
-        />
-        <p className="text-secondary-text text-sm">
-          {robloxId
+    <>
+      <SettingRow
+        title="Inventory Data Deletion"
+        onCopyLink={onCopyLink}
+        description={
+          robloxId
             ? "Delete your current inventory data. Trade history remains, and bots may scan you again later."
-            : "Connect a Roblox account in Account Connections to delete its inventory data."}
-        </p>
-      </div>
-
-      <Button
-        variant="destructive"
-        onClick={() => setOpen(true)}
-        disabled={!robloxId || scheduled}
-      >
-        {scheduled ? "Deletion Scheduled" : "Delete Inventory Data"}
-      </Button>
+            : "Connect a Roblox account in Connections to delete its inventory data."
+        }
+        action={
+          <Button
+            variant="destructive"
+            onClick={() => setOpen(true)}
+            disabled={!robloxId || scheduled}
+          >
+            {scheduled ? "Deletion Scheduled" : "Delete Inventory Data"}
+          </Button>
+        }
+      />
 
       <ConfirmDialog
         isOpen={open}
@@ -112,6 +111,6 @@ export const DeleteInventoryData = ({
           Are you sure?
         </p>
       </ConfirmDialog>
-    </div>
+    </>
   );
 };

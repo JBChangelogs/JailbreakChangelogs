@@ -7,7 +7,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { SettingsSubsectionHeading } from "./SettingsSubsectionHeading";
+import { SettingRow } from "./SettingRow";
 
 const log = createLogger("UI");
 
@@ -45,21 +45,17 @@ export const DeleteAccount = ({ onCopyLink }: { onCopyLink?: () => void }) => {
   };
 
   return (
-    <div className="rounded-lg">
-      <div className="mb-2">
-        <SettingsSubsectionHeading
-          title="Account Deletion"
-          onCopyLink={onCopyLink}
-        />
-        <p className="text-secondary-text text-sm">
-          Delete your Jailbreak Changelogs account. Inventory data can be
-          deleted separately above.
-        </p>
-      </div>
-
-      <Button variant="destructive" onClick={() => setOpen(true)}>
-        Delete Account
-      </Button>
+    <>
+      <SettingRow
+        title="Account Deletion"
+        onCopyLink={onCopyLink}
+        description="Delete your Jailbreak Changelogs account. Inventory data can be deleted separately above."
+        action={
+          <Button variant="destructive" onClick={() => setOpen(true)}>
+            Delete Account
+          </Button>
+        }
+      />
 
       <ConfirmDialog
         isOpen={open}
@@ -81,6 +77,6 @@ export const DeleteAccount = ({ onCopyLink }: { onCopyLink?: () => void }) => {
           </div>
         )}
       </ConfirmDialog>
-    </div>
+    </>
   );
 };
