@@ -241,6 +241,7 @@ function AllThemesSheet({
       </Button>
       <Sheet open={open} onOpenChange={setOpen} modal={!isMobile}>
         <SheetContent
+          data-mobile-theme-panel={isMobile ? "" : undefined}
           side={bottomPanel.sheet.side}
           hideOverlay={isMobile}
           // The page stays usable under the panel; only the X closes it.

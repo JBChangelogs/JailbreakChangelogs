@@ -613,6 +613,7 @@ export default function CustomThemeEditor({
       {/* Not modal and no overlay: the user browses the site with the draft
           applied. Clicks on the page don't close it, so work isn't lost. */}
       <SheetContent
+        data-mobile-theme-panel={isMobile ? "" : undefined}
         side={bottomPanel.sheet.side}
         hideOverlay
         onInteractOutside={(event) => event.preventDefault()}
