@@ -231,9 +231,6 @@ export default async function RootLayout({
                     <SiteBanGate>
                       <RybbitIdentity />
                       <Suspense fallback={null}>
-                        <LatestReleaseDialog />
-                      </Suspense>
-                      <Suspense fallback={null}>
                         <SharedThemeDialog />
                         <ThemeEditorHost />
                       </Suspense>
@@ -258,7 +255,13 @@ export default async function RootLayout({
                           }
                         >
                           <HideOnAccessDenied>
-                            <Header />
+                            <Header
+                              releaseAnnouncement={
+                                <Suspense fallback={null}>
+                                  <LatestReleaseDialog />
+                                </Suspense>
+                              }
+                            />
                           </HideOnAccessDenied>
                         </Suspense>
                         <main className="min-h-screen flex-1">
@@ -387,9 +390,6 @@ export default async function RootLayout({
                 <SiteBanGate>
                   <RybbitIdentity />
                   <Suspense fallback={null}>
-                    <LatestReleaseDialog />
-                  </Suspense>
-                  <Suspense fallback={null}>
                     <SharedThemeDialog />
                     <ThemeEditorHost />
                   </Suspense>
@@ -409,7 +409,13 @@ export default async function RootLayout({
                       }
                     >
                       <HideOnAccessDenied>
-                        <Header />
+                        <Header
+                          releaseAnnouncement={
+                            <Suspense fallback={null}>
+                              <LatestReleaseDialog />
+                            </Suspense>
+                          }
+                        />
                       </HideOnAccessDenied>
                     </Suspense>
                     <main className="min-h-screen flex-1">

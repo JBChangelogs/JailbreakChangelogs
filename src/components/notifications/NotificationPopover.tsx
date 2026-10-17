@@ -188,7 +188,7 @@ export function NotificationPopover({
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
           </TooltipTrigger>
-          <TooltipContent>Notifications</TooltipContent>
+          <TooltipContent side="bottom">Notifications</TooltipContent>
         </Tooltip>
       ) : (
         <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>

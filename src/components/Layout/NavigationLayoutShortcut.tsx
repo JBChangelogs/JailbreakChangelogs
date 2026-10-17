@@ -46,7 +46,7 @@ export default function NavigationLayoutShortcut() {
             </svg>
           </Link>
         </TooltipTrigger>
-        <TooltipContent>Change navigation layout</TooltipContent>
+        <TooltipContent side="bottom">Change navigation layout</TooltipContent>
       </Tooltip>
     </div>
   );

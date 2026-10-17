@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -53,15 +55,12 @@ export default function LatestReleaseDialogClient({
   const { disabled, preferencesSynced, setDisabled } = useWhatsNewPreference();
 
   useEffect(() => {
-    if (isAuthenticated && disabled) setOpen(false);
-  }, [disabled, isAuthenticated]);
-
-  useEffect(() => {
+    setOpen(false);
+    setPreview(null);
     if (isLoading || disabled === null) return;
     if (isAuthenticated && (!preferencesSynced || disabled)) return;
 
     if (pathname === "/access-denied") {
-      setOpen(false);
       return;
     }
 
@@ -75,7 +74,6 @@ export default function LatestReleaseDialogClient({
       ) {
         safeLocalStorage.setItem(LAST_SEEN_RELEASE_KEY, release.slug);
       }
-      setOpen(false);
       return;
     }
 
@@ -93,7 +91,6 @@ export default function LatestReleaseDialogClient({
         if (safeLocalStorage.getItem(LAST_SEEN_RELEASE_KEY) === latest.slug)
           return;
         setPreview(latest);
-        setOpen(true);
       })
       .catch(() => {});
 
@@ -113,6 +110,7 @@ export default function LatestReleaseDialogClient({
       preview?.slug ?? release.slug,
     );
     setOpen(false);
+    setPreview(null);
   };
 
   const disable = () => {
@@ -120,13 +118,38 @@ export default function LatestReleaseDialogClient({
     setDisabled(true);
   };
 
-  if (!preview) return null;
+  if (!preview || !pageSettled) return null;
 
   return (
     <Dialog
-      open={open && pageSettled}
-      onOpenChange={(nextOpen) => !nextOpen && dismiss()}
+      open={open}
+      onOpenChange={(nextOpen) => (nextOpen ? setOpen(true) : dismiss())}
     >
+      <div className="bg-secondary-bg border-border-card border-b">
+        <div className="relative container mx-auto px-4 py-2">
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              className="text-primary-text focus-visible:ring-border-focus group flex w-full cursor-pointer flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-sm pr-8 text-center text-xs focus-visible:ring-2 focus-visible:outline-none lg:pr-12"
+            >
+              <span className="font-medium">
+                What&apos;s new in v{preview.version}
+              </span>
+              <span className="text-link group-hover:text-link-hover font-semibold transition-colors">
+                View changes <span aria-hidden="true">→</span>
+              </span>
+            </button>
+          </DialogTrigger>
+          <button
+            type="button"
+            className="text-secondary-text hover:text-primary-text hover:bg-tertiary-bg focus-visible:ring-border-focus absolute top-1/2 right-4 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            aria-label="Dismiss what's new announcement"
+            onClick={dismiss}
+          >
+            <Icon icon="heroicons:x-mark" className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
       <DialogContent
         showClose
         data-whats-new-dialog
