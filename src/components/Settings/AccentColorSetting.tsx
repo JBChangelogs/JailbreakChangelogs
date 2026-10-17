@@ -3,6 +3,7 @@
 import { useId } from "react";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { useQuery } from "@tanstack/react-query";
 import { getProfileBanner } from "@/components/Profile/Banner";
 import { appearanceProfileKey } from "@/hooks/useAccentColor";
@@ -207,6 +208,7 @@ export function AccentColorSetting({
                 className="relative flex h-20 items-end p-2"
               >
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={banner.primary ?? banner.fallback}
                   alt=""
                   fill

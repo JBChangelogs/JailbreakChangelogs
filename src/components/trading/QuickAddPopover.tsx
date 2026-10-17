@@ -2,6 +2,7 @@
 
 import React, { Fragment, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { TradeItem } from "@/types/trading";
 import { FilterSort } from "@/types";
@@ -297,6 +298,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
                     >
                       <span className="bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded">
                         <Image
+                          placeholder={IMAGE_PLACEHOLDER}
                           src={getTradeItemImagePath(item, true)}
                           alt={item.name}
                           fill

@@ -10,6 +10,7 @@ import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { INVENTORY_API_URL } from "@/utils/api/api";
 import XpProgressBar from "./XpProgressBar";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import ScanHistoryModal from "../Modals/ScanHistoryModal";
 import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
@@ -627,6 +628,7 @@ export default function UserStatsSection({
                     <div className="group border-border-card bg-tertiary-bg flex h-full min-h-11 items-center gap-2 rounded-lg border px-2 py-2 text-sm transition-all duration-200 sm:gap-3 sm:px-3">
                       <div className="relative h-7 w-7 shrink-0 sm:h-8 sm:w-8">
                         <Image
+                          placeholder={IMAGE_PLACEHOLDER}
                           src={`https://assets.jailbreakchangelogs.com/assets/images/gamepasses/${gamepassInfo.image}.webp`}
                           alt={gamepass}
                           width={32}

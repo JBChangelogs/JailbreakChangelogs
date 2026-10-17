@@ -12,6 +12,7 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/helpers/timestamp";
 import CountUpNumber from "@/components/Home/CountUpNumber";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import RetryErrorDisplay from "./RetryErrorDisplay";
@@ -438,6 +439,7 @@ function LastUpdatedAvatar({ userId }: { userId: string }) {
     <DefaultAvatar name={userId} />
   ) : (
     <Image
+      placeholder={IMAGE_PLACEHOLDER}
       src={avatarUrl}
       alt="Last processed user avatar"
       width={32}
@@ -485,6 +487,7 @@ function BotStatusCard({
             <DefaultAvatar name={displayName} />
           ) : (
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={avatarUrl}
               alt={`${displayName} avatar`}
               width={40}

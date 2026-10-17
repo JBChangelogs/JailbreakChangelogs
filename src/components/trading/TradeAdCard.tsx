@@ -337,6 +337,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
             >
               {avatarSrc ? (
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={avatarSrc}
                   alt={`${displayName}'s Roblox avatar`}
                   fill

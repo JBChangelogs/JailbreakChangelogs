@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Icon } from "../ui/IconWrapper";
 import { Sheet, SheetContent } from "../ui/sheet";
 import { Slider } from "../ui/slider";
@@ -494,6 +495,7 @@ export default function HyperchromeCalculatorModal({
                 <div className="mb-3 flex items-center gap-3">
                   <div className="relative h-14 w-14 shrink-0">
                     <Image
+                      placeholder={IMAGE_PLACEHOLDER}
                       src="https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/jars/HyperChrome_Wildcard.webp"
                       alt="HyperChrome Wildcard"
                       fill
@@ -805,6 +807,7 @@ export default function HyperchromeCalculatorModal({
               >
                 <div className="relative h-12 w-12 shrink-0 sm:h-14 sm:w-14">
                   <Image
+                    placeholder={IMAGE_PLACEHOLDER}
                     src={imageSrc}
                     alt={item.name}
                     fill

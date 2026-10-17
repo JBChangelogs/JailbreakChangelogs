@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { UserWithFlags } from "@/utils/api/api";
 import UserAvatar from "@/components/Users/UserAvatarClient";
@@ -179,6 +180,7 @@ export default function ContributorsClient({
           }}
         >
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={contrib.avatar}
             alt={contrib.name}
             width={192}

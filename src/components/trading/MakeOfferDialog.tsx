@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { ItemGrid } from "@/components/trading/ItemGrid";
 import TradeItemPickerV2 from "@/components/trading/TradeItemPickerV2";
@@ -566,6 +567,7 @@ export function MakeOfferDialog({
             >
               {avatarSrc ? (
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={avatarSrc}
                   alt={`${tradeOwnerName}'s Roblox avatar`}
                   fill

@@ -554,6 +554,7 @@ export default function TradeItemPickerV2({
                           >
                             <div className="relative aspect-square w-full overflow-hidden rounded">
                               <Image
+                                placeholder={IMAGE_PLACEHOLDER}
                                 src={getTradeItemImagePath({
                                   id: customType.id,
                                   instanceId: customType.id,

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
@@ -44,6 +45,7 @@ export default function BountyCard({
           {/* Avatar */}
           <div className="border-border-card bg-quaternary-bg relative h-12 w-12 shrink-0 overflow-hidden rounded-full border">
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={getAvatarUrl(bounty.userid)}
               alt={bounty.display_name}
               fill

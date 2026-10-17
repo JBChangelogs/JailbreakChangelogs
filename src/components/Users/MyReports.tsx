@@ -7,6 +7,7 @@ import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { fetchItemByIdClient, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
@@ -75,6 +76,7 @@ function SpoilerImage({
         }
       >
         <Image
+          placeholder={IMAGE_PLACEHOLDER}
           src={src}
           alt={alt}
           {...imageProps}
@@ -98,6 +100,7 @@ function SpoilerImage({
       }}
     >
       <Image
+        placeholder={IMAGE_PLACEHOLDER}
         src={src}
         alt={alt}
         {...imageProps}

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState, useMemo } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { useRobloxBotsDataQuery } from "@/hooks/useRobloxDataQuery";
 import { Button } from "@/components/ui/button";
 import { DefaultAvatar } from "@/utils/ui/avatar";
@@ -143,6 +144,7 @@ export default function RobberyPlayersModal({
                   <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
                     {robloxData?.usersData ? (
                       <Image
+                        placeholder={IMAGE_PLACEHOLDER}
                         src={getUserAvatar(player.user_id)}
                         alt={getUsername(player.user_id)}
                         width={40}

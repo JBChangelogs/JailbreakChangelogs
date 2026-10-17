@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Slot } from "radix-ui";
 
 import { Icon } from "@/components/ui/IconWrapper";
@@ -147,6 +148,7 @@ export const ImageLightbox = ({
               <Icon icon="mdi:close" className="size-5" />
             </button>
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={activeImage.src}
               alt={activeImage.alt}
               width={0}

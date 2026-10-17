@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import {
   Sheet,
   SheetContent,
@@ -400,6 +401,7 @@ export default function OGNotificationSheet({
                 <div className="bg-quaternary-bg border-border-card relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
                   {!avatarError ? (
                     <Image
+                      placeholder={IMAGE_PLACEHOLDER}
                       src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${user.roblox_id}/avatar-headshot`}
                       alt="Your Avatar"
                       fill

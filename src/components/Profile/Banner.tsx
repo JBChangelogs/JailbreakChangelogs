@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { cn } from "@/lib/utils";
 import { UserSettingsV2 } from "@/types/auth";
 import { getBackgroundImageByIndex } from "@/utils/helpers/backgroundImages";
@@ -91,6 +92,7 @@ export const Banner = ({
   return (
     <div className={cn("relative h-40 md:h-70", className)} key={userId}>
       <Image
+        placeholder={IMAGE_PLACEHOLDER}
         src={src}
         onError={
           src === primary ? () => setPrimaryBannerFailed(true) : undefined

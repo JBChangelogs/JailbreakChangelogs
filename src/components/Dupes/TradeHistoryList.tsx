@@ -3,6 +3,7 @@
 import { getUserAvatar } from "@/utils/ui/images";
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { SilhouetteAvatar } from "@/utils/ui/avatar";
 import { DupeFinderHistoryEntry } from "@/types";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
@@ -160,6 +161,7 @@ export function TradeHistoryAvatar({
   if (avatarError) return <SilhouetteAvatar />;
   return (
     <Image
+      placeholder={IMAGE_PLACEHOLDER}
       src={avatarUrl}
       alt={name}
       width={40}

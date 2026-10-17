@@ -3,6 +3,7 @@
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { useRouter } from "nextjs-toploader/app";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -371,6 +372,7 @@ export default function DupeSearchInput({
                       <div className="bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
                         {!avatarErrors.has(owner.id) ? (
                           <Image
+                            placeholder={IMAGE_PLACEHOLDER}
                             src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${owner.id}/avatar-headshot`}
                             alt=""
                             fill

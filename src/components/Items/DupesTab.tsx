@@ -5,6 +5,7 @@ import { useRef, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -286,6 +287,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
                       </span>
                       <div className="bg-tertiary-bg relative h-10 w-10 shrink-0 overflow-hidden rounded-full sm:h-12 sm:w-12">
                         <Image
+                          placeholder={IMAGE_PLACEHOLDER}
                           src={user.avatar}
                           alt={user.displayName}
                           width={48}

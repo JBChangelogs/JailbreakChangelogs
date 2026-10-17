@@ -953,6 +953,7 @@ export default function TradeDetailsClient({
                 >
                   {avatarSrc ? (
                     <Image
+                      placeholder={IMAGE_PLACEHOLDER}
                       src={avatarSrc}
                       alt={`${displayName}'s Roblox avatar`}
                       fill
@@ -1414,6 +1415,7 @@ export default function TradeDetailsClient({
                                         >
                                           {offerAvatarSrc ? (
                                             <Image
+                                              placeholder={IMAGE_PLACEHOLDER}
                                               src={offerAvatarSrc}
                                               alt={`${offerDisplayName}'s Roblox avatar`}
                                               fill

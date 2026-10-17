@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { UserConnectionData } from "@/app/inventories/types";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
@@ -53,6 +54,7 @@ export default function DupeUserInfo({
           <div className="border-border-card bg-quaternary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full border">
             {!avatarError ? (
               <Image
+                placeholder={IMAGE_PLACEHOLDER}
                 src={getUserAvatar(robloxId)}
                 alt="Roblox Avatar"
                 fill

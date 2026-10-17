@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { getProfileBanner } from "@/components/Profile/Banner";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { UserBadges } from "@/components/Profile/UserBadges";
@@ -74,6 +75,7 @@ export default function DiscordUserCard({
     <div className="flex h-full flex-col">
       <div className="bg-tertiary-bg relative h-24 overflow-hidden">
         <Image
+          placeholder={IMAGE_PLACEHOLDER}
           src={bannerSrc}
           alt=""
           aria-hidden="true"

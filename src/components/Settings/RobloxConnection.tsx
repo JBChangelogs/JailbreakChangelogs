@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { SettingRow } from "./SettingRow";
 
 interface RobloxConnectionProps {
@@ -151,6 +152,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
           >
             {userData.roblox_avatar && (
               <Image
+                placeholder={IMAGE_PLACEHOLDER}
                 src={userData.roblox_avatar}
                 alt={userData.roblox_username}
                 width={48}

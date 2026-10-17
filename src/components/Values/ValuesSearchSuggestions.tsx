@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import type { PartialItem } from "@/utils/api/api";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
@@ -82,6 +83,7 @@ export default function ValuesSearchSuggestions({
             >
               <div className="bg-quaternary-bg relative h-9 w-16 shrink-0 overflow-hidden rounded-md">
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={getItemImagePath(item.type, item.name, true)}
                   alt=""
                   fill

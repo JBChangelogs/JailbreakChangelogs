@@ -2,6 +2,7 @@ import React from "react";
 import { DragOverlay as DndKitDragOverlay } from "@dnd-kit/core";
 import { TradeItem } from "@/types/trading";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
 import { getCategoryColor } from "@/utils/items/categoryIcons";
 
@@ -18,6 +19,7 @@ export const CustomDragOverlay: React.FC<CustomDragOverlayProps> = ({
         <div className="border-button-info bg-primary-bg shadow-card-shadow w-[200px] rounded-lg border-2 p-2 opacity-90">
           <div className="relative mb-2 aspect-4/3 overflow-hidden rounded-md">
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={getItemImagePath(item.type, item.name, true)}
               alt={item.name}
               className="h-full w-full object-cover"

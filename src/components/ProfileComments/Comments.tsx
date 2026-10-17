@@ -346,6 +346,7 @@ export default function Comment({
       return (
         <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src="https://assets.jailbreakchangelogs.com/assets/logos/collab/JBCL_X_TC_Logo_Long_Light_Background.webp"
             alt="Trade Ad"
             fill
@@ -361,6 +362,7 @@ export default function Comment({
       return (
         <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${item_id}&size=150x150&format=Png&isCircular=false`}
             alt={`User ${item_id}'s inventory`}
             fill
@@ -376,6 +378,7 @@ export default function Comment({
       return (
         <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={IMAGE_PATHS.PLACEHOLDER}
             alt="Item Suggestion"
             fill

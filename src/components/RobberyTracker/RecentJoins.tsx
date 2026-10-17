@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -249,6 +250,7 @@ export default function RecentJoins({
                     <span className="border-border-card bg-quaternary-bg flex aspect-video w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border sm:w-24">
                       {imageName ? (
                         <Image
+                          placeholder={IMAGE_PLACEHOLDER}
                           src={`https://assets.jailbreakchangelogs.com/assets/images/robberies/${imageName}.webp`}
                           alt=""
                           width={96}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserAvatar } from "@/utils/ui/avatar";
@@ -62,6 +63,7 @@ export function ReportSuggestionModal({
             <div className="flex items-center gap-3">
               <div className="bg-quaternary-bg relative h-14 w-20 shrink-0 overflow-hidden rounded-md">
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={
                     item
                       ? getItemImagePath(item.type, item.name, true)

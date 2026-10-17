@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { useDebounce } from "@/hooks/useDebounce";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
@@ -172,6 +173,7 @@ export default function SeasonLeaderboardClient({
                         </div>
                         {avatarUrl && !avatarErrorMap[user.id] ? (
                           <Image
+                            placeholder={IMAGE_PLACEHOLDER}
                             src={avatarUrl}
                             alt={`${user.name} avatar`}
                             width={40}

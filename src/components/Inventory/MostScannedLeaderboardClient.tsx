@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -30,6 +31,7 @@ function LeaderboardAvatar({
   }
   return (
     <Image
+      placeholder={IMAGE_PLACEHOLDER}
       src={avatarUrl}
       alt={`${displayName}'s avatar`}
       width={40}

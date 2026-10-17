@@ -12,6 +12,7 @@ import {
   INVENTORY_API_SOURCE_HEADER,
 } from "@/utils/api/api";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -307,6 +308,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                       </span>
                       <div className="bg-tertiary-bg relative h-10 w-10 shrink-0 overflow-hidden rounded-full sm:h-12 sm:w-12">
                         <Image
+                          placeholder={IMAGE_PLACEHOLDER}
                           src={avatar}
                           alt={displayName}
                           width={48}
