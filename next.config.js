@@ -26,6 +26,7 @@ const nextConfig = {
     compilationMode: "annotation",
   },
   experimental: {
+    agentUpgrade: "latest",
     optimizePackageImports: ["radix-ui"],
   },
   images: {
