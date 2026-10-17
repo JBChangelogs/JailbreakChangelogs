@@ -6,6 +6,7 @@ import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
 import { isSeasonalItem } from "@/utils/items/season";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { TradeItem } from "@/types/trading";
 import { toast } from "sonner";
@@ -1039,6 +1040,7 @@ export default function TradeItemPickerV2({
                   })()}
                   <div className="bg-tertiary-bg relative mb-1.5 aspect-video w-full overflow-hidden rounded-lg">
                     <Image
+                      placeholder={IMAGE_PLACEHOLDER}
                       src={getTradeItemImagePath(item, true)}
                       alt={item.name}
                       fill

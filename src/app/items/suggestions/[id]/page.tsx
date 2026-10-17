@@ -48,6 +48,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import ChartUpdateNotice, {
   itemHistoryStaleTime,
 } from "@/components/Items/ChartUpdateNotice";
@@ -1140,6 +1141,7 @@ export default function ValueSuggestionDetailPage() {
                         />
                       ) : (
                         <Image
+                          placeholder={IMAGE_PLACEHOLDER}
                           src={
                             item
                               ? getItemImagePath(item.type, item.name, true)

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { DupeFinderItem, Item, RobloxUser } from "@/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
@@ -335,6 +336,7 @@ export default function DupeComparisonClient({
               ) : isDriftItem(duplicateItem.categoryTitle) ? (
                 <div className="relative h-full w-full">
                   <Image
+                    placeholder={IMAGE_PLACEHOLDER}
                     src={getItemImagePath(
                       duplicateItem.categoryTitle,
                       duplicateItem.title,
@@ -355,6 +357,7 @@ export default function DupeComparisonClient({
                 </div>
               ) : (
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={getItemImagePath(
                     duplicateItem.categoryTitle,
                     duplicateItem.title,
@@ -368,6 +371,7 @@ export default function DupeComparisonClient({
               )
             ) : (
               <Image
+                placeholder={IMAGE_PLACEHOLDER}
                 src={getItemImagePath(
                   duplicateItem.categoryTitle,
                   duplicateItem.title,

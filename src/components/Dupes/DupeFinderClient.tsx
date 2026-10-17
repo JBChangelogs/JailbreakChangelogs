@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { DefaultAvatar } from "@/utils/ui/avatar";
-import { Spinner } from "@/components/ui/Spinner";
 import DupeFinderResults from "./DupeFinderResults";
 import DupeSearchInput from "./DupeSearchInput";
 import DupeFinderFAQ from "./DupeFinderFAQ";
@@ -45,7 +45,6 @@ export default function DupeFinderClient({
   originalSearchTerm,
 }: DupeFinderClientProps) {
   const [avatarError, setAvatarError] = useState(false);
-  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
 
   // Fetch user info for the error/empty states
   const { robloxUsers: batchedUsers } = useBatchUserData(
@@ -150,22 +149,16 @@ export default function DupeFinderClient({
             {/* Profile header */}
             <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
               <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
-                {isAvatarLoading && !avatarError && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Spinner className="h-5 w-5" />
-                  </div>
-                )}
                 {!avatarError ? (
                   <Image
+                    placeholder={IMAGE_PLACEHOLDER}
                     src={getUserAvatar(robloxId)}
                     alt="Roblox Avatar"
                     fill
                     className="object-cover"
                     unoptimized
-                    onLoad={() => setIsAvatarLoading(false)}
                     onError={() => {
                       setAvatarError(true);
-                      setIsAvatarLoading(false);
                     }}
                   />
                 ) : (

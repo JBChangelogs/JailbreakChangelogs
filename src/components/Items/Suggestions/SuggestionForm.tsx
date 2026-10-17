@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
@@ -553,6 +554,7 @@ export function SuggestionForm({
                     />
                   ) : (
                     <Image
+                      placeholder={IMAGE_PLACEHOLDER}
                       src={getItemImagePath(
                         selectedItem.type,
                         selectedItem.name,
@@ -982,6 +984,7 @@ export function SuggestionForm({
                       />
                     ) : (
                       <Image
+                        placeholder={IMAGE_PLACEHOLDER}
                         src={getItemImagePath(
                           selectedItem.type,
                           selectedItem.name,

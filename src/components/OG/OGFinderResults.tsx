@@ -7,13 +7,13 @@ import { toast } from "sonner";
 import { MaxStreamsError } from "@/utils/api/api";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { useCatalogValues } from "@/hooks/usePartialItems";
 import { DefaultAvatar } from "@/utils/ui/avatar";
-import { Spinner } from "@/components/ui/Spinner";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -105,7 +105,6 @@ export default function OGFinderResults({
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
-  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
 
   // Extract all unique user IDs from OG data
   const allUserIds = useMemo(() => {
@@ -464,22 +463,16 @@ export default function OGFinderResults({
               {/* Profile header */}
               <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
                 <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
-                  {isAvatarLoading && !avatarError && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Spinner className="h-5 w-5" />
-                    </div>
-                  )}
                   {!avatarError ? (
                     <Image
+                      placeholder={IMAGE_PLACEHOLDER}
                       src={getUserAvatar(robloxId)}
                       alt="Roblox Avatar"
                       fill
                       className="object-cover"
                       unoptimized
-                      onLoad={() => setIsAvatarLoading(false)}
                       onError={() => {
                         setAvatarError(true);
-                        setIsAvatarLoading(false);
                       }}
                     />
                   ) : (

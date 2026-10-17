@@ -2,6 +2,7 @@
 
 import type { CatalogValues } from "@/hooks/usePartialItems";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { useState } from "react";
@@ -81,7 +82,6 @@ export default function DupeItemCard({
   ownerLabel = "ORIGINAL OWNER",
   isDupedItem = false,
 }: DupeItemCardProps) {
-  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
   const [checking, setChecking] = useState(false);
   const [checkResult, setCheckResult] = useState<DupeCheckResult | null>(null);
@@ -247,6 +247,7 @@ export default function DupeItemCard({
           ) : isDriftItem(item.categoryTitle) ? (
             <div className="relative h-full w-full">
               <Image
+                placeholder={IMAGE_PLACEHOLDER}
                 src={getItemImagePath(item.categoryTitle, item.title, true)}
                 alt={item.title}
                 fill
@@ -263,6 +264,7 @@ export default function DupeItemCard({
             </div>
           ) : (
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={getItemImagePath(item.categoryTitle, item.title, true)}
               alt={item.title}
               fill
@@ -272,6 +274,7 @@ export default function DupeItemCard({
           )
         ) : (
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={getItemImagePath(item.categoryTitle, item.title, true)}
             alt={item.title}
             fill
@@ -288,23 +291,17 @@ export default function DupeItemCard({
             {avatarError ? (
               <DefaultAvatar name={getUsername(originalOwner)} />
             ) : (
-              <>
-                {isAvatarLoading && (
-                  <Spinner className="absolute inset-0 m-auto h-4 w-4" />
-                )}
-                <Image
-                  src={getUserAvatar(originalOwner)}
-                  alt="Original owner avatar"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                  onLoad={() => setIsAvatarLoading(false)}
-                  onError={() => {
-                    setIsAvatarLoading(false);
-                    setAvatarError(true);
-                  }}
-                />
-              </>
+              <Image
+                placeholder={IMAGE_PLACEHOLDER}
+                src={getUserAvatar(originalOwner)}
+                alt="Original owner avatar"
+                width={32}
+                height={32}
+                className="rounded-full"
+                onError={() => {
+                  setAvatarError(true);
+                }}
+              />
             )}
           </div>
           <div className="min-w-0 flex-1">

@@ -2,6 +2,7 @@
 
 import type { MouseEvent } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -86,6 +87,7 @@ export function SuggestionCard({
           />
         ) : (
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={
               item
                 ? getItemImagePath(item.type, item.name, true)

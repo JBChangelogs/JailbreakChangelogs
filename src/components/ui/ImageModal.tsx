@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { motion, AnimatePresence } from "motion/react";
 
 interface ImageModalProps {
@@ -44,6 +45,7 @@ export default function ImageModal({
         onClick={openModal}
       >
         <Image
+          placeholder={IMAGE_PLACEHOLDER}
           src={src}
           alt={alt}
           width={width}
@@ -99,6 +101,7 @@ export default function ImageModal({
               {/* Image */}
               <div className="relative">
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={src}
                   alt={alt}
                   width={800}

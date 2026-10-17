@@ -12,6 +12,7 @@ import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { handleImageError } from "@/utils/ui/images";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Button } from "../ui/button";
 import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
 import { DupedBadge } from "./DupedBadge";
@@ -159,6 +160,7 @@ const TradeSidePreview = ({
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="bg-tertiary-bg relative hidden aspect-video w-28 shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block">
                       <Image
+                        placeholder={IMAGE_PLACEHOLDER}
                         src={getTradeItemImagePath(item, true)}
                         alt={item.name}
                         fill

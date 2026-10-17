@@ -1,6 +1,7 @@
 import React from "react";
 import { Item } from "@/types";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { createLogger } from "@/services/logger";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -337,6 +338,7 @@ function ItemCard({
           {isHornItem(item.type) ? (
             <div className="relative h-full w-full">
               <Image
+                placeholder={IMAGE_PLACEHOLDER}
                 src={getItemImagePath(item.type, item.name, isValuesPage)}
                 alt={item.name}
                 width={854}
@@ -369,6 +371,7 @@ function ItemCard({
               {isBlueBird ? (
                 <div className="relative h-full w-full overflow-hidden">
                   <Image
+                    placeholder={IMAGE_PLACEHOLDER}
                     src={
                       isBlueBirdRaised
                         ? blueBirdRaisedImage
@@ -400,6 +403,7 @@ function ItemCard({
               ) : isDriftItem(item.type) ? (
                 <div className="relative h-full w-full">
                   <Image
+                    placeholder={IMAGE_PLACEHOLDER}
                     src={getItemImagePath(item.type, item.name, isValuesPage)}
                     alt={item.name}
                     width={854}
@@ -422,6 +426,7 @@ function ItemCard({
                 </div>
               ) : (
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={getItemImagePath(item.type, item.name, isValuesPage)}
                   alt={item.name}
                   width={854}

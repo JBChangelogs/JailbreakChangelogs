@@ -3,6 +3,7 @@ import { isSeasonalItem } from "@/utils/items/season";
 import React from "react";
 import { TradeItem } from "@/types/trading";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import {
   getItemImagePath,
   handleImageError,
@@ -132,6 +133,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       />
                     ) : (
                       <Image
+                        placeholder={IMAGE_PLACEHOLDER}
                         src={getItemImagePath(item.type, item.name, true)}
                         alt={item.name}
                         fill

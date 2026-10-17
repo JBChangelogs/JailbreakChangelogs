@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import {
   handleImageError,
@@ -174,6 +175,7 @@ export default function FavoritesTab({
                 />
               ) : (
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={getItemImagePath(itemType, imageName, true, false)}
                   alt={itemName}
                   fill

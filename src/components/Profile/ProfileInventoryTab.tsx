@@ -12,6 +12,7 @@ import {
   userInventoryQueryOptions,
 } from "@/utils/api/userInventoryQuery";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Pagination } from "@/components/ui/Pagination";
 import {
   DropdownMenu,
@@ -552,6 +553,7 @@ export default function ProfileInventoryTab({
                     ) : isDrift ? (
                       <div className="relative h-full w-full">
                         <Image
+                          placeholder={IMAGE_PLACEHOLDER}
                           src={imgSrc}
                           alt={item.name}
                           fill
@@ -568,6 +570,7 @@ export default function ProfileInventoryTab({
                       </div>
                     ) : (
                       <Image
+                        placeholder={IMAGE_PLACEHOLDER}
                         src={imgSrc}
                         alt={item.name}
                         fill

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
@@ -136,7 +137,6 @@ export default function InventoryCheckerClient({
     originalSearchTerm || robloxId || "",
   );
   const [avatarError, setAvatarError] = useState(false);
-  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const forceShowErrorHandledRef = useRef<boolean>(false);
@@ -753,22 +753,16 @@ export default function InventoryCheckerClient({
             <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
               <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
                 <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
-                  {isAvatarLoading && !avatarError && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Spinner className="h-5 w-5" />
-                    </div>
-                  )}
                   {!avatarError ? (
                     <Image
+                      placeholder={IMAGE_PLACEHOLDER}
                       src={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
                       alt="Roblox Avatar"
                       fill
                       className="object-cover"
                       unoptimized
-                      onLoad={() => setIsAvatarLoading(false)}
                       onError={() => {
                         setAvatarError(true);
-                        setIsAvatarLoading(false);
                       }}
                     />
                   ) : (

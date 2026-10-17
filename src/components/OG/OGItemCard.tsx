@@ -2,10 +2,10 @@
 
 import type { CatalogValues } from "@/hooks/usePartialItems";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { useState } from "react";
-import { Spinner } from "@/components/ui/Spinner";
 import {
   getItemImagePath,
   isVideoItem,
@@ -81,7 +81,6 @@ export default function OGItemCard({
   duplicateCount = 1,
   duplicateOrder = 1,
 }: OGItemCardProps) {
-  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
   const isOriginalOwner = item.isOriginalOwner;
   const isDuplicate = duplicateCount > 1;
@@ -209,6 +208,7 @@ export default function OGItemCard({
           ) : isDriftItem(item.categoryTitle) ? (
             <div className="relative h-full w-full">
               <Image
+                placeholder={IMAGE_PLACEHOLDER}
                 src={getItemImagePath(item.categoryTitle, item.title, true)}
                 alt={item.title}
                 fill
@@ -225,6 +225,7 @@ export default function OGItemCard({
             </div>
           ) : (
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={getItemImagePath(item.categoryTitle, item.title, true)}
               alt={item.title}
               fill
@@ -234,6 +235,7 @@ export default function OGItemCard({
           )
         ) : (
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={getItemImagePath(item.categoryTitle, item.title, true)}
             alt={item.title}
             fill
@@ -316,25 +318,17 @@ export default function OGItemCard({
                 {avatarError ? (
                   <DefaultAvatar name={getUsername(item.user_id)} />
                 ) : (
-                  <>
-                    {isAvatarLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Spinner className="h-4 w-4" />
-                      </div>
-                    )}
-                    <Image
-                      src={getUserAvatar(item.user_id)}
-                      alt="Owner Avatar"
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                      onLoad={() => setIsAvatarLoading(false)}
-                      onError={() => {
-                        setIsAvatarLoading(false);
-                        setAvatarError(true);
-                      }}
-                    />
-                  </>
+                  <Image
+                    placeholder={IMAGE_PLACEHOLDER}
+                    src={getUserAvatar(item.user_id)}
+                    alt="Owner Avatar"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                    onError={() => {
+                      setAvatarError(true);
+                    }}
+                  />
                 )}
               </div>
               <a

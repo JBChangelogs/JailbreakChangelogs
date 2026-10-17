@@ -22,6 +22,7 @@ import {
 } from "@/utils/helpers/timestamp";
 import Link from "next/link";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import {
   getItemImagePath,
   isVideoItem,
@@ -313,6 +314,7 @@ export default function Comment({
       return (
         <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={`https://assets.jailbreakchangelogs.com/assets/images/changelogs/${item_id}.webp`}
             alt={`Changelog ${item_id}`}
             fill
@@ -328,6 +330,7 @@ export default function Comment({
       return (
         <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={`https://assets.jailbreakchangelogs.com/assets/images/seasons/${item_id}/10.webp`}
             alt={`Season ${item_id}`}
             fill
@@ -438,6 +441,7 @@ export default function Comment({
       return (
         <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={imagePath}
             alt={`${item_type} ${itemDetails.name}`}
             fill

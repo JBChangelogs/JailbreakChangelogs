@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import {
   TradeDetail,
@@ -176,7 +177,6 @@ const getErrorMessage = async (response: Response, fallback: string) => {
 };
 
 function TradeAvatar({ userId, name }: { userId: string; name: string }) {
-  const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
   return (
@@ -184,26 +184,18 @@ function TradeAvatar({ userId, name }: { userId: string; name: string }) {
       {hasError ? (
         <DefaultAvatar name={name} />
       ) : (
-        <>
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Spinner className="h-4 w-4" />
-            </div>
-          )}
-          <Image
-            src={`${INVENTORY_API_URL}/proxy/users/${encodeURIComponent(userId)}/avatar-headshot`}
-            alt={`${name}'s Roblox avatar`}
-            fill
-            sizes="40px"
-            className="object-cover"
-            unoptimized
-            onLoad={() => setIsLoading(false)}
-            onError={() => {
-              setIsLoading(false);
-              setHasError(true);
-            }}
-          />
-        </>
+        <Image
+          placeholder={IMAGE_PLACEHOLDER}
+          src={`${INVENTORY_API_URL}/proxy/users/${encodeURIComponent(userId)}/avatar-headshot`}
+          alt={`${name}'s Roblox avatar`}
+          fill
+          sizes="40px"
+          className="object-cover"
+          unoptimized
+          onError={() => {
+            setHasError(true);
+          }}
+        />
       )}
     </div>
   );
@@ -254,6 +246,7 @@ function TradeItem({
     <>
       <div className="relative aspect-square w-24 shrink-0 overflow-hidden min-[360px]:w-28 min-[400px]:aspect-video min-[400px]:w-full">
         <Image
+          placeholder={IMAGE_PLACEHOLDER}
           src={getItemImagePath(item.category_title, item.title, true)}
           alt={item.title}
           fill

@@ -34,6 +34,7 @@ import { TradeAd, TradeItem } from "@/types/trading";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Button } from "@/components/ui/button";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { UserBadges } from "@/components/Profile/UserBadges";
@@ -240,6 +241,7 @@ const TradeSidePreview = ({
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="bg-tertiary-bg relative hidden aspect-video w-28 shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block">
                           <Image
+                            placeholder={IMAGE_PLACEHOLDER}
                             src={getTradeItemImagePath(item, true)}
                             alt={item.name}
                             fill
@@ -338,6 +340,7 @@ const TradeSidePreview = ({
                   <div className="bg-secondary-bg hover:bg-quaternary-bg overflow-hidden rounded-lg border border-white/5 transition-colors">
                     <div className="relative aspect-video w-full overflow-hidden">
                       <Image
+                        placeholder={IMAGE_PLACEHOLDER}
                         src={getTradeItemImagePath(item, true)}
                         alt={item.name}
                         fill

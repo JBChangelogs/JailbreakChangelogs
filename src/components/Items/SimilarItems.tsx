@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ItemDetails } from "@/types";
 import { fetchSimilarItems, fetchSimilarItemSorts } from "@/utils/api/api";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import {
   handleImageError,
   getItemImagePath,
@@ -210,6 +211,7 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                     />
                   ) : (
                     <Image
+                      placeholder={IMAGE_PLACEHOLDER}
                       src={getItemImagePath(item.type, item.name, true)}
                       alt={item.name}
                       fill

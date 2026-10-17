@@ -13,13 +13,13 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { RobloxUser } from "@/types";
 import { formatShortDateTime } from "@/utils/helpers/timestamp";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/Spinner";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 
 interface TradeHistoryEntry {
@@ -47,32 +47,23 @@ interface TradeHistoryModalProps {
 }
 
 const TradeAvatarImage = ({ userId }: { userId: string }) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
   return (
     <div className="bg-quaternary-bg relative h-10 w-10 overflow-hidden rounded-full">
       {avatarError ? (
         <DefaultAvatar name={userId} />
       ) : (
-        <>
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Spinner className="h-5 w-5" />
-            </div>
-          )}
-          <Image
-            src={getUserAvatar(userId)}
-            alt="User Avatar"
-            width={40}
-            height={40}
-            className="rounded-full"
-            onLoad={() => setIsLoading(false)}
-            onError={() => {
-              setIsLoading(false);
-              setAvatarError(true);
-            }}
-          />
-        </>
+        <Image
+          placeholder={IMAGE_PLACEHOLDER}
+          src={getUserAvatar(userId)}
+          alt="User Avatar"
+          width={40}
+          height={40}
+          className="rounded-full"
+          onError={() => {
+            setAvatarError(true);
+          }}
+        />
       )}
     </div>
   );

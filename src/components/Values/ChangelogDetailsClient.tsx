@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { UserAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import {
@@ -718,6 +719,7 @@ export default function ChangelogDetailsClient({
                         />
                       ) : (
                         <Image
+                          placeholder={IMAGE_PLACEHOLDER}
                           src={getItemImagePath(
                             change.item.type,
                             change.item.name,

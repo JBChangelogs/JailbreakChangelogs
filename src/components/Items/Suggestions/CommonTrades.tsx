@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { getTextSearchRank } from "@/utils/helpers/itemSearch";
@@ -231,6 +232,7 @@ function TradeItemSummary({
           className={`bg-quaternary-bg relative aspect-video w-20 shrink-0 overflow-hidden rounded-md sm:w-24 lg:w-32 ${showValues ? "sm:row-span-2 sm:self-center" : ""}`}
         >
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={itemImage(item)}
             alt={item.name ?? `Item ${item.id ?? ""}`}
             fill

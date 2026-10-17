@@ -5,6 +5,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 const log = createLogger("UI");
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { RobberyRelativeTime, RobberyCountdown } from "./RobberyTime";
@@ -214,6 +215,7 @@ function RobberyCard({
         {/* Thumbnail */}
         <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:aspect-auto sm:h-16 sm:w-24">
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={imageUrl}
             alt={displayName}
             fill

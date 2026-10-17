@@ -3,6 +3,7 @@
 import type { CatalogValues } from "@/hooks/usePartialItems";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 
 import Link from "next/link";
@@ -22,7 +23,6 @@ import {
   CategoryIconBadge,
 } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import { Spinner } from "@/components/ui/Spinner";
 import { formatFullValue } from "@/utils/trading/values";
 import { getInventoryDupedValue } from "@/utils/trading/inventoryValues";
 import { hasItemValue } from "@/utils/items/itemValue";
@@ -66,7 +66,6 @@ export default function InventoryItemCard({
   userId,
   isDupedItem = false,
 }: InventoryItemCardProps) {
-  const [isAvatarLoading, setIsAvatarLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
   const isOriginalOwner = item.isOriginalOwner;
   const originalOwnerInfo = item.info.find(
@@ -204,6 +203,7 @@ export default function InventoryItemCard({
           ) : isDriftItem(item.categoryTitle) ? (
             <div className="relative h-full w-full">
               <Image
+                placeholder={IMAGE_PLACEHOLDER}
                 src={getItemImagePath(item.categoryTitle, item.title, true)}
                 alt={item.title}
                 fill
@@ -220,6 +220,7 @@ export default function InventoryItemCard({
             </div>
           ) : (
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={getItemImagePath(item.categoryTitle, item.title, true)}
               alt={item.title}
               fill
@@ -229,6 +230,7 @@ export default function InventoryItemCard({
           )
         ) : (
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={getItemImagePath(item.categoryTitle, item.title, true)}
             alt={item.title}
             fill
@@ -324,27 +326,19 @@ export default function InventoryItemCard({
                       )}
                     />
                   ) : (
-                    <>
-                      {isAvatarLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Spinner className="h-4 w-4" />
-                        </div>
+                    <Image
+                      placeholder={IMAGE_PLACEHOLDER}
+                      src={getUserAvatar(
+                        isOriginalOwner ? userId : originalOwnerInfo.value,
                       )}
-                      <Image
-                        src={getUserAvatar(
-                          isOriginalOwner ? userId : originalOwnerInfo.value,
-                        )}
-                        alt="Owner Avatar"
-                        width={32}
-                        height={32}
-                        className="rounded-full"
-                        onLoad={() => setIsAvatarLoading(false)}
-                        onError={() => {
-                          setIsAvatarLoading(false);
-                          setAvatarError(true);
-                        }}
-                      />
-                    </>
+                      alt="Owner Avatar"
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                      onError={() => {
+                        setAvatarError(true);
+                      }}
+                    />
                   )}
                 </div>
                 <a

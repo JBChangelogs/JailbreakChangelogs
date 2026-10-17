@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import {
   Dialog,
   DialogContent,
@@ -76,6 +77,7 @@ export function CustomTypeDialog({
           <div className="flex items-center gap-4">
             <div className="relative h-32 w-32 shrink-0">
               <Image
+                placeholder={IMAGE_PLACEHOLDER}
                 src={getTradeItemImagePath({
                   id: customType.id,
                   instanceId: customType.id,

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import React from "react";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 
@@ -27,6 +28,7 @@ const ChangelogMediaEmbed: React.FC<ChangelogMediaEmbedProps> = ({
           className={wrapperClassName ?? "my-4 w-full max-w-2xl"}
         >
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={url}
             alt="Embedded image"
             width={800}

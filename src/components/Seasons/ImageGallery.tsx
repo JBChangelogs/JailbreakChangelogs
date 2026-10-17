@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Autoplay from "embla-carousel-autoplay";
 import type { UseEmblaCarouselType } from "embla-carousel-react";
 import {
@@ -89,6 +90,7 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
             <CarouselItem key={reward.id}>
               <div className="relative aspect-video overflow-hidden rounded-lg">
                 <Image
+                  placeholder={IMAGE_PLACEHOLDER}
                   src={`https://assets.jailbreakchangelogs.com${reward.link}`}
                   alt={reward.item}
                   fill

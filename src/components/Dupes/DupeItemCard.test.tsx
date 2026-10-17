@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 
 type Element = {
   type: unknown;
@@ -63,6 +64,8 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
           };
         if (name === "@/utils/dupeComparisonUrl")
           return { getDupeComparisonUrl };
+        if (name === "@/utils/ui/imagePlaceholder")
+          return { IMAGE_PLACEHOLDER };
         if (name === "@/components/ui/dialog")
           return {
             Dialog: "Dialog",
@@ -146,6 +149,13 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
     "Run a check or compare ownership histories to review this record.",
   );
   const elements = flatten(card);
+  const images = elements.filter((element) => element.type === "next/image");
+  expect(images).toHaveLength(2);
+  for (const image of images) {
+    expect(image.props.placeholder).toBe(IMAGE_PLACEHOLDER);
+    expect(image.props.onLoad).toBeUndefined();
+  }
+  expect(elements.some((element) => element.type === "Spinner")).toBe(false);
   const cardActions = elements.find(
     (element) => element.props.className === "mt-auto grid grid-cols-3 gap-2",
   )!;
@@ -350,4 +360,14 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   await new Promise((resolve) => setTimeout(resolve, 0));
   stateIndex = 0;
   expect(JSON.stringify(exports.default(props))).not.toContain("Try again");
+  const avatar = images.find(
+    (image) => image.props.alt === "Original owner avatar",
+  )!;
+  (avatar.props.onError as () => void)();
+  stateIndex = 0;
+  expect(
+    flatten(exports.default(props)).some(
+      (element) => element.props.alt === "Original owner avatar",
+    ),
+  ).toBe(false);
 });

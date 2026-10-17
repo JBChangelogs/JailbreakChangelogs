@@ -2,8 +2,8 @@
 
 import BoringAvatar from "boring-avatars";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { memo, useState } from "react";
-import { Spinner } from "@/components/ui/Spinner";
 import { cn } from "@/lib/utils";
 
 interface UserAvatarProps {
@@ -143,7 +143,6 @@ const UserAvatarImpl = ({
 }: UserAvatarProps) => {
   const [imageError, setImageError] = useState(false);
   const [customAvatarError, setCustomAvatarError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   const finalShape = premiumType === 3 ? "square" : shape;
 
@@ -258,22 +257,15 @@ const UserAvatarImpl = ({
           minHeight: size * 4,
         }}
       >
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Spinner className="h-6 w-6" />
-          </div>
-        )}
         <div className="absolute inset-0">
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={avatarSource.src}
             alt={avatarSource.alt}
             fill
             fetchPriority="high"
             draggable={false}
             onError={avatarSource.onError}
-            onLoad={() => {
-              setIsLoading(false);
-            }}
             className="object-cover"
           />
         </div>

@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import {
@@ -126,6 +127,7 @@ function RobberyComboCard({
         <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
           {comboImageUrl ? (
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={comboImageUrl}
               alt={comboLabel}
               fill

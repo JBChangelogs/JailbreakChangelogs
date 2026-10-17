@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "motion/react";
@@ -252,6 +253,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
         {isBlueBird ? (
           <div className="relative h-full w-full overflow-hidden">
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={
                 isBlueBirdRaised
                   ? BLUEBIRD_RAISED_IMAGE
@@ -286,6 +288,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
         ) : isDriftItem(item.type) ? (
           <div className="relative h-full w-full">
             <Image
+              placeholder={IMAGE_PLACEHOLDER}
               src={getItemImagePath(item.type, item.name)}
               alt={item.name}
               width={2560}
@@ -310,6 +313,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
           </div>
         ) : (
           <Image
+            placeholder={IMAGE_PLACEHOLDER}
             src={getItemImagePath(item.type, item.name)}
             alt={item.name}
             width={2560}

@@ -7,12 +7,12 @@ import {
   TradeList,
 } from "@/app/inventories/types";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/Spinner";
 import { DupedBadge } from "@/components/trading/DupedBadge";
 import { OgBadge } from "@/components/trading/OgBadge";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
@@ -34,7 +34,6 @@ interface ItemTradesTabProps {
 }
 
 function TradeAvatarImage({ userId }: { userId: string }) {
-  const [isLoading, setIsLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
 
   return (
@@ -42,25 +41,17 @@ function TradeAvatarImage({ userId }: { userId: string }) {
       {avatarError ? (
         <DefaultAvatar name={userId} />
       ) : (
-        <>
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Spinner className="h-5 w-5" />
-            </div>
-          )}
-          <Image
-            src={`${INVENTORY_API_URL}/proxy/users/${encodeURIComponent(userId)}/avatar-headshot`}
-            alt={`User ${userId} avatar`}
-            width={40}
-            height={40}
-            className="rounded-full"
-            onLoad={() => setIsLoading(false)}
-            onError={() => {
-              setIsLoading(false);
-              setAvatarError(true);
-            }}
-          />
-        </>
+        <Image
+          placeholder={IMAGE_PLACEHOLDER}
+          src={`${INVENTORY_API_URL}/proxy/users/${encodeURIComponent(userId)}/avatar-headshot`}
+          alt={`User ${userId} avatar`}
+          width={40}
+          height={40}
+          className="rounded-full"
+          onError={() => {
+            setAvatarError(true);
+          }}
+        />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { motion } from "motion/react";
 import { Changelog } from "@/utils/api/api";
 import { Spinner } from "@/components/ui/Spinner";
@@ -101,6 +102,7 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
                       <Spinner className="h-6 w-6" />
                     </div>
                     <Image
+                      placeholder={IMAGE_PLACEHOLDER}
                       src={`https://assets.jailbreakchangelogs.com${changelog.image_url}`}
                       alt={changelog.title}
                       fill

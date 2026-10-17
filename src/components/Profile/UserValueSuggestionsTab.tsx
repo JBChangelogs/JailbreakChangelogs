@@ -29,6 +29,7 @@ import {
   getVideoPath,
 } from "@/utils/ui/images";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createLogger } from "@/services/logger";
@@ -614,6 +615,7 @@ export default function UserValueSuggestionsTab({
                           />
                         ) : (
                           <Image
+                            placeholder={IMAGE_PLACEHOLDER}
                             src={
                               item
                                 ? getItemImagePath(item.type, item.name, true)

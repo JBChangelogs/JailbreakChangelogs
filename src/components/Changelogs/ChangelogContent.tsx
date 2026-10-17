@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Icon } from "@/components/ui/IconWrapper";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import {
@@ -201,6 +202,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
               className={`w-full ${imageAspectRatio}`}
             >
               <Image
+                placeholder={IMAGE_PLACEHOLDER}
                 src={`https://assets.jailbreakchangelogs.com${imageUrl}`}
                 alt={title}
                 fill
