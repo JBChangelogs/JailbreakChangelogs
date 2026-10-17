@@ -791,7 +791,15 @@ export default function CustomThemeEditor({
                           {problem.replace(COLOR_VAR, colorName)}
                         </button>
                       ));
-                      const fix = fixes[key];
+                      // The group's own color if the API can fix it, else
+                      // any other color its problems name that it can.
+                      const fixKey = [
+                        key,
+                        ...items.flatMap((item) => item.keys),
+                      ].find((k) => k && fixes[k]);
+                      const fix = fixKey
+                        ? { key: fixKey, value: fixes[fixKey] }
+                        : undefined;
                       return (
                         <li key={key} className="flex items-start gap-2">
                           {/* Centers the first line on the Fix button beside it. */}
@@ -822,10 +830,10 @@ export default function CustomThemeEditor({
                               size="sm"
                               className="shrink-0"
                               variant="secondary"
-                              aria-label={`Fix ${colorName(key)}`}
+                              aria-label={`Fix ${colorName(fix.key)}`}
                               onClick={() => {
-                                setColor(key, fix);
-                                pickColors([key]);
+                                setColor(fix.key, fix.value);
+                                pickColors([fix.key]);
                               }}
                             >
                               <Icon
