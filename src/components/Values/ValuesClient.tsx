@@ -555,7 +555,7 @@ export default function ValuesClient() {
               setAppliedMinValue(0);
               setAppliedMaxValue(MAX_VALUE_RANGE);
             }}
-            onClearCategoryFilter={handleClearFilterSorts}
+            onClearCategoryFilter={() => handleClearFilterSorts()}
             selectedFilterSorts={selectedFilterSorts}
             totalItemsCount={data?.total ?? 0}
             totalPages={data?.total_pages ?? 0}
