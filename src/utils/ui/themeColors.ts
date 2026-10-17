@@ -108,3 +108,26 @@ export function withDefaultColors(
   }
   return filled;
 }
+
+/** A color var named in text, such as an API message. */
+export const COLOR_VAR = /--color-[a-z0-9-]+/g;
+
+/**
+ * The API's readability problems, grouped under the color most of them
+ * name, so one bad color reads as one fix. Problems naming no color (such
+ * as "a single color") group under "".
+ */
+export function groupProblems(problems: string[]) {
+  const keysOf = problems.map((p) => [...new Set(p.match(COLOR_VAR) ?? [])]);
+  const counts = new Map<string, number>();
+  for (const key of keysOf.flat()) counts.set(key, (counts.get(key) ?? 0) + 1);
+  const groups = new Map<string, { problem: string; keys: string[] }[]>();
+  problems.forEach((problem, i) => {
+    const top = keysOf[i].reduce(
+      (best, key) => (counts.get(key)! > (counts.get(best) ?? 0) ? key : best),
+      "",
+    );
+    groups.set(top, [...(groups.get(top) ?? []), { problem, keys: keysOf[i] }]);
+  });
+  return [...groups];
+}

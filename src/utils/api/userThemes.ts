@@ -1,4 +1,3 @@
-import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   safeValue,
@@ -40,6 +39,8 @@ export class ThemeApiError extends Error {
     readonly status: number,
     readonly code: string | undefined,
     message: string,
+    /** Every reason a theme_unreadable theme was rejected. */
+    readonly problems: string[] = [],
   ) {
     super(message);
   }
@@ -48,7 +49,8 @@ export class ThemeApiError extends Error {
 async function request<T>(
   path: string,
   init: RequestInit = {},
-  baseUrl = PUBLIC_API_URL,
+  // Read per call (Next inlines it at build time), so tests can set it.
+  baseUrl = process.env.NEXT_PUBLIC_API_URL,
 ): Promise<T> {
   const { url, headers } = buildApiFetchRequest(baseUrl, path);
   const response = await fetch(url, {
@@ -70,6 +72,7 @@ async function request<T>(
       response.status,
       data?.error,
       data?.message ?? detail ?? `Request failed (${response.status})`,
+      Array.isArray(data?.problems) ? data.problems.map(String) : [],
     );
   }
   return data as T;
@@ -126,6 +129,30 @@ export const updateMyTheme = async (
       body: JSON.stringify(theme),
     }),
   );
+
+/**
+ * Why a save would be rejected as unreadable, without saving. No tier needed.
+ * `fixes` suggests, per failing color, a replacement that fixes it alone.
+ */
+export const checkMyTheme = async (
+  theme: Pick<CustomThemeInput, "scheme" | "vars">,
+) => {
+  const data = await request<{
+    valid: boolean;
+    problems: string[];
+    fixes?: Record<string, string>;
+  }>("/v2/users/me/themes/check", {
+    method: "POST",
+    body: JSON.stringify(theme),
+  });
+  // Applied straight into the theme, so held to the same checks.
+  const fixes = Object.fromEntries(
+    Object.entries(data.fixes ?? {}).filter(
+      ([key, value]) => VAR_KEY.test(key) && safeValue(value),
+    ),
+  );
+  return { ...data, fixes };
+};
 
 export const deleteMyTheme = (id: number) =>
   request<{ success: boolean }>(`/v2/users/me/themes/${id}`, {
