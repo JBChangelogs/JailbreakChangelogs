@@ -158,7 +158,7 @@ export function ExperimentOverridesBadge({
   return placement === "header" ? (
     <Tooltip>
       <TooltipTrigger asChild>{badge}</TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent side="bottom">{label}</TooltipContent>
     </Tooltip>
   ) : (
     badge

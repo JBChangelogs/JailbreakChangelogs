@@ -22,7 +22,7 @@ export default function WhatsNewToggle() {
             Feature announcements
           </span>
           <span className="text-secondary-text block text-sm">
-            Show what&apos;s new after each release
+            Show a what&apos;s new banner after each release
           </span>
         </span>
         <Switch

@@ -467,7 +467,7 @@ export const NavbarModern = ({
                     )}
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="bottom">
                   {wsTogglePending
                     ? wsConnected
                       ? "Disconnecting…"
@@ -506,7 +506,7 @@ export const NavbarModern = ({
                 )}
               </Link>
             </TooltipTrigger>
-            <TooltipContent>Messages</TooltipContent>
+            <TooltipContent side="bottom">Messages</TooltipContent>
           </Tooltip>
 
           {/* Theme settings shortcut */}

@@ -465,7 +465,11 @@ const MobileDrawer = memo(function MobileDrawer({
   );
 });
 
-export default function Header() {
+export default function Header({
+  releaseAnnouncement,
+}: {
+  releaseAnnouncement?: React.ReactNode;
+}) {
   const queryClient = useQueryClient();
   const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -791,6 +795,7 @@ export default function Header() {
         <ServiceAvailabilityTicker alert={tickerFlags.serviceAlert} />
         <OfflineDetector />
         <NewsTicker announcement={tickerFlags.newsAnnouncement} />
+        {releaseAnnouncement}
         <div className="relative z-10">
           <NavbarModern
             unreadCount={unreadCount}
@@ -818,6 +823,7 @@ export default function Header() {
           <ServiceAvailabilityTicker alert={tickerFlags.serviceAlert} />
           <OfflineDetector />
           <NewsTicker announcement={tickerFlags.newsAnnouncement} />
+          {releaseAnnouncement}
           <div className="relative z-10">
             <div className="bg-secondary-bg border-border-card border-b">
               <div className="flex items-center justify-between px-4 py-2">
