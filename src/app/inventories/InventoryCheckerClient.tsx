@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useQueryState } from "nuqs";
+import { parseAsString, useQueryStates } from "nuqs";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -145,11 +145,14 @@ export default function InventoryCheckerClient({
 
   const [networthData] = useState<UserNetworthData[]>(initialNetworthData);
   const [moneyHistoryData] = useState<MoneyHistory[]>(initialMoneyHistoryData);
-  const [tabParam, setTabParam] = useQueryState("tab", {
-    defaultValue: "",
-    history: "push",
-    shallow: true,
-  });
+  const [{ tab: tabParam }, setTabParams] = useQueryStates(
+    {
+      tab: parseAsString.withDefault(""),
+      commentsSort: parseAsString,
+      commentsPage: parseAsString,
+    },
+    { history: "push", shallow: true },
+  );
   const [mountedTabs, setMountedTabs] = useState<Set<number>>(new Set([0]));
   const pendingSectionRef = useRef<string | null>(null);
   const [showOnlyOriginal, setShowOnlyOriginal] = useState(false);
@@ -627,7 +630,11 @@ export default function InventoryCheckerClient({
     if (tabIndex.comments !== null)
       tabIndexToName[tabIndex.comments] = "comments";
 
-    void setTabParam(tabIndexToName[newValue] ?? null);
+    const tab = tabIndexToName[newValue] ?? null;
+    void setTabParams({
+      tab,
+      ...(tab !== "comments" && { commentsSort: null, commentsPage: null }),
+    });
   };
 
   // Helper function to get user display name with progressive loading
