@@ -9,6 +9,7 @@
  *
  * Run: bun run generate:icons
  */
+import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { getIcons } from "@iconify/utils";
@@ -57,6 +58,7 @@ for (const file of collectSourceFiles(SRC_DIR)) {
 }
 
 const collections: string[] = [];
+const notices: string[] = [];
 const credits: {
   prefix: string;
   name: string;
@@ -91,6 +93,7 @@ for (const prefix of [...iconsByPrefix.keys()].sort()) {
       `Missing license notice for "${prefix}". Preserve the upstream copyright and license notices in public/licenses/icons/${prefix}.txt once when adding this icon set.`,
     );
   }
+  notices.push(readFileSync(noticeFile, "utf8"));
   credits.push({ prefix, name: info.name, author: info.author, license: info.license });
 
   const subset = getIcons(setData, names, true)!;
@@ -113,7 +116,21 @@ ${collections.join("\n\n")}
 `;
 
 writeFileSync(OUT_FILE, output);
-writeFileSync(CREDITS_FILE, JSON.stringify(credits, null, 2) + "\n");
+const previous = existsSync(CREDITS_FILE)
+  ? JSON.parse(readFileSync(CREDITS_FILE, "utf8"))
+  : null;
+const contentHash = createHash("sha256")
+  .update(JSON.stringify({ credits, notices }))
+  .digest("hex");
+const lastUpdated = previous?.contentHash === contentHash
+  ? previous.lastUpdated
+  : new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(new Date());
+writeFileSync(CREDITS_FILE, JSON.stringify({ lastUpdated, contentHash, credits }, null, 2) + "\n");
 for (const warning of warnings) console.warn(`⚠ ${warning}`);
 console.log(
   `Wrote ${OUT_FILE} — ${totalIcons} icons from ${iconsByPrefix.size} sets.`,

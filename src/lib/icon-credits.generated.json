@@ -1,0 +1,279 @@
+{
+  "lastUpdated": "October 18, 2026",
+  "contentHash": "973b7c967a981d20d1fccad4ff3d55a75b71416f2810e6c4350cc434ed531a50",
+  "credits": [
+    {
+      "prefix": "akar-icons",
+      "name": "Akar Icons",
+      "author": {
+        "name": "Arturo Wibawa",
+        "url": "https://github.com/artcoholic/akar-icons"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/artcoholic/akar-icons/blob/master/LICENSE"
+      }
+    },
+    {
+      "prefix": "boxicons",
+      "name": "Boxicons",
+      "author": {
+        "name": "Boxicons",
+        "url": "https://github.com/box-icons/boxicons-core"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/box-icons/boxicons-core/blob/main/LICENSE"
+      }
+    },
+    {
+      "prefix": "emojione",
+      "name": "Emoji One (Colored)",
+      "author": {
+        "name": "Emoji One",
+        "url": "https://github.com/EmojiTwo/emojitwo"
+      },
+      "license": {
+        "title": "CC BY 4.0",
+        "spdx": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "prefix": "emojione-monotone",
+      "name": "Emoji One (Monotone)",
+      "author": {
+        "name": "Emoji One",
+        "url": "https://github.com/EmojiTwo/emojitwo"
+      },
+      "license": {
+        "title": "CC BY 4.0",
+        "spdx": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "prefix": "fluent",
+      "name": "Fluent UI System Icons",
+      "author": {
+        "name": "Microsoft Corporation",
+        "url": "https://github.com/microsoft/fluentui-system-icons"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE"
+      }
+    },
+    {
+      "prefix": "heroicons",
+      "name": "HeroIcons",
+      "author": {
+        "name": "Refactoring UI Inc",
+        "url": "https://github.com/tailwindlabs/heroicons"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/tailwindlabs/heroicons/blob/master/LICENSE"
+      }
+    },
+    {
+      "prefix": "heroicons-outline",
+      "name": "HeroIcons v1 Outline",
+      "author": {
+        "name": "Refactoring UI Inc",
+        "url": "https://github.com/tailwindlabs/heroicons"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/tailwindlabs/heroicons/blob/master/LICENSE"
+      }
+    },
+    {
+      "prefix": "ic",
+      "name": "Google Material Icons",
+      "author": {
+        "name": "Material Design Authors",
+        "url": "https://github.com/material-icons/material-icons"
+      },
+      "license": {
+        "title": "Apache 2.0",
+        "spdx": "Apache-2.0",
+        "url": "https://github.com/material-icons/material-icons/blob/master/LICENSE"
+      }
+    },
+    {
+      "prefix": "la",
+      "name": "Line Awesome",
+      "author": {
+        "name": "Icons8",
+        "url": "https://github.com/icons8/line-awesome"
+      },
+      "license": {
+        "title": "Apache 2.0",
+        "spdx": "Apache-2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0"
+      }
+    },
+    {
+      "prefix": "line-md",
+      "name": "Material Line Icons",
+      "author": {
+        "name": "Vjacheslav Trushkin",
+        "url": "https://github.com/cyberalien/line-md"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/cyberalien/line-md/blob/main/license.txt"
+      }
+    },
+    {
+      "prefix": "logos",
+      "name": "SVG Logos",
+      "author": {
+        "name": "Gil Barbara",
+        "url": "https://github.com/gilbarbara/logos"
+      },
+      "license": {
+        "title": "CC0",
+        "spdx": "CC0-1.0",
+        "url": "https://raw.githubusercontent.com/gilbarbara/logos/master/LICENSE.txt"
+      }
+    },
+    {
+      "prefix": "lucide",
+      "name": "Lucide",
+      "author": {
+        "name": "Lucide Contributors",
+        "url": "https://github.com/lucide-icons/lucide"
+      },
+      "license": {
+        "title": "ISC",
+        "spdx": "ISC",
+        "url": "https://github.com/lucide-icons/lucide/blob/main/LICENSE"
+      }
+    },
+    {
+      "prefix": "material-symbols",
+      "name": "Material Symbols",
+      "author": {
+        "name": "Google",
+        "url": "https://github.com/google/material-design-icons"
+      },
+      "license": {
+        "title": "Apache 2.0",
+        "spdx": "Apache-2.0",
+        "url": "https://github.com/google/material-design-icons/blob/master/LICENSE"
+      }
+    },
+    {
+      "prefix": "mdi",
+      "name": "Material Design Icons",
+      "author": {
+        "name": "Pictogrammers",
+        "url": "https://github.com/Templarian/MaterialDesign"
+      },
+      "license": {
+        "title": "Apache 2.0",
+        "spdx": "Apache-2.0",
+        "url": "https://github.com/Templarian/MaterialDesign/blob/master/LICENSE"
+      }
+    },
+    {
+      "prefix": "mingcute",
+      "name": "MingCute Icon",
+      "author": {
+        "name": "MingCute Design",
+        "url": "https://github.com/Richard9394/MingCute"
+      },
+      "license": {
+        "title": "Apache 2.0",
+        "spdx": "Apache-2.0",
+        "url": "https://github.com/Richard9394/MingCute/blob/main/LICENSE"
+      }
+    },
+    {
+      "prefix": "noto-v1",
+      "name": "Noto Emoji (v1)",
+      "author": {
+        "name": "Google Inc",
+        "url": "https://github.com/googlefonts/noto-emoji"
+      },
+      "license": {
+        "title": "Apache 2.0",
+        "spdx": "Apache-2.0",
+        "url": "https://github.com/googlefonts/noto-emoji/blob/main/svg/LICENSE"
+      }
+    },
+    {
+      "prefix": "rivet-icons",
+      "name": "Rivet Icons",
+      "author": {
+        "name": "Indiana University",
+        "url": "https://github.com/indiana-university/rivet-icons"
+      },
+      "license": {
+        "title": "BSD 3-Clause",
+        "spdx": "BSD-3-Clause",
+        "url": "https://github.com/indiana-university/rivet-icons/blob/develop/LICENSE"
+      }
+    },
+    {
+      "prefix": "si",
+      "name": "Sargam Icons",
+      "author": {
+        "name": "Abhimanyu Rana",
+        "url": "https://github.com/planetabhi/sargam-icons"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/planetabhi/sargam-icons/blob/main/LICENSE.txt"
+      }
+    },
+    {
+      "prefix": "simple-icons",
+      "name": "Simple Icons",
+      "author": {
+        "name": "Simple Icons Collaborators",
+        "url": "https://github.com/simple-icons/simple-icons"
+      },
+      "license": {
+        "title": "CC0 1.0",
+        "spdx": "CC0-1.0",
+        "url": "https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md"
+      }
+    },
+    {
+      "prefix": "solar",
+      "name": "Solar",
+      "author": {
+        "name": "480 Design",
+        "url": "https://www.figma.com/community/file/1166831539721848736"
+      },
+      "license": {
+        "title": "CC BY 4.0",
+        "spdx": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "prefix": "svg-spinners",
+      "name": "SVG Spinners",
+      "author": {
+        "name": "Utkarsh Verma",
+        "url": "https://github.com/n3r4zzurr0/svg-spinners"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/n3r4zzurr0/svg-spinners/blob/main/LICENSE"
+      }
+    }
+  ]
+}

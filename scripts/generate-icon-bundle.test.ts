@@ -31,7 +31,18 @@ test("icon credits follow used sets, ignore generated/test sources, and require 
     writeFileSync(join(root, "src/icons.test.ts"), 'const icon = "unused:icon";');
     let result = run();
     expect(result.status, result.stderr).toBe(0);
-    let credits = JSON.parse(readFileSync(creditsFile, "utf8"));
+    let data = JSON.parse(readFileSync(creditsFile, "utf8"));
+    let credits = data.credits;
+    const today = new Intl.DateTimeFormat("en-US", {
+      month: "long", day: "numeric", year: "numeric", timeZone: "UTC",
+    }).format(new Date());
+    expect(data.lastUpdated).toBe(today);
+    const oldDate = "January 1, 2000";
+    data.lastUpdated = oldDate;
+    writeFileSync(creditsFile, JSON.stringify(data));
+    result = run();
+    expect(result.status, result.stderr).toBe(0);
+    expect(JSON.parse(readFileSync(creditsFile, "utf8")).lastUpdated).toBe(oldDate);
     expect(credits.map((credit: { prefix: string }) => credit.prefix)).toEqual(["fixture-a", "fixture-b"]);
     expect(credits[0].author.name).toBe("Fixture author");
     expect(credits[0].license.url).toBe("https://example.com/LICENSE");
@@ -39,11 +50,30 @@ test("icon credits follow used sets, ignore generated/test sources, and require 
     writeFileSync(source, 'const icon = "fixture-b:icon";');
     result = run();
     expect(result.status, result.stderr).toBe(0);
-    credits = JSON.parse(readFileSync(creditsFile, "utf8"));
+    data = JSON.parse(readFileSync(creditsFile, "utf8"));
+    credits = data.credits;
+    expect(data.lastUpdated).toBe(today);
     expect(credits.map((credit: { prefix: string }) => credit.prefix)).toEqual(["fixture-b"]);
     expect(readFileSync(bundle, "utf8")).not.toContain("fixture-a");
 
     const notice = join(root, "public/licenses/icons/fixture-b.txt");
+    data.lastUpdated = oldDate;
+    writeFileSync(creditsFile, JSON.stringify(data));
+    writeFileSync(notice, "Updated license notice");
+    result = run();
+    expect(result.status, result.stderr).toBe(0);
+    data = JSON.parse(readFileSync(creditsFile, "utf8"));
+    expect(data.lastUpdated).toBe(today);
+    data.lastUpdated = oldDate;
+    writeFileSync(creditsFile, JSON.stringify(data));
+    const metadata = join(root, "node_modules/@iconify-json/fixture-b/info.json");
+    const info = JSON.parse(readFileSync(metadata, "utf8"));
+    info.author.name = "Updated author";
+    writeFileSync(metadata, JSON.stringify(info));
+    result = run();
+    expect(result.status, result.stderr).toBe(0);
+    expect(JSON.parse(readFileSync(creditsFile, "utf8")).lastUpdated).toBe(today);
+
     unlinkSync(notice);
     result = run();
     expect(result.status).not.toBe(0);

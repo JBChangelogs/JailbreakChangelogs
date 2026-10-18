@@ -1,12 +1,12 @@
 import LegalLayout, { LegalSection } from "@/components/Layout/LegalLayout";
-import credits from "@/lib/icon-credits.generated.json";
+import { credits, lastUpdated } from "@/lib/icon-credits.generated.json";
 
 export default function IconCreditsPage() {
   return (
     <LegalLayout
       title="Icon credits"
       icon="lucide:palette"
-      lastUpdated="October 18th, 2026"
+      lastUpdated={lastUpdated}
       toc={credits.map((credit) => ({ id: credit.prefix, label: credit.name }))}
       intro={
         <p>
@@ -26,6 +26,9 @@ export default function IconCreditsPage() {
             By{" "}
             <a
               href={credit.author.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${credit.author.name} (opens in a new tab)`}
               className="text-link hover:text-link-hover underline"
             >
               {credit.author.name}
@@ -33,6 +36,9 @@ export default function IconCreditsPage() {
             . License:{" "}
             <a
               href={credit.license.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${credit.license.title} (opens in a new tab)`}
               className="text-link hover:text-link-hover underline"
             >
               {credit.license.title}

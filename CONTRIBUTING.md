@@ -99,6 +99,9 @@ Notes:
 bundle and the data for `/icon-credits`. Dev and production builds run it too.
 Adding or removing icons from an existing set needs no manual credits edit.
 Generated bundles and test files are excluded from the scan.
+Commit `src/lib/icon-credits.generated.json` when it changes. Its last-updated
+date changes only when the listed credits or license notices change, and is
+preserved across ordinary builds and fresh deployments.
 
 When introducing an icon set, install its `@iconify-json` package and preserve
 its upstream copyright and license notices in `public/licenses/icons/<prefix>.txt`.
