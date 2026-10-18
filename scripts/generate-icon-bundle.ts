@@ -1,4 +1,5 @@
 /**
+ * Generates icon credits from installed package metadata and preserves license notices.
  * Scans src/ for static Iconify icon names (icon="prefix:name") and generates
  * src/lib/icon-bundle.generated.ts, which registers just those icons via
  * addCollection() so <Icon ssr> renders them in server HTML with no pop-in.
@@ -8,13 +9,14 @@
  *
  * Run: bun run generate:icons
  */
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { getIcons } from "@iconify/utils";
-import type { IconifyJSON } from "@iconify/types";
+import type { IconifyInfo, IconifyJSON } from "@iconify/types";
 
 const SRC_DIR = join(import.meta.dir, "..", "src");
 const OUT_FILE = join(SRC_DIR, "lib", "icon-bundle.generated.ts");
+const CREDITS_FILE = join(SRC_DIR, "lib", "icon-credits.generated.json");
 // Matches JSX attributes (icon="mdi:x") and object properties (icon: "mdi:x").
 // A missing set here fails the build, since these are unambiguously icons.
 const ICON_CONTEXT_PATTERN = /icon[=:]\s*["']([a-z0-9-]+):([a-z0-9-]+)["']/gi;
@@ -27,6 +29,7 @@ function collectSourceFiles(dir: string): string[] {
   const files: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
+    if (path === OUT_FILE || /\.(test|spec)\.tsx?$/.test(entry.name)) continue;
     if (entry.isDirectory()) files.push(...collectSourceFiles(path));
     else if (/\.(ts|tsx)$/.test(entry.name)) files.push(path);
   }
@@ -54,25 +57,22 @@ for (const file of collectSourceFiles(SRC_DIR)) {
 }
 
 const collections: string[] = [];
+const credits: {
+  prefix: string;
+  name: string;
+  author: IconifyInfo["author"];
+  license: IconifyInfo["license"];
+}[] = [];
 let totalIcons = 0;
 const warnings: string[] = [];
 
 for (const prefix of [...iconsByPrefix.keys()].sort()) {
   const names = [...iconsByPrefix.get(prefix)!].sort();
+  const packageDir = join(import.meta.dir, "..", "node_modules", "@iconify-json", prefix);
   let setData: IconifyJSON;
   try {
     setData = JSON.parse(
-      readFileSync(
-        join(
-          import.meta.dir,
-          "..",
-          "node_modules",
-          "@iconify-json",
-          prefix,
-          "icons.json",
-        ),
-        "utf8",
-      ),
+      readFileSync(join(packageDir, "icons.json"), "utf8"),
     );
   } catch {
     console.error(
@@ -80,6 +80,18 @@ for (const prefix of [...iconsByPrefix.keys()].sort()) {
     );
     process.exit(1);
   }
+
+  const info: IconifyInfo = JSON.parse(readFileSync(join(packageDir, "info.json"), "utf8"));
+  if (!info.name || !info.author?.name || !info.license?.title || !info.license.url) {
+    throw new Error(`Missing author or license metadata for "${prefix}".`);
+  }
+  const noticeFile = join(import.meta.dir, "..", "public", "licenses", "icons", `${prefix}.txt`);
+  if (!existsSync(noticeFile) || !readFileSync(noticeFile, "utf8").trim()) {
+    throw new Error(
+      `Missing license notice for "${prefix}". Preserve the upstream copyright and license notices in public/licenses/icons/${prefix}.txt once when adding this icon set.`,
+    );
+  }
+  credits.push({ prefix, name: info.name, author: info.author, license: info.license });
 
   const subset = getIcons(setData, names, true)!;
   if (subset.not_found?.length) {
@@ -101,6 +113,7 @@ ${collections.join("\n\n")}
 `;
 
 writeFileSync(OUT_FILE, output);
+writeFileSync(CREDITS_FILE, JSON.stringify(credits, null, 2) + "\n");
 for (const warning of warnings) console.warn(`⚠ ${warning}`);
 console.log(
   `Wrote ${OUT_FILE} — ${totalIcons} icons from ${iconsByPrefix.size} sets.`,

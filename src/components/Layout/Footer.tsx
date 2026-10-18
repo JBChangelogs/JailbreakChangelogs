@@ -265,6 +265,12 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               >
                 Terms of Service
               </Link>
+              <Link
+                href="/icon-credits"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
+              >
+                Icon credits
+              </Link>
               <div id="gdpr-consent-box" style={{ display: "none" }}>
                 <button
                   onClick={() => {

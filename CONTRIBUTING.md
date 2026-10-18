@@ -93,6 +93,23 @@ Notes:
 
 - After a fresh clone, run `bun install` once to set up Husky hooks.
 
+### Icon credits
+
+`bun run generate:icons` scans application source and regenerates both the icon
+bundle and the data for `/icon-credits`. Dev and production builds run it too.
+Adding or removing icons from an existing set needs no manual credits edit.
+Generated bundles and test files are excluded from the scan.
+
+When introducing an icon set, install its `@iconify-json` package and preserve
+its upstream copyright and license notices in `public/licenses/icons/<prefix>.txt`.
+The generator reports missing notices instead of silently omitting them. Packages
+provide author/license metadata in `info.json`, but may omit the full license text
+or extra notices. Review those once per new set or license change. Keep archived
+notices when removing sets so saved themes can still be attributed.
+
+Icons whose names only come from the API or other runtime data are outside this
+source scan; their providers must preserve the relevant credits separately.
+
 ### Editor setup
 
 - Install an Oxlint/Oxc extension in your editor.

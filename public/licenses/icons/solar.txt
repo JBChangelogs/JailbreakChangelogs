@@ -1,0 +1,9 @@
+Solar
+Creator: 480 Design
+Source: https://www.figma.com/community/file/1166831539721848736
+License: CC BY 4.0
+https://creativecommons.org/licenses/by/4.0/
+
+Artwork is scaled and colored for the interface.
+Licensed under Creative Commons Attribution 4.0 International.
+License terms: https://creativecommons.org/licenses/by/4.0/

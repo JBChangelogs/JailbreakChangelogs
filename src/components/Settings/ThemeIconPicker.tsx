@@ -108,22 +108,6 @@ export default function ThemeIconPicker({
             );
           })}
         </div>
-        <p className="text-secondary-text mt-2 text-xs">
-          Biohazard by{" "}
-          <a
-            href="https://github.com/EmojiTwo/emojitwo"
-            className="text-link underline"
-          >
-            Emoji One
-          </a>{" "}
-          /{" "}
-          <a
-            href="https://creativecommons.org/licenses/by/4.0/"
-            className="text-link underline"
-          >
-            CC BY 4.0
-          </a>
-        </p>
       </PopoverContent>
     </Popover>
   );

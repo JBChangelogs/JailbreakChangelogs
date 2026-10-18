@@ -29,6 +29,7 @@ dist/
 
 # Generated at build time by `bun run generate:icons`
 src/lib/icon-bundle.generated.ts
+src/lib/icon-credits.generated.json
 
 # Generated at build time by fumadocs-mdx
 .source/
