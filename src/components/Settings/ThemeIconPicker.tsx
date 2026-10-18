@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 /** Custom themes without an icon show this one. */
 export const DEFAULT_THEME_ICON = "lucide:palette";
 
-// Written out in full so the icon bundle picks them up. 24 fills 8 columns.
+// Written out in full so the icon bundle picks them up.
 const ICONS = [
   "lucide:palette",
   "lucide:moon",
@@ -43,6 +43,9 @@ const ICONS = [
   "lucide:gamepad-2",
   "lucide:car",
   "lucide:shield",
+  "boxicons:bomb",
+  "emojione-monotone:biohazard",
+  "la:radiation",
 ];
 
 /** Picks a custom theme's icon; null means the default palette. */
@@ -105,6 +108,22 @@ export default function ThemeIconPicker({
             );
           })}
         </div>
+        <p className="text-secondary-text mt-2 text-xs">
+          Biohazard by{" "}
+          <a
+            href="https://github.com/EmojiTwo/emojitwo"
+            className="text-link underline"
+          >
+            Emoji One
+          </a>{" "}
+          /{" "}
+          <a
+            href="https://creativecommons.org/licenses/by/4.0/"
+            className="text-link underline"
+          >
+            CC BY 4.0
+          </a>
+        </p>
       </PopoverContent>
     </Popover>
   );
