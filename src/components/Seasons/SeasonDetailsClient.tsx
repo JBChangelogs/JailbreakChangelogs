@@ -12,6 +12,11 @@ import SeasonNavigation from "@/components/Seasons/SeasonNavigation";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
+import {
+  hasRewardImage,
+  rewardImageUrl,
+  sortRewards,
+} from "@/components/Seasons/seasonRewards";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import { Button } from "@/components/ui/button";
@@ -348,21 +353,6 @@ export default function SeasonDetailsClient({
       </div>
     </main>
   );
-}
-
-const rewardImageUrl = (reward: Reward) =>
-  `https://assets.jailbreakchangelogs.com${reward.link}`;
-
-const hasRewardImage = (reward: Reward) =>
-  !!reward.link && reward.link !== "N/A";
-
-// Levels ascending, percentage rewards (e.g. "Top 2%") last
-function sortRewards(rewards: Reward[]) {
-  const rank = (r: Reward) => {
-    const n = parseInt(r.requirement.match(/\d+/)?.[0] || "0");
-    return r.requirement.includes("%") ? 1000 + n : n;
-  };
-  return [...rewards].sort((a, b) => rank(a) - rank(b));
 }
 
 function RewardBadges({ reward }: { reward: Reward }) {
