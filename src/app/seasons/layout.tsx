@@ -59,9 +59,8 @@ export default function SeasonsLayout({
               Seasons Are Paused
             </span>
             <div className="text-secondary-text mt-1">
-              The Jailbreak devs have paused seasons until further notice.
-              Season info here stays available, but no new season is running
-              right now.
+              Badimo has paused seasons until further notice. Season info here
+              stays available, but no new season is running right now.
             </div>
           </div>
         </div>
