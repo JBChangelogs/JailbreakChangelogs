@@ -58,14 +58,10 @@ import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
 import { fetchItemByIdClient, fetchItemScanCount } from "@/utils/api/api";
-import { hasSeason, unlockLevel } from "@/utils/items/season";
+import { hasSeason } from "@/utils/items/season";
 import { hasItemValue } from "@/utils/items/itemValue";
 import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
-import {
-  formatUnlockLevelBadge,
-  formatUnlockRequirementsTooltip,
-  hasUnlockLevel,
-} from "@/utils/items/itemUnlockPresentation";
+import { ItemUnlockBadges } from "./ItemUnlockBadges";
 import { createLogger } from "@/services/logger";
 import Link from "next/link";
 import SiteLogo from "@/components/ui/SiteLogo";
@@ -493,16 +489,6 @@ export default function ItemDetailsClient({
 
   const currentItem = item;
   const currentScanCount = scanCount;
-  const metadataLevel = unlockLevel(currentItem.level);
-  const hasMetadataLevel = hasUnlockLevel(metadataLevel);
-  const requirementsTooltipText = useMemo(
-    () =>
-      formatUnlockRequirementsTooltip(
-        currentItem.season ?? undefined,
-        metadataLevel,
-      ),
-    [currentItem.season, metadataLevel],
-  );
   const categoryColor = useMemo(
     () => getCategoryColor(currentItem.type),
     [currentItem.type],
@@ -556,25 +542,12 @@ export default function ItemDetailsClient({
                     Seasonal
                   </span>
                 )}
-                {(hasSeason(currentItem) || hasMetadataLevel) && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex cursor-help items-center gap-1">
-                        {currentItem.season != null && (
-                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-                            S{currentItem.season}
-                          </span>
-                        )}
-                        {hasMetadataLevel && (
-                          <span className="bg-status-success text-button-success-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-                            {formatUnlockLevelBadge(metadataLevel)}
-                          </span>
-                        )}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>{requirementsTooltipText}</TooltipContent>
-                  </Tooltip>
-                )}
+                <ItemUnlockBadges
+                  season={currentItem.season}
+                  level={currentItem.level}
+                  linkToSeason
+                  className=""
+                />
                 {currentItem.tradable === 0 && (
                   <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                     {currentItem.id === 713 ? "Reference Only" : "Non-Tradable"}
