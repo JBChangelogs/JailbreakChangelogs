@@ -18,7 +18,6 @@ interface ImageLightboxProps {
   src?: string;
   alt?: string;
   images?: LightboxImage[];
-  /** Index in `images` to open at, e.g. the clicked item of a gallery */
   initialIndex?: number;
   children: ReactNode;
   className?: string;

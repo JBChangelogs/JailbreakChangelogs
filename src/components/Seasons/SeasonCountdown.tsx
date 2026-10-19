@@ -134,7 +134,6 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
     return () => clearInterval(interval);
   }, [currentSeason, nextSeason, viewedSeason]);
 
-  // Nothing counting down (season over, no next season) -> render nothing
   if (!timeLeft && !nextSeasonStatus) return null;
 
   return (
