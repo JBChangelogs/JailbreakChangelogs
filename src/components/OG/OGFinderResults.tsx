@@ -6,14 +6,10 @@ import { trackEvent } from "@/utils/analytics/rybbit";
 import { toast } from "sonner";
 import { MaxStreamsError } from "@/utils/api/api";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
-import Image from "next/image";
-import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
-import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { useCatalogValues } from "@/hooks/usePartialItems";
-import { DefaultAvatar } from "@/utils/ui/avatar";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -23,6 +19,7 @@ import OGFilters from "./OGFilters";
 import OGItemsGrid from "./OGItemsGrid";
 import OGNotificationSheet from "./OGNotificationSheet";
 import { Button } from "@/components/ui/button";
+import { UserEmptyStateCard } from "@/components/ui/UserEmptyStateCard";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { compareItemsByValue } from "@/utils/trading/itemValueSort";
 
@@ -104,7 +101,6 @@ export default function OGFinderResults({
   const [selectedItem, setSelectedItem] = useState<OGItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
-  const [avatarError, setAvatarError] = useState(false);
 
   // Extract all unique user IDs from OG data
   const allUserIds = useMemo(() => {
@@ -459,85 +455,16 @@ export default function OGFinderResults({
       {!error &&
         (!initialData?.results || initialData.results.length === 0) && (
           <>
-            <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
-              {/* Profile header */}
-              <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
-                <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
-                  {!avatarError ? (
-                    <Image
-                      placeholder={IMAGE_PLACEHOLDER}
-                      src={getUserAvatar(robloxId)}
-                      alt="Roblox Avatar"
-                      fill
-                      className="object-cover"
-                      unoptimized
-                      onError={() => {
-                        setAvatarError(true);
-                      }}
-                    />
-                  ) : (
-                    <DefaultAvatar />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-primary-text truncate font-semibold">
-                    {getUserDisplay(robloxId)}
-                  </p>
-                  <p className="text-secondary-text truncate text-sm">
-                    @{getUsername(robloxId)}
-                  </p>
-                  <Link
-                    href={`https://www.roblox.com/users/${robloxId}/profile`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    prefetch={false}
-                    className="text-link mt-1 inline-flex items-center gap-1 text-xs hover:underline"
-                  >
-                    Roblox profile
-                    <Icon
-                      icon="heroicons:arrow-top-right-on-square"
-                      className="h-3 w-3"
-                    />
-                  </Link>
-                </div>
-              </div>
-
-              {/* No items message + actions */}
-              <div className="space-y-4 p-5">
-                <div className="flex items-start gap-3">
-                  <div className="bg-secondary-text/10 mt-0.5 shrink-0 rounded-full p-2">
-                    <Icon
-                      icon="heroicons:archive-box-x-mark"
-                      className="text-secondary-text h-5 w-5"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-primary-text font-medium">
-                      No OG items logged yet
-                    </p>
-                    <p className="text-secondary-text mt-0.5 text-sm">
-                      Our bots haven&apos;t recorded any original items for this
-                      user yet. OG items are logged when a bot scans a trade
-                      server.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-wrap gap-2">
-                  <Button asChild size="sm" variant="secondary">
-                    <Link href={`/inventories/${robloxId}`} prefetch={false}>
-                      Check Inventory
-                    </Link>
-                  </Button>
-                  <Button asChild size="sm" variant="secondary">
-                    <Link href={`/dupes/${robloxId}`} prefetch={false}>
-                      Check Dupes
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <UserEmptyStateCard
+              robloxId={robloxId}
+              avatarSrc={getUserAvatar(robloxId)}
+              displayName={getUserDisplay(robloxId)}
+              username={getUsername(robloxId)}
+              icon="material-symbols:fingerprint-rounded"
+              title="No OG items found yet"
+              description="Our bots haven't recorded any OG items for this user yet. OG items are logged automatically after a bot successfully scans their trade server."
+              tool="og"
+            />
             <OGFinderFAQ />
           </>
         )}

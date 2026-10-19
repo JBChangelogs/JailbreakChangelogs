@@ -1,13 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
-import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Button } from "@/components/ui/button";
+import { UserEmptyStateCard } from "@/components/ui/UserEmptyStateCard";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { DefaultAvatar } from "@/utils/ui/avatar";
 import DupeFinderResults from "./DupeFinderResults";
 import DupeSearchInput from "./DupeSearchInput";
 import DupeFinderFAQ from "./DupeFinderFAQ";
@@ -44,8 +39,6 @@ export default function DupeFinderClient({
   items = [],
   originalSearchTerm,
 }: DupeFinderClientProps) {
-  const [avatarError, setAvatarError] = useState(false);
-
   // Fetch user info for the error/empty states
   const { robloxUsers: batchedUsers } = useBatchUserData(
     error && !initialData && robloxId ? [robloxId] : [],
@@ -145,84 +138,16 @@ export default function DupeFinderClient({
       {/* No Dupes Found — user exists but has no dupes */}
       {error && !initialData && isUserFound && robloxId && (
         <>
-          <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
-            {/* Profile header */}
-            <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
-              <div className="bg-quaternary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
-                {!avatarError ? (
-                  <Image
-                    placeholder={IMAGE_PLACEHOLDER}
-                    src={getUserAvatar(robloxId)}
-                    alt="Roblox Avatar"
-                    fill
-                    className="object-cover"
-                    unoptimized
-                    onError={() => {
-                      setAvatarError(true);
-                    }}
-                  />
-                ) : (
-                  <DefaultAvatar />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-primary-text truncate font-semibold">
-                  {getUserDisplay(robloxId)}
-                </p>
-                <p className="text-secondary-text truncate text-sm">
-                  @{getUsername(robloxId)}
-                </p>
-                <Link
-                  href={`https://www.roblox.com/users/${robloxId}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  prefetch={false}
-                  className="text-link mt-1 inline-flex items-center gap-1 text-xs hover:underline"
-                >
-                  Roblox profile
-                  <Icon
-                    icon="heroicons:arrow-top-right-on-square"
-                    className="h-3 w-3"
-                  />
-                </Link>
-              </div>
-            </div>
-
-            {/* No dupes message + actions */}
-            <div className="space-y-4 p-5">
-              <div className="flex items-start gap-3">
-                <div className="bg-secondary-text/10 mt-0.5 shrink-0 rounded-full p-2">
-                  <Icon
-                    icon="heroicons:check-badge"
-                    className="text-secondary-text h-5 w-5"
-                  />
-                </div>
-                <div>
-                  <p className="text-primary-text font-medium">
-                    No duped items found
-                  </p>
-                  <p className="text-secondary-text mt-0.5 text-sm">
-                    No duplicated items have been recorded for this user. Their
-                    items may not yet have been logged by our bots.
-                  </p>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm" variant="secondary">
-                  <Link href={`/inventories/${robloxId}`} prefetch={false}>
-                    Check Inventory
-                  </Link>
-                </Button>
-                <Button asChild size="sm" variant="secondary">
-                  <Link href={`/og/${robloxId}`} prefetch={false}>
-                    Check OG Items
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
+          <UserEmptyStateCard
+            robloxId={robloxId}
+            avatarSrc={getUserAvatar(robloxId)}
+            displayName={getUserDisplay(robloxId)}
+            username={getUsername(robloxId)}
+            icon="material-symbols:content-copy-rounded"
+            title="No duped items found yet"
+            description="Our bots haven't recorded any duped items for this user yet. Dupes are logged automatically after a bot successfully scans their trade server."
+            tool="dupes"
+          />
           <DupeFinderFAQ />
         </>
       )}
