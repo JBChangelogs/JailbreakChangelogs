@@ -265,8 +265,9 @@ export default function SeasonDetailsClient({
         </section>
 
         {/* Countdown first on mobile; on xl it sits atop the sidebar */}
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-12 xl:grid-rows-[auto_1fr]">
-          <div className="xl:col-span-4 xl:col-start-9 xl:row-start-1">
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-12 xl:grid-rows-[auto_1fr] xl:gap-y-0">
+          {/* empty:hidden drops the slot when SeasonCountdown renders nothing */}
+          <div className="empty:hidden xl:col-span-4 xl:col-start-9 xl:row-start-1 xl:mb-8">
             <SeasonCountdown
               viewedSeason={season.season}
               currentSeason={currentSeasonForHeader}

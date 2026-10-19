@@ -73,7 +73,6 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
 
       // Handle current season
       if (!currentSeason) {
-        setStatus("No Season Data");
         setTimeLeft(null);
         setDoubleXp(false);
       } else if (currentSeason.start_date && now < currentSeason.start_date) {
@@ -92,7 +91,6 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
 
         setTimeLeft(formatTime(timeToEnd));
       } else if (currentSeason.end_date && now >= currentSeason.end_date) {
-        setStatus(label("has ended"));
         setTimeLeft(null);
       }
 
@@ -136,24 +134,33 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
     return () => clearInterval(interval);
   }, [currentSeason, nextSeason, viewedSeason]);
 
+  // Nothing counting down (season over, no next season) -> render nothing
+  if (!timeLeft && !nextSeasonStatus) return null;
+
   return (
     <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-secondary-text text-sm font-medium">
-            {status}
-          </span>
-          {doubleXp && (
-            <span className="bg-status-success text-button-success-text inline-flex h-5 items-center rounded-md px-2 text-xs leading-none font-bold">
-              2× XP Active
+      {timeLeft && (
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-secondary-text text-sm font-medium">
+              {status}
             </span>
-          )}
+            {doubleXp && (
+              <span className="bg-status-success text-button-success-text inline-flex h-5 items-center rounded-md px-2 text-xs leading-none font-bold">
+                2× XP Active
+              </span>
+            )}
+          </div>
+          <TimeBlocks time={timeLeft} />
         </div>
-        {timeLeft && <TimeBlocks time={timeLeft} />}
-      </div>
+      )}
 
       {nextSeasonStatus && (
-        <div className="border-border-card mt-4 border-t pt-4">
+        <div
+          className={
+            timeLeft ? "border-border-card mt-4 border-t pt-4" : undefined
+          }
+        >
           <div className="flex items-center">
             <span className="text-secondary-text text-sm font-medium">
               {nextSeasonStatus}
