@@ -11,31 +11,17 @@ import { isFuzzyTokenMatch } from "@/utils/helpers/itemSearch";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
+import ChangelogFilter from "@/components/Changelogs/ChangelogFilter";
+import ChangelogSearchInput from "@/components/Changelogs/ChangelogSearchInput";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Changelog, CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 
 // Dynamic imports for heavy components
-const ChangelogHeader = dynamic(
-  () => import("@/components/Changelogs/ChangelogHeader"),
-  {
-    loading: () => (
-      <div className="bg-secondary-bg mb-4 h-16 animate-pulse rounded" />
-    ),
-    ssr: true,
-  },
-);
-
-const ChangelogFilter = dynamic(
-  () => import("@/components/Changelogs/ChangelogFilter"),
-  {
-    loading: () => (
-      <div className="bg-secondary-bg mb-4 h-20 animate-pulse rounded" />
-    ),
-    ssr: true,
-  },
-);
-
 const ChangelogContent = dynamic(
   () => import("@/components/Changelogs/ChangelogContent"),
   {
@@ -302,22 +288,71 @@ export default function ChangelogDetailsClient({
     }
   };
 
+  const latestId = Math.max(...changelogList.map((item) => item.id));
+  const isLatest = changelog.id === latestId;
+
   return (
     <main className="min-h-screen">
       <div className="container mx-auto mb-8 px-4 sm:px-6">
         <Breadcrumb />
-        <ChangelogHeader changelogs={changelogList} />
-        <ChangelogFilter
-          changelogList={changelogList}
-          selectedId={selectedId}
-          onChangelogSelect={handleChangelogSelect}
-          searchQuery={searchQuery}
-          searchResults={searchResults}
-          isSearching={isSearching}
-          isSearchFocused={isSearchFocused}
-          onSearchChange={handleSearch}
-          onSearchFocus={setIsSearchFocused}
-        />
+
+        <section className="border-border-card mb-8 flex flex-col gap-6 border-b pb-6 lg:flex-row lg:items-start">
+          <div className="min-w-0 flex-1">
+            <div className="mb-5 flex flex-col gap-2 sm:flex-row">
+              <ChangelogSearchInput
+                className="w-full sm:flex-1"
+                searchQuery={searchQuery}
+                searchResults={searchResults}
+                isSearching={isSearching}
+                isSearchFocused={isSearchFocused}
+                onSearchChange={handleSearch}
+                onSearchFocus={setIsSearchFocused}
+                onChangelogSelect={handleChangelogSelect}
+              />
+              <ChangelogFilter
+                changelogList={changelogList}
+                selectedId={selectedId}
+                onChangelogSelect={handleChangelogSelect}
+              />
+            </div>
+
+            <h1 className="page-heading">
+              <span className="text-secondary-text flex items-center gap-2 text-sm font-semibold tracking-wide uppercase">
+                Changelog #{changelog.id}
+                {isLatest && (
+                  <span className="bg-status-success text-button-success-text inline-flex h-5 items-center rounded-md px-2 text-xs leading-none font-bold normal-case">
+                    Latest
+                  </span>
+                )}
+              </span>
+              {changelog.title}
+            </h1>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {!isLatest && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => handleChangelogSelect(latestId.toString())}
+                >
+                  <Icon icon="heroicons:arrow-uturn-right" inline={true} />
+                  Go to Latest Update
+                </Button>
+              )}
+              <Button asChild size="sm" variant="secondary">
+                <Link href="/changelogs/timeline">
+                  <Icon icon="heroicons:clock" inline={true} />
+                  View Timeline
+                </Link>
+              </Button>
+            </div>
+          </div>
+          {/* Nitro: video-nc unit should sit above the fold */}
+          <NitroInlineVideoPlayer
+            slotId="np-changelogs-video"
+            className="lg:mx-0 lg:w-80 lg:shrink-0"
+          />
+        </section>
 
         <ChangelogContent
           title={changelog.title}

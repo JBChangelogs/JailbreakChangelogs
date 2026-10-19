@@ -25,17 +25,17 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
             onChangelogSelect(prevChangelog.id.toString());
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="group border-link text-secondary-text hover:border-link-hover hover:text-link-hover flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent p-4 transition-colors sm:w-auto"
+          className="group border-border-card bg-secondary-bg hover:border-border-focus flex w-full cursor-pointer items-center gap-2 rounded-lg border p-4 transition-colors sm:w-auto"
         >
           <Icon
             icon="heroicons-outline:chevron-left"
-            className="text-link group-hover:text-link-hover h-5 w-5"
+            className="text-secondary-text group-hover:text-primary-text h-5 w-5"
           />
           <div className="flex flex-col items-start">
-            <span className="text-primary-text text-sm">Previous</span>
+            <span className="text-secondary-text text-sm">Previous</span>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-link group-hover:text-link-hover max-w-75 cursor-help truncate text-left text-base font-medium">
+                <span className="text-primary-text max-w-75 cursor-help truncate text-left text-base font-medium">
                   {prevChangelog.title}
                 </span>
               </TooltipTrigger>
@@ -51,13 +51,13 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
             onChangelogSelect(nextChangelog.id.toString());
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="group border-link text-secondary-text hover:border-link-hover hover:text-link-hover flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent p-4 text-right transition-colors sm:w-auto"
+          className="group border-border-card bg-secondary-bg hover:border-border-focus flex w-full cursor-pointer items-center gap-2 rounded-lg border p-4 text-right transition-colors sm:w-auto"
         >
           <div className="flex flex-col items-end">
-            <span className="text-primary-text text-sm">Next</span>
+            <span className="text-secondary-text text-sm">Next</span>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-link group-hover:text-link-hover max-w-75 cursor-help truncate text-right text-base font-medium">
+                <span className="text-primary-text max-w-75 cursor-help truncate text-right text-base font-medium">
                   {nextChangelog.title}
                 </span>
               </TooltipTrigger>
@@ -66,7 +66,7 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
           </div>
           <Icon
             icon="heroicons-outline:chevron-right"
-            className="text-link group-hover:text-link-hover h-5 w-5"
+            className="text-secondary-text group-hover:text-primary-text h-5 w-5"
           />
         </button>
       )}

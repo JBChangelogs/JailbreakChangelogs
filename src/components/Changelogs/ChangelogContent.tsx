@@ -3,12 +3,9 @@ import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Icon } from "@/components/ui/IconWrapper";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
-import {
-  parseMarkdown,
-  extractContentInfo,
-  getBadgeColor,
-} from "@/utils/changelogs/changelogs";
-import { CommentData } from "@/utils/api/api";
+import { parseMarkdown } from "@/utils/changelogs/changelogs";
+import UpdateStatisticsCard from "@/components/common/UpdateStatisticsCard";
+import { Changelog, CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import dynamic from "next/dynamic";
 import ChangelogSummary from "./ChangelogSummary";
@@ -41,7 +38,7 @@ interface ChangelogContentProps {
   imageUrl: string;
   changelogId: number;
   onChangelogSelect: (id: string) => void;
-  changelogList: Array<{ id: number; title: string }>;
+  changelogList: Changelog[];
   initialComments?: CommentData[];
   initialUserMap?: Record<string, UserData>;
 }
@@ -68,7 +65,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
     currentIndex > 0 ? changelogList[currentIndex - 1] : null;
 
   const parsedSections = parseMarkdown(sections);
-  const contentInfo = extractContentInfo(sections);
 
   const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
@@ -86,53 +82,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
         {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
         <div className="sm:col-span-12 xl:col-span-8">
-          <div className="border-secondary-text mb-8 border-b pb-4">
-            <h1 className="page-heading mb-3">{title}</h1>
-            {(contentInfo.mediaTypes.length > 0 ||
-              contentInfo.mentions.length > 0) && (
-              <div className="flex flex-wrap gap-2">
-                {contentInfo.mediaTypeCounts.video > 0 && (
-                  <span
-                    className={`inline-flex h-6 items-center rounded-md px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${getBadgeColor("video")} text-white`}
-                  >
-                    {contentInfo.mediaTypeCounts.video}{" "}
-                    {contentInfo.mediaTypeCounts.video === 1
-                      ? "Video"
-                      : "Videos"}
-                  </span>
-                )}
-                {contentInfo.mediaTypeCounts.audio > 0 && (
-                  <span
-                    className={`inline-flex h-6 items-center rounded-md px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${getBadgeColor("audio")} text-white`}
-                  >
-                    {contentInfo.mediaTypeCounts.audio}{" "}
-                    {contentInfo.mediaTypeCounts.audio === 1
-                      ? "Audio"
-                      : "Audios"}
-                  </span>
-                )}
-                {contentInfo.mediaTypeCounts.image > 0 && (
-                  <span
-                    className={`inline-flex h-6 items-center rounded-md px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${getBadgeColor("image")} text-white`}
-                  >
-                    {contentInfo.mediaTypeCounts.image}{" "}
-                    {contentInfo.mediaTypeCounts.image === 1
-                      ? "Image"
-                      : "Images"}
-                  </span>
-                )}
-                {contentInfo.mentionCount > 0 && (
-                  <span
-                    className={`inline-flex h-6 items-center rounded-md px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${getBadgeColor("mentions")} text-white`}
-                  >
-                    {contentInfo.mentionCount}{" "}
-                    {contentInfo.mentionCount === 1 ? "Mention" : "Mentions"}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
           {/* AI Summary */}
           {isFeatureEnabled("AI_SUMMARY") && (
             <ChangelogSummary changelogId={changelogId} content={sections} />
@@ -211,6 +160,8 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
               />
             </ImageLightbox>
           )}
+
+          <UpdateStatisticsCard changelogs={changelogList} />
 
           {/* Comments Section */}
           <div>
