@@ -69,11 +69,11 @@ export default function OfflineDetector() {
         retryAttempt = 0;
         const wasOffline = confirmedOfflineRef.current;
         confirmedOfflineRef.current = false;
+        window.dispatchEvent(new Event("jbcl:site-online"));
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
 
         if (wasOffline) {
           setStatus("reconnected");
-          window.dispatchEvent(new Event("jbcl:site-online"));
           hideTimerRef.current = setTimeout(() => setStatus("online"), 3000);
         } else {
           setStatus("online");

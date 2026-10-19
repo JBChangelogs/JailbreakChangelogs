@@ -35,8 +35,6 @@ export default function OfflineNavigationRecovery() {
   }, [pathname]);
 
   useEffect(() => {
-    offlineRef.current = !navigator.onLine;
-
     const handleClick = (event: MouseEvent) => {
       if (
         event.button !== 0 ||
@@ -67,7 +65,7 @@ export default function OfflineNavigationRecovery() {
         queued: false,
       };
 
-      if (offlineRef.current || !navigator.onLine) {
+      if (offlineRef.current) {
         navigationRef.current.queued = true;
         event.preventDefault();
         event.stopPropagation();
@@ -76,12 +74,16 @@ export default function OfflineNavigationRecovery() {
     };
 
     const handleOffline = () => {
-      offlineRef.current = true;
       const navigation = navigationRef.current;
       if (navigation && Date.now() - navigation.startedAt < 30_000) {
         navigation.queued = true;
       }
       done(true);
+    };
+
+    const handleSiteOffline = () => {
+      offlineRef.current = true;
+      handleOffline();
     };
 
     const retryNavigation = async (siteConfirmed = false) => {
@@ -120,13 +122,13 @@ export default function OfflineNavigationRecovery() {
     document.addEventListener("click", handleClick, true);
     window.addEventListener("offline", handleOffline);
     window.addEventListener("online", handleOnline);
-    window.addEventListener("jbcl:site-offline", handleOffline);
+    window.addEventListener("jbcl:site-offline", handleSiteOffline);
     window.addEventListener("jbcl:site-online", handleSiteOnline);
     return () => {
       document.removeEventListener("click", handleClick, true);
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("online", handleOnline);
-      window.removeEventListener("jbcl:site-offline", handleOffline);
+      window.removeEventListener("jbcl:site-offline", handleSiteOffline);
       window.removeEventListener("jbcl:site-online", handleSiteOnline);
     };
   }, [done]);
