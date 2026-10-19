@@ -108,7 +108,6 @@ export default function ChangelogDetailsClient({
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // True while the debounce is waiting to settle, so the UI can show a
   // "searching" state instead of briefly flashing "no results found"
@@ -304,9 +303,7 @@ export default function ChangelogDetailsClient({
                 searchQuery={searchQuery}
                 searchResults={searchResults}
                 isSearching={isSearching}
-                isSearchFocused={isSearchFocused}
                 onSearchChange={handleSearch}
-                onSearchFocus={setIsSearchFocused}
                 onChangelogSelect={handleChangelogSelect}
               />
               <ChangelogFilter

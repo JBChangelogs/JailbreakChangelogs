@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { getBadgeColor, highlightText } from "@/utils/changelogs/changelogs";
@@ -16,9 +16,7 @@ interface ChangelogSearchInputProps {
   searchQuery: string;
   searchResults: SearchResult[];
   isSearching: boolean;
-  isSearchFocused: boolean;
   onSearchChange: (query: string) => void;
-  onSearchFocus: (focused: boolean) => void;
   onChangelogSelect: (id: string) => void;
   placeholder?: string;
   className?: string;
@@ -28,23 +26,24 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
   searchQuery,
   searchResults,
   isSearching,
-  isSearchFocused,
   onSearchChange,
-  onSearchFocus,
   onChangelogSelect,
   placeholder = "Search changelogs...",
   className = "",
 }) => {
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  // Quick filters only: picking a result must blur, or the cleared query
+  // reopens the quick filters
+  const keepFocus = (e: React.MouseEvent) => e.preventDefault();
+
   return (
     <div className={`relative ${className}`}>
       <input
         type="text"
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        onFocus={() => onSearchFocus(true)}
-        onBlur={() => {
-          setTimeout(() => onSearchFocus(false), 200);
-        }}
+        onFocus={() => setIsSearchFocused(true)}
+        onBlur={() => setIsSearchFocused(false)}
         placeholder={placeholder}
         className="border-border-card bg-secondary-bg text-secondary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-10 w-full rounded-lg border px-4 pr-10 pl-10 text-sm focus:outline-none"
       />
@@ -68,7 +67,10 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
 
       {/* Quick Filter Buttons */}
       {isSearchFocused && !searchQuery && (
-        <div className="border-tertiary-bg bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border p-2 shadow-lg">
+        <div
+          onMouseDown={keepFocus}
+          className="border-tertiary-bg bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border p-2 shadow-lg"
+        >
           <div className="flex flex-col gap-1">
             <button
               onClick={() => onSearchChange("has:video ")}
