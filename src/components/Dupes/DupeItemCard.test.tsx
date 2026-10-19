@@ -152,7 +152,10 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   const images = elements.filter((element) => element.type === "next/image");
   expect(images).toHaveLength(2);
   for (const image of images) {
-    expect(image.props.placeholder).toBe(IMAGE_PLACEHOLDER);
+    // Next.js warns when images under 40x40 use a placeholder.
+    expect(image.props.placeholder).toBe(
+      Number(image.props.width) < 40 ? undefined : IMAGE_PLACEHOLDER,
+    );
     expect(image.props.onLoad).toBeUndefined();
   }
   expect(elements.some((element) => element.type === "Spinner")).toBe(false);

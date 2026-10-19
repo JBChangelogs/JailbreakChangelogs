@@ -591,7 +591,6 @@ export default function ProfileInventoryTab({
                             <div className="border-border-card bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
                               {ownerAvatarSrc ? (
                                 <Image
-                                  placeholder={IMAGE_PLACEHOLDER}
                                   src={ownerAvatarSrc}
                                   alt="Owner Avatar"
                                   width={32}

@@ -292,7 +292,6 @@ export default function DupeItemCard({
               <DefaultAvatar name={getUsername(originalOwner)} />
             ) : (
               <Image
-                placeholder={IMAGE_PLACEHOLDER}
                 src={getUserAvatar(originalOwner)}
                 alt="Original owner avatar"
                 width={32}

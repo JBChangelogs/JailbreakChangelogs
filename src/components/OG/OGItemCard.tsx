@@ -319,7 +319,6 @@ export default function OGItemCard({
                   <DefaultAvatar name={getUsername(item.user_id)} />
                 ) : (
                   <Image
-                    placeholder={IMAGE_PLACEHOLDER}
                     src={getUserAvatar(item.user_id)}
                     alt="Owner Avatar"
                     width={32}

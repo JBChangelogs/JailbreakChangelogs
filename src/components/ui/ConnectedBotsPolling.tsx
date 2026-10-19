@@ -439,7 +439,6 @@ function LastUpdatedAvatar({ userId }: { userId: string }) {
     <DefaultAvatar name={userId} />
   ) : (
     <Image
-      placeholder={IMAGE_PLACEHOLDER}
       src={avatarUrl}
       alt="Last processed user avatar"
       width={32}

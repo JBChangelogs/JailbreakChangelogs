@@ -327,7 +327,6 @@ export default function InventoryItemCard({
                     />
                   ) : (
                     <Image
-                      placeholder={IMAGE_PLACEHOLDER}
                       src={getUserAvatar(
                         isOriginalOwner ? userId : originalOwnerInfo.value,
                       )}
