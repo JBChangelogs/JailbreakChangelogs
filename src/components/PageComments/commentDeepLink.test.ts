@@ -8,6 +8,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
   const updates: unknown[] = [];
   const requests: string[] = [];
   const historyOptions: unknown[] = [];
+  const paramUpdates: Record<string, string | number | null>[] = [];
   let timer: () => Promise<void>;
   let clearHighlight: () => void;
   const highlighted = new Set<string>();
@@ -136,6 +137,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
                   values: Record<string, string | number | null>,
                   options?: unknown,
                 ) => {
+                  paramUpdates.push(values);
                   historyOptions.push(options);
                   for (const [key, value] of Object.entries(values)) {
                     if (value === null) params.delete(key);
@@ -213,6 +215,9 @@ test("comment links locate the correct page, expand the thread, and fall back wh
   const listUrl = new URL(requests[1]);
   expect(listUrl.searchParams.get("page")).toBe("3");
   expect(listUrl.searchParams.get("sort")).toBe("newest");
+  expect(new URLSearchParams(location.search).get("commentsSort")).toBe(
+    "newest",
+  );
   expect(
     updates.some((update) => update instanceof Set && update.has(10)),
   ).toBe(true);
@@ -238,6 +243,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
   await timer!();
   expect(new URL(requests.at(-1)!).searchParams.get("page")).toBe("1");
 
+  location.search = "?tab=comments";
   const key = ["comments", "changelog", 5, 1, null, null];
   queryClient.setQueryData(key, {
     comments: [{ id: 7 }],
@@ -306,5 +312,20 @@ test("comment links locate the correct page, expand the thread, and fall back wh
       .callback();
     await timer!();
     expect(new URL(requests.at(-1)!).searchParams.get("page")).toBe("1");
+  }
+  for (const pathname of ["/changelogs/5", "/seasons/14"]) {
+    location.pathname = pathname;
+    location.search = "";
+    location.hash = "";
+    effects.length = 0;
+    exports.useCommentState(props);
+    effects
+      .find((entry) => entry.deps[0] === 5 && entry.deps.includes(queryClient))!
+      .callback();
+    await timer!();
+    expect(paramUpdates.at(-1)).not.toHaveProperty("commentsSort");
+    expect(new URLSearchParams(location.search).has("commentsSort")).toBe(
+      false,
+    );
   }
 });

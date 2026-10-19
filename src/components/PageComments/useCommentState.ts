@@ -750,7 +750,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       const effectiveSort = sort ?? sortOrder;
       void setCommentParams({
         commentsPage: targetPage,
-        commentsSort: effectiveSort,
+        ...(sort !== undefined && { commentsSort: sort }),
       });
       setCommentsReady(true);
       try {
