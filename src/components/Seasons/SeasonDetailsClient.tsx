@@ -6,15 +6,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "nextjs-toploader/app";
 import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import SeasonHeader from "@/components/Seasons/SeasonHeader";
+import SeasonCountdown from "@/components/Seasons/SeasonCountdown";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import SeasonNavigation from "@/components/Seasons/SeasonNavigation";
 import { Icon } from "@/components/ui/IconWrapper";
-import ImageGallery from "@/components/Seasons/ImageGallery";
+import Image from "next/image";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
+import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatProfileDate } from "@/utils/helpers/timestamp";
-import { Season, CommentData, PUBLIC_API_URL } from "@/utils/api/api";
+import { Season, Reward, CommentData, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { UserData } from "@/types/auth";
 import SeasonRouteLoading from "@/app/seasons/[id]/loading";
@@ -174,213 +177,209 @@ export default function SeasonDetailsClient({
   const startDate =
     season.start_date > 0 ? new Date(season.start_date * 1000) : null;
   const endDate = season.end_date > 0 ? new Date(season.end_date * 1000) : null;
+  const isLatest = season.season === latestSeasonNumber;
+  const rewards = sortRewards(season.rewards);
+  const imageRewards = rewards.filter(hasRewardImage);
+  const bonusRewards = rewards.filter((r) => !hasRewardImage(r));
+  const lightboxImages = imageRewards.map((r) => ({
+    src: rewardImageUrl(r),
+    alt: r.item,
+  }));
 
   return (
-    <>
-      <main className="min-h-screen">
-        <div className="container mx-auto mb-8 px-4 sm:px-6">
-          <Breadcrumb />
-          <SeasonHeader
-            currentSeason={currentSeasonForHeader}
-            nextSeason={nextSeasonForHeader}
-          />
-          <SeasonNavigation
-            seasonList={filteredSeasonList}
-            selectedId={season.season.toString()}
-            onSeasonSelect={handleSeasonSelect}
-          />
+    <main className="min-h-screen">
+      <div className="container mx-auto mb-8 px-4 sm:px-6">
+        <Breadcrumb />
 
-          <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
-            {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
-            <div className="sm:col-span-12 xl:col-span-8">
-              <h1 className="page-heading border-secondary-text mb-2 border-b pb-2">
-                {`Season ${season.season} / ${season.title}`}
+        <section className="border-border-card mb-8 flex flex-col gap-6 border-b pb-6 lg:flex-row lg:items-start">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <h1 className="page-heading">
+                <span className="text-secondary-text flex items-center gap-2 text-sm font-semibold tracking-wide uppercase">
+                  Season {season.season}
+                  {isLatest && (
+                    <span className="bg-status-success text-button-success-text inline-flex h-5 items-center rounded-md px-2 text-xs leading-none font-bold normal-case">
+                      Latest
+                    </span>
+                  )}
+                </span>
+                {season.title}
               </h1>
-              <p className="text-secondary-text mb-4">{season.description}</p>
-
-              {/* Go to Current Season - Only show when not on latest */}
-              {season.season !== latestSeasonNumber && (
-                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-primary-text mb-2 text-lg font-semibold">
-                        Go to Current Season
-                      </h3>
-                      <p className="text-secondary-text text-sm">
-                        Jump to the latest season to see current rewards and
-                        weekly contracts.
-                      </p>
-                    </div>
-                    <div className="shrink-0">
-                      <Button
-                        type="button"
-                        onClick={handleGoToLatestSeason}
-                        className="w-full lg:w-auto"
-                      >
-                        <Icon
-                          icon="heroicons:clock"
-                          className="h-4 w-4"
-                          inline={true}
-                        />
-                        <span>Go to Current Season</span>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* XP Calculator Button - Only show for highest season */}
-              {season.season === latestSeasonNumber && (
-                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-primary-text mb-2 text-lg font-semibold">
-                        🎯 XP Progress Calculator
-                      </h3>
-                      <p className="text-secondary-text text-sm">
-                        Calculate how long it will take to reach your target
-                        level and see if you can complete the season on time.
-                      </p>
-                    </div>
-                    <div className="shrink-0">
-                      <Button asChild className="w-full lg:w-auto">
-                        <Link href="/seasons/will-i-make-it">
-                          Calculate My Progress
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Weekly Contracts Promo - Only show for highest season */}
-              {season.season === latestSeasonNumber && (
-                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-primary-text mb-2 text-lg font-semibold">
-                        📋 Weekly Contracts
-                      </h3>
-                      <p className="text-secondary-text text-sm">
-                        View your weekly contracts and their xp rewards.
-                      </p>
-                    </div>
-                    <div className="shrink-0">
-                      <Button asChild className="w-full lg:w-auto">
-                        <Link href="/seasons/contracts">View Contracts</Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-                  <h3 className="text-primary-text mb-2 font-semibold">
-                    Start Date
-                  </h3>
-                  <p className="text-secondary-text">
-                    {startDate ? formatProfileDate(startDate.getTime()) : "TBD"}
-                  </p>
-                </div>
-                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-                  <h3 className="text-primary-text mb-2 font-semibold">
-                    End Date
-                  </h3>
-                  <p className="text-secondary-text">
-                    {endDate ? formatProfileDate(endDate.getTime()) : "TBD"}
-                  </p>
-                </div>
-                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-                  <h3 className="text-primary-text mb-2 font-semibold">
-                    Duration
-                  </h3>
-                  <p className="text-secondary-text">
-                    {startDate && endDate
-                      ? `${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days`
-                      : "TBD"}
-                  </p>
-                </div>
-              </div>
-
-              <h2 className="border-secondary-text text-primary-text mb-4 border-b pb-2 text-2xl font-bold tracking-tight">
-                Season Rewards
-              </h2>
-              <div className="space-y-4">
-                {season.rewards
-                  .sort((a, b) => {
-                    const isPercentageA = a.requirement
-                      .toLowerCase()
-                      .includes("%");
-                    const isPercentageB = b.requirement
-                      .toLowerCase()
-                      .includes("%");
-
-                    if (isPercentageA && !isPercentageB) return 1;
-                    if (!isPercentageA && isPercentageB) return -1;
-
-                    if (isPercentageA && isPercentageB) {
-                      const percentA = parseInt(
-                        a.requirement.match(/\d+/)?.[0] || "0",
-                      );
-                      const percentB = parseInt(
-                        b.requirement.match(/\d+/)?.[0] || "0",
-                      );
-                      return percentA - percentB;
-                    }
-
-                    const levelA = parseInt(
-                      a.requirement.match(/\d+/)?.[0] || "0",
-                    );
-                    const levelB = parseInt(
-                      b.requirement.match(/\d+/)?.[0] || "0",
-                    );
-                    return levelA - levelB;
-                  })
-                  .map((reward) => (
-                    <div
-                      key={reward.id}
-                      className="border-border-card bg-secondary-bg rounded-lg border p-4"
-                    >
-                      <div className="mb-2 flex items-center justify-between">
-                        <h3 className="text-primary-text font-semibold">
-                          {reward.item}
-                        </h3>
-                        <div className="flex gap-2">
-                          {reward.bonus === "True" && (
-                            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                              Bonus
-                            </span>
-                          )}
-                          {reward.exclusive === "True" && (
-                            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                              Season Pass
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <p className="text-secondary-text text-sm">
-                        {`Requirement: ${reward.requirement}`}
-                      </p>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            {/* Right side - Image Gallery and Comments */}
-            <div className="space-y-8 sm:col-span-12 xl:col-span-4">
-              <ImageGallery rewards={season.rewards} />
-              <ChangelogComments
-                changelogId={season.season}
-                changelogTitle={season.title}
-                type="season"
-                initialComments={initialComments}
-                initialUserMap={initialUserMap}
+              <SeasonNavigation
+                seasonList={filteredSeasonList}
+                selectedId={season.season.toString()}
+                onSeasonSelect={handleSeasonSelect}
               />
             </div>
+
+            <p className="text-secondary-text mt-2 flex items-center gap-1.5 text-sm">
+              <Icon
+                icon="heroicons:calendar-days"
+                className="h-4 w-4"
+                inline={true}
+              />
+              {startDate && endDate
+                ? `${formatProfileDate(startDate.getTime())} – ${formatProfileDate(endDate.getTime())} · ${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days`
+                : "Dates TBD"}
+            </p>
+            <p className="text-secondary-text mt-4 max-w-3xl">
+              {season.description}
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {isLatest ? (
+                <>
+                  <Button asChild size="sm">
+                    <Link href="/seasons/will-i-make-it">
+                      <Icon icon="heroicons:calculator" inline={true} />
+                      XP Calculator
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" variant="secondary">
+                    <Link href="/seasons/contracts">
+                      <Icon
+                        icon="heroicons:clipboard-document-list"
+                        inline={true}
+                      />
+                      Weekly Contracts
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleGoToLatestSeason}
+                >
+                  <Icon icon="heroicons:arrow-uturn-right" inline={true} />
+                  Go to Latest Season
+                </Button>
+              )}
+            </div>
+          </div>
+          {/* Nitro: video-nc unit should sit above the fold */}
+          <NitroInlineVideoPlayer
+            slotId="np-seasons-video"
+            className="lg:mx-0 lg:w-80 lg:shrink-0"
+          />
+        </section>
+
+        {/* Countdown first on mobile; on xl it sits atop the sidebar */}
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-12 xl:grid-rows-[auto_1fr]">
+          <div className="xl:col-span-4 xl:col-start-9 xl:row-start-1">
+            <SeasonCountdown
+              viewedSeason={season.season}
+              currentSeason={currentSeasonForHeader}
+              nextSeason={nextSeasonForHeader}
+            />
+          </div>
+          <div className="xl:col-span-8 xl:col-start-1 xl:row-span-2 xl:row-start-1">
+            <h2 className="text-primary-text mb-4 text-2xl font-bold tracking-tight">
+              Rewards
+            </h2>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+              {imageRewards.map((reward, index) => (
+                <div
+                  key={reward.id}
+                  className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border"
+                >
+                  <ImageLightbox
+                    images={lightboxImages}
+                    initialIndex={index}
+                    alt={reward.item}
+                    previewRadius="rounded-none"
+                    className="w-full"
+                  >
+                    {/* Natural ratio: banners vary (~1.75–1.94:1), a fixed box crops or letterboxes */}
+                    <Image
+                      placeholder={IMAGE_PLACEHOLDER}
+                      src={rewardImageUrl(reward)}
+                      alt={reward.item}
+                      width={1037}
+                      height={534}
+                      className="h-auto w-full"
+                      fetchPriority={index < 3 ? "high" : "auto"}
+                      sizes="(max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 22vw"
+                    />
+                  </ImageLightbox>
+                  <div className="p-3">
+                    <h3 className="text-primary-text text-sm font-semibold sm:text-base">
+                      {reward.item}
+                    </h3>
+                    <RewardBadges reward={reward} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {bonusRewards.length > 0 && (
+              <>
+                <h2 className="text-primary-text mt-8 mb-4 text-xl font-bold tracking-tight">
+                  Bonus Levels
+                </h2>
+                <ul className="border-border-card bg-secondary-bg divide-border-card divide-y rounded-lg border">
+                  {bonusRewards.map((reward) => (
+                    <li
+                      key={reward.id}
+                      className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+                    >
+                      <span className="text-primary-text font-medium">
+                        {reward.item}
+                      </span>
+                      <RewardBadges reward={reward} />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+
+          <div className="xl:col-span-4 xl:col-start-9 xl:row-start-2">
+            <ChangelogComments
+              changelogId={season.season}
+              changelogTitle={season.title}
+              type="season"
+              initialComments={initialComments}
+              initialUserMap={initialUserMap}
+            />
           </div>
         </div>
-      </main>
-    </>
+      </div>
+    </main>
+  );
+}
+
+const rewardImageUrl = (reward: Reward) =>
+  `https://assets.jailbreakchangelogs.com${reward.link}`;
+
+const hasRewardImage = (reward: Reward) =>
+  !!reward.link && reward.link !== "N/A";
+
+// Levels ascending, percentage rewards (e.g. "Top 2%") last
+function sortRewards(rewards: Reward[]) {
+  const rank = (r: Reward) => {
+    const n = parseInt(r.requirement.match(/\d+/)?.[0] || "0");
+    return r.requirement.includes("%") ? 1000 + n : n;
+  };
+  return [...rewards].sort((a, b) => rank(a) - rank(b));
+}
+
+function RewardBadges({ reward }: { reward: Reward }) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      <span className="bg-status-success text-button-success-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+        {reward.requirement}
+      </span>
+      {reward.exclusive === "True" && (
+        <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+          Season Pass
+        </span>
+      )}
+      {reward.bonus === "True" && hasRewardImage(reward) && (
+        <span className="text-primary-text border-border-card bg-tertiary-bg inline-flex h-6 items-center rounded-md border px-2 text-xs leading-none font-medium">
+          Bonus
+        </span>
+      )}
+    </div>
   );
 }

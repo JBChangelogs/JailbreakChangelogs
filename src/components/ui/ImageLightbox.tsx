@@ -18,6 +18,8 @@ interface ImageLightboxProps {
   src?: string;
   alt?: string;
   images?: LightboxImage[];
+  /** Index in `images` to open at, e.g. the clicked item of a gallery */
+  initialIndex?: number;
   children: ReactNode;
   className?: string;
   previewRadius?: string;
@@ -33,6 +35,7 @@ export const ImageLightbox = ({
   src,
   alt,
   images,
+  initialIndex = 0,
   children,
   className,
   previewRadius = "rounded-lg",
@@ -91,7 +94,7 @@ export const ImageLightbox = ({
 
   const openLightbox = (event: React.MouseEvent) => {
     if (stopPropagation) event.stopPropagation();
-    if (lightboxImages.length) setActiveIndex(0);
+    if (lightboxImages.length) setActiveIndex(initialIndex);
   };
 
   const trigger = triggerAsChild ? (
@@ -130,6 +133,7 @@ export const ImageLightbox = ({
         activeImage &&
         createPortal(
           <div
+            data-image-lightbox
             className="fixed inset-0 z-[10000] flex flex-col items-center justify-center gap-3 bg-black/90 p-4"
             onClick={(event) => {
               if (stopPropagation) event.stopPropagation();

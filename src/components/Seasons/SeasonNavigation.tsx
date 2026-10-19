@@ -26,49 +26,45 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
     "";
 
   return (
-    <div className="mb-8 grid grid-cols-1 gap-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-              aria-label="Select a season"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-10 w-full shrink-0 items-center justify-between gap-2 rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-72"
+          aria-label="Select a season"
+        >
+          <span className="truncate">
+            {selectedId
+              ? `Season ${selectedId} - ${selectedLabel}`
+              : "Select a season"}
+          </span>
+          <Icon
+            icon="heroicons:chevron-down"
+            className="text-secondary-text h-5 w-5"
+            inline={true}
+          />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+      >
+        <DropdownMenuRadioGroup
+          value={selectedId}
+          onValueChange={onSeasonSelect}
+        >
+          {seasonList.map((item) => (
+            <DropdownMenuRadioItem
+              key={item.season}
+              value={item.season.toString()}
+              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
             >
-              <span className="truncate">
-                {selectedId
-                  ? `Season ${selectedId} - ${selectedLabel}`
-                  : "Select a season"}
-              </span>
-              <Icon
-                icon="heroicons:chevron-down"
-                className="text-secondary-text h-5 w-5"
-                inline={true}
-              />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-          >
-            <DropdownMenuRadioGroup
-              value={selectedId}
-              onValueChange={onSeasonSelect}
-            >
-              {seasonList.map((item) => (
-                <DropdownMenuRadioItem
-                  key={item.season}
-                  value={item.season.toString()}
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                >
-                  <span>{`Season ${item.season} - ${item.title}`}</span>
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
+              <span>{`Season ${item.season} - ${item.title}`}</span>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

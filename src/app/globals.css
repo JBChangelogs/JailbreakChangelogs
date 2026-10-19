@@ -86,6 +86,8 @@ html:has([role="menu"][data-side="top"])
 
 body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor,
 body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close,
+body:has([data-image-lightbox]) #np-bottom-anchor,
+body:has([data-image-lightbox]) #np-bottom-anchor-close,
 body:has([data-mobile-theme-panel][data-state="open"]) #np-bottom-anchor,
 body:has([data-mobile-theme-panel][data-state="open"]) #np-bottom-anchor-close,
 body:has([data-mobile-theme-panel][data-state="open"]) #np-video-player {
