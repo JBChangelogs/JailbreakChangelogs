@@ -1,12 +1,11 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface ChangelogFilterProps {
   changelogList: Array<{ id: number; title: string }>;
@@ -14,23 +13,103 @@ interface ChangelogFilterProps {
   onChangelogSelect: (id: string) => void;
 }
 
+const ROW_HEIGHT = 36;
+
+// Virtualized: a Radix menu mounting 400+ items took ~600ms to open
 const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
   changelogList,
   selectedId,
   onChangelogSelect,
 }) => {
-  const sortedChangelogs = [...changelogList].sort((a, b) => b.id - a.id);
-  const selectedLabel =
-    sortedChangelogs.find((item) => item.id.toString() === selectedId)?.title ??
-    "";
+  const [open, setOpen] = useState(false);
+  const [highlighted, setHighlighted] = useState(0);
+  const [listEl, setListEl] = useState<HTMLDivElement | null>(null);
+  const typeahead = useRef({ text: "", at: 0 });
+
+  const sorted = useMemo(
+    () => [...changelogList].sort((a, b) => b.id - a.id),
+    [changelogList],
+  );
+  const selectedIndex = sorted.findIndex(
+    (item) => item.id.toString() === selectedId,
+  );
+  const selectedLabel = sorted[selectedIndex]?.title ?? "";
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const virtualizer = useVirtualizer({
+    count: sorted.length,
+    getScrollElement: () => listEl,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 8,
+  });
+
+  // -1: nothing highlighted until hover or arrow keys, like the Radix menus
+  useEffect(() => {
+    if (!open || !listEl) return;
+    setHighlighted(-1);
+    virtualizer.scrollToIndex(Math.max(selectedIndex, 0), { align: "center" });
+    listEl.focus();
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, listEl]);
+
+  const move = (index: number) => {
+    const next = Math.min(Math.max(index, 0), sorted.length - 1);
+    setHighlighted(next);
+    virtualizer.scrollToIndex(next);
+  };
+
+  const pick = (index: number) => {
+    const item = sorted[index];
+    if (!item) return;
+    setOpen(false);
+    onChangelogSelect(item.id.toString());
+  };
+
+  // Typing "300" jumps to #300, typing letters matches the title
+  const jumpTo = (char: string) => {
+    const now = Date.now();
+    const t = typeahead.current;
+    t.text = now - t.at > 700 ? char : t.text + char;
+    t.at = now;
+    const query = t.text.toLowerCase();
+    const index = sorted.findIndex(
+      (item) =>
+        item.id.toString().startsWith(query) ||
+        item.title.toLowerCase().startsWith(query),
+    );
+    if (index !== -1) move(index);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // First arrow press lands on the current changelog
+    const from = highlighted === -1 ? Math.max(selectedIndex, 0) : highlighted;
+    const step = highlighted === -1 ? 0 : 1;
+    const keys: Record<string, () => void> = {
+      ArrowDown: () => move(from + step),
+      ArrowUp: () => move(from - step),
+      Home: () => move(0),
+      End: () => move(sorted.length - 1),
+      PageDown: () => move(from + 8),
+      PageUp: () => move(from - 8),
+      Enter: () => pick(highlighted),
+      " ": () => pick(highlighted),
+    };
+    if (keys[e.key]) {
+      e.preventDefault();
+      keys[e.key]();
+    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      jumpTo(e.key);
+    }
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <button
           type="button"
           className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-10 w-full shrink-0 items-center justify-between gap-2 rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-72"
           aria-label="Select a changelog"
+          aria-haspopup="listbox"
         >
           <span className="truncate">
             {selectedId
@@ -43,27 +122,68 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
             inline={true}
           />
         </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
+      </PopoverTrigger>
+      <PopoverContent
         align="end"
-        className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+        sideOffset={8}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="bg-secondary-bg w-(--radix-popover-trigger-width) rounded-xl p-1"
       >
-        <DropdownMenuRadioGroup
-          value={selectedId}
-          onValueChange={onChangelogSelect}
+        <div
+          ref={setListEl}
+          role="listbox"
+          aria-label="Changelogs"
+          aria-activedescendant={
+            highlighted >= 0
+              ? `changelog-option-${sorted[highlighted]?.id}`
+              : undefined
+          }
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          onMouseLeave={() => setHighlighted(-1)}
+          className="max-h-80 scrollbar-thin overflow-x-hidden overflow-y-auto outline-none"
         >
-          {sortedChangelogs.map((item) => (
-            <DropdownMenuRadioItem
-              key={item.id}
-              value={item.id.toString()}
-              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-            >
-              #{item.id} - {item.title}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <div
+            className="relative w-full"
+            style={{ height: virtualizer.getTotalSize() }}
+          >
+            {virtualizer.getVirtualItems().map(({ index, start }) => {
+              const item = sorted[index];
+              const isSelected = index === selectedIndex;
+              return (
+                <div
+                  key={item.id}
+                  id={`changelog-option-${item.id}`}
+                  role="option"
+                  aria-selected={isSelected}
+                  title={`#${item.id} - ${item.title}`}
+                  onClick={() => pick(index)}
+                  onMouseMove={() => setHighlighted(index)}
+                  className={`absolute top-0 left-0 flex w-full cursor-pointer items-center rounded-lg px-3 pr-8 text-sm transition-colors select-none ${
+                    index === highlighted ? "bg-quaternary-bg" : ""
+                  }`}
+                  style={{
+                    height: ROW_HEIGHT,
+                    transform: `translateY(${start}px)`,
+                  }}
+                >
+                  <span className="truncate">
+                    #{item.id} - {item.title}
+                  </span>
+                  {isSelected && (
+                    <Icon
+                      icon="lucide:check"
+                      className="absolute right-2 h-4 w-4"
+                      inline={true}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
