@@ -172,7 +172,7 @@ export const navigationSections: NavigationSection[] = [
         href: "/users",
         icon: "material-symbols:person-search-rounded",
         title: "User Search",
-        description: "Browse 60k+ Jailbreak Changelogs user profiles",
+        description: "Browse thousands of Jailbreak Changelogs user profiles",
         prefetch: false,
       },
       {

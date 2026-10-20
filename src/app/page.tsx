@@ -196,8 +196,6 @@ export default async function Home() {
       getHomepageTestimonials(),
     ]);
 
-  const registeredUsersK = Math.floor((homepageStats?.total_users ?? 0) / 1000);
-
   const heroStats: HeroStatCard[] = [
     {
       label: "Registered Users",
@@ -401,11 +399,9 @@ export default async function Home() {
               <h2 className="text-primary-text text-xl font-bold md:text-2xl">
                 Loved by the Jailbreak Community
               </h2>
-              {registeredUsersK >= 1 && (
-                <p className="text-secondary-text mt-1">
-                  Join {registeredUsersK}k+ Jailbreak players
-                </p>
-              )}
+              <p className="text-secondary-text mt-1">
+                Join thousands of Jailbreak players
+              </p>
             </div>
             <Button asChild variant="outline" className="hidden md:inline-flex">
               <Link href="/testimonials" prefetch={false}>
