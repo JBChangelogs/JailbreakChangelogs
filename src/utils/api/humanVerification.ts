@@ -31,12 +31,12 @@ function notifyBanReference(banRef: string) {
   banReferenceListener?.(banRef);
 }
 
-function isPublicApiResponse(response: Response): boolean {
-  if (!PUBLIC_API_URL || !response.url) return false;
+function isPublicApiUrl(url: string | URL): boolean {
+  if (!PUBLIC_API_URL || !url) return false;
 
   try {
     const apiOrigin = new URL(PUBLIC_API_URL, window.location.href).origin;
-    return new URL(response.url, window.location.href).origin === apiOrigin;
+    return new URL(url, window.location.href).origin === apiOrigin;
   } catch {
     return false;
   }
@@ -48,19 +48,21 @@ export function installBanReferenceInterceptor(): () => void {
   }
 
   const originalFetch = window.fetch;
-  const interceptedFetch = (async (
-    input: RequestInfo | URL,
-    init?: RequestInit,
-  ) => {
-    const response = await originalFetch.call(window, input, init);
-
-    if (isPublicApiResponse(response)) {
-      observeSiteBanResponse(response);
-      const banRef = response.headers.get(BAN_REFERENCE_HEADER);
-      if (banRef) notifyBanReference(banRef);
+  const interceptedFetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = input instanceof Request ? input.url : input;
+    if (!isPublicApiUrl(url)) {
+      return originalFetch.call(window, input, init);
     }
 
-    return response;
+    return originalFetch.call(window, input, init).then((response) => {
+      if (isPublicApiUrl(response.url)) {
+        observeSiteBanResponse(response);
+        const banRef = response.headers.get(BAN_REFERENCE_HEADER);
+        if (banRef) notifyBanReference(banRef);
+      }
+
+      return response;
+    });
   }) as typeof window.fetch;
 
   window.fetch = interceptedFetch;
