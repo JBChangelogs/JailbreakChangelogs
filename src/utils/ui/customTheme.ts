@@ -79,18 +79,38 @@ export function applyCustomTheme(theme: CustomTheme | null) {
   const root = document.documentElement;
   const style = root.style;
   for (let i = style.length - 1; i >= 0; i--) {
-    if (style[i].startsWith("--color-")) style.removeProperty(style[i]);
+    const key = style[i];
+    if (
+      key.startsWith("--color-") &&
+      (!theme || !COLOR_KEY.test(key) || !Object.hasOwn(theme.vars, key))
+    ) {
+      style.removeProperty(key);
+    }
   }
-  style.removeProperty("--logo-filter");
-  style.removeProperty("color-scheme");
-  delete root.dataset.customTheme;
-  if (!theme) return;
-  for (const [key, value] of Object.entries(theme.vars)) {
-    if (COLOR_KEY.test(key)) style.setProperty(key, String(value));
+  if (!theme) {
+    style.removeProperty("--logo-filter");
+    style.removeProperty("color-scheme");
+    delete root.dataset.customTheme;
+    return;
   }
-  style.setProperty("--logo-filter", theme.logo_filter || "none");
-  style.setProperty("color-scheme", theme.scheme);
-  root.dataset.customTheme = theme.share_code;
+  for (const [key, value] of Object.entries({
+    ...theme.vars,
+    "--logo-filter": theme.logo_filter || "none",
+    "color-scheme": theme.scheme,
+  })) {
+    if (
+      key !== "--logo-filter" &&
+      key !== "color-scheme" &&
+      !COLOR_KEY.test(key)
+    )
+      continue;
+    if (style.getPropertyValue(key) !== String(value)) {
+      style.setProperty(key, String(value));
+    }
+  }
+  if (root.dataset.customTheme !== theme.share_code) {
+    root.dataset.customTheme = theme.share_code;
+  }
 }
 
 // Themes being previewed, by who shows them (the editor, a shared-theme
@@ -109,7 +129,9 @@ function showTopPreview() {
   const top = topPreview();
   if (!top) return;
   applyCustomTheme(top);
-  document.documentElement.dataset.scheme = top.scheme;
+  if (document.documentElement.dataset.scheme !== top.scheme) {
+    document.documentElement.dataset.scheme = top.scheme;
+  }
 }
 
 /**

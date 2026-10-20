@@ -1006,6 +1006,12 @@ export default function CustomThemeEditor({
                     <LogoFilterBuilder
                       value={current.logo_filter}
                       onChange={(logo_filter) => update({ logo_filter })}
+                      onPreview={(logo_filter) =>
+                        previewCustomTheme("editor", {
+                          ...current,
+                          logo_filter,
+                        })
+                      }
                       matchColor={buttonHex(current.vars)}
                       matching={matchLogo}
                       onMatchingChange={setMatchLogo}

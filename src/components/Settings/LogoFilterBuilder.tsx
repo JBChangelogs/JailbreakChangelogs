@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
@@ -91,7 +92,7 @@ function LogoOption({
       )}
     >
       <span
-        className="flex h-10 w-full items-center justify-center rounded-md px-2"
+        className="flex h-12 w-full items-center justify-center rounded-md"
         style={{ background }}
       >
         <Image
@@ -99,7 +100,7 @@ function LogoOption({
           alt=""
           width={256}
           height={58}
-          className="h-5 w-auto"
+          className="h-auto max-h-10 w-full object-contain"
           style={{ filter: filter ?? "none" }}
         />
       </span>
@@ -126,12 +127,13 @@ export function matchLogoFilter(hex: string): string | null {
 
 /**
  * Picks the logo's color by clicking a finished logo: matched to the theme's
- * buttons, or a preset. Fine-tune holds a color strip and vividness for the
+ * buttons, or a preset. Fine-tune holds a color wheel and vividness for the
  * rest. `value` is the CSS filter, or null for the original logo.
  */
 export default function LogoFilterBuilder({
   value,
   onChange,
+  onPreview,
   background,
   matchColor,
   matching,
@@ -139,6 +141,7 @@ export default function LogoFilterBuilder({
 }: {
   value: string | null;
   onChange: (filter: string | null) => void;
+  onPreview: (filter: string | null) => void;
   /** The theme's header color, behind the logos. */
   background: string;
   /** The theme's button color as #rrggbb, for "Match buttons". */
@@ -147,21 +150,55 @@ export default function LogoFilterBuilder({
   matching: boolean;
   onMatchingChange: (matching: boolean) => void;
 }) {
+  const [dragHue, setDragHue] = useState<number | null>(null);
   const adjust = parseFilter(value);
+  if (dragHue !== null) adjust.hue = dragHue;
+  const drag = useRef<{ frame: number | null; hue: number; active: boolean }>({
+    frame: null,
+    hue: 0,
+    active: false,
+  });
+  const cancelFrame = () => {
+    if (drag.current.frame !== null) cancelAnimationFrame(drag.current.frame);
+    drag.current.frame = null;
+  };
+  useEffect(() => cancelFrame, []);
   // Any other choice stops following the buttons.
   const pick = (filter: string | null) => {
+    cancelFrame();
+    drag.current.active = false;
+    setDragHue(null);
+    if (!matching && filter === value) return;
     onMatchingChange(false);
     onChange(filter);
   };
   const set = (change: Partial<LogoAdjustments>) =>
     pick(buildFilter({ ...adjust, ...change }));
 
+  const pickFromPointer = (event: React.PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left - rect.width / 2;
+    const y = event.clientY - rect.top - rect.height / 2;
+    if (x === 0 && y === 0) return;
+    drag.current.hue = wrapHue(Math.round((Math.atan2(x, -y) * 180) / Math.PI));
+    if (drag.current.frame === null) {
+      drag.current.frame = requestAnimationFrame(() => {
+        drag.current.frame = null;
+        setDragHue(drag.current.hue);
+        onPreview(buildFilter({ ...adjust, hue: drag.current.hue }));
+      });
+    }
+  };
+
   const options = [
     {
       name: "Match buttons",
       filter: matchLogoFilter(matchColor),
-      selected: matching,
+      selected: matching && dragHue === null,
       onSelect: () => {
+        cancelFrame();
+        drag.current.active = false;
+        setDragHue(null);
         onMatchingChange(true);
         onChange(matchLogoFilter(matchColor));
       },
@@ -171,7 +208,7 @@ export default function LogoFilterBuilder({
       return {
         name,
         filter,
-        selected: !matching && value === filter,
+        selected: dragHue === null && !matching && value === filter,
         onSelect: () => pick(filter),
       };
     }),
@@ -196,6 +233,19 @@ export default function LogoFilterBuilder({
         <summary className="text-link cursor-pointer text-sm font-medium">
           Fine-tune the logo color
         </summary>
+        <div
+          className="border-border-card mt-3 flex h-24 items-center justify-center rounded-lg border px-6"
+          style={{ background }}
+        >
+          <Image
+            src="/logos/JBCL_Header.webp"
+            alt="Logo color preview"
+            width={256}
+            height={58}
+            className="h-auto w-full max-w-xs"
+            style={{ filter: buildFilter(adjust) ?? "none" }}
+          />
+        </div>
         <div className="mt-3 grid gap-4 @md:grid-cols-2">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
@@ -206,25 +256,75 @@ export default function LogoFilterBuilder({
                   : `${adjust.hue > 0 ? "+" : ""}${adjust.hue}°`}
               </span>
             </div>
-            {/* Sized like the Slider beside it, whose height is just its 6px
-                track (the thumb overhangs). The track shows the logo color
-                each spot gives. */}
-            <div className="flex h-1.5 items-center">
-              <input
-                type="range"
-                min={-180}
-                max={180}
-                step={5}
-                value={adjust.hue}
-                onChange={(event) => set({ hue: Number(event.target.value) })}
-                aria-label="Logo color"
-                className="focus-visible:[&::-webkit-slider-thumb]:ring-border-focus h-1.5 w-full cursor-pointer appearance-none rounded-full focus-visible:outline-none [&::-moz-range-thumb]:size-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-transparent [&::-webkit-slider-thumb]:size-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-md focus-visible:[&::-webkit-slider-thumb]:ring-2"
+            <div
+              role="slider"
+              tabIndex={0}
+              aria-label="Logo color"
+              aria-valuemin={-180}
+              aria-valuemax={180}
+              aria-valuenow={adjust.hue}
+              aria-valuetext={
+                adjust.hue === 0 ? "Original" : `${adjust.hue} degrees`
+              }
+              onPointerDown={(event) => {
+                if (event.button !== 0) return;
+                drag.current.active = true;
+                drag.current.hue = adjust.hue;
+                event.currentTarget.focus();
+                event.currentTarget.setPointerCapture(event.pointerId);
+                pickFromPointer(event);
+              }}
+              onPointerMove={(event) => {
+                if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                  pickFromPointer(event);
+                }
+              }}
+              onPointerUp={(event) => {
+                if (!event.currentTarget.hasPointerCapture(event.pointerId))
+                  return;
+                pickFromPointer(event);
+                set({ hue: drag.current.hue });
+                event.currentTarget.releasePointerCapture(event.pointerId);
+              }}
+              onPointerCancel={() => {
+                if (drag.current.active) set({ hue: drag.current.hue });
+              }}
+              onLostPointerCapture={() => {
+                if (drag.current.active) set({ hue: drag.current.hue });
+              }}
+              onKeyDown={(event) => {
+                const step = event.shiftKey ? 15 : 5;
+                const keys: Record<string, number> = {
+                  ArrowRight: wrapHue(adjust.hue + step),
+                  ArrowUp: wrapHue(adjust.hue + step),
+                  ArrowLeft: wrapHue(adjust.hue - step),
+                  ArrowDown: wrapHue(adjust.hue - step),
+                  Home: -180,
+                  End: 180,
+                };
+                if (event.key in keys) {
+                  event.preventDefault();
+                  set({ hue: keys[event.key] });
+                }
+              }}
+              className="focus-visible:ring-border-focus relative mx-auto size-40 cursor-crosshair touch-none rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              style={{
+                background: `conic-gradient(${[0, 60, 120, 180, 240, 300, 360]
+                  .map((d) => `hsl(${LOGO_HUE + d} 80% 55%)`)
+                  .join(", ")})`,
+              }}
+            >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-[16%] rounded-full"
+                style={{ background }}
+              />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.4)]"
                 style={{
-                  background: `linear-gradient(to right, ${[
-                    -180, -120, -60, 0, 60, 120, 180,
-                  ]
-                    .map((d) => `hsl(${LOGO_HUE + d} 80% 55%)`)
-                    .join(", ")})`,
+                  left: `${50 + 42 * Math.sin((adjust.hue * Math.PI) / 180)}%`,
+                  top: `${50 - 42 * Math.cos((adjust.hue * Math.PI) / 180)}%`,
                 }}
               />
             </div>
