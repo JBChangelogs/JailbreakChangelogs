@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Changelog } from "@/utils/api/api";
 import UpdateStatisticsCard from "@/components/common/UpdateStatisticsCard";
 
@@ -20,13 +21,14 @@ const TimelineHeader: React.FC<TimelineHeaderProps> = ({ changelogs }) => {
         releases, and gameplay evolution chronologically.
       </p>
 
-      <div className="mb-4">
-        <UpdateStatisticsCard changelogs={changelogs} />
-      </div>
-
-      <Button asChild>
-        <Link href="/changelogs">View Changelogs</Link>
+      <Button asChild size="sm" variant="secondary" className="mb-4">
+        <Link href="/changelogs">
+          <Icon icon="heroicons:document-text" inline={true} />
+          View Changelogs
+        </Link>
       </Button>
+
+      <UpdateStatisticsCard changelogs={changelogs} />
     </div>
   );
 };
