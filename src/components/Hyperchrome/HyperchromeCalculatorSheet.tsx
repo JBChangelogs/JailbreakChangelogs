@@ -9,22 +9,23 @@ import { Slider } from "../ui/slider";
 import { cn } from "@/lib/utils";
 import {
   calculateRobberiesToLevelUp,
-  calculateAllLevelPercentages,
   calculateRobberiesToPublicPityGoal,
   HYPERCHROME_PITY_PUBLIC,
   HYPERCHROME_PITY_SMALL,
+  type HyperchromeLevel,
 } from "@/utils/items/hyperchrome";
-import { toast } from "sonner";
-import { Button } from "../ui/button";
 import { Switch } from "@/components/ui/switch";
 
 function sanitizeDecimalInput(raw: string): string {
-  const digitsAndDots = raw.replace(/[^0-9.]/g, "");
+  const digitsAndDots = raw.replace(/[^0-9.]/g, "").replace(/^0+(?=\d)/, "");
   const firstDot = digitsAndDots.indexOf(".");
   if (firstDot === -1) return digitsAndDots;
   return (
     digitsAndDots.slice(0, firstDot + 1) +
-    digitsAndDots.slice(firstDot + 1).replace(/\./g, "")
+    digitsAndDots
+      .slice(firstDot + 1)
+      .replace(/\./g, "")
+      .slice(0, 1)
   );
 }
 
@@ -108,17 +109,10 @@ export default function HyperchromeCalculatorModal({
   ];
   const [mounted, setMounted] = useState(false);
   const [level, setLevel] = useState<string>("");
-  const [pity, setPity] = useState<string>("0");
-  const [hasCalculated, setHasCalculated] = useState(false);
-  const [resultRobberiesNeeded, setResultRobberiesNeeded] = useState<number>(0);
-  const [resultOtherPity, setResultOtherPity] = useState<Record<
-    number,
-    string
-  > | null>(null);
-  const [resultLevel, setResultLevel] = useState<number>(0);
-  const [resultPity, setResultPity] = useState<number>(0);
-  const [resultTipRobberies, setResultTipRobberies] = useState<number>(0);
+  const [pity, setPity] = useState<string>("");
   const [isSmallServer, setIsSmallServer] = useState(false);
+  // Last pity <= 100, kept so results stay visible while the input is over 100
+  const [validPity, setValidPity] = useState<string>("");
 
   useEffect(() => {
     setMounted(true);
@@ -127,72 +121,28 @@ export default function HyperchromeCalculatorModal({
   const handleClose = useCallback(() => {
     // reset when closing
     setLevel("");
-    setPity("0");
-    setHasCalculated(false);
-    setResultRobberiesNeeded(0);
-    setResultOtherPity(null);
-    setResultLevel(0);
-    setResultPity(0);
-    setResultTipRobberies(0);
+    setPity("");
+    setValidPity("");
     setIsSmallServer(false);
     onClose?.();
   }, [onClose]);
 
-  const handleCalculate = () => {
-    const parsedLevel = parseInt(level);
-    const parsedPity = parseFloat(pity);
+  const resultLevel = parseInt(level) as HyperchromeLevel;
+  const resultPity = Number(validPity);
+  const levelSelected = resultLevel >= 0 && resultLevel <= 4;
+  const pityTooHigh = Number(pity) > 100;
+  const showResults = levelSelected;
 
-    if (isNaN(parsedLevel) || parsedLevel < 0 || parsedLevel > 4) {
-      toast.error("Please enter a valid level (0-4)");
-      return;
-    }
-
-    if (isNaN(parsedPity) || parsedPity < 0 || parsedPity > 100) {
-      toast.error("Please enter a valid pity percentage (0-100)");
-      return;
-    }
-
-    const lvl = parsedLevel as 0 | 1 | 2 | 3 | 4;
-    const pityPercent = parsedPity;
-
-    const limit = 100;
-
-    if (pityPercent > limit) {
-      toast.error("Pity percentage cannot exceed 100%");
-      return;
-    }
-
-    const robberies = calculateRobberiesToLevelUp(
-      lvl,
-      pityPercent,
-      isSmallServer,
-    );
-    const tipRobberies = calculateRobberiesToPublicPityGoal(
-      lvl,
-      pityPercent,
-      isSmallServer,
-    );
-    const others = calculateAllLevelPercentages(
-      lvl,
-      pityPercent,
-      isSmallServer,
-    );
-
-    setResultRobberiesNeeded(robberies);
-    setResultTipRobberies(tipRobberies);
-    setResultOtherPity(others);
-    setResultLevel(lvl);
-    setResultPity(pityPercent);
-    setHasCalculated(true);
+  const updatePity = (value: string) => {
+    setPity(value);
+    if (Number(value) <= 100) setValidPity(value);
   };
-
-  // Keep results in sync if server type is toggled at result stage
-  useEffect(() => {
-    if (hasCalculated) {
-      handleCalculate();
-    }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSmallServer]);
+  const resultRobberiesNeeded = showResults
+    ? calculateRobberiesToLevelUp(resultLevel, resultPity, isSmallServer)
+    : 0;
+  const resultTipRobberies = showResults
+    ? calculateRobberiesToPublicPityGoal(resultLevel, resultPity, isSmallServer)
+    : 0;
 
   if (!mounted) {
     if (asPage) {
@@ -242,19 +192,19 @@ export default function HyperchromeCalculatorModal({
     : "text-primary-text text-sm font-bold tracking-wider uppercase";
 
   const calculatorControls = (
-    <>
-      <div className="mb-4">
+    <div className="space-y-4">
+      <div>
         <span id="level-label" className={inputLabelClass}>
-          Current Hyperchrome Level
+          Current HyperChrome Level
         </span>
         <div
           className={
             asPage
-              ? "text-primary-text mb-2 text-sm"
-              : "text-primary-text mb-2 text-xs"
+              ? "text-secondary-text mb-2 text-sm"
+              : "text-secondary-text mb-2 text-xs"
           }
         >
-          Level 0 means you have no hyperchrome yet.
+          Pick 0 if you don&apos;t own this color yet.
         </div>
         <div
           role="radiogroup"
@@ -281,7 +231,7 @@ export default function HyperchromeCalculatorModal({
         </div>
       </div>
 
-      <div className="mb-4">
+      <div>
         <label
           htmlFor="pity"
           className={
@@ -298,17 +248,19 @@ export default function HyperchromeCalculatorModal({
             id="pity"
             inputMode="decimal"
             autoComplete="off"
-            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus-visible:ring-border-focus w-24 shrink-0 rounded-lg border p-3 text-sm font-medium shadow-sm transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none"
+            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus-visible:ring-border-focus aria-invalid:border-form-error aria-invalid:focus:border-form-error aria-invalid:focus-visible:ring-form-error w-24 shrink-0 rounded-lg border p-3 text-sm font-medium shadow-sm transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none"
             placeholder="0"
             value={pity}
-            onChange={(e) => setPity(sanitizeDecimalInput(e.target.value))}
+            aria-invalid={pityTooHigh}
+            maxLength={5}
+            onChange={(e) => updatePity(sanitizeDecimalInput(e.target.value))}
           />
           <Slider
             value={[Math.min(100, Math.max(0, Number(pity) || 0))]}
             min={0}
             max={100}
             step={0.1}
-            onValueChange={([v]) => setPity(String(v))}
+            onValueChange={([v]) => updatePity(String(v))}
             aria-label={`Current ${isSmallServer ? "small" : "big"} server pity percent`}
             className="flex-1"
           />
@@ -316,53 +268,52 @@ export default function HyperchromeCalculatorModal({
             %
           </span>
         </div>
-        <div className={helperTextClass}>
-          {isSmallServer
-            ? "Reaching 66% in a small server is equivalent to 100% in a big server, guaranteeing an instant level-up!"
-            : "Big server pity is the baseline; reaching 100% guarantees an instant level-up."}
+        <div className={cn(helperTextClass, pityTooHigh && "text-form-error")}>
+          {pityTooHigh
+            ? "Pity can't go above 100%."
+            : isSmallServer
+              ? "Enter the % shown in a small server. 66% here equals 100% in a big server."
+              : "Enter the % shown in a big server. At 100%, your next roll is a guaranteed level-up."}
         </div>
-        <div
-          className={
-            asPage
-              ? "text-primary-text mt-1 text-sm"
-              : "text-primary-text mt-1 text-xs"
-          }
-        >
-          Pity percentages are server-mode specific (small and big % values are
-          not 1:1 comparable).
-        </div>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center justify-between gap-2 sm:justify-start">
-            <span
-              className={
-                asPage
-                  ? "text-primary-text text-sm tracking-wider whitespace-nowrap uppercase"
-                  : "text-primary-text text-xs tracking-wider whitespace-nowrap uppercase"
-              }
-            >
-              Small Server
-            </span>
-            <Switch
-              checked={isSmallServer}
-              onCheckedChange={setIsSmallServer}
-              aria-label="Toggle small server mode"
-            ></Switch>
-          </div>
-          <Button
-            size="md"
-            type="button"
-            onClick={handleCalculate}
-            data-rybbit-event="Hyper Pity Calculate"
-            className="w-full sm:w-auto"
+        <div className="mt-4 flex items-center gap-2">
+          <span
+            className={
+              asPage
+                ? "text-primary-text text-sm tracking-wider whitespace-nowrap uppercase"
+                : "text-primary-text text-xs tracking-wider whitespace-nowrap uppercase"
+            }
           >
-            Calculate
-          </Button>
+            Small Server
+          </span>
+          <Switch
+            checked={isSmallServer}
+            onCheckedChange={setIsSmallServer}
+            aria-label="Toggle small server mode"
+          ></Switch>
         </div>
       </div>
 
-      <div className="mb-4">
-        {hasCalculated && resultOtherPity && (
-          <div className="mb-4">
+      {!levelSelected && (
+        <div
+          className={cn(
+            "border-border-card bg-tertiary-bg text-primary-text flex items-center justify-center gap-2 rounded-lg border p-4 font-medium",
+            asPage ? "text-sm" : "text-xs",
+          )}
+        >
+          <Icon icon="heroicons:arrow-up" className="shrink-0 text-base" />
+          Select your current level above to see results.
+        </div>
+      )}
+
+      {showResults && (
+        <div
+          aria-hidden={pityTooHigh}
+          className={cn(
+            "space-y-4 transition-opacity",
+            pityTooHigh && "pointer-events-none opacity-40",
+          )}
+        >
+          <div>
             <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
               <div className="mb-3 flex items-center justify-between">
                 <div
@@ -428,8 +379,8 @@ export default function HyperchromeCalculatorModal({
                           : "text-secondary-text mt-1 inline-block text-[13px] font-normal"
                       }
                     >
-                      (from your current pity, staying in{" "}
-                      {isSmallServer ? "Small Servers" : "Big Servers"})
+                      from your current pity in{" "}
+                      {isSmallServer ? "small servers" : "big servers"}
                     </span>
                   </div>
                 </div>
@@ -459,22 +410,14 @@ export default function HyperchromeCalculatorModal({
                   >
                     {isSmallServer ? (
                       <>
-                        <span>After </span>
-                        <span className="font-black">
-                          {resultTipRobberies}
-                        </span>{" "}
-                        <span>robberies, your pity reaches </span>
-                        <span className="font-black">66%</span>
-                        <span> in Small Servers.</span>
+                        After{" "}
+                        <span className="font-black">{resultTipRobberies}</span>{" "}
+                        robberies you&apos;ll hit{" "}
+                        <span className="font-black">66%</span>. Join a big
+                        server then and your next roll is guaranteed.
                       </>
                     ) : (
-                      <>
-                        <span>
-                          Big/Public servers don&apos;t speed up pity
-                          progression; they simply use a different pity scale
-                          than Small/Private servers.
-                        </span>
-                      </>
+                      "Big servers don't fill pity faster, they just use a different scale than small servers."
                     )}
                   </div>
                   <div
@@ -485,8 +428,8 @@ export default function HyperchromeCalculatorModal({
                     }
                   >
                     {isSmallServer
-                      ? "Switch to a Big Server (9+ Players) at that point to guarantee an instant level-up."
-                      : "However, Big/Public servers provide 1.5x luck for obtaining hyperchromes naturally (without relying on pity)."}
+                      ? "Small servers also have 0.66x the natural HyperChrome odds."
+                      : "They do give 1.5x the natural HyperChrome odds."}
                   </div>
                 </div>
               </div>
@@ -510,7 +453,7 @@ export default function HyperchromeCalculatorModal({
                           : "text-primary-text text-base font-bold"
                       }
                     >
-                      VP / Mansion Wildcard (Random Color)
+                      Wildcard from VP / Mansion (random color)
                     </div>
                   </div>
                 </div>
@@ -543,7 +486,7 @@ export default function HyperchromeCalculatorModal({
                         : "text-primary-text text-center text-sm font-medium"
                     }
                   >
-                    remaining to guarantee{" "}
+                    remaining to guarantee a{" "}
                     <span className="font-black">HyperChrome Wildcard</span>
                     <br />
                     <span
@@ -553,11 +496,8 @@ export default function HyperchromeCalculatorModal({
                           : "text-secondary-text mt-1 inline-block text-[13px] font-normal"
                       }
                     >
-                      (from your current pity, staying in{" "}
-                      {isSmallServer
-                        ? "Small/Private Servers"
-                        : "Big/Public Servers"}
-                      )
+                      from your current pity in{" "}
+                      {isSmallServer ? "small servers" : "big servers"}
                     </span>
                   </div>
                 </div>
@@ -565,24 +505,24 @@ export default function HyperchromeCalculatorModal({
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
                     <div className="text-secondary-text mb-1 text-[11px] uppercase">
-                      Big/Public Guarantee
+                      Big server
                     </div>
                     <div className="text-primary-text text-2xl font-black">
                       {HYPERCHROME_PITY_PUBLIC[resultLevel]}
                     </div>
                     <div className="text-secondary-text text-xs">
-                      total from 0% pity
+                      robberies from 0%
                     </div>
                   </div>
                   <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
                     <div className="text-secondary-text mb-1 text-[11px] uppercase">
-                      Small/Private Guarantee
+                      Small server
                     </div>
                     <div className="text-primary-text text-2xl font-black">
                       {HYPERCHROME_PITY_SMALL[resultLevel]}
                     </div>
                     <div className="text-secondary-text text-xs">
-                      total from 0% pity
+                      robberies from 0%
                     </div>
                   </div>
                 </div>
@@ -596,8 +536,8 @@ export default function HyperchromeCalculatorModal({
                 }
               >
                 <div>
-                  Based on Level {resultLevel} with {resultPity}%{" "}
-                  {isSmallServer ? "Small Server" : "Big Server"} Pity
+                  Level {resultLevel} at {resultPity}%{" "}
+                  {isSmallServer ? "small server" : "big server"} pity
                 </div>
                 <div className="text-primary-text/70 mt-1">
                   {isSmallServer ? (
@@ -609,7 +549,7 @@ export default function HyperchromeCalculatorModal({
                           HYPERCHROME_PITY_PUBLIC[resultLevel]) *
                         100
                       ).toFixed(2)}
-                      % Big Server Pity
+                      % big server pity
                     </>
                   ) : (
                     <>
@@ -620,20 +560,18 @@ export default function HyperchromeCalculatorModal({
                           HYPERCHROME_PITY_SMALL[resultLevel]) *
                         100
                       ).toFixed(2)}
-                      % Small Server Pity
+                      % small server pity
                     </>
                   )}
                 </div>
               </div>
             </div>
           </div>
-        )}
 
-        {hasCalculated && resultOtherPity && (
-          <div className="mb-4">
+          <div>
             <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
               <div className={cn(sectionTitleClass, "mb-3")}>
-                Alternative Level Calculations
+                If You Trade Levels
               </div>
               <div
                 className={
@@ -642,8 +580,8 @@ export default function HyperchromeCalculatorModal({
                     : "text-primary-text mb-4 text-xs font-medium"
                 }
               >
-                If you trade to a different level, here&apos;s what your public
-                pity would be:
+                Trading doesn&apos;t reset pity. Here&apos;s your big server
+                pity if you owned this color at another level:
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -691,7 +629,7 @@ export default function HyperchromeCalculatorModal({
                         <div className="text-secondary-text text-xs">
                           {isGuaranteed
                             ? "Guaranteed next roll"
-                            : "Public pity"}
+                            : "Big server pity"}
                         </div>
                       </div>
                     </div>
@@ -700,55 +638,41 @@ export default function HyperchromeCalculatorModal({
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 
   const calculatorInformation = (
-    <>
-      <div className="mb-4">
+    <div className="space-y-6">
+      <div>
         <h2 className={sectionTitleClass}>Pities and Chances</h2>
         <div className={`text-primary-text mt-3 space-y-2 ${bodyTextClass}`}>
           <p>
             <span className="font-semibold">HyperChromes</span> are the rarest
-            rewards from the bonus roulette. They come in{" "}
-            <span className="text-link">8 different colors</span>, with most
-            major robberies yielding a different color.
+            bonus roulette reward. There are 8 colors, each tied to a robbery
+            (listed below).
           </p>
           <p>
-            Players start with a Level 1 HyperChrome after their first
-            successful roll, which can level up to a maximum of Level 5 as they
-            roll more of that color. The chance of getting one is below 1% at
-            base rates and depends on its current level. Level 5 HyperChromes
-            cannot be leveled further.
+            Your first roll of a color gives you Level 1, and each roll after
+            that levels it up, to a max of Level 5. The base chance is under 1%
+            and drops at each level.
           </p>
           <p>
-            Upon failing to obtain or evolve a HyperChrome, their pity to that
-            color is increased by a small percentage (the higher the level, the
-            smaller the percentage). The pity to a HyperColor can be viewed as a
-            percentage underneath the bonus roll, provided it is above 10%,
-            otherwise, no number is shown. If their pity reaches 100% or above,
-            the player is guaranteed to obtain or evolve their HyperChrome.
+            Every miss adds pity to that color, less per roll at higher levels.
+            The game shows it under the bonus roll once it passes 10%. At 100%,
+            your next roll is guaranteed.
           </p>
           <p>
-            Officially, production chance per roll varies by level, and pity to
-            100% is calculated as{" "}
-            <span className="font-semibold">chance denominator x 1.25</span>.
-            Small/private servers run at{" "}
-            <span className="font-semibold">66% odds</span>, so they require
-            more rolls for the same pity.
+            Pity needed is the{" "}
+            <span className="font-semibold">chance denominator × 1.25</span>.
+            Small servers (0-8 players) and private servers run at{" "}
+            <span className="font-semibold">66% odds</span>, so they need more
+            rolls.
           </p>
           <p>
-            Upon successfully obtaining or evolving a HyperChrome from a bonus
-            roll (either through chance or through pity), the player&apos;s pity
-            for that color is reset to 0. Trading for a HyperChrome does not
-            reset the pity.
-          </p>
-          <p className="text-primary-text">
-            Below is a table containing the approximate probabilities and pities
-            for each level. The odds are lesser and pities require more in small
-            (0-8 players) and private servers.
+            Rolling a HyperChrome, by luck or by pity, resets that color&apos;s
+            pity to 0. Trading for one doesn&apos;t.
           </p>
         </div>
         <div className="mt-3 overflow-x-auto">
@@ -762,9 +686,11 @@ export default function HyperchromeCalculatorModal({
                   Chance per Roll
                 </th>
                 <th className="px-2 py-2 text-left font-semibold">Approx. %</th>
-                <th className="px-2 py-2 text-left font-semibold">Pity</th>
                 <th className="px-2 py-2 text-left font-semibold">
-                  Pity (Small/Private)
+                  Pity (Big)
+                </th>
+                <th className="px-2 py-2 text-left font-semibold">
+                  Pity (Small)
                 </th>
               </tr>
             </thead>
@@ -786,11 +712,8 @@ export default function HyperchromeCalculatorModal({
         </div>
       </div>
 
-      <div className="mb-4">
-        <div className={sectionTitleClass}>Hyperchrome Colors by Robbery</div>
-        <div className={`text-primary-text mt-2 ${bodyTextClass}`}>
-          Each robbery drops a specific HyperChrome color.
-        </div>
+      <div>
+        <h2 className={sectionTitleClass}>HyperChrome Colors by Robbery</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {hyperchromeRobberyImages.map((item) => {
             const imageSrc = `https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/jars/${item.name}.webp`;
@@ -827,7 +750,7 @@ export default function HyperchromeCalculatorModal({
           })}
         </div>
       </div>
-    </>
+    </div>
   );
 
   if (asPage) {
@@ -857,7 +780,7 @@ export default function HyperchromeCalculatorModal({
         <div className="modal-header text-primary-text flex shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
           <span>Hyperchrome Pity Calculator</span>
         </div>
-        <div className="flex flex-1 flex-col overflow-y-auto p-6">
+        <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
           {calculatorControls}
           {calculatorInformation}
         </div>

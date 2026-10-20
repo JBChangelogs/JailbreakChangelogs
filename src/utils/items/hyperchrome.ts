@@ -44,20 +44,3 @@ export function calculateRobberiesToPublicPityGoal(
 
   return Math.max(0, Math.ceil(publicGoal - robberiesDone));
 }
-
-export function calculateAllLevelPercentages(
-  currentLevel: HyperchromeLevel,
-  currentPityPercent: number,
-  isSmallServer: boolean,
-): string[] {
-  const currentPityBase = isSmallServer
-    ? HYPERCHROME_PITY_SMALL[currentLevel]
-    : HYPERCHROME_PITY_PUBLIC[currentLevel];
-  const robberiesDone = (currentPityPercent / 100) * currentPityBase;
-
-  const targetBases = isSmallServer
-    ? HYPERCHROME_PITY_SMALL
-    : HYPERCHROME_PITY_PUBLIC;
-
-  return targetBases.map((value) => ((robberiesDone / value) * 100).toFixed(2));
-}

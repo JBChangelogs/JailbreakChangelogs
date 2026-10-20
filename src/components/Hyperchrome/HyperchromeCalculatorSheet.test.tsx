@@ -55,18 +55,9 @@ test("page separates information from calculator results while the sheet keeps o
           return {
             cn: (...values: unknown[]) => values.filter(Boolean).join(" "),
           };
-        if (name === "sonner")
-          return {
-            toast: {
-              error: (message: string) => {
-                throw new Error(message);
-              },
-            },
-          };
         return {
           default: name,
           Icon: "icon",
-          Button: "button",
           Switch: "switch",
           Slider: "slider",
           Sheet: "sheet",
@@ -82,22 +73,14 @@ test("page separates information from calculator results while the sheet keeps o
   const page = render(true);
   const [card, information] = page.props.children as Element[];
   expect(card.props.className).toContain("border-border-card");
-  expect(hasText(card, "Calculate")).toBe(true);
+  expect(hasText(card, "Result")).toBe(true);
   expect(hasText(card, "Pities and Chances")).toBe(false);
   expect(information.type).toBe("section");
   expect(hasText(information, "Pities and Chances")).toBe(true);
-  const calculate = elements(card).find(
-    (element) => element.props.children === "Calculate",
-  )!;
-  (calculate.props.onClick as () => void)();
-  const calculatedCard = (render(true).props.children as Element[])[0];
-  expect(hasText(calculatedCard, "Result")).toBe(true);
-  expect(hasText(calculatedCard, "Pities and Chances")).toBe(false);
   const sheet = render(false);
   const scrollBody = elements(sheet).find((element) =>
     String(element.props.className).includes("overflow-y-auto"),
   )!;
-  expect(hasText(scrollBody, "Calculate")).toBe(true);
   expect(hasText(scrollBody, "Result")).toBe(true);
   expect(hasText(scrollBody, "Pities and Chances")).toBe(true);
   states[0] = false;
