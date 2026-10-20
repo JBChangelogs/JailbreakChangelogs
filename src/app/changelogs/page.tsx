@@ -6,6 +6,7 @@ import { useRouter } from "nextjs-toploader/app";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import RateLimitView from "@/components/Layout/RateLimitView";
+import ChangelogRouteLoading from "@/app/changelogs/[id]/loading";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -65,7 +66,7 @@ export default function ChangelogsPage() {
     return <RateLimitView retryAfter={error.retryAfter} />;
   }
 
-  return null;
+  return <ChangelogRouteLoading />;
 }
 
 class ChangelogRateLimitError extends Error {

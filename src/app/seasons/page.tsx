@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "nextjs-toploader/app";
+import SeasonRouteLoading from "@/app/seasons/[id]/loading";
 
 const LATEST_SEASON = Number(process.env.NEXT_PUBLIC_LATEST_SEASON);
 
@@ -15,5 +16,5 @@ export default function SeasonsPage() {
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return null;
+  return <SeasonRouteLoading />;
 }
