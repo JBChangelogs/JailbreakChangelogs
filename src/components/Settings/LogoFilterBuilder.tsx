@@ -1,17 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
-import { Slider } from "@/components/ui/slider";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { hexToHsv } from "@/utils/ui/accentColor";
+import { hexToHsv, hsvToHex } from "@/utils/ui/accentColor";
 
 interface LogoAdjustments {
   /** Degrees around the color wheel, -180 to 180. */
   hue: number;
   /** 1 keeps the colors; lower is softer, higher is more vivid. */
   saturation: number;
-  /** 1 keeps the brightness. Only presets set it. */
   brightness: number;
 }
 
@@ -41,7 +47,8 @@ function parseFilter(filter: string | null): LogoAdjustments {
     return match && Number.isFinite(value) ? value : fallback;
   };
   return {
-    hue: wrapHue(number(/hue-rotate\((-?[\d.]+)deg\)/, 0)),
+    hue:
+      Math.round(wrapHue(number(/hue-rotate\((-?[\d.]+)deg\)/, 0)) * 100) / 100,
     saturation: number(/saturate\(([\d.]+)\)/, 1),
     brightness: number(/brightness\(([\d.]+)\)/, 1),
   };
@@ -50,6 +57,20 @@ function parseFilter(filter: string | null): LogoAdjustments {
 /** Any angle as -180 to 180; hue-rotate(270deg) is the same as -90deg. */
 const wrapHue = (hue: number) => ((((hue + 180) % 360) + 360) % 360) - 180;
 
+function wheelColor(hue: number, saturation: number, brightness: number) {
+  return hsvToHex({
+    h: (LOGO_HUE + hue + 360) % 360,
+    s: Math.min(1, Math.max(0, saturation / 2)),
+    v: Math.min(1, Math.max(0, brightness)),
+  }).toUpperCase();
+}
+
+function wheelPosition(hue: number, saturation: number) {
+  const angle = (hue * Math.PI) / 180;
+  const radius = Math.min(2, Math.max(0, saturation)) * 25;
+  return `translate3d(${Math.sin(angle) * radius}cqw, ${-Math.cos(angle) * radius}cqw, 0)`;
+}
+
 /** The CSS filter for the adjustments, or null when the logo is unchanged. */
 function buildFilter(adjust: LogoAdjustments) {
   // Slider steps leave float noise like 0.7000000001.
@@ -57,7 +78,7 @@ function buildFilter(adjust: LogoAdjustments) {
     adjust.hue,
     adjust.saturation,
     adjust.brightness,
-  ].map((n) => Math.round(n * 100) / 100);
+  ].map((n, index) => Number(n.toFixed(index === 0 ? 2 : 4)));
   const parts = [
     hue !== 0 && `hue-rotate(${hue}deg)`,
     saturation !== 1 && `saturate(${saturation})`,
@@ -150,24 +171,58 @@ export default function LogoFilterBuilder({
   matching: boolean;
   onMatchingChange: (matching: boolean) => void;
 }) {
-  const [dragHue, setDragHue] = useState<number | null>(null);
+  const instructionsId = useId();
+  const [dragging, setDragging] = useState(false);
+  const [hexInvalid, setHexInvalid] = useState(false);
   const adjust = parseFilter(value);
-  if (dragHue !== null) adjust.hue = dragHue;
-  const drag = useRef<{ frame: number | null; hue: number; active: boolean }>({
+  const handleRef = useRef<HTMLSpanElement>(null);
+  const previewRef = useRef<HTMLImageElement>(null);
+  const hexInputRef = useRef<HTMLInputElement>(null);
+  const vividnessRef = useRef<HTMLSpanElement>(null);
+  const swatchRef = useRef<HTMLButtonElement>(null);
+  const editingHex = useRef(false);
+  const color = wheelColor(adjust.hue, adjust.saturation, adjust.brightness);
+  useEffect(() => {
+    if (hexInputRef.current && !editingHex.current) {
+      hexInputRef.current.value = color.slice(1);
+      setHexInvalid(false);
+    }
+  }, [color]);
+  const drag = useRef<{
+    frame: number | null;
+    hue: number;
+    saturation: number;
+    active: boolean;
+    rect: DOMRect | null;
+  }>({
     frame: null,
     hue: 0,
+    saturation: 1,
     active: false,
+    rect: null,
   });
   const cancelFrame = () => {
     if (drag.current.frame !== null) cancelAnimationFrame(drag.current.frame);
     drag.current.frame = null;
   };
   useEffect(() => cancelFrame, []);
+  const syncHexInput = (filter: string | null) => {
+    setHexInvalid(false);
+    if (hexInputRef.current && !editingHex.current) {
+      const next = parseFilter(filter);
+      hexInputRef.current.value = wheelColor(
+        next.hue,
+        next.saturation,
+        next.brightness,
+      ).slice(1);
+    }
+  };
   // Any other choice stops following the buttons.
   const pick = (filter: string | null) => {
     cancelFrame();
     drag.current.active = false;
-    setDragHue(null);
+    setDragging(false);
+    syncHexInput(filter);
     if (!matching && filter === value) return;
     onMatchingChange(false);
     onChange(filter);
@@ -175,30 +230,88 @@ export default function LogoFilterBuilder({
   const set = (change: Partial<LogoAdjustments>) =>
     pick(buildFilter({ ...adjust, ...change }));
 
+  const applyHex = (input: HTMLInputElement) => {
+    const hex = `#${input.value.trim().replace(/^#/, "")}`;
+    if (!/^#[0-9a-f]{6}$/i.test(hex)) {
+      setHexInvalid(true);
+      return;
+    }
+    setHexInvalid(false);
+    if (!editingHex.current) input.value = hex.slice(1).toUpperCase();
+    if (hex.toUpperCase() === color) return;
+    const hsv = hexToHsv(hex);
+    set({
+      hue: hsv.s === 0 ? adjust.hue : wrapHue(hsv.h - LOGO_HUE),
+      saturation: hsv.s * 2,
+      brightness: hsv.v,
+    });
+  };
+  const copyColor = async () => {
+    try {
+      await navigator.clipboard.writeText(color);
+      toast.success("Color copied");
+    } catch {
+      toast.error("Couldn't copy the color");
+    }
+  };
+
+  const previewHue = (wheel: HTMLDivElement) => {
+    const hue = drag.current.hue;
+    const rounded = Math.round(hue * 100) / 100;
+    const saturation = drag.current.saturation;
+    const vividness = Math.round(saturation * 100);
+    const color = wheelColor(hue, saturation, adjust.brightness);
+    const filter = buildFilter({ ...adjust, hue, saturation });
+    if (previewRef.current) previewRef.current.style.filter = filter ?? "none";
+    if (hexInputRef.current) hexInputRef.current.value = color.slice(1);
+    if (swatchRef.current) swatchRef.current.style.backgroundColor = color;
+    if (vividnessRef.current)
+      vividnessRef.current.textContent = `${vividness}%`;
+    wheel.setAttribute("aria-valuenow", String(rounded));
+    wheel.setAttribute("aria-valuetext", `${color}, vividness ${vividness}%`);
+    onPreview(filter);
+  };
+
   const pickFromPointer = (event: React.PointerEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
+    const rect = drag.current.rect;
+    if (!rect) return;
     const x = event.clientX - rect.left - rect.width / 2;
     const y = event.clientY - rect.top - rect.height / 2;
-    if (x === 0 && y === 0) return;
-    drag.current.hue = wrapHue(Math.round((Math.atan2(x, -y) * 180) / Math.PI));
+    const distance = Math.hypot(x, y);
+    if (distance > 0)
+      drag.current.hue = wrapHue((Math.atan2(x, -y) * 180) / Math.PI);
+    drag.current.saturation = Math.min(2, (distance / (rect.width / 2)) * 2);
+    if (handleRef.current) {
+      handleRef.current.style.transform = wheelPosition(
+        drag.current.hue,
+        drag.current.saturation,
+      );
+    }
     if (drag.current.frame === null) {
+      const wheel = event.currentTarget;
       drag.current.frame = requestAnimationFrame(() => {
         drag.current.frame = null;
-        setDragHue(drag.current.hue);
-        onPreview(buildFilter({ ...adjust, hue: drag.current.hue }));
+        previewHue(wheel);
       });
     }
+  };
+
+  const finishDrag = (wheel: HTMLDivElement) => {
+    if (!drag.current.active) return;
+    previewHue(wheel);
+    set({ hue: drag.current.hue, saturation: drag.current.saturation });
   };
 
   const options = [
     {
       name: "Match buttons",
       filter: matchLogoFilter(matchColor),
-      selected: matching && dragHue === null,
+      selected: matching && !dragging,
       onSelect: () => {
         cancelFrame();
         drag.current.active = false;
-        setDragHue(null);
+        setDragging(false);
+        syncHexInput(matchLogoFilter(matchColor));
         onMatchingChange(true);
         onChange(matchLogoFilter(matchColor));
       },
@@ -208,7 +321,7 @@ export default function LogoFilterBuilder({
       return {
         name,
         filter,
-        selected: dragHue === null && !matching && value === filter,
+        selected: !dragging && !matching && value === filter,
         onSelect: () => pick(filter),
       };
     }),
@@ -233,12 +346,27 @@ export default function LogoFilterBuilder({
         <summary className="text-link cursor-pointer text-sm font-medium">
           Fine-tune the logo color
         </summary>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <span className="text-secondary-text text-xs">Logo preview</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              editingHex.current = false;
+              pick(null);
+            }}
+          >
+            Reset to original
+          </Button>
+        </div>
         <div
-          className="border-border-card mt-3 flex h-24 items-center justify-center rounded-lg border px-6"
+          className="border-border-card mt-2 flex h-24 items-center justify-center rounded-lg border px-6"
           style={{ background }}
         >
           <Image
             src="/logos/JBCL_Header.webp"
+            ref={previewRef}
             alt="Logo color preview"
             width={256}
             height={58}
@@ -246,105 +374,187 @@ export default function LogoFilterBuilder({
             style={{ filter: buildFilter(adjust) ?? "none" }}
           />
         </div>
-        <div className="mt-3 grid gap-4 @md:grid-cols-2">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-primary-text">Color</span>
-              <span className="text-secondary-text tabular-nums">
-                {adjust.hue === 0
-                  ? "Original"
-                  : `${adjust.hue > 0 ? "+" : ""}${adjust.hue}°`}
-              </span>
+        <div className="mt-3 space-y-3">
+          <div className="flex flex-wrap items-start justify-between gap-3 text-sm">
+            <div className="space-y-1.5">
+              <label
+                htmlFor={`${instructionsId}-hex`}
+                className="text-primary-text"
+              >
+                Selected color
+              </label>
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      ref={swatchRef}
+                      type="button"
+                      aria-label="Copy selected color"
+                      onClick={copyColor}
+                      className="border-border-card focus-visible:ring-border-focus size-8 shrink-0 cursor-pointer rounded-md border focus-visible:ring-2 focus-visible:outline-none"
+                      style={{ backgroundColor: color }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Copy color</TooltipContent>
+                </Tooltip>
+                <div className="relative">
+                  <span
+                    aria-hidden="true"
+                    className="text-secondary-text pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 font-mono"
+                  >
+                    #
+                  </span>
+                  <Input
+                    id={`${instructionsId}-hex`}
+                    ref={hexInputRef}
+                    aria-label="Selected color hex"
+                    defaultValue={color.slice(1)}
+                    placeholder="RRGGBB"
+                    maxLength={6}
+                    spellCheck={false}
+                    autoComplete="off"
+                    aria-invalid={hexInvalid}
+                    aria-describedby={
+                      hexInvalid ? `${instructionsId}-hex-error` : undefined
+                    }
+                    className="aria-invalid:border-form-error aria-invalid:focus:border-form-error aria-invalid:focus-visible:ring-form-error h-8 w-28 pr-2 pl-6 font-mono uppercase"
+                    onFocus={() => {
+                      editingHex.current = true;
+                    }}
+                    onChange={(event) => {
+                      const input = event.currentTarget;
+                      const text = input.value.trim();
+                      setHexInvalid(/[^0-9a-f]/i.test(text));
+                      if (/^[0-9a-f]{6}$/i.test(text)) applyHex(input);
+                    }}
+                    onPaste={(event) => {
+                      const text = event.clipboardData.getData("text").trim();
+                      if (/^#[0-9a-f]{6}$/i.test(text)) {
+                        event.preventDefault();
+                        event.currentTarget.value = text.slice(1);
+                        applyHex(event.currentTarget);
+                      }
+                    }}
+                    onBlur={(event) => {
+                      editingHex.current = false;
+                      applyHex(event.currentTarget);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        applyHex(event.currentTarget);
+                      } else if (event.key === "Escape") {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        event.currentTarget.value = color.slice(1);
+                        setHexInvalid(false);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+              <p
+                id={`${instructionsId}-hex-error`}
+                role="status"
+                className="text-form-error min-h-4 text-xs"
+              >
+                {hexInvalid ? "Use 6 hex digits, e.g. #5865F2." : ""}
+              </p>
             </div>
-            <div
-              role="slider"
-              tabIndex={0}
-              aria-label="Logo color"
-              aria-valuemin={-180}
-              aria-valuemax={180}
-              aria-valuenow={adjust.hue}
-              aria-valuetext={
-                adjust.hue === 0 ? "Original" : `${adjust.hue} degrees`
-              }
-              onPointerDown={(event) => {
-                if (event.button !== 0) return;
-                drag.current.active = true;
-                drag.current.hue = adjust.hue;
-                event.currentTarget.focus();
-                event.currentTarget.setPointerCapture(event.pointerId);
-                pickFromPointer(event);
-              }}
-              onPointerMove={(event) => {
-                if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-                  pickFromPointer(event);
-                }
-              }}
-              onPointerUp={(event) => {
-                if (!event.currentTarget.hasPointerCapture(event.pointerId))
-                  return;
-                pickFromPointer(event);
-                set({ hue: drag.current.hue });
-                event.currentTarget.releasePointerCapture(event.pointerId);
-              }}
-              onPointerCancel={() => {
-                if (drag.current.active) set({ hue: drag.current.hue });
-              }}
-              onLostPointerCapture={() => {
-                if (drag.current.active) set({ hue: drag.current.hue });
-              }}
-              onKeyDown={(event) => {
-                const step = event.shiftKey ? 15 : 5;
-                const keys: Record<string, number> = {
-                  ArrowRight: wrapHue(adjust.hue + step),
-                  ArrowUp: wrapHue(adjust.hue + step),
-                  ArrowLeft: wrapHue(adjust.hue - step),
-                  ArrowDown: wrapHue(adjust.hue - step),
-                  Home: -180,
-                  End: 180,
-                };
-                if (event.key in keys) {
-                  event.preventDefault();
-                  set({ hue: keys[event.key] });
-                }
-              }}
-              className="focus-visible:ring-border-focus relative mx-auto size-40 cursor-crosshair touch-none rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              style={{
-                background: `conic-gradient(${[0, 60, 120, 180, 240, 300, 360]
-                  .map((d) => `hsl(${LOGO_HUE + d} 80% 55%)`)
-                  .join(", ")})`,
-              }}
-            >
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-[16%] rounded-full"
-                style={{ background }}
-              />
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.4)]"
-                style={{
-                  left: `${50 + 42 * Math.sin((adjust.hue * Math.PI) / 180)}%`,
-                  top: `${50 - 42 * Math.cos((adjust.hue * Math.PI) / 180)}%`,
-                }}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-3">
               <span className="text-primary-text">Vividness</span>
-              <span className="text-secondary-text tabular-nums">
+              <span
+                ref={vividnessRef}
+                className="text-secondary-text tabular-nums"
+              >
                 {Math.round(adjust.saturation * 100)}%
               </span>
             </div>
-            <Slider
-              value={[adjust.saturation]}
-              min={0}
-              max={2}
-              step={0.05}
-              onValueChange={([saturation]) => set({ saturation })}
-              aria-label="Logo vividness"
+          </div>
+          <div
+            role="slider"
+            tabIndex={0}
+            aria-label="Logo color"
+            aria-valuemin={-180}
+            aria-valuemax={180}
+            aria-valuenow={adjust.hue}
+            aria-valuetext={`${color}, vividness ${Math.round(adjust.saturation * 100)}%`}
+            aria-describedby={instructionsId}
+            onPointerDown={(event) => {
+              if (event.button !== 0) return;
+              drag.current.active = true;
+              drag.current.hue = adjust.hue;
+              drag.current.saturation = adjust.saturation;
+              setDragging(true);
+              event.currentTarget.focus({ preventScroll: true });
+              setHexInvalid(false);
+              drag.current.rect = event.currentTarget.getBoundingClientRect();
+              event.currentTarget.setPointerCapture(event.pointerId);
+              pickFromPointer(event);
+            }}
+            onPointerMove={(event) => {
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                pickFromPointer(event);
+              }
+            }}
+            onPointerUp={(event) => {
+              if (!event.currentTarget.hasPointerCapture(event.pointerId))
+                return;
+              pickFromPointer(event);
+              finishDrag(event.currentTarget);
+              event.currentTarget.releasePointerCapture(event.pointerId);
+            }}
+            onPointerCancel={(event) => finishDrag(event.currentTarget)}
+            onLostPointerCapture={(event) => finishDrag(event.currentTarget)}
+            onKeyDown={(event) => {
+              const step = event.shiftKey ? 15 : 5;
+              const hue = drag.current.active ? drag.current.hue : adjust.hue;
+              const saturation = drag.current.active
+                ? drag.current.saturation
+                : adjust.saturation;
+              const vividnessStep = event.shiftKey ? 0.15 : 0.05;
+              const keys: Record<string, Partial<LogoAdjustments>> = {
+                ArrowRight: { hue: wrapHue(hue + step) },
+                ArrowLeft: { hue: wrapHue(hue - step) },
+                ArrowUp: {
+                  saturation: Math.min(2, saturation + vividnessStep),
+                },
+                ArrowDown: {
+                  saturation: Math.max(0, saturation - vividnessStep),
+                },
+                Home: { hue: -180 },
+                End: { hue: 180 },
+              };
+              if (Object.hasOwn(keys, event.key)) {
+                event.preventDefault();
+                set({ hue, saturation, ...keys[event.key] });
+              }
+            }}
+            className="focus-visible:ring-border-focus @container relative mx-auto aspect-square w-64 max-w-full cursor-crosshair touch-none rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            style={{
+              background: `radial-gradient(closest-side, #fff, transparent), conic-gradient(from ${-LOGO_HUE}deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)`,
+            }}
+          >
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-full bg-black"
+              style={{
+                opacity: 1 - Math.min(1, Math.max(0, adjust.brightness)),
+              }}
+            />
+            <span
+              ref={handleRef}
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.4)] will-change-transform"
+              style={{
+                transform: wheelPosition(adjust.hue, adjust.saturation),
+              }}
             />
           </div>
+          <p id={instructionsId} className="sr-only">
+            Left and right arrows change color; up and down arrows change
+            vividness.
+          </p>
         </div>
       </details>
     </div>

@@ -59,6 +59,7 @@ import {
   getCustomTheme,
   parseShareCode,
   previewCustomTheme,
+  previewCustomThemeLogo,
   setCustomTheme,
 } from "@/utils/ui/customTheme";
 import type { SiteTheme } from "@/utils/ui/themeOptions";
@@ -1007,10 +1008,7 @@ export default function CustomThemeEditor({
                       value={current.logo_filter}
                       onChange={(logo_filter) => update({ logo_filter })}
                       onPreview={(logo_filter) =>
-                        previewCustomTheme("editor", {
-                          ...current,
-                          logo_filter,
-                        })
+                        previewCustomThemeLogo("editor", logo_filter)
                       }
                       matchColor={buttonHex(current.vars)}
                       matching={matchLogo}

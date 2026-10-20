@@ -71,11 +71,22 @@ export function getCustomTheme(): CustomTheme | null {
   return current ?? null;
 }
 
+const logoPreviewElements = new Map<HTMLElement, string>();
+
+function clearLogoPreview() {
+  for (const [element, previous] of logoPreviewElements) {
+    if (previous) element.style.setProperty("--logo-filter", previous);
+    else element.style.removeProperty("--logo-filter");
+  }
+  logoPreviewElements.clear();
+}
+
 /**
  * Sets the theme's colors inline on <html>, or clears them. setProperty can't
  * break out of a declaration, so any value is safe here.
  */
 export function applyCustomTheme(theme: CustomTheme | null) {
+  clearLogoPreview();
   const root = document.documentElement;
   const style = root.style;
   for (let i = style.length - 1; i >= 0; i--) {
@@ -146,6 +157,24 @@ export function previewCustomTheme(
   schemeBeforePreview ??= document.documentElement.dataset.scheme ?? "";
   previews.set(owner, { share_code: "preview", label: "", ...theme });
   showTopPreview();
+}
+
+export function previewCustomThemeLogo(owner: string, filter: string | null) {
+  const preview = previews.get(owner);
+  if (!preview) return;
+  preview.logo_filter = filter;
+  if (topPreview() !== preview) return;
+  for (const element of document.querySelectorAll<HTMLElement>(
+    ".header-logo",
+  )) {
+    if (!logoPreviewElements.has(element)) {
+      logoPreviewElements.set(
+        element,
+        element.style.getPropertyValue("--logo-filter"),
+      );
+    }
+    element.style.setProperty("--logo-filter", filter || "none");
+  }
 }
 
 /**

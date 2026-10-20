@@ -55,11 +55,32 @@ test("two previews: the newest shows, and closing one falls back to the other", 
       },
     ),
   };
+  const localProps: Record<string, string>[] = [
+    {},
+    { "--logo-filter": "sepia(1)" },
+  ];
+  const logos = localProps.map((props) => ({
+    style: {
+      getPropertyValue: (key: string) => props[key] ?? "",
+      setProperty: (key: string, value: string) => {
+        props[key] = value;
+      },
+      removeProperty: (key: string) => {
+        delete props[key];
+      },
+    },
+  }));
   const hadDocument = "document" in globalThis;
   const previousDocument = (globalThis as { document?: unknown }).document;
-  Object.assign(globalThis, { document: { documentElement: root } });
-  const { previewCustomTheme, endCustomThemePreview, getPreviewScheme } =
-    await import("./customTheme");
+  Object.assign(globalThis, {
+    document: { documentElement: root, querySelectorAll: () => logos },
+  });
+  const {
+    previewCustomTheme,
+    previewCustomThemeLogo,
+    endCustomThemePreview,
+    getPreviewScheme,
+  } = await import("./customTheme");
   const theme = (bg: string, scheme: "dark" | "light") => ({
     scheme,
     vars: { "--color-primary-bg": bg },
@@ -68,11 +89,25 @@ test("two previews: the newest shows, and closing one falls back to the other", 
 
   previewCustomTheme("editor", theme("#111111", "dark"));
   writes.length = 0;
+  previewCustomThemeLogo("missing", "hue-rotate(10deg)");
+  expect(localProps).toEqual([{}, { "--logo-filter": "sepia(1)" }]);
+  previewCustomThemeLogo("editor", "hue-rotate(10deg)");
+  expect(localProps.map((props) => props["--logo-filter"])).toEqual([
+    "hue-rotate(10deg)",
+    "hue-rotate(10deg)",
+  ]);
+  expect(writes).toEqual([]);
+  previewCustomThemeLogo("editor", null);
+  expect(localProps.map((props) => props["--logo-filter"])).toEqual([
+    "none",
+    "none",
+  ]);
   previewCustomTheme("editor", {
     ...theme("#111111", "dark"),
     logo_filter: "hue-rotate(90deg)",
   });
   expect(writes).toEqual(["--logo-filter"]);
+  expect(localProps).toEqual([{}, { "--logo-filter": "sepia(1)" }]);
   writes.length = 0;
   previewCustomTheme("editor", {
     ...theme("#111111", "dark"),
@@ -88,16 +123,22 @@ test("two previews: the newest shows, and closing one falls back to the other", 
   // The editor updating its draft doesn't jump ahead of the newer sheet.
   previewCustomTheme("editor", theme("#222222", "dark"));
   expect(props["--color-primary-bg"]).toBe("#eeeeee");
+  previewCustomThemeLogo("editor", "hue-rotate(45deg)");
+  expect(localProps).toEqual([{}, { "--logo-filter": "sepia(1)" }]);
+  expect(props["--logo-filter"]).toBe("none");
   expect(getPreviewScheme()).toBe("light");
   expect(props["--color-link"]).toBeUndefined();
 
   endCustomThemePreview("shared");
   expect(props["--color-primary-bg"]).toBe("#222222");
   expect(root.dataset.scheme).toBe("dark");
+  expect(props["--logo-filter"]).toBe("hue-rotate(45deg)");
+  previewCustomThemeLogo("editor", "hue-rotate(90deg)");
 
   endCustomThemePreview("editor");
   expect(getPreviewScheme()).toBeUndefined();
   expect(props).toEqual({});
+  expect(localProps).toEqual([{}, { "--logo-filter": "sepia(1)" }]);
   expect(root.dataset.scheme).toBe("dark");
 
   // Other test files share this process; leave no fake document behind.
