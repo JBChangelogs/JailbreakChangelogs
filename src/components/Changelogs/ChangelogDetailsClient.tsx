@@ -347,7 +347,7 @@ export default function ChangelogDetailsClient({
           {/* Nitro: video-nc unit should sit above the fold */}
           <NitroInlineVideoPlayer
             slotId="np-changelogs-video"
-            className="lg:mx-0 lg:w-80 lg:shrink-0"
+            className="lg:mx-0 lg:w-96 lg:shrink-0"
           />
         </section>
 
