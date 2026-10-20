@@ -1,3 +1,4 @@
+import { getExpFromLevel } from "@/utils/seasonXp";
 import ImageModal from "@/components/ui/ImageModal";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -42,58 +43,9 @@ export default function XpCalculatorForm({
   const getMaxXpForLevel = (level: number) => {
     if (!season || level <= 0) return 0;
 
-    const xpData = season.xp_data;
-    const constants = {
-      MAX_DAILY_EXP: xpData.xp_rates.maxDailyXp,
-      MAX_DAILY_EXP_SEASON_PASS: xpData.xp_rates.maxDailyXpWithPass,
-      AVG_EXP_PER_CONTRACT: xpData.xp_rates.avgXpPerContract,
-      TOTAL_DAYS: xpData.xp_rates.totalDays,
-      CONTRACTS_PER_DAY: xpData.xp_rates.contractsPerDay,
-      EFFICIENCY: xpData.xp_rates.efficiency,
-      CURVE_K: xpData.xp_rates.curveK,
-    };
-
-    // Calculate total possible XP
-    const totalPossibleExp =
-      constants.EFFICIENCY *
-      (constants.AVG_EXP_PER_CONTRACT *
-        constants.CONTRACTS_PER_DAY *
-        constants.TOTAL_DAYS +
-        constants.MAX_DAILY_EXP * constants.TOTAL_DAYS);
-
-    // Function to get XP required for a level
-    function getExpFromLevel(targetLevel: number) {
-      if (targetLevel <= 0) return 0;
-
-      const curveK = constants.CURVE_K;
-      let result;
-
-      if (curveK === 1) {
-        result = totalPossibleExp / (xpData.targetLevel - 1);
-      } else {
-        result =
-          (totalPossibleExp * (1 - curveK)) /
-          (1 - Math.pow(curveK, xpData.targetLevel - 1));
-      }
-
-      let calculatedExp;
-      if (curveK === 1) {
-        calculatedExp = result * (targetLevel - 1);
-      } else {
-        calculatedExp =
-          (result * (1 - Math.pow(curveK, targetLevel - 1))) / (1 - curveK);
-      }
-
-      let roundedExp = Math.floor(calculatedExp);
-      if (0.5 <= calculatedExp - roundedExp) {
-        roundedExp += 1;
-      }
-      return roundedExp;
-    }
-
     // Get total XP for next level and current level
-    const totalXpForNextLevel = getExpFromLevel(level + 1);
-    const totalXpForCurrentLevel = getExpFromLevel(level);
+    const totalXpForNextLevel = getExpFromLevel(season, level + 1);
+    const totalXpForCurrentLevel = getExpFromLevel(season, level);
 
     // Return the XP required to reach the next level
     return totalXpForNextLevel - totalXpForCurrentLevel;

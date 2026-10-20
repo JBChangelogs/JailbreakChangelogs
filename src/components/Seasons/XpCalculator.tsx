@@ -1,5 +1,7 @@
 "use client";
 
+import { getExpFromLevel } from "@/utils/seasonXp";
+
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import XpCalculatorForm from "./XpCalculatorForm";
@@ -58,58 +60,17 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
       MAX_DAILY_EXP: xpData.xp_rates.maxDailyXp,
       MAX_DAILY_EXP_SEASON_PASS: xpData.xp_rates.maxDailyXpWithPass,
       AVG_EXP_PER_CONTRACT: xpData.xp_rates.avgXpPerContract,
-      TOTAL_DAYS: xpData.xp_rates.totalDays,
-      CONTRACTS_PER_DAY: xpData.xp_rates.contractsPerDay,
-      EFFICIENCY: xpData.xp_rates.efficiency,
-      CURVE_K: xpData.xp_rates.curveK,
       DOUBLE_XP_TIME: xpData.doubleXpDuration,
       SEASON_ENDS: season.end_date,
     };
-
-    // Calculate total possible XP
-    const totalPossibleExp =
-      constants.EFFICIENCY *
-      (constants.AVG_EXP_PER_CONTRACT *
-        constants.CONTRACTS_PER_DAY *
-        constants.TOTAL_DAYS +
-        constants.MAX_DAILY_EXP * constants.TOTAL_DAYS);
-
-    // Function to get XP required for a level
-    function getExpFromLevel(targetLevel: number) {
-      if (targetLevel <= 0) return 0;
-
-      const curveK = constants.CURVE_K;
-      let result;
-
-      if (curveK === 1) {
-        result = totalPossibleExp / (xpData.targetLevel - 1);
-      } else {
-        result =
-          (totalPossibleExp * (1 - curveK)) /
-          (1 - Math.pow(curveK, xpData.targetLevel - 1));
-      }
-
-      let calculatedExp;
-      if (curveK === 1) {
-        calculatedExp = result * (targetLevel - 1);
-      } else {
-        calculatedExp =
-          (result * (1 - Math.pow(curveK, targetLevel - 1))) / (1 - curveK);
-      }
-
-      let roundedExp = Math.floor(calculatedExp);
-      if (0.5 <= calculatedExp - roundedExp) {
-        roundedExp += 1;
-      }
-      return roundedExp;
-    }
 
     // Validate XP input
     const parsedXp =
       typeof currentXp === "string" ? parseInt(currentXp) : currentXp;
 
     const maxXpForCurrentLevel =
-      getExpFromLevel(currentLevel + 1) - getExpFromLevel(currentLevel);
+      getExpFromLevel(season, currentLevel + 1) -
+      getExpFromLevel(season, currentLevel);
 
     if (isNaN(parsedXp) || parsedXp < 0 || parsedXp > maxXpForCurrentLevel) {
       toast.error(`Please enter a valid XP amount (0-${maxXpForCurrentLevel})`);
@@ -154,8 +115,8 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
     };
 
     // Current progress
-    const myExp = getExpFromLevel(currentLevel) + parsedXp;
-    const targetLevelExp = getExpFromLevel(season.xp_data.targetLevel);
+    const myExp = getExpFromLevel(season, currentLevel) + parsedXp;
+    const targetLevelExp = getExpFromLevel(season, season.xp_data.targetLevel);
     const xpNeeded = targetLevelExp - myExp;
 
     // Time calculations

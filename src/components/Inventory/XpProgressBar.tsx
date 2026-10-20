@@ -1,6 +1,7 @@
 "use client";
 
-import { type CSSProperties } from "react";
+import { getExpFromLevel } from "@/utils/seasonXp";
+import SeasonXpBar from "@/components/Seasons/SeasonXpBar";
 import { Season } from "@/types/seasons";
 
 interface XpProgressBarProps {
@@ -20,7 +21,6 @@ export default function XpProgressBar({
   seasonRateLimitMessage,
   mobileSecondaryTextMode = "season",
 }: XpProgressBarProps) {
-  // If no season data, don't show the progress bar
   if (!season || !season.xp_data || !season.xp_data.xp_rates) {
     if (seasonRateLimitMessage) {
       return (
@@ -32,66 +32,13 @@ export default function XpProgressBar({
     return null;
   }
 
-  const xpData = season.xp_data;
-
-  // Constants from the season data
-  const constants = {
-    MAX_DAILY_EXP: xpData.xp_rates.maxDailyXp,
-    MAX_DAILY_EXP_SEASON_PASS: xpData.xp_rates.maxDailyXpWithPass,
-    AVG_EXP_PER_CONTRACT: xpData.xp_rates.avgXpPerContract,
-    TOTAL_DAYS: xpData.xp_rates.totalDays,
-    CONTRACTS_PER_DAY: xpData.xp_rates.contractsPerDay,
-    EFFICIENCY: xpData.xp_rates.efficiency,
-    CURVE_K: xpData.xp_rates.curveK,
-  };
-
-  // Calculate total possible XP
-  const totalPossibleExp =
-    constants.EFFICIENCY *
-    (constants.AVG_EXP_PER_CONTRACT *
-      constants.CONTRACTS_PER_DAY *
-      constants.TOTAL_DAYS +
-      constants.MAX_DAILY_EXP * constants.TOTAL_DAYS);
-
-  // Function to get XP required for a level
-  function getExpFromLevel(targetLevel: number) {
-    if (targetLevel <= 0) return 0;
-
-    const curveK = constants.CURVE_K;
-    let result;
-
-    if (curveK === 1) {
-      result = totalPossibleExp / (xpData.targetLevel - 1);
-    } else {
-      result =
-        (totalPossibleExp * (1 - curveK)) /
-        (1 - Math.pow(curveK, xpData.targetLevel - 1));
-    }
-
-    let calculatedExp;
-    if (curveK === 1) {
-      calculatedExp = result * (targetLevel - 1);
-    } else {
-      calculatedExp =
-        (result * (1 - Math.pow(curveK, targetLevel - 1))) / (1 - curveK);
-    }
-
-    let roundedExp = Math.floor(calculatedExp);
-    if (0.5 <= calculatedExp - roundedExp) {
-      roundedExp += 1;
-    }
-    return roundedExp;
-  }
-
-  // Calculate XP progress to next level
-  const totalXpForCurrentLevel = getExpFromLevel(currentLevel);
-  const totalXpForNextLevel = getExpFromLevel(currentLevel + 1);
+  const totalXpForCurrentLevel = getExpFromLevel(season, currentLevel);
+  const totalXpForNextLevel = getExpFromLevel(season, currentLevel + 1);
   const xpRequiredForNextLevel = totalXpForNextLevel - totalXpForCurrentLevel;
 
   // currentXp is the XP progress within the current level (like the XP calculator)
   const currentXpInLevel = currentXp;
 
-  // Calculate progress percentage (clamp between 0 and 100)
   const progressPercentage = Math.min(
     100,
     Math.max(0, (currentXpInLevel / xpRequiredForNextLevel) * 100),
@@ -101,10 +48,6 @@ export default function XpProgressBar({
     return null;
   }
 
-  const clippedTextStyle: CSSProperties & { WebkitClipPath?: string } = {
-    clipPath: `inset(0 ${100 - progressPercentage}% 0 0)`,
-    WebkitClipPath: `inset(0 ${100 - progressPercentage}% 0 0)`,
-  };
   const mobileSecondaryText =
     mobileSecondaryTextMode === "xp"
       ? `${currentXpInLevel.toLocaleString("en-US")}/${xpRequiredForNextLevel.toLocaleString("en-US")} XP`
@@ -112,88 +55,14 @@ export default function XpProgressBar({
 
   return (
     <div className="mt-3">
-      {/* Game-style Progress Bar - old design without rounded corners */}
-      <div
-        className={`border-button-info relative h-8 w-full border-2 ${bgStyle === "secondary" ? "bg-secondary-bg" : bgStyle === "tertiary" ? "bg-tertiary-bg" : bgStyle === "quaternary" ? "bg-quaternary-bg" : "bg-primary-bg"}`}
-      >
-        {/* Progress Fill */}
-        <div
-          className="bg-button-info absolute top-0 left-0 h-full transition-all duration-500"
-          style={{ width: `${progressPercentage}%` }}
-        />
-
-        {/* Base text layer */}
-        <div className="pointer-events-none absolute inset-0 z-10">
-          {/* Mobile Layout - Stack vertically on small screens */}
-          <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
-            <div className="text-primary-text text-xs leading-tight font-bold">
-              <div className="text-center">{`LEVEL ${currentLevel}`}</div>
-              <div className="text-center text-[10px] leading-tight">
-                {mobileSecondaryText}
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Layout - Horizontal layout for larger screens */}
-          <div className="hidden sm:block">
-            <div className="absolute top-1/2 left-2 -translate-y-1/2">
-              <span className="text-primary-text text-sm font-bold">
-                {`${currentXpInLevel.toLocaleString("en-US")}/${xpRequiredForNextLevel.toLocaleString("en-US")}`}
-              </span>
-            </div>
-
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <span className="text-primary-text text-sm font-bold">
-                {`LEVEL ${currentLevel}`}
-              </span>
-            </div>
-
-            <div className="absolute top-1/2 right-2 -translate-y-1/2">
-              <span className="text-primary-text text-sm font-bold">
-                {`SEASON ${season?.season || "?"}`}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Clipped text layer uses the theme's contrasting color over the fill */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-20 transition-all duration-500"
-          style={clippedTextStyle}
-        >
-          {/* Mobile Layout - Stack vertically on small screens */}
-          <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
-            <div className="text-form-button-text text-xs leading-tight font-bold">
-              <div className="text-center">{`LEVEL ${currentLevel}`}</div>
-              <div className="text-center text-[10px] leading-tight">
-                {mobileSecondaryText}
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Layout - Horizontal layout for larger screens */}
-          <div className="hidden sm:block">
-            <div className="absolute top-1/2 left-2 -translate-y-1/2">
-              <span className="text-form-button-text text-sm font-bold">
-                {`${currentXpInLevel.toLocaleString("en-US")}/${xpRequiredForNextLevel.toLocaleString("en-US")}`}
-              </span>
-            </div>
-
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <span className="text-form-button-text text-sm font-bold">
-                {`LEVEL ${currentLevel}`}
-              </span>
-            </div>
-
-            <div className="absolute top-1/2 right-2 -translate-y-1/2">
-              <span className="text-form-button-text text-sm font-bold">
-                {`SEASON ${season?.season || "?"}`}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <SeasonXpBar
+        percent={progressPercentage}
+        xpLabel={`${currentXpInLevel.toLocaleString("en-US")}/${xpRequiredForNextLevel.toLocaleString("en-US")}`}
+        level={currentLevel}
+        season={season.season}
+        mobileSecondaryText={mobileSecondaryText}
+        bgStyle={bgStyle}
+      />
     </div>
   );
 }
