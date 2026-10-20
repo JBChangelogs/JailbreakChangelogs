@@ -35,7 +35,12 @@ function findElement<P>(
   }
 }
 
-function harness(value: string | null = null) {
+function harness(
+  value: string | null = null,
+  openScreen?: (options: {
+    signal: AbortSignal;
+  }) => Promise<{ sRGBHex: string }>,
+) {
   const changes: (string | null)[] = [];
   const matching: boolean[] = [];
   const previews: (string | null)[] = [];
@@ -55,6 +60,17 @@ function harness(value: string | null = null) {
   const exports = {} as { default: typeof LogoFilterBuilder };
   runInNewContext(source, {
     exports,
+    AbortController,
+    DOMException,
+    window: openScreen
+      ? {
+          EyeDropper: class {
+            open(options: { signal: AbortSignal }) {
+              return openScreen(options);
+            }
+          },
+        }
+      : {},
     navigator: {
       clipboard: {
         writeText: async (value: string) => {
@@ -93,6 +109,7 @@ function harness(value: string | null = null) {
           },
         };
       if (name === "next/image") return { default: "img" };
+      if (name === "@/components/ui/IconWrapper") return { Icon: "svg" };
       if (name === "@/components/ui/input") return { Input: "input" };
       if (name === "@/components/ui/button") return { Button: "button" };
       if (name === "@/components/ui/tooltip")
@@ -180,7 +197,14 @@ function harness(value: string | null = null) {
       button,
       pointerId: 1,
     }) as unknown as PointerEvent<HTMLDivElement>;
+  render();
   return {
+    get screenPicker() {
+      return findElement<ButtonHTMLAttributes<HTMLButtonElement>>(
+        render(),
+        (props) => props["aria-label"] === "Pick color from screen",
+      )?.props;
+    },
     get wheel() {
       return findElement<HTMLAttributes<HTMLDivElement>>(
         render(),
@@ -538,4 +562,55 @@ test("invalid characters show an error while typing but incomplete hex digits st
   } as unknown as React.ChangeEvent<HTMLInputElement>);
   expect(h.input["aria-invalid"]).toBe(false);
   expect(h.changes.length).toBe(1);
+});
+
+test("screen picker appears only when supported and applies the picked hex", async () => {
+  expect(harness().screenPicker).toBeUndefined();
+  const h = harness(null, async () => ({ sRGBHex: "#12ab34" }));
+  await h.screenPicker!.onClick!({} as React.MouseEvent<HTMLButtonElement>);
+  expect(h.colorText.value).toBe("12AB34");
+  expect(h.changes.length).toBe(1);
+  expect(harness(h.changes[0]).wheel["aria-valuetext"]).toStartWith("#12AB34,");
+  expect(h.screenPicker!.disabled).toBe(false);
+});
+
+test("canceling the screen picker is silent and failures show an error", async () => {
+  const canceled = harness(null, async () => {
+    throw new DOMException("Canceled", "AbortError");
+  });
+  await canceled.screenPicker!.onClick!(
+    {} as React.MouseEvent<HTMLButtonElement>,
+  );
+  expect(canceled.changes).toEqual([]);
+  expect(canceled.notices).toEqual([]);
+  const failed = harness(null, async () => {
+    throw new Error("Picker failed");
+  });
+  await failed.screenPicker!.onClick!(
+    {} as React.MouseEvent<HTMLButtonElement>,
+  );
+  expect(failed.changes).toEqual([]);
+  expect(failed.notices).toEqual(["Couldn't pick a color from the screen"]);
+});
+
+test("screen picking prevents duplicate opens and aborts when the editor unmounts", async () => {
+  let opened = 0;
+  const h = harness(null, ({ signal }) => {
+    opened++;
+    return new Promise((_resolve, reject) => {
+      signal.addEventListener("abort", () =>
+        reject(new DOMException("Canceled", "AbortError")),
+      );
+    });
+  });
+  const pending = h.screenPicker!.onClick!(
+    {} as React.MouseEvent<HTMLButtonElement>,
+  );
+  expect(h.screenPicker!.disabled).toBe(true);
+  await h.screenPicker!.onClick!({} as React.MouseEvent<HTMLButtonElement>);
+  expect(opened).toBe(1);
+  h.cleanup();
+  await pending;
+  expect(h.changes).toEqual([]);
+  expect(h.notices).toEqual([]);
 });

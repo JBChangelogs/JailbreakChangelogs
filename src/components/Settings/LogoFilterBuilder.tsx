@@ -5,6 +5,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Icon } from "@/components/ui/IconWrapper";
 import {
   Tooltip,
   TooltipContent,
@@ -174,13 +175,16 @@ export default function LogoFilterBuilder({
   const instructionsId = useId();
   const [dragging, setDragging] = useState(false);
   const [hexInvalid, setHexInvalid] = useState(false);
+  const [screenPickerSupported, setScreenPickerSupported] = useState(false);
+  const [pickingScreen, setPickingScreen] = useState(false);
+  useEffect(() => setScreenPickerSupported("EyeDropper" in window), []);
   const adjust = parseFilter(value);
   const handleRef = useRef<HTMLSpanElement>(null);
   const previewRef = useRef<HTMLImageElement>(null);
   const hexInputRef = useRef<HTMLInputElement>(null);
-  const vividnessRef = useRef<HTMLSpanElement>(null);
   const swatchRef = useRef<HTMLButtonElement>(null);
   const editingHex = useRef(false);
+  const screenPick = useRef<AbortController | null>(null);
   const color = wheelColor(adjust.hue, adjust.saturation, adjust.brightness);
   useEffect(() => {
     if (hexInputRef.current && !editingHex.current) {
@@ -205,7 +209,13 @@ export default function LogoFilterBuilder({
     if (drag.current.frame !== null) cancelAnimationFrame(drag.current.frame);
     drag.current.frame = null;
   };
-  useEffect(() => cancelFrame, []);
+  useEffect(
+    () => () => {
+      cancelFrame();
+      screenPick.current?.abort();
+    },
+    [],
+  );
   const syncHexInput = (filter: string | null) => {
     setHexInvalid(false);
     if (hexInputRef.current && !editingHex.current) {
@@ -246,6 +256,40 @@ export default function LogoFilterBuilder({
       brightness: hsv.v,
     });
   };
+  const pickScreenColor = async () => {
+    const EyeDropper = (
+      window as Window & {
+        EyeDropper?: new () => {
+          open: (options: {
+            signal: AbortSignal;
+          }) => Promise<{ sRGBHex: string }>;
+        };
+      }
+    ).EyeDropper;
+    if (!EyeDropper || screenPick.current) return;
+    const controller = new AbortController();
+    screenPick.current = controller;
+    setPickingScreen(true);
+    try {
+      const { sRGBHex } = await new EyeDropper().open({
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted || !hexInputRef.current) return;
+      editingHex.current = false;
+      hexInputRef.current.value = sRGBHex.slice(1);
+      applyHex(hexInputRef.current);
+    } catch (error) {
+      if (
+        !controller.signal.aborted &&
+        !(error instanceof DOMException && error.name === "AbortError")
+      ) {
+        toast.error("Couldn't pick a color from the screen");
+      }
+    } finally {
+      screenPick.current = null;
+      if (!controller.signal.aborted) setPickingScreen(false);
+    }
+  };
   const copyColor = async () => {
     try {
       await navigator.clipboard.writeText(color);
@@ -265,8 +309,6 @@ export default function LogoFilterBuilder({
     if (previewRef.current) previewRef.current.style.filter = filter ?? "none";
     if (hexInputRef.current) hexInputRef.current.value = color.slice(1);
     if (swatchRef.current) swatchRef.current.style.backgroundColor = color;
-    if (vividnessRef.current)
-      vividnessRef.current.textContent = `${vividness}%`;
     wheel.setAttribute("aria-valuenow", String(rounded));
     wheel.setAttribute("aria-valuetext", `${color}, vividness ${vividness}%`);
     onPreview(filter);
@@ -452,6 +494,26 @@ export default function LogoFilterBuilder({
                     }}
                   />
                 </div>
+                {screenPickerSupported && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8!"
+                        aria-label="Pick color from screen"
+                        disabled={pickingScreen}
+                        onClick={pickScreenColor}
+                      >
+                        <Icon icon="lucide:pipette" aria-hidden="true" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      Pick color from screen
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
               <p
                 id={`${instructionsId}-hex-error`}
@@ -460,15 +522,6 @@ export default function LogoFilterBuilder({
               >
                 {hexInvalid ? "Use 6 hex digits, e.g. #5865F2." : ""}
               </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-primary-text">Vividness</span>
-              <span
-                ref={vividnessRef}
-                className="text-secondary-text tabular-nums"
-              >
-                {Math.round(adjust.saturation * 100)}%
-              </span>
             </div>
           </div>
           <div
