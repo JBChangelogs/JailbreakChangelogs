@@ -41,7 +41,7 @@ export default function SeasonXpBar({
 
   return (
     <div
-      className={`border-button-info relative h-8 w-full overflow-hidden rounded-lg border-2 ${bgStyle === "secondary" ? "bg-secondary-bg" : bgStyle === "tertiary" ? "bg-tertiary-bg" : bgStyle === "quaternary" ? "bg-quaternary-bg" : "bg-primary-bg"}`}
+      className={`inset-ring-button-info relative h-8 w-full overflow-hidden rounded-lg inset-ring-2 ${bgStyle === "secondary" ? "bg-secondary-bg" : bgStyle === "tertiary" ? "bg-tertiary-bg" : bgStyle === "quaternary" ? "bg-quaternary-bg" : "bg-primary-bg"}`}
     >
       <div
         className="bg-button-info absolute top-0 left-0 h-full transition-all duration-500"

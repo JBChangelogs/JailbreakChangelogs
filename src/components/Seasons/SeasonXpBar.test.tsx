@@ -12,6 +12,9 @@ test("shared XP bar keeps fill and contrasting label clipping aligned", () => {
     expect(html).toContain(`clip-path:inset(0 ${100 - percent}% 0 0)`);
     expect(html).toContain('aria-hidden="true"');
     expect(html).toContain("overflow-hidden rounded-lg");
+    expect(html).toContain("inset-ring-2");
+    expect(html).toContain("inset-ring-button-info");
+    expect(html).not.toContain("border-2");
     expect(html).toContain("250/500");
     expect(html).toContain("LEVEL 3");
     expect(html).toContain("SEASON 30");
