@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import type { ComponentProps } from "react";
-import type { ComposerFooter } from "./ComposerFooter";
+import type { ComposerBar } from "./ComposerFooter";
 
 test("replying focuses the composer at the draft end after closing actions without changing the draft", () => {
   let effect: () => (() => void) | undefined;
@@ -19,7 +19,7 @@ test("replying focuses the composer at the draft end after closing actions witho
     },
   };
   const composerRef = { current: { querySelector: () => textarea } };
-  const exports = {} as { ComposerFooter: typeof ComposerFooter };
+  const exports = {} as { ComposerBar: typeof ComposerBar };
   const jsx = (type: unknown, props: unknown) => ({ type, props });
   runInNewContext(
     transpileModule(
@@ -47,27 +47,32 @@ test("replying focuses the composer at the draft end after closing actions witho
           };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name === "@/utils/messages/formatting")
-          return { getDisplayName: () => "Recipient" };
+          return {
+            getDisplayName: () => "Recipient",
+            formatMessageText: (text: string) => text,
+          };
         if (name === "@/lib/utils") return { cn: () => "" };
         return new Proxy({}, { get: (_, key) => String(key) });
       },
     },
   );
   const props = {
-    selectedUser: { id: "them" },
-    selectedUserId: "them",
-    replyingToMessage: null,
-  } as ComponentProps<typeof ComposerFooter>;
-  exports.ComposerFooter(props);
+    replying: null,
+    typingUsers: [],
+  } as unknown as ComponentProps<typeof ComposerBar>;
+  exports.ComposerBar(props);
   expect(effect!()).toBeUndefined();
   expect(frame).toBeUndefined();
-  props.replyingToMessage = {
-    id: "reply",
-    senderId: "them",
-    receiverId: "me",
-    content: "hello",
+  props.replying = {
+    message: {
+      id: "reply",
+      senderId: "them",
+      receiverId: "me",
+      content: "hello",
+    },
+    sender: null,
   };
-  exports.ComposerFooter(props);
+  exports.ComposerBar(props);
   const cleanup = effect!();
   expect(focused).toBe(0);
   frame!();

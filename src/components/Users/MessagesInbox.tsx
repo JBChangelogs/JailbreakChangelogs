@@ -18,7 +18,6 @@ import {
 import type { Dispatch, SetStateAction } from "react";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
-import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/utils/ui/avatar";
@@ -48,7 +47,6 @@ import {
   ConversationListSkeleton,
 } from "@/components/Users/Messages/ConversationSidebar";
 import { MessageThreadLoading } from "@/components/Users/Messages/MessageThreadLoading";
-import { NewConversationModal } from "@/components/Users/Messages/NewConversationModal";
 import { useMessagesRealtime } from "@/hooks/useMessagesRealtime";
 import {
   useConversationList,
@@ -65,8 +63,17 @@ import { useMessageBlocking } from "@/hooks/useMessageBlocking";
 import { useLocalMessageOverlay } from "@/hooks/useLocalMessageOverlay";
 import {
   getConversationIdFromPathname,
+  getGroupIdFromPathname,
   useMessageNavigationScroll,
 } from "@/hooks/useMessageNavigationScroll";
+import { useGroupChats } from "@/hooks/useGroupChats";
+import { GroupChatView } from "@/components/Users/Messages/GroupChatView";
+import { UserPickerDialog } from "@/components/Users/Messages/GroupChatDialogs";
+import {
+  createGroupChat,
+  GROUP_MEMBER_LIMIT,
+  GROUP_NAME_MAX,
+} from "@/utils/api/groupChats";
 import { useUserSearch } from "@/hooks/useUserSearch";
 import type {
   ConversationSummary,
@@ -84,6 +91,12 @@ import {
 } from "@/utils/messages/sorting";
 
 const HIDDEN_CONVERSATION_UNDO_MS = 8000;
+
+/** The page: list and thread side by side, filling the space under the header. */
+const MESSAGES_SHELL =
+  "grid h-full min-h-0 grid-cols-1 overflow-hidden lg:grid-cols-[16rem_1fr]";
+const MESSAGES_SIDEBAR =
+  "border-border-primary bg-secondary-bg flex h-full min-h-0 flex-col lg:border-r";
 
 function blockedUserMap(data: unknown): Record<string, boolean> {
   const entries =
@@ -148,7 +161,6 @@ export default function MessagesInbox() {
     () => conversationQuery.data?.items ?? [],
     [conversationQuery.data?.items],
   );
-  const totalConversations = conversationQuery.data?.total ?? null;
   const isLoadingConversations =
     isAuthenticated &&
     !conversationQuery.isError &&
@@ -195,6 +207,17 @@ export default function MessagesInbox() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(() =>
     getConversationIdFromPathname(pathname),
   );
+  // A group chat (/messages/group/<id>); only one of the two is open.
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(() =>
+    getGroupIdFromPathname(pathname),
+  );
+  useEffect(() => {
+    const onPopState = () =>
+      setSelectedGroupId(getGroupIdFromPathname(window.location.pathname));
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+  const [newMessageOpen, setNewMessageOpen] = useState(false);
   const threadKey = useMemo(
     () => ["message-thread", currentUserId, selectedUserId],
     [currentUserId, selectedUserId],
@@ -331,7 +354,6 @@ export default function MessagesInbox() {
   });
   const currentUserEnriched = currentUserQuery.data ?? null;
   const [userSearchQuery, setUserSearchQuery] = useState("");
-  const [newConversationOpen, setNewConversationOpen] = useState(false);
   const userSearchInputRef = useRef<HTMLInputElement | null>(null);
   const messagesPageRef = useRef(1);
   const messagesTotalPagesRef = useRef<number | null>(null);
@@ -554,13 +576,66 @@ export default function MessagesInbox() {
   const { handleBlockToggle, isProcessingBlockAction } = useMessageBlocking({
     setBlockedByMeByUserId,
   });
+  const {
+    groups,
+    isLoading: isLoadingGroups,
+    error: groupsError,
+    groupTypingUserIds,
+    setGroups,
+    markGroupRead,
+  } = useGroupChats({
+    userId: currentUserId,
+    enabled: isAuthenticated,
+    openGroupId: selectedGroupId,
+  });
+  const selectGroup = (id: string) => {
+    setSelectedGroupId(id);
+    setSelectedUserId(null);
+    setRouteConversationId(null);
+    window.history.pushState(
+      {},
+      "",
+      `/messages/group/${encodeURIComponent(id)}`,
+    );
+  };
+
   const selectConversation = (id: string) => {
+    setSelectedGroupId(null);
     setSelectedUserId(id);
     setRouteConversationId(id);
     window.history.pushState({}, "", `/messages/${encodeURIComponent(id)}`);
   };
 
+  // One person opens a DM; more start a group named after them, like
+  // Discord and the app.
+  const suggestedUsers = useMemo(
+    () => conversations.map((conversation) => conversation.user),
+    [conversations],
+  );
+  const startConversation = async (users: MessageUser[]) => {
+    if (users.length === 1) {
+      selectConversation(users[0].id);
+      return;
+    }
+    const group = await createGroupChat(
+      users.map(getDisplayName).join(", ").slice(0, GROUP_NAME_MAX),
+      users.map((user) => user.id),
+    );
+    setGroups((list) =>
+      list.some((item) => item.id === group.id)
+        ? list
+        : [{ ...group, unreadCount: 0, lastMessage: null }, ...list],
+    );
+    selectGroup(group.id);
+  };
+
+  const removeGroup = (groupId: string) => {
+    setGroups((list) => list.filter((item) => item.id !== groupId));
+    if (selectedGroupId === groupId) goToConversationList();
+  };
+
   const goToConversationList = () => {
+    setSelectedGroupId(null);
     setSelectedUserId(null);
     setRouteConversationId(null);
     setMessages([]);
@@ -784,43 +859,31 @@ export default function MessagesInbox() {
   });
   if (isLoading) {
     return (
-      <div data-messages-shell className="h-full overflow-hidden">
-        <div className="flex h-full min-h-0 flex-col">
-          <Breadcrumb loading={isLoading} containerClassName="px-4 py-4" />
-          <div className="border-border-card bg-secondary-bg grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:mx-4 lg:grid-cols-[320px_1fr] lg:rounded-lg lg:border">
-            <aside
-              className={cn(
-                "border-border-card min-h-0 overflow-hidden lg:border-r",
-                routeConversationId && "hidden lg:block",
-              )}
-            >
-              <div
-                aria-hidden="true"
-                className="bg-tertiary-bg border-border-card space-y-4 border-b p-4"
-              >
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-9 w-full" />
-              </div>
-              <ConversationListSkeleton />
-            </aside>
-            <div
-              className={cn(
-                "min-h-0",
-                !routeConversationId && "hidden lg:block",
-              )}
-            >
-              {routeConversationId ? (
-                <MessageThreadLoading />
-              ) : (
-                <div
-                  className="flex h-full items-center justify-center"
-                  role="status"
-                >
-                  <Spinner className="size-6" />
-                </div>
-              )}
-            </div>
+      <div data-messages-shell className={MESSAGES_SHELL}>
+        <aside
+          className={cn(
+            MESSAGES_SIDEBAR,
+            routeConversationId && "hidden lg:flex",
+          )}
+        >
+          <div aria-hidden="true" className="shrink-0 px-2 pt-2">
+            <Skeleton className="h-10 w-full rounded-xl" />
           </div>
+          <ConversationListSkeleton />
+        </aside>
+        <div
+          className={cn("min-h-0", !routeConversationId && "hidden lg:block")}
+        >
+          {routeConversationId ? (
+            <MessageThreadLoading />
+          ) : (
+            <div
+              className="flex h-full items-center justify-center"
+              role="status"
+            >
+              <Spinner className="size-6" />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -828,23 +891,24 @@ export default function MessagesInbox() {
 
   if (!isAuthenticated) {
     return (
-      <div data-messages-shell className="h-full overflow-hidden px-4 pb-4">
-        <div className="flex h-full min-h-0 flex-col">
-          <Breadcrumb containerClassName="py-4" />
-          <div className="border-border-card bg-secondary-bg mt-0 flex min-h-0 w-full flex-1 items-center justify-center rounded-lg border p-6 shadow-md sm:p-8">
-            <div className="text-center">
-              <h1 className="page-heading">Direct Messages</h1>
-              <p className="text-secondary-text mt-2 text-sm">
-                Login to view your conversations and send messages.
-              </p>
-              <div className="mt-4">
-                <Button onClick={() => setLoginModal({ open: true })}>
-                  Login
-                </Button>
-              </div>
-            </div>
-          </div>
+      <div
+        data-messages-shell
+        className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center"
+      >
+        <div className="bg-tertiary-bg text-tertiary-text flex h-16 w-16 items-center justify-center rounded-full">
+          <Icon icon="heroicons:chat-bubble-left-right" className="h-8 w-8" />
         </div>
+        <div>
+          <h1 className="text-primary-text text-base font-semibold">
+            Your Messages
+          </h1>
+          <p className="text-quaternary-text mt-1 max-w-xs text-sm">
+            Log in to view your conversations and send messages.
+          </p>
+        </div>
+        <Button size="sm" onClick={() => setLoginModal({ open: true })}>
+          Log in
+        </Button>
       </div>
     );
   }
@@ -854,268 +918,288 @@ export default function MessagesInbox() {
     : "Select a conversation to start messaging.";
 
   return (
-    <div data-messages-shell className="h-full overflow-hidden">
-      <div className="flex h-full min-h-0 flex-col">
-        <Breadcrumb containerClassName="px-4 py-4" />
+    <div data-messages-shell className={MESSAGES_SHELL}>
+      {/* The whole page, like the app: the conversation list beside the
+          thread. On phones one shows at a time. */}
+      <>
+        <ConversationSidebar
+          userSearchQuery={userSearchQuery}
+          setUserSearchQuery={setUserSearchQuery}
+          isUserSearchLoading={isUserSearchLoading}
+          userSearchResults={userSearchResults}
+          conversations={conversations}
+          groups={groups}
+          typingUserIds={typingUserIds}
+          groupTypingUserIds={groupTypingUserIds}
+          currentUserId={currentUserId}
+          selectedUserId={selectedUserId}
+          selectedGroupId={selectedGroupId}
+          isLoadingConversations={isLoadingConversations || isLoadingGroups}
+          errorMessage={conversationQuery.error?.message ?? groupsError}
+          isAuthenticated={isAuthenticated}
+          recentlyHiddenConversations={recentlyHiddenConversations}
+          userSearchInputRef={userSearchInputRef}
+          selectConversation={selectConversation}
+          selectGroup={selectGroup}
+          onNewMessage={() => setNewMessageOpen(true)}
+          onGroupRemoved={removeGroup}
+          hideConversation={(conversation) =>
+            void hideConversation(conversation)
+          }
+          unhideRecentlyHiddenConversation={(conversation) =>
+            void unhideRecentlyHiddenConversation(conversation)
+          }
+        />
 
-        <div className="bg-secondary-bg border-border-card mt-0 grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:mx-4 lg:grid-cols-[320px_1fr] lg:rounded-lg lg:border">
-          <ConversationSidebar
-            userSearchQuery={userSearchQuery}
-            setUserSearchQuery={setUserSearchQuery}
-            isUserSearchLoading={isUserSearchLoading}
-            userSearchResults={userSearchResults}
-            totalConversations={totalConversations}
-            conversations={conversations}
-            typingUserIds={typingUserIds}
-            selectedUserId={selectedUserId}
-            currentUserId={currentUserId}
-            isLoadingConversations={isLoadingConversations}
-            errorMessage={conversationQuery.error?.message}
-            isAuthenticated={isAuthenticated}
-            twemojiEnabled={twemojiEnabled}
-            recentlyHiddenConversations={recentlyHiddenConversations}
-            userSearchInputRef={userSearchInputRef}
-            selectConversation={selectConversation}
-            hideConversation={(conversation) =>
-              void hideConversation(conversation)
-            }
-            unhideRecentlyHiddenConversation={(conversation) =>
-              void unhideRecentlyHiddenConversation(conversation)
-            }
-          />
-
-          <section
-            className={cn(
-              "min-h-0",
-              selectedUserId ? "block" : "hidden lg:block",
-            )}
-          >
-            {routeConversationId &&
+        <section
+          className={cn(
+            "min-h-0",
+            selectedUserId || selectedGroupId ? "block" : "hidden lg:block",
+          )}
+        >
+          {selectedGroupId ? (
+            <GroupChatView
+              key={selectedGroupId}
+              groupId={selectedGroupId}
+              summary={groups.find((group) => group.id === selectedGroupId)}
+              currentUser={currentUser}
+              currentUserMessageUser={currentUserMessageUser}
+              messageBan={messageBan}
+              setBan={setBan}
+              typingUserIds={groupTypingUserIds.get(selectedGroupId)}
+              suggestedUsers={suggestedUsers}
+              prepareMessageContentForApi={prepareMessageContentForApi}
+              onBack={goToConversationList}
+              onRead={() => markGroupRead(selectedGroupId)}
+              onGroupChange={(group) =>
+                setGroups((list) =>
+                  list.map((item) =>
+                    item.id === group.id ? { ...item, ...group } : item,
+                  ),
+                )
+              }
+              onLeft={() => removeGroup(selectedGroupId)}
+            />
+          ) : routeConversationId &&
             routeUserError?.id !== routeConversationId &&
             (!selectedUser || isLoadingMessages) ? (
-              <MessageThreadLoading />
-            ) : !selectedUser ? (
-              <div className="flex h-full items-center justify-center p-6">
-                <div className="text-center">
-                  <div className="border-border-card bg-tertiary-bg/40 mx-auto flex h-24 w-24 items-center justify-center rounded-full border shadow-sm">
-                    <Icon
-                      icon="heroicons:paper-airplane"
-                      className="text-secondary-text h-10 w-10"
-                    />
-                  </div>
-                  <h2 className="text-primary-text mt-5 text-lg font-semibold">
-                    {routeUserError?.id === routeConversationId &&
-                    routeConversationId
-                      ? "Unable to load this conversation"
-                      : "Your messages"}
-                  </h2>
-                  <p className="text-secondary-text mt-1 text-sm">
-                    {routeUserError?.id === routeConversationId &&
-                    routeConversationId
-                      ? routeUserError.message
-                      : "Search for a user to start a chat."}
-                  </p>
-                  <div className="mt-5 flex justify-center">
-                    <Button onClick={() => setNewConversationOpen(true)}>
-                      Start a conversation
-                    </Button>
-                  </div>
-                </div>
+            <MessageThreadLoading />
+          ) : !selectedUser ? (
+            // The app's empty state.
+            <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+              <div className="bg-tertiary-bg text-tertiary-text flex h-16 w-16 items-center justify-center rounded-full">
+                <Icon
+                  icon="heroicons:chat-bubble-left-right"
+                  className="h-8 w-8"
+                />
               </div>
-            ) : (
-              <Chat className="h-full min-h-0">
-                <ChatHeaderPanel
-                  key={selectedUser.id}
-                  selectedUser={selectedUser}
-                  currentUserId={currentUserId}
-                  isTargetOnline={isTargetOnline}
-                  shouldHidePresence={shouldHidePresence}
-                  lastSeenTime={lastSeenTime}
-                  selectedUserBlockedByMe={selectedUserBlockedByMe}
-                  isProcessingBlockAction={isProcessingBlockAction}
-                  goToConversationList={goToConversationList}
-                  onToggleBlock={() =>
-                    void handleBlockToggle(
-                      selectedUser.id,
-                      !selectedUserBlockedByMe,
-                    )
-                  }
-                />
+              <div>
+                <h2 className="text-primary-text text-base font-semibold">
+                  {routeUserError?.id === routeConversationId &&
+                  routeConversationId
+                    ? "Unable to load this conversation"
+                    : "Your Messages"}
+                </h2>
+                <p className="text-quaternary-text mt-1 max-w-xs text-sm">
+                  {routeUserError?.id === routeConversationId &&
+                  routeConversationId
+                    ? routeUserError.message
+                    : "Select a conversation from the sidebar, or search for someone there to start a new one."}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <Chat className="h-full min-h-0">
+              <ChatHeaderPanel
+                key={selectedUser.id}
+                selectedUser={selectedUser}
+                currentUserId={currentUserId}
+                isTargetOnline={isTargetOnline}
+                shouldHidePresence={shouldHidePresence}
+                lastSeenTime={lastSeenTime}
+                selectedUserBlockedByMe={selectedUserBlockedByMe}
+                isProcessingBlockAction={isProcessingBlockAction}
+                goToConversationList={goToConversationList}
+                onToggleBlock={() =>
+                  void handleBlockToggle(
+                    selectedUser.id,
+                    !selectedUserBlockedByMe,
+                  )
+                }
+              />
 
-                <ActiveOfferReminder
-                  messages={messages}
-                  offerDetails={offerDetails}
-                  onViewOffer={(message) => {
-                    const container = messagesContainerRef.current;
-                    const target = document.getElementById(
-                      `message-${getMessageDomId(message)}`,
-                    );
-                    if (!container || !target || !container.contains(target))
-                      return;
-                    container.scrollTo({
-                      top: Math.max(
-                        0,
-                        target.getBoundingClientRect().top -
-                          container.getBoundingClientRect().top +
-                          container.scrollTop -
-                          16,
-                      ),
-                      behavior: "smooth",
-                    });
-                  }}
-                />
+              <ActiveOfferReminder
+                messages={messages}
+                offerDetails={offerDetails}
+                onViewOffer={(message) => {
+                  const container = messagesContainerRef.current;
+                  const target = document.getElementById(
+                    `message-${getMessageDomId(message)}`,
+                  );
+                  if (!container || !target || !container.contains(target))
+                    return;
+                  container.scrollTo({
+                    top: Math.max(
+                      0,
+                      target.getBoundingClientRect().top -
+                        container.getBoundingClientRect().top +
+                        container.scrollTop -
+                        16,
+                    ),
+                    behavior: "smooth",
+                  });
+                }}
+              />
 
-                <ChatMessages
-                  ref={messagesContainerRef}
-                  onScroll={handleMessagesScroll}
-                  className="bg-secondary-bg relative !flex-col px-2 py-3 sm:px-4 lg:pt-5"
-                  style={{ overflowAnchor: "none" }}
-                >
-                  {!isLoadingMessages &&
-                    isLoadingOlderMessages &&
-                    messages.length > 0 && (
-                      <div className="pointer-events-none absolute inset-x-0 top-2 z-10 flex justify-center">
-                        <div className="bg-tertiary-bg border-border-card text-secondary-text flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
-                          <Spinner className="h-3 w-3" />
-                          <span>Loading older messages</span>
-                        </div>
-                      </div>
-                    )}
-                  {isLoadingMessages ? (
-                    <div className="mx-auto my-auto flex flex-col items-center justify-center px-6 py-8 text-center">
-                      <div className="border-border-card bg-tertiary-bg/40 flex h-14 w-14 items-center justify-center rounded-full border">
-                        <Spinner className="h-6 w-6" />
-                      </div>
-                      <p className="text-secondary-text mt-3 text-sm">
-                        Loading messages…
-                      </p>
-                    </div>
-                  ) : threadQuery.isError && messages.length === 0 ? (
-                    <div
-                      className="mx-auto my-auto space-y-3 px-4 text-center"
-                      role="alert"
-                    >
-                      <p className="text-secondary-text text-sm">
-                        {threadQuery.error?.message ??
-                          "Failed to load messages"}
-                      </p>
-                      <Button
-                        size="sm"
-                        disabled={threadQuery.isFetching}
-                        onClick={() =>
-                          void queryClient.invalidateQueries({
-                            queryKey: threadKey,
-                          })
-                        }
-                      >
-                        Retry
-                      </Button>
-                    </div>
-                  ) : messages.length === 0 ? (
-                    <div className="mx-auto my-auto w-full max-w-md px-4">
-                      <div className="text-center">
-                        <div className="border-border-card bg-tertiary-bg/40 mx-auto flex h-20 w-20 items-center justify-center rounded-full border shadow-sm">
-                          <Icon
-                            icon="ic:baseline-message"
-                            className="text-secondary-text h-9 w-9"
-                            inline={true}
-                          />
-                        </div>
-                        <h3 className="text-primary-text mt-4 text-base font-semibold">
-                          No messages yet
-                        </h3>
-                        <p className="text-secondary-text mt-1 text-sm">
-                          Say hi to start the conversation.
-                        </p>
+              <ChatMessages
+                ref={messagesContainerRef}
+                onScroll={handleMessagesScroll}
+                className="relative !flex-col px-2 pt-1 pb-5 sm:px-3"
+                style={{ overflowAnchor: "none" }}
+              >
+                {!isLoadingMessages &&
+                  isLoadingOlderMessages &&
+                  messages.length > 0 && (
+                    <div className="pointer-events-none absolute inset-x-0 top-2 z-10 flex justify-center">
+                      <div className="bg-tertiary-bg border-border-card text-secondary-text flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
+                        <Spinner className="h-3 w-3" />
+                        <span>Loading older messages</span>
                       </div>
                     </div>
-                  ) : (
-                    messages.map((message, index) => (
-                      <Fragment key={message.id}>
-                        {message.id === newMessagesStartId && (
-                          <div
-                            data-new-messages-divider
-                            role="separator"
-                            aria-label="New messages"
-                            className="flex items-center gap-2 py-2"
-                          >
-                            <span className="bg-status-error h-px flex-1" />
-                            <span className="text-status-error min-w-max text-xs font-semibold">
-                              New messages
-                            </span>
-                            <span className="bg-status-error h-px flex-1" />
-                          </div>
-                        )}
-                        <MessageRow
-                          message={message}
-                          offerDetails={offerDetails}
-                          index={index}
-                          messages={messages}
-                          currentUser={currentUser}
-                          currentUserEnriched={currentUserEnriched}
-                          currentUserMessageUser={currentUserMessageUser}
-                          selectedUser={selectedUser}
-                          activeMessageId={activeMessageId}
-                          replyingToMessage={replyingToMessage}
-                          editingMessageId={editingMessageId}
-
-                          emojiStringMap={emojiStringMap}
-                          twemojiEnabled={twemojiEnabled}
-                          isSending={isSending}
-                          deletingMessageId={deletingMessageId}
-
-                          messagesContainerRef={messagesContainerRef}
-                          setActiveMessageId={setActiveMessageId}
-                          setEditingMessageId={setEditingMessageId}
-
-                          setReplyingToMessage={setReplyingToMessage}
-                          setReportingMessage={setReportingMessage}
-                          setReportReason={setReportReason}
-                          handleDeleteMessage={handleDeleteMessage}
-                          handleRetryFailedMessage={handleRetryFailedMessage}
-                          handleEditMessage={handleEditMessage}
-                        />
-                      </Fragment>
-                    ))
                   )}
-                </ChatMessages>
-
-                {hasNewMessagesBelow && (
-                  <div className="pointer-events-none relative z-20 h-0">
+                {isLoadingMessages ? (
+                  <div className="mx-auto my-auto flex flex-col items-center justify-center px-6 py-8 text-center">
+                    <div className="border-border-card bg-tertiary-bg/40 flex h-14 w-14 items-center justify-center rounded-full border">
+                      <Spinner className="h-6 w-6" />
+                    </div>
+                    <p className="text-secondary-text mt-3 text-sm">
+                      Loading messages…
+                    </p>
+                  </div>
+                ) : threadQuery.isError && messages.length === 0 ? (
+                  <div
+                    className="mx-auto my-auto space-y-3 px-4 text-center"
+                    role="alert"
+                  >
+                    <p className="text-secondary-text text-sm">
+                      {threadQuery.error?.message ?? "Failed to load messages"}
+                    </p>
                     <Button
-                      type="button"
                       size="sm"
-                      className="pointer-events-auto absolute right-1/2 bottom-3 translate-x-1/2 rounded-full shadow-lg"
-                      onClick={showNewMessages}
+                      disabled={threadQuery.isFetching}
+                      onClick={() =>
+                        void queryClient.invalidateQueries({
+                          queryKey: threadKey,
+                        })
+                      }
                     >
-                      <Icon icon="heroicons:arrow-down" className="h-4 w-4" />
-                      New messages
+                      Retry
                     </Button>
                   </div>
-                )}
+                ) : messages.length === 0 ? (
+                  <div className="mx-auto my-auto w-full max-w-md px-4">
+                    <div className="text-center">
+                      <div className="border-border-card bg-tertiary-bg/40 mx-auto flex h-20 w-20 items-center justify-center rounded-full border shadow-sm">
+                        <Icon
+                          icon="ic:baseline-message"
+                          className="text-secondary-text h-9 w-9"
+                          inline={true}
+                        />
+                      </div>
+                      <h3 className="text-primary-text mt-4 text-base font-semibold">
+                        No messages yet
+                      </h3>
+                      <p className="text-secondary-text mt-1 text-sm">
+                        Say hi to start the conversation.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  messages.map((message, index) => (
+                    <Fragment key={message.id}>
+                      {message.id === newMessagesStartId && (
+                        <div
+                          data-new-messages-divider
+                          role="separator"
+                          aria-label="New messages"
+                          className="flex items-center gap-2 py-2"
+                        >
+                          <span className="bg-status-error h-px flex-1" />
+                          <span className="text-status-error min-w-max text-xs font-semibold">
+                            New messages
+                          </span>
+                          <span className="bg-status-error h-px flex-1" />
+                        </div>
+                      )}
+                      <MessageRow
+                        message={message}
+                        offerDetails={offerDetails}
+                        index={index}
+                        messages={messages}
+                        currentUser={currentUser}
+                        currentUserEnriched={currentUserEnriched}
+                        currentUserMessageUser={currentUserMessageUser}
+                        selectedUser={selectedUser}
+                        activeMessageId={activeMessageId}
+                        replyingToMessage={replyingToMessage}
+                        editingMessageId={editingMessageId}
 
-                <ComposerFooter
-                  messageBan={messageBan}
-                  replyingToMessage={replyingToMessage}
-                  setReplyingToMessage={setReplyingToMessage}
-                  currentUser={currentUser}
-                  currentUserEnriched={currentUserEnriched}
-                  currentUserMessageUser={currentUserMessageUser}
-                  selectedUser={selectedUser}
-                  selectedUserId={selectedUserId}
-                  messagePlaceholder={messagePlaceholder}
-                  isSending={isSending}
-                  isUnmessageable={isUnmessageable}
-                  isTyping={typingUserIds.has(selectedUser.id)}
-                  onSend={handleSendMessage}
-                  onSendGift={handleSendGift}
-                  onTyping={handleTyping}
-                />
-              </Chat>
-            )}
-          </section>
-        </div>
-      </div>
+                        emojiStringMap={emojiStringMap}
+                        twemojiEnabled={twemojiEnabled}
+                        isSending={isSending}
+                        deletingMessageId={deletingMessageId}
+
+                        messagesContainerRef={messagesContainerRef}
+                        setActiveMessageId={setActiveMessageId}
+                        setEditingMessageId={setEditingMessageId}
+
+                        setReplyingToMessage={setReplyingToMessage}
+                        setReportingMessage={setReportingMessage}
+                        setReportReason={setReportReason}
+                        handleDeleteMessage={handleDeleteMessage}
+                        handleRetryFailedMessage={handleRetryFailedMessage}
+                        handleEditMessage={handleEditMessage}
+                      />
+                    </Fragment>
+                  ))
+                )}
+              </ChatMessages>
+
+              {hasNewMessagesBelow && (
+                <div className="pointer-events-none relative z-20 h-0">
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="pointer-events-auto absolute right-1/2 bottom-3 translate-x-1/2 rounded-full shadow-lg"
+                    onClick={showNewMessages}
+                  >
+                    <Icon icon="heroicons:arrow-down" className="h-4 w-4" />
+                    New messages
+                  </Button>
+                </div>
+              )}
+
+              <ComposerFooter
+                messageBan={messageBan}
+                replyingToMessage={replyingToMessage}
+                setReplyingToMessage={setReplyingToMessage}
+                currentUser={currentUser}
+                currentUserEnriched={currentUserEnriched}
+                currentUserMessageUser={currentUserMessageUser}
+                selectedUser={selectedUser}
+                selectedUserId={selectedUserId}
+                messagePlaceholder={messagePlaceholder}
+                isSending={isSending}
+                isUnmessageable={isUnmessageable}
+                isTyping={typingUserIds.has(selectedUser.id)}
+                onSend={handleSendMessage}
+                onSendGift={handleSendGift}
+                onTyping={handleTyping}
+              />
+            </Chat>
+          )}
+        </section>
+      </>
 
       <ConfirmDialog
         isOpen={!!deletingMessageId}
@@ -1210,14 +1294,17 @@ export default function MessagesInbox() {
         </div>
       </ConfirmDialog>
 
-      <NewConversationModal
-        open={newConversationOpen}
-        onOpenChange={setNewConversationOpen}
+      <UserPickerDialog
+        open={newMessageOpen}
+        onOpenChange={setNewMessageOpen}
+        title="New Message"
+        subtitle={`Group chats can have up to ${GROUP_MEMBER_LIMIT} members.`}
+        confirmLabel="Create Message"
         currentUserId={currentUserId}
-        onSelectUser={(id) => {
-          setNewConversationOpen(false);
-          selectConversation(id);
-        }}
+        suggested={suggestedUsers}
+        excludeIds={currentUserId ? [currentUserId] : []}
+        maxSelect={GROUP_MEMBER_LIMIT - 1}
+        onConfirm={startConversation}
       />
     </div>
   );

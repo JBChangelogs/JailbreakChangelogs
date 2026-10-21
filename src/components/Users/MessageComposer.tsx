@@ -188,7 +188,9 @@ export function MessageComposer({
             </ChatToolbarButton>
           </div>
         }
-        className={`text-primary-text placeholder-secondary-text ${overLimit > 0 ? "pr-36 lg:pr-32" : ""}`}
+        // The app's text box: 16px on a 24px line with 8px padding, so one
+        // line fills the 40px box and sits centred beside the "+".
+        className={`text-primary-text placeholder-secondary-text py-2 pl-3 text-base leading-6 md:text-base ${overLimit > 0 ? "pr-36 lg:pr-32" : ""}`}
       />
     </>
   );

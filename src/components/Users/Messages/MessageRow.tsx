@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { Dispatch, RefObject, SetStateAction } from "react";
 import Link from "next/link";
 import Twemoji from "react-twemoji";
@@ -33,6 +33,10 @@ import type { UserData } from "@/types/auth";
 import type { EmojiStringMap } from "@/utils/comments/emojiShortcodes";
 import type { Message, MessageUser } from "@/utils/messages/types";
 import { asId, parseOfferAcceptedMetadata } from "@/utils/messages/parsing";
+import {
+  describeGroupEvent,
+  parseGroupEvent,
+} from "@/utils/messages/groupEvents";
 import type { useOfferDetailsBatch } from "@/hooks/useOfferDetailsBatch";
 import {
   formatMessageText,
@@ -100,7 +104,21 @@ interface MessageRowProps {
     messageId: string,
     content: string,
   ) => void | Promise<void>;
+  /** Group chats: each member's profile, to show who sent each message. */
+  usersById?: Map<string, MessageUser>;
+  /** Group owners can delete anyone's message. */
+  canDeleteOthers?: boolean;
 }
+
+/** Messages this close together from one sender share a header, like the app. */
+const GROUP_GAP_MS = 5 * 60_000;
+
+/** A member whose profile hasn't loaded yet. */
+const placeholderUser = (id: string): MessageUser => ({
+  id,
+  username: `User #${id.slice(-6)}`,
+  avatar: "",
+});
 
 export function MessageRow({
   message,
@@ -127,7 +145,12 @@ export function MessageRow({
   handleDeleteMessage,
   handleRetryFailedMessage,
   handleEditMessage,
+  usersById,
+  canDeleteOthers = false,
 }: MessageRowProps) {
+  // In a group, a sender is any member; in a DM, the other person.
+  const userFor = (id: string): MessageUser | null =>
+    usersById ? (usersById.get(id) ?? placeholderUser(id)) : selectedUser;
   const [isMobileSheetOpen, setMobileSheetOpen] = useState(false);
   const closeMessageActions = () => {
     setMobileSheetOpen(false);
@@ -154,6 +177,75 @@ export function MessageRow({
 
   const acceptedOffer = parseOfferAcceptedMetadata(message.metadata);
   const embedMetadata = parseMessageEmbed(message.metadata);
+
+  // A group's rename or membership change: a centred line, Discord style,
+  // with no actions (the API won't edit them).
+  const groupEvent = usersById ? parseGroupEvent(message.metadata) : null;
+  if (groupEvent) {
+    const nameOf = (id: string) => {
+      const user =
+        currentUser && id === asId(currentUser.id)
+          ? currentUserMessageUser
+          : usersById?.get(id);
+      return user ? getDisplayName(user) : `User #${id.slice(-6)}`;
+    };
+    // The app's colours: a darkened green for joins, red for leaving.
+    const [icon, tone] =
+      groupEvent.type === "group_renamed"
+        ? ["heroicons:pencil", "text-tertiary-text"]
+        : groupEvent.type === "members_added"
+          ? [
+              "heroicons:arrow-right",
+              "text-[color-mix(in_srgb,var(--color-status-success)_70%,black)]",
+            ]
+          : [
+              "heroicons:arrow-left",
+              "text-[color-mix(in_srgb,var(--color-status-error)_70%,black)]",
+            ];
+    return (
+      <div
+        id={`message-${getMessageDomId(message)}`}
+        data-message-row
+        className="hover:bg-secondary-bg/60 mt-2 flex items-center gap-3 rounded px-4 py-1"
+      >
+        <span className="flex w-9 shrink-0 justify-center">
+          <Icon
+            icon={icon}
+            aria-hidden="true"
+            className={cn("size-4.5", tone)}
+          />
+        </span>
+        <p className="text-tertiary-text min-w-0 flex-1 text-sm">
+          {describeGroupEvent(groupEvent, asId(message.senderId), nameOf).map(
+            (part, index) =>
+              typeof part === "string" ? (
+                <Fragment key={index}>{part}</Fragment>
+              ) : part.userId ? (
+                <Link
+                  key={index}
+                  href={`/users/${part.userId}`}
+                  prefetch={false}
+                  className="text-primary-text font-semibold hover:underline"
+                >
+                  {part.strong}
+                </Link>
+              ) : (
+                <span key={index} className="text-primary-text font-semibold">
+                  {part.strong}
+                </span>
+              ),
+          )}{" "}
+          {typeof message.createdAt === "number" && (
+            <ChatEventTime
+              timestamp={message.createdAt}
+              format="discord"
+              className="text-quaternary-text text-xs"
+            />
+          )}
+        </p>
+      </div>
+    );
+  }
   if (acceptedOffer || (message.type === "system" && !embedMetadata)) {
     const systemContent = formatSystemMessageContent(
       message,
@@ -211,7 +303,7 @@ export function MessageRow({
   const sender =
     (isOwnMessage && currentUser
       ? (currentUserEnriched ?? currentUserMessageUser)
-      : selectedUser) ??
+      : userFor(senderId)) ??
     selectedUser ??
     currentUserMessageUser;
   if (!sender) {
@@ -238,9 +330,7 @@ export function MessageRow({
     if (asId(previousMessage.senderId) !== senderId) {
       return false;
     }
-    const minute = Math.floor(message.createdAt / 60_000);
-    const prevMinute = Math.floor(previousMessage.createdAt / 60_000);
-    return minute === prevMinute;
+    return message.createdAt - previousMessage.createdAt <= GROUP_GAP_MS;
   })();
 
   const isMessageMenuActive = activeMessageId === message.id;
@@ -284,6 +374,21 @@ export function MessageRow({
           >
             <Icon icon="heroicons-outline:flag" className="mr-2 h-4 w-4" />
             Report Message
+          </Item>
+        )}
+        {!isOwnMessage && canDeleteOthers && message.status !== "failed" && (
+          <Item
+            disabled={isSending || !!deletingMessageId}
+            onClick={(e: React.MouseEvent) =>
+              void handleDeleteMessage(
+                message.id,
+                skipShiftKey ? false : e.shiftKey,
+              )
+            }
+            className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+          >
+            <Icon icon="heroicons-outline:trash" className="mr-2 h-4 w-4" />
+            Delete Message
           </Item>
         )}
         {isOwnMessage && message.status !== "failed" && (
@@ -348,10 +453,12 @@ export function MessageRow({
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hover:bg-tertiary-bg! !size-8 rounded-md p-0"
+            <button
+              type="button"
+              className={cn(
+                "border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border opacity-0 transition-opacity group-hover/message:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed",
+                isMessageMenuActive && "opacity-100",
+              )}
               aria-label="More message actions"
               disabled={
                 isSending ||
@@ -362,13 +469,13 @@ export function MessageRow({
                   message.status !== "failed")
               }
             >
-              <Icon icon="heroicons:ellipsis-horizontal" className="!size-4" />
-            </Button>
+              <Icon icon="heroicons:ellipsis-horizontal" className="size-4" />
+            </button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
         <TooltipContent side="top">More message actions</TooltipContent>
       </Tooltip>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="w-40 p-1">
         {renderMenuItems(DropdownMenuItem)}
       </DropdownMenuContent>
     </DropdownMenu>
@@ -458,29 +565,41 @@ export function MessageRow({
           )}
           <ChatEvent
             className={cn(
-              "relative w-full flex-col items-start rounded-md py-0.5 transition-colors",
+              "relative w-full flex-col items-start rounded py-0.5 transition-colors duration-150",
               editingMessageId === message.id
-                ? "bg-tertiary-bg"
-                : "lg:group-hover/message:bg-tertiary-bg",
+                ? "bg-secondary-bg/60"
+                : "lg:group-hover/message:bg-secondary-bg/60",
               editingMessageId !== message.id &&
                 (isMessageMenuActive || replyingToMessage?.id === message.id) &&
-                "bg-quaternary-bg lg:bg-tertiary-bg",
-              message.parentId && "mt-0.5",
+                "bg-secondary-bg/60",
+              // A new sender (or a reply) starts with a little room, like the app.
+              (!isGroupedWithPrevious || message.parentId) && "mt-2 pt-1",
             )}
           >
             {message.parentId && (
-              <div className="-mb-1 flex items-center gap-2">
-                <div className="relative w-10 shrink-0 self-stretch @md/chat:w-12">
-                  <div className="border-secondary-text/40 absolute top-[calc(50%-1px)] -right-2 -bottom-0.5 left-[calc(50%-1px)] rounded-tl-md border-t-2 border-l-2" />
-                </div>
+              <div className="flex items-center">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 56 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  className="text-tertiary-text h-3 w-14 shrink-0"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M18 9V2h34"
+                  />
+                </svg>
                 {(() => {
                   const parentMsg = messages.find(
                     (m) => m.id === message.parentId,
                   );
                   if (!parentMsg) {
                     return (
-                      <div className="text-secondary-text/80 flex min-w-0 items-center gap-1.5 overflow-hidden rounded px-1 text-xs italic">
-                        This message has been deleted
+                      <div className="text-tertiary-text flex min-w-0 items-center gap-1 text-xs">
+                        Replying to a message
                       </div>
                     );
                   }
@@ -488,14 +607,14 @@ export function MessageRow({
                     asId(parentMsg.senderId) === asId(currentUser?.id);
                   const parentSender = isParentOwn
                     ? (currentUserEnriched ?? currentUserMessageUser)
-                    : selectedUser;
+                    : userFor(asId(parentMsg.senderId));
                   const parentDisplayName = parentSender
                     ? getDisplayName(parentSender)
                     : "Unknown";
                   return (
                     <button
                       type="button"
-                      className="text-secondary-text/80 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
+                      className="text-tertiary-text hover:text-secondary-text flex min-w-0 cursor-pointer items-center gap-1 text-left text-xs transition-colors"
                       onClick={() => {
                         const el = document.getElementById(
                           `message-${getMessageDomId(parentMsg)}`,
@@ -552,10 +671,10 @@ export function MessageRow({
                           className="h-4 w-4"
                         />
                       )}
-                      <span className="text-primary-text shrink-0 font-semibold">
-                        @{parentDisplayName}
+                      <span className="text-secondary-text shrink-0 font-medium">
+                        {parentDisplayName}
                       </span>
-                      <span className="text-secondary-text max-w-50 truncate sm:max-w-100">
+                      <span className="min-w-0 truncate">
                         {formatMessageText(parentMsg.content)}
                       </span>
                     </button>
@@ -574,7 +693,7 @@ export function MessageRow({
                     <ChatEventTime
                       timestamp={message.createdAt}
                       format="time"
-                      className="text-secondary-text invisible text-[10px] lg:group-hover/message:visible"
+                      className="text-quaternary-text invisible text-[10px] lg:group-hover/message:visible"
                     />
                   ) : null
                 ) : (
@@ -590,7 +709,7 @@ export function MessageRow({
                       avatarHash={sender.avatar}
                       username={sender.username}
                       custom_avatar={sender.custom_avatar}
-                      size={7}
+                      size={9}
                       showBadge={false}
                       settings={sender.settings_v2}
                       premiumType={sender.premiumtype}
@@ -605,7 +724,7 @@ export function MessageRow({
                       <Link
                         href={`/users/${sender.id}`}
                         prefetch={false}
-                        className="text-primary-text hover:text-link max-w-full cursor-pointer text-sm font-medium wrap-break-word transition-colors sm:text-base"
+                        className="text-primary-text max-w-full cursor-pointer text-base font-semibold wrap-break-word hover:underline"
                       >
                         {getDisplayName(sender)}
                       </Link>
@@ -613,7 +732,7 @@ export function MessageRow({
                         <ChatEventTime
                           timestamp={message.createdAt}
                           format="discord"
-                          className="text-secondary-text shrink-0 text-xs"
+                          className="text-tertiary-text shrink-0 text-xs"
                         />
                       )}
                     </div>
@@ -635,12 +754,12 @@ export function MessageRow({
                       <ChatEventContent
                         data-message-content
                         className={cn(
-                          "wrap-break-word whitespace-pre-wrap",
+                          "text-base wrap-break-word whitespace-pre-wrap",
                           message.status === "pending"
-                            ? "text-secondary-text/70"
+                            ? "text-primary-text/50"
                             : message.status === "failed"
-                              ? "text-form-error"
-                              : "text-primary-text",
+                              ? "text-status-error"
+                              : "text-primary-text/90",
                         )}
                       >
                         {embedMetadata ? (
@@ -664,7 +783,7 @@ export function MessageRow({
                         )}
                         {message.updatedAt &&
                           message.updatedAt !== message.createdAt && (
-                            <span className="text-secondary-text ml-1.5 text-[10px]">
+                            <span className="text-quaternary-text ml-1 text-xs">
                               (edited)
                             </span>
                           )}
@@ -675,9 +794,9 @@ export function MessageRow({
                 {isLatestSeenOwnMessage &&
                   message.status !== "pending" &&
                   message.status !== "failed" && (
-                    <div className="text-secondary-text mt-1 flex items-center gap-1.5 text-xs leading-tight">
-                      <Icon icon="heroicons:eye" className="h-3.5 w-3.5" />
-                      <span>Seen</span>
+                    <div className="text-quaternary-text mt-0.5 flex items-center gap-1 text-[11px] leading-tight">
+                      <Icon icon="heroicons:eye" className="h-3 w-3" />
+                      <span>Read</span>
                     </div>
                   )}
               </ChatEventBody>
@@ -707,56 +826,8 @@ export function MessageRow({
                 </Button>
               )}
               {editingMessageId !== message.id && canOpenActions && (
-                <div
-                  className={cn(
-                    "border-border-card bg-secondary-bg pointer-events-none absolute top-0 right-2 z-10 hidden -translate-y-1/2 items-center gap-0.5 rounded-lg border p-0.5 opacity-0 shadow-md lg:flex lg:group-hover/message:pointer-events-auto lg:group-hover/message:opacity-100 lg:group-focus-within/message:pointer-events-auto lg:group-focus-within/message:opacity-100",
-                    isMessageMenuActive && "pointer-events-auto opacity-100",
-                  )}
-                >
-                  {message.status !== "failed" && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="hover:bg-tertiary-bg! !size-8"
-                          aria-label="Reply to message"
-                          disabled={isSending || !!deletingMessageId}
-                          onClick={() => setReplyingToMessage(message)}
-                        >
-                          <Icon
-                            icon="heroicons-outline:reply"
-                            className="!size-4"
-                          />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">Reply</TooltipContent>
-                    </Tooltip>
-                  )}
-                  {isOwnMessage &&
-                    message.status !== "failed" &&
-                    embedMetadata?.type !== "gift_sent" && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-tertiary-bg! !size-8"
-                            aria-label="Edit message"
-                            disabled={isSending || !!deletingMessageId}
-                            onClick={() => {
-                              setEditingMessageId(message.id);
-                            }}
-                          >
-                            <Icon
-                              icon="heroicons-outline:pencil"
-                              className="!size-4"
-                            />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top">Edit</TooltipContent>
-                      </Tooltip>
-                    )}
+                // The app's single "…" button, shown on hover.
+                <div className="absolute top-0 right-2 z-10 hidden -translate-y-1/2 lg:block">
                   {messageMenu}
                 </div>
               )}

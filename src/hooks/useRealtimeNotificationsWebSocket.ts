@@ -146,6 +146,11 @@ function isViewingMessageConversation(
   }
 }
 
+function isViewingGroupChat(locationPath: string, groupId: string): boolean {
+  const pathname = locationPath.split(/[?#]/, 1)[0] ?? "";
+  return pathname === `/messages/group/${encodeURIComponent(groupId)}`;
+}
+
 function getReconnectDelay(attempt: number): number {
   const exponentialDelay = Math.min(
     BASE_RECONNECT_DELAY_MS * Math.pow(2, Math.max(0, attempt - 1)),
@@ -160,11 +165,11 @@ function parseRealtimeMessagePayload(raw: string): RealtimeNotificationMessage {
   // Preserve large snowflake-like IDs from websocket payloads.
   const normalized = raw
     .replace(
-      /"(id|parent_id|user_id|recipient_id|sender_id|receiver_id|reader_id)"\s*:\s*(\d{16,})/g,
+      /"(id|parent_id|user_id|recipient_id|sender_id|receiver_id|reader_id|group_id|owner_id|new_owner_id)"\s*:\s*(\d{16,})/g,
       '"$1":"$2"',
     )
     .replace(
-      /("message_ids"\s*:\s*\[)([^\]]*)\]/g,
+      /("(?:message_ids|member_ids|user_ids)"\s*:\s*\[)([^\]]*)\]/g,
       (_match, prefix: string, ids: string) =>
         `${prefix}${ids.replace(/(?<!["\d])(\d{16,})(?!["\d])/g, '"$1"')}]`,
     );
@@ -268,6 +273,21 @@ export function useRealtimeNotificationsWebSocket(
     return audioRef.current;
   }, []);
 
+  /** The message ding, at most once per cooldown. */
+  const playMessageSound = useCallback(() => {
+    const now = Date.now();
+    if (now - lastSoundPlayedAtRef.current < SOUND_COOLDOWN_MS) return;
+    const audio = ensureAudio();
+    audio.currentTime = 0;
+    lastSoundPlayedAtRef.current = now;
+    void audio.play().catch((error) => {
+      if (error instanceof DOMException && error.name === "NotAllowedError") {
+        return;
+      }
+      log.error("Failed to play notification sound", error);
+    });
+  }, [ensureAudio]);
+
   useEffect(() => {
     enabledRef.current = isRealtimeNotificationsEnabled;
   }, [isRealtimeNotificationsEnabled]);
@@ -370,6 +390,29 @@ export function useRealtimeNotificationsWebSocket(
     window.addEventListener("sendRealtimeMarkRead", handleMarkRead);
     return () => {
       window.removeEventListener("sendRealtimeMarkRead", handleMarkRead);
+    };
+  }, []);
+
+  // Group chats: typing and marking read, e.g. { action: "typing", group_id }.
+  useEffect(() => {
+    const send = (action: string) => (event: Event) => {
+      const groupId = (event as CustomEvent<{ group_id?: string }>).detail
+        ?.group_id;
+      if (
+        typeof groupId !== "string" ||
+        wsRef.current?.readyState !== WebSocket.OPEN
+      ) {
+        return;
+      }
+      wsRef.current.send(JSON.stringify({ action, group_id: groupId }));
+    };
+    const handleTyping = send("typing");
+    const handleMarkRead = send("group_mark_read");
+    window.addEventListener("sendRealtimeGroupTyping", handleTyping);
+    window.addEventListener("sendRealtimeGroupMarkRead", handleMarkRead);
+    return () => {
+      window.removeEventListener("sendRealtimeGroupTyping", handleTyping);
+      window.removeEventListener("sendRealtimeGroupMarkRead", handleMarkRead);
     };
   }, []);
 
@@ -744,6 +787,60 @@ export function useRealtimeNotificationsWebSocket(
             }
 
             if (payload.data && typeof payload.data === "object") {
+              // Group chats get their own event, so DM listeners never take
+              // a group's typing or messages for a DM's.
+              const groupData = payload.data as Record<string, unknown>;
+              if (
+                typeof payload.action === "string" &&
+                (payload.action.startsWith("group_") ||
+                  (payload.action === "typing" && groupData.group_id != null))
+              ) {
+                window.dispatchEvent(
+                  new CustomEvent("realtimeGroup", {
+                    detail: { action: payload.action, data: payload.data },
+                  }),
+                );
+                if (
+                  payload.action === "group_message_received" &&
+                  groupData.group_id != null &&
+                  // A group open in a background tab still notifies.
+                  !(
+                    isNotificationPageActive() &&
+                    isViewingGroupChat(
+                      locationPathRef.current,
+                      String(groupData.group_id),
+                    )
+                  )
+                ) {
+                  const path = `/messages/group/${encodeURIComponent(String(groupData.group_id))}`;
+                  const body =
+                    toNotificationBody(groupData.content) ??
+                    "Check your messages.";
+                  const tag = `realtime-group:${String(groupData.id)}`;
+                  showDesktopNotificationUnlessAppConnected(
+                    {
+                      title: "New group message",
+                      body,
+                      target: { internalPath: path },
+                      tag,
+                    },
+                    queryClient,
+                  );
+                  if (isNotificationPageActive()) {
+                    toast("New group message", {
+                      id: tag,
+                      description: body,
+                      action: {
+                        label: "Open chat",
+                        onClick: () => window.location.assign(path),
+                      },
+                    });
+                  }
+                  playMessageSound();
+                }
+                return;
+              }
+
               const dmData = payload.data as RealtimeDmMessageData;
               if (
                 payload.action === "presence_update" &&
@@ -880,23 +977,7 @@ export function useRealtimeNotificationsWebSocket(
                     });
                   }
 
-                  const now = Date.now();
-                  const isOnCooldown =
-                    now - lastSoundPlayedAtRef.current < SOUND_COOLDOWN_MS;
-                  if (!isOnCooldown) {
-                    const audio = ensureAudio();
-                    audio.currentTime = 0;
-                    lastSoundPlayedAtRef.current = now;
-                    void audio.play().catch((error) => {
-                      if (
-                        error instanceof DOMException &&
-                        error.name === "NotAllowedError"
-                      ) {
-                        return;
-                      }
-                      log.error("Failed to play notification sound", error);
-                    });
-                  }
+                  playMessageSound();
                 }
                 return;
               }
@@ -1280,6 +1361,7 @@ export function useRealtimeNotificationsWebSocket(
   }, [
     isRealtimeNotificationsEnabled,
     ensureAudio,
+    playMessageSound,
     flushPreferenceOutbox,
     onWebsiteBan,
     onSupporterUpdated,

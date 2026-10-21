@@ -18,6 +18,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
 import type { MessageUser } from "@/utils/messages/types";
+import { PresenceDot } from "./ConversationSidebar";
 import { getDisplayName } from "@/utils/messages/formatting";
 
 interface ChatHeaderPanelProps {
@@ -37,7 +38,6 @@ export function ChatHeaderPanel({
   currentUserId,
   isTargetOnline,
   shouldHidePresence,
-  lastSeenTime,
   selectedUserBlockedByMe,
   isProcessingBlockAction,
   goToConversationList,
@@ -46,30 +46,23 @@ export function ChatHeaderPanel({
   const [blockConfirmOpen, setBlockConfirmOpen] = useState(false);
   const blockAction = selectedUserBlockedByMe ? "Unblock" : "Block";
   return (
-    <ChatHeader className="border-border-card border-b px-4 py-3">
-      <ChatHeaderAddon>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden"
+    // Like the app's header: avatar with presence, name, block button.
+    <ChatHeader className="border-border-primary gap-2.5 border-b px-3 py-2.5 lg:px-5">
+      <ChatHeaderAddon className="lg:hidden">
+        <button
+          type="button"
           onClick={goToConversationList}
-          aria-label="Open conversations"
+          aria-label="Back to conversations"
+          className="text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors"
         >
-          <svg
-            className="text-primary-text h-5 w-5 fill-current"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-            aria-hidden="true"
-          >
-            <path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" />
-          </svg>
-        </Button>
+          <Icon icon="heroicons:arrow-left" className="h-4 w-4" />
+        </button>
       </ChatHeaderAddon>
       <ChatHeaderAddon>
         <Link
           href={`/users/${selectedUser.id}`}
           prefetch={false}
-          className="cursor-pointer"
+          className="relative cursor-pointer rounded-full"
           aria-label={`View ${getDisplayName(selectedUser)} profile`}
         >
           <UserAvatar
@@ -79,53 +72,23 @@ export function ChatHeaderPanel({
             username={selectedUser.username}
             custom_avatar={selectedUser.custom_avatar}
             size={8}
-            isOnline={isTargetOnline}
-            showBadge={true}
+            showBadge={false}
             settings={selectedUser.settings_v2}
             premiumType={selectedUser.premiumtype}
           />
+          {!shouldHidePresence && (
+            <PresenceDot online={isTargetOnline} typing={false} />
+          )}
         </Link>
       </ChatHeaderAddon>
       <ChatHeaderMain>
-        <div className="flex min-w-0 flex-col">
-          <Link
-            href={`/users/${selectedUser.id}`}
-            prefetch={false}
-            className="text-primary-text hover:text-link cursor-pointer truncate text-left text-base font-semibold transition-colors sm:text-lg"
-          >
-            {getDisplayName(selectedUser)}
-          </Link>
-          {shouldHidePresence ? (
-            <p className="text-secondary-text truncate text-xs">
-              Last seen: Hidden
-            </p>
-          ) : isTargetOnline ? (
-            <p
-              className="truncate text-xs"
-              style={{
-                color: "var(--color-status-success-vibrant)",
-              }}
-            >
-              Online
-            </p>
-          ) : selectedUser.last_seen ? (
-            <p className="text-secondary-text truncate text-xs">
-              Last seen:{" "}
-              {lastSeenTime ? (
-                lastSeenTime
-              ) : (
-                <span className="inline-flex items-center gap-1">
-                  <Spinner className="h-3 w-3" />
-                  <span>Loading...</span>
-                </span>
-              )}
-            </p>
-          ) : (
-            <p className="text-secondary-text truncate text-xs">
-              Last seen unavailable
-            </p>
-          )}
-        </div>
+        <Link
+          href={`/users/${selectedUser.id}`}
+          prefetch={false}
+          className="text-primary-text min-w-0 flex-1 cursor-pointer truncate text-left text-sm font-semibold hover:underline"
+        >
+          {getDisplayName(selectedUser)}
+        </Link>
       </ChatHeaderMain>
       {currentUserId !== selectedUser.id && (
         <ChatHeaderAddon>
@@ -134,22 +97,19 @@ export function ChatHeaderPanel({
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:bg-quaternary-bg! active:bg-quaternary-bg! !size-11 bg-transparent lg:!size-10"
+                className={
+                  selectedUserBlockedByMe
+                    ? "text-status-error! hover:bg-status-error/10! size-7! rounded-md!"
+                    : "text-secondary-text! hover:bg-quaternary-bg! hover:text-primary-text! size-7! rounded-md!"
+                }
                 aria-label={`${blockAction} ${getDisplayName(selectedUser)}`}
                 disabled={isProcessingBlockAction}
                 onClick={() => setBlockConfirmOpen(true)}
               >
                 {isProcessingBlockAction ? (
-                  <Spinner className="!size-5" />
+                  <Spinner className="size-4!" />
                 ) : (
-                  <Icon
-                    icon={
-                      selectedUserBlockedByMe
-                        ? "heroicons:lock-open"
-                        : "heroicons:no-symbol"
-                    }
-                    className="!size-5"
-                  />
+                  <Icon icon="heroicons:no-symbol" className="size-4!" />
                 )}
               </Button>
             </TooltipTrigger>
