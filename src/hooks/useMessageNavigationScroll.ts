@@ -23,9 +23,22 @@ interface UseMessageNavigationScrollOptions {
 
 export function getConversationIdFromPathname(path: string): string | null {
   const parts = path.split("/").filter(Boolean);
-  if (parts[0] !== "messages" || parts.length < 2) return null;
+  // /messages/group/<id> is a group chat, not a DM with a user "group".
+  if (parts[0] !== "messages" || parts.length < 2 || parts[1] === "group")
+    return null;
   try {
     return decodeURIComponent(parts[1]).trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/** The group in /messages/group/<id>, or null. */
+export function getGroupIdFromPathname(path: string): string | null {
+  const parts = path.split("/").filter(Boolean);
+  if (parts[0] !== "messages" || parts[1] !== "group" || !parts[2]) return null;
+  try {
+    return decodeURIComponent(parts[2]).trim() || null;
   } catch {
     return null;
   }
@@ -131,10 +144,9 @@ export function useMessageNavigationScroll({
 
   useEffect(() => {
     const handlePopState = () => {
-      const parts = window.location.pathname.split("/").filter(Boolean);
-      const idFromPath =
-        parts.length >= 2 ? decodeURIComponent(parts[1]).trim() : "";
-      const nextRouteId = idFromPath || null;
+      const nextRouteId = getConversationIdFromPathname(
+        window.location.pathname,
+      );
       setRouteConversationId(nextRouteId);
       setSelectedUserId(nextRouteId);
     };

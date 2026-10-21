@@ -103,9 +103,14 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
             useMemo: (callback: () => unknown) => callback(),
             useEffect: noop,
             useRef: ref,
-            // The second local state is the selected conversation.
+            // The second local state is the selected conversation. Lazy
+            // initializers run, as in React.
             useState: (initialValue: unknown) => [
-              stateIndex++ === 1 ? "them" : initialValue,
+              stateIndex++ === 1
+                ? "them"
+                : typeof initialValue === "function"
+                  ? (initialValue as () => unknown)()
+                  : initialValue,
               noop,
             ],
           };
@@ -144,11 +149,23 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
         if (name === "@/hooks/useMessageNavigationScroll")
           return {
             getConversationIdFromPathname: () => "them",
+            getGroupIdFromPathname: () => null,
             useMessageNavigationScroll: () => ({
               routeConversationId: "them",
               selectedUserIdRef: ref("them"),
               routeConversationIdRef: ref("them"),
               messagesContainerRef: ref(null),
+            }),
+          };
+        if (name === "@/hooks/useGroupChats")
+          return {
+            useGroupChats: () => ({
+              groups: [],
+              isLoading: false,
+              error: null,
+              groupTypingUserIds: new Map(),
+              setGroups: () => {},
+              markGroupRead: () => {},
             }),
           };
         if (name === "@/hooks/useLocalMessageOverlay")

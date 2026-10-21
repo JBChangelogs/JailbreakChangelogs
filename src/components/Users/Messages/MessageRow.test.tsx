@@ -193,7 +193,7 @@ test("mobile holds reveal actions without opening the sheet; scrolling and unmou
       .some(
         (node) =>
           node.type === "ChatEvent" &&
-          node.props.className?.split(" ").includes("bg-quaternary-bg"),
+          node.props.className?.split(" ").includes("bg-secondary-bg/60"),
       ),
   ).toBe(true);
   let defaultPrevented = false;
@@ -220,7 +220,7 @@ test("mobile holds reveal actions without opening the sheet; scrolling and unmou
       .some(
         (node) =>
           node.type === "ChatEvent" &&
-          node.props.className?.split(" ").includes("bg-quaternary-bg"),
+          node.props.className?.split(" ").includes("bg-secondary-bg/60"),
       ),
   ).toBe(false);
   expect(
@@ -329,41 +329,31 @@ test("tapping a selected message clears its actions and a long press release kee
   expect(h.active()).toBeNull();
 });
 
-test("desktop toolbar uses existing reply and edit actions; sending disables actions without revealing the toolbar", () => {
+test("desktop actions open from the app's single menu button; sending disables it without revealing it", () => {
   const h = harness(false);
   let tree = h.render();
-  expect(
-    tree.find((node) => node.props["aria-label"] === "Reply to message")!.props
-      .title,
-  ).toBeUndefined();
-  expect(
-    tree.find((node) => node.props["aria-label"] === "Edit message")!.props
-      .title,
-  ).toBeUndefined();
+  const more = () =>
+    tree.find((node) => node.props["aria-label"] === "More message actions")!;
+  // Hidden until the row is hovered, like the app.
+  expect(more().props.className!.split(" ")).toContain("opacity-0");
+  expect(more().props.className!.split(" ")).toContain(
+    "group-hover/message:opacity-100",
+  );
   expect(
     tree
       .filter((node) => node.type === "TooltipContent")
       .map((node) => node.props.children),
-  ).toEqual(["Reply", "Edit", "More message actions"]);
-  tree.find((node) => node.props["aria-label"] === "Reply to message")!.props
-    .onClick!();
-  tree.find((node) => node.props["aria-label"] === "Edit message")!.props
-    .onClick!();
+  ).toEqual(["More message actions"]);
+  // Reply and Edit are the menu's first items for your own message.
+  const items = tree.filter((node) => node.type === "DropdownMenuItem");
+  items[0].props.onClick!();
+  items[1].props.onClick!();
   expect(h.replies).toEqual([h.props.message]);
   expect(h.edits).toEqual(["message"]);
   h.props.isSending = true;
   tree = h.render();
-  expect(
-    tree.find((node) => node.props["aria-label"] === "Reply to message")!.props
-      .disabled,
-  ).toBe(true);
-  const toolbar = tree.find((node) =>
-    node.props.className?.includes("lg:group-hover/message:opacity-100"),
-  )!;
-  expect(toolbar.props.className!.split(" ")).toContain("opacity-0");
-  expect(toolbar.props.className!.split(" ")).not.toContain(
-    "disabled:opacity-50",
-  );
+  expect(more().props.disabled).toBe(true);
+  expect(more().props.className!.split(" ")).toContain("opacity-0");
   expect(tree.find((node) => node.type === "Sheet")!.props.open).toBe(false);
 });
 
@@ -376,7 +366,7 @@ test("the reply target stays highlighted after the sheet closes until replying i
       .some(
         (node) =>
           node.type === "ChatEvent" &&
-          node.props.className?.split(" ").includes("bg-quaternary-bg"),
+          node.props.className?.split(" ").includes("bg-secondary-bg/60"),
       );
   expect(h.active()).toBeNull();
   expect(highlighted()).toBe(true);
@@ -394,7 +384,7 @@ test("editing uses a persistent row background without the message hover backgro
       node.type === "ChatEvent" &&
       node.props.className?.includes("relative w-full"),
   )!;
-  expect(row.props.className!.split(" ")).toContain("bg-tertiary-bg");
+  expect(row.props.className!.split(" ")).toContain("bg-secondary-bg/60");
   expect(row.props.className).not.toContain("group-hover/message:bg");
   expect(
     tree.find((node) => node.type === "MessageEditor")?.props.message,

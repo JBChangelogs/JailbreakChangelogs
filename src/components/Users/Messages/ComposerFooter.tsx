@@ -1,9 +1,8 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
 import { BanBanner } from "@/components/ui/BanBanner";
-import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { MessageComposer } from "@/components/Users/MessageComposer";
 import { ComposerActionsMenu } from "./ComposerActionsMenu";
@@ -17,8 +16,170 @@ import {
   type OutgoingMessageMetadata,
 } from "@/utils/messages/types";
 import { asId } from "@/utils/messages/parsing";
-import { getDisplayName } from "@/utils/messages/formatting";
+import { formatMessageText, getDisplayName } from "@/utils/messages/formatting";
 import type { BanInfo } from "@/utils/api/ban";
+
+const TYPING_DOTS = ["[animation-delay:-0.3s]", "[animation-delay:-0.15s]", ""];
+
+/** "A is typing…", "A and B are typing…", or "Several people are typing…". */
+function TypingText({ users }: { users: MessageUser[] }) {
+  const name = (user: MessageUser) => (
+    <span className="text-secondary-text font-semibold">
+      {getDisplayName(user)}
+    </span>
+  );
+  if (users.length === 1) return <>{name(users[0])} is typing…</>;
+  if (users.length === 2) {
+    return (
+      <>
+        {name(users[0])} and {name(users[1])} are typing…
+      </>
+    );
+  }
+  return <>Several people are typing…</>;
+}
+
+interface ComposerBarProps {
+  messageBan: BanInfo | null;
+  /** The message being replied to, and who sent it. */
+  replying: { message: Message; sender: MessageUser | null } | null;
+  onCancelReply: () => void;
+  /** Who is typing now; the line expands while anyone is. */
+  typingUsers: MessageUser[];
+  conversationId: string | null;
+  placeholder: string;
+  isSending: boolean;
+  disabled: boolean;
+  /** The "+" menu: invites, servers, gifts. */
+  actions?: ReactNode;
+  onSend: (
+    message: string,
+    metadata?: OutgoingMessageMetadata,
+  ) => void | Promise<void>;
+  onTyping: () => void;
+}
+
+/**
+ * The message box under a chat, laid out like the desktop app's: who is
+ * typing, the reply bar, then the rounded input with its actions. Shared by
+ * DMs and group chats.
+ */
+export function ComposerBar({
+  messageBan,
+  replying,
+  onCancelReply,
+  typingUsers,
+  conversationId,
+  placeholder,
+  isSending,
+  disabled,
+  actions,
+  onSend,
+  onTyping,
+}: ComposerBarProps) {
+  const composerRef = useRef<HTMLDivElement>(null);
+  const replyingTo = replying?.message ?? null;
+  useEffect(() => {
+    if (!replyingTo) return;
+    // Focus after the message menu closes and restores focus.
+    const frame = requestAnimationFrame(() => {
+      const textarea = composerRef.current?.querySelector("textarea");
+      if (!textarea || textarea.disabled) return;
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [replyingTo]);
+
+  return (
+    <div className="bg-primary-bg relative flex shrink-0 flex-col justify-center px-2 pb-2">
+      <div
+        aria-live="polite"
+        className={cn(
+          "grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none",
+          typingUsers.length ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+        )}
+      >
+        <div className="text-tertiary-text flex items-center gap-2 overflow-hidden px-2 text-xs">
+          {typingUsers.length > 0 && (
+            <>
+              <span className="flex h-3 shrink-0 items-center gap-[2px]">
+                {TYPING_DOTS.map((delay) => (
+                  <span
+                    key={delay}
+                    className={cn(
+                      "animate-typing-dot bg-tertiary-text h-1 w-1 rounded-full",
+                      delay,
+                    )}
+                  />
+                ))}
+              </span>
+              {typingUsers.length === 1 && (
+                <UserAvatar
+                  userId={typingUsers[0].id}
+                  avatarHash={typingUsers[0].avatar}
+                  username={typingUsers[0].username}
+                  custom_avatar={typingUsers[0].custom_avatar}
+                  size={4}
+                  showBadge={false}
+                  settings={typingUsers[0].settings_v2}
+                  premiumType={typingUsers[0].premiumtype}
+                />
+              )}
+              <span className="truncate py-1.5">
+                <TypingText users={typingUsers} />
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+      {messageBan && <BanBanner ban={messageBan} className="mb-2" />}
+      {replyingTo && (
+        <div className="border-border-card bg-tertiary-bg flex items-center gap-2 rounded-t-xl border-x border-t px-3 py-1.5 transition-all duration-200 ease-out starting:translate-y-1 starting:opacity-0">
+          <Icon
+            icon="heroicons:arrow-uturn-left"
+            className="text-tertiary-text h-3.5 w-3.5 shrink-0"
+          />
+          <p className="text-tertiary-text min-w-0 flex-1 truncate text-xs">
+            Replying to{" "}
+            <span className="text-secondary-text font-semibold">
+              {replying?.sender ? getDisplayName(replying.sender) : "a message"}
+            </span>
+            {replyingTo.content && (
+              <>: {formatMessageText(replyingTo.content)}</>
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={onCancelReply}
+            aria-label="Cancel reply"
+            className="text-tertiary-text hover:bg-quaternary-bg hover:text-primary-text flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded"
+          >
+            <Icon icon="heroicons:x-mark" className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+      <div
+        ref={composerRef}
+        className={cn(
+          "border-border-card bg-tertiary-bg text-primary-text focus-within:border-border-focus flex min-h-16 w-full items-center gap-2 rounded-xl border px-1 py-2 transition-[border-radius] duration-200 ease-out",
+          replyingTo && "rounded-t-none",
+        )}
+      >
+        <MessageComposer
+          conversationId={conversationId}
+          placeholder={placeholder}
+          maxChars={MESSAGE_CHAR_LIMIT}
+          isSending={isSending}
+          disabled={disabled}
+          actions={actions}
+          onSend={onSend}
+          onTyping={onTyping}
+        />
+      </div>
+    </div>
+  );
+}
 
 interface ComposerFooterProps {
   messageBan: BanInfo | null;
@@ -41,6 +202,7 @@ interface ComposerFooterProps {
   onSendGift: (gift: SupporterGift) => Promise<void>;
 }
 
+/** The DM composer: the shared bar, with gifts in its menu. */
 export function ComposerFooter({
   messageBan,
   replyingToMessage,
@@ -58,107 +220,41 @@ export function ComposerFooter({
   onTyping,
   onSendGift,
 }: ComposerFooterProps) {
-  const composerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!replyingToMessage) return;
-    // Focus after the message menu closes and restores focus.
-    const frame = requestAnimationFrame(() => {
-      const textarea = composerRef.current?.querySelector("textarea");
-      if (!textarea || textarea.disabled) return;
-      textarea.focus();
-      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [replyingToMessage]);
-
+  const blocked = !!messageBan || isUnmessageable;
   return (
-    <>
-      {isTyping ? (
-        <div
-          className="bg-secondary-bg text-secondary-text flex shrink-0 items-center gap-2 px-3 py-1.5 text-xs sm:px-4"
-          aria-live="polite"
-        >
-          <Icon
-            icon="svg-spinners:3-dots-bounce"
-            className="h-4 w-4 shrink-0"
-          />
-          <UserAvatar
-            userId={selectedUser.id}
-            avatarHash={selectedUser.avatar}
-            username={selectedUser.username}
-            custom_avatar={selectedUser.custom_avatar}
-            size={5}
-            showBadge={false}
-            settings={selectedUser.settings_v2}
-            premiumType={selectedUser.premiumtype}
-          />
-          <span>
-            <span className="text-primary-text font-medium">
-              {getDisplayName(selectedUser)}
-            </span>{" "}
-            is typing…
-          </span>
-        </div>
-      ) : null}
-      <div className="shrink-0 px-3 pt-1 pb-3">
-        {messageBan && <BanBanner ban={messageBan} className="mb-3" />}
-        {replyingToMessage && (
-          <div className="bg-secondary-bg border-border-card flex min-h-11 w-full items-center justify-between rounded-t-xl border px-3 text-sm lg:min-h-8 lg:text-xs">
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="text-secondary-text truncate">
-                Replying to{" "}
-                <span className="text-primary-text font-bold">
-                  {getDisplayName(
-                    replyingToMessage.senderId === selectedUserId
-                      ? selectedUser
-                      : (currentUserEnriched ??
-                          currentUserMessageUser ??
-                          selectedUser),
-                  )}
-                </span>
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="!size-11 rounded-full p-0 lg:!size-8"
-              aria-label="Cancel reply"
-              onClick={() => setReplyingToMessage(null)}
-            >
-              <Icon icon="lucide:x" className="h-3 w-3" />
-            </Button>
-          </div>
-        )}
-        <div
-          ref={composerRef}
-          className={cn(
-            "border-border-card bg-tertiary-bg text-primary-text flex w-full items-center rounded-xl border px-2 py-1 shadow-none sm:px-3 lg:py-2",
-            replyingToMessage && "rounded-t-none border-t-0",
-          )}
-        >
-          <MessageComposer
-            conversationId={selectedUserId}
-            placeholder={messagePlaceholder}
-            maxChars={MESSAGE_CHAR_LIMIT}
-            isSending={isSending}
-            disabled={!!messageBan || isUnmessageable}
-            actions={
-              currentUser && selectedUserId ? (
-                <ComposerActionsMenu
-                  key={`${currentUser.id}:${selectedUserId}`}
-                  userId={asId(currentUser.id)}
-                  recipientLabel={getDisplayName(selectedUser)}
-                  disabled={isSending || !!messageBan || isUnmessageable}
-                  onSend={onSend}
-                  onSendGift={onSendGift}
-                />
-              ) : null
+    <ComposerBar
+      messageBan={messageBan}
+      replying={
+        replyingToMessage
+          ? {
+              message: replyingToMessage,
+              sender:
+                replyingToMessage.senderId === selectedUserId
+                  ? selectedUser
+                  : (currentUserEnriched ?? currentUserMessageUser),
             }
+          : null
+      }
+      onCancelReply={() => setReplyingToMessage(null)}
+      typingUsers={isTyping ? [selectedUser] : []}
+      conversationId={selectedUserId}
+      placeholder={messagePlaceholder}
+      isSending={isSending}
+      disabled={blocked}
+      actions={
+        currentUser && selectedUserId ? (
+          <ComposerActionsMenu
+            key={`${currentUser.id}:${selectedUserId}`}
+            userId={asId(currentUser.id)}
+            recipientLabel={getDisplayName(selectedUser)}
+            disabled={isSending || blocked}
             onSend={onSend}
-            onTyping={onTyping}
+            onSendGift={onSendGift}
           />
-        </div>
-      </div>
-    </>
+        ) : null
+      }
+      onSend={onSend}
+      onTyping={onTyping}
+    />
   );
 }

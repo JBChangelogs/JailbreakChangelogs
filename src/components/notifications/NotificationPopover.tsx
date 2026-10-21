@@ -171,7 +171,7 @@ export function NotificationPopover({
       aria-label="Notifications"
     >
       <Icon
-        icon="mingcute:notification-line"
+        icon="mingcute:notification-fill"
         className={cn("text-primary-text", isDesktop ? "h-5 w-5" : "h-4 w-4")}
         inline={true}
       />

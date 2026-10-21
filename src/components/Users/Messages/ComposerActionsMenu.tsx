@@ -21,7 +21,8 @@ interface ComposerActionsMenuProps {
   userId: string;
   recipientLabel: string;
   disabled: boolean;
-  onSendGift: (gift: SupporterGift) => Promise<void>;
+  /** Leave out (group chats) to hide gifts. */
+  onSendGift?: (gift: SupporterGift) => Promise<void>;
   onSend: (
     content: string,
     metadata?: OutgoingMessageMetadata,
@@ -52,7 +53,7 @@ export function ComposerActionsMenu({
   const giftsQuery = useQuery({
     queryKey: giftsKey,
     queryFn: fetchSupporterGifts,
-    enabled: open,
+    enabled: open && !!onSendGift,
     staleTime: 30_000,
     retry: false,
   });
@@ -62,7 +63,10 @@ export function ComposerActionsMenu({
   const giftsError = giftsQuery.error?.message;
   const giftMutation = useMutation({
     retry: false,
-    mutationFn: onSendGift,
+    mutationFn: async (gift: SupporterGift) => {
+      if (!onSendGift) throw new Error("Gifts can't be sent here");
+      await onSendGift(gift);
+    },
     onSuccess: (_result, gift) => {
       queryClient.setQueryData<SupporterGift[]>(giftsKey, (previous) =>
         previous?.filter((item) => item.share_id !== gift.share_id),
@@ -117,9 +121,9 @@ export function ComposerActionsMenu({
           type="button"
           aria-label="More message options"
           disabled={busy}
-          className="hover:bg-tertiary-bg! size-9! p-0! transition-colors [&_svg]:size-5!"
+          className="text-secondary-text! hover:bg-quaternary-bg! ml-2.5 size-9! shrink-0 rounded-full! p-0! transition-colors [&_svg]:size-6!"
         >
-          <Icon icon="heroicons:plus" className="h-4 w-4" />
+          <Icon icon="heroicons:plus" className="size-6" />
         </ChatToolbarButton>
       </PopoverTrigger>
       <PopoverContent
@@ -151,14 +155,16 @@ export function ComposerActionsMenu({
               <Icon icon="lucide:server" className="h-4 w-4" />
               Send VIP Server
             </button>
-            <button
-              type="button"
-              className={itemClass}
-              onClick={() => setView("gifts")}
-            >
-              <Icon icon="heroicons:gift" className="h-4 w-4" />
-              Send Gift
-            </button>
+            {onSendGift && (
+              <button
+                type="button"
+                className={itemClass}
+                onClick={() => setView("gifts")}
+              >
+                <Icon icon="heroicons:gift" className="h-4 w-4" />
+                Send Gift
+              </button>
+            )}
           </>
         )}
         {view === "servers" && (
