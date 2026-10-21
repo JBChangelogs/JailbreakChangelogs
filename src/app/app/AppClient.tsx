@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -16,6 +22,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import type { ChangelogEntry } from "@/lib/changelog-parser";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
+import { getCustomTheme, subscribeCustomTheme } from "@/utils/ui/customTheme";
 import { appAccessKey, fetchAppAccess } from "./access";
 import { AppReleaseNotes } from "./AppReleaseNotes";
 import type { Releases } from "./releases";
@@ -98,6 +105,19 @@ export default function AppClient({
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, []);
+  // The preview is cross-origin, so it gets the theme by message and swaps
+  // it in place. The src keeps the first theme only, so changes don't reload it.
+  const [initialTheme] = useState(theme);
+  const postTheme = useCallback(() => {
+    previewRef.current?.contentWindow?.postMessage(
+      { type: "jbcl-theme", theme, customTheme: getCustomTheme() },
+      previewOrigin,
+    );
+  }, [theme]);
+  useEffect(() => {
+    postTheme();
+    return subscribeCustomTheme(postTheme);
+  }, [postTheme]);
   const platform = useSyncExternalStore(
     subscribePlatform,
     getBrowserDownloadPlatform,
@@ -397,7 +417,8 @@ export default function AppClient({
         <div className="mt-6 overflow-hidden rounded-2xl">
           <iframe
             ref={previewRef}
-            src={`${previewOrigin}/?theme=${encodeURIComponent(theme)}`}
+            src={`${previewOrigin}/?theme=${encodeURIComponent(initialTheme)}`}
+            onLoad={postTheme}
             className="block w-full border-0 bg-transparent"
             style={{
               height:
