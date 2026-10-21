@@ -335,6 +335,8 @@ export function GroupChatView({
     staleTime: 0,
     gcTime: 0,
     retry: false,
+    // Focus refetches would discard pending and failed messages in this cache.
+    refetchOnWindowFocus: false,
   });
   const messages = useMemo(() => {
     const byId = new Map<string, Message>();
