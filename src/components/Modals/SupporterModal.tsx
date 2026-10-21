@@ -234,14 +234,14 @@ export default function SupporterModal({
                 return (
                   <div
                     key={recommendedTier.name}
-                    className={`relative rounded-lg border-2 ${recommendedTier.color} bg-tertiary-bg p-4 ${
+                    className={`bg-tertiary-bg relative rounded-lg border-2 p-4 ${
                       recommendedTier.recommended
-                        ? "ring-button-info ring-opacity-50 ring-2"
-                        : ""
+                        ? "border-button-info"
+                        : recommendedTier.color
                     }`}
                   >
                     {recommendedTier.recommended && (
-                      <div className="bg-button-info text-form-button-text absolute -top-2 left-1/2 -translate-x-1/2 transform rounded-full px-3 py-1 text-xs font-medium">
+                      <div className="bg-button-info text-form-button-text absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-3 py-1 text-xs font-medium">
                         Recommended
                       </div>
                     )}
