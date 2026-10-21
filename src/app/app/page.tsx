@@ -5,7 +5,7 @@ import { getCachedAppChangelogEntries } from "@/lib/changelog-parser";
 import { fetchReleases } from "./releases";
 
 const description =
-  "Download the Jailbreak Changelogs desktop app for Windows, macOS and Linux. Available in early access to selected accounts.";
+  "Download the Jailbreak Changelogs desktop app for Windows, macOS and Linux. Explore trading tools, live alerts, and more.";
 const embedImage =
   "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png";
 
