@@ -541,7 +541,8 @@ export function GroupChatView({
   const send = async (
     text: string,
     metadata?: OutgoingMessageMetadata,
-    parentId = replyingToMessage?.id ?? null,
+    // Invites never go out as replies, like DMs.
+    parentId = metadata ? null : (replyingToMessage?.id ?? null),
   ) => {
     const content = prepareMessageContentForApi(text);
     if (!content || !currentUserId) return;
@@ -559,7 +560,7 @@ export function GroupChatView({
       status: "pending",
     };
     atBottomRef.current = true;
-    setReplyingToMessage(null);
+    if (!metadata) setReplyingToMessage(null);
     setMessages((list) => [...list, pending]);
     setIsSending(true);
     try {

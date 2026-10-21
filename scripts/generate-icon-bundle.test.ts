@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 test("icon credits follow used sets, ignore generated/test sources, and require notices", () => {
   const root = mkdtempSync(join(tmpdir(), "jbcl-icon-credits-"));
@@ -11,7 +12,7 @@ test("icon credits follow used sets, ignore generated/test sources, and require 
       mkdirSync(join(root, directory), { recursive: true });
     }
     copyFileSync(new URL("./generate-icon-bundle.ts", import.meta.url), join(root, "scripts/generate-icon-bundle.ts"));
-    symlinkSync(new URL("../node_modules/@iconify", import.meta.url).pathname, join(root, "node_modules/@iconify"), "dir");
+    symlinkSync(fileURLToPath(new URL("../node_modules/@iconify", import.meta.url)), join(root, "node_modules/@iconify"), "dir");
     for (const prefix of ["fixture-a", "fixture-b", "unused"]) {
       const directory = join(root, "node_modules/@iconify-json", prefix);
       mkdirSync(directory);

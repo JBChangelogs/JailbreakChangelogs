@@ -803,9 +803,13 @@ export function useRealtimeNotificationsWebSocket(
                 if (
                   payload.action === "group_message_received" &&
                   groupData.group_id != null &&
-                  !isViewingGroupChat(
-                    locationPathRef.current,
-                    String(groupData.group_id),
+                  // A group open in a background tab still notifies.
+                  !(
+                    isNotificationPageActive() &&
+                    isViewingGroupChat(
+                      locationPathRef.current,
+                      String(groupData.group_id),
+                    )
                   )
                 ) {
                   const path = `/messages/group/${encodeURIComponent(String(groupData.group_id))}`;

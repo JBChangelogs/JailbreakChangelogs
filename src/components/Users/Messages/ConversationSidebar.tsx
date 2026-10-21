@@ -591,7 +591,10 @@ export function ConversationSidebar({
                     premiumType={user.premiumtype}
                   />
                   <PresenceDot
-                    online={user.presence?.status === "Online"}
+                    online={
+                      user.presence?.status === "Online" &&
+                      user.settings_v2?.hide_presence !== true
+                    }
                     typing={typingUserIds.has(user.id)}
                   />
                 </span>
