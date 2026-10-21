@@ -84,14 +84,25 @@ html:has([role="menu"][data-side="top"])
   text-decoration: underline;
 }
 
-body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor,
-body:has([data-whats-new-dialog][data-state="open"]) #np-bottom-anchor-close,
-body:has([data-image-lightbox]) #np-bottom-anchor,
-body:has([data-image-lightbox]) #np-bottom-anchor-close,
-body:has([data-mobile-theme-panel][data-state="open"]) #np-bottom-anchor,
-body:has([data-mobile-theme-panel][data-state="open"]) #np-bottom-anchor-close,
-body:has([data-mobile-theme-panel][data-state="open"]) #np-video-player {
+body:has(
+    [data-image-lightbox],
+    [data-whats-new-dialog][data-state="open"],
+    [data-suggestion-guidelines-dialog][data-state="open"]
+  )
+  :is(#np-bottom-anchor, #np-bottom-anchor-close),
+body:has(
+    [data-sheet][data-state="open"],
+    [data-suggestion-guidelines-dialog][data-state="open"]
+  )
+  #np-video-player {
   display: none !important;
+}
+
+@media (max-width: 1024px) {
+  body:has([data-sheet][data-state="open"])
+    :is(#np-bottom-anchor, #np-bottom-anchor-close) {
+    display: none !important;
+  }
 }
 
 @theme {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,32 +16,6 @@ export function SuggestionGuidelinesDialog({
   open: boolean;
   onConfirm: () => void;
 }) {
-  useEffect(() => {
-    if (!open) return;
-
-    const AD_IDS = ["np-bottom-anchor", "np-video-player"];
-
-    const hide = () => {
-      AD_IDS.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el && el.style.display !== "none") el.style.display = "none";
-      });
-    };
-
-    hide();
-
-    const observer = new MutationObserver(hide);
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => {
-      observer.disconnect();
-      AD_IDS.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "";
-      });
-    };
-  }, [open]);
-
   const rules = [
     "Not use any form of AI generated content to make any item suggestions (If found using AI, you will receive punishment for your actions).",
     "Not be biased solely on your trading experiences, as other people might have different experiences while trading an item.",
@@ -58,6 +31,7 @@ export function SuggestionGuidelinesDialog({
   return (
     <Dialog open={open}>
       <DialogContent
+        data-suggestion-guidelines-dialog
         showClose={false}
         className="bg-secondary-bg flex max-h-[90dvh] max-w-lg flex-col overflow-hidden rounded-lg p-0 backdrop-blur-none"
         aria-describedby={undefined}
