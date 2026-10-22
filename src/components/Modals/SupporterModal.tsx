@@ -55,7 +55,6 @@ const SUPPORTER_TIERS = [
       `Upload a Custom Profile Background (${getAllowedFileExtensions()})`,
     ],
     color: "border-[#C0C0C0]",
-    recommended: true,
     tierNumber: 2,
   },
   {
@@ -80,8 +79,7 @@ const getFeatureDescription = (
     case "hide_ads":
       return {
         title: "Hide Ads",
-        description:
-          "You're trying to hide ads. Hiding ads is a supporter perk. Upgrade to Supporter II or higher to remove advertisements and support the site.",
+        description: "Remove ads and support the site with Supporter II.",
         current: `Current tier: ${currentLimit ?? "Free"}`,
         required: `Required: ${
           requiredLimit ?? SUPPORTER_TIER_NAMES[HIDE_ADS_REQUIRED_TIER]
@@ -90,15 +88,14 @@ const getFeatureDescription = (
     case "comment_length":
       return {
         title: "Unlock Longer Comments",
-        description: `You're trying to post a comment that's longer than your current limit of ${currentLimit} characters. Upgrade to a higher supporter tier to unlock longer comment limits!`,
+        description: `Your comment exceeds ${currentLimit} characters. Upgrade to increase your limit to ${requiredLimit}.`,
         current: `Current limit: ${currentLimit} characters`,
         required: `Required: ${requiredLimit} characters`,
       };
     case "custom_avatar":
       return {
         title: "Unlock Custom Avatars",
-        description:
-          "You're trying to upload and use a custom avatar, but this feature requires Supporter II or higher. Upgrade to unlock custom avatar functionality!",
+        description: "Use a custom avatar with Supporter II or higher.",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
@@ -106,7 +103,7 @@ const getFeatureDescription = (
       return {
         title: "Unlock Custom Banners",
         description:
-          "You're trying to upload and use a custom banner, but this feature requires Supporter II or higher. Upgrade to unlock custom banner functionality!",
+          "Personalize your profile with a custom banner with Supporter II or higher.",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
@@ -114,7 +111,7 @@ const getFeatureDescription = (
       return {
         title: "Unlock Custom Accent Colors",
         description:
-          "You're trying to set a custom profile accent color, but this feature requires a supporter tier. Upgrade to unlock custom accent colors!",
+          "Choose your profile’s accent color with Supporter I or higher.",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
@@ -122,38 +119,35 @@ const getFeatureDescription = (
       return {
         title: "Unlock Custom Backgrounds",
         description:
-          "You're trying to upload a custom profile background, but this feature requires Supporter II or higher. Upgrade to unlock custom backgrounds!",
+          "Use a custom profile background with Supporter II or higher.",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
     case "trade_ad_duration":
       return {
         title: "Unlock Longer Trade Ad Durations",
-        description:
-          "You're trying to create a trade ad with a duration above your current tier. Upgrade to unlock longer expiration times!",
+        description: `Keep your trade ads active longer with ${requiredLimit}.`,
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
     case "inventory_scan":
       return {
         title: "Unlock On-Demand Inventory Scan",
-        description:
-          "You're trying to scan your inventory on-demand, but this feature requires Supporter III. Upgrade to unlock instant inventory scans anytime!",
+        description: "Scan your inventory on demand with Supporter III.",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
     case "og_notification":
       return {
         title: "Unlock More OG Notifications",
-        description: `You've reached your limit of ${currentLimit} tracked items. Upgrade your supporter tier to track more OG items!`,
+        description: `You’re tracking the maximum of ${currentLimit} OG items. Upgrade to track up to ${requiredLimit}.`,
         current: `Current limit: ${currentLimit} items`,
         required: `Next tier limit: ${requiredLimit} items`,
       };
     default:
       return {
         title: "Supporter Feature",
-        description:
-          "This feature requires a higher supporter tier. Upgrade to unlock this and many more features!",
+        description: "Upgrade your supporter tier to unlock this feature.",
         current: "",
         required: "",
       };
@@ -164,6 +158,7 @@ export default function SupporterModal({
   isOpen,
   onClose,
   feature,
+  currentTier,
   requiredTier,
   currentLimit,
   requiredLimit,
@@ -181,7 +176,6 @@ export default function SupporterModal({
       <DialogContent
         className="bg-secondary-bg max-w-2xl rounded-lg p-0 backdrop-blur-none"
         showClose
-        aria-describedby={undefined}
       >
         <DialogHeader className="px-6 pt-6 pb-2">
           <div>
@@ -189,7 +183,7 @@ export default function SupporterModal({
               {featureInfo.title}
             </DialogTitle>
             <DialogDescription className="text-secondary-text mt-1 text-sm">
-              Upgrade your supporter tier to unlock this feature.
+              {featureInfo.description}
               <span className="text-link mt-1 block text-xs">
                 One-time purchase • Non-refundable • Keep perks forever
               </span>
@@ -204,22 +198,25 @@ export default function SupporterModal({
             scrollbarColor: "var(--color-border-primary) transparent",
           }}
         >
-          <div className="mb-6">
-            <p className="text-primary-text mb-4">{featureInfo.description}</p>
-
-            {featureInfo.current && (
-              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
-                <span className="text-primary-text text-sm font-medium">
-                  {featureInfo.current}
-                </span>
-              </div>
-            )}
-          </div>
+          {featureInfo.current && (
+            <p className="text-secondary-text mb-6 flex items-center gap-2 text-sm">
+              {featureInfo.current}
+              {currentTier >= 1 && currentTier <= 3 && (
+                <Image
+                  src={`${BADGE_BASE_URL}/jbcl_supporter_${currentTier}.svg`}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="shrink-0 object-contain"
+                />
+              )}
+            </p>
+          )}
 
           {/* Supporter Tiers */}
           <div>
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
-              Recommended Supporter Tier
+              Suggested upgrade
             </h3>
             <div className="grid grid-cols-1 gap-4">
               {(() => {
@@ -234,142 +231,120 @@ export default function SupporterModal({
                 return (
                   <div
                     key={recommendedTier.name}
-                    className={`grid ${
-                      recommendedTier.recommended
-                        ? "grid-rows-[auto_2px_auto_1fr]"
-                        : ""
-                    }`}
+                    className={`bg-tertiary-bg min-w-0 rounded-lg border-2 px-4 py-3 ${recommendedTier.color}`}
                   >
-                    {/* Equal rows above and below the 2px border center the badge. */}
-                    <div
-                      aria-hidden="true"
-                      className={`bg-tertiary-bg col-start-1 rounded-lg border-2 ${
-                        recommendedTier.recommended
-                          ? "border-button-info row-start-2 row-end-5"
-                          : `${recommendedTier.color} row-start-1`
-                      }`}
-                    />
-                    {recommendedTier.recommended && (
-                      <div className="bg-button-info text-form-button-text z-10 col-start-1 row-start-1 row-end-4 place-self-center rounded-full px-3 py-1 text-xs font-medium">
-                        Recommended
-                      </div>
-                    )}
-                    <div
-                      className={`z-10 col-start-1 min-w-0 p-4 ${recommendedTier.recommended ? "row-start-4" : "row-start-1"}`}
-                    >
-                      <div className="mb-3 flex items-center gap-2">
-                        <h4 className="text-primary-text text-lg font-semibold">
-                          {recommendedTier.name}
-                        </h4>
-                        {recommendedTier.name !== "Free" &&
-                          recommendedTier.tierNumber && (
-                            <Image
-                              src={`${BADGE_BASE_URL}/jbcl_supporter_${recommendedTier.tierNumber}.svg`}
-                              alt={recommendedTier.name}
-                              width={24}
-                              height={24}
-                              className="object-contain"
-                            />
-                          )}
-                      </div>
-                      <div className="mb-3">
-                        {(() => {
-                          if (feature === "comment_length") {
-                            const commentPerks = [
-                              "Post Comments up to 200 characters",
-                              "Post Comments up to 400 characters",
-                              "Post Comments up to 800 characters",
-                              "Post Comments up to 2000 characters",
-                            ];
-                            return (
-                              <span className="text-secondary-text block">
-                                {
-                                  commentPerks[
-                                    SUPPORTER_TIERS.indexOf(recommendedTier)
-                                  ]
-                                }
-                              </span>
-                            );
-                          } else if (feature === "trade_ad_duration") {
-                            const tradeAdPerks = [
-                              "Trade Ad Duration: 6 Hours",
-                              "Trade Ad Duration: +6 Hours (12 Hours total)",
-                              "Trade Ad Duration: +12 Hours (24 Hours total)",
-                              "Trade Ad Duration: +24 Hours (48 Hours total)",
-                            ];
-                            return (
-                              <span className="text-secondary-text block">
-                                {
-                                  tradeAdPerks[
-                                    SUPPORTER_TIERS.indexOf(recommendedTier)
-                                  ]
-                                }
-                              </span>
-                            );
-                          } else if (feature === "custom_avatar") {
-                            return (
-                              <span className="text-secondary-text block">
-                                Upload and Use Custom Avatars (
-                                {getAllowedFileExtensions()})
-                              </span>
-                            );
-                          } else if (feature === "custom_banner") {
-                            return (
-                              <span className="text-secondary-text block">
-                                Upload and Use Custom Banners (
-                                {getAllowedFileExtensions()})
-                              </span>
-                            );
-                          } else if (feature === "accent_color") {
-                            return (
-                              <span className="text-secondary-text block">
-                                Choose a Custom Profile Accent Color
-                              </span>
-                            );
-                          } else if (feature === "custom_background") {
-                            return (
-                              <span className="text-secondary-text block">
-                                Upload a Custom Profile Background (
-                                {getAllowedFileExtensions()})
-                              </span>
-                            );
-                          } else if (feature === "hide_ads") {
-                            return (
-                              <span className="text-secondary-text block">
-                                Hide ads across the site
-                              </span>
-                            );
-                          } else if (feature === "inventory_scan") {
-                            return (
-                              <span className="text-secondary-text block">
-                                On-Demand Inventory Scan
-                              </span>
-                            );
-                          } else if (feature === "og_notification") {
-                            const ogPerks = [
-                              "Monitor up to 3 OG Items",
-                              "Monitor up to 5 OG Items",
-                              "Monitor up to 10 OG Items",
-                              "Monitor up to 15 OG Items",
-                            ];
-                            return (
-                              <span className="text-secondary-text block">
-                                {
-                                  ogPerks[
-                                    SUPPORTER_TIERS.indexOf(recommendedTier)
-                                  ]
-                                }
-                              </span>
-                            );
-                          } else {
-                            return recommendedTier.features[0] ? (
-                              <span className="text-secondary-text block">
-                                {recommendedTier.features[0]}
-                              </span>
-                            ) : null;
-                          }
-                        })()}
-                      </div>
+                    <div className="mb-2 flex items-center gap-2">
+                      <h4 className="text-primary-text text-lg font-semibold">
+                        {recommendedTier.name}
+                      </h4>
+                      {recommendedTier.name !== "Free" &&
+                        recommendedTier.tierNumber && (
+                          <Image
+                            src={`${BADGE_BASE_URL}/jbcl_supporter_${recommendedTier.tierNumber}.svg`}
+                            alt={recommendedTier.name}
+                            width={24}
+                            height={24}
+                            className="object-contain"
+                          />
+                        )}
+                    </div>
+                    <div>
+                      {(() => {
+                        if (feature === "comment_length") {
+                          const commentPerks = [
+                            "Post Comments up to 200 characters",
+                            "Post Comments up to 400 characters",
+                            "Post Comments up to 800 characters",
+                            "Post Comments up to 2000 characters",
+                          ];
+                          return (
+                            <span className="text-secondary-text block">
+                              {
+                                commentPerks[
+                                  SUPPORTER_TIERS.indexOf(recommendedTier)
+                                ]
+                              }
+                            </span>
+                          );
+                        } else if (feature === "trade_ad_duration") {
+                          const tradeAdPerks = [
+                            "Trade Ad Duration: 6 Hours",
+                            "Trade Ad Duration: +6 Hours (12 Hours total)",
+                            "Trade Ad Duration: +12 Hours (24 Hours total)",
+                            "Trade Ad Duration: +24 Hours (48 Hours total)",
+                          ];
+                          return (
+                            <span className="text-secondary-text block">
+                              {
+                                tradeAdPerks[
+                                  SUPPORTER_TIERS.indexOf(recommendedTier)
+                                ]
+                              }
+                            </span>
+                          );
+                        } else if (feature === "custom_avatar") {
+                          return (
+                            <span className="text-secondary-text block">
+                              Upload and Use Custom Avatars (
+                              {getAllowedFileExtensions()})
+                            </span>
+                          );
+                        } else if (feature === "custom_banner") {
+                          return (
+                            <span className="text-secondary-text block">
+                              Upload and Use Custom Banners (
+                              {getAllowedFileExtensions()})
+                            </span>
+                          );
+                        } else if (feature === "accent_color") {
+                          return (
+                            <span className="text-secondary-text block">
+                              Choose a Custom Profile Accent Color
+                            </span>
+                          );
+                        } else if (feature === "custom_background") {
+                          return (
+                            <span className="text-secondary-text block">
+                              Upload a Custom Profile Background (
+                              {getAllowedFileExtensions()})
+                            </span>
+                          );
+                        } else if (feature === "hide_ads") {
+                          return (
+                            <span className="text-secondary-text block">
+                              Hide ads across the site
+                            </span>
+                          );
+                        } else if (feature === "inventory_scan") {
+                          return (
+                            <span className="text-secondary-text block">
+                              On-Demand Inventory Scan
+                            </span>
+                          );
+                        } else if (feature === "og_notification") {
+                          const ogPerks = [
+                            "Monitor up to 3 OG Items",
+                            "Monitor up to 5 OG Items",
+                            "Monitor up to 10 OG Items",
+                            "Monitor up to 15 OG Items",
+                          ];
+                          return (
+                            <span className="text-secondary-text block">
+                              {
+                                ogPerks[
+                                  SUPPORTER_TIERS.indexOf(recommendedTier)
+                                ]
+                              }
+                            </span>
+                          );
+                        } else {
+                          return recommendedTier.features[0] ? (
+                            <span className="text-secondary-text block">
+                              {recommendedTier.features[0]}
+                            </span>
+                          ) : null;
+                        }
+                      })()}
                     </div>
                   </div>
                 );
@@ -387,7 +362,7 @@ export default function SupporterModal({
           </DialogClose>
           <DialogClose asChild>
             <Button asChild size="sm">
-              <Link href="/supporting">View All Supporter Benefits</Link>
+              <Link href="/supporting">View supporter plans</Link>
             </Button>
           </DialogClose>
         </DialogFooter>
