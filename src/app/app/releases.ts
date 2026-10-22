@@ -138,11 +138,15 @@ async function fetchYmlRelease(file: string): Promise<Release | null> {
 
 /** The Tauri release when there is one, else the Electron files. */
 export async function fetchReleases(): Promise<Releases> {
-  const [tauri, Windows, macOS, Linux] = await Promise.all([
-    fetchTauriReleases().catch(() => null),
+  // Both start at once; a Tauri result doesn't wait on the fallback.
+  const tauri = fetchTauriReleases().catch(() => null);
+  const electron = Promise.all([
     fetchWindowsRelease().catch(() => null),
     fetchYmlRelease("latest-mac.yml").catch(() => null),
     fetchYmlRelease("latest-linux.yml").catch(() => null),
   ]);
-  return tauri ?? { Windows, macOS, Linux };
+  const release = await tauri;
+  if (release) return release;
+  const [Windows, macOS, Linux] = await electron;
+  return { Windows, macOS, Linux };
 }
