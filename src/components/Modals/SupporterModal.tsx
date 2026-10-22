@@ -234,129 +234,142 @@ export default function SupporterModal({
                 return (
                   <div
                     key={recommendedTier.name}
-                    className={`bg-tertiary-bg relative rounded-lg border-2 p-4 ${
+                    className={`grid ${
                       recommendedTier.recommended
-                        ? "border-button-info"
-                        : recommendedTier.color
+                        ? "grid-rows-[auto_2px_auto_1fr]"
+                        : ""
                     }`}
                   >
+                    {/* Equal rows above and below the 2px border center the badge. */}
+                    <div
+                      aria-hidden="true"
+                      className={`bg-tertiary-bg col-start-1 rounded-lg border-2 ${
+                        recommendedTier.recommended
+                          ? "border-button-info row-start-2 row-end-5"
+                          : `${recommendedTier.color} row-start-1`
+                      }`}
+                    />
                     {recommendedTier.recommended && (
-                      <div className="bg-button-info text-form-button-text absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-3 py-1 text-xs font-medium">
+                      <div className="bg-button-info text-form-button-text z-10 col-start-1 row-start-1 row-end-4 place-self-center rounded-full px-3 py-1 text-xs font-medium">
                         Recommended
                       </div>
                     )}
-                    <div className="mb-3 flex items-center gap-2">
-                      <h4 className="text-primary-text text-lg font-semibold">
-                        {recommendedTier.name}
-                      </h4>
-                      {recommendedTier.name !== "Free" &&
-                        recommendedTier.tierNumber && (
-                          <Image
-                            src={`${BADGE_BASE_URL}/jbcl_supporter_${recommendedTier.tierNumber}.svg`}
-                            alt={recommendedTier.name}
-                            width={24}
-                            height={24}
-                            className="object-contain"
-                          />
-                        )}
-                    </div>
-                    <div className="mb-3">
-                      {(() => {
-                        if (feature === "comment_length") {
-                          const commentPerks = [
-                            "Post Comments up to 200 characters",
-                            "Post Comments up to 400 characters",
-                            "Post Comments up to 800 characters",
-                            "Post Comments up to 2000 characters",
-                          ];
-                          return (
-                            <span className="text-secondary-text block">
-                              {
-                                commentPerks[
-                                  SUPPORTER_TIERS.indexOf(recommendedTier)
-                                ]
-                              }
-                            </span>
-                          );
-                        } else if (feature === "trade_ad_duration") {
-                          const tradeAdPerks = [
-                            "Trade Ad Duration: 6 Hours",
-                            "Trade Ad Duration: +6 Hours (12 Hours total)",
-                            "Trade Ad Duration: +12 Hours (24 Hours total)",
-                            "Trade Ad Duration: +24 Hours (48 Hours total)",
-                          ];
-                          return (
-                            <span className="text-secondary-text block">
-                              {
-                                tradeAdPerks[
-                                  SUPPORTER_TIERS.indexOf(recommendedTier)
-                                ]
-                              }
-                            </span>
-                          );
-                        } else if (feature === "custom_avatar") {
-                          return (
-                            <span className="text-secondary-text block">
-                              Upload and Use Custom Avatars (
-                              {getAllowedFileExtensions()})
-                            </span>
-                          );
-                        } else if (feature === "custom_banner") {
-                          return (
-                            <span className="text-secondary-text block">
-                              Upload and Use Custom Banners (
-                              {getAllowedFileExtensions()})
-                            </span>
-                          );
-                        } else if (feature === "accent_color") {
-                          return (
-                            <span className="text-secondary-text block">
-                              Choose a Custom Profile Accent Color
-                            </span>
-                          );
-                        } else if (feature === "custom_background") {
-                          return (
-                            <span className="text-secondary-text block">
-                              Upload a Custom Profile Background (
-                              {getAllowedFileExtensions()})
-                            </span>
-                          );
-                        } else if (feature === "hide_ads") {
-                          return (
-                            <span className="text-secondary-text block">
-                              Hide ads across the site
-                            </span>
-                          );
-                        } else if (feature === "inventory_scan") {
-                          return (
-                            <span className="text-secondary-text block">
-                              On-Demand Inventory Scan
-                            </span>
-                          );
-                        } else if (feature === "og_notification") {
-                          const ogPerks = [
-                            "Monitor up to 3 OG Items",
-                            "Monitor up to 5 OG Items",
-                            "Monitor up to 10 OG Items",
-                            "Monitor up to 15 OG Items",
-                          ];
-                          return (
-                            <span className="text-secondary-text block">
-                              {
-                                ogPerks[
-                                  SUPPORTER_TIERS.indexOf(recommendedTier)
-                                ]
-                              }
-                            </span>
-                          );
-                        } else {
-                          return recommendedTier.features[0] ? (
-                            <span className="text-secondary-text block">
-                              {recommendedTier.features[0]}
-                            </span>
-                          ) : null;
-                        }
-                      })()}
+                    <div
+                      className={`z-10 col-start-1 min-w-0 p-4 ${recommendedTier.recommended ? "row-start-4" : "row-start-1"}`}
+                    >
+                      <div className="mb-3 flex items-center gap-2">
+                        <h4 className="text-primary-text text-lg font-semibold">
+                          {recommendedTier.name}
+                        </h4>
+                        {recommendedTier.name !== "Free" &&
+                          recommendedTier.tierNumber && (
+                            <Image
+                              src={`${BADGE_BASE_URL}/jbcl_supporter_${recommendedTier.tierNumber}.svg`}
+                              alt={recommendedTier.name}
+                              width={24}
+                              height={24}
+                              className="object-contain"
+                            />
+                          )}
+                      </div>
+                      <div className="mb-3">
+                        {(() => {
+                          if (feature === "comment_length") {
+                            const commentPerks = [
+                              "Post Comments up to 200 characters",
+                              "Post Comments up to 400 characters",
+                              "Post Comments up to 800 characters",
+                              "Post Comments up to 2000 characters",
+                            ];
+                            return (
+                              <span className="text-secondary-text block">
+                                {
+                                  commentPerks[
+                                    SUPPORTER_TIERS.indexOf(recommendedTier)
+                                  ]
+                                }
+                              </span>
+                            );
+                          } else if (feature === "trade_ad_duration") {
+                            const tradeAdPerks = [
+                              "Trade Ad Duration: 6 Hours",
+                              "Trade Ad Duration: +6 Hours (12 Hours total)",
+                              "Trade Ad Duration: +12 Hours (24 Hours total)",
+                              "Trade Ad Duration: +24 Hours (48 Hours total)",
+                            ];
+                            return (
+                              <span className="text-secondary-text block">
+                                {
+                                  tradeAdPerks[
+                                    SUPPORTER_TIERS.indexOf(recommendedTier)
+                                  ]
+                                }
+                              </span>
+                            );
+                          } else if (feature === "custom_avatar") {
+                            return (
+                              <span className="text-secondary-text block">
+                                Upload and Use Custom Avatars (
+                                {getAllowedFileExtensions()})
+                              </span>
+                            );
+                          } else if (feature === "custom_banner") {
+                            return (
+                              <span className="text-secondary-text block">
+                                Upload and Use Custom Banners (
+                                {getAllowedFileExtensions()})
+                              </span>
+                            );
+                          } else if (feature === "accent_color") {
+                            return (
+                              <span className="text-secondary-text block">
+                                Choose a Custom Profile Accent Color
+                              </span>
+                            );
+                          } else if (feature === "custom_background") {
+                            return (
+                              <span className="text-secondary-text block">
+                                Upload a Custom Profile Background (
+                                {getAllowedFileExtensions()})
+                              </span>
+                            );
+                          } else if (feature === "hide_ads") {
+                            return (
+                              <span className="text-secondary-text block">
+                                Hide ads across the site
+                              </span>
+                            );
+                          } else if (feature === "inventory_scan") {
+                            return (
+                              <span className="text-secondary-text block">
+                                On-Demand Inventory Scan
+                              </span>
+                            );
+                          } else if (feature === "og_notification") {
+                            const ogPerks = [
+                              "Monitor up to 3 OG Items",
+                              "Monitor up to 5 OG Items",
+                              "Monitor up to 10 OG Items",
+                              "Monitor up to 15 OG Items",
+                            ];
+                            return (
+                              <span className="text-secondary-text block">
+                                {
+                                  ogPerks[
+                                    SUPPORTER_TIERS.indexOf(recommendedTier)
+                                  ]
+                                }
+                              </span>
+                            );
+                          } else {
+                            return recommendedTier.features[0] ? (
+                              <span className="text-secondary-text block">
+                                {recommendedTier.features[0]}
+                              </span>
+                            ) : null;
+                          }
+                        })()}
+                      </div>
                     </div>
                   </div>
                 );
@@ -372,9 +385,11 @@ export default function SupporterModal({
               Maybe Later
             </Button>
           </DialogClose>
-          <Button asChild size="sm">
-            <Link href="/supporting">View All Supporter Benefits</Link>
-          </Button>
+          <DialogClose asChild>
+            <Button asChild size="sm">
+              <Link href="/supporting">View All Supporter Benefits</Link>
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

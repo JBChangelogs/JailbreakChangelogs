@@ -282,26 +282,35 @@ export default function ModernPricingSection() {
             return (
               <div
                 key={tier.name}
-                className={`hover:bg-tertiary-bg relative transform rounded-lg transition-all duration-500 ${
-                  tier.recommended
-                    ? "border-button-info bg-secondary-bg border-2"
-                    : "border-border-card bg-secondary-bg border"
+                className={`group grid ${
+                  tier.recommended ? "grid-rows-[auto_2px_auto_1fr]" : ""
                 }`}
-                style={
-                  highlightedTier === tier.tierNumber
-                    ? {
-                        backgroundColor:
-                          "color-mix(in srgb, var(--color-button-info), transparent 80%)",
-                      }
-                    : undefined
-                }
               >
+                {/* Equal rows above and below the 2px border center the badge. */}
+                <div
+                  aria-hidden="true"
+                  className={`bg-secondary-bg group-hover:bg-tertiary-bg col-start-1 rounded-lg transition-colors duration-500 ${
+                    tier.recommended
+                      ? "border-button-info row-start-2 row-end-5 border-2"
+                      : "border-border-card row-start-1 border"
+                  }`}
+                  style={
+                    highlightedTier === tier.tierNumber
+                      ? {
+                          backgroundColor:
+                            "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                        }
+                      : undefined
+                  }
+                />
                 {tier.recommended && (
-                  <div className="bg-button-info text-form-button-text absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-5 py-2 text-xs font-semibold">
+                  <div className="bg-button-info text-form-button-text z-10 col-start-1 row-start-1 row-end-4 place-self-center rounded-full px-5 py-2 text-xs font-semibold">
                     Popular
                   </div>
                 )}
-                <div className="flex h-full flex-col p-6">
+                <div
+                  className={`z-10 col-start-1 flex min-w-0 flex-col p-6 ${tier.recommended ? "row-start-4" : "row-start-1"}`}
+                >
                   <div className="mb-2 flex items-center gap-2">
                     <p className="text-primary-text text-lg font-medium">
                       {tier.name}
