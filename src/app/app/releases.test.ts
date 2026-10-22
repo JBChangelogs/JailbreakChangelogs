@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import {
   compareVersions,
+  parseTauriManifest,
   parseWindowsVersion,
   parseYmlRelease,
 } from "./releases";
@@ -61,4 +62,24 @@ test("orders versions numerically, with prereleases before their release", () =>
   expect(compareVersions("1.2", "1.2.0")).toBe(0);
   expect(compareVersions("1.2.4+build.1", "1.2.3")).toBeGreaterThan(0);
   expect(compareVersions("1.2.3+build.9", "1.2.3")).toBe(0);
+});
+
+test("reads version and date from tauri/latest.json", () => {
+  expect(
+    parseTauriManifest({
+      version: "0.6.0",
+      notes: "Notes",
+      pub_date: "2026-10-22T20:15:03.123Z",
+      platforms: { "windows-x86_64": { url: "x", signature: "y" } },
+    }),
+  ).toEqual({
+    version: "0.6.0",
+    releasedAt: Date.parse("2026-10-22T20:15:03.123Z"),
+  });
+  expect(parseTauriManifest({ version: "0.6.0" })).toEqual({
+    version: "0.6.0",
+    releasedAt: null,
+  });
+  expect(parseTauriManifest({})).toBeNull();
+  expect(parseTauriManifest(null)).toBeNull();
 });
