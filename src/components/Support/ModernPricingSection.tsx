@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useQueryState } from "nuqs";
@@ -105,6 +106,7 @@ const CRYPTO_ADDRESSES = {
 } as const;
 
 export default function ModernPricingSection() {
+  const reduceMotion = useReducedMotion();
   const BADGE_BASE_URL =
     "https://assets.jailbreakchangelogs.com/assets/website_icons";
   const [highlightedTier, setHighlightedTier] = useState<number | null>(null);
@@ -216,15 +218,29 @@ export default function ModernPricingSection() {
               Support Jailbreak Changelogs
             </h2>
             <p className="text-secondary-text mt-4 text-base sm:text-lg">
-              <span className="text-button-info relative inline-block font-bold">
+              <motion.span
+                className="text-button-info relative inline-block font-bold"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.8 }}
+              >
                 One-time purchase
                 <svg
+                  aria-hidden="true"
                   className="absolute -bottom-1 left-0 hidden w-full sm:block"
                   viewBox="0 0 120 8"
                   preserveAspectRatio="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path
+                  <motion.path
+                    variants={{
+                      hidden: { pathLength: 0 },
+                      visible: { pathLength: 1 },
+                    }}
+                    transition={{
+                      duration: reduceMotion ? 0 : 1.2,
+                      ease: "easeInOut",
+                    }}
                     d="M0 4 Q 6 1, 12 4 T 24 4 T 36 4 T 48 4 T 60 4 T 72 4 T 84 4 T 96 4 T 108 4 T 120 4"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -232,7 +248,7 @@ export default function ModernPricingSection() {
                     strokeLinecap="round"
                   />
                 </svg>
-              </span>
+              </motion.span>
               . No subscriptions. No recurring fees. Keep perks forever.
             </p>
           </div>
@@ -400,17 +416,30 @@ export default function ModernPricingSection() {
           })}
         </div>
 
+        <p className="text-secondary-text mt-6 text-center text-sm">
+          Prefer to support us with a custom amount?{" "}
+          <a
+            href="https://ko-fi.com/jailbreakchangelogs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-link hover:text-link-hover font-semibold underline transition-colors"
+          >
+            Support us on Ko-fi
+          </a>
+          .
+        </p>
+
         {/* Important Information Section */}
         <div
           id="important-information"
           className="bg-button-info/10 border-border-card mt-12 scroll-mt-24 rounded-lg border p-6"
         >
-          <h3 className="text-primary-text mb-4 text-lg font-semibold">
+          <h3 className="text-primary-text mb-6 text-lg font-semibold">
             Important Information
           </h3>
 
-          <div className="grid gap-2">
-            <div className="bg-primary-bg/60 border-border-card rounded-lg border p-4">
+          <div className="space-y-6">
+            <div>
               <p className="text-primary-text text-sm font-semibold">
                 One-time Purchases
               </p>
@@ -420,7 +449,7 @@ export default function ModernPricingSection() {
               </p>
             </div>
 
-            <div className="bg-primary-bg/60 border-border-card rounded-lg border p-4">
+            <div>
               <p className="text-primary-text text-sm font-semibold">
                 Discord Purchases
               </p>
@@ -429,21 +458,11 @@ export default function ModernPricingSection() {
                 <span className="text-primary-text font-semibold">
                   &quot;Support with Discord&quot;
                 </span>{" "}
-                on any tier above to be taken to the purchase page. Need help?
-                Join our{" "}
-                <a
-                  href="https://discord.jailbreakchangelogs.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
-                >
-                  Discord server
-                </a>
-                .
+                on any tier above to be taken to the purchase page.
               </p>
             </div>
 
-            <div className="bg-primary-bg/60 border-border-card rounded-lg border p-4">
+            <div>
               <p className="text-primary-text text-sm font-semibold">
                 After You Purchase
               </p>
@@ -453,7 +472,7 @@ export default function ModernPricingSection() {
               </p>
             </div>
 
-            <div className="bg-primary-bg/60 border-border-card rounded-lg border p-4">
+            <div>
               <p className="text-primary-text text-sm font-semibold">
                 Need Help?
               </p>
@@ -644,7 +663,7 @@ export default function ModernPricingSection() {
         </div>
 
         {/* Long-term Sponsor Section */}
-        <div className="border-border-card bg-secondary-bg mt-12 rounded-lg border p-6">
+        <div className="mt-12 p-6">
           <div className="text-center">
             <h3 className="text-primary-text mb-2 text-lg font-semibold">
               Want to become a long-term sponsor?

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { motion, useReducedMotion } from "motion/react";
 import UserAvatar from "@/components/Users/UserAvatarClient";
 import { Supporter } from "@/utils/api/api";
 import SupporterCarousel from "./SupporterCarousel";
@@ -71,6 +72,7 @@ function computeSampledTiers(supporters: Supporter[]) {
 export default function SupportersSection({
   supporters,
 }: SupportersSectionProps) {
+  const reduceMotion = useReducedMotion();
   const BADGE_BASE_URL =
     "https://assets.jailbreakchangelogs.com/assets/website_icons";
 
@@ -185,15 +187,29 @@ export default function SupportersSection({
     <div id="supporters-section" className="pt-4 pb-8">
       <h2 className="text-primary-text mb-8 text-center text-3xl font-bold lg:text-4xl">
         Made possible by our{" "}
-        <span className="text-button-info relative inline-block">
+        <motion.span
+          className="text-button-info relative inline-block"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.8 }}
+        >
           supporters
           <svg
+            aria-hidden="true"
             className="absolute -bottom-1 left-0 hidden w-full sm:block"
             viewBox="0 0 120 8"
             preserveAspectRatio="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path
+            <motion.path
+              variants={{
+                hidden: { pathLength: 0 },
+                visible: { pathLength: 1 },
+              }}
+              transition={{
+                duration: reduceMotion ? 0 : 1.2,
+                ease: "easeInOut",
+              }}
               d="M0 4 Q 6 1, 12 4 T 24 4 T 36 4 T 48 4 T 60 4 T 72 4 T 84 4 T 96 4 T 108 4 T 120 4"
               stroke="currentColor"
               strokeWidth="2"
@@ -201,7 +217,7 @@ export default function SupportersSection({
               strokeLinecap="round"
             />
           </svg>
-        </span>
+        </motion.span>
       </h2>
 
       <div className="container mx-auto px-4">
