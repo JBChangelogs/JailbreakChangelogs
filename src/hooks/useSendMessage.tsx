@@ -450,7 +450,7 @@ export function useSendMessage({
       ),
     ]);
     try {
-      await giftSupporterGift(gift.share_id, targetUserId);
+      await giftSupporterGift(gift.share_id, targetUserId, true);
       updateStatus("sent");
     } catch (error) {
       updateStatus("failed");
