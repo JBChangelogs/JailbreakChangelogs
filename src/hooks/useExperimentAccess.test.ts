@@ -4,20 +4,23 @@ import { runInNewContext } from "node:vm";
 import { ModuleKind, ScriptTarget, transpileModule } from "typescript";
 import { parseExperimentsResponse } from "@/utils/api/experiments";
 
-test("global search requires treatment, isolates accounts and overrides, and stays off for guests and failures", async () => {
+test("experiment gates require treatment, isolate accounts and overrides, and deny guests and failures", async () => {
   type Options = {
     enabled: boolean;
     queryKey: unknown[];
-    queryFn: (context: { signal: AbortSignal }) => Promise<boolean>;
+    queryFn: (context: {
+      signal: AbortSignal;
+    }) => Promise<Record<string, string>>;
   };
   let options!: Options;
-  let data: boolean | undefined;
+  let data: Record<string, string> | undefined;
   let isError = false;
   let overrides = "";
   let response = Response.json({ experiments: { global_search: "treatment" } });
   const signal = new AbortController().signal;
   const exports = {} as {
-    useGlobalSearchAccess: (
+    useExperimentAccess: (
+      experimentKey: string,
       userId: string | undefined,
       enabled: boolean,
     ) => boolean;
@@ -48,7 +51,7 @@ test("global search requires treatment, isolates accounts and overrides, and sta
   runInNewContext(
     transpileModule(
       readFileSync(
-        new URL("./useGlobalSearchAccess.ts", import.meta.url),
+        new URL("./useExperimentAccess.ts", import.meta.url),
         "utf8",
       ),
       {
@@ -72,19 +75,28 @@ test("global search requires treatment, isolates accounts and overrides, and sta
       },
     },
   );
-  const allowed = exports.useGlobalSearchAccess;
-  expect(allowed("123", true)).toBe(false);
+  const allowed = exports.useExperimentAccess;
+  expect(allowed("global_search", "123", true)).toBe(false);
   expect(options.enabled).toBe(true);
   data = await options.queryFn({ signal });
-  expect(allowed("123", true)).toBe(true);
-  expect(options.queryKey).toEqual(["global-search-access", "123", ""]);
-  expect(allowed(undefined, true)).toBe(false);
+  expect(allowed("global_search", "123", true)).toBe(true);
+  expect(allowed("airdrop_tracker", "123", true)).toBe(false);
+  data = { global_search: "control", airdrop_tracker: "treatment" };
+  expect(allowed("airdrop_tracker", "123", true)).toBe(true);
+  expect(allowed("global_search", "123", true)).toBe(false);
+  data = { airdrop_tracker: "control" };
+  expect(allowed("airdrop_tracker", "123", true)).toBe(false);
+  expect(allowed("airdrop_tracker", undefined, true)).toBe(false);
+  expect(allowed("airdrop_tracker", "123", false)).toBe(false);
+  allowed("global_search", "123", true);
+  expect(options.queryKey).toEqual(["experiment-access", "123", ""]);
+  expect(allowed("global_search", undefined, true)).toBe(false);
   expect(options.enabled).toBe(false);
-  expect(allowed("123", false)).toBe(false);
+  expect(allowed("global_search", "123", false)).toBe(false);
   expect(options.enabled).toBe(false);
   overrides = "global_search=control";
-  allowed("456", true);
-  expect(options.queryKey).toEqual(["global-search-access", "456", overrides]);
+  allowed("global_search", "456", true);
+  expect(options.queryKey).toEqual(["experiment-access", "456", overrides]);
   for (const experiments of [
     { global_search: "control" },
     {},
@@ -92,11 +104,11 @@ test("global search requires treatment, isolates accounts and overrides, and sta
   ]) {
     response = Response.json({ experiments });
     data = await options.queryFn({ signal });
-    expect(allowed("456", true)).toBe(false);
+    expect(allowed("global_search", "456", true)).toBe(false);
   }
-  data = true;
+  data = { global_search: "treatment" };
   isError = true;
-  expect(allowed("456", true)).toBe(false);
+  expect(allowed("global_search", "456", true)).toBe(false);
   response = new Response(null, { status: 503 });
   await expect(options.queryFn({ signal })).rejects.toThrow("Unable to check");
   response = Response.json({ experiments: { global_search: true } });

@@ -48,7 +48,7 @@ import { getNavigationHref, getNavigationSection } from "@/utils/ui/navigation";
 import { cn } from "@/lib/utils";
 import { isGlobalSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useGlobalSearchAccess } from "@/hooks/useGlobalSearchAccess";
+import { useExperimentAccess } from "@/hooks/useExperimentAccess";
 
 const GlobalSearch = dynamic(() => import("./GlobalSearch"), { ssr: false });
 
@@ -513,7 +513,8 @@ export default function Header({
   useEffect(() => setMounted(true), []);
   const showAuth = mounted && !isLoading && isAuthenticated;
   const userData = showAuth ? authUser : null;
-  const searchEnabled = useGlobalSearchAccess(
+  const searchEnabled = useExperimentAccess(
+    "global_search",
     userData?.id,
     isDesktop && showAuth,
   );
