@@ -547,11 +547,6 @@ function RobberyTrackerContent() {
       ? "Logged (Newest to Oldest)"
       : "Logged (Oldest to Newest)";
 
-  const robberyFilterModeLabel =
-    robberyFilterMode === "any"
-      ? "Any Selected Type"
-      : "Power Combo (All Selected Types)";
-
   const isPowerComboMode = robberyFilterMode === "all";
 
   const robberyTypeCounts = useMemo(() => {
@@ -1510,53 +1505,6 @@ function RobberyTrackerContent() {
                       </Button>
                     );
                   })}
-                </div>
-                <div className="mt-4 w-full lg:max-w-md">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-11 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
-                        aria-label="Robbery type filter mode"
-                      >
-                        <span className="truncate">
-                          {robberyFilterModeLabel}
-                        </span>
-                        <Icon
-                          icon="heroicons:chevron-down"
-                          className="text-secondary-text h-5 w-5"
-                        />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
-                    >
-                      <DropdownMenuRadioGroup
-                        value={robberyFilterMode}
-                        onValueChange={(value) => {
-                          const nextMode = value as RobberyFilterMode;
-                          setRobberyFilterMode(nextMode);
-                          if (nextMode === "all") {
-                            setSelectedRobberyTypes([]);
-                          }
-                        }}
-                      >
-                        <DropdownMenuRadioItem
-                          value="any"
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          Any Selected Type
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem
-                          value="all"
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          Power Combo (All Types Open)
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
                 {isPowerComboMode && (
                   <p className="text-secondary-text mt-3 text-xs">
