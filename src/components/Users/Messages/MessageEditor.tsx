@@ -47,6 +47,8 @@ export function MessageEditor({
     mentionsToText(
       message.content,
       (id) => mentionUsers.find((user) => user.id === id)?.username,
+      // A profile not loaded yet keeps its <@id>, so saving doesn't lose it.
+      null,
     ),
   );
   const save = () =>

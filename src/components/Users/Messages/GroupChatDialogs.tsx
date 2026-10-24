@@ -176,7 +176,7 @@ export function UserPickerDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="flex h-[min(560px,85dvh)] max-w-md flex-col gap-0 overflow-hidden p-0"
+        className="flex h-[min(560px,85dvh)] max-w-md flex-col gap-0 overflow-x-hidden overflow-y-auto p-0"
         showClose
       >
         <div className="shrink-0 px-5 pt-5 pb-3">

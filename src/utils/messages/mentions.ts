@@ -10,16 +10,19 @@ export const SUGGESTION_TRIGGER = /(?:^|\s)([:@])([a-z0-9_.]{0,32})$/i;
 const escapeRegExp = (text: string) =>
   text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** <@id> → @username, for plain-text places like reply previews and toasts. */
+/**
+ * <@id> → @name, for plain-text places like reply previews and toasts.
+ * `unknown` names anyone not found; null keeps their <@id> as it is.
+ */
 export function mentionsToText(
   text: string,
   nameOf: (id: string) => string | null | undefined,
-  unknown = "unknown-user",
+  unknown: string | null = "unknown-user",
 ): string {
-  return text.replace(
-    MENTION_GLOBAL,
-    (_, id: string) => `@${nameOf(id) ?? unknown}`,
-  );
+  return text.replace(MENTION_GLOBAL, (raw, id: string) => {
+    const name = nameOf(id) ?? unknown;
+    return name === null ? raw : `@${name}`;
+  });
 }
 
 /** @username → <@id> for each known user; skips email@bob and @bobby. */

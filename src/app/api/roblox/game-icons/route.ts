@@ -4,7 +4,7 @@ import { KNOWN_ROBLOX_GAMES } from "@/utils/messages/invites";
 
 const log = createLogger("API");
 
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 /**
  * Icons for the games invites can name ({ placeId: imageUrl }). Roblox's

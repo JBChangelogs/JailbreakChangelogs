@@ -29,7 +29,7 @@ export function toggleReaction(
 export async function sendReactionToggle(
   path: string,
   emoji: string,
-): Promise<MessageReactions> {
+): Promise<MessageReactions | null> {
   const { url, headers } = buildApiFetchRequest(
     process.env.NEXT_PUBLIC_API_URL,
     `${path}/reactions?emoji=${encodeURIComponent(emoji)}`,
@@ -51,11 +51,16 @@ export async function sendReactionToggle(
       unknown
     >;
   } catch {
-    // An empty body leaves no reactions.
+    // An unreadable body: the caller keeps its optimistic state.
   }
   const message = body.message as Record<string, unknown> | undefined;
-  return parseReactions(body.reactions ?? message?.reactions);
+  // {} is a real answer (the last reaction went); a missing field isn't.
+  const raw = body.reactions ?? message?.reactions;
+  return raw == null ? null : parseReactions(raw);
 }
+
+/** The latest toggle per message, so quick repeats build on each other. */
+const reactionQueues = new Map<string, Promise<MessageReactions>>();
 
 /**
  * Toggles your reaction at once, then takes the server's reactions; rolls
@@ -74,16 +79,26 @@ export async function reactToMessage({
   path: string;
   setReactions: (reactions: MessageReactions) => void;
 }) {
-  const previous = message.reactions ?? {};
-  // Only adding counts toward your most-used emoji.
-  if (!previous[emoji]?.includes(userId)) recordEmojiUse(emoji);
-  setReactions(toggleReaction(previous, emoji, userId));
-  try {
-    setReactions(await sendReactionToggle(path, emoji));
-  } catch (error) {
-    setReactions(previous);
-    toast.error(
-      error instanceof Error ? error.message : "Failed to react to message",
-    );
-  }
+  const operation = (
+    reactionQueues.get(path) ?? Promise.resolve(message.reactions ?? {})
+  ).then(async (previous) => {
+    // Only adding counts toward your most-used emoji.
+    if (!previous[emoji]?.includes(userId)) recordEmojiUse(emoji);
+    const optimistic = toggleReaction(previous, emoji, userId);
+    setReactions(optimistic);
+    try {
+      const confirmed = (await sendReactionToggle(path, emoji)) ?? optimistic;
+      setReactions(confirmed);
+      return confirmed;
+    } catch (error) {
+      setReactions(previous);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to react to message",
+      );
+      return previous;
+    }
+  });
+  reactionQueues.set(path, operation);
+  await operation;
+  if (reactionQueues.get(path) === operation) reactionQueues.delete(path);
 }

@@ -73,7 +73,8 @@ function GameIcon({ placeId }: { placeId: string }) {
       if (!response.ok) throw new Error("Failed to load game icons");
       return (await response.json()) as Record<string, string>;
     },
-    staleTime: Infinity,
+    // Finite, so icons Roblox hadn't ready yet turn up later.
+    staleTime: 60 * 60_000,
     retry: false,
   });
   const src = iconsQuery.data?.[placeId];
