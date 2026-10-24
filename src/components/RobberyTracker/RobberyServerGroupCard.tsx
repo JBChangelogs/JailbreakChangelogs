@@ -265,7 +265,7 @@ function RobberyServerGroupCard({
             {chipRobberies.map((robbery) => (
               <span
                 key={`${robbery.marker_name}-${robbery.timestamp}`}
-                className={`${getStatusBadgeClass(robbery.status)} inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium`}
+                className={`${getStatusBadgeClass(robbery.status)} inline-flex max-w-full items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium`}
               >
                 <span className="truncate">
                   {robberyMarkerToDisplayName(
@@ -282,7 +282,7 @@ function RobberyServerGroupCard({
             {remainingChipCount > 0 && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-primary-text border-border-card bg-tertiary-bg inline-flex cursor-help items-center rounded-lg border px-2.5 py-1 text-xs font-medium">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg inline-flex cursor-help items-center rounded-md border px-2.5 py-1 text-xs font-medium">
                     +{remainingChipCount} more
                   </span>
                 </TooltipTrigger>

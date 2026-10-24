@@ -159,7 +159,7 @@ function RobberyComboCard({
             {displayRobberies.map((robbery) => (
               <span
                 key={`${robbery.marker_name}-${robbery.timestamp}`}
-                className={`${getStatusBadgeClass(robbery.status)} inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium`}
+                className={`${getStatusBadgeClass(robbery.status)} inline-flex max-w-full items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium`}
               >
                 <span className="truncate">{robbery.name}</span>
                 <span className="text-tertiary-text">•</span>
@@ -169,7 +169,7 @@ function RobberyComboCard({
               </span>
             ))}
             {remainingCount > 0 && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-medium">
+              <span className="text-primary-text border-border-card bg-tertiary-bg inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium">
                 +{remainingCount} more
               </span>
             )}
