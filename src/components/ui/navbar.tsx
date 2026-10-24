@@ -122,7 +122,7 @@ export const NavbarModern = ({
   className?: string;
   sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
-  onOpenSearch: () => void;
+  onOpenSearch?: () => void;
   unreadCount: number;
   unreadMessageCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
@@ -449,26 +449,28 @@ export const NavbarModern = ({
         <div className="flex shrink-0 items-center gap-2">
           {/* Notification icon */}
           <ExperimentOverridesBadge placement="header" />
-          <button
-            type="button"
-            onClick={onOpenSearch}
-            aria-label={`Search the site (${searchShortcut})`}
-            aria-keyshortcuts="Control+k Meta+k"
-            aria-haspopup="dialog"
-            className="text-secondary-text border-border-card bg-tertiary-bg hover:bg-quaternary-bg hover:text-primary-text focus-visible:ring-link flex h-10 w-40 shrink-0 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none 2xl:w-48"
-          >
-            <Icon
-              icon="heroicons:magnifying-glass"
-              className="size-4 shrink-0"
-            />
-            <span>Search…</span>
-            <kbd
-              aria-hidden="true"
-              className="border-border-card bg-secondary-bg ml-auto shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none"
+          {onOpenSearch && (
+            <button
+              type="button"
+              onClick={onOpenSearch}
+              aria-label={`Search the site (${searchShortcut})`}
+              aria-keyshortcuts="Control+k Meta+k"
+              aria-haspopup="dialog"
+              className="text-secondary-text border-border-card bg-tertiary-bg hover:bg-quaternary-bg hover:text-primary-text focus-visible:ring-link flex h-10 w-40 shrink-0 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none 2xl:w-48"
             >
-              {searchShortcut}
-            </kbd>
-          </button>
+              <Icon
+                icon="heroicons:magnifying-glass"
+                className="size-4 shrink-0"
+              />
+              <span>Search…</span>
+              <kbd
+                aria-hidden="true"
+                className="border-border-card bg-secondary-bg ml-auto shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none"
+              >
+                {searchShortcut}
+              </kbd>
+            </button>
+          )}
           <NotificationPopover
             unreadCount={unreadCount}
             setUnreadCount={setUnreadCount}

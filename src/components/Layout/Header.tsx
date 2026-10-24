@@ -48,6 +48,7 @@ import { getNavigationHref, getNavigationSection } from "@/utils/ui/navigation";
 import { cn } from "@/lib/utils";
 import { isGlobalSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useGlobalSearchAccess } from "@/hooks/useGlobalSearchAccess";
 
 const GlobalSearch = dynamic(() => import("./GlobalSearch"), { ssr: false });
 
@@ -480,19 +481,6 @@ export default function Header({
   const [searchOpen, setSearchOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 80rem)");
 
-  useEffect(() => {
-    if (!isDesktop) {
-      setSearchOpen(false);
-      return;
-    }
-    const handleSearchShortcut = (event: KeyboardEvent) => {
-      if (!isGlobalSearchShortcut(event)) return;
-      event.preventDefault();
-      setSearchOpen((open) => !open);
-    };
-    window.addEventListener("keydown", handleSearchShortcut);
-    return () => window.removeEventListener("keydown", handleSearchShortcut);
-  }, [isDesktop]);
   const sidebarCollapsed = useSyncExternalStore(
     subscribeDesktopNavigation,
     getDesktopSidebarCollapsed,
@@ -525,6 +513,23 @@ export default function Header({
   useEffect(() => setMounted(true), []);
   const showAuth = mounted && !isLoading && isAuthenticated;
   const userData = showAuth ? authUser : null;
+  const searchEnabled = useGlobalSearchAccess(
+    userData?.id,
+    isDesktop && showAuth,
+  );
+  useEffect(() => {
+    if (!searchEnabled) {
+      setSearchOpen(false);
+      return;
+    }
+    const handleSearchShortcut = (event: KeyboardEvent) => {
+      if (!isGlobalSearchShortcut(event)) return;
+      event.preventDefault();
+      setSearchOpen((open) => !open);
+    };
+    window.addEventListener("keydown", handleSearchShortcut);
+    return () => window.removeEventListener("keydown", handleSearchShortcut);
+  }, [searchEnabled]);
   useEscapeLogin();
 
   const pathname = usePathname();
@@ -818,7 +823,7 @@ export default function Header({
         {releaseAnnouncement}
         <div className="relative z-10">
           <NavbarModern
-            onOpenSearch={() => setSearchOpen(true)}
+            onOpenSearch={searchEnabled ? () => setSearchOpen(true) : undefined}
             unreadCount={unreadCount}
             unreadMessageCount={unreadMessageCount}
             setUnreadCount={setUnreadCount}
@@ -941,7 +946,7 @@ export default function Header({
       </div>
 
       <LoginModal />
-      {searchOpen && isDesktop && (
+      {searchOpen && searchEnabled && (
         <GlobalSearch onClose={() => setSearchOpen(false)} />
       )}
 
