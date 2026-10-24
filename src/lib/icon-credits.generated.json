@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "October 21, 2026",
-  "contentHash": "f3d33696f3068c3b52771489fbfaeec33a47c9af64eeea7c007fa47fd4ae1e35",
+  "lastUpdated": "October 23, 2026",
+  "contentHash": "973b7c967a981d20d1fccad4ff3d55a75b71416f2810e6c4350cc434ed531a50",
   "credits": [
     {
       "prefix": "akar-icons",
@@ -16,8 +16,34 @@
       }
     },
     {
+      "prefix": "boxicons",
+      "name": "Boxicons",
+      "author": {
+        "name": "Boxicons",
+        "url": "https://github.com/box-icons/boxicons-core"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/box-icons/boxicons-core/blob/main/LICENSE"
+      }
+    },
+    {
       "prefix": "emojione",
       "name": "Emoji One (Colored)",
+      "author": {
+        "name": "Emoji One",
+        "url": "https://github.com/EmojiTwo/emojitwo"
+      },
+      "license": {
+        "title": "CC BY 4.0",
+        "spdx": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "prefix": "emojione-monotone",
+      "name": "Emoji One (Monotone)",
       "author": {
         "name": "Emoji One",
         "url": "https://github.com/EmojiTwo/emojitwo"
@@ -78,6 +104,19 @@
         "title": "Apache 2.0",
         "spdx": "Apache-2.0",
         "url": "https://github.com/material-icons/material-icons/blob/master/LICENSE"
+      }
+    },
+    {
+      "prefix": "la",
+      "name": "Line Awesome",
+      "author": {
+        "name": "Icons8",
+        "url": "https://github.com/icons8/line-awesome"
+      },
+      "license": {
+        "title": "Apache 2.0",
+        "spdx": "Apache-2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0"
       }
     },
     {
