@@ -9,7 +9,7 @@ import {
   useDeferredValue,
   type CSSProperties,
 } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import AirdropList from "@/components/RobberyTracker/AirdropList";
 import { useRobberyTrackerAirdropsWebSocket } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import { useQuery } from "@tanstack/react-query";
@@ -245,8 +245,6 @@ function isNonEmptyString(value: unknown): value is string {
 function RobberyTrackerContent() {
   const { user } = useAuthContext();
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const isAirdrops = searchParams.has("airdrops");
   const robberyTracker = useRobberyTrackerWebSocket(!isAirdrops, user?.id);
   const airdropTracker = useRobberyTrackerAirdropsWebSocket(
@@ -1044,25 +1042,6 @@ function RobberyTrackerContent() {
 
           <TrackerSwitcher className="mb-6" />
 
-          <Tabs
-            value={isAirdrops ? "airdrops" : "robberies"}
-            onValueChange={(value) =>
-              router.push(
-                `${pathname}${value === "airdrops" ? "?airdrops" : ""}`,
-              )
-            }
-            className="mb-6"
-          >
-            <TabsList fullWidth aria-label="Robbery tracker views">
-              <TabsTrigger value="robberies" fullWidth>
-                Robberies
-              </TabsTrigger>
-              <TabsTrigger value="airdrops" fullWidth>
-                Airdrops
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
           {/* Header */}
           <div className="mb-6">
             <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
@@ -1354,7 +1333,9 @@ function RobberyTrackerContent() {
               </span>
             </div>
 
-            <TotalRobberiesLoggedPolling className="hidden sm:ml-auto sm:inline-flex" />
+            {!isAirdrops && (
+              <TotalRobberiesLoggedPolling className="hidden sm:ml-auto sm:inline-flex" />
+            )}
           </div>
 
           {!isAirdrops && user && (

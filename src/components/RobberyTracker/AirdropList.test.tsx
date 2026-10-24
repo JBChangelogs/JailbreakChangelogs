@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import { getAirdropKey } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
-import { filterAirdrops } from "./AirdropList";
+import AirdropList, { filterAirdrops } from "./AirdropList";
 import AirdropCard from "./AirdropCard";
 
 function renderCard(card: ReactNode) {
@@ -46,6 +46,26 @@ const hard: AirdropData = {
     })),
   },
 };
+
+test("difficulty uses filter chips while locations stay in tabs", () => {
+  const markup = renderCard(
+    <AirdropList
+      airdrops={[]}
+      searchQuery=""
+      serverSize="all"
+      timeSort="newest"
+      serverRegions={{}}
+    />,
+  );
+  expect(markup).toContain('role="group" aria-label="Airdrop difficulty"');
+  expect(markup).toMatch(/aria-pressed="true"[^>]*>All Difficulties<\/button>/);
+  for (const label of ["Easy", "Medium", "Hard"])
+    expect(markup).toMatch(
+      new RegExp(`aria-pressed="false"[^>]*>${label}</button>`),
+    );
+  expect(markup.match(/role="tablist"/g)).toHaveLength(1);
+  expect(markup).toContain('aria-label="Airdrop location"');
+});
 
 test("airdrop filters combine location, difficulty, search and server size", () => {
   const drops = [easy, hard, { ...easy, color: "Blue" as const }];

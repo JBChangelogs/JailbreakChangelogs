@@ -1,26 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TRACKERS = [
   {
     href: "/robberies",
-    label: "Robbery Tracker",
+    label: "Robberies",
+  },
+  {
+    href: "/robberies?airdrops",
+    label: "Airdrops",
   },
   {
     href: "/bounties",
-    label: "Bounty Tracker",
+    label: "Bounties",
   },
 ] as const;
 
 // Tabs linking the live trackers so users of one discover the other
 export default function TrackerSwitcher({ className }: { className?: string }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeTracker =
+    pathname === "/robberies" && searchParams.has("airdrops")
+      ? "/robberies?airdrops"
+      : pathname;
 
   return (
-    <Tabs value={pathname} className={className}>
+    <Tabs value={activeTracker} className={className}>
       <TabsList aria-label="Live trackers" fullWidth className="w-full">
         {TRACKERS.map((tracker) => (
           <TabsTrigger
