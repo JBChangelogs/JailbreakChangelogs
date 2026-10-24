@@ -1,5 +1,7 @@
 "use client";
 
+import { FRONTEND_SETTINGS } from "@/config/settings";
+
 import { useId, useSyncExternalStore } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
@@ -50,10 +52,10 @@ export default function TabStyleSettings() {
   return (
     <div>
       <h3 id={`${id}-label`} className="text-primary-text font-medium">
-        Tab style
+        {FRONTEND_SETTINGS["tab-style"].title}
       </h3>
       <p className="text-secondary-text mt-1 text-sm">
-        Choose how tabs appear across the site.
+        {FRONTEND_SETTINGS["tab-style"].description}
         {isAuthenticated
           ? " Syncs with your account."
           : " Saved on this browser."}

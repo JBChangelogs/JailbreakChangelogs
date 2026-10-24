@@ -105,12 +105,29 @@ function elements(value: unknown): Element[] {
   return [element, ...elements(element.props.children)];
 }
 
+function expectCollapsed(tree: Element | null) {
+  const banner = elements(tree).find(
+    (element) => element.props["data-whats-new-banner"],
+  );
+  expect(banner).toBeDefined();
+  expect(banner!.props["aria-hidden"]).toBe(true);
+  expect(banner!.props.inert).toBe(true);
+  expect(banner!.props.className).toContain("grid-rows-[0fr]");
+  expect(banner!.props.className).toContain("motion-reduce:transition-none");
+}
+
 test("new releases show a banner, open only on request, and stay dismissed", async () => {
   const { render, storage } = setup();
-  expect(render()).toBeNull();
+  expectCollapsed(render());
   await new Promise((resolve) => setTimeout(resolve, 0));
   const banner = render()!;
   expect(banner.props.open).toBe(false);
+  const expanded = elements(banner).find(
+    (element) => element.props["data-whats-new-banner"],
+  )!;
+  expect(expanded.props["aria-hidden"]).toBe(false);
+  expect(expanded.props.inert).toBe(false);
+  expect(expanded.props.className).toContain("grid-rows-[1fr]");
   expect(
     elements(banner).some((element) => element.type === "DialogTrigger"),
   ).toBe(true);
@@ -118,7 +135,7 @@ test("new releases show a banner, open only on request, and stay dismissed", asy
   onOpenChange(true);
   expect(render()!.props.open).toBe(true);
   onOpenChange(false);
-  expect(render()).toBeNull();
+  expectCollapsed(render());
   expect(storage.get(seenKey)).toBe(release.slug);
 });
 
@@ -131,7 +148,7 @@ test("banner can be dismissed without opening the dialog", async () => {
       element.props["aria-label"] === "Dismiss what's new announcement",
   )!;
   (dismiss.props.onClick as () => void)();
-  expect(render()).toBeNull();
+  expectCollapsed(render());
   expect(storage.get(seenKey)).toBe(release.slug);
 });
 
@@ -146,7 +163,7 @@ test("seen releases, disabled announcements, and excluded routes do not show ban
     const { render, requests } = setup(options);
     render();
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(render()).toBeNull();
+    expectCollapsed(render());
     expect(requests()).toBe(0);
   }
 });

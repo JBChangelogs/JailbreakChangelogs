@@ -1,5 +1,7 @@
 "use client";
 
+import { FRONTEND_SETTINGS } from "@/config/settings";
+
 import { useEffect, useId, useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -329,7 +331,13 @@ function AllThemesSheet({
 }
 
 /** Theme picker (in a sheet), plus the cursor and header button settings. */
-export default function ThemeSettings() {
+export default function ThemeSettings({
+  customThemeHighlightStyle,
+  customThemeScrollRef,
+}: {
+  customThemeHighlightStyle?: React.CSSProperties;
+  customThemeScrollRef?: React.Ref<HTMLDivElement>;
+}) {
   const id = useId();
   const { isAuthenticated } = useAuthContext();
   const { theme, setTheme, themes, customTheme } = useTheme();
@@ -383,7 +391,14 @@ export default function ThemeSettings() {
           </div>
           <AllThemesSheet items={allItems} name={`${id}-theme`} />
         </div>
-        <CustomThemeControls custom={custom} />
+        <div
+          id="custom-themes"
+          className="scroll-mt-24 rounded-lg transition-colors duration-500"
+          style={customThemeHighlightStyle}
+          ref={customThemeScrollRef}
+        >
+          <CustomThemeControls custom={custom} />
+        </div>
 
         <div
           className={cn(
@@ -396,10 +411,10 @@ export default function ThemeSettings() {
               htmlFor={`${id}-cursor`}
               className="text-primary-text font-medium"
             >
-              Use theme cursor
+              {FRONTEND_SETTINGS["theme-cursor"].title}
             </label>
             <p className="text-secondary-text mt-1 text-sm">
-              Match your cursor to your selected theme. Saved on this browser.
+              {FRONTEND_SETTINGS["theme-cursor"].description}
             </p>
           </div>
           <Switch
@@ -420,11 +435,10 @@ export default function ThemeSettings() {
               htmlFor={`${id}-shortcut`}
               className="text-primary-text font-medium"
             >
-              Theme button in header
+              {FRONTEND_SETTINGS["theme-shortcut"].title}
             </label>
             <p className="text-secondary-text mt-1 text-sm">
-              Show a button in the header that opens these settings. Saved on
-              this browser.
+              {FRONTEND_SETTINGS["theme-shortcut"].description}
             </p>
           </div>
           <Switch

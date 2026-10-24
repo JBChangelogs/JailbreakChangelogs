@@ -1,5 +1,7 @@
 "use client";
 
+import { FRONTEND_SETTINGS } from "@/config/settings";
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -136,7 +138,7 @@ export const EmailNotificationSettings = ({
   return (
     <div>
       <SettingRow
-        title="Email Notifications"
+        title={FRONTEND_SETTINGS["email-notifications"].title}
         highlight
         description={
           email.isError

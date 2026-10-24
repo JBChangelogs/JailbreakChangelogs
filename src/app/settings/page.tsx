@@ -2,7 +2,11 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { UserData } from "@/types/auth";
-import { formatSettingName } from "@/config/settings";
+import {
+  APP_ONLY_SETTINGS,
+  FRONTEND_SETTINGS,
+  formatSettingName,
+} from "@/config/settings";
 import { useAccentColor } from "@/hooks/useAccentColor";
 import { useQuery } from "@tanstack/react-query";
 import { ProfileBackground } from "@/components/Profile/ProfileBackground";
@@ -48,7 +52,6 @@ import { useSupporterGifting } from "@/hooks/useSupporterGifting";
 import { usePurchaseGiftModal } from "@/hooks/usePurchaseGiftModal";
 import SettingsLoading from "./loading";
 
-const APP_ONLY_SETTINGS = new Set(["hide_roblox_activity"]);
 const PREVIEW_SETTINGS = new Set(["custom_avatar", "custom_banner"]);
 
 // One icon per section, shared by the sidebar and the card headings. Filled
@@ -72,13 +75,6 @@ export default function SettingsPage() {
   const { user, isLoading, refreshUser, setLoginModal } = useAuthContext();
   const { twemojiEnabled, setTwemojiEnabled } = useTwemoji();
   const { modalState, closeModal, openModal } = useSupporterModal();
-  const {
-    highlightSetting,
-    showHighlight,
-    copySectionLink,
-    getSectionHighlightStyle,
-    scrollHighlightedSectionIntoView,
-  } = useSectionHighlight();
   const {
     prefs: notificationPrefs,
     loading: notificationPrefsLoading,
@@ -107,6 +103,17 @@ export default function SettingsPage() {
     handleSettingChange,
     setSettingValue,
   } = useSettings(userData, openModal, refreshUser);
+  const {
+    highlightSetting,
+    showHighlight,
+    copySectionLink,
+    getSectionHighlightStyle,
+    scrollHighlightedSectionIntoView,
+  } = useSectionHighlight(!loading && (!userData || !settingsLoading));
+  const profileImageTarget =
+    highlightSetting && PREVIEW_SETTINGS.has(highlightSetting)
+      ? highlightSetting
+      : "profile-images";
   const accentColor = useAccentColor(userData?.id);
   // The custom background shows behind settings like it does on the
   // profile, so changes to it are seen in place. Same query as the uploader,
@@ -248,18 +255,23 @@ export default function SettingsPage() {
     <>
       <SettingsCard
         id="themes"
-        title="Themes"
+        title={FRONTEND_SETTINGS["themes"].title}
         icon={sectionIcon("themes")}
         isOwner={isOwner}
         highlightStyle={getSectionHighlightStyle("themes")}
         scrollRef={(el) => scrollHighlightedSectionIntoView("themes", el)}
         onCopyLink={() => copySectionLink("themes", "Themes")}
       >
-        <ThemeSettings />
+        <ThemeSettings
+          customThemeHighlightStyle={getSectionHighlightStyle("custom-themes")}
+          customThemeScrollRef={(el) =>
+            scrollHighlightedSectionIntoView("custom-themes", el)
+          }
+        />
       </SettingsCard>
       <SettingsCard
         id="display"
-        title="Display"
+        title={FRONTEND_SETTINGS["display"].title}
         icon={sectionIcon("display")}
         isOwner={isOwner}
         highlightStyle={getSectionHighlightStyle("display")}
@@ -267,13 +279,29 @@ export default function SettingsPage() {
         onCopyLink={() => copySectionLink("display", "Display")}
       >
         <div className={SETTINGS_LIST}>
-          <TabStyleSettings />
-          <DesktopNavigationSettings />
+          <div
+            id="tab-style"
+            className="scroll-mt-24 rounded-lg transition-colors duration-500"
+            style={getSectionHighlightStyle("tab-style")}
+            ref={(el) => scrollHighlightedSectionIntoView("tab-style", el)}
+          >
+            <TabStyleSettings />
+          </div>
+          <div
+            id="navigation-layout"
+            className="scroll-mt-24 rounded-lg transition-colors duration-500"
+            style={getSectionHighlightStyle("navigation-layout")}
+            ref={(el) =>
+              scrollHighlightedSectionIntoView("navigation-layout", el)
+            }
+          >
+            <DesktopNavigationSettings />
+          </div>
           <SettingToggle
             name="twemoji_enabled"
             value={twemojiEnabled}
-            description="Use Twemoji for emojis instead of your browser's native emoji set"
-            displayName="Twemoji Emojis"
+            description={FRONTEND_SETTINGS.twemoji_enabled.description!}
+            displayName={FRONTEND_SETTINGS.twemoji_enabled.title}
             onChange={(_name, value) => {
               setTwemojiEnabled(value);
               toast.success("Setting Updated", {
@@ -327,8 +355,16 @@ export default function SettingsPage() {
     (cat) => cat.name === "appearance",
   );
   const displayNavItems = [
-    { id: "themes", title: "Themes", icon: sectionIcon("themes") },
-    { id: "display", title: "Display", icon: sectionIcon("display") },
+    {
+      id: "themes",
+      title: FRONTEND_SETTINGS["themes"].title,
+      icon: sectionIcon("themes"),
+    },
+    {
+      id: "display",
+      title: FRONTEND_SETTINGS["display"].title,
+      icon: sectionIcon("display"),
+    },
   ];
 
   const sortedSupporterGifts = [...supporterGifts].sort((a, b) => {
@@ -385,31 +421,31 @@ export default function SettingsPage() {
                   items: [
                     {
                       id: "connections",
-                      title: "Connections",
+                      title: FRONTEND_SETTINGS["connections"].title,
                       icon: sectionIcon("connections"),
                     },
                     {
                       id: "export",
-                      title: "Export Data",
+                      title: FRONTEND_SETTINGS["export"].title,
                       icon: sectionIcon("export"),
                     },
                     ...(hasSupporterHistory
                       ? [
                           {
                             id: "supporter-history",
-                            title: "Supporter History",
+                            title: FRONTEND_SETTINGS["supporter-history"].title,
                             icon: sectionIcon("supporter-history"),
                           },
                         ]
                       : []),
                     {
                       id: "gifts",
-                      title: "Purchased Gifts",
+                      title: FRONTEND_SETTINGS["gifts"].title,
                       icon: sectionIcon("gifts"),
                     },
                     {
                       id: "danger",
-                      title: "Danger Zone",
+                      title: FRONTEND_SETTINGS["danger"].title,
                       icon: sectionIcon("danger"),
                     },
                   ],
@@ -436,13 +472,22 @@ export default function SettingsPage() {
                 : sortedSettings;
               // Shown just above the custom background setting.
               const accentSetting = isAppearanceCat && (
-                <AccentColorSetting
-                  accent={accentColor.accent}
-                  customAccent={accentColor.customAccent}
-                  onChange={accentColor.setAccent}
-                  onReset={() => void accentColor.reset()}
-                  userData={userData}
-                />
+                <div
+                  id="accent-color"
+                  className="scroll-mt-24 rounded-lg transition-colors duration-500"
+                  style={getSectionHighlightStyle("accent-color")}
+                  ref={(el) =>
+                    scrollHighlightedSectionIntoView("accent-color", el)
+                  }
+                >
+                  <AccentColorSetting
+                    accent={accentColor.accent}
+                    customAccent={accentColor.customAccent}
+                    onChange={accentColor.setAccent}
+                    onReset={() => void accentColor.reset()}
+                    userData={userData}
+                  />
+                </div>
               );
               return (
                 <Fragment key={cat.name}>
@@ -474,35 +519,50 @@ export default function SettingsPage() {
                   >
                     <div className={SETTINGS_LIST}>
                       {isAppearanceCat && (
-                        <AppearancePreview
-                          userData={userData}
-                          customAvatarOn={
-                            sortedSettings.find(
-                              (e) => e.name === "custom_avatar",
-                            )?.value === true
+                        <div
+                          id="profile-images"
+                          className="scroll-mt-24 rounded-xl border-2 border-transparent transition-colors duration-500"
+                          style={getSectionHighlightStyle(profileImageTarget)}
+                          ref={(el) =>
+                            scrollHighlightedSectionIntoView(
+                              profileImageTarget,
+                              el,
+                            )
                           }
-                          customBannerOn={
-                            sortedSettings.find(
-                              (e) => e.name === "custom_banner",
-                            )?.value === true
-                          }
-                          onAvatarUploaded={(url, enabled) => {
-                            handleAvatarUpdate(url);
-                            if (enabled) setSettingValue("custom_avatar", true);
-                          }}
-                          onBannerUploaded={(url, enabled) => {
-                            handleBannerUpdate(url);
-                            if (enabled) setSettingValue("custom_banner", true);
-                          }}
-                          onUploadStateChange={setIsPreviewUploading}
-                          onToggle={handleSettingChange}
-                          togglesDisabled={isPreviewUploading}
-                          accent={
-                            userData.settings_v2?.colored_profile_cards === true
-                              ? accentColor.accent
-                              : null
-                          }
-                        />
+                        >
+                          <AppearancePreview
+                            userData={userData}
+                            customAvatarOn={
+                              sortedSettings.find(
+                                (e) => e.name === "custom_avatar",
+                              )?.value === true
+                            }
+                            customBannerOn={
+                              sortedSettings.find(
+                                (e) => e.name === "custom_banner",
+                              )?.value === true
+                            }
+                            onAvatarUploaded={(url, enabled) => {
+                              handleAvatarUpdate(url);
+                              if (enabled)
+                                setSettingValue("custom_avatar", true);
+                            }}
+                            onBannerUploaded={(url, enabled) => {
+                              handleBannerUpdate(url);
+                              if (enabled)
+                                setSettingValue("custom_banner", true);
+                            }}
+                            onUploadStateChange={setIsPreviewUploading}
+                            onToggle={handleSettingChange}
+                            togglesDisabled={isPreviewUploading}
+                            accent={
+                              userData.settings_v2?.colored_profile_cards ===
+                              true
+                                ? accentColor.accent
+                                : null
+                            }
+                          />
+                        </div>
                       )}
                       {listedSettings.map((entry) => {
                         const isHighlighted =
@@ -514,6 +574,7 @@ export default function SettingsPage() {
                             {entry.name === "custom_background" &&
                               accentSetting}
                             <div
+                              id={entry.name}
                               // Not rounded: the divider above is its top border, and a rounded
                               // corner would bend it.
                               className="transition-colors duration-500"
@@ -573,7 +634,7 @@ export default function SettingsPage() {
 
             <SettingsCard
               id="notifications"
-              title="Notification Preferences"
+              title={FRONTEND_SETTINGS["notifications"].title}
               icon={sectionIcon("notifications")}
               isOwner={
                 userData.flags?.some((f) => f.flag === "is_owner") ?? false
@@ -642,7 +703,7 @@ export default function SettingsPage() {
 
             <SettingsCard
               id="connections"
-              title="Connections"
+              title={FRONTEND_SETTINGS["connections"].title}
               icon={sectionIcon("connections")}
               isOwner={
                 userData.flags?.some((f) => f.flag === "is_owner") ?? false
@@ -665,7 +726,7 @@ export default function SettingsPage() {
 
             <SettingsCard
               id="export"
-              title="Export Data"
+              title={FRONTEND_SETTINGS["export"].title}
               icon={sectionIcon("export")}
               isOwner={
                 userData.flags?.some((f) => f.flag === "is_owner") ?? false
@@ -680,7 +741,7 @@ export default function SettingsPage() {
             {hasSupporterHistory ? (
               <SettingsCard
                 id="supporter-history"
-                title="Supporter History"
+                title={FRONTEND_SETTINGS["supporter-history"].title}
                 icon={sectionIcon("supporter-history")}
                 isOwner={
                   userData.flags?.some((f) => f.flag === "is_owner") ?? false
@@ -693,7 +754,7 @@ export default function SettingsPage() {
                   copySectionLink("supporter-history", "Supporter History")
                 }
                 headerAccessory={
-                  <p>Previous supporter tiers recorded on your account.</p>
+                  <p>{FRONTEND_SETTINGS["supporter-history"].description}</p>
                 }
               >
                 <SupporterHistorySection
@@ -708,7 +769,7 @@ export default function SettingsPage() {
 
             <SettingsCard
               id="gifts"
-              title="Purchased Gifts"
+              title={FRONTEND_SETTINGS["gifts"].title}
               icon={sectionIcon("gifts")}
               isOwner={
                 userData.flags?.some((f) => f.flag === "is_owner") ?? false
@@ -718,7 +779,7 @@ export default function SettingsPage() {
               onCopyLink={() => copySectionLink("gifts", "Purchased Gifts")}
               headerAccessory={
                 <>
-                  <p>Supporter gifts purchased on your account.</p>
+                  <p>{FRONTEND_SETTINGS.gifts.description}</p>
                 </>
               }
             >
@@ -733,7 +794,7 @@ export default function SettingsPage() {
 
             <SettingsCard
               id="danger"
-              title="Danger Zone"
+              title={FRONTEND_SETTINGS["danger"].title}
               icon={sectionIcon("danger")}
               isOwner={
                 userData.flags?.some((f) => f.flag === "is_owner") ?? false

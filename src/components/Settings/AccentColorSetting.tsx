@@ -1,5 +1,7 @@
 "use client";
 
+import { FRONTEND_SETTINGS } from "@/config/settings";
+
 import { useId } from "react";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import Image from "next/image";
@@ -96,7 +98,9 @@ export function AccentColorSetting({
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-primary-text text-base font-medium">Accent color</p>
+        <p className="text-primary-text text-base font-medium">
+          {FRONTEND_SETTINGS["accent-color"].title}
+        </p>
         <p className="text-secondary-text text-sm">
           Choose the color and style of your profile cards.{" "}
           {customAccent

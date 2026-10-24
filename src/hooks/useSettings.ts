@@ -7,7 +7,6 @@ import {
   SupporterHistoryEntry,
 } from "@/types/auth";
 import {
-  fetchUserSettings,
   fetchSupporterGifts,
   fetchSupporterHistory,
   updateUserSettings,
@@ -15,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { safeLocalStorage, safeSetJSON } from "@/utils/storage/safeStorage";
 import { formatSettingName } from "@/config/settings";
+import { useUserSettings } from "@/hooks/useUserSettings";
 
 const withSettingValue = (
   current: ApiSettingsResponse,
@@ -49,15 +49,7 @@ export const useSettings = (
   const settingsKey = ["user-settings", userId] as const;
   const giftsKey = ["supporter-gifts", userId] as const;
   const historyKey = ["supporter-history", userId] as const;
-  const settingsQuery = useQuery({
-    queryKey: settingsKey,
-    queryFn: fetchUserSettings,
-    enabled: Boolean(userId),
-    staleTime: 0,
-    gcTime: 5 * 60_000,
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
+  const settingsQuery = useUserSettings(userId);
   const giftsQuery = useQuery({
     queryKey: giftsKey,
     queryFn: fetchSupporterGifts,

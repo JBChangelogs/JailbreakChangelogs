@@ -46,6 +46,10 @@ import DesktopSidebar from "./DesktopSidebar";
 import { navigationSections } from "@/utils/ui/navigation-menu";
 import { getNavigationHref, getNavigationSection } from "@/utils/ui/navigation";
 import { cn } from "@/lib/utils";
+import { isGlobalSearchShortcut } from "@/utils/ui/searchShortcut";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
+const GlobalSearch = dynamic(() => import("./GlobalSearch"), { ssr: false });
 
 const ThemeShortcut = dynamic(
   () =>
@@ -473,6 +477,22 @@ export default function Header({
   const queryClient = useQueryClient();
   const isCollabPage = useIsCollabPage();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 80rem)");
+
+  useEffect(() => {
+    if (!isDesktop) {
+      setSearchOpen(false);
+      return;
+    }
+    const handleSearchShortcut = (event: KeyboardEvent) => {
+      if (!isGlobalSearchShortcut(event)) return;
+      event.preventDefault();
+      setSearchOpen((open) => !open);
+    };
+    window.addEventListener("keydown", handleSearchShortcut);
+    return () => window.removeEventListener("keydown", handleSearchShortcut);
+  }, [isDesktop]);
   const sidebarCollapsed = useSyncExternalStore(
     subscribeDesktopNavigation,
     getDesktopSidebarCollapsed,
@@ -798,6 +818,7 @@ export default function Header({
         {releaseAnnouncement}
         <div className="relative z-10">
           <NavbarModern
+            onOpenSearch={() => setSearchOpen(true)}
             unreadCount={unreadCount}
             unreadMessageCount={unreadMessageCount}
             setUnreadCount={setUnreadCount}
@@ -827,8 +848,8 @@ export default function Header({
           <div className="relative z-10">
             <div className="bg-secondary-bg border-border-card border-b">
               <div className="flex items-center justify-between px-4 py-2">
-                <div className="flex items-center">
-                  <Link href="/" style={{ display: "block" }}>
+                <div className="flex min-w-0 flex-1 items-center pr-2">
+                  <Link href="/" className="block min-w-0">
                     <SiteLogo
                       collaboration={isCollabPage}
                       alt="Jailbreak Changelogs Logo"
@@ -837,11 +858,11 @@ export default function Header({
                       quality={90}
                       fetchPriority="high"
                       loading="eager"
-                      className="h-9 w-auto sm:h-12"
+                      className="h-9 w-auto max-w-full object-contain object-left sm:h-12"
                     />
                   </Link>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                   <ExperimentOverridesBadge placement="header" />
                   {/* Notification icon */}
                   <NotificationPopover
@@ -920,6 +941,9 @@ export default function Header({
       </div>
 
       <LoginModal />
+      {searchOpen && isDesktop && (
+        <GlobalSearch onClose={() => setSearchOpen(false)} />
+      )}
 
       {/* EscapeLoginModal - Desktop only (no Escape key on mobile) */}
       <div className="hidden xl:block">

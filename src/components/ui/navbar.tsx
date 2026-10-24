@@ -11,6 +11,7 @@ import { getNavigationSection } from "@/utils/ui/navigation";
 import SiteLogo from "@/components/ui/SiteLogo";
 import { NavigationMenu as NavigationMenu } from "radix-ui";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
+import { getBrowserDownloadPlatform } from "@/app/app/platform";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { canOverrideExperiments } from "@/utils/api/experiments";
@@ -27,8 +28,6 @@ import {
   NotificationPopover,
   UnreadBadge,
 } from "@/components/notifications/NotificationPopover";
-import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
-import { Spinner } from "@/components/ui/Spinner";
 
 const ThemeShortcut = dynamic(
   () =>
@@ -118,10 +117,12 @@ export const NavbarModern = ({
   setUtmModalOpen,
   sidebarCollapsed,
   onToggleSidebar,
+  onOpenSearch,
 }: {
   className?: string;
   sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
+  onOpenSearch: () => void;
   unreadCount: number;
   unreadMessageCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
@@ -248,15 +249,14 @@ export const NavbarModern = ({
     isAuthenticated: isAuthenticatedRaw,
     isLoading: isLoadingRaw,
     logout,
-    wsConnected,
   } = useAuthContext();
-  const { isPending: wsTogglePending, toggleConnection: toggleWsConnection } =
-    useWsConnectionPending(wsConnected);
 
   // Auth resolves from cache in an effect, which can run before this Suspense
   // boundary hydrates; render the server's logged-out shape until mounted
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
+  const searchShortcut =
+    mounted && getBrowserDownloadPlatform() === "macOS" ? "⌘K" : "Ctrl K";
   const currentSection = mounted ? getNavigationSection(pathname) : null;
   const isLoading = !mounted || isLoadingRaw;
   const isAuthenticated = mounted && isAuthenticatedRaw;
@@ -276,9 +276,9 @@ export const NavbarModern = ({
     <div
       className={cn("bg-secondary-bg border-border-card border-b", className)}
     >
-      <div className="flex h-15 items-center justify-between px-4">
+      <div className="flex h-15 items-center justify-between gap-4 px-4">
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -341,7 +341,7 @@ export const NavbarModern = ({
         <div
           ref={navRootWrapperRef}
           data-desktop-top-navigation
-          className="absolute left-1/2 -translate-x-1/2"
+          className="mr-auto shrink-0 min-[1800px]:absolute min-[1800px]:left-1/2 min-[1800px]:mr-0 min-[1800px]:-translate-x-1/2"
         >
           <NavigationMenu.Root
             style={{ position: "relative" }}
@@ -349,7 +349,7 @@ export const NavbarModern = ({
             value={navMenuValue}
             onValueChange={handleNavValueChange}
           >
-            <NavigationMenu.List className="m-0 flex list-none items-center gap-2 p-0">
+            <NavigationMenu.List className="m-0 flex list-none items-center gap-1 p-0 text-sm whitespace-nowrap 2xl:gap-2 2xl:text-base">
               {navigationSections.map((section) => (
                 <NavigationMenu.Item key={section.id} value={section.id}>
                   <NavigationMenu.Trigger
@@ -446,40 +446,29 @@ export const NavbarModern = ({
         </div>
 
         {/* Right side actions */}
-        <div className="flex items-center gap-2">
-          {isAuthenticated &&
-            userData?.flags?.some((f) => f.flag === "is_owner") && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Toggle real-time connection"
-                    onClick={toggleWsConnection}
-                    disabled={wsTogglePending}
-                    className="hover:bg-quaternary-bg focus-visible:ring-link flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {wsTogglePending ? (
-                      <Spinner className="h-4 w-4" />
-                    ) : (
-                      <span
-                        className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
-                      />
-                    )}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  {wsTogglePending
-                    ? wsConnected
-                      ? "Disconnecting…"
-                      : "Connecting…"
-                    : wsConnected
-                      ? "WebSocket connected — click to disconnect"
-                      : "WebSocket disconnected — click to reconnect"}
-                </TooltipContent>
-              </Tooltip>
-            )}
+        <div className="flex shrink-0 items-center gap-2">
           {/* Notification icon */}
           <ExperimentOverridesBadge placement="header" />
+          <button
+            type="button"
+            onClick={onOpenSearch}
+            aria-label={`Search the site (${searchShortcut})`}
+            aria-keyshortcuts="Control+k Meta+k"
+            aria-haspopup="dialog"
+            className="text-secondary-text border-border-card bg-tertiary-bg hover:bg-quaternary-bg hover:text-primary-text focus-visible:ring-link flex h-10 w-40 shrink-0 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none 2xl:w-48"
+          >
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="size-4 shrink-0"
+            />
+            <span>Search…</span>
+            <kbd
+              aria-hidden="true"
+              className="border-border-card bg-secondary-bg ml-auto shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none"
+            >
+              {searchShortcut}
+            </kbd>
+          </button>
           <NotificationPopover
             unreadCount={unreadCount}
             setUnreadCount={setUnreadCount}

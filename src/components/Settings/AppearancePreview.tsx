@@ -77,7 +77,7 @@ export function AppearancePreview({
       data-accent-cards={accent?.style}
       style={accent ? accentCardTheme(accent) : undefined}
     >
-      <div className="relative">
+      <div id="custom_banner" className="relative scroll-mt-24">
         <Banner
           userId={userData.id}
           username={userData.username}
@@ -100,6 +100,7 @@ export function AppearancePreview({
       </div>
       <div className="flex items-end gap-4 px-5 pb-4">
         <div
+          id="custom_avatar"
           className={cn(
             "bg-secondary-bg relative z-30 -mt-10 shrink-0 p-1",
             userData.premiumtype === 3 ? "rounded-[20px]" : "rounded-full",
