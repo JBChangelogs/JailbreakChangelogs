@@ -9,6 +9,25 @@ import {
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
+import { getJoinImageName } from "./RecentJoins";
+
+test("recent joins resolve every airdrop image and preserve robbery and fallback images", () => {
+  for (const location of ["cactusvalley", "dunes"])
+    for (const difficulty of ["easy", "medium", "hard"])
+      expect(getJoinImageName(`Airdrop:${location}:${difficulty}`)).toBe(
+        `location/${location}/${difficulty}`,
+      );
+  expect(getJoinImageName("MoneyTruck")).toBe("Bank Truck");
+  expect(getJoinImageName("Bank")).toBe("Bank");
+  for (const marker of [
+    "Airdrop",
+    "Unknown",
+    "Airdrop:dunes:unknown",
+    "Airdrop:../../other:hard",
+    "Airdrop:dunes:hard:extra",
+  ])
+    expect(getJoinImageName(marker)).toBeNull();
+});
 
 test("recent joins keep loaded pages, update realtime cache, and retry a failed next page", async () => {
   const client = new QueryClient();

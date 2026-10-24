@@ -43,6 +43,16 @@ const robberyImages = new Set([
   "TrainPassenger",
 ]);
 
+export function getJoinImageName(markerName: string): string | null {
+  const airdrop = /^Airdrop:(cactusvalley|dunes):(easy|medium|hard)$/.exec(
+    markerName,
+  );
+  if (airdrop) return `location/${airdrop[1]}/${airdrop[2]}`;
+  return robberyImages.has(markerName)
+    ? robberyMarkerToImageName(markerName)
+    : null;
+}
+
 type TrackerType = "robbery" | "bounty";
 
 interface JoinItem {
@@ -239,9 +249,7 @@ export default function RecentJoins({
                 const validDate = !Number.isNaN(date.getTime());
                 const imageName =
                   trackerType === "robbery" &&
-                  robberyImages.has(item.marker_name)
-                    ? robberyMarkerToImageName(item.marker_name)
-                    : null;
+                  getJoinImageName(item.marker_name);
                 return (
                   <li
                     key={`${itemKey(item)}:${index}`}

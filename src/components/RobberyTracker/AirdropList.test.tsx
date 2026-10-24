@@ -2,10 +2,17 @@ import { expect, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
+import { JsxEmit, ModuleKind, ScriptTarget, transpileModule } from "typescript";
+import { updateTrackerJoinHistory } from "@/hooks/trackerJoinHistory";
+import type { TrackerJoinReport } from "@/hooks/trackerJoinHistory";
 import type { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import { getAirdropKey } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import AirdropList, { filterAirdrops } from "./AirdropList";
 import AirdropCard from "./AirdropCard";
+
+const joinProps = { joinedUsers: [], onJoin: () => {} };
 
 function renderCard(card: ReactNode) {
   return renderToStaticMarkup(
@@ -55,6 +62,8 @@ test("difficulty uses filter chips while locations stay in tabs", () => {
       serverSize="all"
       timeSort="newest"
       serverRegions={{}}
+      joinHistory={{}}
+      onJoin={() => {}}
     />,
   );
   expect(markup).toContain('role="group" aria-label="Airdrop difficulty"');
@@ -114,7 +123,11 @@ test("airdrop cards restore difficulty, location and server actions", () => {
     ["Red", "Hard"],
   ] as const) {
     const markup = renderCard(
-      <AirdropCard airdrop={{ ...hard, color }} useExternalRegionData />,
+      <AirdropCard
+        {...joinProps}
+        airdrop={{ ...hard, color }}
+        useExternalRegionData
+      />,
     );
     expect(markup).toContain(label);
     expect(markup).toContain("Dunes Airdrop");
@@ -123,8 +136,136 @@ test("airdrop cards restore difficulty, location and server actions", () => {
     expect(markup).toContain("Logged");
   }
   const markup = renderCard(
-    <AirdropCard airdrop={easy} useExternalRegionData />,
+    <AirdropCard {...joinProps} airdrop={easy} useExternalRegionData />,
   );
   expect(markup).toContain("Cactus Valley Airdrop");
   expect(markup).not.toContain("Join Server");
+});
+
+test("airdrop cards show synced server joins and follow roster updates", () => {
+  const first = { user_id: "123", display_name: "First", joined_at: 100 };
+  const second = { user_id: "456", display_name: "Second", joined_at: 101 };
+  let joinHistory = updateTrackerJoinHistory(
+    {},
+    {
+      action: "join_history_sync",
+      servers: { "test-server": [first], "other-server": [second] },
+    },
+  );
+  const render = () =>
+    renderCard(
+      <AirdropList
+        airdrops={[hard]}
+        searchQuery=""
+        serverSize="all"
+        timeSort="newest"
+        serverRegions={{}}
+        joinHistory={joinHistory}
+        onJoin={() => {}}
+      />,
+    );
+  expect(render()).toContain("/users/123");
+  expect(render()).not.toContain("/users/456");
+  joinHistory = updateTrackerJoinHistory(joinHistory, {
+    action: "update_join_history",
+    data: { server_id: "test-server" },
+    users: [first, second],
+  });
+  expect(render()).toContain("2 people joined");
+  joinHistory = updateTrackerJoinHistory(joinHistory, {
+    action: "update_join_history",
+    data: { server_id: "test-server" },
+    users: [],
+  });
+  expect(render()).not.toContain("people joined");
+  expect(render()).not.toContain("/users/123");
+});
+
+test("airdrop Join reports the server before opening Roblox, and requires a server ID", () => {
+  type Node = { type: unknown; props: Record<string, unknown> };
+  const nodes = (value: unknown): Node[] => {
+    if (Array.isArray(value)) return value.flatMap(nodes);
+    if (!value || typeof value !== "object" || !("props" in value)) return [];
+    const node = value as Node;
+    return [node, ...nodes(node.props.children)];
+  };
+  const actions: unknown[] = [];
+  const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
+  const exports = {} as { default: (props: object) => Node };
+  runInNewContext(
+    transpileModule(
+      readFileSync(new URL("./AirdropCard.tsx", import.meta.url), "utf8"),
+      {
+        compilerOptions: {
+          module: ModuleKind.CommonJS,
+          jsx: JsxEmit.ReactJSX,
+          target: ScriptTarget.ES2022,
+        },
+      },
+    ).outputText,
+    {
+      exports,
+      window: {
+        setTimeout: () => 1,
+        location: { assign: (url: string) => actions.push(url) },
+      },
+      require: (name: string) => {
+        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "react")
+          return {
+            useState: (initial: unknown) => [initial, () => {}],
+            useEffect: () => {},
+          };
+        if (name === "@/hooks/useRobberyTrackerLastJoinedServer")
+          return {
+            useRobberyTrackerLastJoinedServer: () => ({
+              lastJoined: null,
+              setLastJoined: () => {},
+            }),
+          };
+        if (name === "@/hooks/useServerRegions")
+          return { useServerRegions: () => ({}) };
+        if (name === "@/hooks/useSharedTimer")
+          return { useOptimizedRealTimeRelativeDate: () => "" };
+        if (name === "sonner") return { toast: { loading: () => 1 } };
+        if (name === "./deepLink")
+          return {
+            buildRobloxServerDeepLink: (jobId: string) => `roblox://${jobId}`,
+          };
+        if (name === "./utils") return { formatServerTime: () => "12:00" };
+        if (name === "@/lib/utils")
+          return {
+            cn: (...values: unknown[]) => values.filter(Boolean).join(" "),
+          };
+        return new Proxy({}, { get: (_, key) => String(key) });
+      },
+    },
+  );
+  const render = (airdrop: AirdropData) =>
+    nodes(
+      exports.default({
+        ...joinProps,
+        airdrop,
+        useExternalRegionData: true,
+        onJoin: (report: TrackerJoinReport) => actions.push(report),
+      }),
+    );
+  const join = render(hard).find(
+    (node) => node.props["data-rybbit-prop-tracker"] === "Airdrop_Tracker",
+  )!;
+  (join.props.onClick as () => void)();
+  expect(actions).toEqual([
+    {
+      server_id: "test-server",
+      marker_name: "Airdrop:dunes:hard",
+      display_name: "Dunes Airdrop",
+      tracker_type: "robbery",
+    },
+    "roblox://test-server",
+  ]);
+  expect(
+    render(easy).some(
+      (node) => node.props["data-rybbit-prop-tracker"] === "Airdrop_Tracker",
+    ),
+  ).toBe(false);
 });

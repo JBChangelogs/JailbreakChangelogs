@@ -1398,6 +1398,8 @@ function RobberyTrackerContent() {
                 serverSize={serverSize}
                 timeSort={timeSort}
                 serverRegions={serverRegionsByJobId}
+                joinHistory={joinHistory}
+                onJoin={handleJoin}
               />
             )
           ) : hasData ? (

@@ -23,17 +23,26 @@ import { formatServerTime } from "./utils";
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
+import JoinedUsers from "./JoinedUsers";
+import type {
+  TrackerJoinReport,
+  TrackerJoinUser,
+} from "@/hooks/trackerJoinHistory";
 
 interface AirdropCardProps {
   airdrop: AirdropData;
   regionData?: ServerRegionData | null;
   useExternalRegionData?: boolean;
+  joinedUsers: TrackerJoinUser[];
+  onJoin: (report: TrackerJoinReport) => void;
 }
 
 export default function AirdropCard({
   airdrop,
   regionData: externalRegionData,
   useExternalRegionData = false,
+  joinedUsers,
+  onJoin,
 }: AirdropCardProps) {
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [isMapImageLoading, setIsMapImageLoading] = useState(false);
@@ -220,6 +229,7 @@ export default function AirdropCard({
           </div>
 
           <InlineTeamPlayers players={players} className="mt-1" />
+          <JoinedUsers users={joinedUsers} />
 
           {/* Region */}
           <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
@@ -258,6 +268,12 @@ export default function AirdropCard({
                   data-rybbit-prop-term={`${airdrop.color} Airdrop`}
                   onClick={() => {
                     setIsJoining(true);
+                    onJoin({
+                      server_id: jobId,
+                      marker_name: `Airdrop:${locationLower}:${difficulty}`,
+                      display_name: `${airdrop.location.replace(/([A-Z])/g, " $1").trim()} Airdrop`,
+                      tracker_type: "robbery",
+                    });
                     setLastJoined({
                       kind: "airdrop",
                       jobId,

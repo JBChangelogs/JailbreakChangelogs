@@ -9,6 +9,10 @@ import type { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import AirdropCard from "./AirdropCard";
+import type {
+  TrackerJoinHistory,
+  TrackerJoinReport,
+} from "@/hooks/trackerJoinHistory";
 
 export function filterAirdrops(
   airdrops: AirdropData[],
@@ -45,12 +49,16 @@ export default function AirdropList({
   serverSize,
   timeSort,
   serverRegions,
+  joinHistory,
+  onJoin,
 }: {
   airdrops: AirdropData[];
   searchQuery: string;
   serverSize: "all" | "big" | "small";
   timeSort: "newest" | "oldest";
   serverRegions: Record<string, ServerRegionData | null>;
+  joinHistory: TrackerJoinHistory;
+  onJoin: (report: TrackerJoinReport) => void;
 }) {
   const [location, setLocation] = useState("all");
   const [color, setColor] = useState("all");
@@ -115,6 +123,8 @@ export default function AirdropList({
             <AirdropCard
               key={getAirdropKey(airdrop)}
               airdrop={airdrop}
+              joinedUsers={joinHistory[airdrop.server?.job_id ?? ""] ?? []}
+              onJoin={onJoin}
               regionData={serverRegions[airdrop.server?.job_id ?? ""]}
               useExternalRegionData
             />
