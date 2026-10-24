@@ -17,6 +17,7 @@ import { formatFullValue } from "@/utils/trading/values";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import {
   createGlobalSearchIndex,
   getGlobalSearchResults,
@@ -33,6 +34,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const returnFocusRef = useRef(document.activeElement);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const trackedOpenRef = useRef(false);
   const { user } = useAuthContext();
   const settings = useUserSettings(user?.id);
   const items = usePartialItemFields<SearchCatalogItem>(SEARCH_ITEM_FIELDS);
@@ -96,6 +98,37 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           inputRef.current?.focus();
+          if (!trackedOpenRef.current) {
+            trackEvent("Global Search Opened");
+            trackedOpenRef.current = true;
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.defaultPrevented || event.nativeEvent.isComposing) return;
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            inputRef.current?.focus();
+            if (orderedResults.length)
+              setHighlighted(
+                (previous) =>
+                  (Math.min(previous, orderedResults.length - 1) +
+                    (event.key === "ArrowDown" ? 1 : -1) +
+                    orderedResults.length) %
+                  orderedResults.length,
+              );
+          }
+          if (
+            event.key === "Enter" &&
+            event.target === inputRef.current &&
+            activeIndex >= 0
+          ) {
+            event.preventDefault();
+            resultsRef.current
+              ?.querySelector<HTMLAnchorElement>(
+                `#global-search-result-${activeIndex} a`,
+              )
+              ?.click();
+          }
         }}
         onCloseAutoFocus={(event) => {
           event.preventDefault();
@@ -131,27 +164,6 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
             onChange={(event) => {
               setQuery(event.target.value);
               setHighlighted(0);
-            }}
-            onKeyDown={(event) => {
-              if (event.nativeEvent.isComposing) return;
-              if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-                event.preventDefault();
-                if (orderedResults.length)
-                  setHighlighted(
-                    (activeIndex +
-                      (event.key === "ArrowDown" ? 1 : -1) +
-                      orderedResults.length) %
-                      orderedResults.length,
-                  );
-              }
-              if (event.key === "Enter" && activeIndex >= 0) {
-                event.preventDefault();
-                resultsRef.current
-                  ?.querySelector<HTMLAnchorElement>(
-                    `#global-search-result-${activeIndex} a`,
-                  )
-                  ?.click();
-              }
             }}
           />
           <button
