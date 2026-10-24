@@ -889,7 +889,7 @@ export default function Header({
                       aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
                     >
                       <Icon
-                        icon="lucide:message-square"
+                        icon="ic:baseline-message"
                         className="h-4 w-4"
                         inline={true}
                       />
