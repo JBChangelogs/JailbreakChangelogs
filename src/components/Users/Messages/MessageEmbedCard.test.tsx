@@ -4,6 +4,8 @@ import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, ScriptTarget, transpileModule } from "typescript";
 import {
   buildRobloxGameLink,
+  JAILBREAK_PLACE_ID,
+  KNOWN_ROBLOX_GAMES,
   type MessageEmbedMetadata,
 } from "@/utils/messages/invites";
 import { validatePrivateServerLink } from "@/utils/api/serverValidation";
@@ -92,7 +94,12 @@ test("received cards join valid games and VIP servers, handle missing servers, a
           };
         if (name === "next/image")
           return { default: "image", __esModule: true };
-        if (name === "@/utils/messages/invites") return { buildRobloxGameLink };
+        if (name === "@/utils/messages/invites")
+          return {
+            buildRobloxGameLink,
+            JAILBREAK_PLACE_ID,
+            KNOWN_ROBLOX_GAMES,
+          };
         if (name === "@/utils/api/serverValidation")
           return { validatePrivateServerLink };
         if (name === "@/utils/ui/supporterCelebration")

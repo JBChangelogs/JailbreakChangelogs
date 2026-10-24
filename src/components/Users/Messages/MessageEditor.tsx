@@ -17,7 +17,11 @@ import { CommentTextarea } from "@/components/PageComments/CommentTextarea";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import type { EmojiStringMap } from "@/utils/comments/emojiShortcodes";
-import type { Message } from "@/utils/messages/types";
+import type { Message, MessageUser } from "@/utils/messages/types";
+import { recordEmojiUse } from "@/hooks/useFrequentEmojis";
+import { mentionsToIds, mentionsToText } from "@/utils/messages/mentions";
+
+const NO_USERS: MessageUser[] = [];
 
 interface MessageEditorProps {
   message: Message;
@@ -26,6 +30,8 @@ interface MessageEditorProps {
   isSending: boolean;
   onSave: (messageId: string, content: string) => void | Promise<void>;
   onCancel: () => void;
+  /** Known users: their mentions show as @username while editing. */
+  mentionUsers?: MessageUser[];
 }
 
 export function MessageEditor({
@@ -35,8 +41,16 @@ export function MessageEditor({
   isSending,
   onSave,
   onCancel,
+  mentionUsers = NO_USERS,
 }: MessageEditorProps) {
-  const [editContent, setEditContent] = useState(message.content);
+  const [editContent, setEditContent] = useState(
+    mentionsToText(
+      message.content,
+      (id) => mentionUsers.find((user) => user.id === id)?.username,
+    ),
+  );
+  const save = () =>
+    void onSave(message.id, mentionsToIds(editContent, mentionUsers));
   const [editEmojiOpen, setEditEmojiOpen] = useState(false);
   const editCursorPosRef = useRef<number | null>(null);
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -55,6 +69,7 @@ export function MessageEditor({
         editContent.slice(0, cursor) + emoji + editContent.slice(cursor);
       setEditContent(next);
       editCursorPosRef.current = cursor + emoji.length;
+      recordEmojiUse(emoji);
       if (!keepOpen) {
         setEditEmojiOpen(false);
         requestAnimationFrame(() => {
@@ -77,6 +92,8 @@ export function MessageEditor({
           value={editContent}
           onChange={setEditContent}
           emojiMap={emojiStringMap}
+          mentionUsers={mentionUsers}
+          onEmojiPicked={recordEmojiUse}
           disabled={isSending}
           rows={2}
           className="text-primary-text placeholder-secondary-text min-h-16 w-full resize-y bg-transparent p-3 pr-14 text-sm focus:outline-none disabled:opacity-60"
@@ -90,7 +107,7 @@ export function MessageEditor({
             }
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              void onSave(message.id, editContent);
+              save();
             }
           }}
         />
@@ -160,7 +177,7 @@ export function MessageEditor({
       <div className="flex items-center gap-2 lg:hidden">
         <Button
           size="sm"
-          onClick={() => void onSave(message.id, editContent)}
+          onClick={save}
           disabled={isSending || !editContent.trim()}
         >
           {isSending ? <Spinner className="mr-1 h-3 w-3" /> : null}
@@ -189,7 +206,7 @@ export function MessageEditor({
         <button
           type="button"
           className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-          onClick={() => void onSave(message.id, editContent)}
+          onClick={save}
           disabled={isSending || !editContent.trim()}
         >
           save

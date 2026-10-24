@@ -26,6 +26,9 @@ export type MessageUser = {
   settings_v2?: Partial<UserSettingsV2>;
 };
 
+/** Emoji → the ids of the users who reacted with it. */
+export type MessageReactions = Record<string, string[]>;
+
 export type Message = {
   id: string;
   clientId?: string;
@@ -39,6 +42,7 @@ export type Message = {
   readAt?: number;
   type?: "user" | "system";
   status?: "pending" | "sent" | "failed";
+  reactions?: MessageReactions;
 };
 
 export type OutgoingMessageMetadata =
@@ -89,6 +93,7 @@ export type RealtimeMessageEventDetail = {
     | "message_edited"
     | "message_deleted"
     | "messages_read"
+    | "message_reaction"
     | "presence_update"
     | "typing";
   data?: {
@@ -101,6 +106,7 @@ export type RealtimeMessageEventDetail = {
     status?: "Online" | "Offline";
     reader_id?: string;
     message_ids?: string[];
+    reactions?: MessageReactions;
   };
 };
 

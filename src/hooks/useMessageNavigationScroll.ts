@@ -105,7 +105,8 @@ export function useMessageNavigationScroll({
 
     const distanceFromBottom =
       container.scrollHeight - container.scrollTop - container.clientHeight;
-    isAtBottomRef.current = distanceFromBottom <= 48;
+    // Like the app: only right at the bottom keeps following new messages.
+    isAtBottomRef.current = distanceFromBottom <= 4;
     if (isAtBottomRef.current) {
       setHasNewMessagesBelow(false);
       const userId = selectedUserId;

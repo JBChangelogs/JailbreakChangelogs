@@ -21,6 +21,10 @@ import {
 } from "@/utils/notifications/notifMarkdown";
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import { mentionsToText } from "@/utils/messages/mentions";
+import { getDisplayName } from "@/utils/messages/formatting";
+import { parseReactions } from "@/utils/messages/parsing";
+import type { MessageUser } from "@/utils/messages/types";
 import {
   clearPreferencesCache,
   deleteCachedPreference,
@@ -88,6 +92,7 @@ interface RealtimeDmMessageData {
   status?: "Online" | "Offline";
   reader_id?: string | number;
   message_ids?: Array<string | number>;
+  reactions?: unknown;
 }
 
 const PING_INTERVAL_MS = 30000;
@@ -114,9 +119,34 @@ function shouldReconnectOnFocusOnly(code: number, reason: string): boolean {
   );
 }
 
-function toNotificationBody(value: unknown, maxLen = 140): string | undefined {
+/** A user's name from the message caches, for mentions in toasts. */
+function cachedUsername(queryClient: QueryClient, id: string): string | null {
+  for (const [, data] of queryClient.getQueriesData<MessageUser[]>({
+    queryKey: ["message-users-batch"],
+  }))
+    for (const user of Array.isArray(data) ? data : [])
+      if (user.id === id) return getDisplayName(user);
+  for (const [, data] of queryClient.getQueriesData<{
+    items?: { user: MessageUser }[];
+  }>({ queryKey: ["conversation-list"] }))
+    for (const { user } of data?.items ?? [])
+      if (user.id === id) return getDisplayName(user);
+  return null;
+}
+
+function toNotificationBody(
+  value: unknown,
+  queryClient: QueryClient,
+  maxLen = 140,
+): string | undefined {
   if (typeof value !== "string") return undefined;
-  const formatted = formatNotifPlainText(value.trim());
+  const formatted = formatNotifPlainText(
+    mentionsToText(
+      value.trim(),
+      (id) => cachedUsername(queryClient, id),
+      "someone",
+    ),
+  );
   if (!formatted) return undefined;
   if (formatted.length <= maxLen) return formatted;
   return `${formatted.slice(0, maxLen - 1)}…`;
@@ -172,6 +202,12 @@ function parseRealtimeMessagePayload(raw: string): RealtimeNotificationMessage {
       /("(?:message_ids|member_ids|user_ids)"\s*:\s*\[)([^\]]*)\]/g,
       (_match, prefix: string, ids: string) =>
         `${prefix}${ids.replace(/(?<!["\d])(\d{16,})(?!["\d])/g, '"$1"')}]`,
+    )
+    // Reactions map each emoji to the ids of who reacted.
+    .replace(
+      /("reactions"\s*:\s*\{)([^}]*)\}/g,
+      (_match, prefix: string, body: string) =>
+        `${prefix}${body.replace(/(?<!["\d])(\d{16,})(?!["\d])/g, '"$1"')}}`,
     );
   return JSON.parse(normalized) as RealtimeNotificationMessage;
 }
@@ -814,7 +850,7 @@ export function useRealtimeNotificationsWebSocket(
                 ) {
                   const path = `/messages/group/${encodeURIComponent(String(groupData.group_id))}`;
                   const body =
-                    toNotificationBody(groupData.content) ??
+                    toNotificationBody(groupData.content, queryClient) ??
                     "Check your messages.";
                   const tag = `realtime-group:${String(groupData.id)}`;
                   showDesktopNotificationUnlessAppConnected(
@@ -901,6 +937,28 @@ export function useRealtimeNotificationsWebSocket(
                 return;
               }
 
+              if (
+                payload.action === "message_reaction" &&
+                dmData.id != null &&
+                dmData.user_id != null &&
+                dmData.recipient_id != null
+              ) {
+                window.dispatchEvent(
+                  new CustomEvent("realtimeMessage", {
+                    detail: {
+                      action: "message_reaction",
+                      data: {
+                        id: String(dmData.id),
+                        user_id: String(dmData.user_id),
+                        recipient_id: String(dmData.recipient_id),
+                        reactions: parseReactions(dmData.reactions),
+                      },
+                    },
+                  }),
+                );
+                return;
+              }
+
               const hasValidIds =
                 (typeof dmData.id === "string" ||
                   typeof dmData.id === "number") &&
@@ -943,7 +1001,7 @@ export function useRealtimeNotificationsWebSocket(
                 if (payload.action === "message_received") {
                   const senderId = String(dmData.user_id);
                   const messagePreview =
-                    toNotificationBody(dmData.content) ??
+                    toNotificationBody(dmData.content, queryClient) ??
                     "Check your messages.";
                   showDesktopNotificationUnlessAppConnected(
                     {

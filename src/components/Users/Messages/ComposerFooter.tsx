@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch, ReactNode, SetStateAction } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { Icon } from "@/components/ui/IconWrapper";
 import { MessageComposer } from "@/components/Users/MessageComposer";
@@ -16,7 +16,7 @@ import {
   type OutgoingMessageMetadata,
 } from "@/utils/messages/types";
 import { asId } from "@/utils/messages/parsing";
-import { formatMessageText, getDisplayName } from "@/utils/messages/formatting";
+import { getDisplayName } from "@/utils/messages/formatting";
 import type { BanInfo } from "@/utils/api/ban";
 
 const TYPING_DOTS = ["[animation-delay:-0.3s]", "[animation-delay:-0.15s]", ""];
@@ -24,8 +24,8 @@ const TYPING_DOTS = ["[animation-delay:-0.3s]", "[animation-delay:-0.15s]", ""];
 /** "A is typing…", "A and B are typing…", or "Several people are typing…". */
 function TypingText({ users }: { users: MessageUser[] }) {
   const name = (user: MessageUser) => (
-    <span className="text-secondary-text font-semibold">
-      {getDisplayName(user)}
+    <span className="font-semibold">
+      {user.username || getDisplayName(user)}
     </span>
   );
   if (users.length === 1) return <>{name(users[0])} is typing…</>;
@@ -44,6 +44,8 @@ interface ComposerBarProps {
   /** The message being replied to, and who sent it. */
   replying: { message: Message; sender: MessageUser | null } | null;
   onCancelReply: () => void;
+  /** Who @ can mention. */
+  mentionCandidates: MessageUser[];
   /** Who is typing now; the line expands while anyone is. */
   typingUsers: MessageUser[];
   conversationId: string | null;
@@ -68,6 +70,7 @@ export function ComposerBar({
   messageBan,
   replying,
   onCancelReply,
+  mentionCandidates,
   typingUsers,
   conversationId,
   placeholder,
@@ -100,7 +103,7 @@ export function ComposerBar({
           typingUsers.length ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
       >
-        <div className="text-tertiary-text flex items-center gap-2 overflow-hidden px-2 text-xs">
+        <div className="text-secondary-text flex items-center gap-2 overflow-hidden px-2 text-xs">
           {typingUsers.length > 0 && (
             <>
               <span className="flex h-3 shrink-0 items-center gap-[2px]">
@@ -145,9 +148,6 @@ export function ComposerBar({
             <span className="text-secondary-text font-semibold">
               {replying?.sender ? getDisplayName(replying.sender) : "a message"}
             </span>
-            {replyingTo.content && (
-              <>: {formatMessageText(replyingTo.content)}</>
-            )}
           </p>
           <button
             type="button"
@@ -161,6 +161,7 @@ export function ComposerBar({
       )}
       <div
         ref={composerRef}
+        data-suggestions-anchor
         className={cn(
           "border-border-card bg-tertiary-bg text-primary-text focus-within:border-border-focus flex min-h-16 w-full items-center gap-2 rounded-xl border px-1 py-2 transition-[border-radius] duration-200 ease-out",
           replyingTo && "rounded-t-none",
@@ -175,6 +176,7 @@ export function ComposerBar({
           actions={actions}
           onSend={onSend}
           onTyping={onTyping}
+          mentionUsers={mentionCandidates}
         />
       </div>
     </div>
@@ -221,6 +223,7 @@ export function ComposerFooter({
   onSendGift,
 }: ComposerFooterProps) {
   const blocked = !!messageBan || isUnmessageable;
+  const mentionCandidates = useMemo(() => [selectedUser], [selectedUser]);
   return (
     <ComposerBar
       messageBan={messageBan}
@@ -236,6 +239,7 @@ export function ComposerFooter({
           : null
       }
       onCancelReply={() => setReplyingToMessage(null)}
+      mentionCandidates={mentionCandidates}
       typingUsers={isTyping ? [selectedUser] : []}
       conversationId={selectedUserId}
       placeholder={messagePlaceholder}

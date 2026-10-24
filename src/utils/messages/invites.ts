@@ -78,3 +78,11 @@ export function buildRobloxGameLink(
   if (metadata.job_id) params.set("gameInstanceId", metadata.job_id);
   return `roblox://experiences/start?${params}`;
 }
+
+export const JAILBREAK_PLACE_ID = "606849621";
+
+/** Games invites can come from; only Jailbreak can be joined directly. */
+export const KNOWN_ROBLOX_GAMES: Record<string, string> = {
+  [JAILBREAK_PLACE_ID]: "Jailbreak",
+  "9780994092": "Trading",
+};

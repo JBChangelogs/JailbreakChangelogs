@@ -23,6 +23,9 @@ import {
 import { useTwemoji } from "@/contexts/TwemojiContext";
 import Twemoji from "react-twemoji";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { recordEmojiUse } from "@/hooks/useFrequentEmojis";
+import { mentionsToIds } from "@/utils/messages/mentions";
+import type { MessageUser } from "@/utils/messages/types";
 
 export interface MessageComposerProps {
   conversationId: string | null;
@@ -33,7 +36,11 @@ export interface MessageComposerProps {
   actions?: React.ReactNode;
   onSend: (message: string) => void | Promise<void>;
   onTyping?: () => void;
+  /** Who @ can mention: a group's other members, or the other person. */
+  mentionUsers?: MessageUser[];
 }
+
+const NO_USERS: MessageUser[] = [];
 
 export function MessageComposer({
   conversationId,
@@ -44,6 +51,7 @@ export function MessageComposer({
   actions,
   onSend,
   onTyping,
+  mentionUsers = NO_USERS,
 }: MessageComposerProps) {
   const [draft, setDraft] = React.useState("");
   const [emojiOpen, setEmojiOpen] = React.useState(false);
@@ -56,14 +64,20 @@ export function MessageComposer({
     setDraft("");
   }, [conversationId]);
 
+  // What's sent: @username becomes <@id>, which is longer, so the limit
+  // counts that.
+  const outgoing = React.useMemo(
+    () => mentionsToIds(draft, mentionUsers),
+    [draft, mentionUsers],
+  );
   const overLimit = React.useMemo(() => {
-    const trimmed = draft.trim();
+    const trimmed = outgoing.trim();
     if (!trimmed) return 0;
     return Math.max(0, sanitizeText(trimmed).length - maxChars);
-  }, [draft, maxChars]);
+  }, [outgoing, maxChars]);
 
   const submit = React.useCallback(() => {
-    const trimmed = draft.trim();
+    const trimmed = outgoing.trim();
     if (!trimmed || isSending || disabled) return;
 
     const sanitized = sanitizeText(trimmed);
@@ -72,9 +86,9 @@ export function MessageComposer({
       return;
     }
 
-    void onSend(draft);
+    void onSend(outgoing);
     setDraft("");
-  }, [draft, disabled, isSending, maxChars, onSend]);
+  }, [outgoing, disabled, isSending, maxChars, onSend]);
 
   const insertEmoji = React.useCallback(
     (emoji: string, keepOpen = false) => {
@@ -82,6 +96,7 @@ export function MessageComposer({
       const next = draft.slice(0, cursor) + emoji + draft.slice(cursor);
       setDraft(next);
       cursorPosRef.current = cursor + emoji.length;
+      recordEmojiUse(emoji);
       if (!keepOpen) setEmojiOpen(false);
     },
     [draft],
@@ -110,6 +125,8 @@ export function MessageComposer({
         maxLength={1000}
         disabled={disabled}
         emojiMap={emojiStringMap}
+        mentionUsers={mentionUsers}
+        onEmojiPicked={recordEmojiUse}
         autoCorrect="off"
         autoComplete="off"
         spellCheck="false"
