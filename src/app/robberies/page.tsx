@@ -1344,7 +1344,7 @@ function RobberyTrackerContent() {
             )}
           </div>
 
-          {!isAirdrops && user && (
+          {user && (
             <RecentJoins
               key={user.id}
               trackerType="robbery"

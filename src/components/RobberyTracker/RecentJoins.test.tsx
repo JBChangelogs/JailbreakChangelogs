@@ -9,7 +9,52 @@ import {
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
-import { getJoinImageName } from "./RecentJoins";
+import { getJoinImageName, groupRecentJoins } from "./RecentJoins";
+
+test("history groups repeat joins, ignores page overlaps, and keeps the newest time", () => {
+  const older = {
+    timestamp: "2026-10-01T12:00:00Z",
+    marker_name: "OilRig",
+    display_name: "Oil Rig",
+    tracker_type: "robbery" as const,
+  };
+  const newer = { ...older, timestamp: "2026-10-24T12:00:00Z" };
+  const bank = {
+    ...older,
+    marker_name: "Bank",
+    display_name: "Bank",
+    timestamp: "2026-10-10T12:00:00Z",
+  };
+  const input = [older, bank, newer, { ...older }];
+  const snapshot = structuredClone(input);
+  expect(groupRecentJoins(input)).toEqual([
+    { ...newer, count: 2 },
+    { ...bank, count: 1 },
+  ]);
+  expect(input).toEqual(snapshot);
+  expect(groupRecentJoins([])).toEqual([]);
+});
+
+test("history keeps different airdrop locations, difficulties and tracker types separate", () => {
+  const base = {
+    timestamp: "2026-10-24T12:00:00Z",
+    display_name: "Dunes Airdrop",
+    marker_name: "Airdrop:dunes:easy",
+    tracker_type: "robbery" as const,
+  };
+  const input = [
+    base,
+    { ...base, marker_name: "Airdrop:dunes:hard" },
+    {
+      ...base,
+      marker_name: "Airdrop:cactusvalley:easy",
+      display_name: "Cactus Valley Airdrop",
+    },
+    { ...base, tracker_type: "bounty" as const },
+  ];
+  expect(groupRecentJoins(input)).toHaveLength(4);
+  expect(groupRecentJoins(input).every((item) => item.count === 1)).toBe(true);
+});
 
 test("recent joins resolve every airdrop image and preserve robbery and fallback images", () => {
   for (const location of ["cactusvalley", "dunes"])

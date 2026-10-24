@@ -93,6 +93,37 @@ function itemKey(item: JoinItem): string {
   return `${item.timestamp}:${item.marker_name}:${item.display_name}`;
 }
 
+export function groupRecentJoins(items: JoinItem[]) {
+  const seen = new Set<string>();
+  const groups = new Map<string, JoinItem & { count: number }>();
+  for (const item of items) {
+    const eventKey = `${item.tracker_type}:${itemKey(item)}`;
+    if (seen.has(eventKey)) continue;
+    seen.add(eventKey);
+    const key = JSON.stringify([
+      item.tracker_type,
+      item.marker_name,
+      item.display_name,
+    ]);
+    const group = groups.get(key);
+    if (!group) {
+      groups.set(key, { ...item, count: 1 });
+    } else {
+      group.count++;
+      if (
+        (parseUtcTimestamp(item.timestamp).getTime() || 0) >
+        (parseUtcTimestamp(group.timestamp).getTime() || 0)
+      )
+        group.timestamp = item.timestamp;
+    }
+  }
+  return [...groups.values()].sort(
+    (a, b) =>
+      (parseUtcTimestamp(b.timestamp).getTime() || 0) -
+      (parseUtcTimestamp(a.timestamp).getTime() || 0),
+  );
+}
+
 export default function RecentJoins({
   trackerType,
   recentJoin,
@@ -153,15 +184,9 @@ export default function RecentJoins({
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
-  const seen = new Set<string>();
-  const items = (
-    joinsQuery.data?.pages.flatMap((page) => page.items) ?? []
-  ).filter((item) => {
-    const key = itemKey(item);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  const items = groupRecentJoins(
+    joinsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+  );
   const loaded = Boolean(joinsQuery.data);
   const loading = joinsQuery.isFetching;
   const error = joinsQuery.isError;
@@ -208,7 +233,7 @@ export default function RecentJoins({
       <Button
         type="button"
         variant="ghost"
-        className="flex w-full items-center justify-between rounded-none py-3 text-left"
+        className="flex w-full items-center justify-between rounded-none py-3 text-left active:scale-100"
         aria-expanded={isOpen}
         onClick={() => {
           setIsOpen((open) => !open);
@@ -244,7 +269,7 @@ export default function RecentJoins({
           )}
           {items.length > 0 && (
             <ul className="grid max-h-80 grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3">
-              {items.map((item, index) => {
+              {items.map((item) => {
                 const date = parseUtcTimestamp(item.timestamp);
                 const validDate = !Number.isNaN(date.getTime());
                 const imageName =
@@ -252,7 +277,11 @@ export default function RecentJoins({
                   getJoinImageName(item.marker_name);
                 return (
                   <li
-                    key={`${itemKey(item)}:${index}`}
+                    key={JSON.stringify([
+                      item.tracker_type,
+                      item.marker_name,
+                      item.display_name,
+                    ])}
                     className="border-border-card bg-tertiary-bg flex min-w-0 items-center gap-3 rounded-lg border p-2.5"
                   >
                     <span className="border-border-card bg-quaternary-bg flex aspect-video w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border sm:w-24">
@@ -287,10 +316,19 @@ export default function RecentJoins({
                           title={date.toLocaleString()}
                           className="text-secondary-text text-xs"
                         >
-                          {relativeTime(date, now)}
+                          Last joined {relativeTime(date, now)}
                         </time>
                       )}
                     </span>
+                    {item.count > 1 && (
+                      <span
+                        title={`${item.count} joins in loaded history`}
+                        aria-label={`${item.count} joins in loaded history`}
+                        className="bg-quaternary-bg text-secondary-text shrink-0 rounded-md px-2 py-1 text-xs font-semibold tabular-nums"
+                      >
+                        ×{item.count}
+                      </span>
+                    )}
                   </li>
                 );
               })}
