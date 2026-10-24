@@ -461,6 +461,7 @@ export function GroupChatView({
       if (atBottomRef.current && prependRef.current === null)
         container.scrollTop = container.scrollHeight;
     });
+    observer.observe(container);
     for (const child of container.children) observer.observe(child);
     return () => observer.disconnect();
   }, [messages]);
