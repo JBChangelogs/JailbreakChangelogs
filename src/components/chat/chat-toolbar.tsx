@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CommentTextarea } from "@/components/PageComments/CommentTextarea";
 import type { EmojiStringMap } from "@/utils/comments/emojiShortcodes";
+import type { MessageUser } from "@/utils/messages/types";
 
 /** Modifier key that allows inserting a new line instead of submitting */
 const NEWLINE_MODIFIER_KEY = "shiftKey" as const;
@@ -25,6 +26,9 @@ export interface ChatToolbarTextareaProps extends React.ComponentProps<
   showResizeHandle?: boolean;
   /** Enables `:shortcode:` emoji autocomplete when non-empty. */
   emojiMap?: EmojiStringMap;
+  /** Enables @mention suggestions and highlighting. */
+  mentionUsers?: MessageUser[];
+  onEmojiPicked?: (emoji: string) => void;
 }
 
 /**
@@ -61,10 +65,12 @@ export function ChatToolbarTextarea({
   onChange,
   value,
   emojiMap,
+  mentionUsers,
+  onEmojiPicked,
   ...props
 }: ChatToolbarTextareaProps) {
   const hasEmojiAutocomplete = Boolean(
-    emojiMap && Object.keys(emojiMap).length > 0,
+    (emojiMap && Object.keys(emojiMap).length > 0) || mentionUsers?.length,
   );
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const [manualHeight, setManualHeight] = React.useState<number | null>(null);
@@ -211,7 +217,9 @@ export function ChatToolbarTextarea({
               } as React.ChangeEvent<HTMLTextAreaElement>);
               scheduleAutosize();
             }}
-            emojiMap={emojiMap!}
+            emojiMap={emojiMap ?? {}}
+            mentionUsers={mentionUsers}
+            onEmojiPicked={onEmojiPicked}
             className={cn(
               "h-fit max-h-60 min-h-10 w-full @md/chat:text-base",
               "resize-none overflow-y-auto bg-transparent p-2 text-base text-inherit shadow-none md:text-sm",

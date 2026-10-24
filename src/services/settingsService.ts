@@ -151,9 +151,11 @@ export const revertSupporterLevel = async (level: number): Promise<void> => {
   }
 };
 
+/** `dm` also posts the gift into your DMs with them (gifting from a chat). */
 export const giftSupporterGift = async (
   shareId: string,
   userId: string,
+  dm = false,
 ): Promise<{ id: string }> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
@@ -163,7 +165,7 @@ export const giftSupporterGift = async (
     method: "POST",
     credentials: "include",
     headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: userId }),
+    body: JSON.stringify({ user_id: userId, dm }),
     cache: "no-store",
   });
 

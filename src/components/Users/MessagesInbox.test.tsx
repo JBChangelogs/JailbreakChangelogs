@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import * as mentions from "@/utils/messages/mentions";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, ScriptTarget, transpileModule } from "typescript";
@@ -209,6 +210,9 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
           return { useOptimizedRealTimeRelativeDate: () => "" };
         if (name === "@/utils/messages/parsing")
           return { asId: String, parseOfferAcceptedMetadata: () => null };
+        if (name === "@/utils/messages/mentions") return mentions;
+        if (name === "@/hooks/useFrequentEmojis")
+          return { useFrequentEmojis: () => [] };
         if (name === "@/utils/messages/formatting")
           return {
             getDisplayName: (user: { username: string }) => user.username,
