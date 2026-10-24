@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useExperimentAccess } from "@/hooks/useExperimentAccess";
 
 const TRACKERS = [
   {
@@ -23,15 +25,23 @@ const TRACKERS = [
 export default function TrackerSwitcher({ className }: { className?: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { user, isAuthenticated, isLoading } = useAuthContext();
+  const airdropsEnabled = useExperimentAccess(
+    "airdrop_tracker",
+    user?.id,
+    isAuthenticated && !isLoading,
+  );
   const activeTracker =
-    pathname === "/robberies" && searchParams.has("airdrops")
+    airdropsEnabled && pathname === "/robberies" && searchParams.has("airdrops")
       ? "/robberies?airdrops"
       : pathname;
 
   return (
     <Tabs value={activeTracker} className={className}>
       <TabsList aria-label="Live trackers" fullWidth className="w-full">
-        {TRACKERS.map((tracker) => (
+        {TRACKERS.filter(
+          (tracker) => tracker.label !== "Airdrops" || airdropsEnabled,
+        ).map((tracker) => (
           <TabsTrigger
             key={tracker.href}
             value={tracker.href}

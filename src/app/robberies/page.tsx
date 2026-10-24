@@ -12,6 +12,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import AirdropList from "@/components/RobberyTracker/AirdropList";
 import { useRobberyTrackerAirdropsWebSocket } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
+import { useExperimentAccess } from "@/hooks/useExperimentAccess";
 import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import {
@@ -243,9 +244,14 @@ function isNonEmptyString(value: unknown): value is string {
 }
 
 function RobberyTrackerContent() {
-  const { user } = useAuthContext();
+  const { user, isAuthenticated, isLoading } = useAuthContext();
   const searchParams = useSearchParams();
-  const isAirdrops = searchParams.has("airdrops");
+  const airdropsEnabled = useExperimentAccess(
+    "airdrop_tracker",
+    user?.id,
+    isAuthenticated && !isLoading,
+  );
+  const isAirdrops = searchParams.has("airdrops") && airdropsEnabled;
   const robberyTracker = useRobberyTrackerWebSocket(!isAirdrops, user?.id);
   const airdropTracker = useRobberyTrackerAirdropsWebSocket(
     isAirdrops,

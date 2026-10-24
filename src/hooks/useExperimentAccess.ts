@@ -9,7 +9,8 @@ import {
   subscribeExperimentOverrides,
 } from "@/utils/api/experiments";
 
-export function useGlobalSearchAccess(
+export function useExperimentAccess(
+  experimentKey: string,
   userId: string | undefined,
   enabled: boolean,
 ) {
@@ -19,7 +20,7 @@ export function useGlobalSearchAccess(
     () => "",
   );
   const access = useQuery({
-    queryKey: ["global-search-access", userId, overrides],
+    queryKey: ["experiment-access", userId, overrides],
     enabled: enabled && Boolean(userId),
     queryFn: async ({ signal }) => {
       const { url, headers } = buildApiFetchRequest(
@@ -32,14 +33,16 @@ export function useGlobalSearchAccess(
         cache: "no-store",
         signal,
       });
-      if (!response.ok) throw new Error("Unable to check global search access");
-      return (
-        parseExperimentsResponse(await response.json()).experiments
-          .global_search === "treatment"
-      );
+      if (!response.ok) throw new Error("Unable to check experiment access");
+      return parseExperimentsResponse(await response.json()).experiments;
     },
     staleTime: 60_000,
     retry: false,
   });
-  return enabled && Boolean(userId) && !access.isError && access.data === true;
+  return (
+    enabled &&
+    Boolean(userId) &&
+    !access.isError &&
+    access.data?.[experimentKey] === "treatment"
+  );
 }

@@ -8,3 +8,44 @@ test("icons name themselves in data-icon", () => {
   expect(html).toContain("<svg");
   expect(html).toContain('data-icon="lucide:chevron-down"');
 });
+
+test("simple navbar icons do not expose tree-dependent IDs", () => {
+  for (const icon of ["mingcute:notification-fill", "ic:baseline-message"]) {
+    const before = renderToStaticMarkup([
+      <Icon key="icon" icon={icon} />,
+      null,
+    ]);
+    const after = renderToStaticMarkup([null, <Icon key="icon" icon={icon} />]);
+    expect(before).not.toMatch(/\sid=/);
+    expect(after).toBe(before);
+  }
+});
+
+test("SVG references keep unique stable IDs and explicit IDs are preserved", () => {
+  const icon = {
+    body: '<defs><clipPath id="clip"><path d="M0 0h16v16H0z"/></clipPath></defs><path clip-path="url(#clip)" d="M0 0h16v16H0z"/>',
+    width: 16,
+    height: 16,
+  };
+  const render = () =>
+    renderToStaticMarkup(
+      <>
+        <Icon icon={icon} />
+        <Icon icon={icon} />
+      </>,
+    );
+  const markup = render();
+  expect(render()).toBe(markup);
+  const ids = Array.from(
+    markup.matchAll(/<clipPath id="([^"]+)"/g),
+    ([, id]) => id,
+  );
+  expect(ids).toHaveLength(2);
+  expect(new Set(ids).size).toBe(2);
+  for (const id of ids) expect(markup).toContain(`clip-path="url(#${id})"`);
+  expect(
+    renderToStaticMarkup(
+      <Icon icon="ic:baseline-message" id="messages-icon" />,
+    ),
+  ).toContain('id="messages-icon"');
+});
