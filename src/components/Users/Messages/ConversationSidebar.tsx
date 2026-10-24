@@ -150,20 +150,49 @@ function memberHash(memberIds: string[]): string {
   return (hash >>> 0).toString(36);
 }
 
+// Where each member sits while there's no generated icon, matching the
+// API's icon layouts: two overlap diagonally, three are one on top and two
+// below, four make a 2x2 cluster.
+const FALLBACK_LAYOUTS: Record<number, React.CSSProperties[]> = {
+  2: [
+    { top: 0, left: 0 },
+    { right: 0, bottom: 0 },
+  ],
+  3: [
+    { top: 0, left: "22%" },
+    { bottom: 0, left: 0 },
+    { bottom: 0, right: 0 },
+  ],
+  4: [
+    { top: 0, left: 0 },
+    { top: 0, right: 0 },
+    { bottom: 0, left: 0 },
+    { bottom: 0, right: 0 },
+  ],
+};
+const FALLBACK_SCALE: Record<number, number> = { 2: 0.62, 3: 0.56, 4: 0.54 };
+
 /**
  * A group's avatar: the API's generated icon of its most active members, as
- * overlapping circles. Until it loads, or if it can't, the first two letters
- * of its name in a circle, like the app's fallback.
+ * overlapping circles. Until it loads, or if it can't, up to four other
+ * members' avatars in the same layout, like the app; with none, the first
+ * two letters of its name.
  */
 export function GroupAvatar({
   name,
   groupId,
   memberIds,
+  currentUserId,
+  sizePx = 32,
   className,
 }: {
   name: string;
   groupId?: string;
   memberIds?: string[];
+  /** Left out of the fallback, which shows the others. */
+  currentUserId?: string | null;
+  /** The avatar's width, which the fallback's member avatars scale from. */
+  sizePx?: number;
   className?: string;
 }) {
   const version = memberHash(memberIds ?? []);
@@ -186,8 +215,72 @@ export function GroupAvatar({
     setSrc(url);
     return () => URL.revokeObjectURL(url);
   }, [icon]);
+  const fallbackIds = (memberIds ?? [])
+    .filter((id) => id !== currentUserId)
+    .slice(0, 4);
+  const fallbackKey = [...fallbackIds].sort();
+  const { data: fallbackUsers } = useQuery({
+    queryKey: ["message-users-batch", fallbackKey],
+    queryFn: () => fetchMessageUsers(fallbackKey),
+    enabled: !src && fallbackIds.length > 0,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const userFor = (id: string) =>
+    fallbackUsers?.find((user) => user.id === id) ?? {
+      id,
+      username: id,
+      avatar: "",
+    };
+  const memberAvatar = (id: string, px: number, ring = false) => {
+    const user = userFor(id);
+    return (
+      <UserAvatar
+        userId={user.id}
+        bgClassName="bg-tertiary-bg"
+        avatarHash={user.avatar}
+        username={user.username}
+        custom_avatar={user.custom_avatar}
+        size={px / 4}
+        showBadge={false}
+        settings={user.settings_v2}
+        premiumType={user.premiumtype}
+        // Later avatars are cut out from the ones behind by a ring in the
+        // background color.
+        className={ring ? "ring-secondary-bg ring-2" : undefined}
+      />
+    );
+  };
+
   // The icon is overlapping circles on a transparent background, so it gets
   // no backdrop, rounding or crop: the gaps show the list behind it.
+  if (!src && fallbackIds.length === 1)
+    return (
+      <span aria-hidden="true" className="shrink-0">
+        {memberAvatar(fallbackIds[0], sizePx)}
+      </span>
+    );
+  if (!src && fallbackIds.length > 1)
+    return (
+      <span
+        aria-hidden="true"
+        className={cn("relative block shrink-0", className)}
+      >
+        {fallbackIds.map((id, index) => (
+          <span
+            key={id}
+            className="absolute"
+            style={FALLBACK_LAYOUTS[fallbackIds.length][index]}
+          >
+            {memberAvatar(
+              id,
+              Math.round(sizePx * FALLBACK_SCALE[fallbackIds.length]),
+              index > 0,
+            )}
+          </span>
+        ))}
+      </span>
+    );
   return src ? (
     <span
       aria-hidden="true"
@@ -502,6 +595,7 @@ export function ConversationSidebar({
                     name={group.name}
                     groupId={group.id}
                     memberIds={group.memberIds}
+                    currentUserId={currentUserId}
                     className="h-8 w-8"
                   />
                   <span className="min-w-0 flex-1">

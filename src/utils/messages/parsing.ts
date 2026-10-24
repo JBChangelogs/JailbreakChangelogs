@@ -2,6 +2,7 @@ import type { UserFlag, UserSettingsV2 } from "@/types/auth";
 import type { TradeOfferDetails } from "@/hooks/useOfferDetailsBatch";
 import type {
   Message,
+  MessageReactions,
   MessageUser,
   OfferAcceptedMetadata,
   OfferItem,
@@ -47,6 +48,15 @@ export function parseOfferAcceptedMetadata(
     offer,
     trade_user: metadata.trade_user as OfferAcceptedMetadata["trade_user"],
   };
+}
+
+export function parseReactions(raw: unknown): MessageReactions {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  return Object.fromEntries(
+    Object.entries(raw).flatMap(([emoji, users]) =>
+      Array.isArray(users) && users.length ? [[emoji, users.map(String)]] : [],
+    ),
+  );
 }
 
 export function parseMessageRecord(item: unknown): Message | null {
@@ -102,6 +112,7 @@ export function parseMessageRecord(item: unknown): Message | null {
     readAt,
     type:
       sourceMetadata && typeof sourceMetadata === "object" ? "system" : "user",
+    reactions: parseReactions(source.reactions),
   };
 }
 

@@ -197,6 +197,8 @@ export function useMessageMutations({
         updatedAt: parsedBody.message?.updated_at
           ? normalizeTimestamp(parsedBody.message.updated_at)
           : Date.now(),
+        // Editing keeps the message's reactions.
+        reactions: originalMessage?.reactions,
       };
 
       setMessages((prev) =>

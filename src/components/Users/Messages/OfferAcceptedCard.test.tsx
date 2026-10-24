@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import * as mentions from "@/utils/messages/mentions";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, ScriptTarget, transpileModule } from "typescript";
@@ -99,6 +100,9 @@ test("inline accepted offers keep their own links and details, allow only owners
           };
         if (name === "@/utils/messages/parsing")
           return { asId, normalizeOfferItems };
+        if (name === "@/utils/messages/mentions") return mentions;
+        if (name === "@/hooks/useFrequentEmojis")
+          return { useFrequentEmojis: () => [] };
         if (name === "@/utils/messages/formatting")
           return { formatMessageText: (text: string) => text };
         if (name === "@/utils/trading/core")
@@ -283,6 +287,9 @@ test("accepted trade cards use the message content column and one row timestamp"
           return { parseMessageEmbed: () => null };
         if (name === "@/utils/messages/sorting")
           return { getMessageDomId: (message: { id: string }) => message.id };
+        if (name === "@/utils/messages/mentions") return mentions;
+        if (name === "@/hooks/useFrequentEmojis")
+          return { useFrequentEmojis: () => [] };
         if (name === "@/utils/messages/formatting")
           return {
             formatSystemMessageContent: () => "Accepted offer",
@@ -316,6 +323,7 @@ test("accepted trade cards use the message content column and one row timestamp"
     currentUser: { id: "42" },
     selectedUser: null,
     offerDetails: { map: {}, status: "loading" },
+    emojiStringMap: {},
   });
   const children = row.props.children as Node[];
   expect(row.props.id).toBe("message-accepted-offer");
@@ -355,6 +363,9 @@ test("active offer reminders persist through chatting, jump to the right card, d
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name === "@/utils/messages/parsing")
           return { normalizeOfferItems, parseOfferAcceptedMetadata };
+        if (name === "@/utils/messages/mentions") return mentions;
+        if (name === "@/hooks/useFrequentEmojis")
+          return { useFrequentEmojis: () => [] };
         if (name === "@/utils/messages/formatting")
           return { formatOfferItemSummary };
         return {

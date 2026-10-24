@@ -203,6 +203,31 @@ export function useMessagesRealtime({
       }
 
       if (
+        action === "message_reaction" &&
+        payload?.id &&
+        payload.user_id &&
+        payload.recipient_id
+      ) {
+        const { id, user_id: userId, recipient_id: recipientId } = payload;
+        const reactions = payload.reactions ?? {};
+        // Whoever reacted, the counterpart is the one who isn't you.
+        const counterpartId = userId === currentUserId ? recipientId : userId;
+        updateLocalThreadMessage(
+          counterpartId,
+          (message) => message.id === id,
+          (message) => ({ ...message, reactions }),
+        );
+        const openId = selectedUserIdRef.current;
+        if (openId === userId || openId === recipientId)
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === id ? { ...message, reactions } : message,
+            ),
+          );
+        return;
+      }
+
+      if (
         (action !== "message_received" &&
           action !== "message_sent" &&
           action !== "message_edited" &&

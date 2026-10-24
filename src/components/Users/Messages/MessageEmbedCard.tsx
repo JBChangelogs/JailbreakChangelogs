@@ -13,6 +13,8 @@ import {
 } from "@/utils/messages/formatting";
 import {
   buildRobloxGameLink,
+  JAILBREAK_PLACE_ID,
+  KNOWN_ROBLOX_GAMES,
   type MessageEmbedMetadata,
 } from "@/utils/messages/invites";
 import type { Message } from "@/utils/messages/types";
@@ -59,6 +61,30 @@ function VipServerJoinAction({ serverId }: { serverId: number }) {
         Join Server
       </a>
     </Button>
+  );
+}
+
+/** The game's Roblox icon, or a controller tile while missing. */
+function GameIcon({ placeId }: { placeId: string }) {
+  const iconsQuery = useQuery({
+    queryKey: ["roblox-game-icons"],
+    queryFn: async ({ signal }) => {
+      const response = await fetch("/api/roblox/game-icons", { signal });
+      if (!response.ok) throw new Error("Failed to load game icons");
+      return (await response.json()) as Record<string, string>;
+    },
+    // Finite, so icons Roblox hadn't ready yet turn up later.
+    staleTime: 60 * 60_000,
+    retry: false,
+  });
+  const src = iconsQuery.data?.[placeId];
+  return src ? (
+    // eslint-disable-next-line @next/next/no-img-element -- Roblox's CDN, already sized.
+    <img src={src} alt="" className="size-14 shrink-0 rounded-xl" />
+  ) : (
+    <span className="bg-tertiary-bg text-tertiary-text flex size-14 shrink-0 items-center justify-center rounded-xl">
+      <Icon icon="lucide:gamepad-2" className="h-6 w-6" />
+    </span>
   );
 }
 
@@ -133,32 +159,48 @@ export function MessageEmbedCard({
             Server rules
           </p>
         )}
-      <div
-        className={`mt-1 text-sm wrap-break-word whitespace-pre-wrap ${message.status === "failed" ? "text-form-error" : "text-secondary-text"}`}
-      >
-        {formatMessageText(description)}
-      </div>
-      {metadata.type === "game_invite" && (
-        <div className="mt-2">
-          <Button
-            size="sm"
-            disabled={isJoining}
-            onClick={() => {
-              if (joinTimeoutRef.current !== null) return;
-              setIsJoining(true);
-              joinTimeoutRef.current = window.setTimeout(() => {
-                joinTimeoutRef.current = null;
-                setIsJoining(false);
-              }, 5000);
-              window.location.assign(buildRobloxGameLink(metadata));
-            }}
-          >
-            <Icon
-              icon="heroicons:arrow-top-right-on-square"
-              className="h-4 w-4"
-            />
-            {isJoining ? "Joining..." : "Join Game"}
-          </Button>
+      {metadata.type === "game_invite" ? (
+        <div className="mt-2 flex items-center gap-3">
+          <GameIcon placeId={metadata.place_id} />
+          <div className="min-w-0 flex-1">
+            <p className="text-primary-text text-base font-semibold">
+              {KNOWN_ROBLOX_GAMES[metadata.place_id] ?? "Roblox"}
+            </p>
+            <p
+              className={`text-sm wrap-break-word whitespace-pre-wrap ${message.status === "failed" ? "text-form-error" : "text-secondary-text"}`}
+            >
+              {formatMessageText(description)}
+            </p>
+          </div>
+          {/* Roblox doesn't let anyone join you in Trading directly. */}
+          {metadata.place_id === JAILBREAK_PLACE_ID && (
+            <Button
+              className="shrink-0"
+              size="sm"
+              disabled={isJoining}
+              onClick={() => {
+                if (joinTimeoutRef.current !== null) return;
+                setIsJoining(true);
+                joinTimeoutRef.current = window.setTimeout(() => {
+                  joinTimeoutRef.current = null;
+                  setIsJoining(false);
+                }, 5000);
+                window.location.assign(buildRobloxGameLink(metadata));
+              }}
+            >
+              <Icon
+                icon="heroicons:arrow-top-right-on-square"
+                className="h-4 w-4"
+              />
+              {isJoining ? "Joining..." : "Join"}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div
+          className={`mt-1 text-sm wrap-break-word whitespace-pre-wrap ${message.status === "failed" ? "text-form-error" : "text-secondary-text"}`}
+        >
+          {formatMessageText(description)}
         </div>
       )}
       {metadata.type === "vip_server_invite" && (

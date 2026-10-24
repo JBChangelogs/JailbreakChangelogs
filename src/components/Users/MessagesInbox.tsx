@@ -67,10 +67,13 @@ import {
   useMessageNavigationScroll,
 } from "@/hooks/useMessageNavigationScroll";
 import { useGroupChats } from "@/hooks/useGroupChats";
+import { mentionedIds, mentionsToText } from "@/utils/messages/mentions";
+import { reactToMessage } from "@/utils/messages/reactions";
 import { GroupChatView } from "@/components/Users/Messages/GroupChatView";
 import { UserPickerDialog } from "@/components/Users/Messages/GroupChatDialogs";
 import {
   createGroupChat,
+  fetchMessageUsers,
   GROUP_MEMBER_LIMIT,
   GROUP_NAME_MAX,
 } from "@/utils/api/groupChats";
@@ -528,6 +531,35 @@ export default function MessagesInbox() {
     [messages],
   );
   const offerDetails = useOfferDetailsBatch(acceptedOffers);
+
+  // Profiles for anyone a message mentions who isn't already known here.
+  const mentionedUserIds = useMemo(() => {
+    const known = new Set([selectedUserId, currentUserId]);
+    const ids = new Set(
+      messages.flatMap((message) => mentionedIds(message.content)),
+    );
+    return [...ids].filter((id) => !known.has(id)).sort();
+  }, [messages, selectedUserId, currentUserId]);
+  const mentionedUsersQuery = useQuery({
+    queryKey: ["message-users-batch", mentionedUserIds],
+    queryFn: () => fetchMessageUsers(mentionedUserIds),
+    enabled: mentionedUserIds.length > 0,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const usersById = useMemo(() => {
+    const map = new Map<string, MessageUser>();
+    for (const user of mentionedUsersQuery.data ?? []) map.set(user.id, user);
+    if (selectedUser) map.set(selectedUser.id, selectedUser);
+    const self = currentUserEnriched ?? currentUserMessageUser;
+    if (self) map.set(self.id, self);
+    return map;
+  }, [
+    mentionedUsersQuery.data,
+    selectedUser,
+    currentUserEnriched,
+    currentUserMessageUser,
+  ]);
   const lastSeenTime = useOptimizedRealTimeRelativeDate(
     selectedUser?.last_seen,
     `messages-last-seen-${selectedUser?.id ?? "none"}`,
@@ -612,13 +644,14 @@ export default function MessagesInbox() {
     () => conversations.map((conversation) => conversation.user),
     [conversations],
   );
-  const startConversation = async (users: MessageUser[]) => {
+  const startConversation = async (users: MessageUser[], groupName: string) => {
     if (users.length === 1) {
       selectConversation(users[0].id);
       return;
     }
     const group = await createGroupChat(
-      users.map(getDisplayName).join(", ").slice(0, GROUP_NAME_MAX),
+      groupName ||
+        users.map(getDisplayName).join(", ").slice(0, GROUP_NAME_MAX),
       users.map((user) => user.id),
     );
     setGroups((list) =>
@@ -857,6 +890,29 @@ export default function MessagesInbox() {
     updateLocalThreadMessage,
     removeLocalThreadMessage,
   });
+  const handleReact = (message: Message, emoji: string) => {
+    const otherId = selectedUserId;
+    if (!currentUserId || !otherId) return;
+    void reactToMessage({
+      message,
+      emoji,
+      userId: currentUserId,
+      path: `/v2/conversations/${encodeURIComponent(otherId)}/messages/${encodeURIComponent(message.id)}`,
+      setReactions: (reactions) => {
+        setMessages((prev) =>
+          prev.map((item) =>
+            item.id === message.id ? { ...item, reactions } : item,
+          ),
+        );
+        updateLocalThreadMessage(
+          otherId,
+          (item) => item.id === message.id,
+          (item) => ({ ...item, reactions }),
+        );
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <div data-messages-shell className={MESSAGES_SHELL}>
@@ -1149,7 +1205,6 @@ export default function MessagesInbox() {
                         isSending={isSending}
                         deletingMessageId={deletingMessageId}
 
-                        messagesContainerRef={messagesContainerRef}
                         setActiveMessageId={setActiveMessageId}
                         setEditingMessageId={setEditingMessageId}
 
@@ -1159,6 +1214,8 @@ export default function MessagesInbox() {
                         handleDeleteMessage={handleDeleteMessage}
                         handleRetryFailedMessage={handleRetryFailedMessage}
                         handleEditMessage={handleEditMessage}
+                        onReact={handleReact}
+                        mentionUsers={usersById}
                       />
                     </Fragment>
                   ))
@@ -1218,8 +1275,8 @@ export default function MessagesInbox() {
           </p>
           <p className="text-secondary-text text-xs">
             Tip: Hold <span className="font-semibold">Shift</span> while
-            clicking <span className="font-semibold">Delete Message</span> to
-            skip this confirmation.
+            clicking <span className="font-semibold">Delete</span> to skip this
+            confirmation.
           </p>
         </div>
       </ConfirmDialog>
@@ -1267,7 +1324,12 @@ export default function MessagesInbox() {
                     )}
                   </div>
                   <p className="text-primary-text/80 mt-0.5 line-clamp-4 text-sm break-words">
-                    {formatMessageText(reportingMessage.content)}
+                    {formatMessageText(
+                      mentionsToText(reportingMessage.content, (id) => {
+                        const user = usersById.get(id);
+                        return user ? getDisplayName(user) : undefined;
+                      }),
+                    )}
                   </p>
                 </div>
               </div>
@@ -1299,7 +1361,10 @@ export default function MessagesInbox() {
         onOpenChange={setNewMessageOpen}
         title="New Message"
         subtitle={`Group chats can have up to ${GROUP_MEMBER_LIMIT} members.`}
-        confirmLabel="Create Message"
+        confirmLabel={(count) =>
+          count > 1 ? "Create Group" : "Create Message"
+        }
+        askGroupName
         currentUserId={currentUserId}
         suggested={suggestedUsers}
         excludeIds={currentUserId ? [currentUserId] : []}
