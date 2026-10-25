@@ -1,0 +1,64 @@
+diff --git a/dist/iconify.cjs b/dist/iconify.cjs
+index 5ed65b09cc53aa2f6a9dc344027e16dc72ce52e1..94cdf9de9680567139812a6f7191f9a3f6bf78d3 100644
+--- a/dist/iconify.cjs
++++ b/dist/iconify.cjs
+@@ -551,14 +551,15 @@ function nextID(id) {
+ /**
+ * Replace IDs in SVG output with unique IDs
+ */
+-function replaceIDs(body) {
++function replaceIDs(body, prefix) {
+ 	const ids = [];
+ 	let match;
+ 	while (match = regex.exec(body)) ids.push(match[1]);
+ 	if (!ids.length) return body;
+ 	const suffix = "suffix" + (Math.random() * 16777216 | Date.now()).toString(16);
+-	ids.forEach((id) => {
+-		const newID = nextID(id);
++	ids.forEach((id, index) => {
++		// React useId prefixes must stay stable across SSR and hydration.
++		const newID = prefix ? `${prefix}ID${index}` : nextID(id);
+ 		const escapedID = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ 		body = body.replace(new RegExp("([#;\"])(" + escapedID + ")([\")]|\\.[a-z])", "g"), "$1" + newID + suffix + "$3");
+ 	});
+@@ -1650,7 +1651,7 @@ const render = (icon, props, name) => {
+         Object.assign(componentProps, renderAttribs);
+         // Add icon stuff
+         componentProps.dangerouslySetInnerHTML = {
+-            __html: cleanUpInnerHTML(replaceIDs(item.body)),
++            __html: cleanUpInnerHTML(replaceIDs(item.body, props.id)),
+         };
+         return react.createElement('svg', componentProps);
+     }
+diff --git a/dist/iconify.js b/dist/iconify.js
+index 8d6e70d7cd9e7e1a803be914d9391f72c1a46fd9..b8f27879bc9f3101fd09226238354b8ac06365c6 100644
+--- a/dist/iconify.js
++++ b/dist/iconify.js
+@@ -549,14 +549,15 @@ function nextID(id) {
+ /**
+ * Replace IDs in SVG output with unique IDs
+ */
+-function replaceIDs(body) {
++function replaceIDs(body, prefix) {
+ 	const ids = [];
+ 	let match;
+ 	while (match = regex.exec(body)) ids.push(match[1]);
+ 	if (!ids.length) return body;
+ 	const suffix = "suffix" + (Math.random() * 16777216 | Date.now()).toString(16);
+-	ids.forEach((id) => {
+-		const newID = nextID(id);
++	ids.forEach((id, index) => {
++		// React useId prefixes must stay stable across SSR and hydration.
++		const newID = prefix ? `${prefix}ID${index}` : nextID(id);
+ 		const escapedID = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ 		body = body.replace(new RegExp("([#;\"])(" + escapedID + ")([\")]|\\.[a-z])", "g"), "$1" + newID + suffix + "$3");
+ 	});
+@@ -1648,7 +1649,7 @@ const render = (icon, props, name) => {
+         Object.assign(componentProps, renderAttribs);
+         // Add icon stuff
+         componentProps.dangerouslySetInnerHTML = {
+-            __html: cleanUpInnerHTML(replaceIDs(item.body)),
++            __html: cleanUpInnerHTML(replaceIDs(item.body, props.id)),
+         };
+         return createElement('svg', componentProps);
+     }

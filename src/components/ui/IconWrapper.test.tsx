@@ -43,6 +43,13 @@ test("SVG references keep unique stable IDs and explicit IDs are preserved", () 
   expect(ids).toHaveLength(2);
   expect(new Set(ids).size).toBe(2);
   for (const id of ids) expect(markup).toContain(`clip-path="url(#${id})"`);
+  const renderExplicit = () =>
+    renderToStaticMarkup(<Icon icon={icon} id="clipped-icon" />);
+  const explicitMarkup = renderExplicit();
+  expect(renderExplicit()).toBe(explicitMarkup);
+  expect(explicitMarkup).toContain('id="clipped-icon"');
+  expect(explicitMarkup).toContain('<clipPath id="clipped-iconID0"');
+  expect(explicitMarkup).toContain('clip-path="url(#clipped-iconID0)"');
   expect(
     renderToStaticMarkup(
       <Icon icon="ic:baseline-message" id="messages-icon" />,
