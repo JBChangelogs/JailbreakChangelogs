@@ -445,10 +445,29 @@ export default function ExperimentsClient() {
                 }
                 className="shrink-0"
               >
-                <TabsList aria-labelledby="experiment-indicator-label">
-                  <TabsTrigger value="floating">Floating</TabsTrigger>
-                  <TabsTrigger value="header">Header</TabsTrigger>
-                  <TabsTrigger value="hidden">Hidden</TabsTrigger>
+                <TabsList
+                  hideIndicator
+                  aria-labelledby="experiment-indicator-label"
+                  className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
+                >
+                  <TabsTrigger
+                    value="floating"
+                    className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                  >
+                    Floating
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="header"
+                    className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                  >
+                    Header
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="hidden"
+                    className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                  >
+                    Hidden
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
