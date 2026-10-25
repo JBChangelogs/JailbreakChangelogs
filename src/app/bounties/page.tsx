@@ -672,24 +672,16 @@ function BountyTrackerContent() {
           </div>
         )}
 
-        {/* Show stale data warning if disconnected */}
-        {!isConnected && hasData && (
+        {/* Show stale data warning for connection failures */}
+        {!isConnected && hasData && !isIdle && (!isConnecting || error) && (
           <div className="bg-secondary-bg border-border-card mb-4 rounded-lg border p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div>
                 <span className="text-primary-text text-base font-bold">
-                  {isConnecting
-                    ? "Connecting..."
-                    : isIdle
-                      ? "Inactivity Detected"
-                      : "Connection Lost"}
+                  Connection Lost
                 </span>
                 <p className="text-secondary-text mt-1 text-sm">
-                  {isConnecting
-                    ? "Resuming connection to bounty tracker..."
-                    : isIdle
-                      ? "Tracker paused due to inactivity. Move your mouse or press a key to resume."
-                      : "Showing last known data. Connection will resume automatically."}
+                  Showing last known data. Connection will resume automatically.
                 </p>
                 <StatusPageAction className="items-start" />
               </div>

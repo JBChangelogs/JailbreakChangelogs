@@ -1360,30 +1360,27 @@ function RobberyTrackerContent() {
             </div>
           )}
 
-          {/* Show stale data warning if disconnected */}
-          {!isConnected && hasData && !requiresManualReconnect && (
-            <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div>
-                  <span className="text-primary-text text-base font-bold">
-                    {isConnecting
-                      ? "Connecting..."
-                      : isIdle
-                        ? "Inactivity Detected"
-                        : "Connection Lost"}
-                  </span>
-                  <p className="text-secondary-text mt-1 text-sm">
-                    {isConnecting
-                      ? `Resuming connection to ${isAirdrops ? "airdrop" : "robbery"} tracker...`
-                      : isIdle
-                        ? "Tracker paused due to inactivity. Move your mouse or press a key to resume."
-                        : "Showing last known data. Connection will resume automatically."}
-                  </p>
-                  <StatusPageAction className="items-start" />
+          {/* Show stale data warning for connection failures */}
+          {!isConnected &&
+            hasData &&
+            !isIdle &&
+            (!isConnecting || error) &&
+            !requiresManualReconnect && (
+              <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div>
+                    <span className="text-primary-text text-base font-bold">
+                      Connection Lost
+                    </span>
+                    <p className="text-secondary-text mt-1 text-sm">
+                      Showing last known data. Connection will resume
+                      automatically.
+                    </p>
+                    <StatusPageAction className="items-start" />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {isAirdrops ? (
             (hasData || isConnected) && (
