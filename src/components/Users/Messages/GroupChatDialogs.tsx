@@ -104,20 +104,24 @@ export function UserPickerDialog({
   suggested,
   excludeIds = [],
   maxSelect,
+  askGroupName = false,
   onConfirm,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   subtitle: string;
-  confirmLabel: string;
+  confirmLabel: string | ((count: number) => string);
   currentUserId: string | null;
   suggested: MessageUser[];
   excludeIds?: string[];
   maxSelect: number;
-  onConfirm: (users: MessageUser[]) => Promise<void>;
+  /** New Message: offer a group name once two or more are picked. */
+  askGroupName?: boolean;
+  onConfirm: (users: MessageUser[], groupName: string) => Promise<void>;
 }) {
   const [query, setQuery] = useState("");
+  const [groupName, setGroupName] = useState("");
   const [selected, setSelected] = useState<MessageUser[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -129,6 +133,7 @@ export function UserPickerDialog({
   useEffect(() => {
     if (!open) return;
     setQuery("");
+    setGroupName("");
     setSelected([]);
     setError(null);
   }, [open]);
@@ -136,13 +141,14 @@ export function UserPickerDialog({
   const searching = query.trim() !== "";
   const pool = searching ? (results as MessageUser[]) : suggested;
   const selectedIds = new Set(selected.map((user) => user.id));
+  // Rows stay where they are when picked; picks not in the results follow.
+  const visible = pool.filter((user) => !excludeIds.includes(user.id));
   const rows = [
-    ...selected,
-    ...pool.filter(
-      (user) => !selectedIds.has(user.id) && !excludeIds.includes(user.id),
-    ),
+    ...visible,
+    ...selected.filter((user) => !visible.some((item) => item.id === user.id)),
   ];
   const full = selected.length >= maxSelect;
+  const showGroupName = askGroupName && selected.length > 1;
 
   const toggle = (user: MessageUser) =>
     setSelected((previous) =>
@@ -158,7 +164,7 @@ export function UserPickerDialog({
     setSubmitting(true);
     setError(null);
     try {
-      await onConfirm(selected);
+      await onConfirm(selected, groupName.trim());
       onOpenChange(false);
     } catch (err) {
       setError(groupErrorMessage(err, selected));
@@ -170,7 +176,7 @@ export function UserPickerDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="flex max-h-[min(36rem,85dvh)] max-w-md flex-col gap-0 overflow-hidden p-0"
+        className="flex h-[min(560px,85dvh)] max-w-md flex-col gap-0 overflow-x-hidden overflow-y-auto p-0"
         showClose
       >
         <div className="shrink-0 px-5 pt-5 pb-3">
@@ -250,7 +256,30 @@ export function UserPickerDialog({
             {error}
           </p>
         )}
-        <div className="border-border-primary flex shrink-0 gap-3 border-t px-5 py-4">
+        <div
+          aria-hidden={!showGroupName}
+          className={cn(
+            "border-border-primary grid shrink-0 border-t transition-[grid-template-rows,opacity] duration-200 ease-out",
+            showGroupName
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0",
+          )}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="px-5 pt-5">
+              <input
+                value={groupName}
+                tabIndex={showGroupName ? 0 : -1}
+                onChange={(event) => setGroupName(event.target.value)}
+                maxLength={GROUP_NAME_MAX}
+                placeholder="Group name (optional)"
+                aria-label="Group name"
+                className={INPUT}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex shrink-0 gap-3 p-5">
           <Button
             type="button"
             variant="secondary"
@@ -265,7 +294,9 @@ export function UserPickerDialog({
             onClick={() => void submit()}
             disabled={submitting || selected.length === 0}
           >
-            {confirmLabel}
+            {typeof confirmLabel === "function"
+              ? confirmLabel(selected.length)
+              : confirmLabel}
           </Button>
         </div>
       </DialogContent>

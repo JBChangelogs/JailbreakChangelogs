@@ -283,7 +283,9 @@ function RobberyCard({
                         />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent>Click to copy code</TooltipContent>
+                    <TooltipContent side="left">
+                      Click to copy code
+                    </TooltipContent>
                   </Tooltip>
                 ) : (
                   <Tooltip>

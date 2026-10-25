@@ -1,5 +1,7 @@
 "use client";
 
+import { FRONTEND_SETTINGS } from "@/config/settings";
+
 import { useId, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -122,10 +124,10 @@ export default function DesktopNavigationSettings() {
     <div className="space-y-5">
       <div>
         <h3 id={`${id}-label`} className="text-primary-text font-medium">
-          Desktop navigation
+          {FRONTEND_SETTINGS["navigation-layout"].title}
         </h3>
         <p className="text-secondary-text mt-1 text-sm">
-          Choose how navigation appears on large screens.
+          {FRONTEND_SETTINGS["navigation-layout"].description}
           {isAuthenticated
             ? " Syncs with your account."
             : " Saved on this browser."}
@@ -186,11 +188,10 @@ export default function DesktopNavigationSettings() {
             htmlFor={`${id}-shortcut`}
             className="text-primary-text font-medium"
           >
-            Layout button in header
+            {FRONTEND_SETTINGS["navigation-shortcut"].title}
           </label>
           <p className="text-secondary-text mt-1 text-sm">
-            Show the &ldquo;Change navigation layout&rdquo; button next to your
-            notifications. Saved on this browser.
+            {FRONTEND_SETTINGS["navigation-shortcut"].description}
           </p>
         </div>
         <Switch

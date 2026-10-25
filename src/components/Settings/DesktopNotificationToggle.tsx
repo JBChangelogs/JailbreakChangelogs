@@ -1,5 +1,7 @@
 "use client";
 
+import { FRONTEND_SETTINGS } from "@/config/settings";
+
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -70,12 +72,12 @@ export function DesktopNotificationToggle() {
 
   const description = disabledReason
     ? `Desktop notifications unavailable: ${disabledReason}`
-    : "Show browser notifications when the browser tab is not in view.";
+    : FRONTEND_SETTINGS["desktop-notifications"].description!;
 
   return (
     <div className={`${disabledReason ? "opacity-75" : ""}`}>
       <SettingRow
-        title="Desktop Notifications"
+        title={FRONTEND_SETTINGS["desktop-notifications"].title}
         highlight
         description={description}
         action={

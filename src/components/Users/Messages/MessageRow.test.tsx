@@ -7,6 +7,7 @@ import * as formatting from "@/utils/messages/formatting";
 import * as parsing from "@/utils/messages/parsing";
 import * as sorting from "@/utils/messages/sorting";
 import * as invites from "@/utils/messages/invites";
+import * as mentions from "@/utils/messages/mentions";
 import type { ComponentProps } from "react";
 import type { MessageRow } from "./MessageRow";
 
@@ -80,6 +81,10 @@ function harness(mobile: boolean) {
     "@/utils/messages/parsing": parsing,
     "@/utils/messages/sorting": sorting,
     "@/utils/messages/invites": invites,
+    "@/utils/messages/mentions": mentions,
+    "@/hooks/useFrequentEmojis": {
+      useFrequentEmojis: () => ["👍", "👎", "❤️", "😂"],
+    },
   };
   runInNewContext(
     transpileModule(
@@ -114,6 +119,7 @@ function harness(mobile: boolean) {
     message,
     messages: [message],
     index: 0,
+    emojiStringMap: {},
     currentUser: { id: "me" },
     currentUserMessageUser: { id: "me", username: "Me", avatar: "" },
     selectedUser: { id: "them", username: "Them", avatar: "" },
@@ -193,7 +199,7 @@ test("mobile holds reveal actions without opening the sheet; scrolling and unmou
       .some(
         (node) =>
           node.type === "ChatEvent" &&
-          node.props.className?.split(" ").includes("bg-secondary-bg/60"),
+          node.props.className?.split(" ").includes("bg-tertiary-bg"),
       ),
   ).toBe(true);
   let defaultPrevented = false;
@@ -220,7 +226,7 @@ test("mobile holds reveal actions without opening the sheet; scrolling and unmou
       .some(
         (node) =>
           node.type === "ChatEvent" &&
-          node.props.className?.split(" ").includes("bg-secondary-bg/60"),
+          node.props.className?.split(" ").includes("bg-tertiary-bg"),
       ),
   ).toBe(false);
   expect(
@@ -334,9 +340,11 @@ test("desktop actions open from the app's single menu button; sending disables i
   let tree = h.render();
   const more = () =>
     tree.find((node) => node.props["aria-label"] === "More message actions")!;
-  // Hidden until the row is hovered, like the app.
-  expect(more().props.className!.split(" ")).toContain("opacity-0");
-  expect(more().props.className!.split(" ")).toContain(
+  // The hover bar holding it is hidden until the row is hovered.
+  const bar = () =>
+    tree.find((node) => node.props.className?.includes("right-7"))!;
+  expect(bar().props.className!.split(" ")).toContain("opacity-0");
+  expect(bar().props.className!.split(" ")).toContain(
     "group-hover/message:opacity-100",
   );
   expect(
@@ -353,7 +361,7 @@ test("desktop actions open from the app's single menu button; sending disables i
   h.props.isSending = true;
   tree = h.render();
   expect(more().props.disabled).toBe(true);
-  expect(more().props.className!.split(" ")).toContain("opacity-0");
+  expect(bar().props.className!.split(" ")).toContain("opacity-0");
   expect(tree.find((node) => node.type === "Sheet")!.props.open).toBe(false);
 });
 
@@ -366,7 +374,7 @@ test("the reply target stays highlighted after the sheet closes until replying i
       .some(
         (node) =>
           node.type === "ChatEvent" &&
-          node.props.className?.split(" ").includes("bg-secondary-bg/60"),
+          node.props.className?.split(" ").includes("bg-button-info/10"),
       );
   expect(h.active()).toBeNull();
   expect(highlighted()).toBe(true);

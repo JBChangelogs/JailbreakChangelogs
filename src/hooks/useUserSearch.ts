@@ -53,5 +53,10 @@ export function useUserSearch(
     !!query.trim() &&
     (debouncedQuery !== query.trim() || searchQuery.isPending);
 
-  return { results, isLoading };
+  return {
+    results,
+    isLoading,
+    isError: searchQuery.isError,
+    refetch: searchQuery.refetch,
+  };
 }

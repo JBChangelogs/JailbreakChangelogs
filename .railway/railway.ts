@@ -29,6 +29,7 @@ const sharedEnv = {
   RAILWAY_INTERNAL_API_URL: preserve(),
   RAILWAY_TOKEN: preserve(),
   RYBBIT_API_URL: "http://rybbit-server.railway.internal:3001/api",
+  THEMES_REVALIDATE_SECRET: preserve(),
   TURNSTILE_SECRET_KEY: preserve(),
   VGY_ME_USERKEY: preserve(),
 };

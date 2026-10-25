@@ -8,7 +8,6 @@ import {
   type RefObject,
   type SetStateAction,
 } from "react";
-import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,7 +21,6 @@ import { cn } from "@/lib/utils";
 import type { UserData } from "@/types/auth";
 import type { ConversationSummary, MessageUser } from "@/utils/messages/types";
 import {
-  fetchGroupIcon,
   fetchMessageUsers,
   type GroupChatSummary,
 } from "@/utils/api/groupChats";
@@ -142,68 +140,123 @@ export function PresenceDot({
   );
 }
 
-/** Changes whenever the member list does, to refetch the icon. */
-function memberHash(memberIds: string[]): string {
-  let hash = 5381;
-  for (const char of [...memberIds].sort().join(","))
-    hash = ((hash << 5) + hash + char.charCodeAt(0)) | 0;
-  return (hash >>> 0).toString(36);
-}
+// Backend icon coordinates: [left, top, diameter] on its 256px canvas.
+const GROUP_AVATAR_LAYOUTS: Record<number, [number, number, number][]> = {
+  2: [
+    [0, 0, 174],
+    [82, 82, 174],
+  ],
+  3: [
+    [56, 0, 143],
+    [0, 113, 143],
+    [113, 113, 143],
+  ],
+  4: [
+    [0, 0, 138],
+    [118, 0, 138],
+    [0, 118, 138],
+    [118, 118, 138],
+  ],
+};
 
 /**
- * A group's avatar: the API's generated icon of its most active members, as
- * overlapping circles. Until it loads, or if it can't, the first two letters
- * of its name in a circle, like the app's fallback.
+ * Up to four members' normal avatars, including the site's fallback
+ * and custom avatars. With no members, the first two letters of its name.
  */
 export function GroupAvatar({
   name,
-  groupId,
   memberIds,
+  sizePx = 32,
   className,
 }: {
   name: string;
-  groupId?: string;
   memberIds?: string[];
+  /** The avatar's width, which the member avatars scale from. */
+  sizePx?: number;
   className?: string;
 }) {
-  const version = memberHash(memberIds ?? []);
-  const { data: icon } = useQuery({
-    queryKey: ["group-icon", groupId, version],
-    queryFn: ({ signal }) => fetchGroupIcon(groupId!, version, signal),
-    enabled: !!groupId,
+  const fallbackIds = (memberIds ?? []).slice(0, 4);
+  const fallbackKey = [...fallbackIds].sort();
+  const { data: fallbackUsers } = useQuery({
+    queryKey: ["message-users-batch", fallbackKey],
+    queryFn: () => fetchMessageUsers(fallbackKey),
+    enabled: fallbackIds.length > 0,
     staleTime: 5 * 60_000,
-    gcTime: 30 * 60_000,
     retry: false,
   });
-  // An object URL per avatar, released when it changes or unmounts.
-  const [src, setSrc] = useState<string | null>(null);
-  useEffect(() => {
-    if (!icon) {
-      setSrc(null);
-      return;
-    }
-    const url = URL.createObjectURL(icon);
-    setSrc(url);
-    return () => URL.revokeObjectURL(url);
-  }, [icon]);
-  // The icon is overlapping circles on a transparent background, so it gets
-  // no backdrop, rounding or crop: the gaps show the list behind it.
-  return src ? (
-    <span
-      aria-hidden="true"
-      className={cn("relative block shrink-0", className)}
-    >
-      <Image
-        src={src}
-        alt=""
-        fill
-        sizes="64px"
-        unoptimized
-        draggable={false}
-        className="object-contain"
+  const userFor = (id: string) =>
+    fallbackUsers?.find((user) => user.id === id) ?? {
+      id,
+      username: id,
+      avatar: "",
+    };
+  const memberAvatar = (id: string, px: number) => {
+    const user = userFor(id);
+    return (
+      <UserAvatar
+        userId={user.id}
+        bgClassName="bg-tertiary-bg"
+        avatarHash={user.avatar}
+        username={user.username}
+        custom_avatar={user.custom_avatar}
+        size={px / 4}
+        showBadge={false}
+        settings={user.settings_v2}
+        premiumType={user.premiumtype}
+        className="border-0!"
       />
-    </span>
-  ) : (
+    );
+  };
+
+  if (fallbackIds.length === 1)
+    return (
+      <span aria-hidden="true" className="shrink-0">
+        {memberAvatar(fallbackIds[0], sizePx)}
+      </span>
+    );
+  if (fallbackIds.length > 1)
+    return (
+      <span
+        aria-hidden="true"
+        className={cn("relative block shrink-0", className)}
+      >
+        {fallbackIds.map((id, index) => {
+          const layout = GROUP_AVATAR_LAYOUTS[fallbackIds.length];
+          const [left, top, diameter] = layout[index];
+          // Punch transparent gaps into earlier avatars, as the backend does.
+          const cutouts = fallbackIds
+            .slice(index + 1)
+            .map((nextId, offset) => {
+              const [x, y, d] = layout[index + offset + 1];
+              return userFor(nextId).premiumtype === 3
+                ? `<rect x="${x - 8}" y="${y - 8}" width="${d + 16}" height="${d + 16}" rx="${(d + 16) / 4}" fill="black"/>`
+                : `<circle cx="${x + d / 2}" cy="${y + d / 2}" r="${d / 2 + 8}" fill="black"/>`;
+            })
+            .join("");
+          const mask = cutouts
+            ? `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><mask id="cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256"><rect width="256" height="256" fill="white"/>${cutouts}</mask><rect width="256" height="256" fill="white" mask="url(#cutout)"/></svg>`)}")`
+            : undefined;
+          return (
+            <span
+              key={id}
+              className="absolute inset-0"
+              style={{ maskImage: mask, maskSize: "100% 100%" }}
+            >
+              <span
+                className="absolute"
+                style={{
+                  left: `${(left / 256) * 100}%`,
+                  top: `${(top / 256) * 100}%`,
+                }}
+              >
+                {memberAvatar(id, (sizePx * diameter) / 256)}
+              </span>
+            </span>
+          );
+        })}
+      </span>
+    );
+  return (
     <span
       aria-hidden="true"
       className={cn(
@@ -500,7 +553,6 @@ export function ConversationSidebar({
                 >
                   <GroupAvatar
                     name={group.name}
-                    groupId={group.id}
                     memberIds={group.memberIds}
                     className="h-8 w-8"
                   />

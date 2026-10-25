@@ -165,14 +165,17 @@ export function NotificationPopover({
     <button
       suppressHydrationWarning={true}
       className={cn(
-        "text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none data-[state=open]:bg-quaternary-bg",
+        // The tooltip owns data-state on this trigger, so use the popover's
+        // own state for the open look.
+        "text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none",
+        open && "bg-quaternary-bg",
         isDesktop ? "h-10 w-10" : "h-8 w-8",
       )}
       aria-label="Notifications"
     >
       <Icon
         icon="mingcute:notification-fill"
-        className={cn("text-primary-text", isDesktop ? "h-5 w-5" : "h-4 w-4")}
+        className={isDesktop ? "h-5 w-5" : "h-4 w-4"}
         inline={true}
       />
       {isAuthenticated && unreadCount > 0 && (

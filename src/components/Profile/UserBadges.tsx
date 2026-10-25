@@ -81,7 +81,7 @@ export const UserBadges = ({
         <Image
           src={getFlagIconUrl(flag.flag)}
           alt={flag.flag}
-          width={20}
+          width={flag.flag === "is_badimo" ? Math.round((20 * 1000) / 563) : 20}
           height={20}
           className="object-contain"
         />
@@ -90,7 +90,8 @@ export const UserBadges = ({
   };
 
   const getFlagIconUrl = (f: string) => {
-    if (f === "is_badimo") return `${BADGE_BASE_URL}/Jailbreak.png`;
+    if (f === "is_badimo")
+      return "https://assets.jailbreakchangelogs.com/assets/testimonials/Badimo.webp";
     const name = f.startsWith("is_") ? f.slice(3) : f;
     return `${BADGE_BASE_URL}/jbcl_${name}.svg`;
   };
@@ -101,9 +102,13 @@ export const UserBadges = ({
       <Image
         src={getFlagIconUrl(flag.flag)}
         alt={flag.flag}
-        width={badgeSize}
+        width={
+          flag.flag === "is_badimo"
+            ? Math.round((badgeSize * 1000) / 563)
+            : badgeSize
+        }
         height={badgeSize}
-        className={disableClick ? undefined : "cursor-pointer"}
+        className={`shrink-0 object-contain ${disableClick ? "" : "cursor-pointer"}`}
         onClick={disableClick ? undefined : (e) => handleFlagClick(e, flag)}
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).style.display = "none";

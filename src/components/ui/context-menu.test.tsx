@@ -33,6 +33,10 @@ test("mobile context triggers preserve native text selection and desktop trigger
               Content: "Content",
               Item: "Item",
               Separator: "Separator",
+              Sub: "Sub",
+              SubTrigger: "SubTrigger",
+              SubContent: "SubContent",
+              Portal: "Portal",
             },
           };
         if (name === "@/hooks/useMediaQuery")

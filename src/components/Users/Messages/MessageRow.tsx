@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { Fragment, useEffect, useRef, useState } from "react";
-import type { Dispatch, RefObject, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import Link from "next/link";
 import Twemoji from "react-twemoji";
 import { Button } from "@/components/ui/button";
@@ -10,14 +10,32 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useFrequentEmojis } from "@/hooks/useFrequentEmojis";
+import { MENTION_SPLIT, mentionsToText } from "@/utils/messages/mentions";
+import {
+  EMOJI_CELL,
+  EmojiGlyph,
+  EmojiGrid,
+  ReactionChips,
+} from "./MessageReactions";
 import {
   ChatEvent,
   ChatEventAddon,
@@ -73,6 +91,10 @@ function MessageSheetAction({
   );
 }
 
+function SheetSeparator() {
+  return <div className="bg-border-primary/60 my-1 h-px" />;
+}
+
 interface MessageRowProps {
   message: Message;
   offerDetails: ReturnType<typeof useOfferDetailsBatch>;
@@ -89,7 +111,6 @@ interface MessageRowProps {
   twemojiEnabled: boolean;
   isSending: boolean;
   deletingMessageId: string | null;
-  messagesContainerRef: RefObject<HTMLDivElement | null>;
   setActiveMessageId: Dispatch<SetStateAction<string | null>>;
   setEditingMessageId: Dispatch<SetStateAction<string | null>>;
   setReplyingToMessage: Dispatch<SetStateAction<Message | null>>;
@@ -108,7 +129,113 @@ interface MessageRowProps {
   usersById?: Map<string, MessageUser>;
   /** Group owners can delete anyone's message. */
   canDeleteOthers?: boolean;
+  /** Toggles your reaction; leave out to hide reactions. */
+  onReact?: (message: Message, emoji: string) => void;
+  /** DMs: profiles for mentions (groups use usersById). */
+  mentionUsers?: Map<string, MessageUser>;
 }
+
+/** Same key and shape as the app: an array of message ids, newest last. */
+const ACKNOWLEDGED_READS_KEY = "jbcl:acknowledged-reads";
+const READ_FLASH_MS = 4000;
+const READ_FADE_MS = 500;
+
+function acknowledgedReads(): string[] {
+  try {
+    const ids: unknown = JSON.parse(
+      localStorage.getItem(ACKNOWLEDGED_READS_KEY) ?? "[]",
+    );
+    return Array.isArray(ids) ? ids.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * "Read" under your newest read message: flashes for 4s, fades, then goes.
+ * Acknowledged only once the whole flash has shown (a StrictMode re-run or
+ * leaving mid-flash still shows it next time); then it never flashes again.
+ */
+function ReadReceipt({ messageId }: { messageId: string }) {
+  const [phase, setPhase] = useState<"shown" | "fading" | "done">(() =>
+    acknowledgedReads().includes(messageId) ? "done" : "shown",
+  );
+  const flashing = phase !== "done";
+  useEffect(() => {
+    if (!flashing) return;
+    const fade = setTimeout(() => {
+      setPhase("fading");
+      try {
+        const ids = acknowledgedReads().filter((id) => id !== messageId);
+        localStorage.setItem(
+          ACKNOWLEDGED_READS_KEY,
+          JSON.stringify([...ids, messageId].slice(-500)),
+        );
+      } catch {
+        // Flashes again next time.
+      }
+    }, READ_FLASH_MS);
+    const done = setTimeout(
+      () => setPhase("done"),
+      READ_FLASH_MS + READ_FADE_MS,
+    );
+    return () => {
+      clearTimeout(fade);
+      clearTimeout(done);
+    };
+  }, [flashing, messageId]);
+  if (phase === "done") return null;
+  return (
+    <div
+      className={cn(
+        "text-quaternary-text mt-0.5 flex items-center gap-1 text-[11px] leading-tight transition-opacity duration-500",
+        phase === "fading" && "opacity-0",
+      )}
+    >
+      <Icon icon="heroicons:eye" className="h-3 w-3" />
+      <span>Read</span>
+    </div>
+  );
+}
+
+const MENTION_PILL =
+  "bg-button-info/30 rounded-[3px] px-0.5 font-medium text-[color-mix(in_srgb,var(--color-button-info)_25%,white)]";
+
+/** Message text with each <@id> as a pill linking to that profile. */
+function MessageText({
+  content,
+  nameOf,
+}: {
+  content: string;
+  nameOf: (id: string) => string | undefined;
+}) {
+  return formatMessageText(content)
+    .split(MENTION_SPLIT)
+    .map((part, index) => {
+      if (index % 2 === 0) return part;
+      const name = nameOf(part);
+      return name ? (
+        <Link
+          key={index}
+          href={`/users/${part}`}
+          prefetch={false}
+          className={cn(
+            MENTION_PILL,
+            "hover:bg-button-info transition-colors hover:text-white",
+          )}
+        >
+          @{name}
+        </Link>
+      ) : (
+        <span key={index} className={MENTION_PILL}>
+          @unknown-user
+        </span>
+      );
+    });
+}
+
+const TOOLBAR_BUTTON =
+  "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed";
 
 /** Messages this close together from one sender share a header, like the app. */
 const GROUP_GAP_MS = 5 * 60_000;
@@ -136,7 +263,6 @@ export function MessageRow({
   twemojiEnabled,
   isSending,
   deletingMessageId,
-  messagesContainerRef,
   setActiveMessageId,
   setEditingMessageId,
   setReplyingToMessage,
@@ -147,7 +273,19 @@ export function MessageRow({
   handleEditMessage,
   usersById,
   canDeleteOthers = false,
+  onReact,
+  mentionUsers,
 }: MessageRowProps) {
+  const people = mentionUsers ?? usersById;
+  const nameOf = (id: string) => {
+    const user =
+      people?.get(id) ??
+      (selectedUser?.id === id ? selectedUser : undefined) ??
+      (currentUserMessageUser?.id === id ? currentUserMessageUser : undefined);
+    return user ? getDisplayName(user) : undefined;
+  };
+  const topEmojis = useFrequentEmojis(emojiStringMap, 4);
+  const allEmojis = [...new Set(Object.values(emojiStringMap))];
   // In a group, a sender is any member; in a DM, the other person.
   const userFor = (id: string): MessageUser | null =>
     usersById ? (usersById.get(id) ?? placeholderUser(id)) : selectedUser;
@@ -206,7 +344,7 @@ export function MessageRow({
       <div
         id={`message-${getMessageDomId(message)}`}
         data-message-row
-        className="hover:bg-secondary-bg/60 mt-2 flex items-center gap-3 rounded px-4 py-1"
+        className="hover:bg-tertiary-bg mt-2 flex items-center gap-3 rounded px-4 py-1"
       >
         <span className="flex w-9 shrink-0 justify-center">
           <Icon
@@ -334,6 +472,16 @@ export function MessageRow({
   })();
 
   const isMessageMenuActive = activeMessageId === message.id;
+  // Someone else replying to one of yours.
+  const isReplyToMe =
+    !isOwnMessage &&
+    !!message.parentId &&
+    messages.some(
+      (item) =>
+        item.id === message.parentId &&
+        !!currentUserId &&
+        asId(item.senderId) === currentUserId,
+    );
   const canOpenActions =
     message.status !== "pending" &&
     ((message.type !== "system" && !embedMetadata) ||
@@ -343,6 +491,14 @@ export function MessageRow({
     typeof message.readAt === "number" &&
     !messages.slice(index + 1).some(isUserMessage);
 
+  const canReact = !!onReact && canOpenActions && message.status !== "failed";
+  const react = (emoji: string) => onReact?.(message, emoji);
+  const plainText = () =>
+    formatMessageText(mentionsToText(message.content ?? "", nameOf));
+  const copy = (text: string) => void navigator.clipboard?.writeText(text);
+  const busy = isSending || !!deletingMessageId;
+  const canDelete = isOwnMessage || canDeleteOthers;
+
   const renderMenuItems = (
     Item: React.ComponentType<{
       onClick?: React.MouseEventHandler;
@@ -350,101 +506,94 @@ export function MessageRow({
       disabled?: boolean;
       children?: React.ReactNode;
     }>,
+    Separator: React.ComponentType,
     skipShiftKey = false,
-  ) =>
-    !canOpenActions ? null : (
+  ) => {
+    if (!canOpenActions) return null;
+    const danger =
+      "text-button-danger focus:bg-button-danger/10 focus:text-button-danger";
+    if (message.status === "failed")
+      return isOwnMessage ? (
+        <>
+          {embedMetadata?.type !== "gift_sent" && (
+            <Item
+              disabled={busy}
+              onClick={() => void handleRetryFailedMessage(message)}
+            >
+              <Icon icon="lucide:rotate-cw" className="mr-2 h-4 w-4" />
+              Retry
+            </Item>
+          )}
+          <Item
+            disabled={busy}
+            onClick={() => void handleDeleteMessage(message.id, true)}
+            className={danger}
+          >
+            <Icon icon="heroicons-outline:trash" className="mr-2 h-4 w-4" />
+            Remove
+          </Item>
+        </>
+      ) : null;
+    // The app's order: reply, edit, copy; then delete and report; then id.
+    return (
       <>
-        {message.status !== "failed" && (
-          <Item
-            disabled={isSending || !!deletingMessageId}
-            onClick={() => setReplyingToMessage(message)}
-          >
-            <Icon icon="heroicons-outline:reply" className="mr-2 h-4 w-4" />
-            Reply
+        <Item disabled={busy} onClick={() => setReplyingToMessage(message)}>
+          <Icon icon="heroicons-outline:reply" className="mr-2 h-4 w-4" />
+          Reply
+        </Item>
+        {isOwnMessage && embedMetadata?.type !== "gift_sent" && (
+          <Item disabled={busy} onClick={() => setEditingMessageId(message.id)}>
+            <Icon icon="heroicons-outline:pencil" className="mr-2 h-4 w-4" />
+            Edit
           </Item>
         )}
-        {!isOwnMessage && message.status !== "failed" && (
+        <Item onClick={() => copy(plainText())}>
+          <Icon
+            icon="heroicons-outline:document-duplicate"
+            className="mr-2 h-4 w-4"
+          />
+          Copy Text
+        </Item>
+        <Separator />
+        {canDelete && (
           <Item
-            disabled={isSending || !!deletingMessageId}
-            onClick={() => {
-              setReportingMessage(message);
-              setReportReason("");
-            }}
-            className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
-          >
-            <Icon icon="heroicons-outline:flag" className="mr-2 h-4 w-4" />
-            Report Message
-          </Item>
-        )}
-        {!isOwnMessage && canDeleteOthers && message.status !== "failed" && (
-          <Item
-            disabled={isSending || !!deletingMessageId}
+            disabled={busy}
             onClick={(e: React.MouseEvent) =>
               void handleDeleteMessage(
                 message.id,
                 skipShiftKey ? false : e.shiftKey,
               )
             }
-            className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+            className={danger}
           >
             <Icon icon="heroicons-outline:trash" className="mr-2 h-4 w-4" />
-            Delete Message
+            Delete
           </Item>
         )}
-        {isOwnMessage && message.status !== "failed" && (
-          <>
-            {embedMetadata?.type !== "gift_sent" && (
-              <Item
-                disabled={isSending || !!deletingMessageId}
-                onClick={() => {
-                  setEditingMessageId(message.id);
-                }}
-              >
-                <Icon
-                  icon="heroicons-outline:pencil"
-                  className="mr-2 h-4 w-4"
-                />
-                Edit Message
-              </Item>
-            )}
-            <Item
-              disabled={isSending || !!deletingMessageId}
-              onClick={(e: React.MouseEvent) =>
-                void handleDeleteMessage(
-                  message.id,
-                  skipShiftKey ? false : e.shiftKey,
-                )
-              }
-              className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
-            >
-              <Icon icon="heroicons-outline:trash" className="mr-2 h-4 w-4" />
-              Delete Message
-            </Item>
-          </>
+        {!isOwnMessage && (
+          <Item
+            disabled={busy}
+            onClick={() => {
+              setReportingMessage(message);
+              setReportReason("");
+            }}
+            className={danger}
+          >
+            <Icon icon="heroicons-outline:flag" className="mr-2 h-4 w-4" />
+            Report
+          </Item>
         )}
-        {isOwnMessage && message.status === "failed" && (
-          <>
-            {embedMetadata?.type !== "gift_sent" && (
-              <Item
-                disabled={isSending || !!deletingMessageId}
-                onClick={() => void handleRetryFailedMessage(message)}
-              >
-                <Icon icon="lucide:rotate-cw" className="mr-2 h-4 w-4" />
-                Retry
-              </Item>
-            )}
-            <Item
-              disabled={isSending || !!deletingMessageId}
-              onClick={() => void handleDeleteMessage(message.id, true)}
-              className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
-            >
-              <Icon icon="heroicons-outline:trash" className="mr-2 h-4 w-4" />
-              Remove
-            </Item>
-          </>
-        )}
+        <Separator />
+        <Item onClick={() => copy(message.id)}>
+          <Icon
+            icon="heroicons-outline:identification"
+            className="mr-2 h-4 w-4"
+          />
+          Copy Message ID
+        </Item>
       </>
     );
+  };
 
   const messageMenu = (
     <DropdownMenu
@@ -455,10 +604,7 @@ export function MessageRow({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className={cn(
-                "border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border opacity-0 transition-opacity group-hover/message:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed",
-                isMessageMenuActive && "opacity-100",
-              )}
+              className={TOOLBAR_BUTTON}
               aria-label="More message actions"
               disabled={
                 isSending ||
@@ -475,8 +621,8 @@ export function MessageRow({
         </TooltipTrigger>
         <TooltipContent side="top">More message actions</TooltipContent>
       </Tooltip>
-      <DropdownMenuContent align="end" className="w-40 p-1">
-        {renderMenuItems(DropdownMenuItem)}
+      <DropdownMenuContent align="end" className="w-52 p-1">
+        {renderMenuItems(DropdownMenuItem, DropdownMenuSeparator)}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -565,96 +711,72 @@ export function MessageRow({
           )}
           <ChatEvent
             className={cn(
-              "relative w-full flex-col items-start rounded py-0.5 transition-colors duration-150",
+              "relative w-full flex-col items-start gap-0 rounded py-0.5 transition-colors duration-150",
               editingMessageId === message.id
                 ? "bg-secondary-bg/60"
-                : "lg:group-hover/message:bg-secondary-bg/60",
+                : "lg:group-hover/message:bg-tertiary-bg",
               editingMessageId !== message.id &&
-                (isMessageMenuActive || replyingToMessage?.id === message.id) &&
-                "bg-secondary-bg/60",
+                (replyingToMessage?.id === message.id
+                  ? "bg-button-info/10 lg:group-hover/message:bg-button-info/10 shadow-[inset_2px_0_0_var(--color-button-info)]"
+                  : isReplyToMe
+                    ? "bg-status-warning/10 lg:group-hover/message:bg-status-warning/15 shadow-[inset_2px_0_0_var(--color-status-warning)]"
+                    : isMessageMenuActive && "bg-tertiary-bg"),
               // A new sender (or a reply) starts with a little room, like the app.
-              (!isGroupedWithPrevious || message.parentId) && "mt-2 pt-1",
+              (!isGroupedWithPrevious || message.parentId) && "mt-2",
+              // A reply's preview line is its own top padding.
+              !isGroupedWithPrevious && !message.parentId && "pt-1",
             )}
           >
             {message.parentId && (
-              <div className="flex items-center">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 56 12"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  className="text-tertiary-text h-3 w-14 shrink-0"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M18 9V2h34"
+              <div className="flex h-5 w-full items-center gap-2">
+                {/* The app's connector: from the avatar's centre up and
+                    across to the parent, ending 4px short of its avatar and
+                    2px above this message's (which sits 4px lower). */}
+                <span className="relative h-full w-10 shrink-0 @md/chat:w-12">
+                  <span
+                    aria-hidden
+                    className="border-tertiary-text/70 pointer-events-none absolute top-1/2 right-[-4px] bottom-[-2px] left-[calc(50%-1px)] -mt-px rounded-tl-md border-t-2 border-l-2"
                   />
-                </svg>
+                </span>
                 {(() => {
                   const parentMsg = messages.find(
                     (m) => m.id === message.parentId,
                   );
                   if (!parentMsg) {
                     return (
-                      <div className="text-tertiary-text flex min-w-0 items-center gap-1 text-xs">
+                      <span className="text-tertiary-text min-w-0 text-sm">
                         Replying to a message
-                      </div>
+                      </span>
                     );
                   }
                   const isParentOwn =
                     asId(parentMsg.senderId) === asId(currentUser?.id);
+                  const parentId = asId(parentMsg.senderId);
                   const parentSender = isParentOwn
                     ? (currentUserEnriched ?? currentUserMessageUser)
-                    : userFor(asId(parentMsg.senderId));
-                  const parentDisplayName = parentSender
+                    : userFor(parentId);
+                  const parentLabel = parentSender
                     ? getDisplayName(parentSender)
-                    : "Unknown";
+                    : "unknown-user";
                   return (
                     <button
                       type="button"
-                      className="text-tertiary-text hover:text-secondary-text flex min-w-0 cursor-pointer items-center gap-1 text-left text-xs transition-colors"
+                      className="text-tertiary-text flex min-w-0 flex-1 cursor-pointer items-center gap-1 text-left text-sm"
                       onClick={() => {
                         const el = document.getElementById(
                           `message-${getMessageDomId(parentMsg)}`,
                         );
-                        const container = messagesContainerRef.current;
-                        if (el && container) {
-                          const rect = el.getBoundingClientRect();
-                          const containerRect =
-                            container.getBoundingClientRect();
-
-                          const isVisible =
-                            rect.top >= containerRect.top &&
-                            rect.bottom <= containerRect.bottom;
-
-                          if (!isVisible) {
-                            const relativeTop =
-                              el.offsetTop - container.offsetTop;
-                            container.scrollTo({
-                              top:
-                                relativeTop -
-                                container.clientHeight / 2 +
-                                el.clientHeight / 2,
-                              behavior: "smooth",
-                            });
-                          }
-                          el.classList.add(
-                            "bg-button-info/10",
-                            "transition-colors",
-                            "duration-500",
-                          );
-                          setTimeout(
-                            () =>
-                              el.classList.remove(
-                                "bg-button-info/10",
-                                "transition-colors",
-                                "duration-500",
-                              ),
-                            1500,
-                          );
-                        }
+                        if (!el) return;
+                        // The app's jump: centre the parent and tint it.
+                        el.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        });
+                        el.classList.add("bg-status-info/15");
+                        setTimeout(
+                          () => el.classList.remove("bg-status-info/15"),
+                          1500,
+                        );
                       }}
                     >
                       {parentSender && (
@@ -671,11 +793,13 @@ export function MessageRow({
                           className="h-4 w-4"
                         />
                       )}
-                      <span className="text-secondary-text shrink-0 font-medium">
-                        {parentDisplayName}
+                      <span className="text-primary-text/90 shrink-0 font-medium">
+                        @{parentLabel}
                       </span>
                       <span className="min-w-0 truncate">
-                        {formatMessageText(parentMsg.content)}
+                        {formatMessageText(
+                          mentionsToText(parentMsg.content, nameOf),
+                        ) || "(a message)"}
                       </span>
                     </button>
                   );
@@ -747,6 +871,7 @@ export function MessageRow({
                     isSending={isSending}
                     onSave={handleEditMessage}
                     onCancel={() => setEditingMessageId(null)}
+                    mentionUsers={people ? [...people.values()] : undefined}
                   />
                 ) : (
                   <div className="flex w-full items-start gap-2">
@@ -776,10 +901,16 @@ export function MessageRow({
                               className: "twemoji",
                             }}
                           >
-                            {formatMessageText(message.content ?? "")}
+                            <MessageText
+                              content={message.content ?? ""}
+                              nameOf={nameOf}
+                            />
                           </Twemoji>
                         ) : (
-                          formatMessageText(message.content ?? "")
+                          <MessageText
+                            content={message.content ?? ""}
+                            nameOf={nameOf}
+                          />
                         )}
                         {message.updatedAt &&
                           message.updatedAt !== message.createdAt && (
@@ -791,13 +922,19 @@ export function MessageRow({
                     </div>
                   </div>
                 )}
+                {editingMessageId !== message.id && (
+                  <ReactionChips
+                    reactions={message.reactions}
+                    currentUserId={currentUserId}
+                    nameOf={nameOf}
+                    twemojiEnabled={twemojiEnabled}
+                    onToggle={canReact ? react : undefined}
+                  />
+                )}
                 {isLatestSeenOwnMessage &&
                   message.status !== "pending" &&
                   message.status !== "failed" && (
-                    <div className="text-quaternary-text mt-0.5 flex items-center gap-1 text-[11px] leading-tight">
-                      <Icon icon="heroicons:eye" className="h-3 w-3" />
-                      <span>Read</span>
-                    </div>
+                    <ReadReceipt key={message.id} messageId={message.id} />
                   )}
               </ChatEventBody>
               {editingMessageId !== message.id && canOpenActions && (
@@ -825,19 +962,119 @@ export function MessageRow({
                   />
                 </Button>
               )}
-              {editingMessageId !== message.id && canOpenActions && (
-                // The app's single "…" button, shown on hover.
-                <div className="absolute top-0 right-2 z-10 hidden -translate-y-1/2 lg:block">
-                  {messageMenu}
-                </div>
-              )}
             </div>
+            {editingMessageId !== message.id && canOpenActions && (
+              // The app's hover bar, on the row's top edge (above a reply's
+              // preview line): quick reactions, the picker, then "…".
+              <div
+                className={cn(
+                  "border-border-primary bg-secondary-bg absolute -top-1 right-7 z-10 hidden -translate-y-1/2 items-center gap-0.5 rounded-md border p-0.5 opacity-0 transition-opacity group-hover/message:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 lg:flex",
+                  isMessageMenuActive && "opacity-100",
+                )}
+              >
+                {canReact && (
+                  <>
+                    {topEmojis.slice(0, 3).map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        aria-label={`React with ${emoji}`}
+                        className={cn(TOOLBAR_BUTTON, "text-base")}
+                        onClick={() => react(emoji)}
+                      >
+                        <EmojiGlyph
+                          emoji={emoji}
+                          twemojiEnabled={twemojiEnabled}
+                        />
+                      </button>
+                    ))}
+                    <span className="bg-border-primary mx-0.5 h-4 w-px" />
+                    <Popover>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              aria-label="Add reaction"
+                              className={TOOLBAR_BUTTON}
+                            >
+                              <Icon
+                                icon="heroicons:face-smile"
+                                className="size-4"
+                              />
+                            </button>
+                          </PopoverTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">Add Reaction</TooltipContent>
+                      </Tooltip>
+                      <PopoverContent align="end" className="w-auto p-1.5">
+                        <EmojiGrid
+                          emojis={allEmojis}
+                          twemojiEnabled={twemojiEnabled}
+                          renderCell={(emoji, glyph) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              aria-label={`React with ${emoji}`}
+                              className={EMOJI_CELL}
+                              onClick={() => react(emoji)}
+                            >
+                              {glyph}
+                            </button>
+                          )}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </>
+                )}
+                {messageMenu}
+              </div>
+            )}
           </ChatEvent>
         </div>
       </ContextMenuTrigger>
       {canOpenActions && (
-        <ContextMenuContent>
-          {renderMenuItems(ContextMenuItem, true)}
+        <ContextMenuContent className="w-52">
+          {canReact && (
+            <>
+              <div className="flex gap-1 p-1">
+                {topEmojis.map((emoji) => (
+                  <ContextMenuItem
+                    key={emoji}
+                    aria-label={`React with ${emoji}`}
+                    className="bg-tertiary-bg h-9 flex-1 justify-center p-0 text-lg"
+                    onClick={() => react(emoji)}
+                  >
+                    <EmojiGlyph emoji={emoji} twemojiEnabled={twemojiEnabled} />
+                  </ContextMenuItem>
+                ))}
+              </div>
+              <ContextMenuSub>
+                <ContextMenuSubTrigger>
+                  <Icon icon="heroicons-outline:face-smile" className="mr-2" />
+                  Add Reaction
+                </ContextMenuSubTrigger>
+                <ContextMenuSubContent className="p-1.5">
+                  <EmojiGrid
+                    emojis={allEmojis}
+                    twemojiEnabled={twemojiEnabled}
+                    renderCell={(emoji, glyph) => (
+                      <ContextMenuItem
+                        key={emoji}
+                        aria-label={`React with ${emoji}`}
+                        className={EMOJI_CELL}
+                        onClick={() => react(emoji)}
+                      >
+                        {glyph}
+                      </ContextMenuItem>
+                    )}
+                  />
+                </ContextMenuSubContent>
+              </ContextMenuSub>
+              <ContextMenuSeparator />
+            </>
+          )}
+          {renderMenuItems(ContextMenuItem, ContextMenuSeparator, true)}
         </ContextMenuContent>
       )}
       <Sheet
@@ -878,7 +1115,25 @@ export function MessageRow({
               className="min-h-0 overflow-y-auto px-4"
               onClick={closeMessageActions}
             >
-              {renderMenuItems(MessageSheetAction, true)}
+              {canReact && (
+                <div className="flex gap-1 py-1">
+                  {topEmojis.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      aria-label={`React with ${emoji}`}
+                      className="bg-tertiary-bg flex h-11 flex-1 cursor-pointer items-center justify-center rounded-md text-xl"
+                      onClick={() => react(emoji)}
+                    >
+                      <EmojiGlyph
+                        emoji={emoji}
+                        twemojiEnabled={twemojiEnabled}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+              {renderMenuItems(MessageSheetAction, SheetSeparator, true)}
             </div>
           )}
         </SheetContent>

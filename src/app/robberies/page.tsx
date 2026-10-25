@@ -9,6 +9,10 @@ import {
   useDeferredValue,
   type CSSProperties,
 } from "react";
+import { useSearchParams } from "next/navigation";
+import AirdropList from "@/components/RobberyTracker/AirdropList";
+import { useRobberyTrackerAirdropsWebSocket } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
+import { useExperimentAccess } from "@/hooks/useExperimentAccess";
 import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import {
@@ -240,10 +244,23 @@ function isNonEmptyString(value: unknown): value is string {
 }
 
 function RobberyTrackerContent() {
-  const { user } = useAuthContext();
+  const { user, isAuthenticated, isLoading } = useAuthContext();
+  const searchParams = useSearchParams();
+  const airdropsEnabled = useExperimentAccess(
+    "airdrop_tracker",
+    user?.id,
+    isAuthenticated && !isLoading,
+  );
+  const isAirdrops = searchParams.has("airdrops") && airdropsEnabled;
+  const robberyTracker = useRobberyTrackerWebSocket(!isAirdrops, user?.id);
+  const airdropTracker = useRobberyTrackerAirdropsWebSocket(
+    isAirdrops,
+    user?.id,
+  );
+  const { robberies } = robberyTracker;
+  const { airdrops } = airdropTracker;
   const [recentJoin, setRecentJoin] = useState<RecentJoinEvent | null>(null);
   const {
-    robberies,
     joinHistory,
     reportJoin,
     isConnected,
@@ -255,7 +272,7 @@ function RobberyTrackerContent() {
     isBanned,
     banRemainingSeconds,
     checkBanStatus: handleBanStatusCheck,
-  } = useRobberyTrackerWebSocket(true, user?.id);
+  } = isAirdrops ? airdropTracker : robberyTracker;
 
   const handleJoin = useCallback(
     (report: TrackerJoinReport) => {
@@ -273,7 +290,7 @@ function RobberyTrackerContent() {
     [reportJoin],
   );
 
-  const hasData = robberies.length > 0;
+  const hasData = isAirdrops ? airdrops.length > 0 : robberies.length > 0;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [robberiesTimeSort, setRobberiesTimeSort] = useState<TimeSort>(() => {
@@ -491,9 +508,15 @@ function RobberyTrackerContent() {
       ids.push(id);
       fetchedRegionIdsRef.current.add(id);
     }
+    for (const airdrop of airdrops) {
+      const id = airdrop.server?.job_id;
+      if (!id || fetchedRegionIdsRef.current.has(id)) continue;
+      ids.push(id);
+      fetchedRegionIdsRef.current.add(id);
+    }
     if (ids.length === 0) return;
     fetchRegionData(ids).then(mergeRegionResults);
-  }, [robberies, fetchRegionData, mergeRegionResults]);
+  }, [robberies, airdrops, fetchRegionData, mergeRegionResults]);
 
   const countryCodeSet = useMemo(
     () => new Set(selectedCountryCodes),
@@ -523,11 +546,6 @@ function RobberyTrackerContent() {
     timeSort === "newest"
       ? "Logged (Newest to Oldest)"
       : "Logged (Oldest to Newest)";
-
-  const robberyFilterModeLabel =
-    robberyFilterMode === "any"
-      ? "Any Selected Type"
-      : "Power Combo (All Selected Types)";
 
   const isPowerComboMode = robberyFilterMode === "all";
 
@@ -1029,9 +1047,13 @@ function RobberyTrackerContent() {
           <div className="mb-6">
             <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
               <div className="flex-1">
-                <h1 className="page-heading mb-2">Robbery Tracker</h1>
+                <h1 className="page-heading mb-2">
+                  {isAirdrops ? "Airdrop Tracker" : "Robbery Tracker"}
+                </h1>
                 <p className="text-secondary-text mb-6">
-                  Real-time tracking of open and in-progress robberies
+                  {isAirdrops
+                    ? "Real-time tracking of airdrops across servers"
+                    : "Real-time tracking of open and in-progress robberies"}
                 </p>
 
                 {/* Search and Filters Row */}
@@ -1047,7 +1069,14 @@ function RobberyTrackerContent() {
                       </div>
                       <input
                         type="text"
-                        placeholder="Search robberies..."
+                        aria-label={
+                          isAirdrops ? "Search airdrops" : "Search robberies"
+                        }
+                        placeholder={
+                          isAirdrops
+                            ? "Search airdrops..."
+                            : "Search robberies..."
+                        }
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all focus:outline-none"
@@ -1116,75 +1145,76 @@ function RobberyTrackerContent() {
                     </div>
 
                     {/* Location Filter */}
-                    <div className="col-span-1 w-full lg:flex-1">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            disabled={
-                              isLoadingServerRegionStats ||
-                              (isLocationFilterUnavailable &&
-                                selectedCountryCodes.length === 0)
-                            }
-                            className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus disabled:hover:border-border-card flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label="Filter by server location"
+                    {!isAirdrops && (
+                      <div className="col-span-1 w-full lg:flex-1">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              type="button"
+                              disabled={
+                                isLoadingServerRegionStats ||
+                                (isLocationFilterUnavailable &&
+                                  selectedCountryCodes.length === 0)
+                              }
+                              className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus disabled:hover:border-border-card flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                              aria-label="Filter by server location"
+                            >
+                              <span className="truncate">{locationLabel}</span>
+                              <Icon
+                                icon="heroicons:chevron-down"
+                                className="text-secondary-text h-5 w-5"
+                              />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                           >
-                            <span className="truncate">{locationLabel}</span>
-                            <Icon
-                              icon="heroicons:chevron-down"
-                              className="text-secondary-text h-5 w-5"
-                            />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="start"
-                          className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                        >
-                          {countryOptions.length === 0 ? (
-                            <div className="text-secondary-text px-3 py-2 text-sm">
-                              {isLoadingServerRegionStats
-                                ? "Loading locations..."
-                                : "Location data unavailable"}
-                            </div>
-                          ) : (
-                            <>
-                              {selectedCountryCodes.length > 0 && (
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedCountryCodes([])}
-                                  className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
-                                >
-                                  Clear Locations
-                                </button>
-                              )}
-                              {countryOptions.map((option) => (
-                                <DropdownMenuCheckboxItem
-                                  key={option.countryCode}
-                                  checked={selectedCountryCodes.includes(
-                                    option.countryCode,
-                                  )}
-                                  onSelect={(e) => e.preventDefault()}
-                                  onCheckedChange={(checked) => {
-                                    setSelectedCountryCodes((prev) =>
-                                      checked
-                                        ? [...prev, option.countryCode]
-                                        : prev.filter(
-                                            (code) =>
-                                              code !== option.countryCode,
-                                          ),
-                                    );
-                                  }}
-                                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
-                                >
-                                  {option.label}
-                                </DropdownMenuCheckboxItem>
-                              ))}
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
+                            {countryOptions.length === 0 ? (
+                              <div className="text-secondary-text px-3 py-2 text-sm">
+                                {isLoadingServerRegionStats
+                                  ? "Loading locations..."
+                                  : "Location data unavailable"}
+                              </div>
+                            ) : (
+                              <>
+                                {selectedCountryCodes.length > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedCountryCodes([])}
+                                    className="text-link hover:text-link-hover w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm font-medium"
+                                  >
+                                    Clear Locations
+                                  </button>
+                                )}
+                                {countryOptions.map((option) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={option.countryCode}
+                                    checked={selectedCountryCodes.includes(
+                                      option.countryCode,
+                                    )}
+                                    onSelect={(e) => e.preventDefault()}
+                                    onCheckedChange={(checked) => {
+                                      setSelectedCountryCodes((prev) =>
+                                        checked
+                                          ? [...prev, option.countryCode]
+                                          : prev.filter(
+                                              (code) =>
+                                                code !== option.countryCode,
+                                            ),
+                                      );
+                                    }}
+                                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm"
+                                  >
+                                    {option.label}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    )}
                     {/* Time Sort Dropdown */}
                     <div className="col-span-full w-full lg:col-span-1 lg:flex-1">
                       <DropdownMenu>
@@ -1236,53 +1266,61 @@ function RobberyTrackerContent() {
 
           {/* Status Bar */}
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            {/* Statistics */}
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <span className="text-primary-text font-semibold">
-                {hasActiveRobberyFilters ? (
-                  <span>
-                    Showing {robberyStats.total} of {robberyStats.baselineTotal}{" "}
-                    {robberyStats.baselineTotal === 1
-                      ? robberyStats.nounSingular
-                      : robberyStats.nounPlural}
+            {!isAirdrops && (
+              <>
+                {/* Statistics */}
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  <span className="text-primary-text font-semibold">
+                    {hasActiveRobberyFilters ? (
+                      <span>
+                        Showing {robberyStats.total} of{" "}
+                        {robberyStats.baselineTotal}{" "}
+                        {robberyStats.baselineTotal === 1
+                          ? robberyStats.nounSingular
+                          : robberyStats.nounPlural}
+                      </span>
+                    ) : (
+                      <span>
+                        {robberyStats.total}{" "}
+                        {robberyStats.total === 1
+                          ? robberyStats.nounSingular
+                          : robberyStats.nounPlural}
+                      </span>
+                    )}
                   </span>
-                ) : (
-                  <span>
-                    {robberyStats.total}{" "}
-                    {robberyStats.total === 1
-                      ? robberyStats.nounSingular
-                      : robberyStats.nounPlural}
-                  </span>
-                )}
-              </span>
-              {!(robberiesDisplayMode === "grouped" && !isPowerComboMode) && (
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-secondary-text">
-                    {robberyStats.open} Open
-                  </span>
-                  <span className="text-tertiary-text">•</span>
-                  <span className="text-secondary-text">
-                    {robberyStats.inProgress} In Progress
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Active Location Filters */}
-            {selectedCountryCodes.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                <span className="text-secondary-text">Location:</span>
-                <span className="text-primary-text font-medium">
-                  {visibleCountryLabels.join(", ")}
-                  {hiddenCountryLabelCount > 0 && (
-                    <span>{` +${hiddenCountryLabelCount} other ${
-                      hiddenCountryLabelCount === 1 ? "country" : "countries"
-                    }`}</span>
+                  {!(
+                    robberiesDisplayMode === "grouped" && !isPowerComboMode
+                  ) && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-secondary-text">
+                        {robberyStats.open} Open
+                      </span>
+                      <span className="text-tertiary-text">•</span>
+                      <span className="text-secondary-text">
+                        {robberyStats.inProgress} In Progress
+                      </span>
+                    </div>
                   )}
-                </span>
-              </div>
-            )}
+                </div>
 
+                {/* Active Location Filters */}
+                {selectedCountryCodes.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className="text-secondary-text">Location:</span>
+                    <span className="text-primary-text font-medium">
+                      {visibleCountryLabels.join(", ")}
+                      {hiddenCountryLabelCount > 0 && (
+                        <span>{` +${hiddenCountryLabelCount} other ${
+                          hiddenCountryLabelCount === 1
+                            ? "country"
+                            : "countries"
+                        }`}</span>
+                      )}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
             {/* Connection Status */}
             <div className="flex items-center gap-2">
               <Icon
@@ -1296,7 +1334,9 @@ function RobberyTrackerContent() {
               </span>
             </div>
 
-            <TotalRobberiesLoggedPolling className="hidden sm:ml-auto sm:inline-flex" />
+            {!isAirdrops && (
+              <TotalRobberiesLoggedPolling className="hidden sm:ml-auto sm:inline-flex" />
+            )}
           </div>
 
           {user && (
@@ -1313,39 +1353,48 @@ function RobberyTrackerContent() {
               <div className="text-center">
                 <Spinner className="mx-auto mb-4 h-12 w-12" />
                 <p className="text-secondary-text">
-                  Connecting to robbery tracker...
+                  Connecting to {isAirdrops ? "airdrop" : "robbery"} tracker...
                 </p>
                 <StatusPageAction />
               </div>
             </div>
           )}
 
-          {/* Show stale data warning if disconnected */}
-          {!isConnected && hasData && !requiresManualReconnect && (
-            <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div>
-                  <span className="text-primary-text text-base font-bold">
-                    {isConnecting
-                      ? "Connecting..."
-                      : isIdle
-                        ? "Inactivity Detected"
-                        : "Connection Lost"}
-                  </span>
-                  <p className="text-secondary-text mt-1 text-sm">
-                    {isConnecting
-                      ? "Resuming connection to robbery tracker..."
-                      : isIdle
-                        ? "Tracker paused due to inactivity. Move your mouse or press a key to resume."
-                        : "Showing last known data. Connection will resume automatically."}
-                  </p>
-                  <StatusPageAction className="items-start" />
+          {/* Show stale data warning for connection failures */}
+          {!isConnected &&
+            hasData &&
+            !isIdle &&
+            (!isConnecting || error) &&
+            !requiresManualReconnect && (
+              <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div>
+                    <span className="text-primary-text text-base font-bold">
+                      Connection Lost
+                    </span>
+                    <p className="text-secondary-text mt-1 text-sm">
+                      Showing last known data. Connection will resume
+                      automatically.
+                    </p>
+                    <StatusPageAction className="items-start" />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {hasData ? (
+          {isAirdrops ? (
+            (hasData || isConnected) && (
+              <AirdropList
+                airdrops={airdrops}
+                searchQuery={searchQuery}
+                serverSize={serverSize}
+                timeSort={timeSort}
+                serverRegions={serverRegionsByJobId}
+                joinHistory={joinHistory}
+                onJoin={handleJoin}
+              />
+            )
+          ) : hasData ? (
             <>
               {/* Robbery Type Multi-Select */}
               <div className="mb-6">
@@ -1453,53 +1502,6 @@ function RobberyTrackerContent() {
                       </Button>
                     );
                   })}
-                </div>
-                <div className="mt-4 w-full lg:max-w-md">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-11 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
-                        aria-label="Robbery type filter mode"
-                      >
-                        <span className="truncate">
-                          {robberyFilterModeLabel}
-                        </span>
-                        <Icon
-                          icon="heroicons:chevron-down"
-                          className="text-secondary-text h-5 w-5"
-                        />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
-                    >
-                      <DropdownMenuRadioGroup
-                        value={robberyFilterMode}
-                        onValueChange={(value) => {
-                          const nextMode = value as RobberyFilterMode;
-                          setRobberyFilterMode(nextMode);
-                          if (nextMode === "all") {
-                            setSelectedRobberyTypes([]);
-                          }
-                        }}
-                      >
-                        <DropdownMenuRadioItem
-                          value="any"
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          Any Selected Type
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem
-                          value="all"
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          Power Combo (All Types Open)
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
                 {isPowerComboMode && (
                   <p className="text-secondary-text mt-3 text-xs">

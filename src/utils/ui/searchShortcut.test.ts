@@ -34,3 +34,18 @@ test("slash focuses search without overriding browser shortcuts or typing", () =
     ),
   ).toBe(false);
 });
+
+test("global search uses Ctrl/Cmd K without taking slash or modified shortcuts", async () => {
+  const { isGlobalSearchShortcut } = await import("./searchShortcut");
+  expect(isGlobalSearchShortcut(key({ key: "k", ctrlKey: true }))).toBe(true);
+  expect(isGlobalSearchShortcut(key({ key: "K", metaKey: true }))).toBe(true);
+  for (const overrides of [
+    { key: "k" },
+    { key: "/", ctrlKey: true },
+    { key: "k", ctrlKey: true, altKey: true },
+    { key: "k", ctrlKey: true, shiftKey: true },
+    { key: "k", ctrlKey: true, defaultPrevented: true },
+    { key: "k", ctrlKey: true, isComposing: true },
+  ])
+    expect(isGlobalSearchShortcut(key(overrides))).toBe(false);
+});

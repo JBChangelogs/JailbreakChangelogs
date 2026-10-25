@@ -52,8 +52,10 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { UserData } from "@/types/auth";
 import { showBanToast, type BanInfo } from "@/utils/api/ban";
-import { asId } from "@/utils/messages/parsing";
+import { asId, parseReactions } from "@/utils/messages/parsing";
 import { getDisplayName } from "@/utils/messages/formatting";
+import { mentionedIds } from "@/utils/messages/mentions";
+import { reactToMessage } from "@/utils/messages/reactions";
 import type {
   Message,
   MessageUser,
@@ -348,13 +350,14 @@ export function GroupChatView({
     );
   }, [messagesQuery.data]);
 
-  // Profiles for the members, and for anyone an event names (someone
-  // removed, for example, is no longer a member).
+  // Profiles for the members, and for anyone an event names or a message
+  // mentions (someone removed, for example, is no longer a member).
   const memberIds = useMemo(() => {
     const ids = new Set(group?.memberIds ?? []);
     for (const message of messages) {
       const event = parseGroupEvent(message.metadata);
       if (event) for (const id of groupEventUserIds(event)) ids.add(id);
+      for (const id of mentionedIds(message.content)) ids.add(id);
     }
     return [...ids].sort();
   }, [group?.memberIds, messages]);
@@ -442,11 +445,25 @@ export function GroupChatView({
       prependRef.current = null;
       return;
     }
+    // Only the newest message changing moves you, and only from the bottom
+    // (sending puts you there); reactions and edits never do.
     const lastId = messages.at(-1)?.id ?? null;
     if (lastId !== lastIdRef.current && atBottomRef.current) {
       container.scrollTop = container.scrollHeight;
     }
     lastIdRef.current = lastId;
+  }, [messages]);
+  // Rows growing (a reaction, an image) keep you pinned, unless scrolled up.
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(() => {
+      if (atBottomRef.current && prependRef.current === null)
+        container.scrollTop = container.scrollHeight;
+    });
+    observer.observe(container);
+    for (const child of container.children) observer.observe(child);
+    return () => observer.disconnect();
   }, [messages]);
   const loadOlder = () => {
     const container = containerRef.current;
@@ -490,6 +507,14 @@ export function GroupChatView({
           );
           onRead();
         }
+        return;
+      }
+      if (action === "group_message_reaction") {
+        const id = String(data.id);
+        const reactions = parseReactions(data.reactions);
+        setMessages((list) =>
+          list.map((item) => (item.id === id ? { ...item, reactions } : item)),
+        );
         return;
       }
       if (action === "group_message_edited") {
@@ -639,6 +664,22 @@ export function GroupChatView({
     }
   };
 
+  const handleReact = (message: Message, emoji: string) => {
+    if (!currentUserId) return;
+    void reactToMessage({
+      message,
+      emoji,
+      userId: currentUserId,
+      path: `/v2/group-chats/${encodeURIComponent(groupId)}/messages/${encodeURIComponent(message.id)}`,
+      setReactions: (reactions) =>
+        setMessages((list) =>
+          list.map((item) =>
+            item.id === message.id ? { ...item, reactions } : item,
+          ),
+        ),
+    });
+  };
+
   const handleRetry = async (message: Message) => {
     setMessages((list) => list.filter((item) => item.id !== message.id));
     await send(
@@ -727,7 +768,6 @@ export function GroupChatView({
         >
           <GroupAvatar
             name={group?.name ?? ""}
-            groupId={groupId}
             memberIds={group?.memberIds}
             className="h-8 w-8"
           />
@@ -745,16 +785,18 @@ export function GroupChatView({
             {group?.name ?? "Group"}
           </span>
           {isOwner && (
-            <Icon
-              icon="heroicons:pencil"
-              aria-hidden="true"
-              className="text-tertiary-text h-3.5 w-3.5 shrink-0 opacity-0 transition-opacity group-hover/name:opacity-100 [@media(hover:none)]:opacity-100"
-            />
-          )}
-          {group && (
-            <span className="text-tertiary-text shrink-0 text-xs">
-              {memberCount} members
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-secondary-text hover:text-primary-text flex h-5 w-5 shrink-0 items-center justify-center opacity-0 transition-opacity group-hover/name:opacity-100 [@media(hover:none)]:opacity-100">
+                  <Icon
+                    icon="heroicons:pencil-20-solid"
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5"
+                  />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Edit Group</TooltipContent>
+            </Tooltip>
           )}
         </button>
         {canInvite && (
@@ -804,7 +846,7 @@ export function GroupChatView({
                 container.scrollHeight -
                   container.scrollTop -
                   container.clientHeight <=
-                48;
+                4;
             }}
             className="relative !flex-col px-2 pt-1 pb-5 sm:px-3"
             style={{ overflowAnchor: "none" }}
@@ -865,7 +907,6 @@ export function GroupChatView({
                   twemojiEnabled={twemojiEnabled}
                   isSending={isSending}
                   deletingMessageId={deletingMessageId}
-                  messagesContainerRef={containerRef}
                   setActiveMessageId={setActiveMessageId}
                   setEditingMessageId={setEditingMessageId}
                   setReplyingToMessage={setReplyingToMessage}
@@ -874,6 +915,7 @@ export function GroupChatView({
                   handleDeleteMessage={handleDeleteMessage}
                   handleRetryFailedMessage={handleRetry}
                   handleEditMessage={handleEditMessage}
+                  onReact={handleReact}
                 />
               ))
             )}
@@ -890,6 +932,9 @@ export function GroupChatView({
                 : null
             }
             onCancelReply={() => setReplyingToMessage(null)}
+            mentionCandidates={members.filter(
+              (member) => member.id !== currentUserId,
+            )}
             typingUsers={typingUsers}
             conversationId={`group:${groupId}`}
             placeholder={`Message ${group?.name ?? "the group"}...`}

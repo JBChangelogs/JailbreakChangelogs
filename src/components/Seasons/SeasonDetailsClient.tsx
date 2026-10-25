@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import {
+  useSeasonsList,
+  SeasonListRateLimitError,
+} from "@/hooks/useSeasonsList";
 
 import { useRouter } from "nextjs-toploader/app";
 import { notFound } from "next/navigation";
@@ -22,19 +25,12 @@ import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatProfileDate } from "@/utils/helpers/timestamp";
-import { Season, Reward, CommentData, PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { Season, Reward, CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import SeasonRouteLoading from "@/app/seasons/[id]/loading";
 import RateLimitView from "@/components/Layout/RateLimitView";
 
 const LATEST_SEASON = Number(process.env.NEXT_PUBLIC_LATEST_SEASON);
-
-class SeasonListRateLimitError extends Error {
-  constructor(readonly retryAfter: number | null) {
-    super("Season list request was rate limited");
-  }
-}
 
 interface SeasonDetailsClientProps {
   seasonId: string;
@@ -51,35 +47,13 @@ export default function SeasonDetailsClient({
   const [currentSeasonState, setCurrentSeasonState] = useState<Season | null>(
     null,
   );
-  const seasonsQuery = useQuery({
-    queryKey: ["seasons-list"],
-    queryFn: async ({ signal }): Promise<Season[]> => {
-      if (!PUBLIC_API_URL) throw new Error("Missing PUBLIC_API_URL");
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL,
-        "/v2/seasons",
-      );
-      const response = await fetch(url, {
-        credentials: "include",
-        signal,
-        headers: {
-          ...headers,
-          "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-        },
-      });
-      if (response.status === 429) {
-        const raw = response.headers.get("retry-after");
-        throw new SeasonListRateLimitError(
-          raw ? Number.parseInt(raw, 10) : null,
-        );
-      }
-      if (!response.ok) throw new Error("Failed to fetch season list");
-      return response.json() as Promise<Season[]>;
-    },
-    staleTime: 60_000,
-    gcTime: 5 * 60_000,
-    retry: false,
-  });
+  useEffect(() => {
+    if (!currentSeasonState) return;
+    const rewardId = window.location.hash.slice(1);
+    if (rewardId.startsWith("reward-"))
+      document.getElementById(rewardId)?.scrollIntoView({ block: "start" });
+  }, [currentSeasonState]);
+  const seasonsQuery = useSeasonsList();
   const seasonList = seasonsQuery.data;
   const matchedSeason = seasonList?.find(
     (season) => season.season.toString() === seasonId,
@@ -287,7 +261,8 @@ export default function SeasonDetailsClient({
               {imageRewards.map((reward, index) => (
                 <div
                   key={reward.id}
-                  className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border"
+                  id={`reward-${reward.id}`}
+                  className="border-border-card bg-secondary-bg scroll-mt-[calc(var(--header-height,80px)+1rem)] overflow-hidden rounded-lg border"
                 >
                   <ImageLightbox
                     images={lightboxImages}
@@ -327,7 +302,8 @@ export default function SeasonDetailsClient({
                   {bonusRewards.map((reward) => (
                     <li
                       key={reward.id}
-                      className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+                      id={`reward-${reward.id}`}
+                      className="flex scroll-mt-[calc(var(--header-height,80px)+1rem)] flex-wrap items-center justify-between gap-2 px-4 py-3"
                     >
                       <span className="text-primary-text font-medium">
                         {reward.item}

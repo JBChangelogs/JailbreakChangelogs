@@ -1,5 +1,7 @@
 "use client";
 
+import { FRONTEND_SETTINGS } from "@/config/settings";
+
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -337,9 +339,11 @@ export default function CustomThemeControls({
     // Laid out like the other settings: title, description, button.
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
       <div className="min-w-0">
-        <h3 className="text-primary-text font-medium">Custom themes</h3>
+        <h3 className="text-primary-text font-medium">
+          {FRONTEND_SETTINGS["custom-themes"].title}
+        </h3>
         <p className="text-secondary-text mt-1 text-sm">
-          Make your own, or import one someone shared.
+          {FRONTEND_SETTINGS["custom-themes"].description}
         </p>
       </div>
       {custom.isAuthenticated && (

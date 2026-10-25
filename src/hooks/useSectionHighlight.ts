@@ -1,37 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQueryState } from "nuqs";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-export function useSectionHighlight() {
-  const [highlightParam, setHighlightParam] = useQueryState("highlight", {
-    defaultValue: "",
-    history: "push",
-    shallow: true,
-  });
-  const [showHighlight, setShowHighlight] = useState(false);
+export function useSectionHighlight(ready = true) {
+  const highlightParam = useSearchParams().get("highlight");
   const [highlightSetting, setHighlightSetting] = useState<string | null>(null);
+  const showHighlight = highlightSetting !== null;
 
   useEffect(() => {
-    if (!highlightParam) return;
+    if (!highlightParam || !ready) return;
+    const pathname = window.location.pathname;
 
     const timer = window.setTimeout(() => {
+      const url = new URL(window.location.href);
+      if (
+        url.pathname !== pathname ||
+        url.searchParams.get("highlight") !== highlightParam
+      )
+        return;
+      url.searchParams.delete("highlight");
+      window.history.replaceState(null, "", url.toString());
       setHighlightSetting(highlightParam);
-      setShowHighlight(true);
     }, 0);
 
+    return () => window.clearTimeout(timer);
+  }, [highlightParam, ready]);
+
+  useEffect(() => {
+    if (!highlightSetting) return;
     const clearTimer = window.setTimeout(() => {
-      setShowHighlight(false);
       setHighlightSetting(null);
-      void setHighlightParam(null);
     }, 3000);
 
-    return () => {
-      window.clearTimeout(timer);
-      window.clearTimeout(clearTimer);
-    };
-  }, [highlightParam, setHighlightParam]);
+    return () => window.clearTimeout(clearTimer);
+  }, [highlightSetting]);
 
   const copySectionLink = (sectionId: string, sectionTitle: string) => {
     const url = new URL(window.location.href);
