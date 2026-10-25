@@ -11,7 +11,7 @@ export function ProfileBackground({ src }: { src: string }) {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 -z-10 [clip-path:inset(0)]"
     >
-      <div className="fixed inset-0">
+      <div className="fixed inset-x-0 top-(--header-height) bottom-0">
         <Image
           src={src}
           alt=""
@@ -19,7 +19,7 @@ export function ProfileBackground({ src }: { src: string }) {
           sizes="100vw"
           unoptimized
           draggable={false}
-          className="object-cover"
+          className="object-cover object-top"
         />
         <div className="bg-primary-bg/70 absolute inset-0" />
         <div className="from-primary-bg absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t to-transparent" />

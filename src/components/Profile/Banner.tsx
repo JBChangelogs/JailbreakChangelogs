@@ -90,7 +90,7 @@ export const Banner = ({
   const src = primary && !primaryBannerFailed ? primary : fallback;
 
   return (
-    <div className={cn("relative h-40 md:h-70", className)} key={userId}>
+    <div className={cn("relative aspect-[3/1]", className)} key={userId}>
       <Image
         placeholder={IMAGE_PLACEHOLDER}
         src={src}

@@ -87,7 +87,6 @@ export function AppearancePreview({
           }
           settings={settings}
           premiumType={userData.premiumtype}
-          className="h-28 md:h-40"
         />
         <BannerEditOverlay
           userData={userData}
