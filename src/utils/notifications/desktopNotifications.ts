@@ -1,6 +1,16 @@
 import { safeGetJSON, safeSetJSON } from "@/utils/storage/safeStorage";
 
 const DESKTOP_NOTIFICATIONS_STORAGE_KEY = "desktop_notifications_enabled";
+const messageNotifications = new Map<Notification, string>();
+
+export function dismissMessageDesktopNotifications(path?: string): void {
+  const pathname = path?.split(/[?#]/, 1)[0].replace(/\/$/, "");
+  for (const [notification, conversation] of messageNotifications) {
+    if (pathname !== undefined && conversation !== pathname) continue;
+    messageNotifications.delete(notification);
+    notification.close();
+  }
+}
 
 export type DesktopNotificationPermission =
   | NotificationPermission
@@ -82,11 +92,24 @@ export function showDesktopNotification(input: {
       data: target ?? undefined,
     });
 
+    if (
+      target &&
+      "internalPath" in target &&
+      (tag?.startsWith("realtime-dm:") || tag?.startsWith("realtime-group:"))
+    ) {
+      messageNotifications.set(notification, target.internalPath);
+      notification.onclose = () => {
+        messageNotifications.delete(notification);
+      };
+    }
+
     if (target) {
       notification.onclick = (event) => {
         event.preventDefault();
+        messageNotifications.delete(notification);
         notification.close();
         if ("internalPath" in target) {
+          dismissMessageDesktopNotifications(target.internalPath);
           window.location.assign(target.internalPath);
           return;
         }

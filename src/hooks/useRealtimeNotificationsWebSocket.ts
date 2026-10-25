@@ -10,6 +10,7 @@ import {
 } from "@/utils/notifications/notificationUrl";
 import {
   isNotificationPageActive,
+  dismissMessageDesktopNotifications,
   shouldShowDesktopNotification,
   showDesktopNotification,
 } from "@/utils/notifications/desktopNotifications";
@@ -22,9 +23,11 @@ import {
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import { mentionsToText } from "@/utils/messages/mentions";
-import { getDisplayName } from "@/utils/messages/formatting";
 import { parseReactions } from "@/utils/messages/parsing";
-import type { MessageUser } from "@/utils/messages/types";
+import {
+  cachedMessageUsername,
+  resolveMessageSenderName,
+} from "@/utils/notifications/messageSender";
 import {
   clearPreferencesCache,
   deleteCachedPreference,
@@ -119,21 +122,6 @@ function shouldReconnectOnFocusOnly(code: number, reason: string): boolean {
   );
 }
 
-/** A user's name from the message caches, for mentions in toasts. */
-function cachedUsername(queryClient: QueryClient, id: string): string | null {
-  for (const [, data] of queryClient.getQueriesData<MessageUser[]>({
-    queryKey: ["message-users-batch"],
-  }))
-    for (const user of Array.isArray(data) ? data : [])
-      if (user.id === id) return getDisplayName(user);
-  for (const [, data] of queryClient.getQueriesData<{
-    items?: { user: MessageUser }[];
-  }>({ queryKey: ["conversation-list"] }))
-    for (const { user } of data?.items ?? [])
-      if (user.id === id) return getDisplayName(user);
-  return null;
-}
-
 function toNotificationBody(
   value: unknown,
   queryClient: QueryClient,
@@ -143,7 +131,7 @@ function toNotificationBody(
   const formatted = formatNotifPlainText(
     mentionsToText(
       value.trim(),
-      (id) => cachedUsername(queryClient, id),
+      (id) => cachedMessageUsername(queryClient, id),
       "someone",
     ),
   );
@@ -219,8 +207,9 @@ function openValidatedExternalNotificationUrl(validatedExternalHref: string) {
 function showDesktopNotificationUnlessAppConnected(
   notification: Parameters<typeof showDesktopNotification>[0],
   queryClient: QueryClient,
+  isCurrent: () => boolean,
 ): void {
-  if (!shouldShowDesktopNotification()) return;
+  if (!isCurrent() || !shouldShowDesktopNotification()) return;
 
   void queryClient
     .fetchQuery({
@@ -231,13 +220,13 @@ function showDesktopNotificationUnlessAppConnected(
       retry: false,
     })
     .then((hasAppConnection) => {
-      if (!hasAppConnection) {
+      if (!hasAppConnection && isCurrent()) {
         showDesktopNotification(notification);
       }
     })
     .catch(() => {
       // Do not lose browser notifications if the connection check fails.
-      showDesktopNotification(notification);
+      if (isCurrent()) showDesktopNotification(notification);
     });
 }
 
@@ -273,6 +262,16 @@ export function useRealtimeNotificationsWebSocket(
       : "/",
   );
   const lastSentLocationRef = useRef<string>("");
+  const messageReadVersionsRef = useRef(new Map<string, number>());
+  const dismissReadMessageNotifications = useCallback((path: string) => {
+    const pathname = path.split(/[?#]/, 1)[0].replace(/\/$/, "");
+    if (!pathname.startsWith("/messages/")) return;
+    dismissMessageDesktopNotifications(pathname);
+    messageReadVersionsRef.current.set(
+      pathname,
+      (messageReadVersionsRef.current.get(pathname) ?? 0) + 1,
+    );
+  }, []);
   const preferenceScope: PreferenceOutboxScope | null = preferenceUserId
     ? getUserPreferenceOutboxScope(preferenceUserId)
     : isRealtimeNotificationsEnabled
@@ -336,6 +335,7 @@ export function useRealtimeNotificationsWebSocket(
           ? (window.location?.pathname ?? "") + (window.location?.search ?? "")
           : "/";
     locationPathRef.current = nextPath;
+    if (isNotificationPageActive()) dismissReadMessageNotifications(nextPath);
 
     if (
       wsRef.current?.readyState === WebSocket.OPEN &&
@@ -344,7 +344,7 @@ export function useRealtimeNotificationsWebSocket(
       lastSentLocationRef.current = nextPath;
       wsRef.current.send(JSON.stringify({ location: nextPath }));
     }
-  }, [locationPath]);
+  }, [locationPath, dismissReadMessageNotifications]);
 
   // Queue preference changes locally and forward them after a full snapshot.
   useEffect(() => {
@@ -409,12 +409,12 @@ export function useRealtimeNotificationsWebSocket(
   useEffect(() => {
     const handleMarkRead = (event: Event) => {
       const detail = (event as CustomEvent<{ sender_id?: string }>).detail;
-      if (
-        typeof detail?.sender_id !== "string" ||
-        wsRef.current?.readyState !== WebSocket.OPEN
-      ) {
-        return;
-      }
+      if (typeof detail?.sender_id !== "string") return;
+      if (isNotificationPageActive())
+        dismissReadMessageNotifications(
+          `/messages/${encodeURIComponent(detail.sender_id)}`,
+        );
+      if (wsRef.current?.readyState !== WebSocket.OPEN) return;
       wsRef.current.send(
         JSON.stringify({
           type: "mark_read",
@@ -427,19 +427,19 @@ export function useRealtimeNotificationsWebSocket(
     return () => {
       window.removeEventListener("sendRealtimeMarkRead", handleMarkRead);
     };
-  }, []);
+  }, [dismissReadMessageNotifications]);
 
   // Group chats: typing and marking read, e.g. { action: "typing", group_id }.
   useEffect(() => {
     const send = (action: string) => (event: Event) => {
       const groupId = (event as CustomEvent<{ group_id?: string }>).detail
         ?.group_id;
-      if (
-        typeof groupId !== "string" ||
-        wsRef.current?.readyState !== WebSocket.OPEN
-      ) {
-        return;
-      }
+      if (typeof groupId !== "string") return;
+      if (action === "group_mark_read" && isNotificationPageActive())
+        dismissReadMessageNotifications(
+          `/messages/group/${encodeURIComponent(groupId)}`,
+        );
+      if (wsRef.current?.readyState !== WebSocket.OPEN) return;
       wsRef.current.send(JSON.stringify({ action, group_id: groupId }));
     };
     const handleTyping = send("typing");
@@ -450,7 +450,7 @@ export function useRealtimeNotificationsWebSocket(
       window.removeEventListener("sendRealtimeGroupTyping", handleTyping);
       window.removeEventListener("sendRealtimeGroupMarkRead", handleMarkRead);
     };
-  }, []);
+  }, [dismissReadMessageNotifications]);
 
   useEffect(() => {
     const handleManualDisconnect = () => {
@@ -525,6 +525,7 @@ export function useRealtimeNotificationsWebSocket(
     }
 
     let unmounted = false;
+    const messageReadVersions = messageReadVersionsRef.current;
     const connectionNotice = createRealtimeConnectionNotice(
       (outage) => {
         if (
@@ -666,7 +667,7 @@ export function useRealtimeNotificationsWebSocket(
           ws.send(JSON.stringify({ action: "get_preferences" }));
         });
 
-        ws.addEventListener("message", (event) => {
+        ws.addEventListener("message", async (event) => {
           if (unmounted || wsRef.current !== ws) return;
           try {
             const rawPayload =
@@ -831,6 +832,8 @@ export function useRealtimeNotificationsWebSocket(
                 (payload.action.startsWith("group_") ||
                   (payload.action === "typing" && groupData.group_id != null))
               ) {
+                const path = `/messages/group/${encodeURIComponent(String(groupData.group_id))}`;
+                const readVersion = messageReadVersions.get(path);
                 window.dispatchEvent(
                   new CustomEvent("realtimeGroup", {
                     detail: { action: payload.action, data: payload.data },
@@ -848,22 +851,48 @@ export function useRealtimeNotificationsWebSocket(
                     )
                   )
                 ) {
-                  const path = `/messages/group/${encodeURIComponent(String(groupData.group_id))}`;
+                  playMessageSound();
+                  const rawSenderId = groupData.sender_id ?? groupData.user_id;
+                  const senderName =
+                    typeof rawSenderId === "string" ||
+                    typeof rawSenderId === "number"
+                      ? await resolveMessageSenderName(
+                          queryClient,
+                          String(rawSenderId),
+                        )
+                      : null;
+                  const isCurrent = () =>
+                    !unmounted &&
+                    wsRef.current === ws &&
+                    messageReadVersions.get(path) === readVersion;
+                  if (!isCurrent()) return;
+                  if (
+                    isNotificationPageActive() &&
+                    isViewingGroupChat(
+                      locationPathRef.current,
+                      String(groupData.group_id),
+                    )
+                  )
+                    return;
+                  const title = senderName
+                    ? `${senderName} in a group chat`
+                    : "New group message";
                   const body =
                     toNotificationBody(groupData.content, queryClient) ??
                     "Check your messages.";
                   const tag = `realtime-group:${String(groupData.id)}`;
                   showDesktopNotificationUnlessAppConnected(
                     {
-                      title: "New group message",
+                      title,
                       body,
                       target: { internalPath: path },
                       tag,
                     },
                     queryClient,
+                    isCurrent,
                   );
                   if (isNotificationPageActive()) {
-                    toast("New group message", {
+                    toast(title, {
                       id: tag,
                       description: body,
                       action: {
@@ -872,7 +901,6 @@ export function useRealtimeNotificationsWebSocket(
                       },
                     });
                   }
-                  playMessageSound();
                 }
                 return;
               }
@@ -978,6 +1006,9 @@ export function useRealtimeNotificationsWebSocket(
                 hasValidIds &&
                 typeof dmData.content === "string"
               ) {
+                const senderId = String(dmData.user_id);
+                const path = `/messages/${encodeURIComponent(senderId)}`;
+                const readVersion = messageReadVersions.get(path);
                 window.dispatchEvent(
                   new CustomEvent("realtimeMessage", {
                     detail: {
@@ -999,20 +1030,33 @@ export function useRealtimeNotificationsWebSocket(
                 );
 
                 if (payload.action === "message_received") {
-                  const senderId = String(dmData.user_id);
+                  playMessageSound();
+                  const senderName = await resolveMessageSenderName(
+                    queryClient,
+                    senderId,
+                  );
+                  const isCurrent = () =>
+                    !unmounted &&
+                    wsRef.current === ws &&
+                    messageReadVersions.get(path) === readVersion;
+                  if (!isCurrent()) return;
+                  const title = senderName
+                    ? `Message from ${senderName}`
+                    : "New message";
                   const messagePreview =
                     toNotificationBody(dmData.content, queryClient) ??
                     "Check your messages.";
                   showDesktopNotificationUnlessAppConnected(
                     {
-                      title: "New message",
+                      title,
                       body: messagePreview,
                       target: {
-                        internalPath: `/messages/${encodeURIComponent(senderId)}`,
+                        internalPath: path,
                       },
                       tag: `realtime-dm:${String(dmData.id)}`,
                     },
                     queryClient,
+                    isCurrent,
                   );
                   if (
                     isNotificationPageActive() &&
@@ -1021,7 +1065,7 @@ export function useRealtimeNotificationsWebSocket(
                       senderId,
                     )
                   ) {
-                    toast("New message", {
+                    toast(title, {
                       id: `realtime-dm:${String(dmData.id)}`,
                       description: messagePreview,
                       action: {
@@ -1034,8 +1078,6 @@ export function useRealtimeNotificationsWebSocket(
                       },
                     });
                   }
-
-                  playMessageSound();
                 }
                 return;
               }
@@ -1248,6 +1290,7 @@ export function useRealtimeNotificationsWebSocket(
             showDesktopNotificationUnlessAppConnected(
               desktopNotification,
               queryClient,
+              () => !unmounted && wsRef.current === ws,
             );
 
             const now = Date.now();
@@ -1363,8 +1406,10 @@ export function useRealtimeNotificationsWebSocket(
     };
 
     const handleVisibilityChange = () => {
-      if (manuallyDisconnectedRef.current) return;
       if (document.visibilityState !== "visible") return;
+      if (isNotificationPageActive())
+        dismissReadMessageNotifications(locationPathRef.current);
+      if (manuallyDisconnectedRef.current) return;
       if (!wsRef.current || !hasSyncedPreferences()) {
         connectionNotice.unavailable();
       }
@@ -1373,6 +1418,8 @@ export function useRealtimeNotificationsWebSocket(
 
     const handleWindowFocus = () => {
       if (document.visibilityState !== "visible") return;
+      if (isNotificationPageActive())
+        dismissReadMessageNotifications(locationPathRef.current);
       reconnectNow("focus");
     };
 
@@ -1388,6 +1435,8 @@ export function useRealtimeNotificationsWebSocket(
 
     return () => {
       unmounted = true;
+      dismissMessageDesktopNotifications();
+      messageReadVersions.clear();
       publishRealtimeConnectionState(false);
       connectionNotice.reset();
       connectionNoticeRef.current = null;
@@ -1425,5 +1474,6 @@ export function useRealtimeNotificationsWebSocket(
     onSupporterUpdated,
     preferenceScope,
     queryClient,
+    dismissReadMessageNotifications,
   ]);
 }
