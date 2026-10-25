@@ -768,9 +768,7 @@ export function GroupChatView({
         >
           <GroupAvatar
             name={group?.name ?? ""}
-            groupId={groupId}
             memberIds={group?.memberIds}
-            currentUserId={currentUserId}
             className="h-8 w-8"
           />
         </button>
