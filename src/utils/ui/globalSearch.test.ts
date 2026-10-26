@@ -3,9 +3,7 @@ import {
   createGlobalSearchIndex,
   getGlobalSearchResults,
   getGlobalUserQuery,
-  GLOBAL_SEARCH_GROUP_LIMIT,
 } from "./globalSearch";
-import { navigationSections } from "./navigation-menu";
 
 const catalog = [
   { id: 1, name: "OG Monster", type: "Vehicle", cash_value: "1250000" },
@@ -14,17 +12,31 @@ const catalog = [
 ];
 const index = createGlobalSearchIndex(catalog);
 
-test("empty search lists sidebar destinations without dumping the catalog", () => {
-  const results = getGlobalSearchResults(index, "  ");
-  expect(results.map((result) => result.href)).toEqual(
-    navigationSections.flatMap((section) =>
-      section.items
-        .filter((item) => item.badge !== "coming-soon")
-        .slice(0, GLOBAL_SEARCH_GROUP_LIMIT)
-        .map((item) => item.href),
-    ),
-  );
-  expect(results.every((result) => !result.item)).toBe(true);
+test("empty search shows eight ordered quick links without loading the catalog", () => {
+  for (const query of ["", "  "]) {
+    const results = getGlobalSearchResults(index, query);
+    expect(results.map((result) => result.href)).toEqual([
+      "/values",
+      "/values/calculator",
+      "/trading",
+      "/inventories",
+      "/dupes",
+      "/og",
+      "/changelogs",
+      "/settings",
+    ]);
+    expect(
+      results.every((result) => result.group === "Quick links" && !result.item),
+    ).toBe(true);
+    expect(
+      results.every(
+        (result) => result.title && result.description && result.icon,
+      ),
+    ).toBe(true);
+    expect(getGlobalSearchResults(createGlobalSearchIndex([]), query)).toEqual(
+      results,
+    );
+  }
 });
 
 test("a query finds tools and items together, retaining category, URL and price", () => {

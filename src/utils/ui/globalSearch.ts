@@ -47,6 +47,24 @@ const routes: GlobalSearchResult[] = navigationSections.flatMap((section) =>
     })),
 );
 
+const quickLinks: GlobalSearchResult[] = [
+  ...[
+    "/values",
+    "/values/calculator",
+    "/trading",
+    "/inventories",
+    "/dupes",
+    "/og",
+    "/changelogs",
+  ].flatMap((href) => routes.filter((route) => route.href === href)),
+  {
+    title: "Settings",
+    description: "Manage your account and preferences",
+    href: "/settings",
+    icon: "material-symbols:settings-rounded",
+  },
+].map((route) => ({ ...route, group: "Quick links" }));
+
 export function createGlobalSearchIndex(
   items: SearchCatalogItem[],
   seasons: Season[] = [],
@@ -146,6 +164,7 @@ export function getGlobalSearchResults(
 ): GlobalSearchResult[] {
   if (getGlobalUserQuery(query) !== null) return [];
   const term = query.trim().toLowerCase();
+  if (!term) return quickLinks;
   const matches = index.search(term).filter(
     ({ item }) =>
       term.length > 3 ||
@@ -164,12 +183,10 @@ export function getGlobalSearchResults(
         Number(b.matches?.some((match) => match.key === "title")) -
         Number(a.matches?.some((match) => match.key === "title")),
     );
-  const ranked = query.trim()
-    ? [
-        ...matches.filter(({ item }) => item.group !== "Changelogs"),
-        ...changelogs,
-      ].map(({ item }) => item)
-    : routes;
+  const ranked = [
+    ...matches.filter(({ item }) => item.group !== "Changelogs"),
+    ...changelogs,
+  ].map(({ item }) => item);
   const counts = new Map<string, number>();
   return ranked.filter((result) => {
     const count = counts.get(result.group) ?? 0;

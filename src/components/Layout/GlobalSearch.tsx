@@ -304,6 +304,18 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                     </div>
                   ),
                 )}
+                {group === "Items" &&
+                  localResults.filter((result) => result.item).length ===
+                    GLOBAL_SEARCH_GROUP_LIMIT && (
+                    <Link
+                      href={`/values?${new URLSearchParams({ query: query.trim() })}`}
+                      prefetch={false}
+                      onClick={onClose}
+                      className="text-link focus-visible:ring-link mx-3 my-2 block w-fit rounded text-xs underline focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      View all item results
+                    </Link>
+                  )}
               </div>
             ))}
           </div>
@@ -344,17 +356,6 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
           </div>
         </div>
         <div className="text-secondary-text border-border-card shrink-0 space-y-2 border-t px-4 py-3 text-xs">
-          {localResults.filter((result) => result.item).length ===
-            GLOBAL_SEARCH_GROUP_LIMIT && (
-            <Link
-              href={`/values?${new URLSearchParams({ query: query.trim() })}`}
-              prefetch={false}
-              onClick={onClose}
-              className="text-link focus-visible:ring-link block w-fit rounded underline focus-visible:ring-2 focus-visible:outline-none"
-            >
-              View all item results
-            </Link>
-          )}
           <p id="global-search-hint">Search users with @username.</p>
           <p>
             <span className="text-primary-text">↑ ↓</span> to navigate ·{" "}
