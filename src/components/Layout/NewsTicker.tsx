@@ -33,7 +33,7 @@ export default function NewsTicker({
 
   return (
     <div className="from-status-info/15 to-secondary-bg bg-linear-to-r">
-      <div className="relative container mx-auto px-4 py-2">
+      <div className="relative px-4 py-2">
         <div className="flex flex-col items-center justify-center gap-2 pr-8 lg:flex-row lg:gap-3 lg:pr-12">
           {announcement.label && (
             <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ export default function NewsTicker({
           <button
             type="button"
             onClick={handleDismiss}
-            className="text-secondary-text hover:text-primary-text hover:bg-tertiary-bg focus-visible:ring-border-focus absolute top-1/2 right-4 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="text-primary-text hover:bg-tertiary-bg focus-visible:ring-border-focus absolute top-1/2 right-4 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
             aria-label="Dismiss announcement"
           >
             <svg

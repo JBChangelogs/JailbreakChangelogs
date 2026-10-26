@@ -136,7 +136,7 @@ export default function LatestReleaseDialogClient({
       >
         <div className="overflow-hidden">
           <div className="bg-secondary-bg border-border-card border-b">
-            <div className="relative container mx-auto px-4 py-2">
+            <div className="relative px-4 py-2">
               <DialogTrigger asChild>
                 <button
                   type="button"
@@ -152,7 +152,7 @@ export default function LatestReleaseDialogClient({
               </DialogTrigger>
               <button
                 type="button"
-                className="text-secondary-text hover:text-primary-text hover:bg-tertiary-bg focus-visible:ring-border-focus absolute top-1/2 right-4 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="text-primary-text hover:bg-tertiary-bg focus-visible:ring-border-focus absolute top-1/2 right-4 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
                 aria-label="Dismiss what's new announcement"
                 onClick={dismiss}
               >
