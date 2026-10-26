@@ -45,8 +45,8 @@ function LayoutPreview({ layout }: { layout: DesktopNavigation }) {
       role="img"
       aria-label={
         sidebar
-          ? "Sidebar navigation beside the page content"
-          : "Top bar navigation above the page content"
+          ? "Sidebar navigation beside the page content with search centered in the header"
+          : "Top bar navigation above the page content with search after the navigation links"
       }
       className="border-border-card bg-primary-bg w-full rounded-lg border"
     >
@@ -74,15 +74,36 @@ function LayoutPreview({ layout }: { layout: DesktopNavigation }) {
           <rect
             key={index}
             style={{
-              x: sidebar ? 10 : 60 + index * 42,
+              x: sidebar ? 10 : 48 + index * 20,
               y: sidebar ? 34 + index * 18 : 8,
-              width: sidebar ? 34 : 28,
+              width: sidebar ? 34 : 14,
             }}
             height="4"
             rx="2"
             className={MOTION}
           />
         ))}
+      </g>
+      <g
+        style={{
+          transform: sidebar ? "translate(86px,5px)" : "translate(134px,5px)",
+        }}
+        className={MOTION}
+      >
+        <rect
+          style={{ width: sidebar ? 68 : 64 }}
+          height="10"
+          rx="3"
+          className={`fill-tertiary-bg stroke-border-card ${MOTION}`}
+        />
+        <g className="stroke-secondary-text" fill="none" strokeWidth="0.8">
+          <circle cx="6" cy="4.5" r="1.7" />
+          <path d="M7.3 5.8 9 7.5" />
+        </g>
+      </g>
+      <g className="fill-secondary-text">
+        <circle cx="214" cy="10" r="2" />
+        <circle cx="226" cy="10" r="3" />
       </g>
       <g
         style={{
