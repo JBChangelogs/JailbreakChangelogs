@@ -60,6 +60,10 @@ test("preserves large numeric IDs and disallows redirects for all profile reques
     expect(options?.redirect).toBe("error");
   }
 
+  const metadataQuery = new URLSearchParams(
+    String(fetchMock.mock.calls.at(-1)![0]).split("?")[1],
+  );
+  expect(metadataQuery.get("fields")?.split(",")).toContain("roblox_id");
   expect(fetchMock).toHaveBeenCalledTimes(2);
 });
 

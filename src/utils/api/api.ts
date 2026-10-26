@@ -467,6 +467,7 @@ export async function fetchUserByIdForMetadata(
       "custom_accent_color",
       "global_name",
       "username",
+      "roblox_id",
     ].join(",");
 
     const response = await fetch(

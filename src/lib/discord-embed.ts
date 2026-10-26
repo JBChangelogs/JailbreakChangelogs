@@ -55,6 +55,8 @@ type EmbedData = {
   description: string;
   url: string;
   images: string[];
+  robloxId?: string;
+  accentColor?: string;
 };
 
 function httpUrl(value: string): boolean {
@@ -65,8 +67,13 @@ function httpUrl(value: string): boolean {
   }
 }
 
-function buttons(url: string) {
+function buttons(url: string, robloxId?: string) {
   const path = new URL(url).pathname.replace(/\/$/, "");
+  const isUserProfile = /^\/users\/[^/]+$/.test(path);
+  const linkedRobloxId =
+    typeof robloxId === "string" && /^[1-9]\d*$/.test(robloxId)
+      ? robloxId
+      : undefined;
   const area = path.split("/")[1];
   const group = BUTTON_GROUPS.find(([areas]) => areas.includes(area));
   const keys: (keyof typeof EMBED_LINKS)[] = group?.[1] ?? [
@@ -75,6 +82,7 @@ function buttons(url: string) {
     "inventories",
   ];
   const links: [string, string][] = keys
+    .filter((key) => key !== "inventories" || !isUserProfile || linkedRobloxId)
     .map(
       (key) =>
         EMBED_LINKS[
@@ -82,7 +90,10 @@ function buttons(url: string) {
         ],
     )
     .filter(([, route]) => route !== path)
-    .map(([label, route]) => [label, `${SITE_URL}${route}`]);
+    .map(([label, route]) => [
+      label,
+      `${SITE_URL}${isUserProfile && route === "/inventories" ? `/inventories/${linkedRobloxId}` : route}`,
+    ]);
   links.push(["Join Discord", COMMUNITY_URL]);
   return links.map(([label, link]) => ({
     type: 2,
@@ -126,10 +137,18 @@ export function buildDiscordEmbed(data: unknown) {
     text,
     ...(gallery.items.length ? [gallery] : []),
     { type: 14, spacing: 1 },
-    { type: 1, components: buttons(input.url) },
+    { type: 1, components: buttons(input.url, input.robloxId) },
   ];
   const payload = {
-    component: { type: 17, accent_color: 0x2462cd, components },
+    component: {
+      type: 17,
+      accent_color:
+        typeof input.accentColor === "string" &&
+        /^#[0-9a-fA-F]{6}$/.test(input.accentColor)
+          ? Number.parseInt(input.accentColor.slice(1), 16)
+          : 0x2462cd,
+      components,
+    },
   };
 
   return Buffer.byteLength(JSON.stringify(payload)) <= 3000 ? payload : null;
@@ -139,6 +158,7 @@ export function withDiscordEmbed(
   metadata: Metadata,
   path: string,
   details?: string,
+  profile: Pick<EmbedData, "robloxId" | "accentColor"> = {},
 ): Metadata {
   const og = metadata.openGraph;
   const title = metadata.title ?? og?.title;
@@ -154,6 +174,7 @@ export function withDiscordEmbed(
       : [rawImages]
     : [];
   const data: EmbedData = {
+    ...profile,
     title: `${path === "/" && pageTitle === "Jailbreak Changelogs" ? "Home" : pageTitle.replace(/\s+[|–—-]\s+Jailbreak Changelogs$/, "")} | Jailbreak Changelogs`,
     description: [og?.description ?? metadata.description ?? "", details]
       .filter(Boolean)

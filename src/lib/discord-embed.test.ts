@@ -58,10 +58,7 @@ test("each section links to related tools without repeating the current page", (
       ["Dupe Finder", "OG Finder", "Item Values", "Join Discord"],
     ],
     ["/robberies/", ["Private Servers", "Bounty Tracker", "Join Discord"]],
-    [
-      "/users/123",
-      ["User Search", "Item Values", "Inventory Checker", "Join Discord"],
-    ],
+    ["/users/123", ["User Search", "Item Values", "Join Discord"]],
     ["/supporting", ["Testimonials", "Meet the Team", "Join Discord"]],
   ] as const) {
     const url = `https://jailbreakchangelogs.com${path}`;
@@ -79,6 +76,59 @@ test("each section links to related tools without repeating the current page", (
     expect(
       row.components.every((button) => button.url !== url.replace(/\/$/, "")),
     ).toBe(true);
+  }
+});
+
+test("profile inventory buttons require a linked Roblox ID and link to its inventory", async () => {
+  for (const robloxId of [
+    undefined,
+    "",
+    "None",
+    "0",
+    "../123",
+    "123?tab=trades",
+    "456789",
+  ]) {
+    const metadata = withDiscordEmbed(
+      { title: "User Profile" },
+      "/users/123/",
+      undefined,
+      { robloxId },
+    );
+    const response = GET(new Request(embedUrl(metadata)));
+    expect(response.status).toBe(200);
+    const payload = await response.json();
+    const buttons = payload.component.components.at(-1).components;
+    const inventoryButton = buttons.find(
+      (button: { label: string }) => button.label === "Inventory Checker",
+    );
+    if (robloxId === "456789") {
+      expect(inventoryButton?.url).toBe(
+        "https://jailbreakchangelogs.com/inventories/456789",
+      );
+    } else {
+      expect(inventoryButton).toBeUndefined();
+    }
+  }
+});
+
+test("profile embeds use their accent color with blue as the fallback", async () => {
+  for (const [accentColor, expected] of [
+    ["#ff0088", 0xff0088],
+    ["#000000", 0],
+    ["#ABCDEF", 0xabcdef],
+    [undefined, 0x2462cd],
+    ["None", 0x2462cd],
+    ["#12345g", 0x2462cd],
+  ] as const) {
+    const metadata = withDiscordEmbed(
+      { title: "User Profile" },
+      "/users/123",
+      undefined,
+      { accentColor },
+    );
+    const payload = await GET(new Request(embedUrl(metadata))).json();
+    expect(payload.component.accent_color).toBe(expected);
   }
 });
 

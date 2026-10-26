@@ -152,6 +152,13 @@ export async function generateMetadata({
     return withDiscordEmbed(
       metadata,
       `/users/${encodeURIComponent((await params).id)}`,
+      undefined,
+      {
+        robloxId: user.roblox_id,
+        accentColor: formatAccentColor(
+          user.custom_accent_color ?? user.accent_color,
+        ),
+      },
     );
   } catch (error: unknown) {
     // Check if this is a banned user error
