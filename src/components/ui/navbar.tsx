@@ -276,7 +276,7 @@ export const NavbarModern = ({
     <div
       className={cn("bg-secondary-bg border-border-card border-b", className)}
     >
-      <div className="flex h-15 items-center justify-between gap-4 px-4">
+      <div className="relative flex h-15 items-center justify-between gap-4 px-4">
         {/* Logo */}
         <div className="flex shrink-0 items-center gap-2">
           <Tooltip>
@@ -324,7 +324,7 @@ export const NavbarModern = ({
         <div
           ref={navRootWrapperRef}
           data-desktop-top-navigation
-          className="mr-auto shrink-0 min-[1800px]:absolute min-[1800px]:left-1/2 min-[1800px]:mr-0 min-[1800px]:-translate-x-1/2"
+          className="shrink-0"
         >
           <NavigationMenu.Root
             style={{ position: "relative" }}
@@ -428,8 +428,32 @@ export const NavbarModern = ({
           </NavigationMenu.Root>
         </div>
 
+        {onOpenSearch && (
+          <button
+            type="button"
+            data-desktop-search
+            onClick={onOpenSearch}
+            aria-label={`Search the site (${searchShortcut})`}
+            aria-keyshortcuts="Control+k Meta+k"
+            aria-haspopup="dialog"
+            className="text-secondary-text border-border-card bg-tertiary-bg hover:bg-quaternary-bg hover:text-primary-text focus-visible:ring-link flex h-10 w-40 max-w-md min-w-40 flex-1 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="size-4 shrink-0"
+            />
+            <span>Search…</span>
+            <kbd
+              aria-hidden="true"
+              className="border-border-card bg-secondary-bg ml-auto shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none"
+            >
+              {searchShortcut}
+            </kbd>
+          </button>
+        )}
+
         {/* Right side actions */}
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <ExperimentOverridesBadge placement="header" />
           {/* Notification icon */}
           <NotificationPopover
@@ -471,29 +495,6 @@ export const NavbarModern = ({
           <ThemeShortcut className="focus-visible:ring-link data-[state=open]:bg-quaternary-bg border-0 bg-transparent transition-colors focus-visible:ring-2 focus-visible:outline-none" />
 
           <NavigationLayoutShortcut />
-
-          {onOpenSearch && (
-            <button
-              type="button"
-              onClick={onOpenSearch}
-              aria-label={`Search the site (${searchShortcut})`}
-              aria-keyshortcuts="Control+k Meta+k"
-              aria-haspopup="dialog"
-              className="text-secondary-text border-border-card bg-tertiary-bg hover:bg-quaternary-bg hover:text-primary-text focus-visible:ring-link flex h-10 w-40 shrink-0 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none 2xl:w-48"
-            >
-              <Icon
-                icon="heroicons:magnifying-glass"
-                className="size-4 shrink-0"
-              />
-              <span>Search…</span>
-              <kbd
-                aria-hidden="true"
-                className="border-border-card bg-secondary-bg ml-auto shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none"
-              >
-                {searchShortcut}
-              </kbd>
-            </button>
-          )}
 
           {/* User menu or login button */}
           {isLoading ? (

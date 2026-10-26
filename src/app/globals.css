@@ -840,6 +840,14 @@ img.twemoji {
     display: none;
   }
 
+  html:not([data-desktop-navigation="top-bar"]) [data-desktop-search] {
+    position: absolute;
+    left: 50%;
+    width: 28rem;
+    max-width: 28rem;
+    transform: translateX(-50%);
+  }
+
   html[data-desktop-navigation="top-bar"] [data-desktop-sidebar],
   html[data-desktop-navigation="top-bar"] [data-desktop-sidebar-toggle] {
     display: none;
