@@ -18,6 +18,7 @@ export const trendOrder = [
   "Unstable",
   "Hoarded",
   "Manipulated",
+  "Projected",
   "Stable",
   "Recovering",
   "Rising",
@@ -39,6 +40,7 @@ const trendValueMap: Record<string, string> = {
   "trend-stable": "Stable",
   "trend-rising": "Rising",
   "trend-hyped": "Hyped",
+  "trend-projected": "Projected",
   "trend-dropping": "Dropping",
   "trend-unstable": "Unstable",
   "trend-hoarded": "Hoarded",
@@ -344,6 +346,7 @@ export const sortByValueSort = <T>(
     case "trend-stable":
     case "trend-rising":
     case "trend-hyped":
+    case "trend-projected":
     case "trend-dropping":
     case "trend-unstable":
     case "trend-hoarded":
@@ -424,6 +427,7 @@ const matchesFilterSort = (
     case "trend-stable":
     case "trend-rising":
     case "trend-hyped":
+    case "trend-projected":
     case "trend-dropping":
     case "trend-unstable":
     case "trend-hoarded":
@@ -459,6 +463,7 @@ const TREND_FILTER_SORTS: FilterSort[] = [
   "trend-stable",
   "trend-rising",
   "trend-hyped",
+  "trend-projected",
   "trend-dropping",
   "trend-unstable",
   "trend-hoarded",

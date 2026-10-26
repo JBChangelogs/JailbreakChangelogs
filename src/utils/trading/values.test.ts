@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import type { Item } from "@/types";
-import { filterByTypes } from "./values";
+import { filterByTypes, filterByValueSort } from "./values";
 
 function item(id: number, type: string, demand: string): Item {
   return {
@@ -29,6 +29,21 @@ function item(id: number, type: string, demand: string): Item {
 }
 
 describe("combined value page filters", () => {
+  test("projected filters match the trend in both filter paths", () => {
+    const items = [
+      { ...item(1, "Vehicle", "High"), trend: "Projected" },
+      { ...item(2, "Vehicle", "High"), trend: "projected" },
+      { ...item(3, "Vehicle", "High"), trend: "Stable" },
+    ];
+
+    expect(
+      filterByTypes(items, ["trend-projected"]).map((entry) => entry.id),
+    ).toEqual([1, 2]);
+    expect(
+      filterByValueSort(items, "trend-projected").map((entry) => entry.id),
+    ).toEqual([1, 2]);
+  });
+
   test("seasonal filtering uses season or level instead of the legacy flag", () => {
     const base = item(1, "Vehicle", "High");
     const filtered = filterByTypes(

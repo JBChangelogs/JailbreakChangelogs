@@ -14,4 +14,6 @@ export const trendDescriptions: Record<string, string> = {
     "Items which are currently experiencing a sustained increase in value due to a surplus in demand.",
   Hyped:
     "Items which are experiencing a significant, but temporary, spike in demand which is driven by the community",
+  Projected:
+    "Items which aren't as rare/valuable as people make it out to be yet consistently are treated as such.",
 };

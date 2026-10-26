@@ -139,6 +139,8 @@ function TradingGuides({
         return "trend-rising";
       case "Hyped":
         return "trend-hyped";
+      case "Projected":
+        return "trend-projected";
       default:
         return "trend-stable";
     }
@@ -266,7 +268,7 @@ function TradingGuides({
                   }
                 >
                   <span
-                    className="rounded px-2 py-0.5 text-xs font-bold tracking-wider text-white uppercase"
+                    className={`rounded px-2 py-0.5 text-xs font-bold tracking-wider uppercase ${trend === "Projected" ? "text-black" : "text-white"}`}
                     style={{ backgroundColor: getTrendHexColor(trend) }}
                   >
                     {trend}

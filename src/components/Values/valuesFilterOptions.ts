@@ -54,6 +54,7 @@ export const advancedFilterGroups: FilterGroup[] = [
       { value: "trend-unstable", label: "Unstable" },
       { value: "trend-hoarded", label: "Hoarded" },
       { value: "trend-manipulated", label: "Manipulated" },
+      { value: "trend-projected", label: "Projected" },
       { value: "trend-stable", label: "Stable" },
       { value: "trend-recovering", label: "Recovering" },
       { value: "trend-rising", label: "Rising" },

@@ -53,6 +53,8 @@ export const getTrendHexColor = (trend: string | null | undefined): string => {
       return "#1d4ed8";
     case "Hyped":
       return "#ec4899";
+    case "Projected":
+      return "#38B2CD";
     default:
       return "#6b7280";
   }
@@ -111,6 +113,8 @@ export const getTrendColor = (trend: string | null | undefined): string => {
       return "bg-blue-700 text-white";
     case "Hyped":
       return "bg-pink-500 text-white";
+    case "Projected":
+      return "bg-[#38B2CD] text-black";
     default:
       return "bg-gray-600 text-white";
   }
