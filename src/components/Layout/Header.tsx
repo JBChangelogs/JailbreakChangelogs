@@ -881,7 +881,11 @@ export default function Header({
                     <Link
                       href="/messages"
                       className={cn(
-                        "text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none",
+                        "hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none",
+                        pathname.startsWith("/messages") ||
+                          unreadMessageCount > 0
+                          ? "text-primary-text"
+                          : "text-secondary-text",
                         pathname.startsWith("/messages") && "bg-quaternary-bg",
                       )}
                       aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
@@ -913,7 +917,12 @@ export default function Header({
                     aria-expanded={mobileOpen}
                   >
                     <svg
-                      className="text-primary-text h-5 w-5 fill-current"
+                      className={cn(
+                        "h-5 w-5 fill-current",
+                        mobileOpen
+                          ? "text-primary-text"
+                          : "text-secondary-text",
+                      )}
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 512 512"
                     >

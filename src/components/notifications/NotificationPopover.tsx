@@ -167,7 +167,10 @@ export function NotificationPopover({
       className={cn(
         // The tooltip owns data-state on this trigger, so use the popover's
         // own state for the open look.
-        "text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none",
+        "hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none",
+        open || (isAuthenticated && unreadCount > 0)
+          ? "text-primary-text"
+          : "text-secondary-text",
         open && "bg-quaternary-bg",
         isDesktop ? "h-10 w-10" : "h-8 w-8",
       )}

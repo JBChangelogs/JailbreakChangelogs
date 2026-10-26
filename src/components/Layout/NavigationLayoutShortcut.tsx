@@ -29,7 +29,7 @@ export default function NavigationLayoutShortcut() {
           <Link
             href={SETTINGS_HREF}
             aria-label="Change navigation layout"
-            className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link flex size-10 items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-link flex size-10 items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <svg
               viewBox="0 0 24 24"

@@ -55,7 +55,7 @@ export const ThemeShortcut = ({
           href={THEME_SETTINGS_HREF}
           aria-label={`Change theme (current: ${label})`}
           className={cn(
-            "text-primary-text hover:bg-quaternary-bg flex items-center justify-center rounded-lg transition-colors duration-200",
+            "text-secondary-text hover:text-primary-text hover:bg-quaternary-bg flex items-center justify-center rounded-lg transition-colors duration-200",
             size === "sm" ? "h-8 w-8" : "h-10 w-10",
             className,
           )}

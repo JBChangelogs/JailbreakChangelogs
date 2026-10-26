@@ -288,31 +288,14 @@ export const NavbarModern = ({
                 aria-label={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
                 aria-expanded={!sidebarCollapsed}
                 aria-controls="desktop-sidebar-navigation"
-                className="text-primary-text hover:bg-quaternary-bg focus-visible:ring-link hidden size-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none 2xl:flex"
+                className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-link hidden size-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none 2xl:flex"
               >
                 <svg
-                  viewBox="0 0 24 24"
+                  viewBox="0 0 512 512"
                   aria-hidden="true"
-                  className="size-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  className="size-5 fill-current"
                 >
-                  <rect x="2" y="3" width="20" height="18" rx="2" />
-                  <path d="M8 3v18" />
-                  <path
-                    d="M4.5 7.5h1.5M4.5 11.5h1.5M4.5 15.5h1.5"
-                    className="opacity-[var(--desktop-sidebar-collapsed-opacity,0)]"
-                  />
-                  <path
-                    d="M4 3h4v18H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z M4 7h2v1H4Z M4 11h2v1H4Z M4 15h2v1H4Z"
-                    fill="currentColor"
-                    fillRule="evenodd"
-                    stroke="none"
-                    className="opacity-[var(--desktop-sidebar-expanded-opacity,1)]"
-                  />
+                  <path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" />
                 </svg>
               </button>
             </TooltipTrigger>
@@ -463,7 +446,10 @@ export const NavbarModern = ({
                 href="/messages"
                 prefetch={false}
                 className={cn(
-                  "text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none",
+                  "hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-link relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none",
+                  pathname.startsWith("/messages") || unreadMessageCount > 0
+                    ? "text-primary-text"
+                    : "text-secondary-text",
                   pathname.startsWith("/messages") && "bg-quaternary-bg",
                 )}
                 aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
