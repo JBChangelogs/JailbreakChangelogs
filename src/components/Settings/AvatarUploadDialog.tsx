@@ -5,6 +5,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
 } from "react";
 import { useDropzone } from "react-dropzone";
 import type { Area, Point } from "react-easy-crop";
@@ -23,6 +24,8 @@ import {
 import { Icon } from "@/components/ui/IconWrapper";
 import { Slider } from "@/components/ui/slider";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
+import { useProfileBannerAspectRatio } from "@/hooks/useProfileBannerAspectRatio";
+import { useProfileBackgroundAspectRatio } from "@/hooks/useProfileBackgroundAspectRatio";
 import { createLogger } from "@/services/logger";
 import {
   updateUserSettings,
@@ -133,8 +136,22 @@ const ImageUploadDialog = ({
     checkBackgroundAccess,
   } = useSupporterModal();
   const isAvatar = imageType === "avatar";
+  const bannerAspectRatio = useProfileBannerAspectRatio(
+    imageType === "banner" && isCropOpen,
+  );
+  const backgroundAspectRatio = useProfileBackgroundAspectRatio(
+    imageType === "background" && isCropOpen,
+  );
   const label = imageType;
   const config = IMAGE_TYPE_CONFIG[imageType];
+  const visibleAspectRatio =
+    imageType === "banner" ? bannerAspectRatio : backgroundAspectRatio;
+  const visibleHeight = visibleAspectRatio
+    ? Math.min(config.aspect / visibleAspectRatio, 1) * 100
+    : 100;
+  const visibleWidth = visibleAspectRatio
+    ? Math.min(visibleAspectRatio / config.aspect, 1) * 100
+    : 100;
   const title = config.title;
   const maxFileSizeMb = IMAGE_UPLOAD_MAX_SIZE_MB[imageType];
   const settingName = config.setting;
@@ -411,6 +428,24 @@ const ImageUploadDialog = ({
                   zoom={zoom}
                   rotation={rotation}
                   aspect={config.aspect}
+                  classes={
+                    visibleAspectRatio
+                      ? { cropAreaClassName: "profile-upload-crop" }
+                      : undefined
+                  }
+                  style={
+                    visibleAspectRatio
+                      ? {
+                          cropAreaStyle: {
+                            border: "none",
+                            "--profile-visible-width": `${visibleWidth}%`,
+                            "--profile-visible-left": `${(100 - visibleWidth) / 2}%`,
+                            "--profile-visible-height": `${visibleHeight}%`,
+                            "--profile-visible-top": `${imageType === "background" ? 0 : (100 - visibleHeight) / 2}%`,
+                          } as CSSProperties,
+                        }
+                      : undefined
+                  }
                   cropShape={
                     isAvatar && userData.premiumtype !== 3 ? "round" : "rect"
                   }
@@ -427,6 +462,16 @@ const ImageUploadDialog = ({
             )}
           </div>
 
+          {visibleAspectRatio && (
+            <p className="text-secondary-text mt-3 text-xs">
+              The outline shows the visible {label} on this screen. Uploads use
+              a{" "}
+              {imageType === "banner"
+                ? "3:1 crop (up to 1500 × 500 px)"
+                : "16:9 crop (up to 1920 × 1080 px)"}
+              ; other screen sizes may show a different crop.
+            </p>
+          )}
           <div className="my-5 flex items-center gap-3">
             <Icon
               icon="heroicons:magnifying-glass-minus"

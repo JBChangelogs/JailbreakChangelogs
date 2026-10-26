@@ -16,17 +16,19 @@ function nodes(value: unknown): Node[] {
   return [node, ...nodes(node.props.children)];
 }
 
-test("avatar and banner uploads open a prompt and validate dropped and picked files before cropping", () => {
+test("image uploads validate files and preview banner and background display crops", () => {
   let allowed = true;
   let stateIndex = 0;
   let drop: (files: File[]) => void;
   let clicks = 0;
   let sources = 0;
+  let backgroundRatio = 32 / 9;
   const errors: string[] = [];
   const updates = new Map<number, unknown>();
   const exports = {} as {
     AvatarUploadDialog: (props: unknown) => Node;
     BannerUploadDialog: (props: unknown) => Node;
+    BackgroundUploadDialog: (props: unknown) => Node;
   };
   const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
   runInNewContext(
@@ -60,7 +62,10 @@ test("avatar and banner uploads open a prompt and validate dropped and picked fi
             useRef: (current: unknown) => ({ current }),
             useState: (initial: unknown) => {
               const index = stateIndex++;
-              return [initial, (value: unknown) => updates.set(index, value)];
+              return [
+                updates.has(index) ? updates.get(index) : initial,
+                (value: unknown) => updates.set(index, value),
+              ];
             },
           };
         if (name === "react-dropzone")
@@ -83,7 +88,18 @@ test("avatar and banner uploads open a prompt and validate dropped and picked fi
               modalState: {},
               checkAvatarAccess: () => allowed,
               checkBannerAccess: () => allowed,
+              checkBackgroundAccess: () => allowed,
             }),
+          };
+        if (name === "@/hooks/useProfileBannerAspectRatio")
+          return {
+            useProfileBannerAspectRatio: (enabled: boolean) =>
+              enabled ? 4 : null,
+          };
+        if (name === "@/hooks/useProfileBackgroundAspectRatio")
+          return {
+            useProfileBackgroundAspectRatio: (enabled: boolean) =>
+              enabled ? backgroundRatio : null,
           };
         if (name === "@/services/logger") return { createLogger: () => ({}) };
         if (name === "@/utils/storage/fileValidation") return { validateFile };
@@ -98,6 +114,7 @@ test("avatar and banner uploads open a prompt and validate dropped and picked fi
   for (const [type, sizeMb] of [
     ["Avatar", 8],
     ["Banner", 10],
+    ["Background", 10],
   ] as const) {
     let openPrompt: () => void;
     const element = exports[`${type}UploadDialog`]({
@@ -122,9 +139,10 @@ test("avatar and banner uploads open a prompt and validate dropped and picked fi
     openPrompt!();
     expect(updates.size).toBe(0);
     allowed = true;
+    const previousClicks = clicks;
     openPrompt!();
     expect(updates.get(1)).toBe(true);
-    expect(clicks).toBe(type === "Avatar" ? 0 : 1);
+    expect(clicks).toBe(previousClicks);
     (
       tree.find(
         (node) =>
@@ -132,7 +150,7 @@ test("avatar and banner uploads open a prompt and validate dropped and picked fi
           `Choose or drop a ${type.toLowerCase()} image`,
       )!.props.onClick as () => void
     )();
-    expect(clicks).toBe(type === "Avatar" ? 1 : 2);
+    expect(clicks).toBe(previousClicks + 1);
 
     updates.clear();
     drop!([new File(["text"], "bad.txt", { type: "text/plain" })]);
@@ -162,6 +180,45 @@ test("avatar and banner uploads open a prompt and validate dropped and picked fi
       expect(updates.get(2)).toBe(true);
       expect(updates.get(3)).toBe("blob:image");
     }
+    const cropStyle = () => {
+      stateIndex = 0;
+      const edited = nodes(
+        (element.type as (props: unknown) => unknown)(element.props),
+      );
+      expect(
+        edited.some(
+          (node) =>
+            node.props["aria-label"] === "Background horizontal position" ||
+            node.props["aria-label"] === "Background vertical position",
+        ),
+      ).toBe(false);
+      return (
+        edited.find((node) => node.type === "lazy-cropper")!.props.style as {
+          cropAreaStyle?: Record<string, unknown>;
+        }
+      )?.cropAreaStyle;
+    };
+    if (type === "Avatar") {
+      expect(cropStyle()).toBeUndefined();
+    } else {
+      expect(cropStyle()).toEqual({
+        border: "none",
+        "--profile-visible-width": "100%",
+        "--profile-visible-left": "0%",
+        "--profile-visible-height": type === "Banner" ? "75%" : "50%",
+        "--profile-visible-top": type === "Banner" ? "12.5%" : "0%",
+      });
+      if (type === "Background") {
+        backgroundRatio = 8 / 9;
+        expect(cropStyle()).toEqual({
+          border: "none",
+          "--profile-visible-width": "50%",
+          "--profile-visible-left": "25%",
+          "--profile-visible-height": "100%",
+          "--profile-visible-top": "0%",
+        });
+      }
+    }
   }
-  expect(sources).toBe(4);
+  expect(sources).toBe(6);
 });

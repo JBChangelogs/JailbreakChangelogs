@@ -79,6 +79,7 @@ export function AppearancePreview({
     >
       <div id="custom_banner" className="relative scroll-mt-24">
         <Banner
+          preview
           userId={userData.id}
           username={userData.username}
           banner={(profile?.banner ?? userData.banner) || undefined}

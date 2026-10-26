@@ -2,6 +2,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { cn } from "@/lib/utils";
+import {
+  PROFILE_BANNER_HEIGHT,
+  useProfileBannerAspectRatio,
+} from "@/hooks/useProfileBannerAspectRatio";
 import { UserSettingsV2 } from "@/types/auth";
 import { getBackgroundImageByIndex } from "@/utils/helpers/backgroundImages";
 
@@ -13,6 +17,7 @@ interface BannerProps {
   settings?: UserSettingsV2;
   premiumType?: number;
   className?: string;
+  preview?: boolean;
 }
 
 // Optimized seed calculation - converts string to number more efficiently
@@ -78,7 +83,9 @@ export const Banner = ({
   settings,
   premiumType,
   className,
+  preview = false,
 }: BannerProps) => {
+  const previewAspectRatio = useProfileBannerAspectRatio(preview);
   const [primaryBannerFailed, setPrimaryBannerFailed] = useState(false);
   const { primary, fallback } = getProfileBanner({
     userId,
@@ -90,7 +97,18 @@ export const Banner = ({
   const src = primary && !primaryBannerFailed ? primary : fallback;
 
   return (
-    <div className={cn("relative aspect-[3/1]", className)} key={userId}>
+    <div
+      className={cn(
+        "relative",
+        PROFILE_BANNER_HEIGHT,
+        preview && previewAspectRatio ? "h-auto md:h-auto" : undefined,
+        className,
+      )}
+      style={
+        preview ? { aspectRatio: previewAspectRatio ?? undefined } : undefined
+      }
+      key={userId}
+    >
       <Image
         placeholder={IMAGE_PLACEHOLDER}
         src={src}

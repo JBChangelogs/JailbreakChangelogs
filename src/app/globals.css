@@ -2,6 +2,22 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+.profile-upload-crop {
+  overflow: hidden;
+}
+
+.profile-upload-crop::after {
+  content: "";
+  position: absolute;
+  top: var(--profile-visible-top);
+  left: var(--profile-visible-left);
+  width: var(--profile-visible-width);
+  height: var(--profile-visible-height);
+  border: 1px solid white;
+  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.5);
+  pointer-events: none;
+}
+
 html[data-tab-style="filled"] [data-slot="tabs-list"] {
   border: 1px solid var(--color-border-card);
   background: var(--color-tertiary-bg);
