@@ -523,6 +523,9 @@ export default function Header({
       setSearchOpen(false);
       return;
     }
+    void import("./GlobalSearch").catch((error) =>
+      log.warn("Unable to preload search", error),
+    );
     const handleSearchShortcut = (event: KeyboardEvent) => {
       if (!isGlobalSearchShortcut(event)) return;
       event.preventDefault();

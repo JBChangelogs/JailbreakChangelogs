@@ -65,13 +65,36 @@ const quickLinks: GlobalSearchResult[] = [
   },
 ].map((route) => ({ ...route, group: "Quick links" }));
 
+const EMPTY_ITEMS: SearchCatalogItem[] = [];
+const EMPTY_SEASONS: Season[] = [];
+const EMPTY_CHANGELOGS: Changelog[] = [];
+let cachedIndex:
+  | {
+      items: SearchCatalogItem[];
+      seasons: Season[];
+      changelogs: Changelog[];
+      settings: ApiSettingsResponse | undefined;
+      signedIn: boolean;
+      index: Fuse<GlobalSearchResult>;
+    }
+  | undefined;
+
 export function createGlobalSearchIndex(
-  items: SearchCatalogItem[],
-  seasons: Season[] = [],
-  changelogs: Changelog[] = [],
+  items: SearchCatalogItem[] = EMPTY_ITEMS,
+  seasons: Season[] = EMPTY_SEASONS,
+  changelogs: Changelog[] = EMPTY_CHANGELOGS,
   settings?: ApiSettingsResponse,
   signedIn = Boolean(settings),
 ) {
+  if (
+    cachedIndex?.items === items &&
+    cachedIndex.seasons === seasons &&
+    cachedIndex.changelogs === changelogs &&
+    cachedIndex.settings === settings &&
+    cachedIndex.signedIn === signedIn
+  )
+    return cachedIndex.index;
+
   const settingEntries = [
     ...Object.entries(FRONTEND_SETTINGS)
       .filter(([, setting]) => signedIn || !setting.requiresAccount)
@@ -95,7 +118,7 @@ export function createGlobalSearchIndex(
         })),
     ]),
   ];
-  return new Fuse<GlobalSearchResult>(
+  const index = new Fuse<GlobalSearchResult>(
     [
       ...routes,
       ...settingEntries.map((setting) => ({
@@ -156,6 +179,8 @@ export function createGlobalSearchIndex(
       includeMatches: true,
     },
   );
+  cachedIndex = { items, seasons, changelogs, settings, signedIn, index };
+  return index;
 }
 
 export function getGlobalSearchResults(

@@ -1379,7 +1379,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 icon="emojione:light-bulb"
                 className="text-sm text-yellow-500"
               />
-              <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+              <kbd className="border-border-card bg-secondary-bg text-secondary-text shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none">
                 Shift
               </kbd>{" "}
               while clicking Clear to clear both sides instantly without

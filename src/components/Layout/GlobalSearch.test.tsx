@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { getGlobalUserQuery } from "@/utils/ui/globalSearch";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, ScriptTarget, transpileModule } from "typescript";
@@ -27,6 +28,7 @@ function setupSearch() {
     title: `Page ${id}`,
   }));
   const query = { data: [], isPending: false, isError: false };
+  const users = { results: [], isLoading: false, isError: false };
   const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
   const exports = {} as { default: (props: { onClose: () => void }) => Node };
   runInNewContext(
@@ -70,12 +72,15 @@ function setupSearch() {
         if (name === "@/utils/ui/globalSearch")
           return {
             createGlobalSearchIndex: () => [],
-            getGlobalSearchResults: () => results,
+            getGlobalSearchResults: (_index: unknown, term: string) =>
+              getGlobalUserQuery(term) !== null ? [] : results,
             getGlobalUserResults: () => [],
-            getGlobalUserQuery: () => null,
+            getGlobalUserQuery,
           };
         if (name === "@/utils/analytics/rybbit")
           return { trackEvent: (event: string) => events.push(event) };
+        if (name === "@/hooks/useUserSearch")
+          return { useUserSearch: () => users };
         if (name.startsWith("@/hooks/"))
           return new Proxy({}, { get: () => () => query });
         return new Proxy({}, { get: (_, key) => String(key) });
@@ -99,6 +104,11 @@ function setupSearch() {
     clicks,
     input,
     results,
+    sources: query,
+    users,
+    setQuery: (value: string) => {
+      state[0] = value;
+    },
     highlighted: () => state[1],
     focuses: () => focuses,
     key: (
@@ -169,4 +179,50 @@ test("opening the modal records once per mount, including focus effect replay", 
   const reopened = setupSearch();
   (reopened.render().props.onOpenAutoFocus as (event: object) => void)(event);
   expect(reopened.events).toEqual(["Global Search Opened"]);
+});
+
+function textContent(value: unknown): string {
+  if (value == null || typeof value === "boolean") return "";
+  if (Array.isArray(value)) return value.map(textContent).join(" ");
+  if (typeof value === "object")
+    return textContent((value as Node).props.children);
+  return String(value);
+}
+
+test("bare @ shows account guidance even while unrelated catalogs load or fail", () => {
+  const search = setupSearch();
+  search.setQuery("@ ");
+  search.sources.isPending = true;
+  search.sources.isError = true;
+  const text = textContent(search.render());
+  expect(text).toContain("Type a username to search accounts.");
+  expect(text).not.toContain("Searching…");
+  expect(text).not.toContain("No results found");
+  expect(text).not.toContain("could not be refreshed");
+});
+
+test("no matches show guidance only when the active search has completed successfully", () => {
+  const search = setupSearch();
+  search.setQuery("missing");
+  search.results.length = 0;
+  expect(textContent(search.render())).toContain("No results found");
+  expect(textContent(search.render())).toContain(
+    "Try a different name or search users with @username.",
+  );
+  search.sources.isPending = true;
+  expect(textContent(search.render())).not.toContain("No results found");
+  expect(textContent(search.render())).toContain("Searching…");
+  search.sources.isPending = false;
+  search.sources.isError = true;
+  expect(textContent(search.render())).not.toContain("No results found");
+
+  search.setQuery("@missing");
+  search.users.isLoading = true;
+  expect(textContent(search.render())).toContain("Searching…");
+  expect(textContent(search.render())).not.toContain("No results found");
+  search.users.isLoading = false;
+  expect(textContent(search.render())).toContain("No results found");
+  search.users.isError = true;
+  expect(textContent(search.render())).toContain("User search failed.");
+  expect(textContent(search.render())).not.toContain("No results found");
 });

@@ -372,3 +372,77 @@ test("short searches match title prefixes instead of unrelated description and b
     expect.objectContaining({ href: "/changelogs/112" }),
   );
 });
+
+test("reopening reuses the index while data and account state are unchanged", () => {
+  const items = [...catalog];
+  const seasons: Parameters<typeof createGlobalSearchIndex>[1] = [];
+  const changelogs: Parameters<typeof createGlobalSearchIndex>[2] = [];
+  const settings = {};
+  const first = createGlobalSearchIndex(
+    items,
+    seasons,
+    changelogs,
+    settings,
+    true,
+  );
+  expect(
+    createGlobalSearchIndex(items, seasons, changelogs, settings, true),
+  ).toBe(first);
+
+  const updatedItems = [
+    ...items,
+    { id: 4, name: "New Vehicle", type: "Vehicle", cash_value: "100" },
+  ];
+  const refreshed = createGlobalSearchIndex(
+    updatedItems,
+    seasons,
+    changelogs,
+    settings,
+    true,
+  );
+  expect(refreshed).not.toBe(first);
+  expect(getGlobalSearchResults(refreshed, "New Vehicle")).toContainEqual(
+    expect.objectContaining({ title: "New Vehicle" }),
+  );
+  expect(
+    createGlobalSearchIndex(
+      updatedItems,
+      [...seasons],
+      changelogs,
+      settings,
+      true,
+    ),
+  ).not.toBe(refreshed);
+  const updatedChangelogs = createGlobalSearchIndex(
+    updatedItems,
+    seasons,
+    [...changelogs],
+    settings,
+    true,
+  );
+  expect(updatedChangelogs).not.toBe(refreshed);
+  expect(
+    createGlobalSearchIndex(updatedItems, seasons, changelogs, {}, true),
+  ).not.toBe(updatedChangelogs);
+
+  const signedIn = createGlobalSearchIndex(
+    items,
+    seasons,
+    changelogs,
+    settings,
+    true,
+  );
+  const signedOut = createGlobalSearchIndex(
+    items,
+    seasons,
+    changelogs,
+    settings,
+    false,
+  );
+  expect(signedOut).not.toBe(signedIn);
+  expect(
+    createGlobalSearchIndex(items, seasons, changelogs, settings, false),
+  ).toBe(signedOut);
+  const empty = createGlobalSearchIndex();
+  expect(createGlobalSearchIndex()).toBe(empty);
+});

@@ -635,7 +635,7 @@ export default function ValuesSearchControls({
               className="text-sm text-yellow-500"
             />
             Helpful tip: Press{" "}
-            <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+            <kbd className="border-border-card bg-secondary-bg text-secondary-text shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none">
               /
             </kbd>{" "}
             to quickly focus the search.

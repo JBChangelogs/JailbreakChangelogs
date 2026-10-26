@@ -53,15 +53,19 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
     ...(user ? [{ label: "Settings", ...settings }] : []),
   ];
   const isLoading =
-    sources.some((source) => source.isPending) || users.isLoading;
+    userQuery !== null
+      ? usersEnabled && users.isLoading
+      : sources.some((source) => source.isPending);
   const hasError =
-    sources.some((source) => source.isError) || (usersEnabled && users.isError);
+    userQuery !== null
+      ? usersEnabled && users.isError
+      : sources.some((source) => source.isError);
   const index = useMemo(
     () =>
       createGlobalSearchIndex(
-        items.data ?? [],
-        seasons.data ?? [],
-        changelogs.data ?? [],
+        items.data,
+        seasons.data,
+        changelogs.data,
         user ? settings.data : undefined,
         Boolean(user),
       ),
@@ -93,7 +97,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         data-global-search-dialog
-        className="top-[10dvh] flex max-h-[80dvh] w-[calc(100%-2rem)] max-w-2xl translate-y-0 flex-col gap-0 overflow-hidden p-0"
+        className="top-[10dvh] flex h-[min(40rem,80dvh)] max-h-[80dvh] w-[calc(100%-2rem)] max-w-2xl translate-y-0 flex-col gap-0 overflow-hidden p-0"
         aria-describedby={undefined}
         onOpenAutoFocus={(event) => {
           event.preventDefault();
@@ -159,7 +163,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                 : undefined
             }
             className="text-primary-text placeholder:text-secondary-text h-16 min-w-0 flex-1 bg-transparent outline-none"
-            placeholder="Search the site…"
+            placeholder="What are you looking for?"
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -175,7 +179,10 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
             <Icon icon="heroicons:x-mark" className="size-5" />
           </button>
         </div>
-        <div ref={resultsRef} className="min-h-0 overflow-y-auto p-2">
+        <div
+          ref={resultsRef}
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2"
+        >
           <div
             id="global-search-results"
             role="listbox"
@@ -319,16 +326,28 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
               </div>
             ))}
           </div>
-          <div role="status" className="text-secondary-text px-3 py-2 text-sm">
+          <div
+            role="status"
+            className={`text-secondary-text px-3 py-2 text-sm ${!results.length ? "flex flex-1 flex-col items-center justify-center text-center" : ""}`}
+          >
             {!results.length &&
               !isLoading &&
               !hasError &&
-              (userQuery !== null && !usersEnabled
-                ? "Enter a name after @ to search users."
-                : "No results found. Try another name.")}
+              (userQuery !== null && !usersEnabled ? (
+                <p>Type a username to search accounts.</p>
+              ) : (
+                <>
+                  <p className="text-primary-text font-medium">
+                    No results found
+                  </p>
+                  <p className="mt-1">
+                    Try a different name or search users with @username.
+                  </p>
+                </>
+              ))}
             {isLoading && <p>Searching…</p>}
             {sources
-              .filter((source) => source.isError)
+              .filter((source) => userQuery === null && source.isError)
               .map((source) => (
                 <p key={source.label}>
                   {source.label} could not be refreshed.{" "}
@@ -357,10 +376,22 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
         </div>
         <div className="text-secondary-text border-border-card shrink-0 space-y-2 border-t px-4 py-3 text-xs">
           <p id="global-search-hint">Search users with @username.</p>
-          <p>
-            <span className="text-primary-text">↑ ↓</span> to navigate ·{" "}
-            <span className="text-primary-text">Enter</span> to open ·{" "}
-            <span className="text-primary-text">Esc</span> to close
+          <p className="flex flex-wrap items-center gap-1">
+            <kbd className="border-border-card bg-secondary-bg text-primary-text shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none">
+              ↑
+            </kbd>
+            <kbd className="border-border-card bg-secondary-bg text-primary-text shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none">
+              ↓
+            </kbd>
+            <span>to navigate ·</span>
+            <kbd className="border-border-card bg-secondary-bg text-primary-text shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none">
+              Enter
+            </kbd>
+            <span>to open ·</span>
+            <kbd className="border-border-card bg-secondary-bg text-primary-text shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none">
+              Esc
+            </kbd>
+            <span>to close</span>
           </p>
         </div>
       </DialogContent>
