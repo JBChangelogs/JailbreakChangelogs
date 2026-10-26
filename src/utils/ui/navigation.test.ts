@@ -1,5 +1,9 @@
 import { expect, test } from "bun:test";
-import { getNavigationHref, getNavigationSection } from "./navigation";
+import {
+  getNavigationHref,
+  getNavigationSection,
+  getNavigationViewportCenter,
+} from "./navigation";
 
 test("highlights the section containing a page, including nested routes", () => {
   for (const [path, section] of [
@@ -43,4 +47,11 @@ test("sidebar selects the most specific link in the destination's section", () =
   ] as const) {
     expect(getNavigationHref(path)).toBe(href);
   }
+});
+
+test("navigation dropdowns keep a viewport gutter at both edges", () => {
+  expect(getNavigationViewportCenter(250, 540, 1280)).toBe(286);
+  expect(getNavigationViewportCenter(800, 540, 1280)).toBe(800);
+  expect(getNavigationViewportCenter(1200, 540, 1280)).toBe(994);
+  expect(getNavigationViewportCenter(1200, 600, 1280)).toBe(964);
 });

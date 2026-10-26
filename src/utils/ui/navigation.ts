@@ -45,3 +45,15 @@ export function getNavigationHref(pathname: string) {
       .sort((a, b) => b.href.length - a.href.length)[0]?.href ?? null
   );
 }
+
+export function getNavigationViewportCenter(
+  triggerCenter: number,
+  menuWidth: number,
+  viewportWidth: number,
+) {
+  const halfWidth = menuWidth / 2;
+  return Math.max(
+    16 + halfWidth,
+    Math.min(triggerCenter, viewportWidth - 16 - halfWidth),
+  );
+}

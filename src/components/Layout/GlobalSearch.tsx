@@ -355,7 +355,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
               View all item results
             </Link>
           )}
-          <p id="global-search-hint">Type @name to search users.</p>
+          <p id="global-search-hint">Search users with @username.</p>
           <p>↑ ↓ to navigate · Enter to open · Esc to close</p>
         </div>
       </DialogContent>

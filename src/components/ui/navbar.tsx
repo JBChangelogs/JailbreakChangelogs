@@ -7,7 +7,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navigationSections } from "@/utils/ui/navigation-menu";
 import NavigationLayoutShortcut from "@/components/Layout/NavigationLayoutShortcut";
-import { getNavigationSection } from "@/utils/ui/navigation";
+import {
+  getNavigationSection,
+  getNavigationViewportCenter,
+} from "@/utils/ui/navigation";
+import GlobalSearchTip from "@/components/Layout/GlobalSearchTip";
 import SiteLogo from "@/components/ui/SiteLogo";
 import { NavigationMenu as NavigationMenu } from "radix-ui";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
@@ -118,11 +122,13 @@ export const NavbarModern = ({
   sidebarCollapsed,
   onToggleSidebar,
   onOpenSearch,
+  searchOpen,
 }: {
   className?: string;
   sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
   onOpenSearch?: () => void;
+  searchOpen: boolean;
   unreadCount: number;
   unreadMessageCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
@@ -150,18 +156,29 @@ export const NavbarModern = ({
 
   React.useEffect(() => {
     const container = navViewportContainerRef.current;
-    if (
-      container &&
-      navMenuValue &&
-      triggerRefs.current[navMenuValue] &&
-      navRootWrapperRef.current
-    ) {
-      const trigger = triggerRefs.current[navMenuValue]!;
-      const root = navRootWrapperRef.current;
+    const viewport = navViewportWrapperRef.current;
+    const root = navRootWrapperRef.current;
+    const trigger = triggerRefs.current[navMenuValue];
+    if (!container || !viewport || !root || !trigger) return;
+
+    const updatePosition = () => {
       const triggerRect = trigger.getBoundingClientRect();
-      const rootRect = root.getBoundingClientRect();
-      container.style.left = `${triggerRect.left - rootRect.left + triggerRect.width / 2}px`;
-    }
+      const center = getNavigationViewportCenter(
+        triggerRect.left + triggerRect.width / 2,
+        viewport.offsetWidth,
+        document.documentElement.clientWidth,
+      );
+      container.style.left = `${center - root.getBoundingClientRect().left}px`;
+    };
+    updatePosition();
+    const observer = new ResizeObserver(updatePosition);
+    observer.observe(viewport);
+    observer.observe(root);
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updatePosition);
+    };
   }, [navMenuValue]);
 
   // Only pass-through open events — all closing is owned by the mousemove effect below.
@@ -429,27 +446,29 @@ export const NavbarModern = ({
         </div>
 
         {onOpenSearch && (
-          <button
-            type="button"
-            data-desktop-search
-            onClick={onOpenSearch}
-            aria-label={`Search the site (${searchShortcut})`}
-            aria-keyshortcuts="Control+k Meta+k"
-            aria-haspopup="dialog"
-            className="text-secondary-text border-border-card bg-tertiary-bg hover:bg-quaternary-bg hover:text-primary-text focus-visible:ring-link flex h-10 w-40 max-w-md min-w-40 flex-1 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <Icon
-              icon="heroicons:magnifying-glass"
-              className="size-4 shrink-0"
-            />
-            <span>Search…</span>
-            <kbd
-              aria-hidden="true"
-              className="border-border-card bg-secondary-bg ml-auto shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none"
+          <GlobalSearchTip searchOpen={searchOpen} onOpenSearch={onOpenSearch}>
+            <button
+              type="button"
+              data-desktop-search
+              onClick={onOpenSearch}
+              aria-label={`Search the site (${searchShortcut})`}
+              aria-keyshortcuts="Control+k Meta+k"
+              aria-haspopup="dialog"
+              className="text-secondary-text border-border-card bg-tertiary-bg hover:bg-quaternary-bg hover:text-primary-text focus-visible:ring-link flex h-10 w-40 max-w-md min-w-40 flex-1 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
-              {searchShortcut}
-            </kbd>
-          </button>
+              <Icon
+                icon="heroicons:magnifying-glass"
+                className="size-4 shrink-0"
+              />
+              <span>Search…</span>
+              <kbd
+                aria-hidden="true"
+                className="border-border-card bg-secondary-bg ml-auto shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none"
+              >
+                {searchShortcut}
+              </kbd>
+            </button>
+          </GlobalSearchTip>
         )}
 
         {/* Right side actions */}
