@@ -271,7 +271,7 @@ const CarouselPrevious = React.forwardRef<
   (
     {
       className,
-      variant = "outline",
+      variant = "secondary",
       size = "icon",
       type = "button",
       ...props
@@ -312,7 +312,7 @@ const CarouselNext = React.forwardRef<
   (
     {
       className,
-      variant = "outline",
+      variant = "secondary",
       size = "icon",
       type = "button",
       ...props

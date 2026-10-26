@@ -18,13 +18,7 @@ interface ConfirmDialogProps {
   message?: string;
   confirmText?: string;
   cancelText?: string;
-  confirmVariant?:
-    | "default"
-    | "destructive"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "link";
+  confirmVariant?: "default" | "destructive" | "secondary" | "ghost" | "link";
   confirmDisabled?: boolean;
   closeOnConfirm?: boolean;
   children?: React.ReactNode;

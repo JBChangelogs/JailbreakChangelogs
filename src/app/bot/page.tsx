@@ -109,7 +109,7 @@ export default function BotPage() {
                     Invite to Your Server
                   </a>
                 </Button>
-                <Button asChild size="lg" variant="heroOutline">
+                <Button asChild size="lg" variant="secondary">
                   <a href="#bot-features">Explore Features</a>
                 </Button>
               </div>

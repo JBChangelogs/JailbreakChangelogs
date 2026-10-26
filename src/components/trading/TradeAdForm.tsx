@@ -1076,7 +1076,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                       syncItemsToPreference([], requestingItems);
                       setShowClearConfirmModal(false);
                     }}
-                    variant="outline"
+                    variant="secondary"
                     className="border-button-success! text-button-success! bg-button-success/10! hover:bg-button-success/20! active:bg-button-success/20!"
                   >
                     Clear You Give
@@ -1092,7 +1092,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                       syncItemsToPreference(offeringItems, []);
                       setShowClearConfirmModal(false);
                     }}
-                    variant="outline"
+                    variant="secondary"
                     className="border-button-danger! text-button-danger! bg-button-danger/10! hover:bg-button-danger/20! active:bg-button-danger/20!"
                   >
                     Clear You Receive

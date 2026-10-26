@@ -427,7 +427,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                   <Button
                     asChild
                     size="sm"
-                    variant="outline"
+                    variant="secondary"
                     className="px-2 sm:px-3"
                     aria-label="Make an offer"
                   >

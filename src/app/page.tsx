@@ -280,7 +280,7 @@ export default async function Home() {
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <PlayJailbreakButton />
-                <Button asChild variant="heroOutline" size="lg">
+                <Button asChild variant="secondary" size="lg">
                   <a
                     href="https://discord.jailbreakchangelogs.com"
                     target="_blank"
@@ -403,7 +403,11 @@ export default async function Home() {
                 Join thousands of Jailbreak players
               </p>
             </div>
-            <Button asChild variant="outline" className="hidden md:inline-flex">
+            <Button
+              asChild
+              variant="secondary"
+              className="hidden md:inline-flex"
+            >
               <Link href="/testimonials" prefetch={false}>
                 View All Testimonials
               </Link>
@@ -458,7 +462,7 @@ export default async function Home() {
               )}
             </div>
           </div>
-          <Button asChild variant="outline" className="md:hidden">
+          <Button asChild variant="secondary" className="md:hidden">
             <Link href="/testimonials" prefetch={false}>
               View Testimonials
             </Link>

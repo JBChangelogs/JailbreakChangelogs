@@ -43,14 +43,14 @@ export default function AccessDeniedPage() {
           <AccessDeniedLoginButton />
           <Button
             asChild
-            variant="outline"
+            variant="secondary"
             className="border-border-primary! text-primary-text! hover:bg-quaternary-bg! active:bg-quaternary-bg! w-full sm:w-auto"
           >
             <Link href="/">Back to Home</Link>
           </Button>
           <Button
             asChild
-            variant="outline"
+            variant="secondary"
             className="border-border-primary! text-primary-text! hover:bg-quaternary-bg! active:bg-quaternary-bg! w-full sm:w-auto"
           >
             <a

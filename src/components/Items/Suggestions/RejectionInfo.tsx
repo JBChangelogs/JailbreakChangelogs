@@ -24,7 +24,7 @@ export function RejectionInfo({
       triggerAsChild
       noReferrer
     >
-      <Button type="button" variant="outline" size="sm" className="w-fit">
+      <Button type="button" variant="secondary" size="sm" className="w-fit">
         <Icon
           icon="material-symbols:visibility-outline-rounded"
           className="h-4 w-4"
