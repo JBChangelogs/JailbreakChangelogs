@@ -170,6 +170,8 @@ export function SuggestionForm({
       ));
 
   useEffect(() => {
+    setSuggestedValue("");
+    setSuggestedValueError(null);
     setCommonTrades([createEmptyCommonTrade(), createEmptyCommonTrade()]);
     setCommonTradesError(null);
   }, [selectedItem?.id]);
@@ -628,29 +630,35 @@ export function SuggestionForm({
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {(limits?.valid_trends ?? []).map((t) => {
-                        const color = getTrendCssColor(t);
-                        return (
-                          <button
-                            key={t}
-                            type="button"
-                            onClick={() => setSuggestedValue(t)}
-                            className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
-                              suggestedValue === t
-                                ? "ring-2"
-                                : "opacity-60 hover:opacity-90"
-                            }`}
-                            style={
-                              {
-                                borderColor: color,
-                                "--tw-ring-color": color,
-                              } as React.CSSProperties
-                            }
-                          >
-                            {t}
-                          </button>
-                        );
-                      })}
+                      {(limits?.valid_trends ?? [])
+                        .filter(
+                          (t) =>
+                            t.trim().toLowerCase() !==
+                            selectedItem?.trend?.trim().toLowerCase(),
+                        )
+                        .map((t) => {
+                          const color = getTrendCssColor(t);
+                          return (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => setSuggestedValue(t)}
+                              className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                                suggestedValue === t
+                                  ? "ring-2"
+                                  : "opacity-60 hover:opacity-90"
+                              }`}
+                              style={
+                                {
+                                  borderColor: color,
+                                  "--tw-ring-color": color,
+                                } as React.CSSProperties
+                              }
+                            >
+                              {t}
+                            </button>
+                          );
+                        })}
                     </div>
                   </div>
                 )
@@ -668,29 +676,37 @@ export function SuggestionForm({
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {(limits?.valid_demands ?? []).map((d) => {
-                        const color = getDemandCssColor(d);
-                        return (
-                          <button
-                            key={d}
-                            type="button"
-                            onClick={() => setSuggestedValue(d)}
-                            className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
-                              suggestedValue === d
-                                ? "ring-2"
-                                : "opacity-60 hover:opacity-90"
-                            }`}
-                            style={
-                              {
-                                borderColor: color,
-                                "--tw-ring-color": color,
-                              } as React.CSSProperties
-                            }
-                          >
-                            {d}
-                          </button>
-                        );
-                      })}
+                      {(limits?.valid_demands ?? [])
+                        .filter(
+                          (d) =>
+                            d.trim().toLowerCase() !==
+                            selectedItem?.[field as "demand" | "duped_demand"]
+                              ?.trim()
+                              .toLowerCase(),
+                        )
+                        .map((d) => {
+                          const color = getDemandCssColor(d);
+                          return (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={() => setSuggestedValue(d)}
+                              className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                                suggestedValue === d
+                                  ? "ring-2"
+                                  : "opacity-60 hover:opacity-90"
+                              }`}
+                              style={
+                                {
+                                  borderColor: color,
+                                  "--tw-ring-color": color,
+                                } as React.CSSProperties
+                              }
+                            >
+                              {d}
+                            </button>
+                          );
+                        })}
                     </div>
                   </div>
                 )
