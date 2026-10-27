@@ -56,7 +56,7 @@ const colors = (...keys: string[]) => ({
  * Content is placeholder text only, so it can't be mistaken for real data.
  *
  * Hovering anything names its colors; with `onPick`, clicking it passes
- * them on, so the editor can jump to those settings.
+ * them and the element on, so the editor can open its controls beside it.
  */
 export default function CustomThemePreview({
   vars,
@@ -68,7 +68,7 @@ export default function CustomThemePreview({
   vars: Record<string, string>;
   scheme: "dark" | "light";
   logoFilter: string | null;
-  onPick?: (keys: string[]) => void;
+  onPick?: (keys: string[], element: Element) => void;
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -108,12 +108,13 @@ export default function CustomThemePreview({
   return (
     <div
       ref={rootRef}
+      data-theme-color-preview={onPick ? "" : undefined}
       aria-hidden="true"
       onMouseOver={showTip}
       onMouseLeave={() => setTip(null)}
       onClick={(event) => {
         const hit = keysAt(event.target);
-        if (hit && onPick) onPick(hit.keys);
+        if (hit && onPick) onPick(hit.keys, hit.el);
       }}
       className={cn(
         "bg-primary-bg text-primary-text border-border-card @container relative overflow-hidden rounded-xl border",

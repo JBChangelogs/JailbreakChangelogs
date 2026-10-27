@@ -24,13 +24,17 @@ function editor({
   existing = false,
   active = false,
   fail = false,
+  collapsed = true,
 } = {}) {
   const saved: UserTheme = {
     id: 1,
     share_code: "K7QM4XRP",
     label: "Mine",
     scheme: "dark",
-    vars: { "--color-primary-bg": "#111111" },
+    vars: {
+      "--color-primary-bg": "#111111",
+      "--color-secondary-bg": "#222222",
+    },
     logo_filter: null,
   };
   const states: unknown[] = [];
@@ -39,6 +43,8 @@ function editor({
   const savedEvents: UserTheme[] = [];
   const requests: string[] = [];
   const errors: string[] = [];
+  const scrolls: string[] = [];
+  const timers: (() => void)[] = [];
   const exports = {} as { default: (props: unknown) => Node };
   const jsx = (type: string, props: Node["props"]) => ({ type, props });
   const persist = async (method: string) => {
@@ -55,11 +61,24 @@ function editor({
     ).outputText,
     {
       exports,
+      setTimeout: (callback: () => void) => timers.push(callback),
+      document: {
+        createElement: () => ({ getContext: () => null }),
+        getElementById: (id: string) => ({
+          scrollIntoView: () => scrolls.push(id),
+        }),
+      },
       require: (name: string) => {
+        if (name === "radix-ui")
+          return { Popover: { Anchor: "PopoverAnchor" } };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name === "react")
           return {
-            useRef: (current: unknown) => ({ current }),
+            useRef: (current: unknown) => {
+              const index = cursor++;
+              states[index] ??= { current };
+              return states[index];
+            },
             useEffect: () => {},
             useState: (initial: unknown) => {
               const index = cursor++;
@@ -112,7 +131,7 @@ function editor({
           return {
             useBottomPanel: () => ({
               isMobile: mobile,
-              collapsed: true,
+              collapsed,
               sheet: { side: "right" },
             }),
             BottomPanelHeader: "BottomPanelHeader",
@@ -145,7 +164,127 @@ function editor({
     (button.props.onClick as () => void)();
     await new Promise((resolve) => setImmediate(resolve));
   };
-  return { saved, applied, savedEvents, requests, errors, prompt, save };
+  return {
+    saved,
+    applied,
+    savedEvents,
+    requests,
+    errors,
+    prompt,
+    save,
+    render,
+    scrolls,
+    flushTimers: () => timers.splice(0).forEach((callback) => callback()),
+  };
+}
+
+for (const mobile of [true, false]) {
+  test(`${mobile ? "mobile" : "desktop"} preview picks open an inline color bubble without scrolling or filtering the grid`, () => {
+    const view = editor({ mobile, collapsed: false });
+    let rect = { top: 420, bottom: 452, left: 100, right: 180 };
+    const element = { getBoundingClientRect: () => rect } as Element;
+    const pick = (keys: string[]) => {
+      const preview = view.render().find((node) => node.props.onPick)!;
+      (preview.props.onPick as (keys: string[], element: Element) => void)(
+        keys,
+        element,
+      );
+    };
+    const bubble = () => view.render().find((node) => node.type === "Popover")!;
+    const control = () => view.render().find((node) => node.props.inline)!;
+    const gridCount = () =>
+      view
+        .render()
+        .filter((node) => "colorKey" in node.props && !node.props.inline)
+        .length;
+    const initialCount = gridCount();
+    expect(bubble().props.open).toBe(false);
+    pick(["--unknown"]);
+    expect(bubble().props.open).toBe(false);
+    pick(["--color-primary-bg", "--color-secondary-bg", "--unknown"]);
+    expect(bubble().props.open).toBe(true);
+    expect(control().props.colorKey).toBe("--color-primary-bg");
+    const anchor = view.render().find((node) => node.type === "PopoverAnchor")!;
+    const virtual = (
+      anchor.props.virtualRef as {
+        current: {
+          getBoundingClientRect: () => unknown;
+          contextElement: Element;
+        };
+      }
+    ).current;
+    expect(virtual.contextElement).toBe(element);
+    expect(virtual.getBoundingClientRect()).toBe(rect);
+    rect = { ...rect, top: 320, bottom: 352 };
+    expect(virtual.getBoundingClientRect()).toBe(rect);
+    expect(gridCount()).toBe(initialCount);
+    view.flushTimers();
+    expect(view.scrolls).toEqual([]);
+
+    (control().props.onChange as (value: string) => void)("#abcdef");
+    expect(control().props.value).toBe("#abcdef");
+    const colors = view
+      .render()
+      .find(
+        (node) =>
+          node.type === "Tabs" &&
+          node.props.radio &&
+          node.props.value === "--color-primary-bg",
+      )!;
+    expect(
+      view
+        .render()
+        .filter(
+          (node) =>
+            node.type === "TabsTrigger" &&
+            [
+              "--color-primary-bg",
+              "--color-secondary-bg",
+              "--unknown",
+            ].includes(node.props.value as string),
+        ),
+    ).toHaveLength(2);
+    (colors.props.onValueChange as (key: string) => void)(
+      "--color-secondary-bg",
+    );
+    expect(control().props.colorKey).toBe("--color-secondary-bg");
+    const outside = (selectable: boolean) => {
+      let prevented = false;
+      const content = view
+        .render()
+        .find((node) => node.type === "PopoverContent")!;
+      (content.props.onInteractOutside as (event: unknown) => void)({
+        target: {
+          closest: (selector: string) => {
+            expect(selector).toBe("[data-theme-color-preview] [data-color]");
+            return selectable ? element : null;
+          },
+        },
+        preventDefault: () => {
+          prevented = true;
+        },
+      });
+      if (!prevented)
+        (bubble().props.onOpenChange as (open: boolean) => void)(false);
+      return prevented;
+    };
+    // Mouse dismissal precedes the pick; touch dismissal can follow the click.
+    expect(outside(true)).toBe(true);
+    expect(bubble().props.open).toBe(true);
+    pick(["--color-primary-bg"]);
+    expect(control().props.colorKey).toBe("--color-primary-bg");
+    pick(["--color-secondary-bg"]);
+    expect(outside(true)).toBe(true);
+    expect(bubble().props.open).toBe(true);
+    expect(control().props.colorKey).toBe("--color-secondary-bg");
+    expect(outside(false)).toBe(false);
+    expect(bubble().props.open).toBe(false);
+    pick(["--color-primary-bg"]);
+    (bubble().props.onOpenChange as (open: boolean) => void)(false);
+    expect(bubble().props.open).toBe(false);
+    pick(["--color-primary-bg"]);
+    expect(control().props.value).toBe("#abcdef");
+  });
 }
 
 test("saving a new desktop theme asks before applying and Not now leaves it inactive", async () => {
