@@ -5,6 +5,7 @@ import { FRONTEND_SETTINGS } from "@/config/settings";
 import { useId, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useExperimentAccess } from "@/hooks/useExperimentAccess";
 import { Switch } from "@/components/ui/switch";
 import { SETTING_HIGHLIGHT } from "@/components/Settings/SettingsCard";
 import {
@@ -37,7 +38,13 @@ const MOTION =
   "transition-all duration-700 ease-in-out motion-reduce:transition-none";
 
 /** Animates between layouts by moving the same shapes. */
-function LayoutPreview({ layout }: { layout: DesktopNavigation }) {
+function LayoutPreview({
+  layout,
+  search,
+}: {
+  layout: DesktopNavigation;
+  search: boolean;
+}) {
   const sidebar = layout === "sidebar";
   return (
     <svg
@@ -45,8 +52,8 @@ function LayoutPreview({ layout }: { layout: DesktopNavigation }) {
       role="img"
       aria-label={
         sidebar
-          ? "Sidebar navigation beside the page content with search centered in the header"
-          : "Top bar navigation above the page content with search after the navigation links"
+          ? `Sidebar navigation beside the page content${search ? " with search centered in the header" : ""}`
+          : `Top bar navigation above the page content${search ? " with search after the navigation links" : ""}`
       }
       className="border-border-card bg-primary-bg w-full rounded-lg border"
     >
@@ -74,9 +81,9 @@ function LayoutPreview({ layout }: { layout: DesktopNavigation }) {
           <rect
             key={index}
             style={{
-              x: sidebar ? 10 : 48 + index * 20,
+              x: sidebar ? 10 : search ? 48 + index * 20 : 60 + index * 42,
               y: sidebar ? 34 + index * 18 : 8,
-              width: sidebar ? 34 : 14,
+              width: sidebar ? 34 : search ? 14 : 28,
             }}
             height="4"
             rx="2"
@@ -84,25 +91,27 @@ function LayoutPreview({ layout }: { layout: DesktopNavigation }) {
           />
         ))}
       </g>
-      <g
-        style={{
-          transform: sidebar ? "translate(86px,5px)" : "translate(134px,5px)",
-        }}
-        className={MOTION}
-      >
-        <rect
-          style={{ width: sidebar ? 68 : 64 }}
-          height="10"
-          rx="3"
-          className={`fill-tertiary-bg stroke-border-card ${MOTION}`}
-        />
-        <g className="stroke-secondary-text" fill="none" strokeWidth="0.8">
-          <circle cx="6" cy="4.5" r="1.7" />
-          <path d="M7.3 5.8 9 7.5" />
+      {search && (
+        <g
+          style={{
+            transform: sidebar ? "translate(86px,5px)" : "translate(134px,5px)",
+          }}
+          className={MOTION}
+        >
+          <rect
+            style={{ width: sidebar ? 68 : 64 }}
+            height="10"
+            rx="3"
+            className={`fill-tertiary-bg stroke-border-card ${MOTION}`}
+          />
+          <g className="stroke-secondary-text" fill="none" strokeWidth="0.8">
+            <circle cx="6" cy="4.5" r="1.7" />
+            <path d="M7.3 5.8 9 7.5" />
+          </g>
         </g>
-      </g>
+      )}
       <g className="fill-secondary-text">
-        <circle cx="214" cy="10" r="2" />
+        {search && <circle cx="214" cy="10" r="2" />}
         <circle cx="226" cy="10" r="3" />
       </g>
       <g
@@ -128,7 +137,12 @@ function LayoutPreview({ layout }: { layout: DesktopNavigation }) {
 
 export default function DesktopNavigationSettings() {
   const id = useId();
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, user } = useAuthContext();
+  const searchEnabled = useExperimentAccess(
+    "global_search",
+    user?.id,
+    isAuthenticated,
+  );
   const mode = useSyncExternalStore(
     subscribeDesktopNavigation,
     getDesktopNavigation,
@@ -198,7 +212,7 @@ export default function DesktopNavigationSettings() {
             </label>
           ))}
         </div>
-        <LayoutPreview layout={mode} />
+        <LayoutPreview layout={mode} search={searchEnabled} />
       </div>
 
       <div

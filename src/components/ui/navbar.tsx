@@ -670,7 +670,43 @@ export const NavbarModern = ({
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button onClick={() => setShowLoginModal(true)}>Login</Button>
+            <div className="flex">
+              <Button
+                onClick={() => setShowLoginModal(true)}
+                className="rounded-r-none"
+              >
+                Login
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    aria-label="More options"
+                    className="border-primary-bg/20 rounded-l-none border-l px-2"
+                  >
+                    <Icon icon="mdi:chevron-down" className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  data-toast-avoid=""
+                  align="end"
+                  className="bg-secondary-bg z-[2147483647] w-48 rounded-lg p-1 shadow-lg"
+                >
+                  <DropdownMenuItem
+                    asChild
+                    className="gap-3 rounded-md px-3 py-2.5"
+                  >
+                    <Link href="/settings">
+                      <Icon
+                        icon="material-symbols:settings-rounded"
+                        className="text-secondary-text h-4 w-4"
+                        inline={true}
+                      />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
         </div>
       </div>
