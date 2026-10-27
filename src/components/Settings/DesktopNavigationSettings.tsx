@@ -41,9 +41,11 @@ const MOTION =
 function LayoutPreview({
   layout,
   search,
+  squareAvatar,
 }: {
   layout: DesktopNavigation;
   search: boolean;
+  squareAvatar: boolean;
 }) {
   const sidebar = layout === "sidebar";
   return (
@@ -111,8 +113,11 @@ function LayoutPreview({
         </g>
       )}
       <g className="fill-secondary-text">
-        {search && <circle cx="214" cy="10" r="2" />}
-        <circle cx="226" cy="10" r="3" />
+        {squareAvatar ? (
+          <rect x="223" y="7" width="6" height="6" rx="1.5" />
+        ) : (
+          <circle cx="226" cy="10" r="3" />
+        )}
       </g>
       <g
         style={{
@@ -212,7 +217,11 @@ export default function DesktopNavigationSettings() {
             </label>
           ))}
         </div>
-        <LayoutPreview layout={mode} search={searchEnabled} />
+        <LayoutPreview
+          layout={mode}
+          search={searchEnabled}
+          squareAvatar={user?.premiumtype === 3}
+        />
       </div>
 
       <div
