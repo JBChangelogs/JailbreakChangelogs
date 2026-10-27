@@ -235,7 +235,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
       expect(result.expanded.pinnedToggle.scrollbarWidth).toBe("none");
       expect(result.expanded.pinnedToggle.scrollTop).toBeGreaterThan(0);
       expect(result.expanded.pinnedToggle.bottom).toBeLessThanOrEqual(
-        result.expanded.pinnedToggle.sidebarBottom,
+        result.expanded.pinnedToggle.sidebarBottom - 32,
       );
       expect(result.expanded.pinnedToggle.navigationBottom).toBeLessThanOrEqual(
         result.expanded.pinnedToggle.top,
