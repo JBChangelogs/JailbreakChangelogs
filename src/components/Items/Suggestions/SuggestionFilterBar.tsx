@@ -1,16 +1,26 @@
 "use client";
 
-import type { FormEventHandler, RefObject } from "react";
+import {
+  Fragment,
+  type FormEventHandler,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
+import { Button } from "@/components/ui/button";
 import { fieldLabel } from "@/components/Items/Suggestions/shared";
+
+import { filterGroups } from "@/components/Values/valuesFilterOptions";
 
 interface SuggestionFilterBarProps {
   searchInputRef: RefObject<HTMLInputElement | null>;
@@ -23,10 +33,10 @@ interface SuggestionFilterBarProps {
   onClearSearch: () => void;
   typeFilter: string;
   onTypeFilterChange: (value: string) => void;
-  suggestionItemTypes: string[];
-  fieldFilter: string;
+  fieldFilter: string[];
   onFieldFilterChange: (value: string) => void;
   suggestionFields: string[];
+  sortControl: ReactNode;
 }
 
 export function SuggestionFilterBar({
@@ -40,11 +50,15 @@ export function SuggestionFilterBar({
   onClearSearch,
   typeFilter,
   onTypeFilterChange: handleTypeFilterChange,
-  suggestionItemTypes,
   fieldFilter,
   onFieldFilterChange: handleFieldFilterChange,
   suggestionFields,
+  sortControl,
 }: SuggestionFilterBarProps) {
+  const categoryLabel =
+    filterGroups
+      .flatMap((group) => group.options)
+      .find((option) => option.itemType === typeFilter)?.label ?? "All Items";
   return (
     <>
       <div className="mb-4 flex flex-col gap-4 sm:flex-row">
@@ -102,18 +116,16 @@ export function SuggestionFilterBar({
           </div>
         </form>
 
-        {/* Item type + field filters — grid so they're side by side on mobile too */}
         <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
           <div className="sm:w-48">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
+                  aria-label="Select category"
                   className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 >
-                  <span className="truncate">
-                    {typeFilter === "All" ? "All Types" : typeFilter}
-                  </span>
+                  <span className="truncate">{categoryLabel}</span>
                   <Icon
                     icon="heroicons:chevron-down"
                     className="text-secondary-text h-5 w-5 shrink-0"
@@ -133,69 +145,61 @@ export function SuggestionFilterBar({
                     value="All"
                     className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                   >
-                    All Types
+                    All Items
                   </DropdownMenuRadioItem>
-                  {suggestionItemTypes.map((type) => (
-                    <DropdownMenuRadioItem
-                      key={type}
-                      value={type}
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      {type}
-                    </DropdownMenuRadioItem>
+                  {filterGroups.map((group, index) => (
+                    <Fragment key={group.label}>
+                      <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                        {group.label}
+                      </DropdownMenuLabel>
+                      {group.options.map((option) => (
+                        <DropdownMenuRadioItem
+                          key={option.itemType}
+                          value={option.itemType}
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          {option.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                      {index !== filterGroups.length - 1 && (
+                        <DropdownMenuSeparator className="bg-border-primary/60" />
+                      )}
+                    </Fragment>
                   ))}
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
 
-          <div className="sm:w-48">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                >
-                  <span className="truncate">
-                    {fieldFilter === "All"
-                      ? "All Fields"
-                      : fieldLabel(fieldFilter)}
-                  </span>
-                  <Icon
-                    icon="heroicons:chevron-down"
-                    className="text-secondary-text h-5 w-5 shrink-0"
-                    inline
-                  />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-              >
-                <DropdownMenuRadioGroup
-                  value={fieldFilter}
-                  onValueChange={handleFieldFilterChange}
-                >
-                  <DropdownMenuRadioItem
-                    value="All"
-                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                  >
-                    All Fields
-                  </DropdownMenuRadioItem>
-                  {suggestionFields.map((f) => (
-                    <DropdownMenuRadioItem
-                      key={f}
-                      value={f}
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      {fieldLabel(f)}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {sortControl && <div className="sm:w-48">{sortControl}</div>}
         </div>
+      </div>
+      <div
+        role="group"
+        aria-label="Suggestion field"
+        className="mb-4 flex flex-wrap gap-2"
+      >
+        <Button
+          type="button"
+          size="sm"
+          variant={fieldFilter.length === 0 ? "default" : "secondary"}
+          aria-pressed={fieldFilter.length === 0}
+          onClick={() => handleFieldFilterChange("All")}
+        >
+          All fields
+        </Button>
+        {suggestionFields.map((field) => (
+          <Button
+            key={field}
+            type="button"
+            size="sm"
+            variant={fieldFilter.includes(field) ? "default" : "secondary"}
+            aria-pressed={fieldFilter.includes(field)}
+            onClick={() => handleFieldFilterChange(field)}
+          >
+            {fieldLabel(field)}
+          </Button>
+        ))}
       </div>
       <div className="text-secondary-text mt-2 mb-4 hidden items-center gap-1 text-xs lg:flex">
         <Icon icon="emojione:light-bulb" className="text-sm text-yellow-500" />

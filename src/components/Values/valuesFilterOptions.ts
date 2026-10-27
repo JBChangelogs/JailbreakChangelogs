@@ -1,31 +1,56 @@
-import { FilterSort } from "@/types";
+import { FilterSort, type ItemType } from "@/types";
 
 type FilterGroup = {
   label: string;
   options: { value: FilterSort; label: string }[];
 };
 
-export const filterGroups: FilterGroup[] = [
+type ItemTypeFilterGroup = {
+  label: string;
+  options: (FilterGroup["options"][number] & { itemType: ItemType })[];
+};
+
+export const filterGroups: ItemTypeFilterGroup[] = [
   {
     label: "Vehicle",
     options: [
-      { value: "name-vehicles", label: "Vehicles" },
-      { value: "name-hyperchromes", label: "HyperChromes" },
-      { value: "name-rims", label: "Rims" },
-      { value: "name-textures", label: "Textures" },
-      { value: "name-spoilers", label: "Spoilers" },
-      { value: "name-tire-styles", label: "Tire Styles" },
-      { value: "name-tire-stickers", label: "Tire Stickers" },
-      { value: "name-horns", label: "Horns" },
-      { value: "name-body-colors", label: "Body Colors" },
-      { value: "name-drifts", label: "Drifts" },
+      { value: "name-vehicles", label: "Vehicles", itemType: "Vehicle" },
+      {
+        value: "name-hyperchromes",
+        label: "HyperChromes",
+        itemType: "HyperChrome",
+      },
+      { value: "name-rims", label: "Rims", itemType: "Rim" },
+      { value: "name-textures", label: "Textures", itemType: "Texture" },
+      { value: "name-spoilers", label: "Spoilers", itemType: "Spoiler" },
+      {
+        value: "name-tire-styles",
+        label: "Tire Styles",
+        itemType: "Tire Style",
+      },
+      {
+        value: "name-tire-stickers",
+        label: "Tire Stickers",
+        itemType: "Tire Sticker",
+      },
+      { value: "name-horns", label: "Horns", itemType: "Horn" },
+      {
+        value: "name-body-colors",
+        label: "Body Colors",
+        itemType: "Body Color",
+      },
+      { value: "name-drifts", label: "Drifts", itemType: "Drift" },
     ],
   },
   {
     label: "Other",
     options: [
-      { value: "name-weapon-skins", label: "Weapon Skins" },
-      { value: "name-furnitures", label: "Furniture" },
+      {
+        value: "name-weapon-skins",
+        label: "Weapon Skins",
+        itemType: "Weapon Skin",
+      },
+      { value: "name-furnitures", label: "Furniture", itemType: "Furniture" },
     ],
   },
 ];

@@ -27,9 +27,6 @@ interface SuggestionsToolbarProps {
   sortGroups: SortGroup[];
   sort: string | null;
   canSeeVt: boolean;
-  suggestionsError: string | null;
-  noSuggestionsFound: boolean;
-  suggestionsCount: number;
   searchInputRef: RefObject<HTMLInputElement | null>;
   isSearchLoading: boolean;
   hasSearchText: boolean;
@@ -39,8 +36,7 @@ interface SuggestionsToolbarProps {
   onClearSearch: () => void;
   typeFilter: string;
   onTypeFilterChange: (value: string) => void;
-  suggestionItemTypes: string[];
-  fieldFilter: string;
+  fieldFilter: string[];
   onFieldFilterChange: (value: string) => void;
   suggestionFields: string[];
   pendingNew: number;
@@ -57,9 +53,6 @@ export function SuggestionsToolbar({
   sortGroups,
   sort,
   canSeeVt,
-  suggestionsError,
-  noSuggestionsFound,
-  suggestionsCount,
   searchInputRef,
   isSearchLoading,
   hasSearchText,
@@ -69,7 +62,6 @@ export function SuggestionsToolbar({
   onClearSearch,
   typeFilter,
   onTypeFilterChange: handleTypeFilterChange,
-  suggestionItemTypes,
   fieldFilter,
   onFieldFilterChange: handleFieldFilterChange,
   suggestionFields,
@@ -78,7 +70,6 @@ export function SuggestionsToolbar({
   onSortChange: handleSortChange,
   onRefresh,
 }: SuggestionsToolbarProps) {
-  const suggestions = { length: suggestionsCount };
   const visibleSortGroups = sortGroups
     .map((group) => ({
       ...group,
@@ -88,93 +79,84 @@ export function SuggestionsToolbar({
     }))
     .filter((group) => group.options.length > 0);
 
+  const sortControl = visibleSortGroups.length > 0 && (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Sort suggestions"
+          className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus focus:ring-button-info/50 flex h-14 w-full items-center gap-2 rounded-lg border px-4 text-sm transition-colors focus:ring-1 focus:outline-none"
+        >
+          <span className="text-secondary-text">Sort:</span>
+          <span className="min-w-0 flex-1 truncate text-left font-medium">
+            {getSortLabel(sortGroups, sort)}
+          </span>
+          <Icon
+            icon="heroicons:chevron-down"
+            className="text-secondary-text h-4 w-4 shrink-0"
+            inline
+          />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
+      >
+        <DropdownMenuRadioGroup
+          value={sort ?? ""}
+          onValueChange={handleSortChange}
+        >
+          {visibleSortGroups.map((group, index) => (
+            <Fragment key={group.label}>
+              {index > 0 && <DropdownMenuSeparator />}
+              <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                {group.label}
+              </DropdownMenuLabel>
+              {group.options.map((option) => (
+                <DropdownMenuRadioItem
+                  key={option.value}
+                  value={option.value}
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  {option.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </Fragment>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <>
       {/* Title row */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-primary-text font-semibold">
-          {loadingSuggestions ? 0 : total}{" "}
-          {urlQuery
-            ? total === 1
-              ? "Search Result"
-              : "Search Results"
-            : "Recent Suggestions"}
+          {loadingSuggestions
+            ? "Loading suggestions…"
+            : `${total} ${urlQuery ? (total === 1 ? "Search Result" : "Search Results") : "Recent Suggestions"}`}
         </h2>
-        <div className="flex flex-wrap items-center gap-3">
-          {visibleSortGroups.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="Sort suggestions"
-                  className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus focus:ring-button-info/50 flex h-10 items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus:ring-1 focus:outline-none"
-                >
-                  <span className="text-secondary-text">Sort:</span>
-                  <span className="max-w-40 truncate font-medium">
-                    {getSortLabel(sortGroups, sort)}
-                  </span>
-                  <Icon
-                    icon="heroicons:chevron-down"
-                    className="text-secondary-text h-4 w-4 shrink-0"
-                    inline
-                  />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
-              >
-                <DropdownMenuRadioGroup
-                  value={sort ?? ""}
-                  onValueChange={handleSortChange}
-                >
-                  {visibleSortGroups.map((group, index) => (
-                    <Fragment key={group.label}>
-                      {index > 0 && <DropdownMenuSeparator />}
-                      <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                        {group.label}
-                      </DropdownMenuLabel>
-                      {group.options.map((option) => (
-                        <DropdownMenuRadioItem
-                          key={option.value}
-                          value={option.value}
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          {option.label}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </Fragment>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-          {actions}
-        </div>
+        <div className="flex flex-wrap items-center gap-3">{actions}</div>
       </div>
 
       {/* Search + filter */}
-      {!loadingSuggestions &&
-        !suggestionsError &&
-        !noSuggestionsFound &&
-        (suggestions.length > 0 || urlQuery) && (
-          <SuggestionFilterBar
-            searchInputRef={searchInputRef}
-            urlQuery={urlQuery}
-            isSearchLoading={isSearchLoading}
-            hasSearchText={hasSearchText}
-            isSearchHighlighted={isSearchHighlighted}
-            onSearchSubmit={onSearchSubmit}
-            onSearchTextChange={onSearchTextChange}
-            onClearSearch={onClearSearch}
-            typeFilter={typeFilter}
-            onTypeFilterChange={handleTypeFilterChange}
-            suggestionItemTypes={suggestionItemTypes}
-            fieldFilter={fieldFilter}
-            onFieldFilterChange={handleFieldFilterChange}
-            suggestionFields={suggestionFields}
-          />
-        )}
+      <SuggestionFilterBar
+        searchInputRef={searchInputRef}
+        urlQuery={urlQuery}
+        isSearchLoading={isSearchLoading}
+        hasSearchText={hasSearchText}
+        isSearchHighlighted={isSearchHighlighted}
+        onSearchSubmit={onSearchSubmit}
+        onSearchTextChange={onSearchTextChange}
+        onClearSearch={onClearSearch}
+        typeFilter={typeFilter}
+        onTypeFilterChange={handleTypeFilterChange}
+        fieldFilter={fieldFilter}
+        onFieldFilterChange={handleFieldFilterChange}
+        suggestionFields={suggestionFields}
+        sortControl={sortControl}
+      />
 
       {/* Suggestions update pill — fixed so it's visible anywhere on the page */}
       {(pendingNew > 0 || pendingTypes.size > 0) && !loadingSuggestions && (

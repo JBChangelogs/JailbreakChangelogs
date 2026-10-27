@@ -14,6 +14,8 @@ import type {
   SuggestionsResponse,
 } from "@/components/Items/Suggestions/types";
 
+import { getSuggestionFeedRequest } from "@/utils/api/suggestionFeed";
+
 const log = createLogger("API");
 
 type AuthContextValue = ReturnType<typeof useAuthContext>;
@@ -27,6 +29,9 @@ interface UseSuggestionVotingOptions {
   setBan: AuthContextValue["setBan"];
   sort: string | null;
   page: number;
+  urlQuery?: string;
+  typeFilter?: string;
+  fieldFilter?: string[];
 }
 
 export function useSuggestionVoting({
@@ -38,6 +43,9 @@ export function useSuggestionVoting({
   setBan,
   sort,
   page,
+  urlQuery = "",
+  typeFilter = "All",
+  fieldFilter,
 }: UseSuggestionVotingOptions) {
   const queryClient = useQueryClient();
   // Per-suggestion voting loading state
@@ -270,14 +278,19 @@ export function useSuggestionVoting({
           return;
         }
 
-        const query = new URLSearchParams({ page: String(page) });
-        if (sort !== null) query.set("sort", sort);
+        const { endpoint, queryKey } = getSuggestionFeedRequest({
+          urlQuery,
+          sort,
+          page,
+          typeFilter,
+          fieldFilter,
+        });
         const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
-          `/v2/value-suggestions?${query}`,
+          endpoint,
         );
         const data = await queryClient.fetchQuery({
-          queryKey: ["suggestion-vote-snapshot", sort, page],
+          queryKey: ["suggestion-vote-snapshot", ...queryKey.slice(1)],
           queryFn: async () => {
             const response = await fetch(url, {
               credentials: "include",
@@ -310,7 +323,15 @@ export function useSuggestionVoting({
         // Stale vote counts are acceptable until the next refresh.
       }
     },
-    [page, queryClient, setSuggestions, sort],
+    [
+      page,
+      queryClient,
+      setSuggestions,
+      sort,
+      urlQuery,
+      typeFilter,
+      fieldFilter,
+    ],
   );
 
   useEffect(() => {

@@ -1,3 +1,12 @@
+export const SUGGESTION_FIELDS = [
+  "cash_value",
+  "duped_value",
+  "trend",
+  "demand",
+  "duped_demand",
+  "notes",
+];
+
 export const fieldLabel = (field: string) =>
   field
     .split("_")
