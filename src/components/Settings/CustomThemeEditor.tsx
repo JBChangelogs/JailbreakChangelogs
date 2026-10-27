@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   Dialog,
   DialogContent,
@@ -189,6 +190,7 @@ export default function CustomThemeEditor({
   // The theme as last saved here; a new theme has one after its first save,
   // so later saves update it instead of making another.
   const [savedTheme, setSavedTheme] = useState(theme);
+  const [themeToApply, setThemeToApply] = useState<UserTheme | null>(null);
   const [askDiscard, setAskDiscard] = useState(false);
   // Phones get a bottom panel instead of a full-screen side sheet, so the
   // page stays visible while editing.
@@ -380,9 +382,10 @@ export default function CustomThemeEditor({
       const saved = savedTheme
         ? await updateMyTheme(savedTheme.id, input)
         : await createMyTheme(input);
-      // Editing the theme in use updates it on screen too.
       if (getCustomTheme()?.share_code === saved.share_code) {
         setCustomTheme(saved);
+      } else {
+        setThemeToApply(saved);
       }
       toast.success(savedTheme ? "Theme saved" : "Theme created");
       setSavedTheme(saved);
@@ -1340,6 +1343,22 @@ export default function CustomThemeEditor({
           </div>
         )}
       </SheetContent>
+
+      <ConfirmDialog
+        isOpen={themeToApply !== null}
+        onClose={() => setThemeToApply(null)}
+        onConfirm={() => {
+          if (themeToApply) {
+            setCustomTheme(themeToApply);
+            toast.success("Theme applied");
+          }
+        }}
+        title="Apply this theme?"
+        message="Your theme is saved. Apply it now, or keep it saved for later."
+        confirmText="Apply theme"
+        cancelText="Not now"
+        confirmVariant="default"
+      />
 
       <Dialog open={askDiscard} onOpenChange={setAskDiscard}>
         <DialogContent className="max-w-md rounded-lg p-6" showClose>
