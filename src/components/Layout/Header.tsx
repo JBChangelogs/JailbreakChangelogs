@@ -69,6 +69,9 @@ const ThemeShortcut = dynamic(
 import { NavbarModern } from "@/components/ui/navbar";
 import ServiceAvailabilityTicker from "./ServiceAvailabilityTicker";
 import NewsTicker from "./NewsTicker";
+import UpdateAvailableNotice, {
+  useUpdateAvailable,
+} from "./UpdateAvailableNotice";
 import type {
   NewsTickerAnnouncement,
   ServiceAlert,
@@ -557,6 +560,7 @@ export default function Header({
     newsAnnouncement: null,
     serviceAlert: null,
   };
+  const updateAvailable = useUpdateAvailable();
 
   const notificationCountKey = ["notifications", "unread-count", authUser?.id];
   const messageCountKey = ["messages", "unread-count", authUser?.id];
@@ -824,6 +828,7 @@ export default function Header({
         <ServiceAvailabilityTicker alert={tickerFlags.serviceAlert} />
         <OfflineDetector />
         <NewsTicker announcement={tickerFlags.newsAnnouncement} />
+        {updateAvailable && <UpdateAvailableNotice />}
         {releaseAnnouncement}
         <div className="relative z-10">
           <NavbarModern
@@ -854,6 +859,7 @@ export default function Header({
           <ServiceAvailabilityTicker alert={tickerFlags.serviceAlert} />
           <OfflineDetector />
           <NewsTicker announcement={tickerFlags.newsAnnouncement} />
+          {updateAvailable && <UpdateAvailableNotice />}
           {releaseAnnouncement}
           <div className="relative z-10">
             <div className="bg-secondary-bg border-border-card border-b">
