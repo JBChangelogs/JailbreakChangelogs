@@ -9,7 +9,11 @@ const EMPTY_ITEMS: Item[] = [];
 const FILTER_SORT_STORAGE_KEY = "valuesFilterSort";
 const FILTER_SORT_PREFERENCE_KEY = "values_filter_sorts";
 const VALUE_SORT_PREFERENCE_KEY = "values_value_sort";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
 import { useUserFavorites } from "@/hooks/useUserFavorites";
 import { filterFavoriteItems } from "@/utils/items/favorites";
@@ -298,9 +302,9 @@ export default function ValuesClient() {
   const serverMaxValue =
     appliedMaxValue < MAX_VALUE_RANGE ? appliedMaxValue : undefined;
   const favoritesSelected = selectedFilterSorts.includes("favorites");
-  const catalogQuery = useQuery({
+  const catalogQuery = useInfiniteQuery({
     queryKey: [
-      "values-items",
+      "values-items-infinite",
       page,
       searchQuery,
       valueSort,
@@ -308,7 +312,8 @@ export default function ValuesClient() {
       serverMinValue,
       serverMaxValue,
     ],
-    queryFn: ({ signal }) => {
+    initialPageParam: Math.max(1, page),
+    queryFn: ({ pageParam, signal }) => {
       const options = {
         sort: valueSort,
         filters: serverFilters,
@@ -316,11 +321,15 @@ export default function ValuesClient() {
         maxValue: serverMaxValue,
       };
       return searchQuery
-        ? searchItemsClientPage(searchQuery, Math.max(1, page), signal, options)
-        : fetchItemsClientPage(Math.max(1, page), signal, options);
+        ? searchItemsClientPage(searchQuery, pageParam, signal, options)
+        : fetchItemsClientPage(pageParam, signal, options);
     },
+    getNextPageParam: (last) =>
+      last.items.length > 0 && last.page < last.total_pages
+        ? last.page + 1
+        : undefined,
     enabled: !favoritesSelected,
-    staleTime: 0,
+    staleTime: 60_000,
     gcTime: 5 * 60_000,
     retry: false,
   });
@@ -343,31 +352,71 @@ export default function ValuesClient() {
       serverMaxValue,
     ],
   );
-  const favoritePageSize = 50;
-  const favoritePages = Math.ceil(matchingFavorites.length / favoritePageSize);
-  const favoritePage = Math.min(Math.max(1, page), Math.max(1, favoritePages));
-  const data = useMemo(
+  const favoriteKey = JSON.stringify([
+    searchQuery,
+    selectedFilterSorts,
+    valueSort,
+    serverMinValue,
+    serverMaxValue,
+  ]);
+  const [favoriteWindow, setFavoriteWindow] = useState({
+    key: favoriteKey,
+    size: Math.max(1, page) * 50,
+  });
+  const favoriteSize =
+    favoriteWindow.key === favoriteKey
+      ? favoriteWindow.size
+      : Math.max(1, page) * 50;
+  const data = catalogQuery.data?.pages.at(-1);
+  useEffect(() => {
+    if (page < 1) {
+      void setSearchParams({ page: null });
+    } else if (
+      !favoritesSelected &&
+      data &&
+      data.total_pages > 0 &&
+      page > data.total_pages
+    ) {
+      void setSearchParams({ page: data.total_pages });
+    }
+  }, [favoritesSelected, data, page, setSearchParams]);
+  const items = useMemo(
     () =>
       favoritesSelected
-        ? {
-            items: matchingFavorites.slice(
-              (favoritePage - 1) * favoritePageSize,
-              favoritePage * favoritePageSize,
-            ),
-            total: matchingFavorites.length,
-            total_pages: favoritePages,
-            size: favoritePageSize,
-          }
-        : catalogQuery.data,
-    [
-      favoritesSelected,
-      matchingFavorites,
-      favoritePage,
-      favoritePages,
-      catalogQuery.data,
-    ],
+        ? matchingFavorites.slice(0, favoriteSize)
+        : catalogQuery.data
+          ? Array.from(
+              new Map(
+                catalogQuery.data.pages
+                  .flatMap((result) => result.items)
+                  .map((item) => [item.id, item]),
+              ).values(),
+            )
+          : EMPTY_ITEMS,
+    [favoritesSelected, matchingFavorites, favoriteSize, catalogQuery.data],
   );
-  const items = data?.items ?? EMPTY_ITEMS;
+  const hasMore = favoritesSelected
+    ? favoriteSize < matchingFavorites.length
+    : catalogQuery.hasNextPage;
+  const isFetching = favoritesSelected
+    ? favoritesQuery.isFetching
+    : catalogQuery.isFetching;
+  const { fetchNextPage } = catalogQuery;
+  const loadMore = useCallback(() => {
+    if (!hasMore || isFetching) return;
+    if (favoritesSelected) {
+      setFavoriteWindow({ key: favoriteKey, size: favoriteSize + 50 });
+    } else {
+      void fetchNextPage({ cancelRefetch: false });
+    }
+  }, [
+    hasMore,
+    isFetching,
+    favoritesSelected,
+    favoriteKey,
+    favoriteSize,
+    fetchNextPage,
+  ]);
   const isLoading = favoritesSelected
     ? Boolean(user?.id) && favoritesQuery.isPending
     : catalogQuery.isLoading;
@@ -375,7 +424,7 @@ export default function ValuesClient() {
     ? favoritesQuery.data
       ? null
       : favoritesQuery.error
-    : data
+    : catalogQuery.data
       ? null
       : catalogQuery.error;
   const refetch = favoritesSelected
@@ -553,8 +602,18 @@ export default function ValuesClient() {
             }}
             onClearCategoryFilter={() => handleClearFilterSorts()}
             selectedFilterSorts={selectedFilterSorts}
-            totalItemsCount={data?.total ?? 0}
-            totalPages={data?.total_pages ?? 0}
+            totalItemsCount={
+              favoritesSelected ? matchingFavorites.length : (data?.total ?? 0)
+            }
+            hasMore={hasMore}
+            isFetching={isFetching}
+            loadMoreError={
+              !favoritesSelected && catalogQuery.isFetchNextPageError
+            }
+            onLoadMore={loadMore}
+            onRetry={() => {
+              void refetch();
+            }}
             pageSize={data?.size ?? 50}
             valueSort={valueSort}
             debouncedSearchTerm={searchQuery}

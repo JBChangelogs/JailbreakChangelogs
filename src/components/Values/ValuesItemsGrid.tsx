@@ -3,7 +3,6 @@
 import { useMemo, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryState, parseAsInteger } from "nuqs";
-import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
 import ItemCardSkeleton from "@/components/Items/ItemCardSkeleton";
 import { Item, FilterSort } from "@/types";
@@ -28,7 +27,11 @@ interface ValuesItemsGridProps {
   onClearCategoryFilter: () => void;
   selectedFilterSorts: FilterSort[];
   totalItemsCount: number;
-  totalPages: number;
+  hasMore: boolean;
+  isFetching: boolean;
+  loadMoreError: boolean;
+  onLoadMore: () => void;
+  onRetry: () => void;
   pageSize: number;
   valueSort: string;
   debouncedSearchTerm: string;
@@ -48,12 +51,16 @@ export default function ValuesItemsGrid({
   onClearCategoryFilter,
   selectedFilterSorts,
   totalItemsCount,
-  totalPages,
+  hasMore,
+  isFetching,
+  loadMoreError,
+  onLoadMore,
+  onRetry,
   pageSize,
   valueSort,
   debouncedSearchTerm,
 }: ValuesItemsGridProps) {
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const { data: placementLimitsMap } = useQuery({
     queryKey: ["furniture-placement-limits"],
     queryFn: fetchFurniturePlacementLimits,
@@ -81,24 +88,32 @@ export default function ValuesItemsGrid({
 
   const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
 
-  const currentPage = Math.min(Math.max(1, page), Math.max(1, totalPages));
   const displayedItems = items;
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (page < 1) void setPage(1);
-    else if (totalPages > 0 && page > totalPages) void setPage(totalPages);
-  }, [page, setPage, totalPages]);
+    const target = loadMoreRef.current;
+    if (
+      !target ||
+      !hasMore ||
+      isFetching ||
+      loadMoreError ||
+      typeof IntersectionObserver === "undefined"
+    )
+      return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) onLoadMore();
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasMore, isFetching, loadMoreError, onLoadMore]);
 
   const hasCategoryActive = selectedFilterSorts.length > 0;
   const hasLocalFilters = selectedFilterSorts.includes("favorites");
   const categoryNames = getFilterSortsDisplayNames(selectedFilterSorts);
-
-  const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
-    value: number,
-  ) => {
-    void setPage(value);
-  };
 
   const getNoItemsMessage = () => {
     const hasCategoryFilter = hasCategoryActive;
@@ -206,16 +221,6 @@ export default function ValuesItemsGrid({
         </p>
 
         <NitroValuesTopAd />
-
-        {totalPages > 1 && (
-          <div className="flex justify-center">
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-            />
-          </div>
-        )}
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -232,6 +237,7 @@ export default function ValuesItemsGrid({
               {getEmptyStateDescription()}
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
+              {searchErrorMessage && <Button onClick={onRetry}>Retry</Button>}
               {(appliedMinValue > 0 || appliedMaxValue < MAX_VALUE_RANGE) && (
                 <Button onClick={onResetValueRange} variant="default">
                   Reset Value Range
@@ -270,15 +276,29 @@ export default function ValuesItemsGrid({
         )}
       </div>
 
-      {totalPages > 1 && (
-        <div className="mt-8 flex justify-center">
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-          />
-        </div>
-      )}
+      <div
+        ref={loadMoreRef}
+        className="mt-8 flex flex-col items-center gap-3"
+        aria-live="polite"
+      >
+        {loadMoreError && (
+          <p className="text-secondary-text">
+            Could not load more items. Please try again.
+          </p>
+        )}
+        {hasMore && (
+          <Button onClick={onLoadMore} disabled={isFetching}>
+            {isFetching
+              ? "Loading more…"
+              : loadMoreError
+                ? "Retry"
+                : "Load more"}
+          </Button>
+        )}
+        {!hasMore && displayedItems.length > 0 && (
+          <p className="text-secondary-text text-sm">No more items.</p>
+        )}
+      </div>
     </>
   );
 }

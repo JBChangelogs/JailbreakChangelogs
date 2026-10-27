@@ -11,6 +11,11 @@ import { ValueRangeFilter } from "./ValueRangeFilter";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ValuesFilterMode } from "@/hooks/useValuesFilterMode";
 import {
   DropdownMenu,
@@ -520,6 +525,7 @@ export default function ValuesSearchControls({
             <Button
               type="button"
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              aria-expanded={showAdvancedFilters}
               size="sm"
               variant={showAdvancedFilters ? "default" : "secondary"}
             >
@@ -539,6 +545,56 @@ export default function ValuesSearchControls({
                 inline={true}
               />
             </Button>
+            {advancedFilterGroups.map((group) => {
+              const selected = group.options.filter((option) =>
+                selectedFilterSorts.includes(option.value),
+              );
+              if (selected.length === 0) return null;
+              const labels = selected.map((option) => option.label);
+              const fullLabel = `${group.label}: ${labels.join(", ")}`;
+              return (
+                <div
+                  key={group.label}
+                  className="border-border-card bg-secondary-bg flex max-w-full items-center rounded-lg border"
+                >
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="hover:bg-tertiary-bg! min-w-0 shrink! rounded-r-none"
+                    title={fullLabel}
+                    aria-label={`Edit ${group.label.toLowerCase()} filters: ${labels.join(", ")}`}
+                    onClick={() => setShowAdvancedFilters(true)}
+                  >
+                    <span className="truncate">
+                      {group.label}: {labels.slice(0, 2).join(", ")}
+                      {labels.length > 2 && ` +${labels.length - 2}`}
+                    </span>
+                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="border-border-card hover:bg-tertiary-bg! w-8! rounded-l-none border-l px-0!"
+                        aria-label={`Clear ${group.label.toLowerCase()} filters`}
+                        onClick={() =>
+                          onClearFilterSorts(
+                            selected.map((option) => option.value),
+                          )
+                        }
+                      >
+                        <Icon icon="heroicons:x-mark" aria-hidden="true" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Clear {group.label.toLowerCase()} filters
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              );
+            })}
             {chipFilterOptions.map((option) => (
               <Button
                 key={option.value}
