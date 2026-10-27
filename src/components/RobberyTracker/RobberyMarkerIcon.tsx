@@ -2,7 +2,7 @@ import icons from "@/lib/robbery-icons.generated.json";
 
 const normalize = (name: string) => name.toLowerCase().replace(/[\s_-]/g, "");
 const iconsByName = new Map(
-  icons.map((file) => [normalize(file.replace(/\.[^.]+$/, "")), file]),
+  icons.map((icon) => [normalize(icon.file.replace(/\.[^.]+$/, "")), icon]),
 );
 
 export default function RobberyMarkerIcon({
@@ -14,15 +14,18 @@ export default function RobberyMarkerIcon({
   name: string;
   className: string;
 }) {
-  const file =
+  const icon =
     iconsByName.get(normalize(markerName)) ?? iconsByName.get(normalize(name));
-  if (!file) return null;
+  if (!icon) return null;
 
   return (
     <span
       aria-hidden="true"
       className={`robbery-marker-icon shrink-0 ${className}`}
-      style={{ maskImage: `url("/robbery_icons/${encodeURIComponent(file)}")` }}
+      style={{
+        maskImage: `url("/robbery_icons/${encodeURIComponent(icon.file)}")`,
+        maskMode: icon.maskMode === "luminance" ? "luminance" : "alpha",
+      }}
     />
   );
 }

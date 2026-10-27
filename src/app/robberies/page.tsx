@@ -1513,18 +1513,32 @@ function RobberyTrackerContent() {
               </div>
 
               {!isPowerComboMode && (
-                <div className="mb-4 overflow-x-auto">
+                <div className="mb-4">
                   <Tabs
+                    radio
                     value={robberiesDisplayMode}
                     onValueChange={(value) =>
                       setRobberiesDisplayMode(value as RobberiesDisplayMode)
                     }
                   >
-                    <TabsList fullWidth>
-                      <TabsTrigger value="individual" fullWidth>
+                    <TabsList
+                      fullWidth
+                      data-variant="filled"
+                      aria-label="Robbery display mode"
+                      className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
+                    >
+                      <TabsTrigger
+                        value="individual"
+                        fullWidth
+                        className="rounded-md px-3 py-1.5"
+                      >
                         Individual
                       </TabsTrigger>
-                      <TabsTrigger value="grouped" fullWidth>
+                      <TabsTrigger
+                        value="grouped"
+                        fullWidth
+                        className="rounded-md px-3 py-1.5"
+                      >
                         Grouped (Server)
                       </TabsTrigger>
                     </TabsList>

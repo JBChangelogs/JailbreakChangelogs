@@ -175,10 +175,10 @@ function RobberyServerGroupCard({
     : regionData;
 
   return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
-      <div className="flex flex-col gap-3 p-3 sm:flex-row">
+    <div className="border-border-card bg-secondary-bg @container flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+      <div className="flex flex-col gap-3 p-3 @[28rem]:flex-row">
         {/* Thumbnail (adaptive layout) */}
-        <div className="aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:aspect-auto sm:h-24 sm:w-40">
+        <div className="aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 @[28rem]:aspect-auto @[28rem]:h-24 @[28rem]:w-40">
           {prioritizedImages.length === 0 ? (
             <div className="bg-tertiary-bg border-border-card flex h-full w-full items-center justify-center border text-sm font-semibold">
               Server

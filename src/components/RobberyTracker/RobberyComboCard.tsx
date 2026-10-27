@@ -122,10 +122,10 @@ function RobberyComboCard({
   const remainingCount = sortedRobberies.length - displayRobberies.length;
 
   return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
-      <div className="flex flex-col gap-3 p-3 sm:flex-row">
+    <div className="border-border-card bg-secondary-bg @container flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+      <div className="flex flex-col gap-3 p-3 @[24rem]:flex-row">
         {/* Thumbnail */}
-        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
+        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 @[24rem]:h-16 @[24rem]:w-24">
           {comboImageUrl ? (
             <Image
               placeholder={IMAGE_PLACEHOLDER}

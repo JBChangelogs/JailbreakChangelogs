@@ -1,18 +1,66 @@
 [
-  "Bank.png",
-  "Cargo_Plane.png",
-  "Cargo_Ship.png",
-  "Crown_Jewel.png",
-  "Donut_Store.png",
-  "Gas_Station.png",
-  "Grocery_Store.png",
-  "Jewelry.png",
-  "Mansion.png",
-  "Money_Truck.png",
-  "Museum.png",
-  "OilRig.png",
-  "PowerPlant.png",
-  "Tomb.png",
-  "Train_Cargo.png",
-  "Train_Passenger.png"
+  {
+    "file": "Bank.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Cargo_Plane.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Cargo_Ship.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Crown_Jewel.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Donut_Store.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Gas_Station.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Grocery_Store.png",
+    "maskMode": "alpha"
+  },
+  {
+    "file": "Jewelry.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Mansion.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Money_Truck.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Museum.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "OilRig.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "PowerPlant.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Tomb.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Train_Cargo.png",
+    "maskMode": "luminance"
+  },
+  {
+    "file": "Train_Passenger.png",
+    "maskMode": "luminance"
+  }
 ]

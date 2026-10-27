@@ -30,3 +30,18 @@ test("icons match marker or display names regardless of case and separators", ()
     ),
   ).toBe("");
 });
+
+test("white icons retain dark details and black icons remain visible", () => {
+  const bank = renderToStaticMarkup(
+    <RobberyMarkerIcon markerName="Bank" name="Bank" className="size-6" />,
+  );
+  const grocery = renderToStaticMarkup(
+    <RobberyMarkerIcon
+      markerName="Grocery"
+      name="Grocery Store"
+      className="size-6"
+    />,
+  );
+  expect(bank).toContain("mask-mode:luminance");
+  expect(grocery).toContain("mask-mode:alpha");
+});
