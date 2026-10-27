@@ -171,7 +171,6 @@ export function NotificationPopover({
         open || (isAuthenticated && unreadCount > 0)
           ? "text-primary-text"
           : "text-secondary-text",
-        open && "bg-quaternary-bg",
         isDesktop ? "h-10 w-10" : "h-8 w-8",
       )}
       aria-label="Notifications"

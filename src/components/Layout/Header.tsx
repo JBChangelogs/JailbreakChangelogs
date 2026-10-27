@@ -890,7 +890,6 @@ export default function Header({
                           unreadMessageCount > 0
                           ? "text-primary-text"
                           : "text-secondary-text",
-                        pathname.startsWith("/messages") && "bg-quaternary-bg",
                       )}
                       aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
                     >
