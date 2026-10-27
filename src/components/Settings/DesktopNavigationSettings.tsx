@@ -204,7 +204,7 @@ export default function DesktopNavigationSettings() {
               />
               <span
                 aria-hidden="true"
-                className="border-border-card group-has-checked:border-button-info group-has-checked:bg-button-info mt-1 size-4 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-tertiary-bg)]"
+                className="border-secondary-text group-has-checked:border-button-info group-has-checked:bg-button-info mt-1 size-4 shrink-0 rounded-full border-2 transition-colors group-has-checked:shadow-[inset_0_0_0_2px_var(--color-tertiary-bg)]"
               />
               <span>
                 <span className="text-primary-text block font-medium">
