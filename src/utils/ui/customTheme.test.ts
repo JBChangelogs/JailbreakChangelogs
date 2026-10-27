@@ -25,12 +25,23 @@ test("the saved custom theme applies only its colors before hydration", () => {
       share_code: "K7QM4XRP",
       label: "Mine",
       scheme: "light",
-      vars: { "--color-primary-bg": "#fff", "--header-height": "999px" },
+      vars: {
+        "--color-primary-bg": "#fff",
+        "--color-badge-owner": "#ff0000",
+        "--color-demand-high": "#abcdef",
+        "--color-trend-rising": "#000000",
+        "--color-trend-rising-text": "#ff0000",
+        "--header-height": "999px",
+      },
       logo_filter: null,
     }),
   );
   expect(props).toEqual({
     "--color-primary-bg": "#fff",
+    "--color-demand-high": "#abcdef",
+    "--color-demand-high-text": "#000000",
+    "--color-trend-rising": "#000000",
+    "--color-trend-rising-text": "#ffffff",
     "--logo-filter": "none",
     "color-scheme": "light",
   });

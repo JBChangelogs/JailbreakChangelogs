@@ -19,14 +19,6 @@ export function accentColorToHex(
   return /^[0-9a-f]{6}$/i.test(hex) ? `#${hex.toLowerCase()}` : null;
 }
 
-const luminance = (hex: string) => {
-  const [r, g, b] = [1, 3, 5].map((i) => {
-    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-};
-
 /**
  * Black or white, whichever contrasts more with every one of `hexes` (WCAG),
  * so text stays readable across both ends of a gradient.
@@ -34,6 +26,13 @@ const luminance = (hex: string) => {
 export function readableTextColor(
   ...hexes: [string, ...string[]]
 ): "#000000" | "#ffffff" {
+  const luminance = (hex: string) => {
+    const [r, g, b] = [1, 3, 5].map((i) => {
+      const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
   const ls = hexes.map(luminance);
   const onBlack = Math.min(...ls.map((l) => (l + 0.05) / 0.05));
   const onWhite = Math.min(...ls.map((l) => 1.05 / (l + 0.05)));

@@ -1,4 +1,5 @@
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { marketThemeVars } from "@/utils/ui/marketThemeVars";
 import {
   safeValue,
   sanitizeThemes,
@@ -91,7 +92,7 @@ export function sanitizeCustomTheme<T extends CustomTheme>(theme: T): T {
     ...theme,
     scheme: theme.scheme === "light" ? "light" : "dark",
     vars: Object.fromEntries(
-      Object.entries(theme.vars ?? {}).filter(
+      Object.entries(marketThemeVars(theme.vars ?? {})).filter(
         ([key, value]) => VAR_KEY.test(key) && safeValue(value),
       ),
     ),
@@ -114,7 +115,7 @@ export const createMyTheme = async (theme: CustomThemeInput) =>
   sanitizeCustomTheme(
     await request<UserTheme>("/v2/users/me/themes", {
       method: "POST",
-      body: JSON.stringify(theme),
+      body: JSON.stringify({ ...theme, vars: marketThemeVars(theme.vars) }),
     }),
   );
 
@@ -126,7 +127,9 @@ export const updateMyTheme = async (
   sanitizeCustomTheme(
     await request<UserTheme>(`/v2/users/me/themes/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(theme),
+      body: JSON.stringify(
+        theme.vars ? { ...theme, vars: marketThemeVars(theme.vars) } : theme,
+      ),
     }),
   );
 
@@ -143,7 +146,7 @@ export const checkMyTheme = async (
     fixes?: Record<string, string>;
   }>("/v2/users/me/themes/check", {
     method: "POST",
-    body: JSON.stringify(theme),
+    body: JSON.stringify({ ...theme, vars: marketThemeVars(theme.vars) }),
   });
   // Applied straight into the theme, so held to the same checks.
   const fixes = Object.fromEntries(

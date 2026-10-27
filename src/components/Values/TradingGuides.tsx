@@ -6,7 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { demandOrder, trendOrder } from "@/utils/trading/values";
 import { FilterSort } from "@/types";
 import { trendDescriptions } from "@/utils/trading/tradingDefinitions";
-import { getDemandHexColor, getTrendHexColor } from "@/utils/items/badgeColors";
+import {
+  getDemandCssColor,
+  getTrendCssColor,
+  getTrendColor,
+} from "@/utils/items/badgeColors";
 
 interface TradingGuidesProps {
   selectedFilterSorts: FilterSort[];
@@ -222,9 +226,9 @@ function TradingGuides({
                     }`}
                     style={
                       {
-                        borderColor: getDemandHexColor(demand),
-                        "--tw-ring-color": getDemandHexColor(demand),
-                        "--hover-bg": `${getDemandHexColor(demand)}1A`,
+                        borderColor: getDemandCssColor(demand),
+                        "--tw-ring-color": getDemandCssColor(demand),
+                        "--hover-bg": `color-mix(in srgb, ${getDemandCssColor(demand)} 10%, transparent)`,
                       } as React.CSSProperties
                     }
                   >
@@ -261,15 +265,14 @@ function TradingGuides({
                   }`}
                   style={
                     {
-                      borderColor: getTrendHexColor(trend),
-                      "--tw-ring-color": getTrendHexColor(trend),
-                      "--hover-bg": `${getTrendHexColor(trend)}1A`,
+                      borderColor: getTrendCssColor(trend),
+                      "--tw-ring-color": getTrendCssColor(trend),
+                      "--hover-bg": `color-mix(in srgb, ${getTrendCssColor(trend)} 10%, transparent)`,
                     } as React.CSSProperties
                   }
                 >
                   <span
-                    className={`rounded px-2 py-0.5 text-xs font-bold tracking-wider uppercase ${trend === "Projected" ? "text-black" : "text-white"}`}
-                    style={{ backgroundColor: getTrendHexColor(trend) }}
+                    className={`rounded px-2 py-0.5 text-xs font-bold tracking-wider uppercase ${getTrendColor(trend)}`}
                   >
                     {trend}
                   </span>

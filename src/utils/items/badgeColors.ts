@@ -1,121 +1,72 @@
 import { hasItemValue } from "@/utils/items/itemValue";
 
-export const getDemandHexColor = (
-  demand: string | null | undefined,
-): string => {
-  if (!hasItemValue(demand)) return "#4b5563";
-  const normalizedDemand = demand
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
+// Defaults match the existing badge palette; older themes inherit these colors.
+export const MARKET_COLORS: Record<string, [background: string, text: string]> =
+  {
+    "demand-close-to-none": ["oklch(44.6% 0.03 256.802)", "#ffffff"],
+    "demand-very-low": ["oklch(57.7% 0.245 27.325)", "#ffffff"],
+    "demand-low": ["oklch(55.3% 0.195 38.402)", "#ffffff"],
+    "demand-below-average": ["oklch(76.9% 0.188 70.08)", "#000000"],
+    "demand-average": ["#D0F03C", "#000000"],
+    "demand-decent": ["oklch(62.7% 0.194 149.214)", "#ffffff"],
+    "demand-high": ["oklch(54.6% 0.245 262.881)", "#ffffff"],
+    "demand-very-high": ["oklch(55.8% 0.288 302.321)", "#ffffff"],
+    "demand-unknown": ["oklch(44.6% 0.03 256.802)", "#ffffff"],
+    "trend-dropping": ["oklch(58.6% 0.253 17.585)", "#ffffff"],
+    "trend-unstable": ["oklch(66.6% 0.179 58.318)", "#ffffff"],
+    "trend-hoarded": ["oklch(54.1% 0.281 293.009)", "#ffffff"],
+    "trend-manipulated": ["oklch(68.1% 0.162 75.834)", "#000000"],
+    "trend-stable": ["oklch(55.1% 0.027 264.364)", "#ffffff"],
+    "trend-recovering": ["oklch(64.6% 0.222 41.116)", "#ffffff"],
+    "trend-rising": ["oklch(48.8% 0.243 264.376)", "#ffffff"],
+    "trend-hyped": ["oklch(65.6% 0.241 354.308)", "#ffffff"],
+    "trend-projected": ["#4cdcfc", "#000000"],
+    "trend-unknown": ["oklch(44.6% 0.03 256.802)", "#ffffff"],
+  };
 
-  switch (normalizedDemand) {
-    case "Close To None":
-      return "#4b5563";
-    case "Very Low":
-      return "#dc2626";
-    case "Low":
-      return "#b45309";
-    case "Below Average":
-      return "#f59e0b";
-    case "Average":
-      return "#D0F03C";
-    case "Decent":
-      return "#16a34a";
-    case "High":
-      return "#2563eb";
-    case "Very High":
-      return "#9333ea";
-    default:
-      return "#4b5563";
-  }
+const DEMAND_CLASSES: Record<string, string> = {
+  "close-to-none": "bg-demand-close-to-none text-demand-close-to-none-text",
+  "very-low": "bg-demand-very-low text-demand-very-low-text",
+  low: "bg-demand-low text-demand-low-text",
+  "below-average": "bg-demand-below-average text-demand-below-average-text",
+  average: "bg-demand-average text-demand-average-text",
+  decent: "bg-demand-decent text-demand-decent-text",
+  high: "bg-demand-high text-demand-high-text",
+  "very-high": "bg-demand-very-high text-demand-very-high-text",
+  unknown: "bg-demand-unknown text-demand-unknown-text",
 };
 
-export const getTrendHexColor = (trend: string | null | undefined): string => {
-  if (!hasItemValue(trend)) return "#6b7280";
-  const normalizedTrend =
-    trend.charAt(0).toUpperCase() + trend.slice(1).toLowerCase();
-
-  switch (normalizedTrend) {
-    case "Dropping":
-      return "#e11d48";
-    case "Unstable":
-      return "#b45309";
-    case "Hoarded":
-      return "#7c3aed";
-    case "Manipulated":
-      return "#ca8a04";
-    case "Stable":
-      return "#6b7280";
-    case "Recovering":
-      return "#ea580c";
-    case "Rising":
-      return "#1d4ed8";
-    case "Hyped":
-      return "#ec4899";
-    case "Projected":
-      return "#38B2CD";
-    default:
-      return "#6b7280";
-  }
+const TREND_CLASSES: Record<string, string> = {
+  dropping: "bg-trend-dropping text-trend-dropping-text",
+  unstable: "bg-trend-unstable text-trend-unstable-text",
+  hoarded: "bg-trend-hoarded text-trend-hoarded-text",
+  manipulated: "bg-trend-manipulated text-trend-manipulated-text",
+  stable: "bg-trend-stable text-trend-stable-text",
+  recovering: "bg-trend-recovering text-trend-recovering-text",
+  rising: "bg-trend-rising text-trend-rising-text",
+  hyped: "bg-trend-hyped text-trend-hyped-text",
+  projected: "bg-trend-projected text-trend-projected-text",
+  unknown: "bg-trend-unknown text-trend-unknown-text",
 };
 
-export const getDemandColor = (demand: string | null | undefined): string => {
-  if (!hasItemValue(demand)) return "bg-gray-600 text-white";
-  // Normalize the demand string to handle case variations
-  const normalizedDemand = demand
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
+function badgeKey(
+  value: string | null | undefined,
+  classes: Record<string, string>,
+) {
+  const key = hasItemValue(value)
+    ? value.toLowerCase().replaceAll(" ", "-")
+    : "unknown";
+  return Object.hasOwn(classes, key) ? key : "unknown";
+}
 
-  switch (normalizedDemand) {
-    case "Close To None":
-      return "bg-gray-600 text-white";
-    case "Very Low":
-      return "bg-red-600 text-white";
-    case "Low":
-      return "bg-orange-700 text-white";
-    case "Below Average":
-      return "bg-amber-500 text-black";
-    case "Average":
-      return "bg-[#D0F03C] text-black";
-    case "Decent":
-      return "bg-green-600 text-white";
-    case "High":
-      return "bg-blue-600 text-white";
-    case "Very High":
-      return "bg-purple-600 text-white";
-    default:
-      return "bg-gray-600 text-white";
-  }
-};
+export const getDemandColor = (demand: string | null | undefined): string =>
+  DEMAND_CLASSES[badgeKey(demand, DEMAND_CLASSES)];
 
-export const getTrendColor = (trend: string | null | undefined): string => {
-  if (!hasItemValue(trend)) return "bg-gray-600 text-white";
-  // Normalize the trend string to handle case variations
-  const normalizedTrend =
-    trend.charAt(0).toUpperCase() + trend.slice(1).toLowerCase();
+export const getTrendColor = (trend: string | null | undefined): string =>
+  TREND_CLASSES[badgeKey(trend, TREND_CLASSES)];
 
-  switch (normalizedTrend) {
-    case "Dropping":
-      return "bg-rose-600 text-white";
-    case "Unstable":
-      return "bg-amber-600 text-white";
-    case "Hoarded":
-      return "bg-violet-600 text-white";
-    case "Manipulated":
-      return "bg-yellow-600 text-black";
-    case "Stable":
-      return "bg-gray-500 text-white";
-    case "Recovering":
-      return "bg-orange-600 text-white";
-    case "Rising":
-      return "bg-blue-700 text-white";
-    case "Hyped":
-      return "bg-pink-500 text-white";
-    case "Projected":
-      return "bg-[#38B2CD] text-black";
-    default:
-      return "bg-gray-600 text-white";
-  }
-};
+export const getDemandCssColor = (demand: string | null | undefined): string =>
+  `var(--color-demand-${badgeKey(demand, DEMAND_CLASSES)})`;
+
+export const getTrendCssColor = (trend: string | null | undefined): string =>
+  `var(--color-trend-${badgeKey(trend, TREND_CLASSES)})`;

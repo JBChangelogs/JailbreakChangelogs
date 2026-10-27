@@ -42,7 +42,7 @@ import {
   isVideoItem,
 } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import { getDemandHexColor, getTrendHexColor } from "@/utils/items/badgeColors";
+import { getDemandCssColor, getTrendCssColor } from "@/utils/items/badgeColors";
 import { formatFullValue } from "@/utils/trading/values";
 import { UserAvatar } from "@/utils/ui/avatar";
 import type { Item } from "@/types/index";
@@ -575,11 +575,11 @@ export function SuggestionForm({
                     (() => {
                       const val =
                         (selectedItem[field as keyof Item] as string) || "N/A";
-                      const hex = getTrendHexColor(val);
+                      const color = getTrendCssColor(val);
                       return (
                         <span
                           className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-md border-2 px-2.5 text-xs leading-none font-semibold"
-                          style={{ borderColor: hex }}
+                          style={{ borderColor: color }}
                         >
                           {val}
                         </span>
@@ -589,11 +589,11 @@ export function SuggestionForm({
                     (() => {
                       const val =
                         (selectedItem[field as keyof Item] as string) || "N/A";
-                      const hex = getDemandHexColor(val);
+                      const color = getDemandCssColor(val);
                       return (
                         <span
                           className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-md border-2 px-2.5 text-xs leading-none font-semibold"
-                          style={{ borderColor: hex }}
+                          style={{ borderColor: color }}
                         >
                           {val}
                         </span>
@@ -629,7 +629,7 @@ export function SuggestionForm({
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {(limits?.valid_trends ?? []).map((t) => {
-                        const hex = getTrendHexColor(t);
+                        const color = getTrendCssColor(t);
                         return (
                           <button
                             key={t}
@@ -642,8 +642,8 @@ export function SuggestionForm({
                             }`}
                             style={
                               {
-                                borderColor: hex,
-                                "--tw-ring-color": hex,
+                                borderColor: color,
+                                "--tw-ring-color": color,
                               } as React.CSSProperties
                             }
                           >
@@ -669,7 +669,7 @@ export function SuggestionForm({
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {(limits?.valid_demands ?? []).map((d) => {
-                        const hex = getDemandHexColor(d);
+                        const color = getDemandCssColor(d);
                         return (
                           <button
                             key={d}
@@ -682,8 +682,8 @@ export function SuggestionForm({
                             }`}
                             style={
                               {
-                                borderColor: hex,
-                                "--tw-ring-color": hex,
+                                borderColor: color,
+                                "--tw-ring-color": color,
                               } as React.CSSProperties
                             }
                           >

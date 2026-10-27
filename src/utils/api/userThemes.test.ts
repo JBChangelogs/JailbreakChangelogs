@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, expect, test } from "bun:test";
-import { checkMyTheme, createMyTheme, ThemeApiError } from "./userThemes";
+import {
+  checkMyTheme,
+  createMyTheme,
+  updateMyTheme,
+  ThemeApiError,
+} from "./userThemes";
 
 const originalFetch = globalThis.fetch;
 const originalApiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -19,6 +24,34 @@ const theme = {
   vars: { "--color-primary-bg": "#000" },
   logo_filter: null,
 };
+
+test("save and validation requests send market backgrounds without derived text variables", async () => {
+  const bodies: { vars: Record<string, string> }[] = [];
+  globalThis.fetch = (async (_url: string, options?: RequestInit) => {
+    const body = JSON.parse(options?.body as string);
+    bodies.push(body);
+    return Response.json({ ...body, share_code: "K7QM4XRP", id: 1 });
+  }) as unknown as typeof fetch;
+  const input = {
+    ...theme,
+    vars: {
+      ...theme.vars,
+      "--color-demand-high": "#ff0000",
+      "--color-demand-high-text": "#ff0000",
+      "--color-badge-owner": "#ff0000",
+    },
+  };
+  await createMyTheme(input);
+  await updateMyTheme(1, input);
+  await checkMyTheme(input);
+  expect(bodies).toHaveLength(3);
+  for (const body of bodies) {
+    expect(body.vars).toEqual({
+      ...theme.vars,
+      "--color-demand-high": "#ff0000",
+    });
+  }
+});
 
 test("an unreadable save carries every problem", async () => {
   const problems = ["A on B has 2.8:1 contrast, needs 4.5:1.", "C is missing."];

@@ -95,7 +95,16 @@ function parseColor(value: string): { hex: string; alpha: number } {
   const out = String(canvas.fillStyle);
   if (/^#[0-9a-f]{6}$/i.test(out)) return { hex: out, alpha: 1 };
   const rgba = out.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
-  if (!rgba) return { hex: "#000000", alpha: 1 };
+  if (!rgba) {
+    // Canvas keeps modern colors such as OKLCH in their original notation.
+    canvas.clearRect(0, 0, 1, 1);
+    canvas.fillRect(0, 0, 1, 1);
+    const [r, g, b, a] = canvas.getImageData(0, 0, 1, 1).data;
+    return {
+      hex: `#${[r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("")}`,
+      alpha: a / 255,
+    };
+  }
   const hex = `#${rgba
     .slice(1, 4)
     .map((n) => Number(n).toString(16).padStart(2, "0"))

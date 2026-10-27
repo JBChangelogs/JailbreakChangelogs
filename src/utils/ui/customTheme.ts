@@ -2,6 +2,8 @@ import {
   getCachedPreference,
   hasSyncedPreferences,
 } from "@/utils/preferences/realtimePreferencesCache";
+import { marketThemeVars } from "@/utils/ui/marketThemeVars";
+import { readableTextColor } from "@/utils/ui/accentColor";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import {
   fetchSharedTheme,
@@ -51,7 +53,7 @@ export function parseShareCode(input: string): string | null {
 const COLOR_KEY = /^--color-[a-z0-9-]+$/;
 
 /** Applies the saved custom theme before React hydrates; see applyCustomTheme. */
-export const CUSTOM_THEME_INIT_SCRIPT = `(function(){try{var t=JSON.parse(localStorage.getItem('${STORAGE_KEY}')||'null');if(!t||!t.vars)return;var d=document.documentElement,s=d.style,c=t.scheme==='light'?'light':'dark';for(var k in t.vars)if(${COLOR_KEY}.test(k))s.setProperty(k,String(t.vars[k]));s.setProperty('--logo-filter',t.logo_filter||'none');s.setProperty('color-scheme',c);d.dataset.scheme=c;d.dataset.customTheme=String(t.share_code);}catch(e){}})();`;
+export const CUSTOM_THEME_INIT_SCRIPT = `(function(){try{var t=JSON.parse(localStorage.getItem('${STORAGE_KEY}')||'null');if(!t||!t.vars)return;var d=document.documentElement,s=d.style,c=t.scheme==='light'?'light':'dark';var v=(${marketThemeVars.toString()})(t.vars,${readableTextColor.toString()});for(var k in v)if(${COLOR_KEY}.test(k))s.setProperty(k,String(v[k]));s.setProperty('--logo-filter',t.logo_filter||'none');s.setProperty('color-scheme',c);d.dataset.scheme=c;d.dataset.customTheme=String(t.share_code);}catch(e){}})();`;
 
 let current: CustomTheme | null | undefined;
 // Bumped by the user's own picks, so a slower load can't undo them.
@@ -89,11 +91,12 @@ export function applyCustomTheme(theme: CustomTheme | null) {
   clearLogoPreview();
   const root = document.documentElement;
   const style = root.style;
+  const vars = theme ? marketThemeVars(theme.vars, readableTextColor) : {};
   for (let i = style.length - 1; i >= 0; i--) {
     const key = style[i];
     if (
       key.startsWith("--color-") &&
-      (!theme || !COLOR_KEY.test(key) || !Object.hasOwn(theme.vars, key))
+      (!theme || !COLOR_KEY.test(key) || !Object.hasOwn(vars, key))
     ) {
       style.removeProperty(key);
     }
@@ -105,7 +108,7 @@ export function applyCustomTheme(theme: CustomTheme | null) {
     return;
   }
   for (const [key, value] of Object.entries({
-    ...theme.vars,
+    ...vars,
     "--logo-filter": theme.logo_filter || "none",
     "color-scheme": theme.scheme,
   })) {

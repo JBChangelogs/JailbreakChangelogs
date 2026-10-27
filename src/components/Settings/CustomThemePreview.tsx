@@ -9,6 +9,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { colorName, withDefaultColors } from "@/utils/ui/themeColors";
+import { MARKET_COLORS } from "@/utils/items/badgeColors";
+import { marketThemeVars } from "@/utils/ui/marketThemeVars";
+import { readableTextColor } from "@/utils/ui/accentColor";
 
 /** A group of related samples, in the order things appear on the site. */
 function Section({
@@ -27,21 +30,6 @@ const pill = "rounded-full px-2 py-0.5 text-[11px] font-medium";
 const field = "rounded-md border px-2 py-1 text-[11px]";
 // The hero and overlays sit on a real site background, as on the homepage.
 const photo = "bg-[url(/backgrounds/v2/background1.webp)] bg-cover bg-center";
-
-const BADGES = [
-  "owner",
-  "tester",
-  "vtm",
-  "vt",
-  "partner",
-  "contributor",
-  "developer",
-  "designer",
-  "early-adopter",
-  "premium-bronze",
-  "premium-silver",
-  "premium-gold",
-];
 
 const SUPPORTERS = [
   ["bronze", "Supporter I"],
@@ -135,7 +123,7 @@ export default function CustomThemePreview({
       style={
         {
           // Older themes lack the newer text colors; the page's would leak in.
-          ...withDefaultColors(vars),
+          ...marketThemeVars(withDefaultColors(vars), readableTextColor),
           "--logo-filter": logoFilter || "none",
           colorScheme: scheme,
         } as CSSProperties
@@ -443,19 +431,32 @@ export default function CustomThemePreview({
             </p>
           </Section>
 
-          <Section title="Badges">
-            <div className="flex flex-wrap gap-1">
-              {BADGES.map((badge) => (
-                <span
-                  key={badge}
-                  className="rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
-                  style={{ background: `var(--color-badge-${badge})` }}
-                  {...colors(`badge-${badge}`)}
-                >
-                  {badge.replace(/-/g, " ")}
+          <Section title="Demand and trends">
+            {(["demand", "trend"] as const).map((group) => (
+              <div key={group} className="flex flex-wrap gap-1">
+                <span className="text-secondary-text w-full text-[10px] font-semibold">
+                  {group === "demand" ? "Demand / Duped demand" : "Trends"}
                 </span>
-              ))}
-            </div>
+                {Object.keys(MARKET_COLORS)
+                  .filter((key) => key.startsWith(`${group}-`))
+                  .map((key) => (
+                    <span
+                      key={key}
+                      className="rounded-md px-2 py-0.5 text-[10px] font-semibold"
+                      style={{
+                        backgroundColor: `var(--color-${key})`,
+                        color: `var(--color-${key}-text)`,
+                      }}
+                      {...colors(key)}
+                    >
+                      {colorName(`--color-${key}`).replace(
+                        /^(Demand|Trend) /,
+                        "",
+                      )}
+                    </span>
+                  ))}
+              </div>
+            ))}
           </Section>
 
           <Section title="Supporters">

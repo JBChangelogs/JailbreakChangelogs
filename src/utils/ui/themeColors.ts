@@ -1,5 +1,7 @@
 // Plain-language names for theme colors, shared by the custom theme editor
 // and its preview so both call a color the same thing.
+import { MARKET_COLORS } from "@/utils/items/badgeColors";
+import { marketThemeVars } from "@/utils/ui/marketThemeVars";
 
 /**
  * The colors most people change, in the order the editor shows them. Kept
@@ -41,9 +43,10 @@ export function colorName(key: string): string {
 /** The group a color sits under in the editor's "More colors". */
 export function colorGroup(key: string): string {
   const name = key.replace(/^--color-/, "");
+  if (name.startsWith("demand-")) return "Demand";
+  if (name.startsWith("trend-")) return "Trends";
   if (name.startsWith("icon-tile") || name.startsWith("menu-badge"))
     return "Icons and menu badges";
-  if (name.startsWith("badge-")) return "Badges";
   if (name.startsWith("supporter-")) return "Supporters";
   if (name.startsWith("button-") || name.startsWith("form-button"))
     return "Buttons";
@@ -67,8 +70,9 @@ export const COLOR_GROUPS = [
   "Buttons",
   "Forms",
   "Status and accents",
+  "Demand",
+  "Trends",
   "Icons and menu badges",
-  "Badges",
   "Supporters",
   "Overlays",
 ];
@@ -101,7 +105,10 @@ const NEWER_COLORS: [
 export function withDefaultColors(
   vars: Record<string, string>,
 ): Record<string, string> {
-  const filled = { ...vars };
+  const filled = marketThemeVars(vars);
+  for (const [key, [background]] of Object.entries(MARKET_COLORS)) {
+    filled[`--color-${key}`] ??= background;
+  }
   for (const [key, from] of NEWER_COLORS) {
     const value = key in vars ? undefined : from(vars);
     if (value) filled[key] = value;

@@ -292,55 +292,45 @@ body:has(
   --color-warning-light: hsl(48, 100%, 62%); /* Yellow for 2 weeks left */
   --color-warning-dark: hsl(32, 85%, 52%); /* Darker warning */
 
-  /* Badge Colors */
-  --color-badge-owner: linear-gradient(
-    to right,
-    hsl(270, 100%, 50%),
-    hsl(240, 100%, 50%)
-  ); /* Purple to indigo gradient */
-  --color-badge-tester: hsl(270, 100%, 60%); /* Purple */
-  --color-badge-vtm: linear-gradient(
-    to right,
-    hsl(155, 100%, 30%),
-    hsl(155, 100%, 25%)
-  ); /* Emerald gradient */
-  --color-badge-vt: hsl(220, 100%, 50%); /* Blue */
-  --color-badge-partner: hsl(25, 100%, 50%); /* Orange */
-  --color-badge-contributor: linear-gradient(
-    to right,
-    hsl(180, 100%, 30%),
-    hsl(180, 100%, 25%)
-  ); /* Teal gradient */
-  --color-badge-developer: linear-gradient(
-    to right,
-    hsl(90, 100%, 50%),
-    hsl(90, 100%, 45%)
-  ); /* Lime gradient */
-  --color-badge-designer: linear-gradient(
-    to right,
-    hsl(290, 100%, 55%),
-    hsl(320, 100%, 50%)
-  ); /* Pink to magenta gradient */
-  --color-badge-early-adopter: linear-gradient(
-    to right,
-    hsl(45, 100%, 50%),
-    hsl(45, 100%, 45%)
-  ); /* Amber to yellow gradient */
-  --color-badge-premium-bronze: linear-gradient(
-    to right,
-    hsl(30, 100%, 50%),
-    hsl(30, 100%, 45%)
-  ); /* Bronze gradient */
-  --color-badge-premium-silver: linear-gradient(
-    to right,
-    hsl(0, 0%, 75%),
-    hsl(0, 0%, 65%)
-  ); /* Silver gradient */
-  --color-badge-premium-gold: linear-gradient(
-    to right,
-    hsl(45, 100%, 50%),
-    hsl(45, 100%, 45%)
-  ); /* Gold gradient */
+  /* Demand and trend palettes; custom themes can override each pair. */
+  --color-demand-close-to-none: oklch(44.6% 0.03 256.802);
+  --color-demand-close-to-none-text: #ffffff;
+  --color-demand-very-low: oklch(57.7% 0.245 27.325);
+  --color-demand-very-low-text: #ffffff;
+  --color-demand-low: oklch(55.3% 0.195 38.402);
+  --color-demand-low-text: #ffffff;
+  --color-demand-below-average: oklch(76.9% 0.188 70.08);
+  --color-demand-below-average-text: #000000;
+  --color-demand-average: #D0F03C;
+  --color-demand-average-text: #000000;
+  --color-demand-decent: oklch(62.7% 0.194 149.214);
+  --color-demand-decent-text: #ffffff;
+  --color-demand-high: oklch(54.6% 0.245 262.881);
+  --color-demand-high-text: #ffffff;
+  --color-demand-very-high: oklch(55.8% 0.288 302.321);
+  --color-demand-very-high-text: #ffffff;
+  --color-demand-unknown: oklch(44.6% 0.03 256.802);
+  --color-demand-unknown-text: #ffffff;
+  --color-trend-dropping: oklch(58.6% 0.253 17.585);
+  --color-trend-dropping-text: #ffffff;
+  --color-trend-unstable: oklch(66.6% 0.179 58.318);
+  --color-trend-unstable-text: #ffffff;
+  --color-trend-hoarded: oklch(54.1% 0.281 293.009);
+  --color-trend-hoarded-text: #ffffff;
+  --color-trend-manipulated: oklch(68.1% 0.162 75.834);
+  --color-trend-manipulated-text: #000000;
+  --color-trend-stable: oklch(55.1% 0.027 264.364);
+  --color-trend-stable-text: #ffffff;
+  --color-trend-recovering: oklch(64.6% 0.222 41.116);
+  --color-trend-recovering-text: #ffffff;
+  --color-trend-rising: oklch(48.8% 0.243 264.376);
+  --color-trend-rising-text: #ffffff;
+  --color-trend-hyped: oklch(65.6% 0.241 354.308);
+  --color-trend-hyped-text: #ffffff;
+  --color-trend-projected: #4cdcfc;
+  --color-trend-projected-text: #000000;
+  --color-trend-unknown: oklch(44.6% 0.03 256.802);
+  --color-trend-unknown-text: #ffffff;
 
   /* Supporter Border Colors */
   --color-supporter-bronze-border: #cd7f32; /* Bronze border for Supporter 1 */
