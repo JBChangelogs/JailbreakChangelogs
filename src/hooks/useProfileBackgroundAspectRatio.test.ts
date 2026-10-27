@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { ModuleKind, transpileModule } from "typescript";
 
-test("background preview measures available space and removes its observer and frame", () => {
+test("background preview measures the full frame and removes its observer and frame", () => {
   let width = 1680;
   let height = 1020;
   let ratio: number | null = null;
@@ -70,6 +70,7 @@ test("background preview measures available space and removes its observer and f
   expect(appended).toBe(false);
   exports.useProfileBackgroundAspectRatio(true);
   const cleanup = effect?.();
+  expect(frame.className).toBe("pointer-events-none invisible fixed inset-0");
   expect(exports.useProfileBackgroundAspectRatio(true)).toBe(1680 / 1020);
   width = 1848;
   height = 960;
