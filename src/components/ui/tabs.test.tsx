@@ -43,3 +43,18 @@ test("plain tabs keep tab semantics", () => {
   expect(html).toContain('role="tab"');
   expect(html).not.toContain("radio");
 });
+
+test("filled segmented controls keep the sliding indicator and radio semantics", () => {
+  const html = renderToStaticMarkup(
+    <Tabs radio value="clean">
+      <TabsList data-variant="filled" aria-label="Condition">
+        <TabsTrigger value="clean">Clean</TabsTrigger>
+        <TabsTrigger value="duped">Duped</TabsTrigger>
+      </TabsList>
+    </Tabs>,
+  );
+  expect(html).toContain('data-variant="filled"');
+  expect(html).toContain('data-slot="tabs-indicator"');
+  expect(html).toContain('role="radiogroup"');
+  expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
+});

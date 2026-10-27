@@ -446,25 +446,25 @@ export default function ExperimentsClient() {
                 className="shrink-0"
               >
                 <TabsList
-                  hideIndicator
+                  data-variant="filled"
                   aria-labelledby="experiment-indicator-label"
                   className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
                 >
                   <TabsTrigger
                     value="floating"
-                    className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                    className="rounded-md px-3 py-1.5"
                   >
                     Floating
                   </TabsTrigger>
                   <TabsTrigger
                     value="header"
-                    className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                    className="rounded-md px-3 py-1.5"
                   >
                     Header
                   </TabsTrigger>
                   <TabsTrigger
                     value="hidden"
-                    className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                    className="rounded-md px-3 py-1.5"
                   >
                     Hidden
                   </TabsTrigger>
@@ -652,7 +652,7 @@ export default function ExperimentsClient() {
                           className="shrink-0 self-start sm:self-auto"
                         >
                           <TabsList
-                            hideIndicator
+                            data-variant="filled"
                             aria-labelledby={`experiment-${key}`}
                             className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
                           >
@@ -666,7 +666,7 @@ export default function ExperimentsClient() {
                               <TabsTrigger
                                 key={value}
                                 value={value}
-                                className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                                className="rounded-md px-3 py-1.5"
                                 disabled={
                                   saving ||
                                   (!forceable && value !== "default") ||

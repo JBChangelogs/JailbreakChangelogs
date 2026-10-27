@@ -18,7 +18,8 @@
   pointer-events: none;
 }
 
-html[data-tab-style="filled"] [data-slot="tabs-list"] {
+html[data-tab-style="filled"] [data-slot="tabs-list"],
+[data-slot="tabs-list"][data-variant="filled"] {
   border: 1px solid var(--color-border-card);
   background: var(--color-tertiary-bg);
   padding: 2px;
@@ -27,14 +28,16 @@ html[data-tab-style="filled"] [data-slot="tabs-list"] {
 }
 
 /* Faded rather than removed, so switching styles can fade it back. */
-html[data-tab-style="filled"] [data-slot="tabs-baseline"] {
+html[data-tab-style="filled"] [data-slot="tabs-baseline"],
+[data-slot="tabs-list"][data-variant="filled"] > [data-slot="tabs-baseline"] {
   opacity: 0;
 }
 
 /* The sliding indicator becomes the active pill, drawn behind the triggers.
    Placed with left/top, not a transform: a transformed layer rounds to whole
    pixels apart from the border, leaving uneven gaps at fractional scaling. */
-html[data-tab-style="filled"] [data-slot="tabs-indicator"] {
+html[data-tab-style="filled"] [data-slot="tabs-indicator"],
+[data-slot="tabs-list"][data-variant="filled"] > [data-slot="tabs-indicator"] {
   top: var(--tab-top);
   left: var(--tab-left);
   height: var(--tab-height);
@@ -43,12 +46,14 @@ html[data-tab-style="filled"] [data-slot="tabs-indicator"] {
   background: var(--color-button-info);
 }
 
-html[data-tab-style="filled"] [data-slot="tabs-trigger"] {
+html[data-tab-style="filled"] [data-slot="tabs-trigger"],
+[data-slot="tabs-list"][data-variant="filled"] > [data-slot="tabs-trigger"] {
   position: relative;
   z-index: 1;
 }
 
-html[data-tab-style="filled"] [data-slot="tabs-trigger"][data-state="active"] {
+html[data-tab-style="filled"] [data-slot="tabs-trigger"][data-state="active"],
+[data-slot="tabs-list"][data-variant="filled"] > [data-slot="tabs-trigger"][data-state="active"] {
   background: var(--color-button-info);
   color: var(--color-form-button-text);
 }
@@ -56,7 +61,9 @@ html[data-tab-style="filled"] [data-slot="tabs-trigger"][data-state="active"] {
 /* Once the pill is measured it carries the background, so it can slide. */
 html[data-tab-style="filled"]
   [data-slot="tabs-list"]:has(> [data-slot="tabs-indicator"][data-visible])
-  [data-slot="tabs-trigger"][data-state="active"] {
+  [data-slot="tabs-trigger"][data-state="active"],
+[data-slot="tabs-list"][data-variant="filled"]:has(> [data-slot="tabs-indicator"][data-visible])
+  > [data-slot="tabs-trigger"][data-state="active"] {
   background: transparent;
 }
 

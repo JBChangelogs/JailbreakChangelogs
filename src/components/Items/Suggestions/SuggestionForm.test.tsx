@@ -167,6 +167,11 @@ test("visibility uses a segmented choice and preserves the VT submission flag", 
     (node) => node.props?.radio === true,
   )!;
   expect(control.props.value).toBe("vt");
+  const list = nodes(control).find(
+    (node) => node.props["data-variant"] === "filled",
+  );
+  expect(list).toBeDefined();
+  expect(list?.props.hideIndicator).not.toBe(true);
   expect(
     nodes(control).some((node) => node.props.children === "Everyone"),
   ).toBe(true);

@@ -984,58 +984,71 @@ export default function TradeItemPickerV2({
                               </span>
                             )}
                         </div>
-                        <div
-                          role="group"
-                          aria-label={`Condition for ${item.name}`}
+                        <Tabs
+                          radio
+                          value={condition}
+                          onClick={(event) => event.stopPropagation()}
                           onKeyDown={(event) => event.stopPropagation()}
-                          className="border-border-card bg-tertiary-bg inline-flex max-w-full items-center gap-0.5 rounded-lg border p-0.5"
+                          onValueChange={(value) => {
+                            const option = value as ItemCondition;
+                            if (showOfferRequestButtons) {
+                              setUnifiedItemConditions((prev) => ({
+                                ...prev,
+                                [itemKey]: option,
+                              }));
+                            } else {
+                              setItemConditionsBySide((prev) => ({
+                                ...prev,
+                                [activeSide]: {
+                                  ...prev[activeSide],
+                                  [itemKey]: option,
+                                },
+                              }));
+                            }
+                          }}
+                          style={
+                            {
+                              "--color-button-info":
+                                condition === "clean"
+                                  ? "var(--color-status-success)"
+                                  : condition === "duped"
+                                    ? "var(--color-status-error)"
+                                    : "#FFD700",
+                              "--color-form-button-text":
+                                condition === "clean"
+                                  ? "var(--color-button-success-text)"
+                                  : condition === "duped"
+                                    ? "var(--color-button-danger-text)"
+                                    : "#000",
+                            } as React.CSSProperties
+                          }
                         >
-                          {(
-                            [
-                              "clean",
-                              "duped",
-                              ...(allowOg ? ["og"] : []),
-                            ] as ItemCondition[]
-                          ).map((option) => (
-                            <button
-                              key={option}
-                              type="button"
-                              aria-pressed={condition === option}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                if (showOfferRequestButtons) {
-                                  setUnifiedItemConditions((prev) => ({
-                                    ...prev,
-                                    [itemKey]: option,
-                                  }));
-                                } else {
-                                  setItemConditionsBySide((prev) => ({
-                                    ...prev,
-                                    [activeSide]: {
-                                      ...prev[activeSide],
-                                      [itemKey]: option,
-                                    },
-                                  }));
-                                }
-                              }}
-                              className={`focus-visible:outline-border-focus cursor-pointer rounded-md px-2 py-1 text-[10px] leading-none font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                                condition === option
-                                  ? option === "clean"
-                                    ? "bg-status-success text-button-success-text"
-                                    : option === "duped"
-                                      ? "bg-status-error text-button-danger-text"
-                                      : "bg-[#FFD700] text-black"
-                                  : "text-primary-text hover:bg-quaternary-bg"
-                              }`}
-                            >
-                              {option === "og"
-                                ? "OG"
-                                : option === "duped"
-                                  ? "Duped"
-                                  : "Clean"}
-                            </button>
-                          ))}
-                        </div>
+                          <TabsList
+                            data-variant="filled"
+                            aria-label={`Condition for ${item.name}`}
+                            className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
+                          >
+                            {(
+                              [
+                                "clean",
+                                "duped",
+                                ...(allowOg ? ["og"] : []),
+                              ] as ItemCondition[]
+                            ).map((option) => (
+                              <TabsTrigger
+                                key={option}
+                                value={option}
+                                className="px-2 py-1 text-[10px] leading-none"
+                              >
+                                {option === "og"
+                                  ? "OG"
+                                  : option === "duped"
+                                    ? "Duped"
+                                    : "Clean"}
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+                        </Tabs>
                       </div>
                     );
                   })()}

@@ -851,20 +851,17 @@ export function SuggestionForm({
                   onValueChange={(value) => setIsVt(value === "vt")}
                 >
                   <TabsList
-                    hideIndicator
+                    data-variant="filled"
                     aria-labelledby="suggestion-visibility-label"
                     className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
                   >
                     <TabsTrigger
                       value="public"
-                      className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                      className="rounded-md px-3 py-1.5"
                     >
                       Everyone
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="vt"
-                      className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
-                    >
+                    <TabsTrigger value="vt" className="rounded-md px-3 py-1.5">
                       Value team only
                     </TabsTrigger>
                   </TabsList>
