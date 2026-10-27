@@ -276,19 +276,31 @@ export default function ConnectedBotsPolling() {
           <>
             {queueInfo && (
               <div className="mb-4 space-y-2 text-sm">
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-6">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                   <div className="flex items-center gap-2">
                     <span className="text-secondary-text">Queue Length:</span>
                     <span className="text-primary-text font-bold">
                       <CountUpNumber value={queueInfo.queue_length} />
                     </span>
                   </div>
+                  <span
+                    className="text-tertiary-text hidden sm:inline"
+                    aria-hidden="true"
+                  >
+                    |
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="text-secondary-text">Worker Count:</span>
                     <span className="text-primary-text font-bold">
                       <CountUpNumber value={queueInfo.worker_count} />
                     </span>
                   </div>
+                  <span
+                    className="text-tertiary-text hidden sm:inline"
+                    aria-hidden="true"
+                  >
+                    |
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="text-secondary-text">Current Delay:</span>
                     <span className="text-primary-text font-bold">
