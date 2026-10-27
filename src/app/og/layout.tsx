@@ -12,14 +12,14 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: "OG Finder",
     description:
-      "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
+      "Find the OG items you traded away in Jailbreak and see who owns them now. Enter any Roblox username or ID to track where your originals ended up.",
     alternates: {
       canonical: "/og",
     },
     openGraph: {
       title: "OG Finder - Jailbreak Changelogs",
       description:
-        "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
+        "Find the OG items you traded away in Jailbreak and see who owns them now. Enter any Roblox username or ID to track where your originals ended up.",
       images: [
         {
           url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: "OG Finder - Jailbreak Changelogs",
       description:
-        "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
+        "Find the OG items you traded away in Jailbreak and see who owns them now. Enter any Roblox username or ID to track where your originals ended up.",
       images: [
         "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
       ],
