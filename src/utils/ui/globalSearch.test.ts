@@ -3,6 +3,7 @@ import {
   createGlobalSearchIndex,
   getGlobalSearchResults,
   getGlobalUserQuery,
+  getGlobalCheckQuery,
 } from "./globalSearch";
 
 const catalog = [
@@ -445,4 +446,22 @@ test("reopening reuses the index while data and account state are unchanged", ()
   ).toBe(signedOut);
   const empty = createGlobalSearchIndex();
   expect(createGlobalSearchIndex()).toBe(empty);
+});
+
+test("inv:, dupe: and og: prefixes link straight to the Roblox lookup pages", () => {
+  expect(getGlobalCheckQuery("torpedo")).toBeNull();
+  expect(getGlobalCheckQuery("og monster")).toBeNull();
+  expect(
+    getGlobalSearchResults(index, " INV: Jalenzz16 ").map((r) => r.href),
+  ).toEqual(["/inventories/Jalenzz16"]);
+  expect(getGlobalSearchResults(index, "dupe:12345")[0]).toMatchObject({
+    title: "Dupe Finder: 12345",
+    group: "Roblox lookup",
+    href: "/dupes/12345",
+  });
+  expect(getGlobalSearchResults(index, "og: some_player")[0].href).toBe(
+    "/og/some_player",
+  );
+  expect(getGlobalSearchResults(index, "og:")).toEqual([]);
+  expect(getGlobalSearchResults(index, "inv: a/b")).toEqual([]);
 });

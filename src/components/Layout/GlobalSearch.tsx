@@ -23,6 +23,7 @@ import {
   getGlobalSearchResults,
   getGlobalUserResults,
   getGlobalUserQuery,
+  getGlobalCheckQuery,
   GLOBAL_SEARCH_GROUP_LIMIT,
   SEARCH_ITEM_FIELDS,
   type SearchCatalogItem,
@@ -41,6 +42,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
   const seasons = useSeasonsList();
   const changelogs = useChangelogTimeline();
   const userQuery = getGlobalUserQuery(query);
+  const checkQuery = getGlobalCheckQuery(query);
   const usersEnabled = userQuery !== null && userQuery.length >= 1;
   const users = useUserSearch(userQuery ?? "", null, {
     limit: GLOBAL_SEARCH_GROUP_LIMIT,
@@ -55,11 +57,11 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
   const isLoading =
     userQuery !== null
       ? usersEnabled && users.isLoading
-      : sources.some((source) => source.isPending);
+      : !checkQuery && sources.some((source) => source.isPending);
   const hasError =
     userQuery !== null
       ? usersEnabled && users.isError
-      : sources.some((source) => source.isError);
+      : !checkQuery && sources.some((source) => source.isError);
   const index = useMemo(
     () =>
       createGlobalSearchIndex(
@@ -335,6 +337,8 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
               !hasError &&
               (userQuery !== null && !usersEnabled ? (
                 <p>Type a username to search accounts.</p>
+              ) : checkQuery ? (
+                <p>Type a Roblox username or ID.</p>
               ) : (
                 <>
                   <p className="text-primary-text font-medium">
@@ -347,7 +351,9 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
               ))}
             {isLoading && <p>Searching…</p>}
             {sources
-              .filter((source) => userQuery === null && source.isError)
+              .filter(
+                (source) => userQuery === null && !checkQuery && source.isError,
+              )
               .map((source) => (
                 <p key={source.label}>
                   {source.label} could not be refreshed.{" "}
@@ -375,7 +381,27 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
           </div>
         </div>
         <div className="text-secondary-text border-border-card shrink-0 space-y-2 border-t px-4 py-3 text-xs">
-          <p id="global-search-hint">Search users with @username.</p>
+          <div id="global-search-hint" className="space-y-1.5">
+            {[
+              { prefixes: ["@"], text: "+ username to search site users" },
+              {
+                prefixes: ["inv:", "dupe:", "og:"],
+                text: "+ Roblox username or ID to open that checker",
+              },
+            ].map(({ prefixes, text }) => (
+              <p key={text} className="flex flex-wrap items-center gap-1">
+                {prefixes.map((prefix) => (
+                  <kbd
+                    key={prefix}
+                    className="border-border-card bg-secondary-bg text-primary-text shrink-0 rounded border px-1.5 py-1 font-mono text-xs leading-none"
+                  >
+                    {prefix}
+                  </kbd>
+                ))}
+                <span>{text}</span>
+              </p>
+            ))}
+          </div>
           <p className="flex flex-wrap items-center gap-1">
             <kbd className="border-border-card bg-secondary-bg text-primary-text shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none">
               ↑
