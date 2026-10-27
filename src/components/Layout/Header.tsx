@@ -837,17 +837,18 @@ export default function Header({
             unreadCount={unreadCount}
             unreadMessageCount={unreadMessageCount}
             setUnreadCount={setUnreadCount}
-            sidebarCollapsed={sidebarCollapsed}
-            onToggleSidebar={() =>
-              setDesktopSidebarCollapsed(!getDesktopSidebarCollapsed())
-            }
             onUserMenuOpenChange={setDesktopUserMenuOpen}
             setUtmModalOpen={setUtmModalOpen}
           />
         </div>
       </div>
 
-      <DesktopSidebar collapsed={sidebarCollapsed} />
+      <DesktopSidebar
+        collapsed={sidebarCollapsed}
+        onToggle={() =>
+          setDesktopSidebarCollapsed(!getDesktopSidebarCollapsed())
+        }
+      />
 
       {/* Mobile header - hidden on desktop via CSS */}
       <div

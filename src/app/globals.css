@@ -853,8 +853,7 @@ img.twemoji {
     transform: translateX(-50%);
   }
 
-  html[data-desktop-navigation="top-bar"] [data-desktop-sidebar],
-  html[data-desktop-navigation="top-bar"] [data-desktop-sidebar-toggle] {
+  html[data-desktop-navigation="top-bar"] [data-desktop-sidebar] {
     display: none;
   }
 

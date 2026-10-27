@@ -119,14 +119,10 @@ export const NavbarModern = ({
   setUnreadCount,
   onUserMenuOpenChange,
   setUtmModalOpen,
-  sidebarCollapsed,
-  onToggleSidebar,
   onOpenSearch,
   searchOpen,
 }: {
   className?: string;
-  sidebarCollapsed: boolean;
-  onToggleSidebar: () => void;
   onOpenSearch?: () => void;
   searchOpen: boolean;
   unreadCount: number;
@@ -296,30 +292,6 @@ export const NavbarModern = ({
       <div className="relative flex h-15 items-center justify-between gap-4 px-4">
         {/* Logo */}
         <div className="flex shrink-0 items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                data-desktop-sidebar-toggle
-                onClick={onToggleSidebar}
-                aria-label={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
-                aria-expanded={!sidebarCollapsed}
-                aria-controls="desktop-sidebar-navigation"
-                className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-link hidden size-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none 2xl:flex"
-              >
-                <svg
-                  viewBox="0 0 512 512"
-                  aria-hidden="true"
-                  className="size-5 fill-current"
-                >
-                  <path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" />
-                </svg>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              {sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
-            </TooltipContent>
-          </Tooltip>
           <Link href="/" style={{ display: "block" }}>
             <SiteLogo
               collaboration={isCollabPage}

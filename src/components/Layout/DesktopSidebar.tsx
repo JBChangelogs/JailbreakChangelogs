@@ -13,7 +13,13 @@ import { cn } from "@/lib/utils";
 import { getNavigationHref } from "@/utils/ui/navigation";
 import { navigationSections } from "@/utils/ui/navigation-menu";
 
-export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
+export default function DesktopSidebar({
+  collapsed,
+  onToggle,
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+}) {
   const pathname = usePathname();
   const activeHref = getNavigationHref(pathname);
   const navigationRef = useRef<HTMLElement>(null);
@@ -66,7 +72,7 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
         ref={navigationRef}
         id="desktop-sidebar-navigation"
         aria-label="Main"
-        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain p-3"
+        className="scrollbar-hide min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain p-3"
       >
         <div className="flex flex-col gap-4">
           {navigationSections.map((section) => (
@@ -155,6 +161,49 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
           ))}
         </div>
       </nav>
+      <div className="shrink-0 p-3">
+        <Tooltip
+          open={collapsed && openTooltip === "toggle"}
+          onOpenChange={(open) =>
+            setOpenTooltip((current) =>
+              open && collapsed
+                ? "toggle"
+                : current === "toggle"
+                  ? null
+                  : current,
+            )
+          }
+        >
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-label={collapsed ? "Show sidebar" : "Hide sidebar"}
+              aria-expanded={!collapsed}
+              aria-controls="desktop-sidebar-navigation"
+              className={cn(linkClassName(false), "w-full cursor-pointer")}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                aria-hidden="true"
+                className="text-secondary-text h-5 w-5 shrink-0"
+              >
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M9 4v16M5.5 8h1M5.5 11h1M5.5 14h1" />
+              </svg>
+              <span className={labelClassName}>Hide sidebar</span>
+            </button>
+          </TooltipTrigger>
+          {collapsed && (
+            <TooltipContent side="right" sideOffset={8}>
+              Show sidebar
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </div>
     </aside>
   );
 }
