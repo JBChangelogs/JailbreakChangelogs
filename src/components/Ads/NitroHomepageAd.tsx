@@ -40,7 +40,7 @@ const MOBILE_CONFIG = {
     enabled: true,
     icon: true,
     wording: "Report Ad",
-    position: "top-right",
+    position: "bottom-right",
   },
   mediaQuery: "(width < 768px)",
 };
@@ -58,7 +58,7 @@ const DESKTOP_CONFIG = {
     enabled: true,
     icon: true,
     wording: "Report Ad",
-    position: "top-right",
+    position: "bottom-right",
   },
   mediaQuery: "(min-width: 768px)",
 };

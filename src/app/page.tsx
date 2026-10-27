@@ -471,7 +471,7 @@ export default async function Home() {
       </section>
 
       <section className="py-4">
-        <div className="p-4 pb-8 empty:hidden">
+        <div className="px-4 pb-6 empty:hidden">
           <NitroHomepageAd />
         </div>
         <div className="container mx-auto px-4">
