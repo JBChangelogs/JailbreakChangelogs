@@ -271,13 +271,13 @@ export default function MostScannedLeaderboardClient({
                     return (
                       <div
                         key={user.user_id}
-                        className="border-border-card min-w-0 border-b"
+                        className="border-border-card min-w-0 border-b py-1"
                       >
                         <Link
                           href={`/inventories/${user.user_id}`}
                           prefetch={false}
                           aria-label={`View ${username}'s inventory`}
-                          className="group hover:bg-tertiary-bg focus-visible:outline-border-focus -mx-2 flex min-w-0 items-center gap-3 rounded-md px-2 py-3 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 sm:gap-4"
+                          className="group hover:bg-tertiary-bg focus-visible:outline-border-focus -mx-2 flex min-w-0 items-center gap-3 rounded-md px-2 py-2 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 sm:gap-4"
                         >
                           <span
                             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums ${

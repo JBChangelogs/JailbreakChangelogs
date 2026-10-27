@@ -53,12 +53,12 @@ export default function MostDuplicatedItems({
             return (
               <li
                 key={`${item.name}-${item.type}-${index}`}
-                className="border-border-card border-b last:border-b-0 xl:[&:nth-last-child(2)]:border-b-0"
+                className="border-border-card border-b py-1 last:border-b-0 xl:[&:nth-last-child(2)]:border-b-0"
               >
                 <Link
                   href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
                   prefetch={false}
-                  className="group hover:bg-tertiary-bg focus-visible:outline-border-focus -mx-2 flex items-center gap-3 rounded-md px-2 py-3 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 sm:gap-4"
+                  className="group hover:bg-tertiary-bg focus-visible:outline-border-focus -mx-2 flex items-center gap-3 rounded-md px-2 py-2 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 sm:gap-4"
                 >
                   <span className="text-secondary-text w-5 shrink-0 text-center text-xs font-medium tabular-nums">
                     <span className="sr-only">Rank </span>
