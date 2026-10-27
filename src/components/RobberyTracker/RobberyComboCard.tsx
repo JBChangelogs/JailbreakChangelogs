@@ -18,6 +18,7 @@ import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLast
 import { Spinner } from "@/components/ui/Spinner";
 import { formatServerTime, getStatusBadgeClass } from "./utils";
 import JoinedUsers from "./JoinedUsers";
+import RobberyMarkerIcon from "./RobberyMarkerIcon";
 import type {
   TrackerJoinUser,
   TrackerJoinReport,
@@ -39,7 +40,7 @@ function getStatusText(status: number): string {
     case 1:
       return "Open";
     case 2:
-      return "In Progress";
+      return "Active";
     case 3:
       return "Closed";
     default:
@@ -112,7 +113,7 @@ function RobberyComboCard({
     });
   }, [useExternalRegionData, serverId, fetchRegionData, internalRegionData]);
 
-  const comboHeaderStatusText = isAllOpen ? "All Open" : "All In Progress";
+  const comboHeaderStatusText = isAllOpen ? "All Open" : "All Active";
   const comboHeaderStatusClass = isAllOpen
     ? getStatusBadgeClass(1)
     : getStatusBadgeClass(2);
@@ -161,6 +162,11 @@ function RobberyComboCard({
                 key={`${robbery.marker_name}-${robbery.timestamp}`}
                 className={`${getStatusBadgeClass(robbery.status)} inline-flex max-w-full items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium`}
               >
+                <RobberyMarkerIcon
+                  markerName={robbery.marker_name}
+                  name={robbery.name}
+                  className="size-6"
+                />
                 <span className="truncate">{robbery.name}</span>
                 <span className="text-tertiary-text">•</span>
                 <span className="shrink-0">

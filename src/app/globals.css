@@ -380,6 +380,14 @@ body:has(
   filter: var(--logo-filter, none);
 }
 
+.robbery-marker-icon {
+  background-color: var(--color-button-info);
+  mask-mode: alpha;
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+}
+
 .theme-cursor-icon {
   display: none;
   background-image: var(--theme-cursor-icon);

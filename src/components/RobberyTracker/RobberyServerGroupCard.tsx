@@ -25,6 +25,7 @@ import {
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 import { Spinner } from "@/components/ui/Spinner";
 import JoinedUsers from "./JoinedUsers";
+import RobberyMarkerIcon from "./RobberyMarkerIcon";
 import type {
   TrackerJoinUser,
   TrackerJoinReport,
@@ -267,6 +268,14 @@ function RobberyServerGroupCard({
                 key={`${robbery.marker_name}-${robbery.timestamp}`}
                 className={`${getStatusBadgeClass(robbery.status)} inline-flex max-w-full items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium`}
               >
+                <RobberyMarkerIcon
+                  markerName={robbery.marker_name}
+                  name={robberyMarkerToDisplayName(
+                    robbery.marker_name,
+                    robbery.name,
+                  )}
+                  className="size-6"
+                />
                 <span className="truncate">
                   {robberyMarkerToDisplayName(
                     robbery.marker_name,

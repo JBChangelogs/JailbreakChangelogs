@@ -31,6 +31,7 @@ import {
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 import { Spinner } from "@/components/ui/Spinner";
 import JoinedUsers from "./JoinedUsers";
+import RobberyMarkerIcon from "./RobberyMarkerIcon";
 import type {
   TrackerJoinUser,
   TrackerJoinReport,
@@ -227,8 +228,13 @@ function RobberyCard({
         <div className="min-w-0 flex-1">
           {/* Header */}
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-primary-text min-w-0 flex-1 truncate text-base font-semibold">
-              {displayName}
+            <h3 className="text-primary-text flex min-w-0 flex-1 items-center gap-1.5 text-base font-semibold">
+              <RobberyMarkerIcon
+                markerName={robbery.marker_name}
+                name={displayName}
+                className="size-7"
+              />
+              <span className="truncate">{displayName}</span>
             </h3>
             <div className="shrink-0">{statusBadge}</div>
           </div>
