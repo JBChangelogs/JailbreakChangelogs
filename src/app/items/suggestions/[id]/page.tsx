@@ -35,6 +35,7 @@ import {
   getItemImagePath,
   handleImageError,
   isVideoItem,
+  isDriftItem,
   getVideoPath,
 } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
@@ -48,6 +49,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Image from "next/image";
+import DriftPreview from "@/components/Items/DriftPreview";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import ChartUpdateNotice, {
   itemHistoryStaleTime,
@@ -1139,6 +1141,8 @@ export default function ValueSuggestionDetailPage() {
                           loop
                           autoPlay
                         />
+                      ) : item && isDriftItem(item.type) ? (
+                        <DriftPreview key={item.name} name={item.name} />
                       ) : (
                         <Image
                           placeholder={IMAGE_PLACEHOLDER}
