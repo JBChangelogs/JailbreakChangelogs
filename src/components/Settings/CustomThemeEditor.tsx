@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -172,8 +171,8 @@ const fromSiteTheme = (theme: SiteTheme): Omit<CustomThemeInput, "label"> => ({
  * Creates a theme, or edits `theme`. New themes start from the site theme in
  * use; "Start from" swaps every color for another site theme's.
  */
-/** Why the editor closed: saved, cancelled, or cancelled to go to settings. */
-export type EditorCloseReason = "saved" | "cancelled" | "cancelled-to-settings";
+/** Whether the editor closed after saving or cancelling. */
+export type EditorCloseReason = "saved" | "cancelled";
 
 export default function CustomThemeEditor({
   theme,
@@ -186,7 +185,6 @@ export default function CustomThemeEditor({
   onClose: (reason: EditorCloseReason) => void;
   onSaved: (theme: UserTheme) => void;
 }) {
-  const onSettings = usePathname() === "/settings";
   // The theme as last saved here; a new theme has one after its first save,
   // so later saves update it instead of making another.
   const [savedTheme, setSavedTheme] = useState(theme);
@@ -1382,18 +1380,6 @@ export default function CustomThemeEditor({
             >
               Discard
             </Button>
-            {!onSettings && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setAskDiscard(false);
-                  onClose("cancelled-to-settings");
-                }}
-              >
-                Discard and go to settings
-              </Button>
-            )}
             <Button size="sm" onClick={() => setAskDiscard(false)}>
               Keep editing
             </Button>

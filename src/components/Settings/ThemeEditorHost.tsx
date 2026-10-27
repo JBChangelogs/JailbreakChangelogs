@@ -39,8 +39,7 @@ export default function ThemeEditorHost() {
       open
       onClose={(reason) => {
         closeThemeEditor();
-        if (reason === "cancelled-to-settings") router.push(THEMES_SETTINGS);
-        else if (reason === "saved" && pathname !== "/settings") {
+        if (reason === "saved" && pathname !== "/settings") {
           // Saving already said so; this only offers the way back.
           toast("Theme editor closed", {
             duration: 6000,

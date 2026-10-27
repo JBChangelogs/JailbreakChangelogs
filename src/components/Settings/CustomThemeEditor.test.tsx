@@ -74,8 +74,6 @@ function editor({
               ];
             },
           };
-        if (name === "next/navigation")
-          return { usePathname: () => "/settings" };
         if (name === "@tanstack/react-query")
           return {
             useQuery: ({ queryKey }: { queryKey: string[] }) => ({
