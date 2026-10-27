@@ -88,7 +88,7 @@ export default function ValuesItemsGrid({
   }, [filterKey, setPage]);
 
   const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
-  const showDesktopFeedAds = useRailAdSize() === "none";
+  const noRailAds = useRailAdSize() === "none";
 
   const displayedItems = items;
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -222,7 +222,7 @@ export default function ValuesItemsGrid({
           })()}
         </p>
 
-        <NitroValuesTopAd />
+        {noRailAds && <NitroValuesTopAd />}
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -271,7 +271,7 @@ export default function ValuesItemsGrid({
                   <NitroGridAd adId={`np-value-grid-${index + 1}`} />
                 </div>
               )}
-              {showDesktopFeedAds && (index + 1) % 96 === 0 && (
+              {noRailAds && (index + 1) % 96 === 0 && (
                 <div className="col-span-full hidden justify-center py-4 md:flex">
                   <NitroGridAd adId={`np-value-feed-${index + 1}`} desktop />
                 </div>
