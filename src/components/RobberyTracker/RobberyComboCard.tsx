@@ -144,8 +144,16 @@ function RobberyComboCard({
         {/* Content */}
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-primary-text min-w-0 flex-1 truncate text-base font-semibold">
-              {comboLabel}
+            <h3 className="text-primary-text flex min-w-0 flex-1 items-center gap-1.5 text-base font-semibold">
+              {displayRobberies.map((robbery) => (
+                <RobberyMarkerIcon
+                  key={robbery.marker_name}
+                  markerName={robbery.marker_name}
+                  name={robbery.name}
+                  className="size-6"
+                />
+              ))}
+              <span className="truncate">{comboLabel}</span>
             </h3>
             {(isAllOpen || isAllInProgress) && (
               <span
@@ -162,11 +170,6 @@ function RobberyComboCard({
                 key={`${robbery.marker_name}-${robbery.timestamp}`}
                 className={`${getStatusBadgeClass(robbery.status)} inline-flex max-w-full items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium`}
               >
-                <RobberyMarkerIcon
-                  markerName={robbery.marker_name}
-                  name={robbery.name}
-                  className="size-6"
-                />
                 <span className="truncate">{robbery.name}</span>
                 <span className="text-tertiary-text">•</span>
                 <span className="shrink-0">

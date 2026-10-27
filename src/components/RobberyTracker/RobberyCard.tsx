@@ -232,7 +232,7 @@ function RobberyCard({
               <RobberyMarkerIcon
                 markerName={robbery.marker_name}
                 name={displayName}
-                className="size-7"
+                className="size-6"
               />
               <span className="truncate">{displayName}</span>
             </h3>
