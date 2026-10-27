@@ -44,7 +44,7 @@ export default function DesktopSidebar({ collapsed }: { collapsed: boolean }) {
 
   const linkClassName = (active: boolean) =>
     cn(
-      "focus-visible:ring-link flex min-h-10 items-center gap-3 overflow-hidden rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none",
+      "focus-visible:ring-link flex min-h-10 items-center gap-2 overflow-hidden rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none",
       active
         ? "bg-button-info/10 text-primary-text"
         : "text-primary-text/85 hover:bg-quaternary-bg hover:text-primary-text",

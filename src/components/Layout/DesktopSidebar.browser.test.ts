@@ -136,7 +136,11 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
           root.style.removeProperty('--header-height');
           root.dataset.desktopSidebarCollapsed = 'false';
           finish();
-          const expanded = { top: sidebar.getBoundingClientRect().top, width: sidebar.getBoundingClientRect().width, icons: positions(), opacity: +getComputedStyle(label).opacity };
+          const liveLabels = [...sidebar.querySelectorAll('a')].filter(link => link.lastElementChild.textContent.trim() === 'Live').map(link => {
+            const label = link.querySelector('svg').nextElementSibling;
+            return { title: label.textContent, width: label.clientWidth, contentWidth: label.scrollWidth };
+          });
+          const expanded = { top: sidebar.getBoundingClientRect().top, width: sidebar.getBoundingClientRect().width, icons: positions(), opacity: +getComputedStyle(label).opacity, liveLabels };
           root.style.setProperty('--header-height', '60px');
           const expandedMeasuredIcons = positions();
           root.dataset.desktopSidebarCollapsed = 'true';
@@ -216,6 +220,12 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
         opacity: 1,
       });
       expect(result.expanded.icons).toEqual(result.initial.icons);
+      expect(result.expanded.liveLabels).toHaveLength(2);
+      for (const label of result.expanded.liveLabels) {
+        expect(label.contentWidth, label.title).toBeLessThanOrEqual(
+          label.width,
+        );
+      }
       expect(result.expandedMeasuredIcons).toEqual(result.expanded.icons);
       expect(result.middle.icons).toEqual(result.expanded.icons);
       expect(result.middle.opacity).toBeGreaterThan(0);
