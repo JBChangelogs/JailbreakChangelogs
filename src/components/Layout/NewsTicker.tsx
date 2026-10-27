@@ -32,7 +32,7 @@ export default function NewsTicker({
   };
 
   return (
-    <div className="from-status-info/15 to-secondary-bg bg-linear-to-r">
+    <div className="from-status-info/15 to-secondary-bg bg-secondary-bg bg-linear-to-r">
       <div className="relative px-4 py-2">
         <div className="flex flex-col items-center justify-center gap-2 pr-8 lg:flex-row lg:gap-3 lg:pr-12">
           {announcement.label && (
