@@ -1,4 +1,5 @@
 import Breadcrumb from "@/components/Layout/Breadcrumb";
+import MostDuplicatedItemsSkeleton from "@/components/Dupes/MostDuplicatedItemsSkeleton";
 
 export default function DupeFinderLoading() {
   return (
@@ -40,20 +41,7 @@ export default function DupeFinderLoading() {
           ))}
         </div>
 
-        {/* Top 10 List Skeleton (Matches MostDuplicatedItems) */}
-        <div className="mt-6">
-          <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
-            <div className="bg-button-secondary mb-4 h-7 w-64 animate-pulse rounded"></div>
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="border-border-card bg-tertiary-bg h-14 w-full animate-pulse rounded-lg border"
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+        <MostDuplicatedItemsSkeleton />
       </div>
     </div>
   );
