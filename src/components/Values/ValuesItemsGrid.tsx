@@ -9,6 +9,7 @@ import { Item, FilterSort } from "@/types";
 import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
+import { useRailAdSize } from "@/hooks/useRailAdSize";
 import React from "react";
 import { Button } from "../ui/button";
 import { getFilterSortsDisplayNames } from "./valuesFilterOptions";
@@ -87,6 +88,7 @@ export default function ValuesItemsGrid({
   }, [filterKey, setPage]);
 
   const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
+  const showDesktopFeedAds = useRailAdSize() === "none";
 
   const displayedItems = items;
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -264,11 +266,14 @@ export default function ValuesItemsGrid({
                   onFavoriteChange(item.id, fav);
                 }}
               />
-              {(index + 1) % 6 === 0 && index + 1 <= 12 && (
+              {(index + 1 === 6 || (index + 1) % 32 === 0) && (
                 <div className="col-span-full flex justify-center py-4 md:hidden">
-                  <NitroGridAd
-                    adId={`np-value-grid-${Math.floor((index + 1) / 6)}`}
-                  />
+                  <NitroGridAd adId={`np-value-grid-${index + 1}`} />
+                </div>
+              )}
+              {showDesktopFeedAds && (index + 1) % 96 === 0 && (
+                <div className="col-span-full hidden justify-center py-4 md:flex">
+                  <NitroGridAd adId={`np-value-feed-${index + 1}`} desktop />
                 </div>
               )}
             </React.Fragment>

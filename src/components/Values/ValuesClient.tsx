@@ -9,6 +9,7 @@ const EMPTY_ITEMS: Item[] = [];
 const FILTER_SORT_STORAGE_KEY = "valuesFilterSort";
 const FILTER_SORT_PREFERENCE_KEY = "values_filter_sorts";
 const VALUE_SORT_PREFERENCE_KEY = "values_value_sort";
+const PAGE_SIZE = 32;
 import {
   useInfiniteQuery,
   useQuery,
@@ -361,12 +362,12 @@ export default function ValuesClient() {
   ]);
   const [favoriteWindow, setFavoriteWindow] = useState({
     key: favoriteKey,
-    size: Math.max(1, page) * 50,
+    size: Math.max(1, page) * PAGE_SIZE,
   });
   const favoriteSize =
     favoriteWindow.key === favoriteKey
       ? favoriteWindow.size
-      : Math.max(1, page) * 50;
+      : Math.max(1, page) * PAGE_SIZE;
   const data = catalogQuery.data?.pages.at(-1);
   useEffect(() => {
     if (page < 1) {
@@ -405,7 +406,7 @@ export default function ValuesClient() {
   const loadMore = useCallback(() => {
     if (!hasMore || isFetching) return;
     if (favoritesSelected) {
-      setFavoriteWindow({ key: favoriteKey, size: favoriteSize + 50 });
+      setFavoriteWindow({ key: favoriteKey, size: favoriteSize + PAGE_SIZE });
     } else {
       void fetchNextPage({ cancelRefetch: false });
     }
@@ -614,7 +615,7 @@ export default function ValuesClient() {
             onRetry={() => {
               void refetch();
             }}
-            pageSize={data?.size ?? 50}
+            pageSize={data?.size ?? PAGE_SIZE}
             valueSort={valueSort}
             debouncedSearchTerm={searchQuery}
           />

@@ -57,6 +57,8 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
             useQueryState: () => [3, (page: number) => pages.push(page)],
             parseAsInteger: { withDefault: () => {} },
           };
+        if (name === "@/hooks/useRailAdSize")
+          return { useRailAdSize: () => "none" };
         if (name === "../ui/button") return { Button: button };
         if (name === "./valuesFilterOptions")
           return { getFilterSortsDisplayNames };

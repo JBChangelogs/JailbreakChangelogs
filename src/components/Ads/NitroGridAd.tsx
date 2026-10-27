@@ -11,9 +11,14 @@ const log = createLogger("UI");
 interface NitroGridAdProps {
   adId: string;
   className?: string;
+  desktop?: boolean;
 }
 
-export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
+export default function NitroGridAd({
+  adId,
+  className,
+  desktop = false,
+}: NitroGridAdProps) {
   const { user, isLoading } = useAuthContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const createdRef = useRef(false);
@@ -46,18 +51,25 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
                 // Wrap in try-catch per Nitropay best practices
                 Promise.resolve(
                   window.nitroAds.createAd(adId, {
-                    sizes: [
-                      ["320", "50"],
-                      ["320", "100"],
-                      ...(tallViewport ? [["300", "250"]] : []),
-                    ],
+                    sizes: desktop
+                      ? [
+                          ["728", "90"],
+                          ["970", "90"],
+                        ]
+                      : [
+                          ["320", "50"],
+                          ["320", "100"],
+                          ...(tallViewport ? [["300", "250"]] : []),
+                        ],
                     report: {
                       enabled: true,
                       icon: true,
                       wording: "Report Ad",
                       position: "top-right",
                     },
-                    mediaQuery: "(min-width: 320px) and (max-width: 767px)",
+                    mediaQuery: desktop
+                      ? "(min-width: 768px)"
+                      : "(min-width: 320px) and (max-width: 767px)",
                   }),
                 )
                   .then((adInstance) => {
@@ -107,19 +119,19 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
       ads?.removeAd?.(adId);
       createdRef.current = false;
     };
-  }, [isLoading, isSupporter, adId, tallViewport]);
+  }, [isLoading, isSupporter, adId, tallViewport, desktop]);
 
   if (isLoading || isSupporter) {
     return null;
   }
 
-  // Reserve space for the largest eligible mobile creative.
+  // Reserve space for the largest eligible creative.
   return (
     <div
       id={adId}
       ref={containerRef}
       className={`flex justify-center ${className || ""}`}
-      style={{ minHeight: tallViewport ? 250 : 100 }}
+      style={{ minHeight: desktop ? 90 : tallViewport ? 250 : 100 }}
     />
   );
 }

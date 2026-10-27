@@ -232,15 +232,16 @@ test("favorites reveal batches locally and reset the visible batch when filters 
   const h = harness();
   try {
     h.setFilters(["favorites"]);
-    expect(h.render().items).toHaveLength(50);
+    expect(h.render().items).toHaveLength(32);
     expect(h.options.enabled).toBe(false);
     h.render().onLoadMore();
-    expect(h.render().items).toHaveLength(100);
+    expect(h.render().items).toHaveLength(64);
+    h.render().onLoadMore();
     h.render().onLoadMore();
     expect(h.render().items).toHaveLength(110);
     expect(h.render().hasMore).toBe(false);
     h.setFilters(["favorites", "name-vehicles"]);
-    expect(h.render().items).toHaveLength(50);
+    expect(h.render().items).toHaveLength(32);
     expect(h.requests).toHaveLength(0);
   } finally {
     h.client.clear();
