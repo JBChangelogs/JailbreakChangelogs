@@ -245,11 +245,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         images: [finalImageUrl],
       },
     };
-    return withDiscordEmbed(
-      metadata,
-      canonicalPath,
-      `Cash value: ${formatFullValue(item.cash_value)}${hasItemValue(item.duped_value) ? `\nDuped value: ${formatFullValue(item.duped_value)}` : ""}`,
-    );
+    return withDiscordEmbed(metadata, canonicalPath);
   } catch {
     const { type, name } = await params;
     const metadata: Metadata = {
