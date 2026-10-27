@@ -14,7 +14,11 @@ const source = transpileModule(
   },
 ).outputText;
 
-function render(field: string, item: Record<string, unknown> | null) {
+function render(
+  field: string,
+  item: Record<string, unknown> | null,
+  suggestedValue = "",
+) {
   const exports = {} as { SuggestionForm: (props: unknown) => Element };
   const effects: Array<{ effect: () => unknown; dependencies: unknown[] }> = [];
   const changes: Array<{ index: number; value: unknown }> = [];
@@ -33,9 +37,11 @@ function render(field: string, item: Record<string, unknown> | null) {
                 ? item
                 : index === 3
                   ? field
-                  : typeof initial === "function"
-                    ? initial()
-                    : initial;
+                  : index === 4
+                    ? suggestedValue
+                    : typeof initial === "function"
+                      ? initial()
+                      : initial;
             return [value, (value: unknown) => changes.push({ index, value })];
           },
           useRef: () => ({ current: null }),
@@ -96,26 +102,14 @@ test("categorical suggestions exclude the item's current value from backend opti
     ["duped_demand", ["Average", "High"]],
     ["trend", ["Dropping", "Rising"]],
   ] as const) {
-    const options = nodes(render(field, item).tree)
-      .filter(
-        (node) =>
-          node.type === "button" &&
-          ["Low", "Average", "High", "Dropping", "Stable", "Rising"].includes(
-            node.props.children as string,
-          ),
-      )
-      .map((node) => node.props.children);
+    const options = optionButtons(render(field, item).tree).map(optionLabel);
     expect(options).toEqual([...expected]);
   }
 });
 
 test("unknown current values preserve backend options and selecting an item clears a stale suggestion", () => {
   const result = render("demand", { ...item, demand: null });
-  const options = nodes(result.tree).filter(
-    (node) =>
-      node.type === "button" &&
-      ["Low", "Average", "High"].includes(node.props.children as string),
-  );
+  const options = optionButtons(result.tree);
   expect(options).toHaveLength(3);
   result.effects
     .find(
@@ -125,4 +119,43 @@ test("unknown current values preserve backend options and selecting an item clea
     ?.effect();
   expect(result.changes).toContainEqual({ index: 4, value: "" });
   expect(result.changes).toContainEqual({ index: 5, value: null });
+});
+
+function optionButtons(tree: unknown) {
+  return nodes(tree).filter(
+    (node) =>
+      node.type === "button" && typeof node.props["aria-pressed"] === "boolean",
+  );
+}
+
+function optionLabel(button: Element) {
+  return nodes(button).find(
+    (node) => node.type === "span" && typeof node.props.children === "string",
+  )?.props.children;
+}
+
+test("demand and trend options preserve pressed state and selection", () => {
+  for (const [field, selected] of [
+    ["demand", "High"],
+    ["duped_demand", "Average"],
+    ["trend", "Rising"],
+  ]) {
+    const result = render(field, item, selected);
+    const options = optionButtons(result.tree);
+    const active = options.find((node) => optionLabel(node) === selected)!;
+    expect(active.props["aria-pressed"]).toBe(true);
+    expect(
+      nodes(active).some((node) => node.props?.icon === "heroicons:check"),
+    ).toBe(true);
+    const inactive = options.find((node) => optionLabel(node) !== selected)!;
+    expect(inactive.props["aria-pressed"]).toBe(false);
+    expect(
+      nodes(inactive).some((node) => node.props?.icon === "heroicons:check"),
+    ).toBe(false);
+    (inactive.props.onClick as () => void)();
+    expect(result.changes).toContainEqual({
+      index: 4,
+      value: optionLabel(inactive),
+    });
+  }
 });

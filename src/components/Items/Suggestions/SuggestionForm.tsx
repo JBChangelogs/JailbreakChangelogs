@@ -463,36 +463,6 @@ export function SuggestionForm({
               </div>
             </div>
           )}
-          {selectedItem && (
-            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-secondary-text">Selected:</span>
-              {(() => {
-                const icon = getCategoryIcon(selectedItem.type);
-                return (
-                  <span
-                    className={`${badgeBase} text-primary-text`}
-                    style={{
-                      borderColor: getCategoryColor(selectedItem.type),
-                      backgroundColor: `${getCategoryColor(selectedItem.type)}22`,
-                    }}
-                  >
-                    {icon && (
-                      <icon.Icon
-                        className="mr-1 h-3 w-3"
-                        style={{
-                          color: getCategoryColor(selectedItem.type),
-                        }}
-                      />
-                    )}
-                    {selectedItem.type}
-                  </span>
-                );
-              })()}
-              <span className="text-secondary-text">
-                Edit the field above to pick a different item.
-              </span>
-            </div>
-          )}
         </div>
 
         {selectedItem && (
@@ -546,7 +516,7 @@ export function SuggestionForm({
             {/* Current value display */}
             {selectedItem && (
               <div className="border-border-card bg-tertiary-bg/50 flex items-center gap-3 overflow-hidden rounded-lg border">
-                <div className="bg-tertiary-bg relative h-16 w-24 shrink-0 overflow-hidden">
+                <div className="bg-tertiary-bg relative aspect-video w-24 shrink-0 overflow-hidden">
                   {isVideoItem(selectedItem.name) ? (
                     <video
                       src={getVideoPath(selectedItem.type, selectedItem.name)}
@@ -570,7 +540,21 @@ export function SuggestionForm({
                   )}
                 </div>
                 <div className="min-w-0 flex-1 py-3 pr-3">
-                  <p className="text-secondary-text mb-1.5 text-sm font-semibold tracking-wide uppercase">
+                  <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                    <p className="text-primary-text text-sm font-semibold wrap-break-word">
+                      {selectedItem.name}
+                    </p>
+                    <span
+                      className={`${badgeBase} text-primary-text`}
+                      style={{
+                        borderColor: getCategoryColor(selectedItem.type),
+                        backgroundColor: `${getCategoryColor(selectedItem.type)}22`,
+                      }}
+                    >
+                      {selectedItem.type}
+                    </span>
+                  </div>
+                  <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
                     Current {fieldLabel(field)}
                   </p>
                   {field === "trend" ? (
@@ -643,7 +627,8 @@ export function SuggestionForm({
                               key={t}
                               type="button"
                               onClick={() => setSuggestedValue(t)}
-                              className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                              aria-pressed={suggestedValue === t}
+                              className={`bg-tertiary-bg text-primary-text focus-visible:outline-border-focus inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
                                 suggestedValue === t
                                   ? "ring-2"
                                   : "opacity-60 hover:opacity-90"
@@ -655,7 +640,14 @@ export function SuggestionForm({
                                 } as React.CSSProperties
                               }
                             >
-                              {t}
+                              {suggestedValue === t && (
+                                <Icon
+                                  icon="heroicons:check"
+                                  className="h-4 w-4 shrink-0"
+                                  aria-hidden="true"
+                                />
+                              )}
+                              <span>{t}</span>
                             </button>
                           );
                         })}
@@ -691,7 +683,8 @@ export function SuggestionForm({
                               key={d}
                               type="button"
                               onClick={() => setSuggestedValue(d)}
-                              className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                              aria-pressed={suggestedValue === d}
+                              className={`bg-tertiary-bg text-primary-text focus-visible:outline-border-focus inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
                                 suggestedValue === d
                                   ? "ring-2"
                                   : "opacity-60 hover:opacity-90"
@@ -703,7 +696,14 @@ export function SuggestionForm({
                                 } as React.CSSProperties
                               }
                             >
-                              {d}
+                              {suggestedValue === d && (
+                                <Icon
+                                  icon="heroicons:check"
+                                  className="h-4 w-4 shrink-0"
+                                  aria-hidden="true"
+                                />
+                              )}
+                              <span>{d}</span>
                             </button>
                           );
                         })}
@@ -989,7 +989,7 @@ export function SuggestionForm({
               {/* Item + type + field + visibility meta */}
               <div className="flex items-center gap-3">
                 {selectedItem && (
-                  <div className="bg-tertiary-bg border-border-card relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border">
+                  <div className="bg-tertiary-bg border-border-card relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg border">
                     {isVideoItem(selectedItem.name) ? (
                       <video
                         src={getVideoPath(selectedItem.type, selectedItem.name)}
