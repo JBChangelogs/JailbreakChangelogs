@@ -18,6 +18,7 @@ function render(
   field: string,
   item: Record<string, unknown> | null,
   suggestedValue = "",
+  isVtEligible = false,
 ) {
   const exports = {} as { SuggestionForm: (props: unknown) => Element };
   const effects: Array<{ effect: () => unknown; dependencies: unknown[] }> = [];
@@ -72,7 +73,7 @@ function render(
       valid_trends: ["Dropping", "Stable", "Rising"],
     },
     loadingLimits: false,
-    isVtEligible: false,
+    isVtEligible,
     user: null,
     onSubmit: async () => {},
     onCancel: () => {},
@@ -158,4 +159,28 @@ test("demand and trend options preserve pressed state and selection", () => {
       value: optionLabel(inactive),
     });
   }
+});
+
+test("visibility uses a segmented choice and preserves the VT submission flag", () => {
+  const result = render("demand", item, "", true);
+  const control = nodes(result.tree).find(
+    (node) => node.props?.radio === true,
+  )!;
+  expect(control.props.value).toBe("vt");
+  expect(
+    nodes(control).some((node) => node.props.children === "Everyone"),
+  ).toBe(true);
+  expect(
+    nodes(control).some((node) => node.props.children === "Value team only"),
+  ).toBe(true);
+  const change = control.props.onValueChange as (value: string) => void;
+  change("public");
+  expect(result.changes).toContainEqual({ index: 14, value: false });
+  change("vt");
+  expect(result.changes).toContainEqual({ index: 14, value: true });
+  expect(
+    nodes(render("demand", item).tree).some(
+      (node) => node.props?.radio === true,
+    ),
+  ).toBe(false);
 });

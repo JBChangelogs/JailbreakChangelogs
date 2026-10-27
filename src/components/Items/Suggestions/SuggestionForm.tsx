@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogClose,
@@ -838,33 +839,36 @@ export function SuggestionForm({
 
             {isVtEligible && (
               <div>
-                <p className="text-primary-text mb-1.5 block text-sm font-medium">
+                <p
+                  id="suggestion-visibility-label"
+                  className="text-primary-text mb-1.5 block text-sm font-medium"
+                >
                   Visibility
                 </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsVt(false)}
-                    className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                      !isVt
-                        ? "bg-button-info border-button-info text-form-button-text"
-                        : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
-                    }`}
+                <Tabs
+                  radio
+                  value={isVt ? "vt" : "public"}
+                  onValueChange={(value) => setIsVt(value === "vt")}
+                >
+                  <TabsList
+                    hideIndicator
+                    aria-labelledby="suggestion-visibility-label"
+                    className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
                   >
-                    Public
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsVt(true)}
-                    className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                      isVt
-                        ? "bg-button-info border-button-info text-form-button-text"
-                        : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
-                    }`}
-                  >
-                    VT Only
-                  </button>
-                </div>
+                    <TabsTrigger
+                      value="public"
+                      className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                    >
+                      Everyone
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="vt"
+                      className="data-[state=active]:bg-button-info data-[state=active]:text-form-button-text rounded-md px-3 py-1.5 transition-colors"
+                    >
+                      Value team only
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
             )}
 
@@ -1054,7 +1058,7 @@ export function SuggestionForm({
                           height={14}
                           className="shrink-0"
                         />
-                        VT Only
+                        Value team only
                       </span>
                     )}
                   </div>
