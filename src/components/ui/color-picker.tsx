@@ -34,13 +34,13 @@ export function ColorPicker({
 }) {
   // Kept as HSV so the hue survives when the color is gray or black.
   const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(value));
-  const [hexText, setHexText] = useState(value);
+  const [hexText, setHexText] = useState(value.slice(1));
   const areaRef = useRef<HTMLDivElement>(null);
 
   const update = (next: Hsv) => {
     setHsv(next);
     const hex = hsvToHex(next);
-    setHexText(hex);
+    setHexText(hex.slice(1));
     onChange(hex);
   };
 
@@ -130,21 +130,38 @@ export function ColorPicker({
 
       <label className="flex items-center gap-2">
         <span className="text-secondary-text text-xs font-medium">Hex</span>
-        <input
-          type="text"
-          value={hexText}
-          maxLength={7}
-          spellCheck={false}
-          onChange={(event) => {
-            const text = event.target.value.trim();
-            setHexText(text);
-            const normalized = text.startsWith("#") ? text : `#${text}`;
-            if (/^#[0-9a-f]{6}$/i.test(normalized)) {
-              update(hexToHsv(normalized.toLowerCase()));
-            }
-          }}
-          className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-8 w-full rounded-md border px-2 font-mono text-sm outline-none"
-        />
+        <div className="relative min-w-0 flex-1">
+          <span
+            aria-hidden="true"
+            className="text-secondary-text pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 font-mono text-sm"
+          >
+            #
+          </span>
+          <input
+            type="text"
+            value={hexText}
+            aria-label="Hex color"
+            placeholder="RRGGBB"
+            maxLength={6}
+            spellCheck={false}
+            onChange={(event) => {
+              const text = event.target.value.trim().replace(/^#/, "");
+              setHexText(text);
+              const normalized = `#${text}`;
+              if (/^#[0-9a-f]{6}$/i.test(normalized)) {
+                update(hexToHsv(normalized.toLowerCase()));
+              }
+            }}
+            onPaste={(event) => {
+              const text = event.clipboardData.getData("text").trim();
+              if (/^#[0-9a-f]{6}$/i.test(text)) {
+                event.preventDefault();
+                update(hexToHsv(text.toLowerCase()));
+              }
+            }}
+            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-8 w-full rounded-md border pr-2 pl-6 font-mono text-sm uppercase outline-none"
+          />
+        </div>
       </label>
     </div>
   );
