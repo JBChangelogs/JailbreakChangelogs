@@ -565,7 +565,7 @@ export default function ValueSuggestionsPage() {
             )}
           </div>
 
-          <p className="border-border-card bg-tertiary-bg text-secondary-text mb-4 flex items-start gap-2 rounded-lg border px-3 py-2 text-sm">
+          <p className="bg-button-info/10 border-button-info text-secondary-text mb-4 flex items-start gap-4 rounded-lg border p-4 text-sm shadow-sm">
             <Icon
               icon="material-symbols:info-outline-rounded"
               className="text-link mt-0.5 h-4 w-4 shrink-0"

@@ -330,8 +330,8 @@ export function SuggestionForm({
           >
             Item
           </label>
-          <div className="bg-button-info/10 border-border-card mb-2 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-            <span className="text-primary-text">
+          <div className="bg-button-info/10 border-button-info mb-2 rounded-lg border p-4 text-sm shadow-sm">
+            <span className="text-secondary-text">
               Only tradable items are shown in search results.
             </span>
           </div>
@@ -624,8 +624,8 @@ export function SuggestionForm({
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                      <span className="text-primary-text">
+                    <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
+                      <span className="text-secondary-text">
                         Select one of the options below as your suggested trend.
                       </span>
                     </div>
@@ -669,8 +669,8 @@ export function SuggestionForm({
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                      <span className="text-primary-text">
+                    <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
+                      <span className="text-secondary-text">
                         Select one of the options below as your suggested{" "}
                         {fieldLabel(field).toLowerCase()}.
                       </span>
@@ -712,8 +712,8 @@ export function SuggestionForm({
                 )
               ) : field === "notes" ? (
                 <div className="space-y-2">
-                  <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                    <span className="text-primary-text">
+                  <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
+                    <span className="text-secondary-text">
                       Enter the note text you want to suggest for this item.
                     </span>
                   </div>
@@ -738,8 +738,8 @@ export function SuggestionForm({
               ) : (
                 <div className="space-y-2">
                   {["cash_value", "duped_value"].includes(field) && (
-                    <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                      <span className="text-primary-text">
+                    <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
+                      <span className="text-secondary-text">
                         Enter a numeric value. Supported formats: 50m, 500k,
                         10,000,000.
                       </span>
