@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useState, useEffect, useRef } from "react";
@@ -987,17 +988,19 @@ export default function UserValueSuggestionsTab({
                             />
                             <div className="min-w-0 flex-1">
                               <div className="text-primary-text mb-1 text-base font-bold">
-                                <Link
-                                  href={`/users/${v.user.id}`}
-                                  prefetch={false}
-                                  className="text-link hover:text-link-hover transition-colors hover:underline"
-                                  onClick={() => setVotersOpen(false)}
-                                >
-                                  {(v.user.global_name !== "None" &&
-                                    v.user.global_name) ||
-                                    v.user.username ||
-                                    `User #${v.user.id}`}
-                                </Link>
+                                <UserProfilePopover user={v.user}>
+                                  <Link
+                                    href={`/users/${v.user.id}`}
+                                    prefetch={false}
+                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                    onClick={() => setVotersOpen(false)}
+                                  >
+                                    {(v.user.global_name !== "None" &&
+                                      v.user.global_name) ||
+                                      v.user.username ||
+                                      `User #${v.user.id}`}
+                                  </Link>
+                                </UserProfilePopover>
                               </div>
                               <div className="text-tertiary-text text-sm">
                                 {formatShortDateTime(v.created_at)}

@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import React, { useState, useEffect, useRef } from "react";
 import { CommentReaction } from "@/utils/api/api";
 import {
@@ -191,14 +192,18 @@ export function ReactionsDialog({
                                 {displayName}
                               </span>
                             ) : (
-                              <Link
-                                href={`/users/${reactUser.id}`}
-                                prefetch={false}
-                                onClick={() => setReactionBreakdownOpenId(null)}
-                                className="text-primary-text hover:text-link text-sm font-medium transition-colors"
-                              >
-                                {displayName}
-                              </Link>
+                              <UserProfilePopover user={reactUser}>
+                                <Link
+                                  href={`/users/${reactUser.id}`}
+                                  prefetch={false}
+                                  onClick={() =>
+                                    setReactionBreakdownOpenId(null)
+                                  }
+                                  className="text-primary-text hover:text-link text-sm font-medium transition-colors"
+                                >
+                                  {displayName}
+                                </Link>
+                              </UserProfilePopover>
                             )}
                           </div>
                           {isLoggedIn && isCurrentUser && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -137,15 +138,17 @@ export default function JoinedUsers({
         <span className="min-w-0 truncate">
           <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>
-              <Link
-                href={`/users/${encodeURIComponent(String(users[0].user_id))}`}
-                prefetch={false}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:text-link-hover no-underline hover:no-underline"
-              >
-                {identityFor(users[0]).name}
-              </Link>
+              <UserProfilePopover user={{ id: String(users[0].user_id) }}>
+                <Link
+                  href={`/users/${encodeURIComponent(String(users[0].user_id))}`}
+                  prefetch={false}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-link hover:text-link-hover no-underline hover:no-underline"
+                >
+                  {identityFor(users[0]).name}
+                </Link>
+              </UserProfilePopover>
             </TooltipTrigger>
             <TooltipContent side="top">{tooltipFor(users[0])}</TooltipContent>
           </Tooltip>{" "}
@@ -211,20 +214,22 @@ export default function JoinedUsers({
                       isBounty ? "bg-quaternary-bg" : "bg-secondary-bg"
                     }
                   />
-                  <Link
-                    href={`/users/${encodeURIComponent(String(user.user_id))}`}
-                    prefetch={false}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group min-w-0 truncate no-underline hover:no-underline"
-                  >
-                    <span className="text-link group-hover:text-link-hover block truncate text-sm">
-                      {identityFor(user).name}
-                    </span>
-                    <span className="text-secondary-text block truncate text-xs">
-                      @{identityFor(user).username}
-                    </span>
-                  </Link>
+                  <UserProfilePopover user={{ id: String(user.user_id) }}>
+                    <Link
+                      href={`/users/${encodeURIComponent(String(user.user_id))}`}
+                      prefetch={false}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group min-w-0 truncate no-underline hover:no-underline"
+                    >
+                      <span className="text-link group-hover:text-link-hover block truncate text-sm">
+                        {identityFor(user).name}
+                      </span>
+                      <span className="text-secondary-text block truncate text-xs">
+                        @{identityFor(user).username}
+                      </span>
+                    </Link>
+                  </UserProfilePopover>
                 </div>
               ))}
             </div>

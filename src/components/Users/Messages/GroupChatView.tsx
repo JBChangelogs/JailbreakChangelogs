@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import {
   useCallback,
   useEffect,
@@ -177,50 +178,52 @@ function GroupMembersPanel({
               key={user.id}
               className="group hover:bg-quaternary-bg flex items-center gap-2.5 rounded-xl px-2 py-1.5"
             >
-              <Link
-                href={`/users/${user.id}`}
-                prefetch={false}
-                className={cn(
-                  "flex min-w-0 flex-1 items-center gap-2.5",
-                  // Offline members are dimmed, like Discord; hovering
-                  // brings them back.
-                  !isOnline(user) &&
-                    !typing &&
-                    "opacity-35 transition-opacity group-hover:opacity-100",
-                )}
-              >
-                <span className="relative shrink-0">
-                  <UserAvatar
-                    userId={user.id}
-                    bgClassName="bg-tertiary-bg"
-                    avatarHash={user.avatar}
-                    username={user.username}
-                    custom_avatar={user.custom_avatar}
-                    size={8}
-                    showBadge={false}
-                    settings={user.settings_v2}
-                    premiumType={user.premiumtype}
-                  />
-                  <PresenceDot online={isOnline(user)} typing={typing} />
-                </span>
-                <span className="text-primary-text min-w-0 truncate text-sm font-medium">
-                  {getDisplayName(user)}
-                </span>
-                {user.id === group.ownerId && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="text-status-warning shrink-0">
-                        <Icon
-                          icon="material-symbols:crown-rounded"
-                          aria-label="Group owner"
-                          className="h-3.5 w-3.5"
-                        />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">Group owner</TooltipContent>
-                  </Tooltip>
-                )}
-              </Link>
+              <UserProfilePopover user={user}>
+                <Link
+                  href={`/users/${user.id}`}
+                  prefetch={false}
+                  className={cn(
+                    "flex min-w-0 flex-1 items-center gap-2.5",
+                    // Offline members are dimmed, like Discord; hovering
+                    // brings them back.
+                    !isOnline(user) &&
+                      !typing &&
+                      "opacity-35 transition-opacity group-hover:opacity-100",
+                  )}
+                >
+                  <span className="relative shrink-0">
+                    <UserAvatar
+                      userId={user.id}
+                      bgClassName="bg-tertiary-bg"
+                      avatarHash={user.avatar}
+                      username={user.username}
+                      custom_avatar={user.custom_avatar}
+                      size={8}
+                      showBadge={false}
+                      settings={user.settings_v2}
+                      premiumType={user.premiumtype}
+                    />
+                    <PresenceDot online={isOnline(user)} typing={typing} />
+                  </span>
+                  <span className="text-primary-text min-w-0 truncate text-sm font-medium">
+                    {getDisplayName(user)}
+                  </span>
+                  {user.id === group.ownerId && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="text-status-warning shrink-0">
+                          <Icon
+                            icon="material-symbols:crown-rounded"
+                            aria-label="Group owner"
+                            className="h-3.5 w-3.5"
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">Group owner</TooltipContent>
+                    </Tooltip>
+                  )}
+                </Link>
+              </UserProfilePopover>
               {isOwner && user.id !== currentUserId && (
                 <Tooltip>
                   <TooltipTrigger asChild>

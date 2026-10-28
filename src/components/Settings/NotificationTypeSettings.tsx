@@ -21,14 +21,16 @@ const GROUPS = [
     ],
   },
   {
-    label: "Comments and followers",
+    label: "Comments, followers and friends",
     icon: "material-symbols:forum-rounded",
-    description: "Comments, replies and new followers.",
+    description: "Comments, replies, new followers and friend requests.",
     titles: [
       "profile_comment",
       "inventory_comment",
       "new_comment_reply",
       "new_follower",
+      "friend_request",
+      "friend_request_accepted",
     ],
   },
   {

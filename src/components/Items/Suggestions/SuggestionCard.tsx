@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import type { MouseEvent } from "react";
 import Image from "next/image";
 import DriftPreview from "@/components/Items/DriftPreview";
@@ -422,15 +423,17 @@ export function SuggestionCard({
               bgClassName="bg-tertiary-bg"
             />
             <div className="min-w-0 flex-1">
-              <Link
-                href={`/users/${suggestion.user.id}`}
-                prefetch={false}
-                className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
-              >
-                {suggestion.user.roblox_display_name ||
-                  suggestion.user.roblox_username ||
-                  `User #${suggestion.user.id}`}
-              </Link>
+              <UserProfilePopover user={suggestion.user}>
+                <Link
+                  href={`/users/${suggestion.user.id}`}
+                  prefetch={false}
+                  className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
+                >
+                  {suggestion.user.roblox_display_name ||
+                    suggestion.user.roblox_username ||
+                    `User #${suggestion.user.id}`}
+                </Link>
+              </UserProfilePopover>
               <p className="text-secondary-text text-xs">
                 Posted on {formatMessageDate(suggestion.created_at)}
                 {suggestion.updated_at !== suggestion.created_at

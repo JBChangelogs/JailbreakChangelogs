@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -119,16 +120,18 @@ export function VotersModal({
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="text-primary-text mb-1 text-base font-bold">
-                              <Link
-                                href={`/users/${v.user.id}`}
-                                prefetch={false}
-                                className="text-link hover:text-link-hover transition-colors hover:underline"
-                                onClick={() => onOpenChange(false)}
-                              >
-                                {v.user.roblox_display_name ||
-                                  v.user.roblox_username ||
-                                  `User #${v.user.id}`}
-                              </Link>
+                              <UserProfilePopover user={v.user}>
+                                <Link
+                                  href={`/users/${v.user.id}`}
+                                  prefetch={false}
+                                  className="text-link hover:text-link-hover transition-colors hover:underline"
+                                  onClick={() => onOpenChange(false)}
+                                >
+                                  {v.user.roblox_display_name ||
+                                    v.user.roblox_username ||
+                                    `User #${v.user.id}`}
+                                </Link>
+                              </UserProfilePopover>
                             </div>
                             <div className="text-tertiary-text text-sm font-medium">
                               {formatShortDateTime(v.created_at)}
