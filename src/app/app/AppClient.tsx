@@ -301,9 +301,10 @@ export default function AppClient({
   const fileSize = (option: keyof Releases, file: Download) => {
     if (file.unsized) return "";
     const release = releases[option];
+    // A release's `size` is its installer's; packages have their own, or none.
     const size =
-      release?.packageSizes && file.format in release.packageSizes
-        ? release.packageSizes[file.format]
+      file.format in LINUX_PACKAGES
+        ? release?.packageSizes?.[file.format]
         : release?.size;
     return size ? `${Math.round(size / 1024 ** 2)} MB` : "";
   };
