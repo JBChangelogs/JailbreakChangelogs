@@ -13,7 +13,9 @@ import { isFeatureEnabled } from "@/utils/api/featureFlags";
 
 // Dynamic imports for heavy components
 const ChangelogMediaEmbed = dynamic(() => import("./ChangelogMediaEmbed"), {
-  loading: () => <div className="bg-secondary-bg h-32 animate-pulse rounded" />,
+  loading: () => (
+    <div className="bg-quaternary-bg/70 h-32 animate-pulse rounded" />
+  ),
   ssr: true,
 });
 
@@ -21,14 +23,16 @@ const ChangelogComments = dynamic(
   () => import("../PageComments/ChangelogComments"),
   {
     loading: () => (
-      <div className="bg-secondary-bg h-64 animate-pulse rounded" />
+      <div className="bg-quaternary-bg/70 h-64 animate-pulse rounded" />
     ),
     ssr: true,
   },
 );
 
 const ChangelogQuickNav = dynamic(() => import("./ChangelogQuickNav"), {
-  loading: () => <div className="bg-secondary-bg h-16 animate-pulse rounded" />,
+  loading: () => (
+    <div className="bg-quaternary-bg/70 h-16 animate-pulse rounded" />
+  ),
   ssr: true,
 });
 

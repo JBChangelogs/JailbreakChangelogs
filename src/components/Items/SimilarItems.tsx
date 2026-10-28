@@ -165,8 +165,8 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
           {[...Array(SIMILAR_ITEMS_LIMIT)].map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="border-border-card bg-tertiary-bg mb-3 aspect-video rounded-lg border"></div>
-              <div className="bg-secondary-bg mb-2 h-4 w-3/4 rounded"></div>
-              <div className="bg-secondary-bg h-4 w-1/2 rounded"></div>
+              <div className="bg-quaternary-bg/70 mb-2 h-4 w-3/4 rounded"></div>
+              <div className="bg-quaternary-bg/70 h-4 w-1/2 rounded"></div>
             </div>
           ))}
         </div>

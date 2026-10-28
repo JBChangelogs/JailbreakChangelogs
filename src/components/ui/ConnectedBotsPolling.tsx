@@ -135,9 +135,9 @@ export default function ConnectedBotsPolling() {
         </div>
         <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
           <div className="mb-4 grid gap-2 sm:grid-cols-3">
-            <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
-            <div className="bg-button-secondary h-4 w-40 animate-pulse rounded"></div>
-            <div className="bg-button-secondary h-4 w-48 animate-pulse rounded"></div>
+            <div className="bg-quaternary-bg/70 h-4 w-32 animate-pulse rounded"></div>
+            <div className="bg-quaternary-bg/70 h-4 w-40 animate-pulse rounded"></div>
+            <div className="bg-quaternary-bg/70 h-4 w-48 animate-pulse rounded"></div>
           </div>
           <div className="grid gap-2 xl:grid-cols-2">
             {[1, 2, 3].map((i) => (
@@ -146,10 +146,10 @@ export default function ConnectedBotsPolling() {
                 className="border-border-card bg-tertiary-bg rounded-lg border p-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
+                  <div className="bg-quaternary-bg/70 h-8 w-8 animate-pulse rounded-full"></div>
                   <div className="space-y-1">
-                    <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
-                    <div className="bg-button-secondary h-3 w-20 animate-pulse rounded"></div>
+                    <div className="bg-quaternary-bg/70 h-4 w-32 animate-pulse rounded"></div>
+                    <div className="bg-quaternary-bg/70 h-3 w-20 animate-pulse rounded"></div>
                   </div>
                 </div>
               </div>
@@ -251,9 +251,9 @@ export default function ConnectedBotsPolling() {
         {isLoading && !botsData ? (
           <div className="space-y-2">
             <div className="mb-4 grid gap-2 sm:grid-cols-3">
-              <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
-              <div className="bg-button-secondary h-4 w-40 animate-pulse rounded"></div>
-              <div className="bg-button-secondary h-4 w-48 animate-pulse rounded"></div>
+              <div className="bg-quaternary-bg/70 h-4 w-32 animate-pulse rounded"></div>
+              <div className="bg-quaternary-bg/70 h-4 w-40 animate-pulse rounded"></div>
+              <div className="bg-quaternary-bg/70 h-4 w-48 animate-pulse rounded"></div>
             </div>
             <div className="grid gap-2 xl:grid-cols-2">
               {[1, 2].map((i) => (
@@ -262,10 +262,10 @@ export default function ConnectedBotsPolling() {
                   className="border-border-card bg-tertiary-bg rounded-lg border p-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
+                    <div className="bg-quaternary-bg/70 h-8 w-8 animate-pulse rounded-full"></div>
                     <div className="space-y-1">
-                      <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
-                      <div className="bg-button-secondary h-3 w-20 animate-pulse rounded"></div>
+                      <div className="bg-quaternary-bg/70 h-4 w-32 animate-pulse rounded"></div>
+                      <div className="bg-quaternary-bg/70 h-3 w-20 animate-pulse rounded"></div>
                     </div>
                   </div>
                 </div>

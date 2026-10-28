@@ -42,7 +42,7 @@ export default function FavoriteButtonWrapper({ itemId }: Props) {
     (user?.id && favoritesQuery.isPending)
   ) {
     return (
-      <div className="bg-secondary-bg h-8 w-24 animate-pulse rounded-lg" />
+      <div className="bg-quaternary-bg/70 h-8 w-24 animate-pulse rounded-lg" />
     );
   }
 

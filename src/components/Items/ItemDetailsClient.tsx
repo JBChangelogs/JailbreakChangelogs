@@ -28,7 +28,7 @@ const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
   {
     loading: () => (
-      <div className="bg-secondary-bg h-87.5 animate-pulse rounded" />
+      <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded" />
     ),
     ssr: false,
   },
@@ -817,7 +817,7 @@ export default function ItemDetailsClient({
                         <div className="mt-4">
                           <Suspense
                             fallback={
-                              <div className="bg-secondary-bg h-87.5 animate-pulse rounded" />
+                              <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded" />
                             }
                           >
                             <ItemValueChart

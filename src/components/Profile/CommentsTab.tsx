@@ -293,7 +293,7 @@ export default function CommentsTab({
     return (
       <div className="space-y-6">
         <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
-          <div className="bg-tertiary-bg mb-4 h-6 w-40 animate-pulse rounded" />
+          <div className="bg-quaternary-bg/70 mb-4 h-6 w-40 animate-pulse rounded" />
           <ProfileCommentsSkeleton preview={preview} />
         </div>
       </div>

@@ -241,7 +241,7 @@ export default function ProfileInventoryTab({
         <div className="flex items-center gap-3">
           <p className="text-secondary-text text-sm">
             {effectiveStatus === "loading" ? (
-              <span className="bg-quaternary-bg inline-block h-4 w-40 animate-pulse rounded" />
+              <span className="bg-quaternary-bg/70 inline-block h-4 w-40 animate-pulse rounded" />
             ) : status === "loaded" ? (
               hasFilters ? (
                 `${filterLabel}${filteredItems.length} of ${totalCount}`
@@ -304,9 +304,9 @@ export default function ProfileInventoryTab({
                 key={i}
                 className="border-border-card bg-tertiary-bg flex min-h-100 flex-col rounded-lg border p-3"
               >
-                <div className="bg-quaternary-bg mb-4 h-7 w-3/4 rounded" />
-                <div className="bg-quaternary-bg mb-3 h-5 w-20 rounded-md" />
-                <div className="bg-quaternary-bg flex-1 rounded-lg" />
+                <div className="bg-quaternary-bg/70 mb-4 h-7 w-3/4 rounded" />
+                <div className="bg-quaternary-bg/70 mb-3 h-5 w-20 rounded-md" />
+                <div className="bg-quaternary-bg/70 flex-1 rounded-lg" />
               </div>
             ))}
           </div>

@@ -91,8 +91,8 @@ export function StatsSkeleton() {
           key={i}
           className="border-border-card bg-secondary-bg rounded-lg border px-5 py-3"
         >
-          <div className="bg-button-secondary mb-3 h-5 w-36 animate-pulse rounded"></div>
-          <div className="bg-button-secondary h-9 w-40 animate-pulse rounded"></div>
+          <div className="bg-quaternary-bg/70 mb-3 h-5 w-36 animate-pulse rounded"></div>
+          <div className="bg-quaternary-bg/70 h-9 w-40 animate-pulse rounded"></div>
         </div>
       ))}
     </div>

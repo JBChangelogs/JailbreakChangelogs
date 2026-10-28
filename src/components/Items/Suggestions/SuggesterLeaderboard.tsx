@@ -104,11 +104,11 @@ export function SuggesterLeaderboard({
                       aria-hidden="true"
                       className="border-border-card flex animate-pulse items-center gap-3 border-b py-3"
                     >
-                      <div className="bg-tertiary-bg h-7 w-7 shrink-0 rounded-full" />
-                      <div className="bg-tertiary-bg h-10 w-10 shrink-0 rounded-full" />
+                      <div className="bg-quaternary-bg/70 h-7 w-7 shrink-0 rounded-full" />
+                      <div className="bg-quaternary-bg/70 h-10 w-10 shrink-0 rounded-full" />
                       <div className="min-w-0 flex-1 space-y-2">
-                        <div className="bg-tertiary-bg h-4 w-24 max-w-full rounded" />
-                        <div className="bg-tertiary-bg h-3 w-40 max-w-full rounded" />
+                        <div className="bg-quaternary-bg/70 h-4 w-24 max-w-full rounded" />
+                        <div className="bg-quaternary-bg/70 h-3 w-40 max-w-full rounded" />
                       </div>
                       <div className="bg-tertiary-bg h-6 w-14 shrink-0 rounded" />
                     </li>
