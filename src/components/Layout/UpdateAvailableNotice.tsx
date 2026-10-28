@@ -35,20 +35,20 @@ export function useUpdateAvailable() {
 
 export default function UpdateAvailableNotice() {
   return (
-    <div className="from-status-info/15 to-secondary-bg bg-secondary-bg bg-linear-to-r">
+    <div className="bg-secondary-bg border-border-card border-b">
       <div className="relative px-4 py-2">
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-primary-text text-center text-xs">
-            A new version of the site is available.{" "}
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="text-link hover:text-link-hover cursor-pointer font-semibold underline"
-            >
-              Reload
-            </button>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="text-primary-text focus-visible:ring-border-focus group flex w-full cursor-pointer flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-sm px-8 text-center text-xs focus-visible:ring-2 focus-visible:outline-none lg:px-12"
+        >
+          <span className="font-medium">
+            A new version of the site is available
           </span>
-        </div>
+          <span className="text-link group-hover:text-link-hover font-semibold transition-colors">
+            Reload <span aria-hidden="true">→</span>
+          </span>
+        </button>
       </div>
     </div>
   );
