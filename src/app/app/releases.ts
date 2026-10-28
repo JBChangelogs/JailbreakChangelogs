@@ -4,6 +4,8 @@ export interface Release {
   version: string;
   releasedAt: number | null;
   size: number | null;
+  /** Extra package formats beside the installer (Linux .deb/.rpm), by format. */
+  packageSizes?: Record<string, number | null>;
 }
 
 export type Releases = Record<"Windows" | "macOS" | "Linux", Release | null>;
@@ -79,6 +81,12 @@ const INSTALLERS = {
   Linux: "JBCLSetup.AppImage",
 } as const;
 
+/** Linux packages beside the AppImage, from the Tauri release on. */
+export const LINUX_PACKAGES = {
+  ".deb": "JBCLSetup.deb",
+  ".rpm": "JBCLSetup.rpm",
+} as const;
+
 // Size and date are optional, so a slow or failed HEAD never blocks the
 // version from a manifest.
 const headInstaller = (file: string) =>
@@ -99,10 +107,14 @@ async function fetchTauriReleases(): Promise<Releases | null> {
   const manifest = parseTauriManifest(await response.json());
   if (!manifest) return null;
   const platforms = Object.keys(INSTALLERS) as (keyof Releases)[];
-  const headers = await Promise.all(
-    platforms.map((platform) => headInstaller(INSTALLERS[platform])),
-  );
-  return Object.fromEntries(
+  const packages = Object.entries(LINUX_PACKAGES);
+  const [headers, packageHeaders] = await Promise.all([
+    Promise.all(
+      platforms.map((platform) => headInstaller(INSTALLERS[platform])),
+    ),
+    Promise.all(packages.map(([, file]) => headInstaller(file))),
+  ]);
+  const releases = Object.fromEntries(
     platforms.map((platform, i) => [
       platform,
       {
@@ -113,6 +125,13 @@ async function fetchTauriReleases(): Promise<Releases | null> {
       },
     ]),
   ) as Releases;
+  releases.Linux!.packageSizes = Object.fromEntries(
+    packages.map(([format], i) => [
+      format,
+      toNumber(packageHeaders[i]?.get("content-length")),
+    ]),
+  );
+  return releases;
 }
 
 // The Electron release files, frozen at 0.5.18 once the app moves to Tauri.

@@ -12,6 +12,12 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -25,29 +31,188 @@ import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 import { getCustomTheme, subscribeCustomTheme } from "@/utils/ui/customTheme";
 import { appAccessKey, fetchAppAccess } from "./access";
 import { AppReleaseNotes } from "./AppReleaseNotes";
-import type { Releases } from "./releases";
+import { LINUX_PACKAGES, type Releases } from "./releases";
 import { getBrowserDownloadPlatform } from "./platform";
 
 const subscribePlatform = () => () => {};
 const getServerPlatform = () => null;
-const downloads = {
+const updatesUrl = "https://updates.jailbreakchangelogs.com";
+type Download = {
+  url: string;
+  format: string;
+  /** Who it's for, when a platform has more than one format. */
+  note?: string;
+  /** A small script, not the app, so no size is shown. */
+  unsized?: boolean;
+};
+// Each platform's files, the one to recommend first. The installer (the
+// file a Release's `size` measures) is listed last on Linux, where the
+// distro packages run smoother and update themselves.
+const downloads: Record<
+  (typeof allPlatforms)[number],
+  { icon: string; files: Download[] }
+> = {
   Windows: {
-    url: "https://updates.jailbreakchangelogs.com/JBCLSetup.exe",
-    format: ".exe",
     icon: "simple-icons:windows",
+    files: [{ url: `${updatesUrl}/JBCLSetup.exe`, format: ".exe" }],
   },
   macOS: {
-    url: "https://updates.jailbreakchangelogs.com/JBCLSetup.dmg",
-    format: ".dmg",
     icon: "mdi:apple",
+    files: [{ url: `${updatesUrl}/JBCLSetup.dmg`, format: ".dmg" }],
   },
   Linux: {
-    url: "https://updates.jailbreakchangelogs.com/JBCLSetup.AppImage",
-    format: ".AppImage",
     icon: "mdi:linux",
+    files: [
+      ...Object.entries(LINUX_PACKAGES).map(([format, file]) => ({
+        url: `${updatesUrl}/${file}`,
+        format,
+        note: format === ".deb" ? "Debian, Ubuntu, Mint" : "Fedora, openSUSE",
+      })),
+      {
+        url: `${updatesUrl}/JBCLSetup.AppImage`,
+        format: ".AppImage",
+        note: "Any distribution",
+      },
+      // Only on GitHub releases until it's on the AUR. It repackages the .deb.
+      {
+        url: "https://github.com/JBChangelogs/JailbreakChangelogsApp/releases/latest/download/PKGBUILD",
+        format: "PKGBUILD",
+        note: "Arch Linux · makepkg -si",
+        unsized: true,
+      },
+    ],
   },
 };
 const allPlatforms = ["Windows", "macOS", "Linux"] as const;
+
+type Platform = (typeof allPlatforms)[number];
+
+const rowLink =
+  "hover:bg-tertiary-bg focus-visible:ring-border-focus group flex items-center gap-3 py-2.5 pr-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset";
+
+function DownloadIcon() {
+  return (
+    <Icon
+      icon="lucide:download"
+      aria-hidden="true"
+      className="text-secondary-text group-hover:text-link size-4 shrink-0 transition-colors"
+    />
+  );
+}
+
+/**
+ * Compact download rows, one per platform; a platform with several formats
+ * (Linux) picks one from a menu. A list of one platform's own formats shows
+ * a row per format instead.
+ */
+function DownloadList({
+  platforms,
+  sizeOf,
+}: {
+  platforms: { option: Platform; files: Download[] }[];
+  sizeOf: (option: Platform, file: Download) => string;
+}) {
+  const named = platforms.length > 1;
+  const platformIcon = (option: Platform) => (
+    <Icon
+      icon={downloads[option].icon}
+      aria-hidden="true"
+      className="text-secondary-text group-hover:text-primary-text size-5 shrink-0 transition-colors"
+    />
+  );
+  return (
+    <ul className="border-border-card divide-border-card divide-y overflow-hidden rounded-lg border">
+      {platforms.map(({ option, files }) =>
+        files.length === 1 ? (
+          <li key={option}>
+            <a href={files[0].url} className={`${rowLink} pl-3`}>
+              {platformIcon(option)}
+              <span className="text-primary-text font-medium">
+                <span className="sr-only">Download for </span>
+                {option}
+              </span>
+              <span className="text-secondary-text ml-auto text-xs">
+                {[files[0].format, sizeOf(option, files[0])]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+              <DownloadIcon />
+            </a>
+          </li>
+        ) : named ? (
+          // Several formats (Linux): one row like the rest, picking the
+          // format from a menu.
+          <li key={option}>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={`${rowLink} w-full cursor-pointer pl-3 text-left`}
+              >
+                {platformIcon(option)}
+                <span className="text-primary-text font-medium">
+                  <span className="sr-only">Download for </span>
+                  {option}
+                </span>
+                <span className="text-secondary-text ml-auto text-xs">
+                  {`${files.length} formats`}
+                </span>
+                <Icon
+                  icon="lucide:chevron-down"
+                  aria-hidden="true"
+                  className="text-secondary-text group-hover:text-link size-4 shrink-0 transition-colors"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-72 p-1">
+                {files.map((file) => (
+                  <DropdownMenuItem key={file.url} asChild>
+                    <a href={file.url} className="flex items-center gap-3">
+                      <span className="min-w-0 flex-1">
+                        <span className="text-primary-text block font-medium">
+                          {file.format}
+                        </span>
+                        {file.note && (
+                          <span className="text-secondary-text block text-xs">
+                            {file.note}
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-secondary-text shrink-0 text-xs">
+                        {sizeOf(option, file)}
+                      </span>
+                      <DownloadIcon />
+                    </a>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
+        ) : (
+          // Just this platform's formats: a row each.
+          files.map((file) => (
+            <li key={file.url}>
+              <a href={file.url} className={`${rowLink} pl-3`}>
+                <span className="min-w-0">
+                  <span className="sr-only">{`Download for ${option} `}</span>
+                  <span className="text-primary-text font-medium">
+                    {file.format}
+                  </span>
+                  {file.note && (
+                    <span className="text-secondary-text ml-2 text-xs">
+                      {file.note}
+                    </span>
+                  )}
+                </span>
+                <span className="text-secondary-text ml-auto shrink-0 text-xs">
+                  {sizeOf(option, file)}
+                </span>
+                <DownloadIcon />
+              </a>
+            </li>
+          ))
+        ),
+      )}
+    </ul>
+  );
+}
 const previewOrigin = "https://app-preview.jailbreakchangelogs.com";
 
 // Things the website can't do, in the app's own wording.
@@ -133,12 +298,19 @@ export default function AppClient({
   const primaryPlatforms = detected ? [detected] : platforms;
   const otherPlatforms = platforms.slice(primaryPlatforms.length);
   const latest = releases[platforms[0]];
-  const fileDetails = (option: keyof Releases) => {
-    const size = releases[option]?.size;
-    return size
-      ? `${downloads[option].format} · ${Math.round(size / 1024 ** 2)} MB`
-      : downloads[option].format;
+  const fileSize = (option: keyof Releases, file: Download) => {
+    if (file.unsized) return "";
+    const release = releases[option];
+    const size =
+      release?.packageSizes && file.format in release.packageSizes
+        ? release.packageSizes[file.format]
+        : release?.size;
+    return size ? `${Math.round(size / 1024 ** 2)} MB` : "";
   };
+  const fileDetails = (option: keyof Releases, file: Download) =>
+    [file.format, file.note, fileSize(option, file)]
+      .filter(Boolean)
+      .join(" · ");
   const { user, isAuthenticated, isLoading, setShowLoginModal } =
     useAuthContext();
   const signedIn = isAuthenticated && !!user;
@@ -286,18 +458,34 @@ export default function AppClient({
                           asChild
                           className="h-auto! min-h-12! w-full py-3! text-sm! whitespace-normal! sm:text-base!"
                         >
-                          <a href={downloads[option].url}>
+                          <a href={downloads[option].files[0].url}>
                             <Icon
                               icon={downloads[option].icon}
                               aria-hidden="true"
                               className="size-5"
                             />
-                            <span>{`Download for ${option}${option === "Linux" ? " (AppImage)" : ""}`}</span>
+                            <span>{`Download for ${option}${downloads[option].files.length > 1 ? ` (${downloads[option].files[0].format})` : ""}`}</span>
                           </a>
                         </Button>
                         <p className="text-secondary-text mt-2 text-center text-xs">
-                          {fileDetails(option)}
+                          {fileDetails(option, downloads[option].files[0])}
                         </p>
+                        {downloads[option].files.length > 1 && (
+                          <div className="mt-4">
+                            <p className="text-secondary-text mb-2 text-xs font-medium">
+                              Other {option} formats
+                            </p>
+                            <DownloadList
+                              platforms={[
+                                {
+                                  option,
+                                  files: downloads[option].files.slice(1),
+                                },
+                              ]}
+                              sizeOf={fileSize}
+                            />
+                          </div>
+                        )}
                         {option === "Windows" && (
                           <Popover>
                             <PopoverTrigger className="text-secondary-text hover:text-primary-text focus-visible:ring-border-focus mx-auto mt-3 flex cursor-pointer items-center gap-1.5 rounded-sm text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none">
@@ -341,34 +529,13 @@ export default function AppClient({
                       <p className="text-secondary-text mb-2 text-xs font-medium">
                         Other platforms
                       </p>
-                      <ul className="border-border-card divide-border-card divide-y overflow-hidden rounded-lg border">
-                        {otherPlatforms.map((option) => (
-                          <li key={option}>
-                            <a
-                              href={downloads[option].url}
-                              className="hover:bg-tertiary-bg focus-visible:ring-border-focus group flex items-center gap-3 px-3 py-2.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
-                            >
-                              <Icon
-                                icon={downloads[option].icon}
-                                aria-hidden="true"
-                                className="text-secondary-text group-hover:text-primary-text size-5 shrink-0 transition-colors"
-                              />
-                              <span className="text-primary-text font-medium">
-                                <span className="sr-only">Download for </span>
-                                <span>{option}</span>
-                              </span>
-                              <span className="text-secondary-text ml-auto text-xs">
-                                {fileDetails(option)}
-                              </span>
-                              <Icon
-                                icon="lucide:download"
-                                aria-hidden="true"
-                                className="text-secondary-text group-hover:text-link size-4 shrink-0 transition-colors"
-                              />
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
+                      <DownloadList
+                        platforms={otherPlatforms.map((option) => ({
+                          option,
+                          files: downloads[option].files,
+                        }))}
+                        sizeOf={fileSize}
+                      />
                     </div>
                   )}
                 </>
