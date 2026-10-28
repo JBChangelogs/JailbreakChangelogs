@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useQueryState } from "nuqs";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import AboutTab from "./AboutTab";
 import CommentsTab from "./CommentsTab";
 import FavoritesTab from "./FavoritesTab";
@@ -60,11 +60,10 @@ export default function ProfileOverview({
   bio,
   onBioUpdate,
 }: ProfileOverviewProps) {
-  const [sectionParam, setSectionParam] = useQueryState("tab", {
-    defaultValue: "",
-    history: "push",
-    shallow: true,
-  });
+  const [{ tab: sectionParam }, setSectionParams] = useQueryStates(
+    { tab: parseAsString.withDefault(""), page: parseAsInteger },
+    { history: "push", shallow: true },
+  );
   const overviewRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   if (!user) return null;
@@ -121,7 +120,7 @@ export default function ProfileOverview({
   const isOverview = section.id === "";
   const openSection = async (id: string) => {
     setMenuOpen(false);
-    await setSectionParam(id || null);
+    await setSectionParams({ tab: id || null, page: null });
     overviewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 

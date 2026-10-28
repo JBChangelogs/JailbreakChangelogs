@@ -33,6 +33,13 @@ test("all overview showcases hide loaded empty data while full sections, loading
         },
         require: (name: string) => {
           if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+          if (name === "nuqs")
+            return {
+              parseAsInteger: {
+                withDefault: () => ({ withOptions: () => ({}) }),
+              },
+              useQueryState: () => [1, () => {}],
+            };
           if (name === "react")
             return {
               useState: (initial: unknown) => [initial, () => {}],

@@ -37,9 +37,8 @@ test("inventory tab changes clear comment parameters only outside Comments", () 
   const serialize = createSerializer({
     tab: parseAsString.withDefault(""),
     commentsSort: parseAsString,
-    commentsPage: parseAsString,
   });
-  const initial = "?tab=comments&commentsSort=newest&commentsPage=3&other=keep";
+  const initial = "?tab=comments&commentsSort=newest&other=keep";
   let result = initial;
   const changeTab = runInNewContext(
     transpileModule(`(${handler})`, {
@@ -73,7 +72,6 @@ test("inventory tab changes clear comment parameters only outside Comments", () 
     const params = new URLSearchParams(result);
     expect(params.get("tab")).toBe(tab || null);
     expect(params.has("commentsSort")).toBe(false);
-    expect(params.has("commentsPage")).toBe(false);
     expect(params.get("other")).toBe("keep");
   }
 

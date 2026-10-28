@@ -48,7 +48,12 @@ test("report previews use the lock avatar for hidden authors and preserve public
         exports,
         require: (name: string) => {
           if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
-          if (name === "react") return { useState: () => [false, () => {}] };
+          if (name === "react")
+            return {
+              useState: () => [false, () => {}],
+              useRef: () => ({ current: null }),
+              useEffect: () => {},
+            };
           if (name === "./commentUtils") return { isCommentIdentityHidden };
           if (name === "./CommentsContext")
             return {

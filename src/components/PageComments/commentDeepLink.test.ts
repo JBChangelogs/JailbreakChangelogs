@@ -3,21 +3,14 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { ModuleKind, transpileModule } from "typescript";
 
-test("comment links locate the correct page, expand the thread, and fall back when a comment is missing", async () => {
-  const effects: { callback: () => unknown; deps: unknown[] }[] = [];
-  const updates: unknown[] = [];
+test("comment links show only their thread, and the list merges loaded pages", async () => {
+  let effects: { callback: () => unknown; deps: unknown[] }[] = [];
+  const hookStates: unknown[] = [];
+  let hookIndex = 0;
   const requests: string[] = [];
   const historyOptions: unknown[] = [];
   const paramUpdates: Record<string, string | number | null>[] = [];
   let timer: () => Promise<void>;
-  let clearHighlight: () => void;
-  const highlighted = new Set<string>();
-  const surface = {
-    classList: {
-      add: (name: string) => highlighted.add(name),
-      remove: (name: string) => highlighted.delete(name),
-    },
-  };
   let lookupStatus = 200;
   let scrolls = 0;
   const initialComments: unknown[] = [];
@@ -34,6 +27,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
         typeof updater === "function" ? updater(cache.get(cacheKey)) : updater,
       );
     },
+    invalidateQueries: async () => {},
     fetchQuery: async (options: {
       queryFn: (context: { signal: AbortSignal }) => Promise<unknown>;
     }) => options.queryFn({ signal: new AbortController().signal }),
@@ -43,19 +37,18 @@ test("comment links locate the correct page, expand the thread, and fall back wh
     pathname: "/changelogs/5",
     search: "?tab=comments",
   };
-  const exports = {} as {
-    useCommentState: (props: unknown) => {
-      comments: { id: number }[];
-      totalComments: number;
-      page: number;
-      sortOrder: string | null;
-      handlePageChange: (event: unknown, page: number) => void;
-      handleSortChange: (sort: string) => void;
-      setComments: (
-        updater: (comments: { id: number }[]) => { id: number }[],
-      ) => void;
-    };
+  type State = {
+    comments: { id: number }[];
+    totalComments: number;
+    focusedThread: { page: number; commentId: number } | null;
+    sortOrder: string | null;
+    handleSortChange: (sort: string) => void;
+    showAllComments: () => void;
+    setComments: (
+      updater: (comments: { id: number }[]) => { id: number }[],
+    ) => void;
   };
+  const exports = {} as { useCommentState: (props: unknown) => State };
   runInNewContext(
     transpileModule(
       readFileSync(new URL("./useCommentState.ts", import.meta.url), "utf8"),
@@ -64,18 +57,22 @@ test("comment links locate the correct page, expand the thread, and fall back wh
     {
       exports,
       Set,
+      Map,
+      Array,
+      Object,
       document: {
         querySelector: () => null,
         querySelectorAll: (selector: string) =>
           selector === "#comment-42"
             ? [
-                { getClientRects: () => [] },
                 {
                   getClientRects: () => [true],
                   scrollIntoView: () => {
                     scrolls++;
                   },
-                  querySelector: () => surface,
+                  querySelector: () => ({
+                    classList: { add: () => {}, remove: () => {} },
+                  }),
                 },
               ]
             : [],
@@ -90,8 +87,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
       localStorage: { setItem: () => {} },
       CustomEvent: class {},
       setTimeout: (callback: typeof timer, delay: number) => {
-        if (delay === 10_000) clearHighlight = callback;
-        else timer = callback;
+        if (delay !== 10_000) timer = callback;
         return 1;
       },
       clearTimeout: () => {},
@@ -109,30 +105,19 @@ test("comment links locate the correct page, expand the thread, and fall back wh
       },
       fetch: async (url: string) => {
         requests.push(url);
-        return url.includes("/42/page")
-          ? Response.json(
-              { comment_id: 10, item_id: 5, item_type: "changelog", page: 3 },
-              { status: lookupStatus },
-            )
-          : Response.json({
-              items: [],
-              total_pages: 3,
-              total: 25,
-              page: Number(new URL(url).searchParams.get("page")),
-            });
+        return Response.json(
+          { comment_id: 10, item_id: 5, item_type: "changelog", page: 3 },
+          { status: lookupStatus },
+        );
       },
       require: (name: string) => {
         if (name === "nuqs")
           return {
-            parseAsInteger: { withDefault: () => ({}) },
             parseAsString: {},
             useQueryStates: () => {
               const params = new URLSearchParams(location.search);
               return [
-                {
-                  commentsPage: Number(params.get("commentsPage") ?? 1),
-                  commentsSort: params.get("commentsSort"),
-                },
+                { commentsSort: params.get("commentsSort") },
                 (
                   values: Record<string, string | number | null>,
                   options?: unknown,
@@ -150,14 +135,19 @@ test("comment links locate the correct page, expand the thread, and fall back wh
           };
         if (name === "react")
           return {
-            useState: (initial: unknown) => [
-              initial,
-              (update: unknown) => {
-                updates.push(
-                  typeof update === "function" ? update(initial) : update,
-                );
-              },
-            ],
+            useState: (initial: unknown) => {
+              const index = hookIndex++;
+              if (!(index in hookStates)) hookStates[index] = initial;
+              return [
+                hookStates[index],
+                (update: unknown) => {
+                  hookStates[index] =
+                    typeof update === "function"
+                      ? update(hookStates[index])
+                      : update;
+                },
+              ];
+            },
             useRef: (initial: unknown) => ({ current: initial }),
             useEffect: (callback: () => unknown, deps: unknown[]) => {
               effects.push({ callback, deps });
@@ -171,6 +161,10 @@ test("comment links locate the correct page, expand the thread, and fall back wh
             useQuery: (options: { queryKey: unknown }) => ({
               data: cache.get(JSON.stringify(options.queryKey)),
             }),
+            useInfiniteQuery: (options: { queryKey: unknown }) => ({
+              data: cache.get(JSON.stringify(options.queryKey)),
+              fetchNextPage: () => {},
+            }),
           };
         if (name === "@/contexts/AuthContext")
           return { useAuthContext: () => ({ user: null, bans: {} }) };
@@ -181,10 +175,7 @@ test("comment links locate the correct page, expand the thread, and fall back wh
         if (name === "@/services/logger")
           return { createLogger: () => ({ error: () => {} }) };
         if (name === "@/utils/api/api")
-          return {
-            PUBLIC_API_URL: "https://public-api.example.com",
-            flattenComments: () => ({ comments: [], userMap: {} }),
-          };
+          return { PUBLIC_API_URL: "https://public-api.example.com" };
         if (name === "@/utils/api/apiDevToken")
           return {
             buildApiFetchRequest: (base: string, path: string) => ({
@@ -202,130 +193,97 @@ test("comment links locate the correct page, expand the thread, and fall back wh
     changelogTitle: "Update",
     initialComments,
   };
-  const state = exports.useCommentState(props);
-  const effect = effects.find(
-    (entry) => entry.deps[0] === 5 && entry.deps.includes(queryClient),
-  );
-  expect(effect).toBeDefined();
-  effect!.callback();
-  await timer!();
+  const render = () => {
+    hookIndex = 0;
+    effects = [];
+    return exports.useCommentState(props);
+  };
+  const runLoadEffect = async () => {
+    effects
+      .find((entry) => entry.deps[0] === 5 && entry.deps.includes(queryClient))!
+      .callback();
+    await timer!();
+  };
+  const page = (ids: number[], pageNumber = 1) => ({
+    comments: ids.map((id) => ({ id })),
+    userMap: {},
+    totalPages: 3,
+    totalComments: 25,
+    page: pageNumber,
+  });
+
+  // Comment link: look up its page, then show only that thread.
+  render();
+  await runLoadEffect();
   expect(requests[0]).toBe(
     "https://public-api.example.com/v2/comments/42/page",
   );
-  const listUrl = new URL(requests[1]);
-  expect(listUrl.searchParams.get("page")).toBe("3");
-  expect(listUrl.searchParams.get("sort")).toBe("newest");
-  expect(new URLSearchParams(location.search).get("commentsSort")).toBe(
-    "newest",
-  );
+  expect(paramUpdates).toEqual([]);
+  const threadKey = ["comments", "changelog", 5, "thread", 3, null];
+  cache.set(JSON.stringify(threadKey), page([9, 10, 11], 3));
+  let state = render();
+  expect(state.focusedThread).toEqual({ page: 3, commentId: 10 });
+  expect(state.comments.map((comment) => comment.id)).toEqual([10]);
+  expect(state.totalComments).toBe(25);
   expect(
-    updates.some((update) => update instanceof Set && update.has(10)),
+    hookStates.some((value) => value instanceof Set && value.has(10)),
   ).toBe(true);
-  const scrollEffect = effects.find(
-    (entry) => entry.deps[0] === initialComments && entry.deps.length === 2,
-  );
-  expect(scrollEffect).toBeDefined();
-  scrollEffect!.callback();
-  scrollEffect!.callback();
+  effects.find((entry) => entry.deps[0] === state.comments)!.callback();
   expect(scrolls).toBe(1);
-  expect(highlighted.has("comment-link-highlight")).toBe(true);
-  clearHighlight!();
-  expect(highlighted.size).toBe(0);
+
+  // Edits in a thread write to the thread's page.
+  state.setComments((comments) =>
+    comments.map((comment) => ({ ...comment, edited: true })),
+  );
+  expect(cancelled).toContainEqual({ queryKey: threadKey, exact: true });
+  expect(
+    (cache.get(JSON.stringify(threadKey)) as { comments: unknown[] }).comments,
+  ).toContainEqual({ id: 10, edited: true });
+
+  // "View all" leaves the thread and clears the hash.
+  state.showAllComments();
   expect(location.hash).toBe("");
+  state = render();
+  expect(state.focusedThread).toBeNull();
+
+  // Thread page no longer has the comment: fall back to the list.
   location.hash = "#comment-42";
-  location.pathname = "/seasons/6";
-  clearHighlight!();
-  expect(location.hash).toBe("#comment-42");
-  location.pathname = "/changelogs/5";
-  location.search = "?tab=comments";
-  lookupStatus = 404;
-  effect!.callback();
-  await timer!();
-  expect(new URL(requests.at(-1)!).searchParams.get("page")).toBe("1");
-
-  location.search = "?tab=comments";
-  const key = ["comments", "changelog", 5, 1, null, null];
-  queryClient.setQueryData(key, {
-    comments: [{ id: 7 }],
-    userMap: {},
-    totalPages: 3,
-    totalComments: 25,
-    page: 1,
-  });
-  state.setComments((comments) => [...comments, { id: 99 }]);
-  const next = exports.useCommentState(props);
-  expect(next.comments.map((comment) => comment.id)).toEqual([7, 99]);
-  expect(next.totalComments).toBe(25);
-  expect(cancelled).toContainEqual({ queryKey: key, exact: true });
-
-  location.hash = "";
-  location.search = "?tab=comments&commentsPage=3&commentsSort=oldest";
-  effects.length = 0;
-  const linkedPage = exports.useCommentState(props);
-  expect(linkedPage.page).toBe(3);
-  expect(linkedPage.sortOrder).toBe("oldest");
+  render();
+  await runLoadEffect();
+  cache.set(JSON.stringify(threadKey), page([9, 11], 3));
+  render();
   effects
-    .find((entry) => entry.deps[0] === 5 && entry.deps.includes(queryClient))!
+    .find((entry) => entry.deps[1] === cache.get(JSON.stringify(threadKey)))!
     .callback();
-  await timer!();
-  expect(new URL(requests.at(-1)!).searchParams.get("page")).toBe("3");
-  expect(new URL(requests.at(-1)!).searchParams.get("sort")).toBe("oldest");
-  linkedPage.handleSortChange("newest");
-  expect(new URLSearchParams(location.search).get("commentsPage")).toBe("1");
-  expect(new URLSearchParams(location.search).get("commentsSort")).toBe(
-    "newest",
+  expect(render().focusedThread).toBeNull();
+
+  // Missing comment link: show the full list.
+  lookupStatus = 404;
+  location.hash = "#comment-42";
+  render();
+  await runLoadEffect();
+  expect(render().focusedThread).toBeNull();
+
+  // List merges loaded pages, dedupes, and updates write across all of them.
+  location.hash = "";
+  const listKey = ["comments", "changelog", 5, "list", null, null];
+  cache.set(JSON.stringify(listKey), {
+    pages: [page([7, 8]), page([8, 9], 2)],
+    pageParams: [1, 2],
+  });
+  state = render();
+  expect(state.comments.map((comment) => comment.id)).toEqual([7, 8, 9]);
+  state.setComments((comments) => [{ id: 99 }, ...comments]);
+  expect(cancelled).toContainEqual({ queryKey: listKey, exact: true });
+  expect(render().comments.map((comment) => comment.id)).toEqual([99, 7, 8, 9]);
+  render().setComments((comments) =>
+    comments.filter((comment) => comment.id !== 8),
   );
+  expect(render().comments.map((comment) => comment.id)).toEqual([99, 7, 9]);
+
+  // Sort changes push history without a page param.
+  render().handleSortChange("oldest");
+  expect(paramUpdates.at(-1)).toEqual({ commentsSort: "oldest" });
+  expect(historyOptions.at(-1)).toEqual({ history: "push" });
   expect(new URLSearchParams(location.search).get("tab")).toBe("comments");
-  expect(historyOptions.at(-1)).toEqual({ history: "push" });
-  const pageOneUrl = location.search;
-  exports.useCommentState(props).handlePageChange({}, 2);
-  expect(new URLSearchParams(location.search).get("commentsPage")).toBe("2");
-  expect(historyOptions.at(-1)).toEqual({ history: "push" });
-  const pageTwoUrl = location.search;
-  location.search = pageOneUrl;
-  expect(exports.useCommentState(props).page).toBe(1);
-  location.search = pageTwoUrl;
-  expect(exports.useCommentState(props).page).toBe(2);
-  expect(exports.useCommentState(props).sortOrder).toBe("newest");
-  location.search = "?commentsPage=99&commentsSort=newest";
-  const outOfRangePage = {
-    comments: [],
-    userMap: {},
-    totalPages: 3,
-    totalComments: 25,
-    page: 99,
-  };
-  queryClient.setQueryData(
-    ["comments", "changelog", 5, 99, "newest", null],
-    outOfRangePage,
-  );
-  effects.length = 0;
-  exports.useCommentState(props);
-  effects.find((entry) => entry.deps[0] === outOfRangePage)!.callback();
-  expect(new URLSearchParams(location.search).get("commentsPage")).toBe("3");
-  for (const invalidPage of ["-1", "0", "NaN", "1.5"]) {
-    location.search = `?commentsPage=${invalidPage}`;
-    effects.length = 0;
-    expect(exports.useCommentState(props).page).toBe(1);
-    effects
-      .find((entry) => entry.deps[0] === 5 && entry.deps.includes(queryClient))!
-      .callback();
-    await timer!();
-    expect(new URL(requests.at(-1)!).searchParams.get("page")).toBe("1");
-  }
-  for (const pathname of ["/changelogs/5", "/seasons/14"]) {
-    location.pathname = pathname;
-    location.search = "";
-    location.hash = "";
-    effects.length = 0;
-    exports.useCommentState(props);
-    effects
-      .find((entry) => entry.deps[0] === 5 && entry.deps.includes(queryClient))!
-      .callback();
-    await timer!();
-    expect(paramUpdates.at(-1)).not.toHaveProperty("commentsSort");
-    expect(new URLSearchParams(location.search).has("commentsSort")).toBe(
-      false,
-    );
-  }
 });

@@ -149,7 +149,6 @@ export default function InventoryCheckerClient({
     {
       tab: parseAsString.withDefault(""),
       commentsSort: parseAsString,
-      commentsPage: parseAsString,
     },
     { history: "push", shallow: true },
   );
@@ -633,7 +632,7 @@ export default function InventoryCheckerClient({
     const tab = tabIndexToName[newValue] ?? null;
     void setTabParams({
       tab,
-      ...(tab !== "comments" && { commentsSort: null, commentsPage: null }),
+      ...(tab !== "comments" && { commentsSort: null }),
     });
   };
 

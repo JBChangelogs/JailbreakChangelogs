@@ -3,8 +3,9 @@
 import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { createLogger } from "@/services/logger";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 const log = createLogger("UI");
 import { Button } from "@/components/ui/button";
@@ -121,7 +122,13 @@ export default function CommentsTab({
   onViewAll,
 }: CommentsTabProps) {
   const queryClient = useQueryClient();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [pageParam, setPageParam] = useQueryState(
+    "page",
+    parseAsInteger
+      .withDefault(1)
+      .withOptions({ history: "push", shallow: true }),
+  );
+  const currentPage = preview ? 1 : Math.max(1, pageParam);
   const fetchChangelogDetailsClient = useCallback(
     async (
       commentsForLookup: CommentData[],
@@ -280,7 +287,7 @@ export default function CommentsTab({
     _event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
-    setCurrentPage(value);
+    void setPageParam(value);
   };
 
   if (

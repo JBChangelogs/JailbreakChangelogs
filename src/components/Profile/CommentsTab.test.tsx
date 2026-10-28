@@ -46,6 +46,13 @@ test("profile comments reuse one timeline request for over ten distinct changelo
         exports,
         fetch,
         require: (name: string) => {
+          if (name === "nuqs")
+            return {
+              parseAsInteger: {
+                withDefault: () => ({ withOptions: () => ({}) }),
+              },
+              useQueryState: () => [1, () => {}],
+            };
           if (name === "react")
             return {
               useState: () => [1, () => {}],

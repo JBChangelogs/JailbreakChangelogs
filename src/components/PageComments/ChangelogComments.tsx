@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { CommentsContext } from "./CommentsContext";
 import { useCommentState } from "./useCommentState";
 import { useCommentsContext } from "./CommentsContext";
@@ -9,7 +9,7 @@ import { CommentForm } from "./CommentForm";
 import { CommentItem } from "./CommentItem";
 import { Icon } from "../ui/IconWrapper";
 import { CommentSkeletonList } from "./CommentSkeleton";
-import { Pagination } from "@/components/ui/Pagination";
+import { Button } from "@/components/ui/button";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { BanBanner } from "@/components/ui/BanBanner";
 import ReportCommentModal from "./ReportCommentModal";
@@ -39,9 +39,13 @@ function CommentsLayout() {
     filteredComments,
     currentComments,
     type,
-    totalPages,
-    page,
-    handlePageChange,
+    totalComments,
+    hasMore,
+    isFetchingMore,
+    loadMoreError,
+    loadMore,
+    focusedThread,
+    showAllComments,
     reportModalOpen,
     setReportModalOpen,
     reportReason,
@@ -54,6 +58,28 @@ function CommentsLayout() {
     modalState,
     closeModal,
   } = useCommentsContext();
+
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (
+      !target ||
+      !hasMore ||
+      isFetchingMore ||
+      loadMoreError ||
+      typeof IntersectionObserver === "undefined"
+    )
+      return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) loadMore();
+      },
+      { rootMargin: "1500px" },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasMore, isFetchingMore, loadMoreError, loadMore]);
 
   const reportingComment = reportingCommentId
     ? (filteredComments.find((c) => c.id === reportingCommentId) ??
@@ -128,6 +154,17 @@ function CommentsLayout() {
             </div>
           ) : (
             <div className="flex flex-col">
+              {focusedThread && (
+                <button
+                  type="button"
+                  onClick={showAllComments}
+                  className="text-link hover:text-link-hover mb-3 flex cursor-pointer items-center gap-1 self-start text-sm font-semibold"
+                >
+                  <Icon icon="heroicons:arrow-left" className="h-4 w-4" />
+                  View all {totalComments}{" "}
+                  {totalComments === 1 ? "comment" : "comments"}
+                </button>
+              )}
               <div className="flex flex-col space-y-3">
                 {currentComments.map((item) => {
                   if (!item) return null;
@@ -154,16 +191,24 @@ function CommentsLayout() {
                 })}
               </div>
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-6 flex justify-center pb-4">
-                  <Pagination
-                    count={totalPages}
-                    page={page}
-                    onChange={handlePageChange}
-                  />
-                </div>
-              )}
+              <div
+                ref={loadMoreRef}
+                className="mt-3 pb-4 [overflow-anchor:none]"
+                aria-live="polite"
+              >
+                {/* Placeholders keep a fast scroll from landing on the footer mid-load */}
+                {hasMore && !loadMoreError && <CommentSkeletonList count={6} />}
+                {loadMoreError && (
+                  <div className="mt-3 flex flex-col items-center gap-3">
+                    <p className="text-secondary-text text-sm">
+                      Could not load more comments. Please try again.
+                    </p>
+                    <Button onClick={loadMore} disabled={isFetchingMore}>
+                      {isFetchingMore ? "Loading more…" : "Retry"}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

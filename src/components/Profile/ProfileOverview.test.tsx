@@ -57,10 +57,12 @@ test("overview previews and legacy section links preserve account and owner rest
           };
         if (name === "nuqs")
           return {
-            useQueryState: () => [
-              section,
-              async (id: string | null) => {
-                selected = id;
+            parseAsInteger: {},
+            parseAsString: { withDefault: () => ({}) },
+            useQueryStates: () => [
+              { tab: section },
+              async (values: { tab: string | null }) => {
+                selected = values.tab;
               },
             ],
           };
