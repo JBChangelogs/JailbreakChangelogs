@@ -15,15 +15,27 @@ import { navigationSections } from "@/utils/ui/navigation-menu";
 
 export default function DesktopSidebar({
   collapsed,
+  expandOnHover = false,
   onToggle,
 }: {
   collapsed: boolean;
+  expandOnHover?: boolean;
   onToggle: () => void;
 }) {
   const pathname = usePathname();
   const activeHref = getNavigationHref(pathname);
   const navigationRef = useRef<HTMLElement>(null);
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const temporarilyExpanded =
+    collapsed && expandOnHover && (hovered || focused);
+  const isCollapsed = collapsed && !temporarilyExpanded;
+  const toggleLabel = temporarilyExpanded
+    ? "Keep sidebar open"
+    : isCollapsed
+      ? "Show sidebar"
+      : "Hide sidebar";
 
   useLayoutEffect(() => {
     setOpenTooltip(null);
@@ -46,7 +58,7 @@ export default function DesktopSidebar({
     const observer = new ResizeObserver(revealActiveLink);
     observer.observe(navigation);
     return () => observer.disconnect();
-  }, [pathname, collapsed]);
+  }, [pathname, isCollapsed]);
 
   const linkClassName = (active: boolean) =>
     cn(
@@ -60,12 +72,30 @@ export default function DesktopSidebar({
 
   return (
     <aside
-      data-desktop-sidebar={collapsed ? "collapsed" : "expanded"}
+      data-desktop-sidebar={isCollapsed ? "collapsed" : "expanded"}
       aria-label="Site navigation"
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse" || event.pointerType === "pen")
+          setHovered(true);
+      }}
+      onPointerLeave={() => setHovered(false)}
+      onFocusCapture={(event) => {
+        if (event.target.matches(":focus-visible")) setFocused(true);
+      }}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setFocused(false);
+      }}
       className="bg-secondary-bg border-border-card fixed bottom-0 left-0 z-1200 hidden flex-col border-r 2xl:flex"
       style={{
         top: "max(60px, var(--header-height, 60px))",
-        width: "var(--desktop-sidebar-width, 240px)",
+        width: temporarilyExpanded
+          ? "240px"
+          : "var(--desktop-sidebar-width, 240px)",
+        ...(temporarilyExpanded && {
+          "--desktop-sidebar-expanded-opacity": 1,
+          "--desktop-sidebar-collapsed-opacity": 0,
+        }),
       }}
     >
       <nav
@@ -94,10 +124,10 @@ export default function DesktopSidebar({
                 {section.items.map((item) => (
                   <li key={item.href}>
                     <Tooltip
-                      open={collapsed && openTooltip === item.href}
+                      open={isCollapsed && openTooltip === item.href}
                       onOpenChange={(open) =>
                         setOpenTooltip((current) =>
-                          open && collapsed
+                          open && isCollapsed
                             ? item.href
                             : current === item.href
                               ? null
@@ -148,7 +178,7 @@ export default function DesktopSidebar({
                           )}
                         </Link>
                       </TooltipTrigger>
-                      {collapsed && (
+                      {isCollapsed && (
                         <TooltipContent side="right" sideOffset={8}>
                           {item.title}
                         </TooltipContent>
@@ -164,10 +194,10 @@ export default function DesktopSidebar({
       {/* Leave room for the browser's bottom-left link preview. */}
       <div className="shrink-0 p-3 pb-8">
         <Tooltip
-          open={collapsed && openTooltip === "toggle"}
+          open={isCollapsed && openTooltip === "toggle"}
           onOpenChange={(open) =>
             setOpenTooltip((current) =>
-              open && collapsed
+              open && isCollapsed
                 ? "toggle"
                 : current === "toggle"
                   ? null
@@ -179,8 +209,8 @@ export default function DesktopSidebar({
             <button
               type="button"
               onClick={onToggle}
-              aria-label={collapsed ? "Show sidebar" : "Hide sidebar"}
-              aria-expanded={!collapsed}
+              aria-label={toggleLabel}
+              aria-expanded={!isCollapsed}
               aria-controls="desktop-sidebar-navigation"
               className={cn(linkClassName(false), "w-full cursor-pointer")}
             >
@@ -195,10 +225,10 @@ export default function DesktopSidebar({
                 <rect x="3" y="4" width="18" height="16" rx="2" />
                 <path d="M9 4v16M5.5 8h1M5.5 11h1M5.5 14h1" />
               </svg>
-              <span className={labelClassName}>Hide sidebar</span>
+              <span className={labelClassName}>{toggleLabel}</span>
             </button>
           </TooltipTrigger>
-          {collapsed && (
+          {isCollapsed && (
             <TooltipContent side="right" sideOffset={8}>
               Show sidebar
             </TooltipContent>

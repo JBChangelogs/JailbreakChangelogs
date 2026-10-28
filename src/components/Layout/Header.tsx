@@ -35,8 +35,8 @@ import type { UserData } from "@/types/auth";
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
 import { Spinner } from "@/components/ui/Spinner";
 import {
-  getDesktopSidebarCollapsed,
-  setDesktopSidebarCollapsed,
+  getDesktopSidebarBehavior,
+  setDesktopSidebarBehavior,
   subscribeDesktopNavigation,
   syncDesktopNavigationPreferences,
 } from "@/utils/ui/desktopNavigation";
@@ -484,10 +484,10 @@ export default function Header({
   const [searchOpen, setSearchOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 80rem)");
 
-  const sidebarCollapsed = useSyncExternalStore(
+  const sidebarBehavior = useSyncExternalStore(
     subscribeDesktopNavigation,
-    getDesktopSidebarCollapsed,
-    () => false,
+    getDesktopSidebarBehavior,
+    () => "expanded" as const,
   );
   useEffect(syncDesktopNavigationPreferences, []);
   useEffect(syncTabStylePreferences, []);
@@ -844,9 +844,12 @@ export default function Header({
       </div>
 
       <DesktopSidebar
-        collapsed={sidebarCollapsed}
+        collapsed={sidebarBehavior !== "expanded"}
+        expandOnHover={sidebarBehavior === "hover"}
         onToggle={() =>
-          setDesktopSidebarCollapsed(!getDesktopSidebarCollapsed())
+          setDesktopSidebarBehavior(
+            getDesktopSidebarBehavior() === "expanded" ? "compact" : "expanded",
+          )
         }
       />
 

@@ -68,6 +68,11 @@ export const FRONTEND_SETTINGS: Record<string, FrontendSetting> = {
     title: "Desktop navigation",
     description: "Choose between sidebar and top bar navigation.",
   },
+  "sidebar-behavior": {
+    title: "Sidebar behavior",
+    description: "Choose when the desktop sidebar expands.",
+    target: "navigation-layout",
+  },
   "tab-style": {
     title: "Tab style",
     description: "Choose how tabs appear across the site.",
