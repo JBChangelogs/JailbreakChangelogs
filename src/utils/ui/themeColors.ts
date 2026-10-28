@@ -30,7 +30,30 @@ const MAIN_NAMES = new Map<string, string>([
   ["--color-icon-tile", "Icon tile icon"],
   ["--color-menu-badge-bg", "Menu badge background"],
   ["--color-menu-badge-text", "Menu badge text"],
+  ["--color-border-focus", "Focus rings and tab underline"],
+  ["--color-tab-active", "Filled tab active"],
 ]);
+
+// Mixing toward the text color lightens on dark themes, darkens on light.
+const shade = (key: string, pct: number) =>
+  `color-mix(in srgb, var(${key}) ${pct}%, var(--color-primary-text))`;
+
+/** Colors that follow a main color when it changes, until edited themselves. */
+export const FOLLOWS: Record<string, [key: string, value: string][]> = {
+  "--color-button-info": [
+    ["--color-button-info-hover", shade("--color-button-info", 85)],
+    ["--color-button-info-active", shade("--color-button-info", 75)],
+    ["--color-border-focus", "var(--color-button-info)"],
+  ],
+  "--color-button-secondary": [
+    ["--color-button-secondary-hover", shade("--color-button-secondary", 85)],
+    ["--color-button-secondary-active", shade("--color-button-secondary", 75)],
+  ],
+  "--color-link": [
+    ["--color-link-hover", shade("--color-link", 80)],
+    ["--color-link-active", shade("--color-link", 70)],
+  ],
+};
 
 /** "--color-card-tag-bg" → "Card tag bg", unless it has a plain name above. */
 export function colorName(key: string): string {
@@ -48,7 +71,11 @@ export function colorGroup(key: string): string {
   if (name.startsWith("icon-tile") || name.startsWith("menu-badge"))
     return "Icons and menu badges";
   if (name.startsWith("supporter-")) return "Supporters";
-  if (name.startsWith("button-") || name.startsWith("form-button"))
+  if (
+    name.startsWith("button-") ||
+    name.startsWith("form-button") ||
+    name === "tab-active"
+  )
     return "Buttons";
   if (name.startsWith("form-")) return "Forms";
   if (name.startsWith("link")) return "Links";
@@ -59,6 +86,10 @@ export function colorGroup(key: string): string {
   if (name.endsWith("-bg")) return "Backgrounds";
   return "Status and accents";
 }
+
+// Kept in themes (the API checks form-label's contrast) but not shown in
+// the editor, since nothing on the site uses them.
+export const HIDDEN_COLORS = new Set(["--color-form-label"]);
 
 /** The order of the groups in "More colors". */
 export const COLOR_GROUPS = [
@@ -87,6 +118,10 @@ const NEWER_COLORS: [
   ["--color-button-success-text", (v) => v["--color-form-button-text"]],
   ["--color-icon-tile", (v) => v["--color-link"]],
   ["--color-menu-badge-text", (v) => v["--color-link"]],
+  [
+    "--color-tab-active",
+    (v) => v["--color-button-info"] && "var(--color-button-info)",
+  ],
   [
     "--color-icon-tile-bg",
     (v) =>

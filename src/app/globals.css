@@ -43,7 +43,7 @@ html[data-tab-style="filled"] [data-slot="tabs-indicator"],
   height: var(--tab-height);
   width: var(--tab-width);
   border-radius: var(--radius-md);
-  background: var(--color-button-info);
+  background: var(--color-tab-active);
 }
 
 html[data-tab-style="filled"] [data-slot="tabs-trigger"],
@@ -54,7 +54,7 @@ html[data-tab-style="filled"] [data-slot="tabs-trigger"],
 
 html[data-tab-style="filled"] [data-slot="tabs-trigger"][data-state="active"],
 [data-slot="tabs-list"][data-variant="filled"] > [data-slot="tabs-trigger"][data-state="active"] {
-  background: var(--color-button-info);
+  background: var(--color-tab-active);
   color: var(--color-form-button-text);
 }
 
@@ -254,6 +254,8 @@ body:has(
   --color-icon-tile: var(--color-link);
   --color-menu-badge-bg: color-mix(in srgb, var(--color-button-info) 20%, transparent);
   --color-menu-badge-text: var(--color-link);
+  /* The filled tab style's active pill; follows the buttons unless a theme sets it. */
+  --color-tab-active: var(--color-button-info);
 
   /* Form Elements */
   --color-form-input: hsl(240, 8%, 9%); /* Input field backgrounds */

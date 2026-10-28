@@ -70,7 +70,9 @@ import {
   COLOR_VAR,
   colorGroup,
   colorName,
+  FOLLOWS,
   groupProblems,
+  HIDDEN_COLORS,
   MAIN_COLORS,
   withDefaultColors,
 } from "@/utils/ui/themeColors";
@@ -308,6 +310,14 @@ export default function CustomThemeEditor({
   const setColor = (key: string, value: string) => {
     if (!current) return;
     const vars = { ...current.vars, [key]: value };
+    // Hover, active and focus colors follow their main color unless they
+    // were changed since the editor opened or last saved.
+    const saved = baselineRef.current
+      ? (JSON.parse(baselineRef.current) as CustomThemeInput).vars
+      : {};
+    for (const [dep, linked] of FOLLOWS[key] ?? []) {
+      if (dep in vars && vars[dep] === saved[dep]) vars[dep] = linked;
+    }
     update(
       matchLogo
         ? { vars, logo_filter: matchLogoFilter(buttonHex(vars)) }
@@ -443,7 +453,9 @@ export default function CustomThemeEditor({
     setFloatingColor(available[0]);
   };
   const otherColors = current
-    ? Object.keys(current.vars).filter((key) => !mainKeys.has(key))
+    ? Object.keys(current.vars).filter(
+        (key) => !mainKeys.has(key) && !HIDDEN_COLORS.has(key),
+      )
     : [];
   const colorGroups = [
     {
@@ -461,7 +473,9 @@ export default function CustomThemeEditor({
   const shownColors = search
     ? Object.keys(current?.vars ?? {}).filter(
         (key) =>
-          colorName(key).toLowerCase().includes(search) || key.includes(search),
+          !HIDDEN_COLORS.has(key) &&
+          (colorName(key).toLowerCase().includes(search) ||
+            key.includes(search)),
       )
     : (colorGroups.find((group) => group.name === colorTab) ?? colorGroups[0])
         .keys;
