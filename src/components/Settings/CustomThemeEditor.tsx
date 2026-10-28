@@ -216,6 +216,9 @@ export default function CustomThemeEditor({
   const [floatingColors, setFloatingColors] = useState<string[] | null>(null);
   const [floatingColor, setFloatingColor] = useState("");
   const floatingRef = useRef<HTMLDivElement>(null);
+  // While typing, the phone keyboard can push the anchor off screen; hiding
+  // the popup then would drop focus and close the keyboard.
+  const [typingHex, setTypingHex] = useState(false);
   const floatingAnchor = useRef<{
     getBoundingClientRect: () => DOMRect;
     contextElement: Element;
@@ -635,7 +638,11 @@ export default function CustomThemeEditor({
               sideOffset={8}
               collisionPadding={12}
               aria-label="Adjust selected color"
-              hideWhenDetached
+              hideWhenDetached={!typingHex}
+              onFocus={(event) =>
+                setTypingHex(event.target instanceof HTMLInputElement)
+              }
+              onBlur={() => setTypingHex(false)}
               className="z-[10001] max-h-(--radix-popover-content-available-height) w-60 max-w-[calc(100vw-1.5rem)] overflow-y-auto p-2.5"
               onOpenAutoFocus={(event) => {
                 event.preventDefault();
