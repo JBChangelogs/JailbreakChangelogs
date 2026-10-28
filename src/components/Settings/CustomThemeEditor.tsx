@@ -673,7 +673,7 @@ export default function CustomThemeEditor({
                   >
                     <TabsList
                       aria-label="Selected element colors"
-                      className="w-full"
+                      className="w-full min-w-0"
                     >
                       {floatingColors?.map((key) => (
                         <TabsTrigger
