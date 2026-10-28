@@ -190,7 +190,6 @@ function ProfileReactionsDialog({
                         <Link
                           href={`/users/${u.id}`}
                           prefetch={false}
-                          onClick={() => onClose()}
                           className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-medium transition-colors"
                         >
                           {u.username}

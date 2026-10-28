@@ -196,9 +196,6 @@ export function ReactionsDialog({
                                 <Link
                                   href={`/users/${reactUser.id}`}
                                   prefetch={false}
-                                  onClick={() =>
-                                    setReactionBreakdownOpenId(null)
-                                  }
                                   className="text-primary-text hover:text-link text-sm font-medium transition-colors"
                                 >
                                   {displayName}

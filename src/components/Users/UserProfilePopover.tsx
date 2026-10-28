@@ -259,7 +259,10 @@ export function UserProfilePopover({
   const isPrivate =
     (settings?.profile_public === false || settings?.profile_public === 0) &&
     !isOwn;
-  const showPresence = !isPrivate && !settings?.hide_presence;
+  // Only the full profile says whether it's private, so presence and their
+  // own banner wait for it; the page's user may carry both.
+  const hidePersonal = isPrivate || !full.data;
+  const showPresence = !hidePersonal && !settings?.hide_presence;
   const username = profile.username ?? `User #${userId.slice(-6)}`;
   // Their profile's look, as on /users/{id}: the background behind the whole
   // card, and the card coloured with their accent.
@@ -279,7 +282,9 @@ export function UserProfilePopover({
       : "bg-primary-bg";
 
   return (
-    <Popover modal open={open} onOpenChange={setOpen}>
+    // The trigger opens it; Radix may only close it. Otherwise a modified
+    // click, which skips preventDefault, would toggle it open as well.
+    <Popover modal open={open} onOpenChange={(o) => !o && setOpen(false)}>
       <PopoverTrigger
         asChild
         onClick={(e) => {
@@ -322,9 +327,9 @@ export function UserProfilePopover({
         )}
         <div className={cn("relative", accent && "bg-secondary-bg")}>
           <PopoverBanner
-            key={`${profile.id}:${profile.custom_banner ?? profile.banner}:${isPrivate}`}
+            key={`${profile.id}:${profile.custom_banner ?? profile.banner}:${hidePersonal}`}
             user={profile}
-            isPrivate={isPrivate}
+            isPrivate={hidePersonal}
           />
           <div className="relative px-4">
             {/* Overlaps the banner with a ring cut out in the card's colour. */}

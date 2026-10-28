@@ -752,7 +752,6 @@ export default function ItemSuggestionsTab({
                                     href={`/users/${v.user.id}`}
                                     prefetch={false}
                                     className="text-link hover:text-link-hover transition-colors hover:underline"
-                                    onClick={() => setVotersOpen(false)}
                                   >
                                     {v.user.roblox_display_name ||
                                       v.user.roblox_username ||

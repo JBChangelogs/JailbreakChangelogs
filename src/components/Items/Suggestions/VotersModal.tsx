@@ -125,7 +125,6 @@ export function VotersModal({
                                   href={`/users/${v.user.id}`}
                                   prefetch={false}
                                   className="text-link hover:text-link-hover transition-colors hover:underline"
-                                  onClick={() => onOpenChange(false)}
                                 >
                                   {v.user.roblox_display_name ||
                                     v.user.roblox_username ||

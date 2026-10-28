@@ -137,8 +137,10 @@ export default function JoinedUsers({
       {users.length === 1 ? (
         <span className="min-w-0 truncate">
           <Tooltip delayDuration={500}>
-            <TooltipTrigger asChild>
-              <UserProfilePopover user={{ id: String(users[0].user_id) }}>
+            {/* Popover outside the tooltip trigger: its trigger merges into
+                TooltipTrigger, which forwards both to the link. */}
+            <UserProfilePopover user={{ id: String(users[0].user_id) }}>
+              <TooltipTrigger asChild>
                 <Link
                   href={`/users/${encodeURIComponent(String(users[0].user_id))}`}
                   prefetch={false}
@@ -148,8 +150,8 @@ export default function JoinedUsers({
                 >
                   {identityFor(users[0]).name}
                 </Link>
-              </UserProfilePopover>
-            </TooltipTrigger>
+              </TooltipTrigger>
+            </UserProfilePopover>
             <TooltipContent side="top">{tooltipFor(users[0])}</TooltipContent>
           </Tooltip>{" "}
           joined
