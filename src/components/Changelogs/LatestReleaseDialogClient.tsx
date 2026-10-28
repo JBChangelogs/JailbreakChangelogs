@@ -140,7 +140,7 @@ export default function LatestReleaseDialogClient({
               <DialogTrigger asChild>
                 <button
                   type="button"
-                  className="text-primary-text focus-visible:ring-border-focus group flex w-full cursor-pointer flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-sm pr-8 text-center text-xs focus-visible:ring-2 focus-visible:outline-none lg:pr-12"
+                  className="text-primary-text focus-visible:ring-border-focus group flex w-full cursor-pointer flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-sm px-8 text-center text-xs focus-visible:ring-2 focus-visible:outline-none lg:px-12"
                 >
                   <span className="font-medium">
                     What&apos;s new in v{announcement.version}
