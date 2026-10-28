@@ -1368,7 +1368,6 @@ export default function ChangelogDetailsClient({
                                     href={`/users/${voter.id}`}
                                     prefetch={false}
                                     className="text-link hover:text-link-hover transition-colors hover:underline"
-                                    onClick={() => setVotersOpen(false)}
                                   >
                                     {voter.name.replace(/(.+)\1/, "$1")}
                                   </Link>

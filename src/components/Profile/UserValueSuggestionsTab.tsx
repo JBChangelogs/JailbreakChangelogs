@@ -993,7 +993,6 @@ export default function UserValueSuggestionsTab({
                                     href={`/users/${v.user.id}`}
                                     prefetch={false}
                                     className="text-link hover:text-link-hover transition-colors hover:underline"
-                                    onClick={() => setVotersOpen(false)}
                                   >
                                     {(v.user.global_name !== "None" &&
                                       v.user.global_name) ||
