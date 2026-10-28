@@ -14,16 +14,23 @@ export function useOmniSearch(
   }: { limit: number; enabled: boolean; userId?: string },
 ) {
   const term = query.trim();
-  const [debounced, setDebounced] = useState(term);
+  // The term and whether it may be searched settle together: pairing the
+  // settled term with the current flag could send a disabled one, like a
+  // bare "@" (every user) the moment a name is typed after it.
+  const [debounced, setDebounced] = useState({ term, enabled });
   useEffect(() => {
-    const timeout = window.setTimeout(() => setDebounced(term), 150);
+    const timeout = window.setTimeout(
+      () => setDebounced({ term, enabled }),
+      150,
+    );
     return () => window.clearTimeout(timeout);
-  }, [term]);
+  }, [term, enabled]);
   const search = useQuery({
     // Settings and themes depend on who's signed in.
-    queryKey: ["omni-search", debounced, limit, userId ?? null],
-    queryFn: ({ signal }) => fetchOmniSearch(debounced, limit, signal),
-    enabled: enabled && !!debounced,
+    queryKey: ["omni-search", debounced.term, limit, userId ?? null],
+    queryFn: ({ signal }) => fetchOmniSearch(debounced.term, limit, signal),
+    // Both now and when it settled, so leaving a disabled term never sends it.
+    enabled: enabled && debounced.enabled && !!debounced.term,
     // The last results stay up while the next ones load.
     placeholderData: keepPreviousData,
     staleTime: 30_000,
@@ -33,6 +40,7 @@ export function useOmniSearch(
   return {
     ...search,
     // Still typing, or waiting on this exact text.
-    isPending: enabled && !!term && (debounced !== term || search.isFetching),
+    isPending:
+      enabled && !!term && (debounced.term !== term || search.isFetching),
   };
 }
