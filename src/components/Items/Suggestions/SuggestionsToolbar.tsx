@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getSortLabel, type SortGroup } from "@/utils/api/sortGroups";
 import { Icon } from "@/components/ui/IconWrapper";
+import { UpdatePill } from "@/components/ui/UpdatePill";
 import { SuggestionFilterBar } from "@/components/Items/Suggestions/SuggestionFilterBar";
 
 interface SuggestionsToolbarProps {
@@ -158,75 +159,62 @@ export function SuggestionsToolbar({
         sortControl={sortControl}
       />
 
-      {/* Suggestions update pill — fixed so it's visible anywhere on the page */}
       {(pendingNew > 0 || pendingTypes.size > 0) && !loadingSuggestions && (
-        <div
-          className="fixed left-1/2 z-[1500] -translate-x-1/2"
-          style={{ top: "calc(var(--header-height, 64px) + 12px)" }}
-        >
-          <button
-            type="button"
-            onClick={onRefresh}
-            className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
-          >
-            {(() => {
-              const hasNew = pendingNew > 0;
-              const hasOther = pendingTypes.size > 0;
+        <UpdatePill onClick={onRefresh}>
+          {(() => {
+            const hasNew = pendingNew > 0;
+            const hasOther = pendingTypes.size > 0;
 
-              if (hasNew && !hasOther) {
-                return (
-                  <>
-                    <Icon
-                      icon="material-symbols:arrow-upward-rounded"
-                      className="h-4 w-4"
-                      inline
-                    />
-                    {pendingNew === 1
-                      ? "1 new suggestion"
-                      : `${pendingNew} new suggestions`}{" "}
-                    — click to load
-                  </>
-                );
-              }
-
-              let label: string;
-              if (hasNew && hasOther) {
-                label = "New suggestions & updates — click to refresh";
-              } else if (
-                pendingTypes.has("vote") ||
-                pendingTypes.has("unvote")
-              ) {
-                label =
-                  pendingTypes.size === 1
-                    ? "Vote counts updated — click to refresh"
-                    : "Suggestions updated — click to refresh";
-              } else if (pendingTypes.has("status")) {
-                label =
-                  pendingTypes.size === 1
-                    ? "A suggestion status changed — click to refresh"
-                    : "Suggestions updated — click to refresh";
-              } else if (pendingTypes.has("edit")) {
-                label =
-                  pendingTypes.size === 1
-                    ? "A suggestion was edited — click to refresh"
-                    : "Suggestions updated — click to refresh";
-              } else {
-                label = "Suggestions updated — click to refresh";
-              }
-
+            if (hasNew && !hasOther) {
               return (
                 <>
                   <Icon
-                    icon="material-symbols:refresh-rounded"
+                    icon="material-symbols:arrow-upward-rounded"
                     className="h-4 w-4"
                     inline
                   />
-                  {label}
+                  {pendingNew === 1
+                    ? "1 new suggestion"
+                    : `${pendingNew} new suggestions`}{" "}
+                  — click to load
                 </>
               );
-            })()}
-          </button>
-        </div>
+            }
+
+            let label: string;
+            if (hasNew && hasOther) {
+              label = "New suggestions & updates — click to refresh";
+            } else if (pendingTypes.has("vote") || pendingTypes.has("unvote")) {
+              label =
+                pendingTypes.size === 1
+                  ? "Vote counts updated — click to refresh"
+                  : "Suggestions updated — click to refresh";
+            } else if (pendingTypes.has("status")) {
+              label =
+                pendingTypes.size === 1
+                  ? "A suggestion status changed — click to refresh"
+                  : "Suggestions updated — click to refresh";
+            } else if (pendingTypes.has("edit")) {
+              label =
+                pendingTypes.size === 1
+                  ? "A suggestion was edited — click to refresh"
+                  : "Suggestions updated — click to refresh";
+            } else {
+              label = "Suggestions updated — click to refresh";
+            }
+
+            return (
+              <>
+                <Icon
+                  icon="material-symbols:refresh-rounded"
+                  className="h-4 w-4"
+                  inline
+                />
+                {label}
+              </>
+            );
+          })()}
+        </UpdatePill>
       )}
     </>
   );

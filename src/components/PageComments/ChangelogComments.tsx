@@ -10,6 +10,7 @@ import { CommentItem } from "./CommentItem";
 import { Icon } from "../ui/IconWrapper";
 import { CommentSkeletonList } from "./CommentSkeleton";
 import { Button } from "@/components/ui/button";
+import { UpdatePill } from "@/components/ui/UpdatePill";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { BanBanner } from "@/components/ui/BanBanner";
 import ReportCommentModal from "./ReportCommentModal";
@@ -46,6 +47,8 @@ function CommentsLayout() {
     loadMore,
     focusedThread,
     showAllComments,
+    newCommentCount,
+    setNewCommentCount,
     reportModalOpen,
     setReportModalOpen,
     reportReason,
@@ -80,6 +83,16 @@ function CommentsLayout() {
     observer.observe(target);
     return () => observer.disconnect();
   }, [hasMore, isFetchingMore, loadMoreError, loadMore]);
+
+  useEffect(() => {
+    const header = document.querySelector("#comments-header");
+    if (!newCommentCount || !header) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setNewCommentCount(0);
+    });
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, [newCommentCount, setNewCommentCount]);
 
   const reportingComment = reportingCommentId
     ? (filteredComments.find((c) => c.id === reportingCommentId) ??
@@ -213,6 +226,25 @@ function CommentsLayout() {
           )}
         </div>
       </div>
+
+      {newCommentCount > 0 && (
+        <UpdatePill
+          onClick={() =>
+            document
+              .querySelector("#comments-header")
+              ?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          <Icon
+            icon="material-symbols:arrow-upward-rounded"
+            className="h-4 w-4"
+            inline
+          />
+          {newCommentCount === 1
+            ? "1 new comment"
+            : `${newCommentCount} new comments`}
+        </UpdatePill>
+      )}
 
       {/* Report Comment Modal */}
       <ReportCommentModal

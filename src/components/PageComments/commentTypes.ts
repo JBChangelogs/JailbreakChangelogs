@@ -63,3 +63,10 @@ export interface CommentApiErrorData {
   required_limit?: number;
   [key: string]: unknown;
 }
+
+/** One change from a `refresh_comments` broadcast; `parent_id` is the thread root for replies. */
+export interface CommentUpdate {
+  id: number;
+  type: "created" | "edited" | "deleted" | "reacted";
+  parent_id: number | null;
+}

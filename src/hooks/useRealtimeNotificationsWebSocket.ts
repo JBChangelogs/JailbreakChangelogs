@@ -1117,7 +1117,12 @@ export function useRealtimeNotificationsWebSocket(
             if (payload.action === "refresh_comments") {
               window.dispatchEvent(
                 new CustomEvent("realtimeComments", {
-                  detail: { action: "refresh_comments" },
+                  detail: {
+                    action: "refresh_comments",
+                    updates: Array.isArray(payload.data)
+                      ? payload.data
+                      : undefined,
+                  },
                 }),
               );
               return;

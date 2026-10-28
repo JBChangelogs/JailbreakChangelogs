@@ -12,6 +12,7 @@ test("comment links show only their thread, and the list merges loaded pages", a
   const paramUpdates: Record<string, string | number | null>[] = [];
   let timer: () => Promise<void>;
   let lookupStatus = 200;
+  const listeners = new Map<string, (event: unknown) => void>();
   let scrolls = 0;
   const initialComments: unknown[] = [];
   const cache = new Map<string, unknown>();
@@ -28,6 +29,7 @@ test("comment links show only their thread, and the list merges loaded pages", a
       );
     },
     invalidateQueries: async () => {},
+    getQueryData: (key: unknown) => cache.get(JSON.stringify(key)),
     fetchQuery: async (options: {
       queryFn: (context: { signal: AbortSignal }) => Promise<unknown>;
     }) => options.queryFn({ signal: new AbortController().signal }),
@@ -99,12 +101,19 @@ test("comment links show only their thread, and the list merges loaded pages", a
             location.hash = "";
           },
         },
-        addEventListener: () => {},
+        addEventListener: (name: string, listener: (event: unknown) => void) =>
+          listeners.set(name, listener),
         removeEventListener: () => {},
         dispatchEvent: () => {},
       },
       fetch: async (url: string) => {
         requests.push(url);
+        const thread = /\/v2\/comments\/(\d+)$/.exec(url)?.[1];
+        if (thread && thread !== "42")
+          return Response.json({
+            id: Number(thread),
+            replies: [{ id: Number(thread) * 10 }],
+          });
         return Response.json(
           { comment_id: 10, item_id: 5, item_type: "changelog", page: 3 },
           { status: lookupStatus },
@@ -175,7 +184,13 @@ test("comment links show only their thread, and the list merges loaded pages", a
         if (name === "@/services/logger")
           return { createLogger: () => ({ error: () => {} }) };
         if (name === "@/utils/api/api")
-          return { PUBLIC_API_URL: "https://public-api.example.com" };
+          return {
+            PUBLIC_API_URL: "https://public-api.example.com",
+            flattenComments: (data: { items: unknown[] }) => ({
+              comments: data.items,
+              userMap: {},
+            }),
+          };
         if (name === "@/utils/api/apiDevToken")
           return {
             buildApiFetchRequest: (base: string, path: string) => ({
@@ -280,6 +295,43 @@ test("comment links show only their thread, and the list merges loaded pages", a
     comments.filter((comment) => comment.id !== 8),
   );
   expect(render().comments.map((comment) => comment.id)).toEqual([99, 7, 9]);
+
+  // Realtime updates patch only the named threads, keeping each page's comments.
+  location.search = "?tab=comments";
+  cache.set(JSON.stringify(listKey), {
+    pages: [page([7, 8]), page([9, 11], 2)],
+    pageParams: [1, 2],
+  });
+  render();
+  effects
+    .find((entry) => String(entry.callback).includes("realtimeComments"))!
+    .callback();
+  listeners.get("realtimeComments")!({
+    detail: {
+      updates: [
+        { id: 80, type: "created", parent_id: 8 },
+        { id: 5, type: "created", parent_id: null },
+        { id: 9, type: "deleted", parent_id: null },
+        { id: 404, type: "edited", parent_id: null },
+      ],
+    },
+  });
+  for (let i = 0; i < 5; i++) await Bun.sleep(0);
+  const list = cache.get(JSON.stringify(listKey)) as {
+    pages: {
+      comments: { id: number; replies?: { id: number }[] }[];
+      totalComments: number;
+    }[];
+  };
+  expect(list.pages.map((p) => p.comments.map((c) => c.id))).toEqual([
+    [5, 7, 8],
+    [11],
+  ]);
+  expect(list.pages[0].comments[2].replies).toEqual([{ id: 80 }]);
+  expect(list.pages[0].totalComments).toBe(25);
+  expect(requests).not.toContain(
+    "https://public-api.example.com/v2/comments/404",
+  );
 
   // Sort changes push history without a page param.
   render().handleSortChange("oldest");

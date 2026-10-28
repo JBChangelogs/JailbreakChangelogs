@@ -42,6 +42,7 @@ import type {
   ThreadedComment,
   MoreItem,
   CommentApiErrorData,
+  CommentUpdate,
 } from "./commentTypes";
 
 const log = createLogger("UI");
@@ -297,47 +298,34 @@ export function useCommentState(props: ChangelogCommentsProps) {
     }),
     [initialUserMap, loadedUserMap, user],
   );
-  const setComments = useCallback(
-    (update: React.SetStateAction<CommentData[]>) => {
-      const apply = (previous: CommentData[]) =>
-        typeof update === "function" ? update(previous) : update;
+  const updateLoadedPages = useCallback(
+    (update: (pages: CommentsPage[]) => CommentsPage[]) => {
       if (focusedThread) {
         void queryClient.cancelQueries({ queryKey: threadKey, exact: true });
         queryClient.setQueryData<CommentsPage>(
           threadKey,
-          (previous) =>
-            previous && { ...previous, comments: apply(previous.comments) },
+          (previous) => previous && update([previous])[0],
         );
         return;
       }
       void queryClient.cancelQueries({ queryKey: listKey, exact: true });
       queryClient.setQueryData<InfiniteData<CommentsPage, number>>(
         listKey,
-        (previous) => {
-          if (!previous)
-            return {
-              pages: [
-                {
-                  comments: apply(initialComments),
-                  userMap: initialUserMap,
-                  totalPages: 1,
-                  totalComments: 0,
-                  page: 1,
-                },
-              ],
-              pageParams: [1],
-            };
-          // Updates can add, remove or reorder across pages, so the merged list
-          // lives on the first page; the follow-up refetch restores page splits.
-          const merged = apply(previous.pages.flatMap((p) => p.comments));
-          return {
-            ...previous,
-            pages: previous.pages.map((p, i) => ({
-              ...p,
-              comments: i === 0 ? merged : [],
-            })),
-          };
-        },
+        (previous) =>
+          previous
+            ? { ...previous, pages: update(previous.pages) }
+            : {
+                pages: update([
+                  {
+                    comments: initialComments,
+                    userMap: initialUserMap,
+                    totalPages: 1,
+                    totalComments: 0,
+                    page: 1,
+                  },
+                ]),
+                pageParams: [1],
+              },
       );
     },
     [
@@ -348,6 +336,150 @@ export function useCommentState(props: ChangelogCommentsProps) {
       initialComments,
       initialUserMap,
     ],
+  );
+  const setComments = useCallback(
+    (update: React.SetStateAction<CommentData[]>) =>
+      updateLoadedPages((pages) => {
+        const all = pages.flatMap((p) => p.comments);
+        const merged = typeof update === "function" ? update(all) : update;
+        // Keep each comment on the page it came from; new ones join the first page.
+        const pageOf = new Map<number, number>();
+        pages.forEach((p, i) => p.comments.forEach((c) => pageOf.set(c.id, i)));
+        return pages.map((p, i) => ({
+          ...p,
+          comments: merged.filter((c) => (pageOf.get(c.id) ?? 0) === i),
+        }));
+      }),
+    [updateLoadedPages],
+  );
+  const adjustTotal = useCallback(
+    (delta: number) =>
+      updateLoadedPages((pages) =>
+        pages.map((p, i) =>
+          i === 0 ? { ...p, totalComments: p.totalComments + delta } : p,
+        ),
+      ),
+    [updateLoadedPages],
+  );
+  const commentsRef = useRef(comments);
+  commentsRef.current = comments;
+  const threadIdOf = (commentId: number) =>
+    commentsRef.current.find(
+      (c) => c.id === commentId || c.replies?.some((r) => r.id === commentId),
+    )?.id;
+  const fetchThread = useCallback(
+    async (id: number) => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        `/v2/comments/${id}`,
+      );
+      const response = await fetch(url, { credentials: "include", headers });
+      if (response.status === 404) return null;
+      if (!response.ok) throw new Error("Failed to fetch comment");
+      const { comments, userMap } = flattenComments(
+        { items: [await response.json()] },
+        currentUserId,
+      );
+      return { comment: comments[0], userMap };
+    },
+    [currentUserId],
+  );
+  const syncThread = useCallback(
+    async (threadId: number) => {
+      if (!commentsRef.current.some((c) => c.id === threadId)) return;
+      const result = await fetchThread(threadId).catch(() => undefined);
+      if (result === undefined) return;
+      updateLoadedPages((pages) =>
+        pages.map((p, i) => ({
+          ...p,
+          comments: result
+            ? p.comments.map((c) => (c.id === threadId ? result.comment : c))
+            : p.comments.filter((c) => c.id !== threadId),
+          userMap:
+            i === 0 && result ? { ...p.userMap, ...result.userMap } : p.userMap,
+        })),
+      );
+    },
+    [fetchThread, updateLoadedPages],
+  );
+  const hasNextPage = commentsQuery.hasNextPage;
+  /** A removed top-level comment pulls the next unloaded one onto the last loaded page. */
+  const fillLastPage = useCallback(async () => {
+    const data =
+      queryClient.getQueryData<InfiniteData<CommentsPage, number>>(listKey);
+    const lastPage = data?.pageParams.at(-1);
+    if (focusedThread || !hasNextPage || lastPage === undefined) return;
+    const fresh = await fetchCommentsPage(
+      lastPage,
+      sortOrder,
+      new AbortController().signal,
+    ).catch(() => null);
+    if (!fresh) return;
+    updateLoadedPages((pages) => {
+      const loaded = new Set(pages.flatMap((p) => p.comments.map((c) => c.id)));
+      return pages.map((p, i) =>
+        i === pages.length - 1
+          ? {
+              ...p,
+              comments: [
+                ...p.comments,
+                ...fresh.comments.filter((c) => !loaded.has(c.id)),
+              ],
+              userMap: { ...p.userMap, ...fresh.userMap },
+              totalPages: fresh.totalPages,
+            }
+          : p,
+      );
+    });
+  }, [
+    queryClient,
+    listKey,
+    focusedThread,
+    hasNextPage,
+    fetchCommentsPage,
+    sortOrder,
+    updateLoadedPages,
+  ]);
+  const removeTopLevel = useCallback(
+    (id: number) => {
+      if (!commentsRef.current.some((c) => c.id === id)) return;
+      setComments((prev) => prev.filter((c) => c.id !== id));
+      adjustTotal(-1);
+      void fillLastPage();
+    },
+    [setComments, adjustTotal, fillLastPage],
+  );
+  const [newCommentCount, setNewCommentCount] = useState(0);
+  const addNewComment = useCallback(
+    async (id: number) => {
+      if (focusedThread || commentsRef.current.some((c) => c.id === id)) return;
+      if (
+        sortOrder !== null &&
+        sortOrder !== "newest" &&
+        sortOrder !== "activity"
+      ) {
+        adjustTotal(1);
+        return;
+      }
+      const result = await fetchThread(id).catch(() => null);
+      if (!result || commentsRef.current.some((c) => c.id === id)) return;
+      updateLoadedPages((pages) =>
+        pages.map((p, i) =>
+          i === 0
+            ? {
+                ...p,
+                comments: [result.comment, ...p.comments],
+                userMap: { ...p.userMap, ...result.userMap },
+                totalComments: p.totalComments + 1,
+              }
+            : p,
+        ),
+      );
+      const header = document.querySelector("#comments-header");
+      if (header && header.getBoundingClientRect().bottom < 0)
+        setNewCommentCount((count) => count + 1);
+    },
+    [focusedThread, sortOrder, adjustTotal, fetchThread, updateLoadedPages],
   );
 
   // Controls whether the new comment form is expanded
@@ -950,10 +1082,24 @@ export function useCommentState(props: ChangelogCommentsProps) {
     return () => cancelAnimationFrame(frame);
   }, [comments, commentsReady]);
 
-  // Silent refresh when the server broadcasts a comment change (only before
-  // loading more, skipped if the user is actively typing in any field)
+  // Server broadcasts name the changed comments, so only those threads update.
+  // Older broadcasts without updates refresh the list before loading more,
+  // skipped if the user is actively typing in any field.
   useEffect(() => {
-    const handler = () => {
+    const handler = (event: Event) => {
+      const updates = (event as CustomEvent<{ updates?: CommentUpdate[] }>)
+        .detail?.updates;
+      if (updates) {
+        const threads = new Set<number>();
+        for (const change of updates) {
+          if (change.parent_id) threads.add(change.parent_id);
+          else if (change.type === "created") void addNewComment(change.id);
+          else if (change.type === "deleted") removeTopLevel(change.id);
+          else threads.add(change.id);
+        }
+        threads.forEach((id) => void syncThread(id));
+        return;
+      }
       const isTyping =
         isCommentFormExpanded ||
         replyingToId !== null ||
@@ -965,6 +1111,9 @@ export function useCommentState(props: ChangelogCommentsProps) {
     window.addEventListener("realtimeComments", handler);
     return () => window.removeEventListener("realtimeComments", handler);
   }, [
+    addNewComment,
+    removeTopLevel,
+    syncThread,
     focusedThread,
     loadedPages.length,
     isCommentFormExpanded,
@@ -1083,9 +1232,12 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
       // Visually add the optimistic comment
       setComments((prev) => [optimisticComment, ...prev]);
+      adjustTotal(1);
       clearCommentHash();
-      setFocusedThread(null);
-      void refreshCommentsFromServer(true);
+      if (focusedThread) {
+        setFocusedThread(null);
+        void refreshCommentsFromServer(true);
+      }
 
       // Track comment post
       window.rybbit?.event("Comment Posted", { type });
@@ -1221,7 +1373,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       );
 
       // Keep local state synced with canonical backend shape for replies/comments.
-      void refreshCommentsFromServer(true);
+      void syncThread(threadIdOf(commentId) ?? commentId);
 
       // Track comment edit
       window.rybbit?.event("Comment Edited", { type });
@@ -1247,6 +1399,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     }));
 
     const isTopLevel = comments.some((c) => c.id === commentId);
+    const threadId = threadIdOf(commentId);
     setComments((prev) =>
       isTopLevel
         ? prev.filter((c) => c.id !== commentId)
@@ -1269,8 +1422,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
         log.error("delete comment failed", { status: response.status, body });
         throw new Error("Failed to delete comment");
       }
+      if (isTopLevel) {
+        adjustTotal(-1);
+        void fillLastPage();
+      } else if (threadId) {
+        void syncThread(threadId);
+      }
       // Comment successfully deleted, track with analytics
-      void refreshCommentsFromServer(true);
       window.rybbit?.event("Comment Deleted", { type });
     } catch (err) {
       // If deletion failed, restore the previous state
@@ -1466,7 +1624,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       );
       setExpandedReplies((prev) => new Set([...prev, parentId]));
 
-      void refreshCommentsFromServer(true);
+      void syncThread(parentId);
       return true;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to post reply");
@@ -1658,6 +1816,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
     loadMore,
     focusedThread,
     showAllComments,
+    newCommentCount,
+    setNewCommentCount,
     isCommentFormExpanded,
     setIsCommentFormExpanded,
     availableEmojis,
