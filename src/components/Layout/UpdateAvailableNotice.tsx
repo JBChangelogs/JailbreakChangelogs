@@ -35,7 +35,7 @@ export function useUpdateAvailable() {
 
 export default function UpdateAvailableNotice() {
   return (
-    <div className="from-status-info/15 to-secondary-bg bg-linear-to-r">
+    <div className="from-status-info/15 to-secondary-bg bg-secondary-bg bg-linear-to-r">
       <div className="relative px-4 py-2">
         <div className="flex items-center justify-center gap-2">
           <span className="text-primary-text text-center text-xs">

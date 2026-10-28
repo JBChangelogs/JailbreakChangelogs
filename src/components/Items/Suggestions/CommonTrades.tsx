@@ -82,7 +82,7 @@ export function SuggestionItemSearchResult({
       onClick={onSelect}
       className="hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
     >
-      <span className="flex min-w-0 flex-1 items-center gap-1">
+      <span className="flex min-w-0 items-center gap-1">
         <span className="text-primary-text min-w-0 truncate">{item.name}</span>
         {selected && (
           <Icon icon="heroicons:check" className="text-link h-4 w-4 shrink-0" />

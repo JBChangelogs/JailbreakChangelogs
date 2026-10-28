@@ -10,11 +10,14 @@ import { Switch } from "@/components/ui/switch";
 import { SETTING_HIGHLIGHT } from "@/components/Settings/SettingsCard";
 import {
   getDesktopNavigation,
+  getDesktopSidebarBehavior,
   getLayoutShortcutHidden,
   setDesktopNavigation,
+  setDesktopSidebarBehavior,
   setLayoutShortcutHidden,
   subscribeDesktopNavigation,
   type DesktopNavigation,
+  type DesktopSidebarBehavior,
 } from "@/utils/ui/desktopNavigation";
 
 const LAYOUTS: {
@@ -36,6 +39,28 @@ const LAYOUTS: {
 
 const MOTION =
   "transition-all duration-700 ease-in-out motion-reduce:transition-none";
+
+const SIDEBAR_BEHAVIORS: {
+  value: DesktopSidebarBehavior;
+  title: string;
+  description: string;
+}[] = [
+  {
+    value: "expanded",
+    title: "Always expanded",
+    description: "Keep icons and labels visible.",
+  },
+  {
+    value: "hover",
+    title: "Expand on hover",
+    description: "Expand on hover or keyboard focus.",
+  },
+  {
+    value: "compact",
+    title: "Compact",
+    description: "Expand using the sidebar button.",
+  },
+];
 
 /** Animates between layouts by moving the same shapes. */
 function LayoutPreview({
@@ -158,6 +183,11 @@ export default function DesktopNavigationSettings() {
     getLayoutShortcutHidden,
     () => false,
   );
+  const sidebarBehavior = useSyncExternalStore(
+    subscribeDesktopNavigation,
+    getDesktopSidebarBehavior,
+    () => "expanded" as const,
+  );
   const canSwitchNavigation = useMediaQuery("(min-width: 1536px)");
 
   return (
@@ -223,6 +253,46 @@ export default function DesktopNavigationSettings() {
           squareAvatar={user?.premiumtype === 3}
         />
       </div>
+
+      {mode === "sidebar" && (
+        <fieldset disabled={!canSwitchNavigation}>
+          <legend className="text-primary-text font-medium">
+            {FRONTEND_SETTINGS["sidebar-behavior"].title}
+          </legend>
+          <p className="text-secondary-text mt-1 text-sm">
+            {FRONTEND_SETTINGS["sidebar-behavior"].description}
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            {SIDEBAR_BEHAVIORS.map((option) => (
+              <label
+                key={option.value}
+                className="group border-border-card bg-tertiary-bg has-checked:border-button-info has-checked:bg-button-info/5 has-focus-visible:ring-link hover:border-border-focus/60 has-disabled:hover:border-border-card flex cursor-pointer items-start gap-3 rounded-xl border p-4 has-focus-visible:ring-2 has-disabled:cursor-not-allowed has-disabled:opacity-70"
+              >
+                <input
+                  type="radio"
+                  name={`${id}-sidebar-behavior`}
+                  value={option.value}
+                  checked={sidebarBehavior === option.value}
+                  onChange={() => setDesktopSidebarBehavior(option.value)}
+                  className="sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className="border-secondary-text group-has-checked:border-button-info group-has-checked:bg-button-info mt-1 size-4 shrink-0 rounded-full border-2 group-has-checked:shadow-[inset_0_0_0_2px_var(--color-tertiary-bg)]"
+                />
+                <span>
+                  <span className="text-primary-text block font-medium">
+                    {option.title}
+                  </span>
+                  <span className="text-secondary-text block text-sm">
+                    {option.description}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
 
       <div
         className={`${SETTING_HIGHLIGHT} flex items-center justify-between gap-4`}

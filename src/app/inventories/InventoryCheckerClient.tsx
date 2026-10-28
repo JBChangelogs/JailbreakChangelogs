@@ -689,17 +689,17 @@ export default function InventoryCheckerClient({
           <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
               <div className="flex items-center gap-4">
-                <div className="bg-button-secondary h-16 w-16 shrink-0 rounded-full" />
+                <div className="bg-quaternary-bg/70 h-16 w-16 shrink-0 rounded-full" />
                 <div className="space-y-2">
-                  <div className="bg-button-secondary h-6 w-36 rounded" />
-                  <div className="bg-button-secondary h-4 w-24 rounded" />
+                  <div className="bg-quaternary-bg/70 h-6 w-36 rounded" />
+                  <div className="bg-quaternary-bg/70 h-4 w-24 rounded" />
                   <div className="flex gap-2 pt-1">
-                    <div className="bg-button-secondary h-7 w-20 rounded-md" />
-                    <div className="bg-button-secondary h-7 w-20 rounded-md" />
+                    <div className="bg-quaternary-bg/70 h-7 w-20 rounded-md" />
+                    <div className="bg-quaternary-bg/70 h-7 w-20 rounded-md" />
                   </div>
                 </div>
               </div>
-              <div className="bg-button-secondary h-9 w-36 rounded-lg xl:shrink-0" />
+              <div className="bg-quaternary-bg/70 h-9 w-36 rounded-lg xl:shrink-0" />
             </div>
           </div>
 
@@ -710,8 +710,8 @@ export default function InventoryCheckerClient({
                 key={i}
                 className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center"
               >
-                <div className="bg-button-secondary mx-auto mb-2 h-4 w-20 rounded" />
-                <div className="bg-button-secondary mx-auto h-7 w-12 rounded" />
+                <div className="bg-quaternary-bg/70 mx-auto mb-2 h-4 w-20 rounded" />
+                <div className="bg-quaternary-bg/70 mx-auto h-7 w-12 rounded" />
               </div>
             ))}
           </div>
@@ -723,8 +723,8 @@ export default function InventoryCheckerClient({
                 key={i}
                 className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center"
               >
-                <div className="bg-button-secondary mx-auto mb-3 h-4 w-28 rounded" />
-                <div className="bg-button-secondary mx-auto h-8 w-24 rounded" />
+                <div className="bg-quaternary-bg/70 mx-auto mb-3 h-4 w-28 rounded" />
+                <div className="bg-quaternary-bg/70 mx-auto h-8 w-24 rounded" />
               </div>
             ))}
           </div>
@@ -734,7 +734,7 @@ export default function InventoryCheckerClient({
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="bg-button-secondary h-9 flex-1 rounded-md"
+                className="bg-quaternary-bg/70 h-9 flex-1 rounded-md"
               />
             ))}
           </div>
@@ -746,9 +746,9 @@ export default function InventoryCheckerClient({
                 key={i}
                 className="border-border-card bg-secondary-bg rounded-lg border p-3"
               >
-                <div className="bg-button-secondary mb-3 aspect-square w-full rounded-md" />
-                <div className="bg-button-secondary mb-2 h-4 w-3/4 rounded" />
-                <div className="bg-button-secondary h-3 w-1/2 rounded" />
+                <div className="bg-quaternary-bg/70 mb-3 aspect-square w-full rounded-md" />
+                <div className="bg-quaternary-bg/70 mb-2 h-4 w-3/4 rounded" />
+                <div className="bg-quaternary-bg/70 h-3 w-1/2 rounded" />
               </div>
             ))}
           </div>

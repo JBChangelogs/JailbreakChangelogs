@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogClose,
@@ -170,6 +171,8 @@ export function SuggestionForm({
       ));
 
   useEffect(() => {
+    setSuggestedValue("");
+    setSuggestedValueError(null);
     setCommonTrades([createEmptyCommonTrade(), createEmptyCommonTrade()]);
     setCommonTradesError(null);
   }, [selectedItem?.id]);
@@ -328,8 +331,8 @@ export function SuggestionForm({
           >
             Item
           </label>
-          <div className="bg-button-info/10 border-border-card mb-2 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-            <span className="text-primary-text">
+          <div className="bg-button-info/10 border-button-info mb-2 rounded-lg border p-4 text-sm shadow-sm">
+            <span className="text-secondary-text">
               Only tradable items are shown in search results.
             </span>
           </div>
@@ -461,36 +464,6 @@ export function SuggestionForm({
               </div>
             </div>
           )}
-          {selectedItem && (
-            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-secondary-text">Selected:</span>
-              {(() => {
-                const icon = getCategoryIcon(selectedItem.type);
-                return (
-                  <span
-                    className={`${badgeBase} text-primary-text`}
-                    style={{
-                      borderColor: getCategoryColor(selectedItem.type),
-                      backgroundColor: `${getCategoryColor(selectedItem.type)}22`,
-                    }}
-                  >
-                    {icon && (
-                      <icon.Icon
-                        className="mr-1 h-3 w-3"
-                        style={{
-                          color: getCategoryColor(selectedItem.type),
-                        }}
-                      />
-                    )}
-                    {selectedItem.type}
-                  </span>
-                );
-              })()}
-              <span className="text-secondary-text">
-                Edit the field above to pick a different item.
-              </span>
-            </div>
-          )}
         </div>
 
         {selectedItem && (
@@ -544,7 +517,7 @@ export function SuggestionForm({
             {/* Current value display */}
             {selectedItem && (
               <div className="border-border-card bg-tertiary-bg/50 flex items-center gap-3 overflow-hidden rounded-lg border">
-                <div className="bg-tertiary-bg relative h-16 w-24 shrink-0 overflow-hidden">
+                <div className="bg-tertiary-bg relative aspect-video w-24 shrink-0 overflow-hidden">
                   {isVideoItem(selectedItem.name) ? (
                     <video
                       src={getVideoPath(selectedItem.type, selectedItem.name)}
@@ -568,7 +541,21 @@ export function SuggestionForm({
                   )}
                 </div>
                 <div className="min-w-0 flex-1 py-3 pr-3">
-                  <p className="text-secondary-text mb-1.5 text-sm font-semibold tracking-wide uppercase">
+                  <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                    <p className="text-primary-text text-sm font-semibold wrap-break-word">
+                      {selectedItem.name}
+                    </p>
+                    <span
+                      className={`${badgeBase} text-primary-text`}
+                      style={{
+                        borderColor: getCategoryColor(selectedItem.type),
+                        backgroundColor: `${getCategoryColor(selectedItem.type)}22`,
+                      }}
+                    >
+                      {selectedItem.type}
+                    </span>
+                  </div>
+                  <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
                     Current {fieldLabel(field)}
                   </p>
                   {field === "trend" ? (
@@ -622,35 +609,49 @@ export function SuggestionForm({
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                      <span className="text-primary-text">
+                    <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
+                      <span className="text-secondary-text">
                         Select one of the options below as your suggested trend.
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {(limits?.valid_trends ?? []).map((t) => {
-                        const color = getTrendCssColor(t);
-                        return (
-                          <button
-                            key={t}
-                            type="button"
-                            onClick={() => setSuggestedValue(t)}
-                            className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
-                              suggestedValue === t
-                                ? "ring-2"
-                                : "opacity-60 hover:opacity-90"
-                            }`}
-                            style={
-                              {
-                                borderColor: color,
-                                "--tw-ring-color": color,
-                              } as React.CSSProperties
-                            }
-                          >
-                            {t}
-                          </button>
-                        );
-                      })}
+                      {(limits?.valid_trends ?? [])
+                        .filter(
+                          (t) =>
+                            t.trim().toLowerCase() !==
+                            selectedItem?.trend?.trim().toLowerCase(),
+                        )
+                        .map((t) => {
+                          const color = getTrendCssColor(t);
+                          return (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => setSuggestedValue(t)}
+                              aria-pressed={suggestedValue === t}
+                              className={`bg-tertiary-bg text-primary-text focus-visible:outline-border-focus inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                                suggestedValue === t
+                                  ? "ring-2"
+                                  : "opacity-60 hover:opacity-90"
+                              }`}
+                              style={
+                                {
+                                  borderColor: color,
+                                  "--tw-ring-color": color,
+                                } as React.CSSProperties
+                              }
+                            >
+                              {suggestedValue === t && (
+                                <Icon
+                                  icon="heroicons:check"
+                                  className="h-4 w-4 shrink-0"
+                                  aria-hidden="true"
+                                />
+                              )}
+                              <span>{t}</span>
+                            </button>
+                          );
+                        })}
                     </div>
                   </div>
                 )
@@ -661,43 +662,59 @@ export function SuggestionForm({
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                      <span className="text-primary-text">
+                    <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
+                      <span className="text-secondary-text">
                         Select one of the options below as your suggested{" "}
                         {fieldLabel(field).toLowerCase()}.
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {(limits?.valid_demands ?? []).map((d) => {
-                        const color = getDemandCssColor(d);
-                        return (
-                          <button
-                            key={d}
-                            type="button"
-                            onClick={() => setSuggestedValue(d)}
-                            className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
-                              suggestedValue === d
-                                ? "ring-2"
-                                : "opacity-60 hover:opacity-90"
-                            }`}
-                            style={
-                              {
-                                borderColor: color,
-                                "--tw-ring-color": color,
-                              } as React.CSSProperties
-                            }
-                          >
-                            {d}
-                          </button>
-                        );
-                      })}
+                      {(limits?.valid_demands ?? [])
+                        .filter(
+                          (d) =>
+                            d.trim().toLowerCase() !==
+                            selectedItem?.[field as "demand" | "duped_demand"]
+                              ?.trim()
+                              .toLowerCase(),
+                        )
+                        .map((d) => {
+                          const color = getDemandCssColor(d);
+                          return (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={() => setSuggestedValue(d)}
+                              aria-pressed={suggestedValue === d}
+                              className={`bg-tertiary-bg text-primary-text focus-visible:outline-border-focus inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                                suggestedValue === d
+                                  ? "ring-2"
+                                  : "opacity-60 hover:opacity-90"
+                              }`}
+                              style={
+                                {
+                                  borderColor: color,
+                                  "--tw-ring-color": color,
+                                } as React.CSSProperties
+                              }
+                            >
+                              {suggestedValue === d && (
+                                <Icon
+                                  icon="heroicons:check"
+                                  className="h-4 w-4 shrink-0"
+                                  aria-hidden="true"
+                                />
+                              )}
+                              <span>{d}</span>
+                            </button>
+                          );
+                        })}
                     </div>
                   </div>
                 )
               ) : field === "notes" ? (
                 <div className="space-y-2">
-                  <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                    <span className="text-primary-text">
+                  <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
+                    <span className="text-secondary-text">
                       Enter the note text you want to suggest for this item.
                     </span>
                   </div>
@@ -722,8 +739,8 @@ export function SuggestionForm({
               ) : (
                 <div className="space-y-2">
                   {["cash_value", "duped_value"].includes(field) && (
-                    <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                      <span className="text-primary-text">
+                    <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
+                      <span className="text-secondary-text">
                         Enter a numeric value. Supported formats: 50m, 500k,
                         10,000,000.
                       </span>
@@ -822,33 +839,33 @@ export function SuggestionForm({
 
             {isVtEligible && (
               <div>
-                <p className="text-primary-text mb-1.5 block text-sm font-medium">
+                <p
+                  id="suggestion-visibility-label"
+                  className="text-primary-text mb-1.5 block text-sm font-medium"
+                >
                   Visibility
                 </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsVt(false)}
-                    className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                      !isVt
-                        ? "bg-button-info border-button-info text-form-button-text"
-                        : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
-                    }`}
+                <Tabs
+                  radio
+                  value={isVt ? "vt" : "public"}
+                  onValueChange={(value) => setIsVt(value === "vt")}
+                >
+                  <TabsList
+                    data-variant="filled"
+                    aria-labelledby="suggestion-visibility-label"
+                    className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
                   >
-                    Public
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsVt(true)}
-                    className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                      isVt
-                        ? "bg-button-info border-button-info text-form-button-text"
-                        : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
-                    }`}
-                  >
-                    VT Only
-                  </button>
-                </div>
+                    <TabsTrigger
+                      value="public"
+                      className="rounded-md px-3 py-1.5"
+                    >
+                      Everyone
+                    </TabsTrigger>
+                    <TabsTrigger value="vt" className="rounded-md px-3 py-1.5">
+                      Value team only
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
             )}
 
@@ -973,7 +990,7 @@ export function SuggestionForm({
               {/* Item + type + field + visibility meta */}
               <div className="flex items-center gap-3">
                 {selectedItem && (
-                  <div className="bg-tertiary-bg border-border-card relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border">
+                  <div className="bg-tertiary-bg border-border-card relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg border">
                     {isVideoItem(selectedItem.name) ? (
                       <video
                         src={getVideoPath(selectedItem.type, selectedItem.name)}
@@ -1038,7 +1055,7 @@ export function SuggestionForm({
                           height={14}
                           className="shrink-0"
                         />
-                        VT Only
+                        Value team only
                       </span>
                     )}
                   </div>

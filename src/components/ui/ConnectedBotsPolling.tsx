@@ -19,6 +19,7 @@ import RetryErrorDisplay from "./RetryErrorDisplay";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Tabs, TabsList, TabsTrigger } from "./tabs";
 import { Button } from "./button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 import { toast } from "sonner";
 import { buildRobloxServerDeepLink } from "@/components/RobberyTracker/deepLink";
 
@@ -133,22 +134,22 @@ export default function ConnectedBotsPolling() {
           </div>
         </div>
         <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-          <div className="mb-4 space-y-2">
-            <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
-            <div className="bg-button-secondary h-4 w-40 animate-pulse rounded"></div>
-            <div className="bg-button-secondary h-4 w-48 animate-pulse rounded"></div>
+          <div className="mb-4 grid gap-2 sm:grid-cols-3">
+            <div className="bg-quaternary-bg/70 h-4 w-32 animate-pulse rounded"></div>
+            <div className="bg-quaternary-bg/70 h-4 w-40 animate-pulse rounded"></div>
+            <div className="bg-quaternary-bg/70 h-4 w-48 animate-pulse rounded"></div>
           </div>
-          <div className="space-y-2">
+          <div className="grid gap-2 xl:grid-cols-2">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
                 className="border-border-card bg-tertiary-bg rounded-lg border p-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
+                  <div className="bg-quaternary-bg/70 h-8 w-8 animate-pulse rounded-full"></div>
                   <div className="space-y-1">
-                    <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
-                    <div className="bg-button-secondary h-3 w-20 animate-pulse rounded"></div>
+                    <div className="bg-quaternary-bg/70 h-4 w-32 animate-pulse rounded"></div>
+                    <div className="bg-quaternary-bg/70 h-3 w-20 animate-pulse rounded"></div>
                   </div>
                 </div>
               </div>
@@ -225,7 +226,7 @@ export default function ConnectedBotsPolling() {
       <div className="text-primary-text mb-2 flex flex-wrap items-center gap-2 text-sm">
         <span>
           <span className="font-semibold">{botsCount.toLocaleString()}</span>{" "}
-          bots
+          {botsCount === 1 ? "bot" : "bots"}
         </span>
         <span className="text-tertiary-text" aria-hidden="true">
           |
@@ -234,7 +235,7 @@ export default function ConnectedBotsPolling() {
           <span className="font-semibold">
             {mainGameBotsCount.toLocaleString()}
           </span>{" "}
-          main game bots
+          main game {mainGameBotsCount === 1 ? "bot" : "bots"}
         </span>
         <span className="text-tertiary-text" aria-hidden="true">
           |
@@ -243,28 +244,28 @@ export default function ConnectedBotsPolling() {
           <span className="font-semibold">
             {tradeWorldBotsCount.toLocaleString()}
           </span>{" "}
-          trade world bots
+          trade world {tradeWorldBotsCount === 1 ? "bot" : "bots"}
         </span>
       </div>
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         {isLoading && !botsData ? (
           <div className="space-y-2">
-            <div className="mb-4 space-y-2">
-              <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
-              <div className="bg-button-secondary h-4 w-40 animate-pulse rounded"></div>
-              <div className="bg-button-secondary h-4 w-48 animate-pulse rounded"></div>
+            <div className="mb-4 grid gap-2 sm:grid-cols-3">
+              <div className="bg-quaternary-bg/70 h-4 w-32 animate-pulse rounded"></div>
+              <div className="bg-quaternary-bg/70 h-4 w-40 animate-pulse rounded"></div>
+              <div className="bg-quaternary-bg/70 h-4 w-48 animate-pulse rounded"></div>
             </div>
-            <div className="space-y-2">
+            <div className="grid gap-2 xl:grid-cols-2">
               {[1, 2].map((i) => (
                 <div
                   key={i}
                   className="border-border-card bg-tertiary-bg rounded-lg border p-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
+                    <div className="bg-quaternary-bg/70 h-8 w-8 animate-pulse rounded-full"></div>
                     <div className="space-y-1">
-                      <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
-                      <div className="bg-button-secondary h-3 w-20 animate-pulse rounded"></div>
+                      <div className="bg-quaternary-bg/70 h-4 w-32 animate-pulse rounded"></div>
+                      <div className="bg-quaternary-bg/70 h-3 w-20 animate-pulse rounded"></div>
                     </div>
                   </div>
                 </div>
@@ -275,27 +276,41 @@ export default function ConnectedBotsPolling() {
           <>
             {queueInfo && (
               <div className="mb-4 space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="text-secondary-text">Queue Length:</span>
-                  <span className="text-primary-text font-bold">
-                    <CountUpNumber value={queueInfo.queue_length} />
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="text-secondary-text">Queue Length:</span>
+                    <span className="text-primary-text font-bold">
+                      <CountUpNumber value={queueInfo.queue_length} />
+                    </span>
+                  </div>
+                  <span
+                    className="text-tertiary-text hidden sm:inline"
+                    aria-hidden="true"
+                  >
+                    |
                   </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-secondary-text">Worker Count:</span>
-                  <span className="text-primary-text font-bold">
-                    <CountUpNumber value={queueInfo.worker_count} />
+                  <div className="flex items-center gap-2">
+                    <span className="text-secondary-text">Worker Count:</span>
+                    <span className="text-primary-text font-bold">
+                      <CountUpNumber value={queueInfo.worker_count} />
+                    </span>
+                  </div>
+                  <span
+                    className="text-tertiary-text hidden sm:inline"
+                    aria-hidden="true"
+                  >
+                    |
                   </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-secondary-text">Current Delay:</span>
-                  <span className="text-primary-text font-bold">
-                    <CountUpNumber
-                      value={queueInfo.current_delay}
-                      decimals={2}
-                    />
-                    s
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-secondary-text">Current Delay:</span>
+                    <span className="text-primary-text font-bold">
+                      <CountUpNumber
+                        value={queueInfo.current_delay}
+                        decimals={2}
+                      />
+                      s
+                    </span>
+                  </div>
                 </div>
                 {queueInfo.processed_counter && queueInfo.running_since && (
                   <div className="text-secondary-text text-sm">
@@ -311,7 +326,9 @@ export default function ConnectedBotsPolling() {
                 {queueInfo.last_dequeue ? (
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-secondary-text">Last Updated:</span>
+                      <span className="text-secondary-text">
+                        Last scanned user:
+                      </span>
                       <div className="border-border-card bg-tertiary-bg flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border">
                         <LastUpdatedAvatar
                           userId={queueInfo.last_dequeue!.user_id}
@@ -348,7 +365,9 @@ export default function ConnectedBotsPolling() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="text-secondary-text">Last Updated:</span>
+                    <span className="text-secondary-text">
+                      Last scanned user:
+                    </span>
                     <span className="text-primary-text">
                       No recent activity
                     </span>
@@ -366,7 +385,11 @@ export default function ConnectedBotsPolling() {
                       setBotFilter(value as "all" | "main" | "trade")
                     }
                   >
-                    <TabsList className="h-9 w-full" fullWidth>
+                    <TabsList
+                      className="h-9 w-full"
+                      fullWidth
+                      aria-label="Filter bots by game"
+                    >
                       <TabsTrigger
                         value="all"
                         className="h-8 px-3 text-xs"
@@ -392,7 +415,7 @@ export default function ConnectedBotsPolling() {
                   </Tabs>
                 </div>
 
-                <div className="max-h-60 space-y-2 overflow-y-auto">
+                <div className="grid max-h-60 gap-2 overflow-y-auto xl:grid-cols-2">
                   {filteredBots.length > 0 ? (
                     filteredBots.map((bot) => (
                       <BotStatusCard
@@ -402,7 +425,7 @@ export default function ConnectedBotsPolling() {
                       />
                     ))
                   ) : (
-                    <div className="text-secondary-text border-border-card bg-tertiary-bg rounded-lg border p-3 text-center text-sm">
+                    <div className="text-secondary-text border-border-card bg-tertiary-bg rounded-lg border p-3 text-center text-sm xl:col-span-2">
                       No bots active in this mode.
                     </div>
                   )}
@@ -503,7 +526,7 @@ function BotStatusCard({
               href={`https://www.roblox.com/users/${bot.id}/profile`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary-text hover:text-link-hover font-bold text-nowrap transition-colors"
+              className="text-primary-text hover:text-link-hover font-bold wrap-break-word transition-colors"
             >
               {displayName}
             </a>
@@ -551,15 +574,26 @@ function BotStatusCard({
                     />
                   </Button>
                 ) : (
-                  <span className="font-mono text-xs">{bot.current_job}</span>
+                  <span className="font-mono text-xs break-all">
+                    {bot.current_job}
+                  </span>
                 )}
               </div>
             )}
 
-            <div className="text-secondary-text text-xs">
-              <span className="font-semibold">Last User Updated:</span>{" "}
-              {fullDate} ({relativeTime})
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  tabIndex={0}
+                  className="text-secondary-text focus-visible:outline-border-focus w-fit rounded text-xs focus-visible:outline-2"
+                  aria-label={`Last user updated: ${fullDate} (${relativeTime})`}
+                >
+                  <span className="font-semibold">Last user updated:</span>{" "}
+                  {relativeTime}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>{fullDate}</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>

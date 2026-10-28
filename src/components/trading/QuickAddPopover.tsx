@@ -25,6 +25,7 @@ import {
   filterOptions,
 } from "@/components/Values/valuesFilterOptions";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { sortByValueSort } from "@/utils/trading/values";
 import {
@@ -280,6 +281,18 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
                 const item = results[index];
                 const itemKey = `${item.id}-${item.name}`;
                 const condition = getCondition(item);
+                const conditionColor =
+                  condition === "clean"
+                    ? "var(--color-status-success)"
+                    : condition === "duped"
+                      ? "var(--color-status-error)"
+                      : "#FFD700";
+                const conditionTextColor =
+                  condition === "clean"
+                    ? "var(--color-button-success-text)"
+                    : condition === "duped"
+                      ? "var(--color-button-danger-text)"
+                      : "#000";
                 return (
                   <div
                     key={itemKey}
@@ -310,36 +323,50 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
                         {item.name}
                       </span>
                     </button>
-                    {conditionOptions.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => {
-                          setConditionsByItem((current) => ({
-                            ...current,
-                            [itemKey]: option,
-                          }));
-                          searchInputRef.current?.focus();
-                        }}
-                        aria-label={
-                          option === "og"
-                            ? `Mark ${item.name} as OG`
-                            : `Use ${option} value for ${item.name}`
-                        }
-                        aria-pressed={condition === option}
-                        className={`shrink-0 cursor-pointer rounded-md border px-1.5 py-1 text-[10px] font-medium capitalize transition-colors ${
-                          condition === option
-                            ? option === "clean"
-                              ? "border-status-success bg-status-success text-button-success-text"
-                              : option === "duped"
-                                ? "border-status-error bg-status-error text-button-danger-text"
-                                : "text-primary-text border-[#FFD700]/50 bg-[#FFD700]/10"
-                            : "border-border-card bg-secondary-bg text-secondary-text hover:text-primary-text"
-                        }`}
+                    <Tabs
+                      radio
+                      value={condition}
+                      className="shrink-0"
+                      onValueChange={(value) => {
+                        setConditionsByItem((current) => ({
+                          ...current,
+                          [itemKey]: value as ItemCondition,
+                        }));
+                      }}
+                      style={
+                        {
+                          "--color-button-info": conditionColor,
+                          "--color-border-focus": conditionColor,
+                          "--color-form-button-text": conditionTextColor,
+                        } as React.CSSProperties
+                      }
+                    >
+                      <TabsList
+                        data-variant="filled"
+                        aria-label={`Condition for ${item.name}`}
+                        className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
                       >
-                        {option}
-                      </button>
-                    ))}
+                        {conditionOptions.map((option) => (
+                          <TabsTrigger
+                            key={option}
+                            value={option}
+                            onClick={() => searchInputRef.current?.focus()}
+                            aria-label={
+                              option === "og"
+                                ? `Mark ${item.name} as OG`
+                                : `Use ${option} value for ${item.name}`
+                            }
+                            className="px-2 py-1 text-[10px] leading-none"
+                          >
+                            {option === "og"
+                              ? "OG"
+                              : option === "duped"
+                                ? "Duped"
+                                : "Clean"}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                    </Tabs>
                   </div>
                 );
               })}

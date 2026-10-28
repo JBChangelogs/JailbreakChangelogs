@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Popover as PopoverPrimitive } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
@@ -13,7 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ColorSwatch } from "@/components/ui/color-picker";
+import { ColorPicker, ColorSwatch } from "@/components/ui/color-picker";
+import { Popover, PopoverContent } from "@/components/ui/popover";
 import {
   Sheet,
   SheetContent,
@@ -68,7 +70,9 @@ import {
   COLOR_VAR,
   colorGroup,
   colorName,
+  FOLLOWS,
   groupProblems,
+  HIDDEN_COLORS,
   MAIN_COLORS,
   withDefaultColors,
 } from "@/utils/ui/themeColors";
@@ -116,15 +120,14 @@ function ThemeColor({
   colorKey,
   value,
   vars,
-  highlighted,
   onChange,
+  inline = false,
 }: {
   colorKey: string;
   value: string;
   vars: Record<string, string>;
-  /** Flashes a ring after the color was picked in the preview. */
-  highlighted: boolean;
   onChange: (value: string) => void;
+  inline?: boolean;
 }) {
   // var(--color-x) values show the color they point to.
   const resolved =
@@ -134,28 +137,19 @@ function ThemeColor({
     ? resolved.match(/#[0-9a-f]{3,8}\b|(?:rgb|hsl)a?\([^)]*\)/i)?.[0]
     : undefined;
   const { hex, alpha } = parseColor(firstStop ?? resolved);
+  const change = (next: string) => {
+    if (alpha >= 1) return onChange(next);
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(next.slice(i, i + 2), 16));
+    onChange(`rgb(${r} ${g} ${b} / ${Math.round(alpha * 100)}%)`);
+  };
+  if (inline) return <ColorPicker value={hex} onChange={change} compact />;
   return (
-    <div
-      id={`theme-color-${colorKey}`}
-      className={cn(
-        // Swatches fill their cells so they all match. The highlight is drawn
-        // on the swatch itself, so it follows its exact border and corners.
-        "flex scroll-my-4 [&>button]:w-full [&>button]:transition-[border-color,box-shadow] [&>button]:duration-300",
-        highlighted &&
-          "[&>button]:border-button-info [&>button]:ring-button-info [&>button]:ring-1",
-      )}
-    >
+    <div id={`theme-color-${colorKey}`} className="flex [&>button]:w-full">
       <ColorSwatch
         label={colorName(colorKey)}
         value={hex}
         canOpen={() => true}
-        onChange={(next) => {
-          if (alpha >= 1) return onChange(next);
-          const [r, g, b] = [1, 3, 5].map((i) =>
-            parseInt(next.slice(i, i + 2), 16),
-          );
-          onChange(`rgb(${r} ${g} ${b} / ${Math.round(alpha * 100)}%)`);
-        }}
+        onChange={change}
       />
     </div>
   );
@@ -221,17 +215,17 @@ export default function CustomThemeEditor({
   // Colors show one group at a time ("Main" first), or search results.
   const [colorTab, setColorTab] = useState("Main");
   const [colorSearch, setColorSearch] = useState("");
-  // Colors of an element picked on the page or in "All colors"; shown on
-  // their own until cleared.
-  const [picked, setPicked] = useState<string[] | null>(null);
+  const [floatingColors, setFloatingColors] = useState<string[] | null>(null);
+  const [floatingColor, setFloatingColor] = useState("");
+  const floatingRef = useRef<HTMLDivElement>(null);
+  // While typing, the phone keyboard can push the anchor off screen; hiding
+  // the popup then would drop focus and close the keyboard.
+  const [typingHex, setTypingHex] = useState(false);
+  const floatingAnchor = useRef<{
+    getBoundingClientRect: () => DOMRect;
+    contextElement: Element;
+  } | null>(null);
   const [picking, setPicking] = useState(false);
-  // Colors picked in the preview, ringed for a moment.
-  const [highlighted, setHighlighted] = useState<string[]>([]);
-  useEffect(() => {
-    if (!highlighted.length) return;
-    const timeout = setTimeout(() => setHighlighted([]), 2000);
-    return () => clearTimeout(timeout);
-  }, [highlighted]);
 
   // A new theme starts from the theme on screen, so the page doesn't shift
   // color when the editor opens: the custom theme in use (its colors only,
@@ -316,6 +310,14 @@ export default function CustomThemeEditor({
   const setColor = (key: string, value: string) => {
     if (!current) return;
     const vars = { ...current.vars, [key]: value };
+    // Hover, active and focus colors follow their main color unless they
+    // were changed since the editor opened or last saved.
+    const saved = baselineRef.current
+      ? (JSON.parse(baselineRef.current) as CustomThemeInput).vars
+      : {};
+    for (const [dep, linked] of FOLLOWS[key] ?? []) {
+      if (dep in vars && vars[dep] === saved[dep]) vars[dep] = linked;
+    }
     update(
       matchLogo
         ? { vars, logo_filter: matchLogoFilter(buttonHex(vars)) }
@@ -439,21 +441,21 @@ export default function CustomThemeEditor({
 
   const mainKeys = new Set(MAIN_COLORS.map(([key]) => key));
 
-  // From the page or the preview: show just those colors, bring them into
-  // view and ring them.
-  const pickColors = (keys: string[]) => {
-    setMode("visual");
-    setColorSearch("");
-    setPicked(keys);
-    setHighlighted(keys);
-    setTimeout(() => {
-      document
-        .getElementById(`theme-color-${keys[0]}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }, 50);
+  // Edit next to the selected element without moving the preview.
+  const pickColors = (keys: string[], element: Element) => {
+    const available = keys.filter((key) => current && key in current.vars);
+    if (!available.length) return;
+    floatingAnchor.current = {
+      getBoundingClientRect: () => element.getBoundingClientRect(),
+      contextElement: element,
+    };
+    setFloatingColors(available);
+    setFloatingColor(available[0]);
   };
   const otherColors = current
-    ? Object.keys(current.vars).filter((key) => !mainKeys.has(key))
+    ? Object.keys(current.vars).filter(
+        (key) => !mainKeys.has(key) && !HIDDEN_COLORS.has(key),
+      )
     : [];
   const colorGroups = [
     {
@@ -468,16 +470,15 @@ export default function CustomThemeEditor({
     })).filter((group) => group.keys.length),
   ];
   const search = colorSearch.trim().toLowerCase();
-  const shownColors = picked
-    ? picked.filter((key) => current && key in current.vars)
-    : search
-      ? Object.keys(current?.vars ?? {}).filter(
-          (key) =>
-            colorName(key).toLowerCase().includes(search) ||
-            key.includes(search),
-        )
-      : (colorGroups.find((group) => group.name === colorTab) ?? colorGroups[0])
-          .keys;
+  const shownColors = search
+    ? Object.keys(current?.vars ?? {}).filter(
+        (key) =>
+          !HIDDEN_COLORS.has(key) &&
+          (colorName(key).toLowerCase().includes(search) ||
+            key.includes(search)),
+      )
+    : (colorGroups.find((group) => group.name === colorTab) ?? colorGroups[0])
+        .keys;
 
   // The element picker, like devtools': hovering outlines an element on
   // the page and names its colors; clicking opens those colors here.
@@ -532,7 +533,7 @@ export default function CustomThemeEditor({
       if (!hit) return;
       block(event);
       setPicking(false);
-      pickColors(hit.keys);
+      pickColors(hit.keys, hit.el);
     };
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setPicking(false);
@@ -638,6 +639,91 @@ export default function CustomThemeEditor({
           isMobile ? bottomPanel.sheet.className : "h-full sm:max-w-xl",
         )}
       >
+        {current && (
+          <Popover
+            open={open && floatingColors !== null && !bottomPanel.collapsed}
+            onOpenChange={(next) => !next && setFloatingColors(null)}
+          >
+            <PopoverPrimitive.Anchor virtualRef={floatingAnchor} />
+            <PopoverContent
+              ref={floatingRef}
+              side="top"
+              align="center"
+              sideOffset={8}
+              collisionPadding={12}
+              aria-label="Adjust selected color"
+              hideWhenDetached={!typingHex}
+              onFocus={(event) =>
+                setTypingHex(event.target instanceof HTMLInputElement)
+              }
+              onBlur={() => setTypingHex(false)}
+              className="z-[10001] max-h-(--radix-popover-content-available-height) w-60 max-w-[calc(100vw-1.5rem)] overflow-y-auto p-2.5"
+              onOpenAutoFocus={(event) => {
+                event.preventDefault();
+                floatingRef.current?.focus({ preventScroll: true });
+              }}
+              onCloseAutoFocus={(event) => event.preventDefault()}
+              onInteractOutside={(event) => {
+                const target = event.target as Element | null;
+                // A preview click switches colors; dismissal can run after it on touch.
+                if (
+                  target?.closest?.("[data-theme-color-preview] [data-color]")
+                ) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              <div className="mb-2 flex items-center gap-1">
+                {floatingColors?.length === 1 ? (
+                  <span className="text-primary-text min-w-0 flex-1 text-xs font-medium">
+                    {colorName(floatingColor)}
+                  </span>
+                ) : (
+                  <Tabs
+                    value={floatingColor}
+                    onValueChange={setFloatingColor}
+                    radio
+                    className="min-w-0 flex-1"
+                  >
+                    <TabsList
+                      aria-label="Selected element colors"
+                      className="w-full min-w-0"
+                    >
+                      {floatingColors?.map((key) => (
+                        <TabsTrigger
+                          key={key}
+                          value={key}
+                          className="px-2 text-xs"
+                        >
+                          {colorName(key)}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Close color picker"
+                  className="shrink-0"
+                  onClick={() => setFloatingColors(null)}
+                >
+                  <Icon icon="lucide:x" aria-hidden="true" />
+                </Button>
+              </div>
+              {floatingColor in current.vars && (
+                <ThemeColor
+                  key={floatingColor}
+                  colorKey={floatingColor}
+                  value={current.vars[floatingColor]}
+                  vars={current.vars}
+                  inline
+                  onChange={(value) => setColor(floatingColor, value)}
+                />
+              )}
+            </PopoverContent>
+          </Popover>
+        )}
         {isMobile ? (
           <>
             {/* Close and Save are in the footer, in thumb reach. */}
@@ -818,7 +904,9 @@ export default function CustomThemeEditor({
                         <button
                           key={problem}
                           type="button"
-                          onClick={() => keys.length && pickColors(keys)}
+                          onClick={(event) =>
+                            keys.length && pickColors(keys, event.currentTarget)
+                          }
                           className="text-secondary-text hover:text-primary-text block cursor-pointer text-left"
                         >
                           {/* The API names vars; show the editor's names. */}
@@ -842,7 +930,9 @@ export default function CustomThemeEditor({
                               // One line per color; opening it also shows the color.
                               <details>
                                 <summary
-                                  onClick={() => pickColors([key])}
+                                  onClick={(event) =>
+                                    pickColors([key], event.currentTarget)
+                                  }
                                   className="text-primary-text cursor-pointer font-medium"
                                 >
                                   {colorName(key)}
@@ -865,9 +955,9 @@ export default function CustomThemeEditor({
                               className="shrink-0"
                               variant="secondary"
                               aria-label={`Fix ${colorName(fix.key)}`}
-                              onClick={() => {
+                              onClick={(event) => {
                                 setColor(fix.key, fix.value);
-                                pickColors([fix.key]);
+                                pickColors([fix.key], event.currentTarget);
                               }}
                             >
                               <Icon
@@ -931,7 +1021,6 @@ export default function CustomThemeEditor({
                             onValueChange={(value) => {
                               setColorTab(value);
                               setColorSearch("");
-                              setPicked(null);
                             }}
                           >
                             {colorGroups.map((g) => (
@@ -953,7 +1042,6 @@ export default function CustomThemeEditor({
                         value={colorSearch}
                         onChange={(event) => {
                           setColorSearch(event.target.value);
-                          setPicked(null);
                         }}
                         placeholder="Search colors"
                         aria-label="Search colors"
@@ -969,18 +1057,6 @@ export default function CustomThemeEditor({
                         {picking ? "Click on the page…" : "Pick"}
                       </Button>
                     </div>
-                    {picked && (
-                      <div className="bg-button-info/10 text-secondary-text flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-xs">
-                        Colors on what you picked
-                        <button
-                          type="button"
-                          onClick={() => setPicked(null)}
-                          className="text-link cursor-pointer font-medium"
-                        >
-                          Show all
-                        </button>
-                      </div>
-                    )}
                     <div className="grid gap-2 @md:grid-cols-2">
                       {shownColors.map((key) => (
                         <ThemeColor
@@ -988,7 +1064,6 @@ export default function CustomThemeEditor({
                           colorKey={key}
                           value={current.vars[key]}
                           vars={current.vars}
-                          highlighted={highlighted.includes(key)}
                           onChange={(value) => setColor(key, value)}
                         />
                       ))}

@@ -36,7 +36,7 @@ export default function TotalRobberiesLoggedPolling({
         </div>
         <div className="text-primary-text text-lg font-semibold tabular-nums">
           {isLoading ? (
-            <span className="bg-button-secondary inline-block h-5 w-28 animate-pulse rounded" />
+            <span className="bg-quaternary-bg/70 inline-block h-5 w-28 animate-pulse rounded" />
           ) : (
             <span>{displayValue}</span>
           )}

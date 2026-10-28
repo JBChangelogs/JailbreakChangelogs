@@ -28,9 +28,11 @@ const clamp = (n: number) => Math.min(1, Math.max(0, n));
 export function ColorPicker({
   value,
   onChange,
+  compact = false,
 }: {
   value: string;
   onChange: (hex: string) => void;
+  compact?: boolean;
 }) {
   // Kept as HSV so the hue survives when the color is gray or black.
   const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(value));
@@ -85,7 +87,7 @@ export function ColorPicker({
             update({ ...hsv, ...moves[event.key] });
           }
         }}
-        className="focus-visible:ring-border-focus relative h-36 w-full cursor-crosshair touch-none rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+        className={`focus-visible:ring-border-focus relative ${compact ? "h-24" : "h-36"} w-full cursor-crosshair touch-none rounded-lg focus-visible:ring-2 focus-visible:outline-none`}
         style={{
           background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, hsl(${hsv.h} 100% 50%))`,
         }}
@@ -115,18 +117,20 @@ export function ColorPicker({
         }}
       />
 
-      <div className="grid grid-cols-6 gap-2">
-        {PRESETS.map((preset) => (
-          <button
-            key={preset}
-            type="button"
-            onClick={() => update(hexToHsv(preset))}
-            aria-label={`Use ${preset}`}
-            className="focus-visible:ring-border-focus aspect-square cursor-pointer rounded-md border border-black/20 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:outline-none"
-            style={{ backgroundColor: preset }}
-          />
-        ))}
-      </div>
+      {!compact && (
+        <div className="grid grid-cols-6 gap-2">
+          {PRESETS.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => update(hexToHsv(preset))}
+              aria-label={`Use ${preset}`}
+              className="focus-visible:ring-border-focus aspect-square cursor-pointer rounded-md border border-black/20 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:outline-none"
+              style={{ backgroundColor: preset }}
+            />
+          ))}
+        </div>
+      )}
 
       <label className="flex items-center gap-2">
         <span className="text-secondary-text text-xs font-medium">Hex</span>

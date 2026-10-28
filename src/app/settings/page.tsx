@@ -682,7 +682,7 @@ export default function SettingsPage() {
                       {[1, 2, 3].map((i) => (
                         <div
                           key={i}
-                          className="bg-tertiary-bg h-12 animate-pulse rounded-lg"
+                          className="bg-quaternary-bg/70 h-12 animate-pulse rounded-lg"
                         />
                       ))}
                     </div>

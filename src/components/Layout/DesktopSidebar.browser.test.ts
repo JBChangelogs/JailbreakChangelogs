@@ -65,7 +65,10 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
       "@/utils/ui/navigation-menu": { navigationSections },
     };
     const exports = {} as {
-      default: React.ComponentType<{ collapsed: boolean }>;
+      default: React.ComponentType<{
+        collapsed: boolean;
+        onToggle: () => void;
+      }>;
     };
     runInNewContext(
       transpileModule(
@@ -75,10 +78,10 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
       { exports, require: (id: string) => imports[id] },
     );
     const expanded = renderToStaticMarkup(
-      createElement(exports.default, { collapsed: false }),
+      createElement(exports.default, { collapsed: false, onToggle: () => {} }),
     );
     const collapsed = renderToStaticMarkup(
-      createElement(exports.default, { collapsed: true }),
+      createElement(exports.default, { collapsed: true, onToggle: () => {} }),
     );
     const itemCount = navigationSections.reduce(
       (count, section) => count + section.items.length,
@@ -86,7 +89,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
     );
     expect(expanded).not.toContain("data-test-tooltip-side");
     expect(collapsed.match(/data-test-tooltip-side="right"/g)).toHaveLength(
-      itemCount,
+      itemCount + 1,
     );
     expect(collapsed).not.toMatch(/ title=/);
 
@@ -127,6 +130,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
             labelOpacity: +getComputedStyle(label).opacity,
             headingOpacity: +getComputedStyle(heading.firstElementChild).opacity,
             dividerOpacity: +getComputedStyle(heading.lastElementChild).opacity,
+            scrollbarWidth: getComputedStyle(navigation).scrollbarWidth,
             icons: positions(),
           };
           root.style.setProperty('--header-height', '60px');
@@ -136,7 +140,16 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
           root.style.removeProperty('--header-height');
           root.dataset.desktopSidebarCollapsed = 'false';
           finish();
-          const expanded = { top: sidebar.getBoundingClientRect().top, width: sidebar.getBoundingClientRect().width, icons: positions(), opacity: +getComputedStyle(label).opacity };
+          const liveLabels = [...sidebar.querySelectorAll('a')].filter(link => link.lastElementChild.textContent.trim() === 'Live').map(link => {
+            const label = link.querySelector('svg').nextElementSibling;
+            return { title: label.textContent, width: label.clientWidth, contentWidth: label.scrollWidth };
+          });
+          const toggle = sidebar.querySelector('button[aria-controls="desktop-sidebar-navigation"]');
+          const toggleTop = toggle.getBoundingClientRect().top;
+          navigation.scrollTop = navigation.scrollHeight;
+          const pinnedToggle = { top: toggleTop, afterScroll: toggle.getBoundingClientRect().top, bottom: toggle.getBoundingClientRect().bottom, sidebarBottom: sidebar.getBoundingClientRect().bottom, navigationBottom: navigation.getBoundingClientRect().bottom, scrollTop: navigation.scrollTop, scrollbarWidth: getComputedStyle(navigation).scrollbarWidth };
+          navigation.scrollTop = 0;
+          const expanded = { pinnedToggle, top: sidebar.getBoundingClientRect().top, width: sidebar.getBoundingClientRect().width, icons: positions(), opacity: +getComputedStyle(label).opacity, liveLabels };
           root.style.setProperty('--header-height', '60px');
           const expandedMeasuredIcons = positions();
           root.dataset.desktopSidebarCollapsed = 'true';
@@ -205,8 +218,9 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
         labelOpacity: 0,
         headingOpacity: 0,
         dividerOpacity: 1,
+        scrollbarWidth: "none",
       });
-      expect(result.initial.icons).toHaveLength(itemCount);
+      expect(result.initial.icons).toHaveLength(itemCount + 1);
       expect(result.initial.icons[0].y).toBeGreaterThan(60);
       expect(result.measuredIcons).toEqual(result.initial.icons);
       expect(result.tickerTop).toBe(90);
@@ -215,7 +229,24 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
         width: 240,
         opacity: 1,
       });
+      expect(result.expanded.pinnedToggle.afterScroll).toBe(
+        result.expanded.pinnedToggle.top,
+      );
+      expect(result.expanded.pinnedToggle.scrollbarWidth).toBe("none");
+      expect(result.expanded.pinnedToggle.scrollTop).toBeGreaterThan(0);
+      expect(result.expanded.pinnedToggle.bottom).toBeLessThanOrEqual(
+        result.expanded.pinnedToggle.sidebarBottom - 32,
+      );
+      expect(result.expanded.pinnedToggle.navigationBottom).toBeLessThanOrEqual(
+        result.expanded.pinnedToggle.top,
+      );
       expect(result.expanded.icons).toEqual(result.initial.icons);
+      expect(result.expanded.liveLabels).toHaveLength(2);
+      for (const label of result.expanded.liveLabels) {
+        expect(label.contentWidth, label.title).toBeLessThanOrEqual(
+          label.width,
+        );
+      }
       expect(result.expandedMeasuredIcons).toEqual(result.expanded.icons);
       expect(result.middle.icons).toEqual(result.expanded.icons);
       expect(result.middle.opacity).toBeGreaterThan(0);
@@ -249,7 +280,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
 );
 
 test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
-  "hovering expanded links then collapsing does not leave stale tooltips",
+  "hover overlays the page and manual toggles save their explicit behavior",
   async () => {
     expect(chromium).not.toBeNull();
     const root = fileURLToPath(new URL("../../../", import.meta.url));
@@ -275,8 +306,19 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
                 import { createRoot } from '${root}/node_modules/react-dom/client.js';
                 import { flushSync } from '${root}/node_modules/react-dom/index.js';
                 import Sidebar from '${root}/src/components/Layout/DesktopSidebar.tsx';
+                import { getDesktopSidebarBehavior, setDesktopSidebarBehavior } from '${root}/src/utils/ui/desktopNavigation.ts';
+                const outgoing = [];
+                window.addEventListener('sendRealtimePreference', event => outgoing.push(event.detail));
                 const app = createRoot(document.querySelector('#app'));
-                const render = collapsed => flushSync(() => app.render(<Sidebar collapsed={collapsed} />));
+                const render = (collapsed, expandOnHover = false) => {
+                  document.documentElement.dataset.desktopSidebarCollapsed = String(collapsed);
+                  document.documentElement.dataset.desktopSidebarHover = String(expandOnHover);
+                  flushSync(() => app.render(<Sidebar collapsed={collapsed} expandOnHover={expandOnHover} onToggle={() => {
+                    setDesktopSidebarBehavior(getDesktopSidebarBehavior() === 'expanded' ? 'compact' : 'expanded');
+                    const behavior = getDesktopSidebarBehavior();
+                    render(behavior !== 'expanded', behavior === 'hover');
+                  }} />));
+                };
                 const pause = () => new Promise(resolve => setTimeout(resolve, 60));
                 const links = () => [...document.querySelectorAll('nav a')];
                 const count = () => document.querySelectorAll('[role="tooltip"]').length;
@@ -292,6 +334,15 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
                 };
                 async function check() {
                   render(false);
+                  const toggle = () => document.querySelector('button[aria-controls="desktop-sidebar-navigation"]');
+                  toggle().focus();
+                  toggle().click();
+                  await pause();
+                  const clickedCollapse = { expanded: toggle().getAttribute('aria-expanded'), label: toggle().getAttribute('aria-label'), focusPreserved: document.activeElement === toggle() };
+                  toggle().click();
+                  await pause();
+                  const clickedExpand = { expanded: toggle().getAttribute('aria-expanded'), label: toggle().getAttribute('aria-label'), focusPreserved: document.activeElement === toggle() };
+                  toggle().blur();
                   await pause();
                   for (const link of links().slice(0, 3)) {
                     hover(link); await pause(); await leave(link); await pause();
@@ -314,7 +365,40 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
                   const afterRefocus = count();
                   links()[1].blur(); await pause();
                   const afterBlur = count();
-                  document.querySelector('#result').textContent = JSON.stringify({afterCollapse, afterHover, afterLeave, afterFocus, afterExpand, focusPreserved, afterRecollapse, afterRefocus, afterBlur});
+                  const sidebar = () => document.querySelector('aside');
+                  const snapshot = () => {
+                    document.getAnimations().forEach(animation => animation.finish());
+                    return { width: sidebar().getBoundingClientRect().width, margin: parseFloat(getComputedStyle(document.querySelector('main')).marginLeft), state: sidebar().dataset.desktopSidebar, action: toggle().getAttribute('aria-label') };
+                  };
+                  const enter = (pointerType = 'mouse') => sidebar().dispatchEvent(new PointerEvent('pointerover', {bubbles: true, pointerType, relatedTarget: document.body}));
+                  const exit = () => sidebar().dispatchEvent(new PointerEvent('pointerout', {bubbles: true, pointerType: 'mouse', relatedTarget: document.body}));
+                  render(true, true); await pause();
+                  const hoverIdle = snapshot();
+                  enter(); await pause();
+                  const hoverOpen = snapshot();
+                  exit(); await pause();
+                  const hoverClosed = snapshot();
+                  enter('touch'); await pause();
+                  const touch = snapshot();
+                  links()[0].focus({focusVisible: true}); await pause();
+                  const keyboardOpen = snapshot();
+                  exit(); await pause();
+                  const keyboardStillOpen = snapshot();
+                  document.querySelector('#outside').focus(); await pause();
+                  const keyboardClosed = snapshot();
+                  enter(); await pause();
+                  toggle().click(); await pause();
+                  exit(); await pause();
+                  const pinned = snapshot();
+                  await new Promise(resolve => setTimeout(resolve, 350));
+                  const showSaves = outgoing.slice(-2);
+                  toggle().click(); await pause();
+                  enter(); await pause();
+                  const compact = snapshot();
+                  await new Promise(resolve => setTimeout(resolve, 350));
+                  const hideSaves = outgoing.slice(-2);
+                  const savedBehavior = getDesktopSidebarBehavior();
+                  document.querySelector('#result').textContent = JSON.stringify({clickedCollapse, clickedExpand, afterCollapse, afterHover, afterLeave, afterFocus, afterExpand, focusPreserved, afterRecollapse, afterRefocus, afterBlur, hoverIdle, hoverOpen, hoverClosed, touch, keyboardOpen, keyboardStillOpen, keyboardClosed, pinned, compact, showSaves, hideSaves, savedBehavior});
                 }
                 check().catch(error => document.querySelector('#result').textContent = JSON.stringify({error: String(error)}));
               `,
@@ -347,10 +431,15 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
       });
       expect(build.success, String(build.logs)).toBe(true);
       writeFileSync(join(directory, "test.js"), await build.outputs[0].text());
+      const cssPath = join(root, "src/app/globals.css");
+      const css = await postcss([tailwind({ base: root })]).process(
+        readFileSync(cssPath, "utf8"),
+        { from: cssPath },
+      );
       const htmlPath = join(directory, "index.html");
       writeFileSync(
         htmlPath,
-        '<!doctype html><html><body><div id="app"></div><pre id="result"></pre><script src="test.js"></script></body></html>',
+        `<!doctype html><html><head><style>${css.css}\n[data-slot="tooltip-content"]{animation:none!important}</style></head><body><div class="site-layout"><div id="app"></div><main><button id="outside">Outside navigation</button></main></div><pre id="result"></pre><script src="test.js"></script></body></html>`,
       );
       const process = Bun.spawn(
         [
@@ -360,7 +449,8 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
           "--disable-gpu",
           `--user-data-dir=${join(directory, "profile")}`,
           "--allow-file-access-from-files",
-          "--virtual-time-budget=5000",
+          "--virtual-time-budget=15000",
+          "--window-size=1920,1080",
           "--dump-dom",
           pathToFileURL(htmlPath).href,
         ],
@@ -381,6 +471,16 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
         output.match(/<pre id="result">(.*?)<\/pre>/)?.[1] ?? "null",
       );
       expect(result).toEqual({
+        clickedCollapse: {
+          expanded: "false",
+          label: "Show sidebar",
+          focusPreserved: true,
+        },
+        clickedExpand: {
+          expanded: "true",
+          label: "Hide sidebar",
+          focusPreserved: true,
+        },
         afterCollapse: 0,
         afterHover: 1,
         afterLeave: 0,
@@ -390,6 +490,69 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
         afterRecollapse: 0,
         afterRefocus: 1,
         afterBlur: 0,
+        hoverIdle: {
+          width: 72,
+          margin: 72,
+          state: "collapsed",
+          action: "Show sidebar",
+        },
+        hoverOpen: {
+          width: 240,
+          margin: 72,
+          state: "expanded",
+          action: "Keep sidebar open",
+        },
+        hoverClosed: {
+          width: 72,
+          margin: 72,
+          state: "collapsed",
+          action: "Show sidebar",
+        },
+        touch: {
+          width: 72,
+          margin: 72,
+          state: "collapsed",
+          action: "Show sidebar",
+        },
+        keyboardOpen: {
+          width: 240,
+          margin: 72,
+          state: "expanded",
+          action: "Keep sidebar open",
+        },
+        keyboardStillOpen: {
+          width: 240,
+          margin: 72,
+          state: "expanded",
+          action: "Keep sidebar open",
+        },
+        keyboardClosed: {
+          width: 72,
+          margin: 72,
+          state: "collapsed",
+          action: "Show sidebar",
+        },
+        pinned: {
+          width: 240,
+          margin: 240,
+          state: "expanded",
+          action: "Hide sidebar",
+        },
+        compact: {
+          width: 72,
+          margin: 72,
+          state: "collapsed",
+          action: "Show sidebar",
+        },
+        showSaves: [
+          { key: "desktop_sidebar_hover", value: false },
+          { key: "desktop_sidebar_collapsed", value: false },
+        ],
+        hideSaves: [
+          { key: "desktop_sidebar_hover", value: false },
+          { key: "desktop_sidebar_collapsed", value: true },
+        ],
+        savedBehavior: "compact",
       });
     } finally {
       rmSync(directory, { recursive: true, force: true });

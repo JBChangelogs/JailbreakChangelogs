@@ -18,6 +18,7 @@ import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLast
 import { Spinner } from "@/components/ui/Spinner";
 import { formatServerTime, getStatusBadgeClass } from "./utils";
 import JoinedUsers from "./JoinedUsers";
+import RobberyMarkerIcon from "./RobberyMarkerIcon";
 import type {
   TrackerJoinUser,
   TrackerJoinReport,
@@ -39,7 +40,7 @@ function getStatusText(status: number): string {
     case 1:
       return "Open";
     case 2:
-      return "In Progress";
+      return "Active";
     case 3:
       return "Closed";
     default:
@@ -112,7 +113,7 @@ function RobberyComboCard({
     });
   }, [useExternalRegionData, serverId, fetchRegionData, internalRegionData]);
 
-  const comboHeaderStatusText = isAllOpen ? "All Open" : "All In Progress";
+  const comboHeaderStatusText = isAllOpen ? "All Open" : "All Active";
   const comboHeaderStatusClass = isAllOpen
     ? getStatusBadgeClass(1)
     : getStatusBadgeClass(2);
@@ -121,10 +122,10 @@ function RobberyComboCard({
   const remainingCount = sortedRobberies.length - displayRobberies.length;
 
   return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
-      <div className="flex flex-col gap-3 p-3 sm:flex-row">
+    <div className="border-border-card bg-secondary-bg @container flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+      <div className="flex flex-col gap-3 p-3 @[24rem]:flex-row">
         {/* Thumbnail */}
-        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
+        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 @[24rem]:h-16 @[24rem]:w-24">
           {comboImageUrl ? (
             <Image
               placeholder={IMAGE_PLACEHOLDER}
@@ -143,8 +144,16 @@ function RobberyComboCard({
         {/* Content */}
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-primary-text min-w-0 flex-1 truncate text-base font-semibold">
-              {comboLabel}
+            <h3 className="text-primary-text flex min-w-0 flex-1 items-center gap-1.5 text-base font-semibold">
+              {displayRobberies.map((robbery) => (
+                <RobberyMarkerIcon
+                  key={robbery.marker_name}
+                  markerName={robbery.marker_name}
+                  name={robbery.name}
+                  className="size-6"
+                />
+              ))}
+              <span className="truncate">{comboLabel}</span>
             </h3>
             {(isAllOpen || isAllInProgress) && (
               <span

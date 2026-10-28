@@ -56,7 +56,7 @@ const colors = (...keys: string[]) => ({
  * Content is placeholder text only, so it can't be mistaken for real data.
  *
  * Hovering anything names its colors; with `onPick`, clicking it passes
- * them on, so the editor can jump to those settings.
+ * them and the element on, so the editor can open its controls beside it.
  */
 export default function CustomThemePreview({
   vars,
@@ -68,7 +68,7 @@ export default function CustomThemePreview({
   vars: Record<string, string>;
   scheme: "dark" | "light";
   logoFilter: string | null;
-  onPick?: (keys: string[]) => void;
+  onPick?: (keys: string[], element: Element) => void;
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -108,12 +108,13 @@ export default function CustomThemePreview({
   return (
     <div
       ref={rootRef}
+      data-theme-color-preview={onPick ? "" : undefined}
       aria-hidden="true"
       onMouseOver={showTip}
       onMouseLeave={() => setTip(null)}
       onClick={(event) => {
         const hit = keysAt(event.target);
-        if (hit && onPick) onPick(hit.keys);
+        if (hit && onPick) onPick(hit.keys, hit.el);
       }}
       className={cn(
         "bg-primary-bg text-primary-text border-border-card @container relative overflow-hidden rounded-xl border",
@@ -181,13 +182,13 @@ export default function CustomThemePreview({
               </span>
             </p>
             <p
-              className="text-primary-text text-base font-bold"
+              className="text-primary-text w-fit text-base font-bold"
               {...colors("primary-text")}
             >
               Page title
             </p>
             <p
-              className="text-secondary-text text-xs"
+              className="text-secondary-text w-fit text-xs"
               {...colors("secondary-text")}
             >
               A short description under the title.
@@ -214,7 +215,7 @@ export default function CustomThemePreview({
                 </span>
               </div>
               <p
-                className="text-card-paragraph mt-1 text-xs"
+                className="text-card-paragraph mt-1 w-fit text-xs"
                 {...colors("card-paragraph")}
               >
                 Body text in a card.
@@ -285,10 +286,67 @@ export default function CustomThemePreview({
             </p>
           </Section>
 
+          <Section title="Tabs">
+            <span className="text-secondary-text text-[10px] font-semibold">
+              Tabs / Filled tabs
+            </span>
+            <div
+              className="flex gap-1 text-xs font-medium"
+              style={{
+                boxShadow:
+                  "inset 0 -1px color-mix(in srgb, var(--color-border-primary) 60%, transparent)",
+              }}
+              {...colors("border-primary")}
+            >
+              <span
+                className="text-primary-text border-border-focus border-b-2 px-2.5 py-1.5"
+                {...colors("border-focus", "primary-text")}
+              >
+                Active
+              </span>
+              <span
+                className="bg-quaternary-bg text-primary-text rounded-md px-2.5 py-1.5"
+                {...colors("quaternary-bg", "primary-text")}
+              >
+                Hovered
+              </span>
+              <span
+                className="text-secondary-text px-2.5 py-1.5"
+                {...colors("secondary-text")}
+              >
+                Tab
+              </span>
+            </div>
+            {/* The filled tab style, from Settings. */}
+            <div
+              className="bg-tertiary-bg border-border-card flex gap-0.5 rounded-lg border p-0.5 text-xs font-medium"
+              {...colors("tertiary-bg", "border-card")}
+            >
+              <span
+                className="bg-tab-active text-form-button-text rounded-md px-2.5 py-1"
+                {...colors("tab-active", "form-button-text")}
+              >
+                Active
+              </span>
+              <span
+                className="bg-quaternary-bg text-primary-text rounded-md px-2.5 py-1"
+                {...colors("quaternary-bg", "primary-text")}
+              >
+                Hovered
+              </span>
+              <span
+                className="text-secondary-text px-2.5 py-1"
+                {...colors("secondary-text")}
+              >
+                Tab
+              </span>
+            </div>
+          </Section>
+
           <Section title="Forms">
             <p
-              className="text-form-label text-xs font-medium"
-              {...colors("form-label")}
+              className="text-primary-text w-fit text-xs font-medium"
+              {...colors("primary-text")}
             >
               Label
             </p>

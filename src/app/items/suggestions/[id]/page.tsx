@@ -35,6 +35,7 @@ import {
   getItemImagePath,
   handleImageError,
   isVideoItem,
+  isDriftItem,
   getVideoPath,
 } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
@@ -48,6 +49,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Image from "next/image";
+import DriftPreview from "@/components/Items/DriftPreview";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import ChartUpdateNotice, {
   itemHistoryStaleTime,
@@ -75,7 +77,7 @@ const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
   {
     loading: () => (
-      <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
+      <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded" />
     ),
     ssr: false,
   },
@@ -406,7 +408,7 @@ function SuggestionHistoryChart({
       )}
       <ChartUpdateNotice />
       {loading ? (
-        <div className="bg-tertiary-bg h-87.5 animate-pulse rounded" />
+        <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded" />
       ) : (
         <ItemValueChart
           historyData={historyData}
@@ -959,12 +961,7 @@ export default function ValueSuggestionDetailPage() {
         <div className="container mx-auto px-4 pb-10 sm:px-6">
           <Breadcrumb />
 
-          <p className="border-border-card bg-tertiary-bg text-secondary-text mb-5 flex items-start gap-2 rounded-lg border px-3 py-2 text-sm">
-            <Icon
-              icon="material-symbols:info-outline-rounded"
-              className="text-link mt-0.5 h-4 w-4 shrink-0"
-              inline
-            />
+          <p className="bg-button-info/10 border-button-info text-secondary-text mb-5 rounded-lg border p-4 text-sm shadow-sm">
             Please note that a high upvote count does not guarantee a suggestion
             will be accepted.
           </p>
@@ -977,19 +974,19 @@ export default function ValueSuggestionDetailPage() {
               <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
                 <div className="flex flex-col sm:flex-row">
                   <div
-                    className="bg-tertiary-bg w-full shrink-0 sm:w-56"
+                    className="bg-quaternary-bg/70 w-full shrink-0 sm:w-56"
                     style={{ aspectRatio: "16/9" }}
                   />
                   <div className="flex flex-1 flex-col justify-center gap-4 p-5">
-                    <div className="bg-quaternary-bg h-7 w-48 rounded" />
+                    <div className="bg-quaternary-bg/70 h-7 w-48 rounded" />
                     <div className="flex flex-wrap gap-1.5">
-                      <div className="bg-quaternary-bg h-6 w-16 rounded-md" />
-                      <div className="bg-quaternary-bg h-6 w-20 rounded-md" />
-                      <div className="bg-quaternary-bg h-6 w-16 rounded-md" />
+                      <div className="bg-quaternary-bg/70 h-6 w-16 rounded-md" />
+                      <div className="bg-quaternary-bg/70 h-6 w-20 rounded-md" />
+                      <div className="bg-quaternary-bg/70 h-6 w-16 rounded-md" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="bg-quaternary-bg h-5 w-5 rounded-full" />
-                      <div className="bg-quaternary-bg h-4 w-28 rounded" />
+                      <div className="bg-quaternary-bg/70 h-5 w-5 rounded-full" />
+                      <div className="bg-quaternary-bg/70 h-4 w-28 rounded" />
                     </div>
                   </div>
                 </div>
@@ -998,14 +995,14 @@ export default function ValueSuggestionDetailPage() {
               {/* Reason */}
               <div className="border-border-card bg-secondary-bg rounded-xl border">
                 <div className="border-border-card border-b px-5 py-3.5">
-                  <div className="bg-quaternary-bg h-4 w-16 rounded" />
+                  <div className="bg-quaternary-bg/70 h-4 w-16 rounded" />
                 </div>
                 <div className="space-y-2 p-5">
-                  <div className="bg-quaternary-bg h-3 w-full rounded" />
-                  <div className="bg-quaternary-bg h-3 w-full rounded" />
-                  <div className="bg-quaternary-bg h-3 w-5/6 rounded" />
-                  <div className="bg-quaternary-bg h-3 w-full rounded" />
-                  <div className="bg-quaternary-bg h-3 w-3/4 rounded" />
+                  <div className="bg-quaternary-bg/70 h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg/70 h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg/70 h-3 w-5/6 rounded" />
+                  <div className="bg-quaternary-bg/70 h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg/70 h-3 w-3/4 rounded" />
                 </div>
               </div>
 
@@ -1013,25 +1010,25 @@ export default function ValueSuggestionDetailPage() {
               <div className="space-y-5 lg:hidden">
                 <div className="border-border-card bg-secondary-bg rounded-xl border">
                   <div className="border-border-card border-b px-5 py-3.5">
-                    <div className="bg-quaternary-bg h-4 w-32 rounded" />
+                    <div className="bg-quaternary-bg/70 h-4 w-32 rounded" />
                   </div>
                   <div className="grid grid-cols-2 gap-2 p-5">
                     <div className="p-3">
-                      <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
-                      <div className="bg-quaternary-bg h-6 w-20 rounded" />
+                      <div className="bg-quaternary-bg/70 mb-2 h-3 w-8 rounded" />
+                      <div className="bg-quaternary-bg/70 h-6 w-20 rounded" />
                     </div>
                     <div className="p-3">
-                      <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
-                      <div className="bg-quaternary-bg h-6 w-20 rounded" />
+                      <div className="bg-quaternary-bg/70 mb-2 h-3 w-8 rounded" />
+                      <div className="bg-quaternary-bg/70 h-6 w-20 rounded" />
                     </div>
                   </div>
                 </div>
                 <div className="border-border-card bg-secondary-bg rounded-xl border">
                   <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
-                    <div className="bg-quaternary-bg h-4 w-12 rounded" />
+                    <div className="bg-quaternary-bg/70 h-4 w-12 rounded" />
                     <div className="flex gap-2">
-                      <div className="bg-quaternary-bg h-7 w-16 rounded-md" />
-                      <div className="bg-quaternary-bg h-7 w-16 rounded-md" />
+                      <div className="bg-quaternary-bg/70 h-7 w-16 rounded-md" />
+                      <div className="bg-quaternary-bg/70 h-7 w-16 rounded-md" />
                     </div>
                   </div>
                 </div>
@@ -1040,33 +1037,33 @@ export default function ValueSuggestionDetailPage() {
               {/* Desktop: 5-col grid */}
               <div className="hidden lg:grid lg:grid-cols-5 lg:gap-5">
                 <div className="border-border-card bg-secondary-bg min-w-0 space-y-3 rounded-xl border p-5 lg:col-span-3">
-                  <div className="bg-quaternary-bg h-4 w-24 rounded" />
-                  <div className="bg-quaternary-bg h-3 w-full rounded" />
-                  <div className="bg-quaternary-bg h-3 w-full rounded" />
-                  <div className="bg-quaternary-bg h-3 w-2/3 rounded" />
+                  <div className="bg-quaternary-bg/70 h-4 w-24 rounded" />
+                  <div className="bg-quaternary-bg/70 h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg/70 h-3 w-full rounded" />
+                  <div className="bg-quaternary-bg/70 h-3 w-2/3 rounded" />
                 </div>
                 <div className="space-y-5 lg:col-span-2">
                   <div className="border-border-card bg-secondary-bg rounded-xl border">
                     <div className="border-border-card border-b px-5 py-3.5">
-                      <div className="bg-quaternary-bg h-4 w-32 rounded" />
+                      <div className="bg-quaternary-bg/70 h-4 w-32 rounded" />
                     </div>
                     <div className="grid grid-cols-2 gap-2 p-5">
                       <div className="p-3">
-                        <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
-                        <div className="bg-quaternary-bg h-6 w-20 rounded" />
+                        <div className="bg-quaternary-bg/70 mb-2 h-3 w-8 rounded" />
+                        <div className="bg-quaternary-bg/70 h-6 w-20 rounded" />
                       </div>
                       <div className="p-3">
-                        <div className="bg-quaternary-bg mb-2 h-3 w-8 rounded" />
-                        <div className="bg-quaternary-bg h-6 w-20 rounded" />
+                        <div className="bg-quaternary-bg/70 mb-2 h-3 w-8 rounded" />
+                        <div className="bg-quaternary-bg/70 h-6 w-20 rounded" />
                       </div>
                     </div>
                   </div>
                   <div className="border-border-card bg-secondary-bg rounded-xl border">
                     <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
-                      <div className="bg-quaternary-bg h-4 w-12 rounded" />
+                      <div className="bg-quaternary-bg/70 h-4 w-12 rounded" />
                       <div className="flex gap-2">
-                        <div className="bg-quaternary-bg h-7 w-16 rounded-md" />
-                        <div className="bg-quaternary-bg h-7 w-16 rounded-md" />
+                        <div className="bg-quaternary-bg/70 h-7 w-16 rounded-md" />
+                        <div className="bg-quaternary-bg/70 h-7 w-16 rounded-md" />
                       </div>
                     </div>
                   </div>
@@ -1139,6 +1136,8 @@ export default function ValueSuggestionDetailPage() {
                           loop
                           autoPlay
                         />
+                      ) : item && isDriftItem(item.type) ? (
+                        <DriftPreview key={item.name} name={item.name} />
                       ) : (
                         <Image
                           placeholder={IMAGE_PLACEHOLDER}

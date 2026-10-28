@@ -129,8 +129,8 @@ function SuggestionsTabSkeleton() {
   return (
     <div className="animate-pulse space-y-4">
       <div className="flex items-center justify-between">
-        <div className="bg-quaternary-bg h-8 w-48 rounded" />
-        <div className="bg-quaternary-bg h-8 w-28 rounded" />
+        <div className="bg-quaternary-bg/70 h-8 w-48 rounded" />
+        <div className="bg-quaternary-bg/70 h-8 w-28 rounded" />
       </div>
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (

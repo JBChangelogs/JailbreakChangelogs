@@ -1,6 +1,5 @@
 "use client";
 
-import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import type { ChangeEvent, MouseEvent } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { SuggestionCard } from "@/components/Items/Suggestions/SuggestionCard";
 import { SuggestionCardSkeletons } from "@/components/Items/Suggestions/SuggestionCardSkeletons";
 import type { Suggestion } from "@/components/Items/Suggestions/types";
+import { fieldLabel } from "@/components/Items/Suggestions/shared";
 
 interface SuggestionResultsProps {
   loadingSuggestions: boolean;
@@ -21,6 +21,8 @@ interface SuggestionResultsProps {
   isBanned: boolean;
   urlQuery: string;
   activeSortLabel: string | null;
+  typeFilter: string;
+  fieldFilter: string[];
   hasActiveFilters: boolean;
   totalPages: number;
   page: number;
@@ -58,6 +60,8 @@ export function SuggestionResults({
   isBanned,
   urlQuery,
   activeSortLabel,
+  typeFilter,
+  fieldFilter,
   hasActiveFilters,
   totalPages,
   page,
@@ -75,6 +79,11 @@ export function SuggestionResults({
   onOpenVoters,
   onOpenReport,
 }: SuggestionResultsProps) {
+  const fields = new Intl.ListFormat("en", { type: "disjunction" }).format(
+    fieldFilter.map(fieldLabel),
+  );
+  const emptyDescription = `No ${typeFilter === "All" ? "" : `${typeFilter} `}suggestions${fields ? ` for ${fields}` : ""}${urlQuery ? ` matching “${urlQuery}”` : ""}.`;
+
   return (
     <>
       {/* Cards */}
@@ -109,24 +118,30 @@ export function SuggestionResults({
         </div>
       ) : noSuggestionsFound || filteredSuggestions.length === 0 ? (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
-          <NotFoundIllustration
-            alt="No suggestions found"
-            width={180}
-            height={180}
-            className="mx-auto mb-4"
-          />
+          <div
+            className="bg-button-info/10 text-button-info mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full"
+            aria-hidden="true"
+          >
+            <Icon icon="heroicons:magnifying-glass" className="h-8 w-8" />
+          </div>
           <h3 className="text-primary-text mb-2 text-lg font-semibold">
-            {urlQuery
-              ? `No suggestions matching "${urlQuery}"`
-              : activeSortLabel
-                ? `No results for ${activeSortLabel}`
-                : hasActiveFilters
-                  ? "No suggestions match these filters"
-                  : "No suggestions yet"}
+            {hasActiveFilters
+              ? "No matching suggestions"
+              : "No suggestions yet"}
           </h3>
+          {hasActiveFilters && (
+            <p className="text-secondary-text mb-2 text-sm">
+              {emptyDescription}
+            </p>
+          )}
+          {activeSortLabel && (
+            <p className="text-secondary-text mb-4 text-xs">
+              Sorted by {activeSortLabel}.
+            </p>
+          )}
           <p className="text-secondary-text mb-6 text-sm">
             {hasActiveFilters
-              ? "Try a different sort or clear your filters to see more suggestions."
+              ? "Try different filters or clear them to see more suggestions."
               : !isAuthenticated
                 ? "Log in to be the first to submit an item suggestion."
                 : !userHasRoblox
@@ -136,7 +151,7 @@ export function SuggestionResults({
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
             {hasActiveFilters ? (
               <Button onClick={onClearAllFilters} variant="secondary">
-                Clear filters and sort
+                Clear filters
               </Button>
             ) : !isAuthenticated ? (
               <Button onClick={onLogin}>

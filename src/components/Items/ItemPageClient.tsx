@@ -52,7 +52,7 @@ export default function ItemPageClient({ type, name }: Props) {
   const commentsSlot = (
     <Suspense
       fallback={
-        <div className="bg-secondary-bg h-87.5 animate-pulse rounded-lg" />
+        <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded-lg" />
       }
     >
       <ItemCommentsServer
@@ -66,7 +66,7 @@ export default function ItemPageClient({ type, name }: Props) {
   const similarItemsSlot = (
     <Suspense
       fallback={
-        <div className="bg-secondary-bg h-87.5 animate-pulse rounded-lg" />
+        <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded-lg" />
       }
     >
       <SimilarItems currentItem={item} />

@@ -1484,27 +1484,27 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                         className="border-border-card bg-secondary-bg w-full rounded-lg border p-1.5 md:p-2"
                       >
                         <div className="mb-2">
-                          <div className="bg-tertiary-bg mb-1.5 h-3 w-3/4 rounded" />
+                          <div className="bg-quaternary-bg/70 mb-1.5 h-3 w-3/4 rounded" />
                           <div className="flex gap-1">
-                            <div className="bg-tertiary-bg h-4 w-10 rounded" />
-                            <div className="bg-tertiary-bg h-4 w-10 rounded" />
+                            <div className="bg-quaternary-bg/70 h-4 w-10 rounded" />
+                            <div className="bg-quaternary-bg/70 h-4 w-10 rounded" />
                           </div>
                         </div>
-                        <div className="bg-tertiary-bg mb-1.5 aspect-video w-full rounded-lg" />
+                        <div className="bg-quaternary-bg/70 mb-1.5 aspect-video w-full rounded-lg" />
                         <div className="space-y-1">
                           {Array.from({ length: 4 }).map((_, j) => (
                             <div
                               key={j}
                               className="bg-tertiary-bg flex items-center justify-between rounded-lg p-1.5"
                             >
-                              <div className="bg-quaternary-bg h-3 w-10 rounded" />
-                              <div className="bg-quaternary-bg h-5 w-14 rounded-md" />
+                              <div className="bg-quaternary-bg/70 h-3 w-10 rounded" />
+                              <div className="bg-quaternary-bg/70 h-5 w-14 rounded-md" />
                             </div>
                           ))}
                         </div>
                         <div className="mt-2 grid grid-cols-2 gap-1.5">
-                          <div className="bg-tertiary-bg h-7 rounded-md" />
-                          <div className="bg-tertiary-bg h-7 rounded-md" />
+                          <div className="bg-quaternary-bg/70 h-7 rounded-md" />
+                          <div className="bg-quaternary-bg/70 h-7 rounded-md" />
                         </div>
                       </div>
                     ))}

@@ -3,7 +3,12 @@
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
+import {
+  useQueryStates,
+  parseAsArrayOf,
+  parseAsInteger,
+  parseAsString,
+} from "nuqs";
 
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -24,7 +29,6 @@ import { SuggestionGuidelinesDialog } from "@/components/Items/Suggestions/Sugge
 import { SuggesterLeaderboard } from "@/components/Items/Suggestions/SuggesterLeaderboard";
 import { VotersModal } from "@/components/Items/Suggestions/VotersModal";
 import { ReportSuggestionModal } from "@/components/Items/Suggestions/ReportSuggestionModal";
-import { useSuggestionFilters } from "@/hooks/useSuggestionFilters";
 import { useSuggestionSort } from "@/hooks/useSuggestionSort";
 import { useSuggestionVoting } from "@/hooks/useSuggestionVoting";
 import { useSuggestionReporting } from "@/hooks/useSuggestionReporting";
@@ -39,7 +43,10 @@ import {
   ProfanityError,
   RateLimitError,
 } from "@/components/Items/Suggestions/errors";
-import { GUIDELINES_DISMISSED_KEY } from "@/components/Items/Suggestions/shared";
+import {
+  GUIDELINES_DISMISSED_KEY,
+  SUGGESTION_FIELDS,
+} from "@/components/Items/Suggestions/shared";
 import RelatedValuePages from "@/components/Values/RelatedValuePages";
 import { getSortLabel } from "@/utils/api/sortGroups";
 
@@ -54,11 +61,23 @@ export default function ValueSuggestionsPage() {
   } = useAuthContext();
   const ban = bans["value_suggestions"] ?? null;
 
-  const [{ query: urlQuery, page, sort, submit }, setParams] = useQueryStates({
+  const [
+    {
+      query: urlQuery,
+      page,
+      sort,
+      submit,
+      type: typeFilter,
+      field: fieldFilter,
+    },
+    setParams,
+  ] = useQueryStates({
     query: parseAsString.withDefault(""),
     page: parseAsInteger.withDefault(1),
     sort: parseAsString,
     submit: parseAsString,
+    type: parseAsString.withDefault("All"),
+    field: parseAsArrayOf(parseAsString).withDefault([]),
   });
   const [hasSearchText, setHasSearchText] = useState(!!urlQuery);
   const {
@@ -75,7 +94,7 @@ export default function ValueSuggestionsPage() {
     pendingTypes,
     fetchSuggestions,
     beginPageChange,
-  } = useSuggestionsFeed({ urlQuery, sort, page });
+  } = useSuggestionsFeed({ urlQuery, sort, page, typeFilter, fieldFilter });
   const {
     votingIds,
     votingTypes,
@@ -96,6 +115,9 @@ export default function ValueSuggestionsPage() {
     setBan,
     sort,
     page,
+    urlQuery,
+    typeFilter,
+    fieldFilter,
   });
   const {
     reportModalOpen,
@@ -217,15 +239,6 @@ export default function ValueSuggestionsPage() {
           flag.flag === "is_vtm") &&
         flag.enabled !== false,
     ) ?? false;
-  const {
-    typeFilter,
-    fieldFilter,
-    filteredSuggestions,
-    suggestionItemTypes,
-    suggestionFields,
-    setTypeFilter,
-    setFieldFilter,
-  } = useSuggestionFilters(suggestions, sort, canSeeVt);
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -245,22 +258,25 @@ export default function ValueSuggestionsPage() {
   };
 
   const handleTypeFilterChange = (value: string) => {
-    setTypeFilter(value);
-    void setParams({ page: null });
+    void setParams({ type: value === "All" ? null : value, page: null });
   };
 
   const handleFieldFilterChange = (value: string) => {
-    setFieldFilter(value);
-    void setParams({ page: null });
+    void setParams((previous) => ({
+      field:
+        value === "All"
+          ? null
+          : previous.field.includes(value)
+            ? previous.field.filter((field) => field !== value)
+            : [...previous.field, value],
+      page: null,
+    }));
   };
 
   const handleClearAllFilters = () => {
-    setTypeFilter("All");
-    setFieldFilter("All");
     if (searchInputRef.current) searchInputRef.current.value = "";
     setHasSearchText(false);
-    if (defaultSort && sort !== defaultSort) handleSortChange(defaultSort);
-    void setParams({ query: null, page: null });
+    void setParams({ query: null, page: null, type: null, field: null });
   };
 
   // Keep input in sync when URL changes externally (back/forward navigation)
@@ -507,9 +523,6 @@ export default function ValueSuggestionsPage() {
             sortGroups={sortGroups}
             sort={sort}
             canSeeVt={canSeeVt}
-            suggestionsError={suggestionsError}
-            noSuggestionsFound={noSuggestionsFound}
-            suggestionsCount={suggestions.length}
             searchInputRef={searchInputRef}
             isSearchLoading={isSearchLoading}
             hasSearchText={hasSearchText}
@@ -528,10 +541,9 @@ export default function ValueSuggestionsPage() {
             }}
             typeFilter={typeFilter}
             onTypeFilterChange={handleTypeFilterChange}
-            suggestionItemTypes={suggestionItemTypes}
             fieldFilter={fieldFilter}
             onFieldFilterChange={handleFieldFilterChange}
-            suggestionFields={suggestionFields}
+            suggestionFields={SUGGESTION_FIELDS}
             pendingNew={pendingNew}
             pendingTypes={pendingTypes}
             onSortChange={handleSortChange}
@@ -565,12 +577,7 @@ export default function ValueSuggestionsPage() {
             )}
           </div>
 
-          <p className="border-border-card bg-tertiary-bg text-secondary-text mb-4 flex items-start gap-2 rounded-lg border px-3 py-2 text-sm">
-            <Icon
-              icon="material-symbols:info-outline-rounded"
-              className="text-link mt-0.5 h-4 w-4 shrink-0"
-              inline
-            />
+          <p className="bg-button-info/10 border-button-info text-secondary-text mb-4 rounded-lg border p-4 text-sm shadow-sm">
             Please note that a high upvote count does not guarantee a suggestion
             will be accepted.
           </p>
@@ -579,18 +586,17 @@ export default function ValueSuggestionsPage() {
             loadingSuggestions={loadingSuggestions}
             noSuggestionsFound={noSuggestionsFound}
             suggestionsError={suggestionsError}
-            filteredSuggestions={filteredSuggestions}
+            filteredSuggestions={suggestions}
             isAuthenticated={isAuthenticated}
             userId={user?.id}
             userHasRoblox={Boolean(user?.roblox_id)}
             isBanned={Boolean(ban)}
             urlQuery={urlQuery}
             activeSortLabel={activeSortLabel}
+            typeFilter={typeFilter}
+            fieldFilter={fieldFilter}
             hasActiveFilters={Boolean(
-              urlQuery ||
-              activeSortLabel ||
-              typeFilter !== "All" ||
-              fieldFilter !== "All",
+              urlQuery || typeFilter !== "All" || fieldFilter.length > 0,
             )}
             totalPages={totalPages}
             page={page}

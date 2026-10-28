@@ -29,8 +29,8 @@ function DuperRowSkeleton() {
 function DupesTabSkeleton() {
   return (
     <div className="animate-pulse space-y-6">
-      <div className="bg-quaternary-bg h-8 w-36 rounded" />
-      <div className="bg-quaternary-bg h-12 w-full rounded-lg" />
+      <div className="bg-quaternary-bg/70 h-8 w-36 rounded" />
+      <div className="bg-quaternary-bg/70 h-12 w-full rounded-lg" />
       <div className="border-border-card bg-secondary-bg divide-border-card divide-y rounded-lg border">
         {Array.from({ length: 8 }).map((_, i) => (
           <DuperRowSkeleton key={i} />

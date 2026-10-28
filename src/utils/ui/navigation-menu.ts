@@ -135,7 +135,8 @@ export const navigationSections: NavigationSection[] = [
         href: "/og",
         icon: "material-symbols:fingerprint-rounded",
         title: "OG Finder",
-        description: "Discover who holds the rarest original items",
+        description:
+          "Track down OG items you traded away and see who has them now",
       },
       {
         href: "/dupes",

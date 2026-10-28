@@ -33,6 +33,36 @@ function renderCard(card: ReactNode) {
   );
 }
 
+test("matching icons appear in all card views, missing icons stay hidden", () => {
+  for (const markerName of ["Tomb", "Museum", "MissingRobberyIcon"]) {
+    const entry = { ...robbery, marker_name: markerName, name: markerName };
+    const views = [
+      <RobberyCard key="individual" {...cardProps} robbery={entry} />,
+      <RobberyComboCard
+        key="combo"
+        {...cardProps}
+        comboId="museum-power"
+        comboLabel="Museum + Power"
+        serverId={entry.job_id}
+        robberies={[entry]}
+      />,
+      <RobberyServerGroupCard
+        key="grouped"
+        {...cardProps}
+        serverId={entry.job_id}
+        robberies={[entry]}
+      />,
+    ];
+
+    for (const view of views) {
+      const markup = renderCard(view);
+      expect(markup.includes("robbery-marker-icon")).toBe(
+        markerName !== "MissingRobberyIcon",
+      );
+    }
+  }
+});
+
 test("casino countdown appears only while a casino robbery is in progress", () => {
   const clock = spyOn(Date, "now").mockReturnValue(1_000_000);
   try {

@@ -5,11 +5,37 @@ import {
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
 export type DesktopNavigation = "sidebar" | "top-bar";
+export type DesktopSidebarBehavior = "expanded" | "hover" | "compact";
 export const DESKTOP_NAVIGATION_KEY = "desktop-navigation";
 export const DESKTOP_SIDEBAR_COLLAPSED_KEY = "desktop-sidebar-collapsed";
+export const DESKTOP_SIDEBAR_HOVER_KEY = "desktop-sidebar-hover";
 
 // Set the layout before first paint; the server still renders both menus.
-export const DESKTOP_NAVIGATION_INIT_SCRIPT = `(function(){var n='sidebar',c=false;try{if(localStorage.getItem('${DESKTOP_NAVIGATION_KEY}')==='top-bar')n='top-bar';c=localStorage.getItem('${DESKTOP_SIDEBAR_COLLAPSED_KEY}')==='true';}catch(e){}document.documentElement.setAttribute('data-desktop-navigation',n);document.documentElement.setAttribute('data-desktop-sidebar-collapsed',String(c));})();`;
+export const DESKTOP_NAVIGATION_INIT_SCRIPT = `(function(){var n='sidebar',c=false,h=false;try{if(localStorage.getItem('${DESKTOP_NAVIGATION_KEY}')==='top-bar')n='top-bar';c=localStorage.getItem('${DESKTOP_SIDEBAR_COLLAPSED_KEY}')==='true';h=localStorage.getItem('${DESKTOP_SIDEBAR_HOVER_KEY}')==='true';}catch(e){}document.documentElement.setAttribute('data-desktop-navigation',n);document.documentElement.setAttribute('data-desktop-sidebar-collapsed',String(c));document.documentElement.setAttribute('data-desktop-sidebar-hover',String(h));})();`;
+
+export function getDesktopSidebarBehavior(): DesktopSidebarBehavior {
+  if (!getDesktopSidebarCollapsed()) return "expanded";
+  return document.documentElement.dataset.desktopSidebarHover === "true"
+    ? "hover"
+    : "compact";
+}
+
+function applyDesktopSidebarHover(hover: boolean) {
+  document.documentElement.dataset.desktopSidebarHover = String(hover);
+  safeLocalStorage.setItem(DESKTOP_SIDEBAR_HOVER_KEY, String(hover));
+  window.dispatchEvent(new Event("desktopNavigationChanged"));
+}
+
+export function setDesktopSidebarBehavior(behavior: DesktopSidebarBehavior) {
+  setDesktopSidebarCollapsed(behavior !== "expanded");
+  const hover = behavior === "hover";
+  applyDesktopSidebarHover(hover);
+  window.dispatchEvent(
+    new CustomEvent("sendRealtimePreference", {
+      detail: { key: "desktop_sidebar_hover", value: hover },
+    }),
+  );
+}
 
 export function getDesktopSidebarCollapsed(): boolean {
   return (
@@ -103,13 +129,22 @@ export function syncDesktopNavigationPreferences() {
     ).detail;
     if (key === "desktop_navigation") apply(value);
     if (key === "desktop_sidebar_collapsed") applyCollapsed(value);
+    if (key === "desktop_sidebar_hover")
+      applyDesktopSidebarHover(value === true);
   };
   const handlePreferences = (event: Event) => {
     const preferences = (event as CustomEvent<Record<string, unknown>>).detail;
     apply(preferences.desktop_navigation);
     applyCollapsed(preferences.desktop_sidebar_collapsed);
+    applyDesktopSidebarHover(preferences.desktop_sidebar_hover === true);
   };
   const handleDeleted = (event: Event) => {
+    if (
+      (event as CustomEvent<{ key: string }>).detail.key ===
+      "desktop_sidebar_hover"
+    ) {
+      applyDesktopSidebarHover(false);
+    }
     if (
       (event as CustomEvent<{ key: string }>).detail.key ===
       "desktop_sidebar_collapsed"
@@ -129,6 +164,9 @@ export function syncDesktopNavigationPreferences() {
   if (hasSyncedPreferences()) {
     apply(getCachedPreference("desktop_navigation"));
     applyCollapsed(getCachedPreference("desktop_sidebar_collapsed"));
+    applyDesktopSidebarHover(
+      getCachedPreference("desktop_sidebar_hover") === true,
+    );
   }
   return () => {
     window.removeEventListener("realtimePreference", handlePreference);

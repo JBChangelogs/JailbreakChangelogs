@@ -4,6 +4,7 @@ import {
   DESKTOP_NAVIGATION_INIT_SCRIPT,
   DESKTOP_NAVIGATION_KEY,
   DESKTOP_SIDEBAR_COLLAPSED_KEY,
+  DESKTOP_SIDEBAR_HOVER_KEY,
 } from "./desktopNavigation";
 
 test("restores navigation before paint and falls back safely for invalid or unavailable storage", () => {
@@ -21,6 +22,7 @@ test("restores navigation before paint and falls back safely for invalid or unav
           expect([
             DESKTOP_NAVIGATION_KEY,
             DESKTOP_SIDEBAR_COLLAPSED_KEY,
+            DESKTOP_SIDEBAR_HOVER_KEY,
           ]).toContain(key);
           if (stored instanceof Error) throw stored;
           return stored;
@@ -61,6 +63,35 @@ test("restores sidebar collapse before paint with safe defaults", () => {
       },
     });
     expect(attributes.get("data-desktop-sidebar-collapsed")).toBe(expected);
+  }
+});
+
+test("restores hover behavior before paint and defaults old browsers to manual expansion", () => {
+  for (const stored of [
+    "true",
+    "false",
+    null,
+    "invalid",
+    new Error("Storage blocked"),
+  ]) {
+    const attributes = new Map<string, string>();
+    runInNewContext(DESKTOP_NAVIGATION_INIT_SCRIPT, {
+      localStorage: {
+        getItem(key: string) {
+          if (stored instanceof Error) throw stored;
+          return key === DESKTOP_SIDEBAR_HOVER_KEY ? stored : "true";
+        },
+      },
+      document: {
+        documentElement: {
+          setAttribute: (name: string, value: string) =>
+            attributes.set(name, value),
+        },
+      },
+    });
+    expect(attributes.get("data-desktop-sidebar-hover")).toBe(
+      String(stored === "true"),
+    );
   }
 });
 
@@ -147,7 +178,7 @@ test("navigation and collapse send local changes and apply realtime updates with
   );
   expect(exports.getDesktopNavigation()).toBe("sidebar");
   expect(outgoing).toHaveLength(1);
-  expect(changes).toBe(5);
+  expect(changes).toBe(6);
   exports.setDesktopSidebarCollapsed(true);
   expect(exports.getDesktopSidebarCollapsed()).toBe(true);
   expect(stored.get(DESKTOP_SIDEBAR_COLLAPSED_KEY)).toBe("true");
@@ -238,4 +269,46 @@ test("navigation and collapse send local changes and apply realtime updates with
   expect(exports.getDesktopSidebarCollapsed()).toBe(true);
   expect(outgoing).toHaveLength(3);
   cleanupCached();
+
+  const cleanupHover = exports.syncDesktopNavigationPreferences();
+  expect(exports.getDesktopSidebarBehavior()).toBe("compact");
+  for (const behavior of ["expanded", "hover", "compact"] as const) {
+    exports.setDesktopSidebarBehavior(behavior);
+    expect(exports.getDesktopSidebarBehavior()).toBe(behavior);
+    expect(stored.get(DESKTOP_SIDEBAR_HOVER_KEY)).toBe(
+      String(behavior === "hover"),
+    );
+    pendingSend?.();
+    expect(outgoing.slice(-2)).toEqual([
+      { key: "desktop_sidebar_hover", value: behavior === "hover" },
+      { key: "desktop_sidebar_collapsed", value: behavior !== "expanded" },
+    ]);
+  }
+  const sent = outgoing.length;
+  browser.dispatchEvent(
+    new CustomEvent("realtimePreference", {
+      detail: { key: "desktop_sidebar_hover", value: true },
+    }),
+  );
+  expect(exports.getDesktopSidebarBehavior()).toBe("hover");
+  browser.dispatchEvent(
+    new CustomEvent("realtimePreference", {
+      detail: { key: "desktop_sidebar_collapsed", value: false },
+    }),
+  );
+  expect(exports.getDesktopSidebarBehavior()).toBe("expanded");
+  browser.dispatchEvent(
+    new CustomEvent("realtimePreferences", {
+      detail: { desktop_sidebar_collapsed: true, desktop_sidebar_hover: true },
+    }),
+  );
+  expect(exports.getDesktopSidebarBehavior()).toBe("hover");
+  browser.dispatchEvent(
+    new CustomEvent("realtimePreferenceDeleted", {
+      detail: { key: "desktop_sidebar_hover" },
+    }),
+  );
+  expect(exports.getDesktopSidebarBehavior()).toBe("compact");
+  expect(outgoing).toHaveLength(sent);
+  cleanupHover();
 });

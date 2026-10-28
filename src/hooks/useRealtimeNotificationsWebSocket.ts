@@ -549,6 +549,7 @@ export function useRealtimeNotificationsWebSocket(
                     ? "Notifications and messages may be delayed. Reconnect to resume live updates."
                     : "Notifications and messages may be delayed. We're reconnecting automatically.",
             duration: Infinity,
+            closeButton: true,
             action: {
               label: "Reconnect",
               onClick: () => {

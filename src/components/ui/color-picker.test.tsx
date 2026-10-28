@@ -10,6 +10,7 @@ interface Node {
     children?: unknown;
     value?: string;
     maxLength?: number;
+    className?: string;
     "aria-label"?: string;
     "aria-hidden"?: boolean;
     onChange?: (event: { target: { value: string } }) => void;
@@ -67,12 +68,13 @@ test("hex input keeps a fixed prefix while clearing, typing, pasting and picking
       },
     },
   );
-  const render = () => {
+  const render = (compact = false) => {
     cursor = 0;
     return nodes(
       exports.ColorPicker({
         value: "#5865f2",
         onChange: (hex: string) => changes.push(hex),
+        compact,
       }),
     );
   };
@@ -111,4 +113,19 @@ test("hex input keeps a fixed prefix while clearing, typing, pasting and picking
     .props.onClick?.();
   expect(changes.at(-1)).toBe("#ed4245");
   expect(input().props.value).toBe("ed4245");
+  const compact = render(true);
+  expect(
+    compact.some((node) => node.props["aria-label"]?.startsWith("Use #")),
+  ).toBe(false);
+  expect(
+    compact.find(
+      (node) => node.props["aria-label"] === "Saturation and brightness",
+    )?.props.className,
+  ).toContain("h-24");
+  expect(compact.some((node) => node.props["aria-label"] === "Hue")).toBe(true);
+  const compactHex = compact.find(
+    (node) => node.props["aria-label"] === "Hex color",
+  )!;
+  compactHex.props.onChange?.({ target: { value: "123456" } });
+  expect(changes.at(-1)).toBe("#123456");
 });

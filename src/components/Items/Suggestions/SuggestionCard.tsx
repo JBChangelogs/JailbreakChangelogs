@@ -2,6 +2,7 @@
 
 import type { MouseEvent } from "react";
 import Image from "next/image";
+import DriftPreview from "@/components/Items/DriftPreview";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -20,6 +21,7 @@ import {
   getVideoPath,
   handleImageError,
   isVideoItem,
+  isDriftItem,
 } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { formatFullValue } from "@/utils/trading/values";
@@ -85,6 +87,8 @@ export function SuggestionCard({
             muted
             loop
           />
+        ) : item && isDriftItem(item.type) ? (
+          <DriftPreview key={item.name} name={item.name} />
         ) : (
           <Image
             placeholder={IMAGE_PLACEHOLDER}

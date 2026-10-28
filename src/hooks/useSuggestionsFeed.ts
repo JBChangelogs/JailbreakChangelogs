@@ -10,33 +10,22 @@ import type {
   SuggestionsResponse,
 } from "@/components/Items/Suggestions/types";
 
-const log = createLogger("API");
+import {
+  getSuggestionFeedRequest,
+  type SuggestionFeedOptions,
+} from "@/utils/api/suggestionFeed";
 
-interface UseSuggestionsFeedOptions {
-  urlQuery: string;
-  sort: string | null;
-  page: number;
-}
+const log = createLogger("API");
 
 type FeedData = SuggestionsResponse & { noSuggestionsFound: boolean };
 
-function feedKey(urlQuery: string, sort: string | null, page: number) {
-  return ["value-suggestions-feed", urlQuery.trim(), sort, page] as const;
-}
-
 async function loadFeed(
-  urlQuery: string,
-  sort: string | null,
-  page: number,
+  options: SuggestionFeedOptions,
   signal: AbortSignal,
 ): Promise<FeedData> {
-  const query = new URLSearchParams({ page: String(page) });
-  if (sort !== null) query.set("sort", sort);
+  const { page, urlQuery } = options;
   const isSearching = urlQuery.trim().length > 0;
-  if (isSearching) query.set("query", urlQuery.trim());
-  const endpoint = isSearching
-    ? `/v2/value-suggestions/search?${query}`
-    : `/v2/value-suggestions?${query}`;
+  const { endpoint } = getSuggestionFeedRequest(options);
   const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL!, endpoint);
   const response = await fetch(url, {
     credentials: "include",
@@ -66,19 +55,29 @@ export function useSuggestionsFeed({
   urlQuery,
   sort,
   page,
-}: UseSuggestionsFeedOptions) {
+  typeFilter = "All",
+  fieldFilter = EMPTY_FIELDS,
+}: SuggestionFeedOptions) {
   const queryClient = useQueryClient();
   const [pageChanging, setPageChanging] = useState(false);
   const [pendingNew, setPendingNew] = useState(0);
   const [pendingTypes, setPendingTypes] = useState<Set<string>>(new Set());
   const hasLoadedOnceRef = useRef(false);
   const key = useMemo(
-    () => feedKey(urlQuery, sort, page),
-    [urlQuery, sort, page],
+    () =>
+      getSuggestionFeedRequest({
+        urlQuery,
+        sort,
+        page,
+        typeFilter,
+        fieldFilter,
+      }).queryKey,
+    [urlQuery, sort, page, typeFilter, fieldFilter],
   );
   const feedQuery = useQuery({
     queryKey: key,
-    queryFn: ({ signal }) => loadFeed(urlQuery, sort, page, signal),
+    queryFn: ({ signal }) =>
+      loadFeed({ urlQuery, sort, page, typeFilter, fieldFilter }, signal),
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     retry: false,
@@ -122,9 +121,18 @@ export function useSuggestionsFeed({
       });
       try {
         await queryClient.fetchQuery({
-          queryKey: feedKey(urlQuery, sort, requestedPage),
+          queryKey: getSuggestionFeedRequest({
+            urlQuery,
+            sort,
+            page: requestedPage,
+            typeFilter,
+            fieldFilter,
+          }).queryKey,
           queryFn: ({ signal }) =>
-            loadFeed(urlQuery, sort, requestedPage, signal),
+            loadFeed(
+              { urlQuery, sort, page: requestedPage, typeFilter, fieldFilter },
+              signal,
+            ),
           staleTime: 30_000,
           gcTime: 5 * 60_000,
           retry: false,
@@ -133,7 +141,7 @@ export function useSuggestionsFeed({
         // The active query exposes the error to the results UI.
       }
     },
-    [queryClient, sort, urlQuery],
+    [queryClient, sort, urlQuery, typeFilter, fieldFilter],
   );
 
   useEffect(() => {
@@ -173,3 +181,5 @@ export function useSuggestionsFeed({
     beginPageChange: () => setPageChanging(true),
   };
 }
+
+const EMPTY_FIELDS: string[] = [];

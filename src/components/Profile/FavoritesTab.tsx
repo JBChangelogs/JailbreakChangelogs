@@ -233,7 +233,7 @@ export default function FavoritesTab({
   if (loading) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
-        <div className="bg-quaternary-bg mb-4 h-6 w-36 animate-pulse rounded" />
+        <div className="bg-quaternary-bg/70 mb-4 h-6 w-36 animate-pulse rounded" />
         <FavoritesTabSkeleton preview={preview} />
       </div>
     );

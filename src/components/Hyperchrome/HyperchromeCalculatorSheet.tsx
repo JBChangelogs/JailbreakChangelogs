@@ -149,28 +149,28 @@ export default function HyperchromeCalculatorModal({
       return (
         <div className="space-y-6">
           <div className="border-border-card bg-secondary-bg rounded-lg border p-6 shadow-lg">
-            <div className="bg-button-secondary mb-4 h-5 w-48 animate-pulse rounded" />
+            <div className="bg-quaternary-bg/70 mb-4 h-5 w-48 animate-pulse rounded" />
 
             <div className="mb-4 space-y-2">
-              <div className="bg-button-secondary h-4 w-full animate-pulse rounded" />
-              <div className="bg-button-secondary h-4 w-5/6 animate-pulse rounded" />
-              <div className="bg-button-secondary h-4 w-2/3 animate-pulse rounded" />
+              <div className="bg-quaternary-bg/70 h-4 w-full animate-pulse rounded" />
+              <div className="bg-quaternary-bg/70 h-4 w-5/6 animate-pulse rounded" />
+              <div className="bg-quaternary-bg/70 h-4 w-2/3 animate-pulse rounded" />
             </div>
 
             <div className="mb-4 space-y-3">
-              <div className="bg-button-secondary border-border-card h-12 w-full animate-pulse rounded border" />
-              <div className="bg-button-secondary border-border-card h-12 w-full animate-pulse rounded border" />
+              <div className="bg-quaternary-bg/70 border-border-card h-12 w-full animate-pulse rounded border" />
+              <div className="bg-quaternary-bg/70 border-border-card h-12 w-full animate-pulse rounded border" />
             </div>
 
             <div className="space-y-3">
-              <div className="bg-button-secondary border-border-card h-24 w-full animate-pulse rounded border" />
-              <div className="bg-button-secondary border-border-card h-24 w-full animate-pulse rounded border" />
+              <div className="bg-quaternary-bg/70 border-border-card h-24 w-full animate-pulse rounded border" />
+              <div className="bg-quaternary-bg/70 border-border-card h-24 w-full animate-pulse rounded border" />
             </div>
           </div>
           <div className="space-y-3">
-            <div className="bg-button-secondary h-6 w-48 animate-pulse rounded" />
-            <div className="bg-button-secondary h-4 w-full animate-pulse rounded" />
-            <div className="bg-button-secondary h-4 w-5/6 animate-pulse rounded" />
+            <div className="bg-quaternary-bg/70 h-6 w-48 animate-pulse rounded" />
+            <div className="bg-quaternary-bg/70 h-4 w-full animate-pulse rounded" />
+            <div className="bg-quaternary-bg/70 h-4 w-5/6 animate-pulse rounded" />
           </div>
         </div>
       );

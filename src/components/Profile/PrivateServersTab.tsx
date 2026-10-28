@@ -28,17 +28,17 @@ function PrivateServersTabSkeleton() {
           className="border-border-card bg-tertiary-bg rounded-xl border p-4 sm:p-5"
         >
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="bg-quaternary-bg h-5 w-28 rounded" />
+            <div className="bg-quaternary-bg/70 h-5 w-28 rounded" />
             <div className="flex gap-2">
-              <div className="bg-quaternary-bg h-8 w-24 rounded-lg" />
-              <div className="bg-quaternary-bg h-8 w-28 rounded-lg" />
+              <div className="bg-quaternary-bg/70 h-8 w-24 rounded-lg" />
+              <div className="bg-quaternary-bg/70 h-8 w-28 rounded-lg" />
             </div>
           </div>
           <div className="mb-4 flex flex-wrap gap-2">
-            <div className="bg-quaternary-bg h-7 w-44 rounded-md" />
-            <div className="bg-quaternary-bg h-7 w-28 rounded-md" />
+            <div className="bg-quaternary-bg/70 h-7 w-44 rounded-md" />
+            <div className="bg-quaternary-bg/70 h-7 w-28 rounded-md" />
           </div>
-          <div className="bg-quaternary-bg h-20 w-full rounded-lg" />
+          <div className="bg-quaternary-bg/70 h-20 w-full rounded-lg" />
         </div>
       ))}
     </div>
@@ -94,7 +94,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
   if (isLoading) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
-        <div className="bg-quaternary-bg mb-4 h-6 w-36 animate-pulse rounded" />
+        <div className="bg-quaternary-bg/70 mb-4 h-6 w-36 animate-pulse rounded" />
         <PrivateServersTabSkeleton />
       </div>
     );

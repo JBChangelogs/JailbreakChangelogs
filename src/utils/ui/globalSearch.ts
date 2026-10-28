@@ -23,6 +23,20 @@ export function getGlobalUserQuery(query: string): string | null {
   return trimmed.slice(1).trim();
 }
 
+const CHECK_PREFIXES: Record<string, string> = {
+  inv: "/inventories",
+  dupe: "/dupes",
+  og: "/og",
+};
+
+export function getGlobalCheckQuery(
+  query: string,
+): { href: string; target: string } | null {
+  const match = query.trim().match(/^(inv|dupe|og):\s*(.*)$/i);
+  if (!match) return null;
+  return { href: CHECK_PREFIXES[match[1].toLowerCase()], target: match[2] };
+}
+
 export type GlobalSearchResult = {
   title: string;
   group: string;
@@ -188,6 +202,20 @@ export function getGlobalSearchResults(
   query: string,
 ): GlobalSearchResult[] {
   if (getGlobalUserQuery(query) !== null) return [];
+  const check = getGlobalCheckQuery(query);
+  if (check) {
+    // Roblox usernames are letters, digits and underscores; IDs are digits.
+    if (!/^\w+$/.test(check.target)) return [];
+    const route = routes.find((route) => route.href === check.href)!;
+    return [
+      {
+        ...route,
+        title: `${route.title}: ${check.target}`,
+        group: "Roblox lookup",
+        href: `${check.href}/${check.target}`,
+      },
+    ];
+  }
   const term = query.trim().toLowerCase();
   if (!term) return quickLinks;
   const matches = index.search(term).filter(

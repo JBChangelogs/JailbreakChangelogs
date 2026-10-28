@@ -6,11 +6,10 @@ import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { bangers } from "@/app/fonts";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Button } from "@/components/ui/button";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 
 interface UserScan {
@@ -53,6 +52,10 @@ export default function MostScannedLeaderboardClient({
   const [searchTerm, setSearchTerm] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const columnCount = useMediaQuery("(min-width: 1280px)") ? 2 : 1;
+  const leaderboardRanks = new Map(
+    initialLeaderboard.map((user, index) => [user.user_id, index + 1]),
+  );
 
   // Extract user IDs from leaderboard data
   const userIds = initialLeaderboard.map((user) => user.user_id);
@@ -124,25 +127,24 @@ export default function MostScannedLeaderboardClient({
     });
   })();
 
-  // TanStack Virtual setup for performance with large datasets
-  // Only renders visible items (~10-15 at a time) for 60FPS scrolling
+  // Virtualize rows so ranks read left to right on wide screens.
   const virtualizer = useVirtualizer({
-    count: filteredLeaderboard.length,
+    count: Math.ceil(filteredLeaderboard.length / columnCount),
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 100,
+    estimateSize: () => 80,
     overscan: 5,
   });
 
   // Recalculate heights on window resize for responsive behavior
   useEffect(() => {
+    virtualizer.measure();
     const handleResize = () => {
       virtualizer.measure();
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [columnCount, virtualizer]);
 
   if (!initialLeaderboard || initialLeaderboard.length === 0) {
     return (
@@ -183,22 +185,23 @@ export default function MostScannedLeaderboardClient({
   }
 
   return (
-    <div className="mt-8">
-      <h2 className="text-primary-text mb-4 text-xl font-bold">
-        Most Scanned Players ({filteredLeaderboard.length}
+    <div className="border-border-card bg-secondary-bg mt-8 overflow-hidden rounded-xl border">
+      <h2 className="text-primary-text border-border-card mb-4 border-b px-4 py-5 text-lg font-semibold sm:px-6">
+        Most scanned players ({filteredLeaderboard.length}
         {searchTerm && <span>{` of ${initialLeaderboard.length}`}</span>})
       </h2>
 
       {/* Search Input */}
       {initialLeaderboard.length > 10 && (
-        <div className="mb-4">
+        <div className="mb-4 px-4 sm:px-6">
           <div className="relative">
             <input
               type="text"
               placeholder="Search by username or ID..."
+              aria-label="Search players by username or ID"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
             />
             <Icon
               icon="heroicons:magnifying-glass"
@@ -220,7 +223,10 @@ export default function MostScannedLeaderboardClient({
       {/* Virtualized leaderboard container */}
       <div
         ref={parentRef}
-        className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-128 scrollbar-thin scrollbar-track-transparent overflow-y-auto pr-2"
+        role="region"
+        aria-label="Most scanned players ranked list"
+        tabIndex={0}
+        className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus focus-visible:outline-border-focus max-h-128 scrollbar-thin scrollbar-track-transparent overflow-y-auto overscroll-contain px-4 focus-visible:outline-2 focus-visible:-outline-offset-2 sm:px-6"
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "var(--color-border-primary) transparent",
@@ -240,111 +246,81 @@ export default function MostScannedLeaderboardClient({
               position: "relative",
             }}
           >
-            {virtualizer.getVirtualItems().map((virtualItem) => {
-              const user = filteredLeaderboard[virtualItem.index];
-              const index = virtualItem.index;
+            {virtualizer.getVirtualItems().map((virtualRow) => (
+              <div
+                key={virtualRow.key}
+                data-index={virtualRow.index}
+                ref={virtualizer.measureElement}
+                className="absolute top-0 left-0 grid w-full gap-x-8 xl:grid-cols-2"
+                style={{ transform: `translateY(${virtualRow.start}px)` }}
+              >
+                {filteredLeaderboard
+                  .slice(
+                    virtualRow.index * columnCount,
+                    (virtualRow.index + 1) * columnCount,
+                  )
+                  .map((user) => {
+                    const rank = leaderboardRanks.get(user.user_id)!;
+                    const userData = userDataMap[user.user_id];
+                    const displayName =
+                      userData?.displayName ||
+                      userData?.name ||
+                      `User ${user.user_id}`;
+                    const username = userData?.name || user.user_id;
 
-              const userData = userDataMap[user.user_id];
-              const displayName =
-                userData?.displayName ||
-                userData?.name ||
-                `User ${user.user_id}`;
-              const username = userData?.name || user.user_id;
-              const avatarUrl = getUserAvatar(user.user_id);
-
-              return (
-                <div
-                  key={user.user_id}
-                  data-index={virtualItem.index}
-                  ref={virtualizer.measureElement}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                >
-                  <div
-                    className={`mb-3 rounded-lg border p-3 transition-colors ${
-                      index <= 2
-                        ? ""
-                        : "border-border-card bg-tertiary-bg hover:border-border-focus"
-                    }`}
-                    style={{
-                      ...(index === 0 && {
-                        background:
-                          "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
-                        borderColor: "hsl(45, 100%, 50%, 0.5)",
-                      }),
-                      ...(index === 1 && {
-                        background:
-                          "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
-                        borderColor: "hsl(0, 0%, 75%, 0.5)",
-                      }),
-                      ...(index === 2 && {
-                        background:
-                          "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
-                        borderColor: "hsl(30, 100%, 50%, 0.5)",
-                      }),
-                    }}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div
-                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-8 sm:w-8 ${
-                            index <= 2 ? "text-black" : "text-primary-text"
-                          }`}
-                          style={{
-                            ...(index === 0 && {
-                              background:
-                                "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
-                            }),
-                            ...(index === 1 && {
-                              background:
-                                "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
-                            }),
-                            ...(index === 2 && {
-                              background:
-                                "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
-                            }),
-                          }}
-                        >
-                          #{index + 1}
-                        </div>
-                        <div className="bg-quaternary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                          <LeaderboardAvatar
-                            avatarUrl={avatarUrl}
-                            displayName={displayName}
-                          />
-                        </div>
-                        <div className="flex min-w-0 flex-col">
-                          <a
-                            href={`https://www.roblox.com/users/${user.user_id}/profile`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`${bangers.className} text-primary-text hover:text-link-hover truncate text-xl tracking-wide transition-colors`}
-                          >
-                            {username}
-                          </a>
-                          <span className="text-secondary-text truncate text-xs">
-                            {user.upsert_count.toLocaleString()} scans
-                          </span>
-                        </div>
-                      </div>
-                      <Button asChild size="sm" className="shrink-0">
+                    return (
+                      <div
+                        key={user.user_id}
+                        className="border-border-card min-w-0 border-b py-1"
+                      >
                         <Link
                           href={`/inventories/${user.user_id}`}
                           prefetch={false}
+                          aria-label={`View ${username}'s inventory`}
+                          className="group hover:bg-tertiary-bg focus-visible:outline-border-focus -mx-2 flex min-w-0 items-center gap-3 rounded-md px-2 py-2 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 sm:gap-4"
                         >
-                          View Inventory
+                          <span
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums ${
+                              rank === 1
+                                ? "bg-amber-400/15 text-amber-400"
+                                : rank === 2
+                                  ? "bg-slate-300/15 text-slate-300"
+                                  : rank === 3
+                                    ? "bg-orange-400/15 text-orange-400"
+                                    : "text-secondary-text"
+                            }`}
+                          >
+                            <span className="sr-only">Rank </span>
+                            {rank}
+                          </span>
+                          <div className="bg-quaternary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                            <LeaderboardAvatar
+                              avatarUrl={getUserAvatar(user.user_id)}
+                              displayName={displayName}
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-primary-text group-hover:text-link block text-sm font-semibold wrap-break-word transition-colors">
+                              {displayName}
+                            </span>
+                            <span className="text-secondary-text block text-xs wrap-break-word">
+                              @{username}
+                            </span>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <span className="text-primary-text block text-base font-semibold tabular-nums">
+                              {user.upsert_count.toLocaleString()}
+                            </span>
+                            <span className="text-secondary-text text-xs">
+                              scans
+                            </span>
+                          </div>
                         </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                      </div>
+                    );
+                  })}
+              </div>
+            ))}
           </div>
         )}
       </div>

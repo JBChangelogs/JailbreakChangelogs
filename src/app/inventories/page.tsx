@@ -94,7 +94,7 @@ export default async function InventoriesPage() {
 function LeaderboardSkeleton() {
   return (
     <div className="mt-8">
-      <div className="bg-button-secondary mb-4 h-6 w-64 animate-pulse rounded"></div>
+      <div className="bg-quaternary-bg/70 mb-4 h-6 w-64 animate-pulse rounded"></div>
       <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
         <div className="max-h-128 space-y-3 overflow-y-auto pr-2">
           {[1, 2, 3, 4, 5].map((i) => (
@@ -103,14 +103,14 @@ function LeaderboardSkeleton() {
               className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
             >
               <div className="flex items-center gap-3">
-                <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
-                <div className="bg-button-secondary h-10 w-10 animate-pulse rounded-full"></div>
+                <div className="bg-quaternary-bg/70 h-8 w-8 animate-pulse rounded-full"></div>
+                <div className="bg-quaternary-bg/70 h-10 w-10 animate-pulse rounded-full"></div>
               </div>
               <div className="flex-1">
-                <div className="bg-button-secondary mb-1 h-4 w-32 animate-pulse rounded"></div>
-                <div className="bg-button-secondary h-3 w-24 animate-pulse rounded"></div>
+                <div className="bg-quaternary-bg/70 mb-1 h-4 w-32 animate-pulse rounded"></div>
+                <div className="bg-quaternary-bg/70 h-3 w-24 animate-pulse rounded"></div>
               </div>
-              <div className="bg-button-secondary h-6 w-16 animate-pulse rounded"></div>
+              <div className="bg-quaternary-bg/70 h-6 w-16 animate-pulse rounded"></div>
             </div>
           ))}
         </div>
