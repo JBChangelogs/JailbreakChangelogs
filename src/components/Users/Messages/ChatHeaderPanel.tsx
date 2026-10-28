@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -59,36 +60,40 @@ export function ChatHeaderPanel({
         </button>
       </ChatHeaderAddon>
       <ChatHeaderAddon>
-        <Link
-          href={`/users/${selectedUser.id}`}
-          prefetch={false}
-          className="relative cursor-pointer rounded-full"
-          aria-label={`View ${getDisplayName(selectedUser)} profile`}
-        >
-          <UserAvatar
-            userId={selectedUser.id}
-            bgClassName="bg-quaternary-bg"
-            avatarHash={selectedUser.avatar}
-            username={selectedUser.username}
-            custom_avatar={selectedUser.custom_avatar}
-            size={8}
-            showBadge={false}
-            settings={selectedUser.settings_v2}
-            premiumType={selectedUser.premiumtype}
-          />
-          {!shouldHidePresence && (
-            <PresenceDot online={isTargetOnline} typing={false} />
-          )}
-        </Link>
+        <UserProfilePopover user={selectedUser}>
+          <Link
+            href={`/users/${selectedUser.id}`}
+            prefetch={false}
+            className="relative cursor-pointer rounded-full"
+            aria-label={`View ${getDisplayName(selectedUser)} profile`}
+          >
+            <UserAvatar
+              userId={selectedUser.id}
+              bgClassName="bg-quaternary-bg"
+              avatarHash={selectedUser.avatar}
+              username={selectedUser.username}
+              custom_avatar={selectedUser.custom_avatar}
+              size={8}
+              showBadge={false}
+              settings={selectedUser.settings_v2}
+              premiumType={selectedUser.premiumtype}
+            />
+            {!shouldHidePresence && (
+              <PresenceDot online={isTargetOnline} typing={false} />
+            )}
+          </Link>
+        </UserProfilePopover>
       </ChatHeaderAddon>
       <ChatHeaderMain>
-        <Link
-          href={`/users/${selectedUser.id}`}
-          prefetch={false}
-          className="text-primary-text min-w-0 flex-1 cursor-pointer truncate text-left text-sm font-semibold hover:underline"
-        >
-          {getDisplayName(selectedUser)}
-        </Link>
+        <UserProfilePopover user={selectedUser}>
+          <Link
+            href={`/users/${selectedUser.id}`}
+            prefetch={false}
+            className="text-primary-text min-w-0 flex-1 cursor-pointer truncate text-left text-sm font-semibold hover:underline"
+          >
+            {getDisplayName(selectedUser)}
+          </Link>
+        </UserProfilePopover>
       </ChatHeaderMain>
       {currentUserId !== selectedUser.id && (
         <ChatHeaderAddon>

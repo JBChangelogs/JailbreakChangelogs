@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { useState } from "react";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
@@ -115,46 +116,48 @@ export default function ContributorsClient({
         key={user.id}
         className="border-border-card bg-secondary-bg group hover:bg-tertiary-bg flex transform cursor-pointer flex-col items-center rounded-xl border p-8 transition-colors duration-300"
       >
-        <Link
-          href={`/users/${user.id}`}
-          prefetch={false}
-          className="flex flex-col items-center"
-        >
-          <div
-            className={`border-border-card relative shrink-0 overflow-hidden border ${avatarContainerShapeClass}`}
-            style={{
-              width: 128,
-              height: 128,
-              minWidth: 128,
-              minHeight: 128,
-            }}
+        <UserProfilePopover user={user}>
+          <Link
+            href={`/users/${user.id}`}
+            prefetch={false}
+            className="flex flex-col items-center"
           >
-            <UserAvatar
-              userId={user.id}
-              avatarHash={user.avatar || null}
-              username={user.username}
-              size={32}
-              showBadge={false}
-              className="border-0"
-              custom_avatar={user.custom_avatar}
-              settings={user.settings_v2}
-              premiumType={user.premiumtype}
-            />
-          </div>
-          <h1 className="text-primary-text group-hover:text-link mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
-            {user.global_name && user.global_name !== "None"
-              ? user.global_name
-              : user.username}
-          </h1>
-          <div className="mt-2">
-            <UserBadges
-              flags={user.flags as UserFlag[]}
-              usernumber={user.usernumber}
-              size="md"
-              noContainer
-            />
-          </div>
-        </Link>
+            <div
+              className={`border-border-card relative shrink-0 overflow-hidden border ${avatarContainerShapeClass}`}
+              style={{
+                width: 128,
+                height: 128,
+                minWidth: 128,
+                minHeight: 128,
+              }}
+            >
+              <UserAvatar
+                userId={user.id}
+                avatarHash={user.avatar || null}
+                username={user.username}
+                size={32}
+                showBadge={false}
+                className="border-0"
+                custom_avatar={user.custom_avatar}
+                settings={user.settings_v2}
+                premiumType={user.premiumtype}
+              />
+            </div>
+            <h1 className="text-primary-text group-hover:text-link mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
+              {user.global_name && user.global_name !== "None"
+                ? user.global_name
+                : user.username}
+            </h1>
+            <div className="mt-2">
+              <UserBadges
+                flags={user.flags as UserFlag[]}
+                usernumber={user.usernumber}
+                size="md"
+                noContainer
+              />
+            </div>
+          </Link>
+        </UserProfilePopover>
       </div>
     );
   };

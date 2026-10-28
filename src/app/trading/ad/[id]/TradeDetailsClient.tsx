@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import {
   parseValueString,
   formatTradeValue,
@@ -970,13 +971,15 @@ export default function TradeDetailsClient({
                 <div className="min-w-0">
                   <div className="flex min-w-0 items-center gap-2">
                     {trade.user?.id ? (
-                      <Link
-                        href={`/users/${trade.user.id}`}
-                        prefetch={false}
-                        className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
-                      >
-                        {displayName}
-                      </Link>
+                      <UserProfilePopover user={trade.user}>
+                        <Link
+                          href={`/users/${trade.user.id}`}
+                          prefetch={false}
+                          className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                        >
+                          {displayName}
+                        </Link>
+                      </UserProfilePopover>
                     ) : trade.user?.roblox_id ? (
                       <a
                         href={`https://www.roblox.com/users/${trade.user.roblox_id}/profile`}
@@ -1437,13 +1440,17 @@ export default function TradeDetailsClient({
                                         <div className="min-w-0">
                                           <div className="flex min-w-0 items-center gap-2">
                                             {offerUser?.id ? (
-                                              <Link
-                                                href={`/users/${offerUser.id}`}
-                                                prefetch={false}
-                                                className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                                              <UserProfilePopover
+                                                user={offerUser}
                                               >
-                                                {offerDisplayName}
-                                              </Link>
+                                                <Link
+                                                  href={`/users/${offerUser.id}`}
+                                                  prefetch={false}
+                                                  className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                                                >
+                                                  {offerDisplayName}
+                                                </Link>
+                                              </UserProfilePopover>
                                             ) : offerUser?.roblox_id ? (
                                               <a
                                                 href={`https://www.roblox.com/users/${offerUser.roblox_id}/profile`}

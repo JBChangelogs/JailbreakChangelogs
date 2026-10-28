@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -104,13 +105,15 @@ export default function SupportersSection({
           settings={{ custom_avatar: false }}
         />
         <div className="min-w-0 flex-1 text-center">
-          <Link href={`/users/${supporter.id}`} prefetch={false}>
-            <h3 className="text-primary-text hover:text-link truncate text-base font-semibold transition-colors">
-              {supporter.global_name && supporter.global_name !== "None"
-                ? supporter.global_name
-                : supporter.username}
-            </h3>
-          </Link>
+          <UserProfilePopover user={supporter}>
+            <Link href={`/users/${supporter.id}`} prefetch={false}>
+              <h3 className="text-primary-text hover:text-link truncate text-base font-semibold transition-colors">
+                {supporter.global_name && supporter.global_name !== "None"
+                  ? supporter.global_name
+                  : supporter.username}
+              </h3>
+            </Link>
+          </UserProfilePopover>
           <p className="text-secondary-text truncate text-sm">
             @{supporter.username}
           </p>

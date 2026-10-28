@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import {
   type ComponentProps,
   useCallback,
@@ -217,15 +218,17 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
         />
       </div>
       <div className="min-w-0 flex-1">
-        <Link
-          href={`/users/${v.user.id}`}
-          prefetch={false}
-          className="text-primary-text hover:text-link block truncate text-sm font-medium transition-colors"
-        >
-          {v.user.roblox_display_name ||
-            v.user.roblox_username ||
-            `User #${v.user.id}`}
-        </Link>
+        <UserProfilePopover user={v.user}>
+          <Link
+            href={`/users/${v.user.id}`}
+            prefetch={false}
+            className="text-primary-text hover:text-link block truncate text-sm font-medium transition-colors"
+          >
+            {v.user.roblox_display_name ||
+              v.user.roblox_username ||
+              `User #${v.user.id}`}
+          </Link>
+        </UserProfilePopover>
         <p className="text-tertiary-text mt-0.5 text-xs">
           {formatMessageDate(v.created_at)}
         </p>
@@ -1311,15 +1314,17 @@ export default function ValueSuggestionDetailPage() {
                             bgClassName="bg-tertiary-bg"
                           />
                           <div className="min-w-0">
-                            <Link
-                              href={`/users/${suggestion.user.id}`}
-                              prefetch={false}
-                              className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
-                            >
-                              {suggestion.user.roblox_display_name ||
-                                suggestion.user.roblox_username ||
-                                `User #${suggestion.user.id}`}
-                            </Link>
+                            <UserProfilePopover user={suggestion.user}>
+                              <Link
+                                href={`/users/${suggestion.user.id}`}
+                                prefetch={false}
+                                className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
+                              >
+                                {suggestion.user.roblox_display_name ||
+                                  suggestion.user.roblox_username ||
+                                  `User #${suggestion.user.id}`}
+                              </Link>
+                            </UserProfilePopover>
                             <p className="text-secondary-text mt-1 text-xs">
                               Posted on{" "}
                               {formatMessageDate(suggestion.created_at)}

@@ -21,6 +21,7 @@ import {
   normalizeNotificationText,
 } from "@/utils/notifications/notifMarkdown";
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
+import { applyFriendUpdate } from "@/hooks/useFriendship";
 import { createLogger } from "@/services/logger";
 import { mentionsToText } from "@/utils/messages/mentions";
 import { parseReactions } from "@/utils/messages/parsing";
@@ -779,6 +780,24 @@ export function useRealtimeNotificationsWebSocket(
             }
 
             if (payload.action === "pong") return;
+
+            // A friendship changed (by them, or by you in another tab).
+            if (payload.action === "friend_update") {
+              const update = payload.data as
+                | { user_id?: unknown; status?: unknown }
+                | undefined;
+              const status = update?.status;
+              if (
+                update?.user_id != null &&
+                (status === "incoming" ||
+                  status === "outgoing" ||
+                  status === "friends" ||
+                  status === "none")
+              ) {
+                applyFriendUpdate(queryClient, String(update.user_id), status);
+              }
+              return;
+            }
 
             if (
               payload.action === "supporter_updated" &&

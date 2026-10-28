@@ -2,6 +2,7 @@ import {
   parseValueString,
   formatTradeValue,
 } from "@/components/Values/Calculator/calculatorUtils";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import React, { useEffect, useState } from "react";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import Link from "next/link";
@@ -354,13 +355,15 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
                 {trade.user?.id ? (
-                  <Link
-                    href={`/users/${trade.user.id}`}
-                    prefetch={false}
-                    className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
-                  >
-                    {displayName}
-                  </Link>
+                  <UserProfilePopover user={trade.user}>
+                    <Link
+                      href={`/users/${trade.user.id}`}
+                      prefetch={false}
+                      className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                    >
+                      {displayName}
+                    </Link>
+                  </UserProfilePopover>
                 ) : (
                   <p className="text-primary-text truncate text-sm font-semibold">
                     {displayName}
