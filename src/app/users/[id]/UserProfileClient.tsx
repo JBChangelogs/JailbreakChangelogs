@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  MutualFriendsCount,
+  RemoveFriendMenuItem,
+} from "@/components/Users/Friends";
+import { FriendButton } from "@/components/Users/UserProfilePopover";
+import { FRIENDS_KEY, FRIEND_REQUESTS_KEY } from "@/hooks/useFriendship";
 import { accentCardTheme, userCardAccent } from "@/utils/ui/accentColor";
 
 import { useState, useEffect, useRef } from "react";
@@ -414,6 +420,11 @@ export default function UserProfileClient({
         throw new Error(fallbackErrorMessage);
       }
 
+      // Blocking ends any friendship or pending request between you.
+      if (shouldBlock) {
+        void queryClient.invalidateQueries({ queryKey: FRIENDS_KEY });
+        void queryClient.invalidateQueries({ queryKey: FRIEND_REQUESTS_KEY });
+      }
       const blockedQueryKey = ["blocked-users", currentUserId];
       await queryClient.cancelQueries({ queryKey: blockedQueryKey });
       queryClient.setQueryData<{ blocked_users?: unknown[] }>(
@@ -1048,6 +1059,7 @@ export default function UserProfileClient({
                           </span>{" "}
                           following
                         </button>
+                        <MutualFriendsCount userId={user.id} />
                       </div>
                     </div>
                   </div>
@@ -1069,6 +1081,20 @@ export default function UserProfileClient({
                                 className="size-4"
                               />
                               Settings
+                            </Link>
+                          </Button>
+                          <Button
+                            asChild
+                            variant="secondary"
+                            size="sm"
+                            className={profileActionButtonClassName}
+                          >
+                            <Link href="/friends">
+                              <Icon
+                                icon="material-symbols:group-rounded"
+                                className="size-4"
+                              />
+                              Friends
                             </Link>
                           </Button>
                         </>
@@ -1103,6 +1129,11 @@ export default function UserProfileClient({
                                 : "Follow this user"}
                             </TooltipContent>
                           </Tooltip>
+                          <FriendButton
+                            userId={user.id}
+                            size="md"
+                            hideWhenFriends
+                          />
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -1137,6 +1168,7 @@ export default function UserProfileClient({
                                   Message
                                 </DropdownMenuItem>
                               )}
+                              <RemoveFriendMenuItem userId={user.id} />
                               {/* Mobile (< sm): flat report actions */}
                               <DropdownMenuItem
                                 onClick={() => {

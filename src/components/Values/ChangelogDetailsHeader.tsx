@@ -1,4 +1,5 @@
 import React from "react";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import Link from "next/link";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
@@ -103,13 +104,15 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
                     showBadge={false}
                     bgClassName="bg-tertiary-bg"
                   />
-                  <Link
-                    href={`/users/${userId}`}
-                    prefetch={false}
-                    className="text-link hover:text-link-hover text-sm hover:underline"
-                  >
-                    {contributorData.name}
-                  </Link>
+                  <UserProfilePopover user={{ id: userId }}>
+                    <Link
+                      href={`/users/${userId}`}
+                      prefetch={false}
+                      className="text-link hover:text-link-hover text-sm hover:underline"
+                    >
+                      {contributorData.name}
+                    </Link>
+                  </UserProfilePopover>
                   {index < sortedContributors.length - 1 && (
                     <span className="text-secondary-text text-sm">,</span>
                   )}

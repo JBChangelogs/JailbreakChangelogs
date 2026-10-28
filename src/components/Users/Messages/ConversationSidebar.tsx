@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useMyFriends } from "@/hooks/useFriendship";
 import {
   useEffect,
   useRef,
@@ -292,6 +294,36 @@ function UnreadBadge({ count, active }: { count: number; active: boolean }) {
         {count > 99 ? "99+" : count}
       </span>
     </span>
+  );
+}
+
+/** Links to /friends, with a badge for requests waiting on you. */
+function FriendsRow() {
+  const { requests } = useMyFriends();
+  const incoming = requests.data?.incoming.length ?? 0;
+  return (
+    <div className="border-border-primary shrink-0 border-t p-2">
+      <Link
+        href="/friends"
+        prefetch={false}
+        className={cn(ROW, "hover:bg-quaternary-bg text-primary-text")}
+      >
+        <span className="bg-tertiary-bg flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+          <Icon
+            icon="material-symbols:group-rounded"
+            className="text-secondary-text h-5 w-5"
+          />
+        </span>
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+          Friends
+        </span>
+        {incoming > 0 && (
+          <span className="bg-button-danger flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white">
+            {incoming > 99 ? "99+" : incoming}
+          </span>
+        )}
+      </Link>
+    </div>
   );
 }
 
@@ -699,6 +731,7 @@ export function ConversationSidebar({
           onRemoved={onGroupRemoved}
         />
       )}
+      {isAuthenticated && <FriendsRow />}
     </aside>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -624,15 +625,17 @@ export default function ItemSuggestionsTab({
                       bgClassName="bg-tertiary-bg"
                     />
                     <div className="min-w-0 flex-1">
-                      <Link
-                        href={`/users/${suggestion.user.id}`}
-                        prefetch={false}
-                        className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
-                      >
-                        {suggestion.user.roblox_display_name ||
-                          suggestion.user.roblox_username ||
-                          `User #${suggestion.user.id}`}
-                      </Link>
+                      <UserProfilePopover user={suggestion.user}>
+                        <Link
+                          href={`/users/${suggestion.user.id}`}
+                          prefetch={false}
+                          className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
+                        >
+                          {suggestion.user.roblox_display_name ||
+                            suggestion.user.roblox_username ||
+                            `User #${suggestion.user.id}`}
+                        </Link>
+                      </UserProfilePopover>
                       <p className="text-secondary-text text-xs">
                         {formatMessageDate(suggestion.created_at)}
                         {suggestion.updated_at !== suggestion.created_at
@@ -744,16 +747,18 @@ export default function ItemSuggestionsTab({
                             />
                             <div className="min-w-0 flex-1">
                               <div className="text-primary-text mb-1 text-base font-bold">
-                                <Link
-                                  href={`/users/${v.user.id}`}
-                                  prefetch={false}
-                                  className="text-link hover:text-link-hover transition-colors hover:underline"
-                                  onClick={() => setVotersOpen(false)}
-                                >
-                                  {v.user.roblox_display_name ||
-                                    v.user.roblox_username ||
-                                    `User #${v.user.id}`}
-                                </Link>
+                                <UserProfilePopover user={v.user}>
+                                  <Link
+                                    href={`/users/${v.user.id}`}
+                                    prefetch={false}
+                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                    onClick={() => setVotersOpen(false)}
+                                  >
+                                    {v.user.roblox_display_name ||
+                                      v.user.roblox_username ||
+                                      `User #${v.user.id}`}
+                                  </Link>
+                                </UserProfilePopover>
                               </div>
                               <div className="text-tertiary-text text-sm">
                                 {formatShortDateTime(v.created_at)}
