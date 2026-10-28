@@ -54,7 +54,7 @@ import {
  * The theme's colors: dots for its main colors on its page background, each
  * named in a tooltip. Hidden from screen readers; the label names the theme.
  */
-function ThemePreview({
+export function ThemePreview({
   preview: p,
   compact,
 }: {

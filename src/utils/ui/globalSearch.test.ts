@@ -2,16 +2,16 @@ import { expect, test } from "bun:test";
 import {
   createGlobalSearchIndex,
   getGlobalSearchResults,
+  getOmniSearchResults,
+  parseSearchFilter,
+  filteredQuery,
+  splitQueryMatches,
+  snippetLine,
   getGlobalUserQuery,
   getGlobalCheckQuery,
 } from "./globalSearch";
 
-const catalog = [
-  { id: 1, name: "OG Monster", type: "Vehicle", cash_value: "1250000" },
-  { id: 2, name: "Torpedo", type: "Vehicle", cash_value: null },
-  { id: 3, name: "OG Fuel", type: "Texture", cash_value: "750000" },
-];
-const index = createGlobalSearchIndex(catalog);
+const index = createGlobalSearchIndex();
 
 test("empty search shows eight ordered quick links without loading the catalog", () => {
   for (const query of ["", "  "]) {
@@ -34,113 +34,10 @@ test("empty search shows eight ordered quick links without loading the catalog",
         (result) => result.title && result.description && result.icon,
       ),
     ).toBe(true);
-    expect(getGlobalSearchResults(createGlobalSearchIndex([]), query)).toEqual(
-      results,
-    );
+    expect(
+      getGlobalSearchResults(createGlobalSearchIndex(true), query),
+    ).toEqual(results);
   }
-});
-
-test("a query finds tools and items together, retaining category, URL and price", () => {
-  const results = getGlobalSearchResults(index, " og ");
-  expect(results).toContainEqual(
-    expect.objectContaining({
-      title: "OG Finder",
-      href: "/og",
-      group: "Tools & Trackers",
-    }),
-  );
-  expect(
-    results.filter((result) => result.item).map((result) => result.title),
-  ).toEqual(["OG Monster", "OG Fuel"]);
-  expect(
-    results.find((result) => result.title === "OG Monster")?.item?.cash_value,
-  ).toBe("1250000");
-});
-
-test("search tolerates typos and caps item results", () => {
-  expect(getGlobalSearchResults(index, "torpdeo")[0]?.title).toBe("Torpedo");
-  expect(getGlobalSearchResults(index, "zzzzzzzzzzzz")).toEqual([]);
-  const many = createGlobalSearchIndex(
-    Array.from({ length: 40 }, (_, id) => ({
-      ...catalog[0],
-      id,
-      name: `OG Item ${id}`,
-    })),
-  );
-  expect(
-    getGlobalSearchResults(many, "OG").filter((result) => result.item),
-  ).toHaveLength(5);
-});
-
-test("individual seasons, rewards and changelogs link to their own destinations", () => {
-  const seasons = [
-    {
-      season: 33,
-      title: "Retro Arcade",
-      description: "Old school rewards",
-      is_current: 1,
-      start_date: 0,
-      end_date: 0,
-      rewards: [
-        {
-          id: 501,
-          season_number: 33,
-          item: "Pixel Cruiser",
-          requirement: "Level 10",
-          link: "/rewards/pixel.webp",
-          exclusive: "True",
-          bonus: "False",
-        },
-      ],
-    },
-  ];
-  const changelogs = [
-    {
-      id: 901,
-      title: "Museum Expansion",
-      sections: "<p>Added a secret underground vault</p>",
-      image_url: "",
-    },
-  ];
-  const expanded = createGlobalSearchIndex(catalog, seasons, changelogs);
-  expect(getGlobalSearchResults(expanded, "season 33")).toContainEqual(
-    expect.objectContaining({ group: "Seasons", href: "/seasons/33" }),
-  );
-  expect(getGlobalSearchResults(expanded, "pixel cruiser")).toContainEqual(
-    expect.objectContaining({
-      group: "Rewards",
-      href: "/seasons/33#reward-501",
-      description: "Season 33 · Level 10",
-      image: "https://assets.jailbreakchangelogs.com/rewards/pixel.webp",
-    }),
-  );
-  expect(getGlobalSearchResults(expanded, "museum")).toContainEqual(
-    expect.objectContaining({ group: "Changelogs", href: "/changelogs/901" }),
-  );
-  expect(getGlobalSearchResults(expanded, "underground vault")).toContainEqual(
-    expect.objectContaining({ group: "Changelogs", href: "/changelogs/901" }),
-  );
-  expect(getGlobalSearchResults(expanded, "901")).toContainEqual(
-    expect.objectContaining({ href: "/changelogs/901" }),
-  );
-});
-
-test("seasons without rewards are omitted because their routes redirect", () => {
-  const empty = {
-    season: 99,
-    title: "Future Season",
-    description: "",
-    is_current: 0,
-    start_date: 0,
-    end_date: 0,
-    rewards: [],
-  };
-  const index = createGlobalSearchIndex([], [empty]);
-  expect(
-    getGlobalSearchResults(index, "Future Season").some(
-      (result) => result.href === "/seasons/99",
-    ),
-  ).toBe(false);
 });
 
 test("user results link to profiles and fall back from missing display names", async () => {
@@ -192,122 +89,8 @@ test("user search requires a leading @ and strips the marker", () => {
   expect(getGlobalSearchResults(index, "@torpedo")).toEqual([]);
 });
 
-test("changelog title matches precede content-only matches before the group is capped", () => {
-  const changelogs = [
-    ...Array.from({ length: 8 }, (_, id) => ({
-      id,
-      title: `Update ${id}`,
-      sections: "museum",
-      image_url: "",
-    })),
-    {
-      id: 100,
-      title: "Museum Expansion",
-      sections: "New robbery and rewards",
-      image_url: "",
-    },
-  ];
-  const results = getGlobalSearchResults(
-    createGlobalSearchIndex([], [], changelogs),
-    "museum",
-  ).filter((result) => result.group === "Changelogs");
-  expect(results).toHaveLength(5);
-  expect(results[0].title).toBe("Museum Expansion");
-  expect(
-    results.slice(1).every((result) => result.title.startsWith("Update")),
-  ).toBe(true);
-});
-
-test("backend settings supply result names, descriptions and precise highlight links", () => {
-  const settings = {
-    appearance: {
-      name: "appearance",
-      description: "Profile appearance",
-      index: 0,
-      settings: [
-        {
-          name: "custom_banner",
-          description: "Upload a custom banner",
-          value: true,
-          index: 0,
-        },
-        {
-          name: "custom_avatar",
-          description: "Upload a custom avatar",
-          value: true,
-          index: 1,
-        },
-        {
-          name: "custom_background",
-          description: "Upload a custom background",
-          value: true,
-          index: 2,
-        },
-      ],
-    },
-    privacy: {
-      name: "privacy",
-      description: "Privacy settings",
-      index: 1,
-      settings: [
-        {
-          name: "brand_new_preference",
-          description: "A setting added by the backend",
-          value: false,
-          index: 0,
-        },
-        {
-          name: "hide_roblox_activity",
-          description: "Desktop app only",
-          value: false,
-          index: 1,
-        },
-      ],
-    },
-  };
-  const settingsIndex = createGlobalSearchIndex([], [], [], settings, true);
-  for (const [query, title, target] of [
-    ["banner", "Custom Banner", "custom_banner"],
-    ["avatar", "Custom Avatar", "custom_avatar"],
-    ["background", "Custom Background", "custom_background"],
-    ["brand new preference", "Brand New Preference", "brand_new_preference"],
-    ["custom theme", "Custom themes", "custom-themes"],
-    ["navigation", "Desktop navigation", "navigation-layout"],
-    ["tab style", "Tab style", "tab-style"],
-    ["accent", "Accent color", "accent-color"],
-    ["notification", "Notification Preferences", "notifications"],
-    ["supporter", "Supporter History", "supporter-history"],
-  ]) {
-    const result = getGlobalSearchResults(settingsIndex, query).find(
-      (result) => result.title === title,
-    );
-    expect(result).toBeDefined();
-    expect(result?.group).toBe("Settings");
-    const url = new URL(result!.href!, "https://example.test");
-    expect(url.pathname).toBe("/settings");
-    expect(url.hash).toBe(`#${target}`);
-    expect(url.searchParams.get("highlight")).toBe(target);
-  }
-  expect(
-    getGlobalSearchResults(settingsIndex, "brand new preference").find(
-      (result) => result.title === "Brand New Preference",
-    )?.description,
-  ).toBe("A setting added by the backend");
-  expect(
-    getGlobalSearchResults(settingsIndex, "hide roblox activity").some(
-      (result) => result.title === "Hide Roblox Activity",
-    ),
-  ).toBe(false);
-  expect(
-    getGlobalSearchResults(
-      createGlobalSearchIndex([], [], [], settings, false),
-      "brand new preference",
-    ).some((result) => result.title === "Brand New Preference"),
-  ).toBe(false);
-});
-
 test("logged-out settings search offers only the locally available display controls", () => {
-  const index = createGlobalSearchIndex([]);
+  const index = createGlobalSearchIndex(false);
   expect(getGlobalSearchResults(index, "custom theme")).toContainEqual(
     expect.objectContaining({ group: "Settings", title: "Custom themes" }),
   );
@@ -335,7 +118,7 @@ test("logged-out settings search offers only the locally available display contr
 
 test("navigation layout can be found by its sidebar and top bar options", () => {
   for (const signedIn of [false, true]) {
-    const index = createGlobalSearchIndex([], [], [], undefined, signedIn);
+    const index = createGlobalSearchIndex(signedIn);
     for (const query of ["sidebar", "topbar", "top bar"]) {
       expect(getGlobalSearchResults(index, query)).toContainEqual(
         expect.objectContaining({
@@ -345,107 +128,6 @@ test("navigation layout can be found by its sidebar and top bar options", () => 
       );
     }
   }
-});
-
-test("short searches match title prefixes instead of unrelated description and body fragments", () => {
-  const index = createGlobalSearchIndex(
-    [],
-    [],
-    [
-      {
-        id: 112,
-        title: "Museum Expansion",
-        sections: "Tests and updates for the latest game build",
-        image_url: "",
-      },
-    ],
-  );
-  const results = getGlobalSearchResults(index, "tes");
-  expect(results.map((result) => result.title)).toContain("Testimonials");
-  expect(results.some((result) => result.title === "Game Changelogs")).toBe(
-    false,
-  );
-  expect(results.some((result) => result.group === "Changelogs")).toBe(false);
-  expect(getGlobalSearchResults(index, "112")).toContainEqual(
-    expect.objectContaining({ href: "/changelogs/112" }),
-  );
-  expect(getGlobalSearchResults(index, "latest game build")).toContainEqual(
-    expect.objectContaining({ href: "/changelogs/112" }),
-  );
-});
-
-test("reopening reuses the index while data and account state are unchanged", () => {
-  const items = [...catalog];
-  const seasons: Parameters<typeof createGlobalSearchIndex>[1] = [];
-  const changelogs: Parameters<typeof createGlobalSearchIndex>[2] = [];
-  const settings = {};
-  const first = createGlobalSearchIndex(
-    items,
-    seasons,
-    changelogs,
-    settings,
-    true,
-  );
-  expect(
-    createGlobalSearchIndex(items, seasons, changelogs, settings, true),
-  ).toBe(first);
-
-  const updatedItems = [
-    ...items,
-    { id: 4, name: "New Vehicle", type: "Vehicle", cash_value: "100" },
-  ];
-  const refreshed = createGlobalSearchIndex(
-    updatedItems,
-    seasons,
-    changelogs,
-    settings,
-    true,
-  );
-  expect(refreshed).not.toBe(first);
-  expect(getGlobalSearchResults(refreshed, "New Vehicle")).toContainEqual(
-    expect.objectContaining({ title: "New Vehicle" }),
-  );
-  expect(
-    createGlobalSearchIndex(
-      updatedItems,
-      [...seasons],
-      changelogs,
-      settings,
-      true,
-    ),
-  ).not.toBe(refreshed);
-  const updatedChangelogs = createGlobalSearchIndex(
-    updatedItems,
-    seasons,
-    [...changelogs],
-    settings,
-    true,
-  );
-  expect(updatedChangelogs).not.toBe(refreshed);
-  expect(
-    createGlobalSearchIndex(updatedItems, seasons, changelogs, {}, true),
-  ).not.toBe(updatedChangelogs);
-
-  const signedIn = createGlobalSearchIndex(
-    items,
-    seasons,
-    changelogs,
-    settings,
-    true,
-  );
-  const signedOut = createGlobalSearchIndex(
-    items,
-    seasons,
-    changelogs,
-    settings,
-    false,
-  );
-  expect(signedOut).not.toBe(signedIn);
-  expect(
-    createGlobalSearchIndex(items, seasons, changelogs, settings, false),
-  ).toBe(signedOut);
-  const empty = createGlobalSearchIndex();
-  expect(createGlobalSearchIndex()).toBe(empty);
 });
 
 test("inv:, dupe: and og: prefixes link straight to the Roblox lookup pages", () => {
@@ -464,4 +146,323 @@ test("inv:, dupe: and og: prefixes link straight to the Roblox lookup pages", ()
   );
   expect(getGlobalSearchResults(index, "og:")).toEqual([]);
   expect(getGlobalSearchResults(index, "inv: a/b")).toEqual([]);
+});
+
+test("a query finds tools here, and short queries need a title word prefix", () => {
+  expect(getGlobalSearchResults(index, " og ")).toContainEqual(
+    expect.objectContaining({ title: "OG Finder", href: "/og" }),
+  );
+  expect(
+    getGlobalSearchResults(index, "tes").some(
+      (result) => result.title === "Game Changelogs",
+    ),
+  ).toBe(false);
+  expect(getGlobalSearchResults(index, "@torpedo")).toEqual([]);
+});
+
+test("/v2/search groups become rows with their links and in-place actions", () => {
+  const results = getOmniSearchResults([
+    {
+      group: "items",
+      has_more: true,
+      results: [
+        {
+          kind: "item",
+          id: 1,
+          name: "Torpedo",
+          type: "Vehicle",
+          cash_value: "25m",
+        },
+      ],
+    },
+    {
+      group: "changelogs",
+      has_more: false,
+      results: [
+        {
+          kind: "changelog",
+          id: 112,
+          title: "Museum",
+          image_url: null,
+          matched: "title",
+        },
+        {
+          kind: "changelog",
+          id: 113,
+          title: "Update",
+          image_url: "/c.png",
+          matched: "body",
+          snippet: "…the new torpedo…",
+        },
+      ],
+    },
+    {
+      group: "settings",
+      has_more: false,
+      results: [
+        {
+          kind: "setting",
+          name: "hide_presence",
+          description: "Hide it",
+          category: "privacy",
+          value: true,
+        },
+      ],
+    },
+    {
+      group: "servers",
+      has_more: false,
+      results: [
+        {
+          kind: "server",
+          id: 7,
+          link: "javascript:alert(1)",
+          rules: "",
+          owner: { id: "1", username: "sam" },
+        },
+      ],
+    },
+    {
+      group: "themes",
+      has_more: false,
+      results: [
+        {
+          kind: "theme",
+          slug: "dark",
+          label: "Dark",
+          icon: null,
+          scheme: "dark",
+          custom: false,
+        },
+      ],
+    },
+  ]);
+  expect(results.map((result) => result.group)).toEqual([
+    "Items",
+    "Changelogs",
+    "Changelogs",
+    "Settings",
+    "Servers",
+    "Themes",
+  ]);
+  expect(results[0].item).toMatchObject({ name: "Torpedo", cash_value: "25m" });
+  expect(results[1]).toMatchObject({
+    href: "/changelogs/112",
+    description: "Game update 112",
+  });
+  expect(results[2]).toMatchObject({
+    description: "Game update 113",
+    snippet: "…the new torpedo…",
+    image: "https://assets.jailbreakchangelogs.com/c.png",
+  });
+  expect(results[3].setting).toEqual({ name: "hide_presence", value: true });
+  // An unsafe server link falls back to the servers page.
+  expect(results[4]).toMatchObject({
+    href: "/servers",
+    external: false,
+    description: "No rules listed",
+  });
+  expect(results[5].theme?.slug).toBe("dark");
+});
+
+test("season links show on items and changelogs", () => {
+  const [item, launch, during, before] = getOmniSearchResults([
+    {
+      group: "items",
+      has_more: false,
+      results: [
+        {
+          kind: "item",
+          id: 1,
+          name: "Torpedo",
+          type: "Vehicle",
+          cash_value: null,
+          season: 2,
+        },
+      ],
+    },
+    {
+      group: "changelogs",
+      has_more: false,
+      results: [
+        {
+          kind: "changelog",
+          id: 300,
+          title: "A",
+          image_url: null,
+          season: 20,
+          launches_season: 20,
+        },
+        {
+          kind: "changelog",
+          id: 301,
+          title: "B",
+          image_url: null,
+          season: 20,
+          launches_season: null,
+        },
+        {
+          kind: "changelog",
+          id: 1,
+          title: "C",
+          image_url: null,
+          season: null,
+          launches_season: null,
+        },
+      ],
+    },
+  ]);
+  expect(item.description).toBe("Vehicle · Season 2");
+  expect(launch.description).toBe("Game update 300 · Launched Season 20");
+  expect(during.description).toBe("Game update 301 · Season 20");
+  expect(before.description).toBe("Game update 1");
+});
+
+test("titles split around the typed text, ignoring case, @ and regex characters", () => {
+  expect(splitQueryMatches("OG Torpedo", "torp")).toEqual([
+    "OG ",
+    "Torp",
+    "edo",
+  ]);
+  expect(splitQueryMatches("jakobiis", "@jak")).toEqual(["", "jak", "obiis"]);
+  expect(splitQueryMatches("Version 1.2 (beta)", "1.2 (")).toEqual([
+    "Version ",
+    "1.2 (",
+    "beta)",
+  ]);
+  expect(splitQueryMatches("Torpedo", "zzz")).toEqual(["Torpedo"]);
+  expect(splitQueryMatches("Torpedo", "  ")).toEqual(["Torpedo"]);
+});
+
+test("changelog snippets show the bullet that holds the query", () => {
+  const snippet =
+    '…w code: "leaves", redeemable for 5,000$ cash. - the torpedo, arachnid and raptor are no l…';
+  expect(snippetLine(snippet, "torpedo")).toBe(
+    "the torpedo, arachnid and raptor are no l…",
+  );
+  expect(snippetLine(snippet, "leaves")).toBe(
+    '…w code: "leaves", redeemable for 5,000$ cash.',
+  );
+  expect(
+    snippetLine("- torpedo is less slippery and is now faster...", "torpedo"),
+  ).toBe("torpedo is less slippery and is now faster…");
+});
+
+test("quick links carry shortcuts, with yours only when Roblox is connected", () => {
+  const shortcuts = (robloxId?: string | null) =>
+    Object.fromEntries(
+      getGlobalSearchResults(index, "", robloxId)
+        .filter((result) => result.shortcuts)
+        .map((result) => [
+          result.href,
+          result.shortcuts!.map(
+            (shortcut) => shortcut.href ?? `?${shortcut.query}`,
+          ),
+        ]),
+    );
+  expect(shortcuts("123")).toEqual({
+    "/values": ["/values/changelogs"],
+    "/inventories": ["/inventories/123"],
+    "/og": ["/og/123"],
+    "/changelogs": ["/changelogs/timeline"],
+    "/settings": ["?setting:", "?theme:"],
+  });
+  for (const unlinked of [undefined, null, "None"])
+    expect(shortcuts(unlinked)).toEqual({
+      "/values": ["/values/changelogs"],
+      "/changelogs": ["/changelogs/timeline"],
+      "/settings": ["?setting:", "?theme:"],
+    });
+});
+
+test("type: filters split off the front, singular or plural, with @ for users", () => {
+  expect(parseSearchFilter("item:torp")).toEqual({
+    filter: "items",
+    text: "torp",
+  });
+  expect(parseSearchFilter("Items: torp")).toEqual({
+    filter: "items",
+    text: "torp",
+  });
+  expect(parseSearchFilter("settings:")).toEqual({
+    filter: "settings",
+    text: "",
+  });
+  expect(parseSearchFilter("@jak")).toEqual({ filter: "users", text: "jak" });
+  for (const plain of ["inv:name", "og:", "torpedo", "foo:bar", "season 2"])
+    expect(parseSearchFilter(plain)).toBeNull();
+  expect(filteredQuery("items", "torp")).toBe("item:torp");
+  expect(filteredQuery("users", "")).toBe("user:");
+  expect(filteredQuery(null, "torp")).toBe("torp");
+  expect(getGlobalUserQuery("user: jak")).toBe("jak");
+  expect(getGlobalUserQuery("users:")).toBe("");
+});
+
+test("seasons, items and changelogs link to each other", () => {
+  const [season, launchOnly, item, changelog] = getOmniSearchResults([
+    {
+      group: "seasons",
+      has_more: false,
+      results: [
+        {
+          kind: "season",
+          season: 33,
+          title: "Jurassic",
+          description: "",
+          launch_changelog_id: 415,
+          changelogs: [{ id: 419, title: "Misc 230", image_url: null }],
+        },
+        // The older shape: ids only, the latest being the launch.
+        {
+          kind: "season",
+          season: 32,
+          title: "Old",
+          description: "",
+          launch_changelog_id: 400,
+          changelog_ids: [400],
+        },
+      ],
+    },
+    {
+      group: "items",
+      has_more: false,
+      results: [
+        {
+          kind: "item",
+          id: 1,
+          name: "Torpedo",
+          type: "Vehicle",
+          cash_value: null,
+          changelog_ids: [277, 117],
+        },
+      ],
+    },
+    {
+      group: "changelogs",
+      has_more: false,
+      results: [
+        {
+          kind: "changelog",
+          id: 419,
+          title: "Misc",
+          image_url: null,
+          season: 33,
+          season_title: "Jurassic",
+        },
+      ],
+    },
+  ]);
+  expect(season.shortcuts).toEqual([
+    { title: "Launch update", href: "/changelogs/415" },
+    { title: "Latest update", href: "/changelogs/419" },
+  ]);
+  expect(launchOnly.shortcuts).toEqual([
+    { title: "Launch update", href: "/changelogs/400" },
+  ]);
+  expect(item.shortcuts).toEqual([
+    { title: "Latest changelog", href: "/changelogs/277" },
+  ]);
+  expect(changelog.shortcuts).toEqual([
+    { title: "Season 33: Jurassic", href: "/seasons/33" },
+  ]);
 });
