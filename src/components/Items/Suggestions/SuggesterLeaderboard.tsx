@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import Link from "next/link";
 import {
   Tooltip,
@@ -127,79 +128,81 @@ export function SuggesterLeaderboard({
                         key={entry.user.id}
                         className="border-border-card min-w-0 border-b py-1"
                       >
-                        <Link
-                          href={`/users/${entry.user.id}`}
-                          prefetch={false}
-                          className="group/card hover:bg-tertiary-bg focus-visible:outline-border-focus -mx-2 flex items-center gap-3 rounded-md px-2 py-2 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 sm:gap-4"
-                        >
-                          <span
-                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums ${podiumClasses[i] ?? "text-secondary-text"}`}
+                        <UserProfilePopover user={entry.user}>
+                          <Link
+                            href={`/users/${entry.user.id}`}
+                            prefetch={false}
+                            className="group/card hover:bg-tertiary-bg focus-visible:outline-border-focus -mx-2 flex items-center gap-3 rounded-md px-2 py-2 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 sm:gap-4"
                           >
-                            <span className="sr-only">Rank </span>
-                            {i + 1}
-                          </span>
+                            <span
+                              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums ${podiumClasses[i] ?? "text-secondary-text"}`}
+                            >
+                              <span className="sr-only">Rank </span>
+                              {i + 1}
+                            </span>
 
-                          <UserAvatar
-                            userId={entry.user.id!}
-                            avatarHash={entry.user.avatar ?? null}
-                            username={displayName}
-                            forceAvatarUrl={entry.user.roblox_avatar}
-                            size={10}
-                            cdnSize={128}
-                            custom_avatar={
-                              entry.user.custom_avatar ?? undefined
-                            }
-                            showBadge={false}
-                            premiumType={entry.user.premiumtype}
-                            bgClassName="bg-quaternary-bg"
-                          />
+                            <UserAvatar
+                              userId={entry.user.id!}
+                              avatarHash={entry.user.avatar ?? null}
+                              username={displayName}
+                              forceAvatarUrl={entry.user.roblox_avatar}
+                              size={10}
+                              cdnSize={128}
+                              custom_avatar={
+                                entry.user.custom_avatar ?? undefined
+                              }
+                              showBadge={false}
+                              premiumType={entry.user.premiumtype}
+                              bgClassName="bg-quaternary-bg"
+                            />
 
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1">
-                              <span className="text-primary-text group-hover/card:text-link min-w-0 text-sm font-semibold wrap-break-word transition-colors">
-                                {displayName}
-                              </span>
-                              {entry.user.premiumtype !== undefined &&
-                                entry.user.premiumtype >= 1 &&
-                                entry.user.premiumtype <= 3 && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Image
-                                        src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${entry.user.premiumtype}.svg`}
-                                        alt={`Supporter Type ${entry.user.premiumtype}`}
-                                        width={12}
-                                        height={12}
-                                        className="shrink-0 cursor-pointer"
-                                      />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      Supporter Type {entry.user.premiumtype}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1">
+                                <span className="text-primary-text group-hover/card:text-link min-w-0 text-sm font-semibold wrap-break-word transition-colors">
+                                  {displayName}
+                                </span>
+                                {entry.user.premiumtype !== undefined &&
+                                  entry.user.premiumtype >= 1 &&
+                                  entry.user.premiumtype <= 3 && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Image
+                                          src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${entry.user.premiumtype}.svg`}
+                                          alt={`Supporter Type ${entry.user.premiumtype}`}
+                                          width={12}
+                                          height={12}
+                                          className="shrink-0 cursor-pointer"
+                                        />
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        Supporter Type {entry.user.premiumtype}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                              </div>
+
+                              <p className="text-secondary-text mt-1 text-xs">
+                                <span className="font-medium tabular-nums">
+                                  {entry.total_accepted.toLocaleString()}
+                                </span>{" "}
+                                accepted
+                                <span aria-hidden="true"> / </span>
+                                <span className="font-medium tabular-nums">
+                                  {entry.total_submitted.toLocaleString()}
+                                </span>{" "}
+                                submitted
+                              </p>
                             </div>
-
-                            <p className="text-secondary-text mt-1 text-xs">
-                              <span className="font-medium tabular-nums">
-                                {entry.total_accepted.toLocaleString()}
-                              </span>{" "}
-                              accepted
-                              <span aria-hidden="true"> / </span>
-                              <span className="font-medium tabular-nums">
-                                {entry.total_submitted.toLocaleString()}
-                              </span>{" "}
-                              submitted
-                            </p>
-                          </div>
-                          <div className="shrink-0 text-right">
-                            <p className="text-primary-text text-base font-semibold tabular-nums">
-                              {rate}%
-                            </p>
-                            <p className="text-secondary-text text-xs">
-                              acceptance
-                            </p>
-                          </div>
-                        </Link>
+                            <div className="shrink-0 text-right">
+                              <p className="text-primary-text text-base font-semibold tabular-nums">
+                                {rate}%
+                              </p>
+                              <p className="text-secondary-text text-xs">
+                                acceptance
+                              </p>
+                            </div>
+                          </Link>
+                        </UserProfilePopover>
                       </li>
                     );
                   })}

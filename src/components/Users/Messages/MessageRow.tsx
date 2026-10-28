@@ -29,7 +29,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useFrequentEmojis } from "@/hooks/useFrequentEmojis";
-import { MENTION_SPLIT, mentionsToText } from "@/utils/messages/mentions";
+import {
+  MENTION_SPLIT,
+  mentionedIds,
+  mentionsToText,
+} from "@/utils/messages/mentions";
 import {
   EMOJI_CELL,
   EmojiGlyph,
@@ -46,6 +50,7 @@ import {
 } from "@/components/chat/chat-event";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserAvatar } from "@/utils/ui/avatar";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { cn } from "@/lib/utils";
 import type { UserData } from "@/types/auth";
 import type { EmojiStringMap } from "@/utils/comments/emojiShortcodes";
@@ -215,17 +220,18 @@ function MessageText({
       if (index % 2 === 0) return part;
       const name = nameOf(part);
       return name ? (
-        <Link
-          key={index}
-          href={`/users/${part}`}
-          prefetch={false}
-          className={cn(
-            MENTION_PILL,
-            "hover:bg-button-info transition-colors hover:text-white",
-          )}
-        >
-          @{name}
-        </Link>
+        <UserProfilePopover key={index} user={{ id: part, username: name }}>
+          <Link
+            href={`/users/${part}`}
+            prefetch={false}
+            className={cn(
+              MENTION_PILL,
+              "hover:bg-button-info transition-colors hover:text-white",
+            )}
+          >
+            @{name}
+          </Link>
+        </UserProfilePopover>
       ) : (
         <span key={index} className={MENTION_PILL}>
           @unknown-user
@@ -482,6 +488,11 @@ export function MessageRow({
         !!currentUserId &&
         asId(item.senderId) === currentUserId,
     );
+  // Highlighted like a reply to you, as Discord does.
+  const mentionsMe =
+    !isOwnMessage &&
+    !!currentUserId &&
+    mentionedIds(message.content).includes(currentUserId);
   const canOpenActions =
     message.status !== "pending" &&
     ((message.type !== "system" && !embedMetadata) ||
@@ -718,7 +729,7 @@ export function MessageRow({
               editingMessageId !== message.id &&
                 (replyingToMessage?.id === message.id
                   ? "bg-button-info/10 lg:group-hover/message:bg-button-info/10 shadow-[inset_2px_0_0_var(--color-button-info)]"
-                  : isReplyToMe
+                  : isReplyToMe || mentionsMe
                     ? "bg-status-warning/10 lg:group-hover/message:bg-status-warning/15 shadow-[inset_2px_0_0_var(--color-status-warning)]"
                     : isMessageMenuActive && "bg-tertiary-bg"),
               // A new sender (or a reply) starts with a little room, like the app.
@@ -821,37 +832,41 @@ export function MessageRow({
                     />
                   ) : null
                 ) : (
-                  <Link
-                    href={`/users/${sender.id}`}
-                    prefetch={false}
-                    className="cursor-pointer"
-                    aria-label={`View ${getDisplayName(sender)} profile`}
-                  >
-                    <UserAvatar
-                      userId={sender.id}
-                      bgClassName="bg-tertiary-bg"
-                      avatarHash={sender.avatar}
-                      username={sender.username}
-                      custom_avatar={sender.custom_avatar}
-                      size={9}
-                      showBadge={false}
-                      settings={sender.settings_v2}
-                      premiumType={sender.premiumtype}
-                    />
-                  </Link>
+                  <UserProfilePopover user={sender}>
+                    <Link
+                      href={`/users/${sender.id}`}
+                      prefetch={false}
+                      className="cursor-pointer"
+                      aria-label={`View ${getDisplayName(sender)} profile`}
+                    >
+                      <UserAvatar
+                        userId={sender.id}
+                        bgClassName="bg-tertiary-bg"
+                        avatarHash={sender.avatar}
+                        username={sender.username}
+                        custom_avatar={sender.custom_avatar}
+                        size={9}
+                        showBadge={false}
+                        settings={sender.settings_v2}
+                        premiumType={sender.premiumtype}
+                      />
+                    </Link>
+                  </UserProfilePopover>
                 )}
               </ChatEventAddon>
               <ChatEventBody>
                 {!isGroupedWithPrevious ? (
                   <ChatEventTitle className="w-full items-start">
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
-                      <Link
-                        href={`/users/${sender.id}`}
-                        prefetch={false}
-                        className="text-primary-text max-w-full cursor-pointer text-base font-semibold wrap-break-word hover:underline"
-                      >
-                        {getDisplayName(sender)}
-                      </Link>
+                      <UserProfilePopover user={sender}>
+                        <Link
+                          href={`/users/${sender.id}`}
+                          prefetch={false}
+                          className="text-primary-text max-w-full cursor-pointer text-base font-semibold wrap-break-word hover:underline"
+                        >
+                          {getDisplayName(sender)}
+                        </Link>
+                      </UserProfilePopover>
                       {typeof message.createdAt === "number" && (
                         <ChatEventTime
                           timestamp={message.createdAt}

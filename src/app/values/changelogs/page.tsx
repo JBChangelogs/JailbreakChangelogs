@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
 
 import { useState } from "react";
@@ -399,32 +400,35 @@ export default function ValuesChangelogPage() {
                                     Contributors:
                                   </p>
                                   {contributors.map((u) => (
-                                    <Link
-                                      key={u.id}
-                                      href={`/users/${u.id}`}
-                                      prefetch={false}
-                                      className="relative z-10 flex items-center gap-1.5"
-                                    >
-                                      <UserAvatar
-                                        userId={u.id}
-                                        avatarHash={null}
-                                        username={
-                                          u.roblox_username ?? u.username ?? ""
-                                        }
-                                        forceAvatarUrl={
-                                          u.roblox_avatar ?? undefined
-                                        }
-                                        premiumType={u.premiumtype ?? 0}
-                                        size={7}
-                                        showBadge={false}
-                                        bgClassName="bg-tertiary-bg"
-                                      />
-                                      <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
-                                        {u.roblox_display_name ||
-                                          u.roblox_username ||
-                                          `User #${u.id}`}
-                                      </span>
-                                    </Link>
+                                    <UserProfilePopover key={u.id} user={u}>
+                                      <Link
+                                        href={`/users/${u.id}`}
+                                        prefetch={false}
+                                        className="relative z-10 flex items-center gap-1.5"
+                                      >
+                                        <UserAvatar
+                                          userId={u.id}
+                                          avatarHash={null}
+                                          username={
+                                            u.roblox_username ??
+                                            u.username ??
+                                            ""
+                                          }
+                                          forceAvatarUrl={
+                                            u.roblox_avatar ?? undefined
+                                          }
+                                          premiumType={u.premiumtype ?? 0}
+                                          size={7}
+                                          showBadge={false}
+                                          bgClassName="bg-tertiary-bg"
+                                        />
+                                        <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
+                                          {u.roblox_display_name ||
+                                            u.roblox_username ||
+                                            `User #${u.id}`}
+                                        </span>
+                                      </Link>
+                                    </UserProfilePopover>
                                   ))}
                                 </div>
                               );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
@@ -258,38 +259,40 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
                         key={follower.follower_id}
                         className="group hover:bg-tertiary-bg flex items-center justify-between rounded-lg p-1.5 transition-colors sm:p-3"
                       >
-                        <Link
-                          href={`/users/${user.id}`}
-                          prefetch={false}
-                          className="block flex-1"
-                        >
-                          <div className="flex items-center space-x-1.5 sm:space-x-3">
-                            <UserAvatar
-                              userId={user.id}
-                              avatarHash={user.avatar}
-                              username={user.username}
-                              size={10}
-                              cdnSize={512}
-                              custom_avatar={user.custom_avatar}
-                              showBadge={false}
-                              settings={user.settings_v2}
-                              premiumType={user.premiumtype}
-                            />
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1 sm:gap-2">
-                                <h3 className="text-primary-text group-hover:text-link-hover max-w-45 truncate text-sm font-semibold transition-colors sm:max-w-62.5 sm:text-base">
-                                  {user.global_name &&
-                                  user.global_name !== "None"
-                                    ? user.global_name
-                                    : user.username}
-                                </h3>
+                        <UserProfilePopover user={user}>
+                          <Link
+                            href={`/users/${user.id}`}
+                            prefetch={false}
+                            className="block flex-1"
+                          >
+                            <div className="flex items-center space-x-1.5 sm:space-x-3">
+                              <UserAvatar
+                                userId={user.id}
+                                avatarHash={user.avatar}
+                                username={user.username}
+                                size={10}
+                                cdnSize={512}
+                                custom_avatar={user.custom_avatar}
+                                showBadge={false}
+                                settings={user.settings_v2}
+                                premiumType={user.premiumtype}
+                              />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  <h3 className="text-primary-text group-hover:text-link-hover max-w-45 truncate text-sm font-semibold transition-colors sm:max-w-62.5 sm:text-base">
+                                    {user.global_name &&
+                                    user.global_name !== "None"
+                                      ? user.global_name
+                                      : user.username}
+                                  </h3>
+                                </div>
+                                <p className="text-secondary-text max-w-45 truncate text-[10px] sm:max-w-62.5 sm:text-sm">
+                                  @{user.username}
+                                </p>
                               </div>
-                              <p className="text-secondary-text max-w-45 truncate text-[10px] sm:max-w-62.5 sm:text-sm">
-                                @{user.username}
-                              </p>
                             </div>
-                          </div>
-                        </Link>
+                          </Link>
+                        </UserProfilePopover>
                         {isOwnProfile && (
                           <Button
                             variant={

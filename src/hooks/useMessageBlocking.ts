@@ -2,7 +2,9 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { FRIENDS_KEY, FRIEND_REQUESTS_KEY } from "@/hooks/useFriendship";
 import { createLogger } from "@/services/logger";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
@@ -16,6 +18,7 @@ interface UseMessageBlockingOptions {
 export function useMessageBlocking({
   setBlockedByMeByUserId,
 }: UseMessageBlockingOptions) {
+  const queryClient = useQueryClient();
   const [isProcessingBlockAction, setIsProcessingBlockAction] = useState(false);
 
   const updateBlockStatus = (targetUserId: string, isBlocked: boolean) => {
@@ -73,6 +76,11 @@ export function useMessageBlocking({
       }
 
       updateBlockStatus(targetUserId, shouldBlock);
+      // Blocking ends any friendship or pending request between you.
+      if (shouldBlock) {
+        void queryClient.invalidateQueries({ queryKey: FRIENDS_KEY });
+        void queryClient.invalidateQueries({ queryKey: FRIEND_REQUESTS_KEY });
+      }
 
       toast.success(successMessage, { id: toastId });
     } catch (error) {

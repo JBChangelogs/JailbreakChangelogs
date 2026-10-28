@@ -48,8 +48,11 @@ test("SVG references keep unique stable IDs and explicit IDs are preserved", () 
   const explicitMarkup = renderExplicit();
   expect(renderExplicit()).toBe(explicitMarkup);
   expect(explicitMarkup).toContain('id="clipped-icon"');
-  expect(explicitMarkup).toContain('<clipPath id="clipped-iconID0"');
-  expect(explicitMarkup).toContain('clip-path="url(#clipped-iconID0)"');
+  // Iconify derives it from the given id; its separator changed in 6.0.3
+  // (clipped-iconID0 → clipped_iconID0), so only the prefix is checked.
+  const clipId = explicitMarkup.match(/<clipPath id="([^"]+)"/)?.[1];
+  expect(clipId).toMatch(/^clipped[-_]icon/);
+  expect(explicitMarkup).toContain(`clip-path="url(#${clipId})"`);
   expect(
     renderToStaticMarkup(
       <Icon icon="ic:baseline-message" id="messages-icon" />,

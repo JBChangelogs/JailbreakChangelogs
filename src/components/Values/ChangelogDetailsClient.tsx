@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
@@ -790,13 +791,17 @@ export default function ChangelogDetailsClient({
                             <span className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                               Suggested by
                             </span>
-                            <Link
-                              href={`/users/${change.suggestion.user_id}`}
-                              prefetch={false}
-                              className="text-link hover:text-link-hover text-lg font-bold wrap-break-word transition-colors hover:underline"
+                            <UserProfilePopover
+                              user={{ id: String(change.suggestion.user_id) }}
                             >
-                              {change.suggestion.suggestor_name}
-                            </Link>
+                              <Link
+                                href={`/users/${change.suggestion.user_id}`}
+                                prefetch={false}
+                                className="text-link hover:text-link-hover text-lg font-bold wrap-break-word transition-colors hover:underline"
+                              >
+                                {change.suggestion.suggestor_name}
+                              </Link>
+                            </UserProfilePopover>
                           </div>
                         </div>
                         <div className="flex shrink-0 items-center justify-center">
@@ -1358,14 +1363,15 @@ export default function ChangelogDetailsClient({
                             />
                             <div className="min-w-0 flex-1">
                               <div className="text-primary-text mb-1 text-base font-bold">
-                                <Link
-                                  href={`/users/${voter.id}`}
-                                  prefetch={false}
-                                  className="text-link hover:text-link-hover transition-colors hover:underline"
-                                  onClick={() => setVotersOpen(false)}
-                                >
-                                  {voter.name.replace(/(.+)\1/, "$1")}
-                                </Link>
+                                <UserProfilePopover user={voter}>
+                                  <Link
+                                    href={`/users/${voter.id}`}
+                                    prefetch={false}
+                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                  >
+                                    {voter.name.replace(/(.+)\1/, "$1")}
+                                  </Link>
+                                </UserProfilePopover>
                               </div>
                               <div className="text-tertiary-text text-sm font-medium">
                                 {formatShortDateTime(voter.timestamp)}

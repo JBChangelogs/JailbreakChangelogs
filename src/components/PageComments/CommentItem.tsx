@@ -37,7 +37,7 @@ import { Button } from "../ui/button";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import Link from "next/link";
-import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import type { UserData } from "@/types/auth";
 import CommentTimestamp from "./CommentTimestamp";
 import { CommentReactions } from "./CommentReactions";
@@ -72,15 +72,10 @@ function CommentAuthorName({
     </Link>
   );
 
-  if (!user) return link;
-
   return (
-    <Tooltip delayDuration={500}>
-      <TooltipTrigger asChild>{link}</TooltipTrigger>
-      <TooltipContent className="max-w-sm min-w-75 p-0">
-        <UserDetailsTooltip user={user} />
-      </TooltipContent>
-    </Tooltip>
+    <UserProfilePopover user={user ?? { id: userId, username: name }}>
+      {link}
+    </UserProfilePopover>
   );
 }
 
@@ -468,19 +463,34 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                       : "rounded-full"
                   }`}
                 >
-                  <UserAvatar
-                    userId={comment.user_id}
-                    avatarHash={userData[comment.user_id]?.avatar}
-                    username={displayName}
-                    forceAvatarUrl={robloxAvatarUrl}
-                    size={10}
-                    cdnSize={512}
-                    custom_avatar={userData[comment.user_id]?.custom_avatar}
-                    showBadge={false}
-                    settings={userData[comment.user_id]?.settings}
-                    premiumType={userData[comment.user_id]?.premiumtype}
-                    bgClassName="bg-tertiary-bg"
-                  />
+                  <UserProfilePopover
+                    user={
+                      userData[comment.user_id] ?? {
+                        id: comment.user_id,
+                        username: displayName,
+                      }
+                    }
+                  >
+                    <button
+                      type="button"
+                      className="block cursor-pointer"
+                      aria-label={`View ${displayName}'s profile card`}
+                    >
+                      <UserAvatar
+                        userId={comment.user_id}
+                        avatarHash={userData[comment.user_id]?.avatar}
+                        username={displayName}
+                        forceAvatarUrl={robloxAvatarUrl}
+                        size={10}
+                        cdnSize={512}
+                        custom_avatar={userData[comment.user_id]?.custom_avatar}
+                        showBadge={false}
+                        settings={userData[comment.user_id]?.settings}
+                        premiumType={userData[comment.user_id]?.premiumtype}
+                        bgClassName="bg-tertiary-bg"
+                      />
+                    </button>
+                  </UserProfilePopover>
                 </div>
               )}
             </div>

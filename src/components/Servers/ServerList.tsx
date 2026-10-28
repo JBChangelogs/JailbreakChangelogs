@@ -1,5 +1,6 @@
 "use client";
 
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { parseSortGroups } from "@/utils/api/sortGroups";
 import React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -663,13 +664,15 @@ const ServerList: React.FC = () => {
                         settings={server.user.settings}
                         premiumType={server.user.premiumtype}
                       />
-                      <Link
-                        href={`/users/${server.user.id}`}
-                        prefetch={false}
-                        className="text-primary-text hover:text-link active:text-link-active min-w-0 truncate font-medium transition-colors"
-                      >
-                        {server.user.username}
-                      </Link>
+                      <UserProfilePopover user={server.user}>
+                        <Link
+                          href={`/users/${server.user.id}`}
+                          prefetch={false}
+                          className="text-primary-text hover:text-link active:text-link-active min-w-0 truncate font-medium transition-colors"
+                        >
+                          {server.user.username}
+                        </Link>
+                      </UserProfilePopover>
                       {isSupporter && supporterTier && (
                         <Tooltip>
                           <TooltipTrigger asChild>

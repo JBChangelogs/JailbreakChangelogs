@@ -1,4 +1,5 @@
 import { createLogger } from "@/services/logger";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import React, { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -185,14 +186,15 @@ function ProfileReactionsDialog({
                           premiumType={u.premiumtype}
                         />
                       </div>
-                      <Link
-                        href={`/users/${u.id}`}
-                        prefetch={false}
-                        onClick={() => onClose()}
-                        className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-medium transition-colors"
-                      >
-                        {u.username}
-                      </Link>
+                      <UserProfilePopover user={u}>
+                        <Link
+                          href={`/users/${u.id}`}
+                          prefetch={false}
+                          className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-medium transition-colors"
+                        >
+                          {u.username}
+                        </Link>
+                      </UserProfilePopover>
                     </div>
                   ))
                 )}
