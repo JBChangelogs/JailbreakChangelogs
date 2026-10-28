@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { STICKY_COLUMN_CLASS, stickyColumnRef } from "@/utils/ui/stickyColumn";
 import {
   useSeasonsList,
   SeasonListRateLimitError,
@@ -253,7 +254,10 @@ export default function SeasonDetailsClient({
               nextSeason={nextSeasonForHeader}
             />
           </div>
-          <div className="xl:col-span-8 xl:col-start-1 xl:row-span-2 xl:row-start-1">
+          <div
+            ref={stickyColumnRef}
+            className={`xl:col-span-8 xl:col-start-1 xl:row-span-2 xl:row-start-1 ${STICKY_COLUMN_CLASS}`}
+          >
             <h2 className="text-primary-text mb-4 text-2xl font-bold tracking-tight">
               Rewards
             </h2>

@@ -6,6 +6,7 @@ import { useQueryState } from "nuqs";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import React, { Suspense } from "react";
+import { STICKY_COLUMN_CLASS, stickyColumnRef } from "@/utils/ui/stickyColumn";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "motion/react";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -231,7 +232,7 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
   };
 
   return (
-    <div className="relative">
+    <div ref={stickyColumnRef} className={`relative ${STICKY_COLUMN_CLASS}`}>
       <div
         className="bg-secondary-bg relative aspect-video w-full overflow-hidden rounded-lg"
         onMouseEnter={() => setIsHovered(true)}

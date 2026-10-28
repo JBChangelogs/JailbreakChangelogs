@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { STICKY_COLUMN_CLASS, stickyColumnRef } from "@/utils/ui/stickyColumn";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -85,7 +86,10 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
     <>
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
         {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
-        <div className="sm:col-span-12 xl:col-span-8">
+        <div
+          ref={stickyColumnRef}
+          className={`sm:col-span-12 xl:col-span-8 ${STICKY_COLUMN_CLASS}`}
+        >
           {/* AI Summary */}
           {isFeatureEnabled("AI_SUMMARY") && (
             <ChangelogSummary changelogId={changelogId} content={sections} />
