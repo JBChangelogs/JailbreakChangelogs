@@ -8,6 +8,7 @@ import {
 } from "@/components/Seasons/seasonRewards";
 import { validatePrivateServerLink } from "@/utils/api/serverValidation";
 import { navigationSections } from "./navigation-menu";
+import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import {
   APP_ONLY_SETTINGS,
   FRONTEND_SETTINGS,
@@ -17,6 +18,41 @@ import {
 export type SearchCatalogItem = PartialItem & { cash_value: string | null };
 
 export const GLOBAL_SEARCH_GROUP_LIMIT = 5;
+
+const HISTORY_KEY = "jbcl:search-history";
+const HISTORY_LIMIT = 10;
+
+/** Recent searches on this browser, newest first. */
+export function getSearchHistory(): string[] {
+  try {
+    const saved: unknown = JSON.parse(
+      safeLocalStorage.getItem(HISTORY_KEY) ?? "[]",
+    );
+    return Array.isArray(saved)
+      ? saved.filter((entry): entry is string => typeof entry === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Saves a search that was used, moving a repeat to the top. */
+export function rememberSearch(query: string): string[] {
+  const term = query.trim();
+  if (!term) return getSearchHistory();
+  const next = [
+    term,
+    ...getSearchHistory().filter(
+      (entry) => entry.toLowerCase() !== term.toLowerCase(),
+    ),
+  ].slice(0, HISTORY_LIMIT);
+  safeLocalStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+  return next;
+}
+
+export function clearSearchHistory() {
+  safeLocalStorage.removeItem(HISTORY_KEY);
+}
 
 /** The text of a users-only search ("@name" or "user:name"), else null. */
 export function getGlobalUserQuery(query: string): string | null {
@@ -84,6 +120,8 @@ export type GlobalSearchResult = {
   image?: string;
   /** Opens in a new tab (a Roblox server link). */
   external?: boolean;
+  /** A private server's id, for a stable key (titles and links repeat). */
+  serverId?: number;
   /** An account setting the row toggles in place. */
   setting?: { name: string; value: boolean };
   /** A theme the row applies in place. */
@@ -92,6 +130,8 @@ export type GlobalSearchResult = {
   snippet?: string;
   /** From a whole group the API expanded for a keyword search. */
   expanded?: boolean;
+  /** A recent search, run again when chosen. */
+  recentQuery?: string;
   /** A quick link's shortcuts, shown on the row while it's highlighted. */
   shortcuts?: QuickLinkShortcut[];
   /** A browser-side preference (FRONTEND_SETTINGS key) changed in place. */
@@ -335,6 +375,18 @@ const latestChangelog = (result: {
   changelog_ids?: number[];
 }) => result.changelogs?.[0]?.id ?? result.changelog_ids?.[0];
 
+/**
+ * A row's React key: titles repeat (a custom theme named like a site one,
+ * servers sharing an owner or link), so ids are used where they exist.
+ */
+export function searchResultKey(result: GlobalSearchResult): string {
+  if (result.item) return `item-${result.item.id}`;
+  if (result.theme)
+    return `theme-${result.theme.share_code ?? result.theme.slug}`;
+  if (result.serverId != null) return `server-${result.serverId}`;
+  return `${result.group}:${result.href}:${result.title}`;
+}
+
 /** One /v2/search result as a search row, with the link or action it opens. */
 function toResult(result: OmniResult, group: string): GlobalSearchResult[] {
   switch (result.kind) {
@@ -449,6 +501,7 @@ function toResult(result: OmniResult, group: string): GlobalSearchResult[] {
           description: result.rules || "No rules listed",
           href: joinable ? result.link : "/servers",
           external: joinable,
+          serverId: result.id,
         },
       ];
     }

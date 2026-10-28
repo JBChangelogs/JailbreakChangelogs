@@ -3,6 +3,10 @@ import {
   createGlobalSearchIndex,
   getGlobalSearchResults,
   getOmniSearchResults,
+  getSearchHistory,
+  rememberSearch,
+  clearSearchHistory,
+  searchResultKey,
   parseSearchFilter,
   filteredQuery,
   splitQueryMatches,
@@ -465,4 +469,75 @@ test("seasons, items and changelogs link to each other", () => {
   expect(changelog.shortcuts).toEqual([
     { title: "Season 33: Jurassic", href: "/seasons/33" },
   ]);
+});
+
+test("row keys stay unique where titles repeat", () => {
+  const rows = getOmniSearchResults([
+    {
+      group: "themes",
+      has_more: false,
+      results: [
+        {
+          kind: "theme",
+          slug: "dark",
+          label: "Dark",
+          icon: null,
+          scheme: "dark",
+          custom: false,
+        },
+        {
+          kind: "theme",
+          share_code: "ABCDEFGH",
+          label: "Dark",
+          icon: null,
+          scheme: "dark",
+          custom: true,
+        },
+      ],
+    },
+    {
+      group: "servers",
+      has_more: false,
+      results: [1, 2].map((id) => ({
+        kind: "server" as const,
+        id,
+        link: "not a link",
+        rules: "",
+        owner: { id: "1", username: "sam" },
+      })),
+    },
+  ]);
+  const keys = rows.map(searchResultKey);
+  expect(new Set(keys).size).toBe(keys.length);
+});
+
+test("search history keeps the latest ten, newest first, without repeats", () => {
+  const store = new Map<string, string>();
+  const before = {
+    window: (globalThis as { window?: unknown }).window,
+    localStorage: (globalThis as { localStorage?: unknown }).localStorage,
+  };
+  Object.assign(globalThis, {
+    window: new EventTarget(),
+    localStorage: {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => store.set(key, value),
+      removeItem: (key: string) => store.delete(key),
+    },
+  });
+  try {
+    for (let i = 0; i < 12; i++) rememberSearch(`q${i}`);
+    rememberSearch("Q5");
+    rememberSearch("  ");
+    const history = getSearchHistory();
+    expect(history).toHaveLength(10);
+    expect(history[0]).toBe("Q5");
+    expect(
+      history.filter((entry) => entry.toLowerCase() === "q5"),
+    ).toHaveLength(1);
+    clearSearchHistory();
+    expect(getSearchHistory()).toEqual([]);
+  } finally {
+    Object.assign(globalThis, before);
+  }
 });

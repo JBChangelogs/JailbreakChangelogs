@@ -102,6 +102,10 @@ function setupSearch() {
             parseSearchFilter,
             filteredQuery,
             SEARCH_FILTERS: {},
+            searchResultKey: (result: { title: string }) => result.title,
+            getSearchHistory: () => [],
+            rememberSearch: () => [],
+            clearSearchHistory: () => {},
             getGlobalUserQuery,
             getGlobalCheckQuery,
           };

@@ -20,7 +20,6 @@ import { useOmniSearch } from "@/hooks/useOmniSearch";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import {
   Popover,
   PopoverContent,
@@ -78,6 +77,10 @@ import {
   parseSearchFilter,
   filteredQuery,
   SEARCH_FILTERS,
+  searchResultKey,
+  getSearchHistory,
+  rememberSearch,
+  clearSearchHistory,
   splitQueryMatches,
   snippetLine,
   getGlobalUserQuery,
@@ -168,6 +171,23 @@ function ThemePickerCard({
         )}
       </span>
     </button>
+  );
+}
+
+/**
+ * A switch's look without its button: the row itself is the control (a
+ * button can't hold another), and its aria-pressed carries the state.
+ */
+function SwitchIndicator({ on }: { on: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors ${on ? "border-button-info bg-button-info" : "border-[color-mix(in_srgb,var(--color-border-card),white_10%)] bg-[color-mix(in_srgb,var(--color-tertiary-bg),white_8%)]"}`}
+    >
+      <span
+        className={`block size-4 rounded-full bg-white shadow-sm transition-transform ${on ? "translate-x-6" : "translate-x-1"}`}
+      />
+    </span>
   );
 }
 
@@ -288,6 +308,10 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
   }>({ query: "", groups: {} });
   const [loadingMore, setLoadingMore] = useState<string | null>(null);
   const [tipsOpen, setTipsOpen] = useState(false);
+  const [history, setHistory] = useState<string[]>([]);
+  useEffect(() => setHistory(getSearchHistory()), []);
+  // Recent shows 3 until expanded.
+  const [allRecent, setAllRecent] = useState(false);
   const term = fullQuery.trim();
   const extra = more.query === term ? more.groups : {};
   const groups = ((searchEnabled && term && search.data) || []).map(
@@ -299,11 +323,29 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
   );
   // A keyword search ("theme", "settings") puts the whole group first.
   const apiResults = getOmniSearchResults(groups);
+  // An empty search starts with your recent searches, above the quick links.
+  const recentResults: GlobalSearchResult[] = fullQuery.trim()
+    ? []
+    : history.slice(0, allRecent ? undefined : 3).map((entry) => ({
+        title: entry,
+        group: "Recent",
+        description: "",
+        icon: "lucide:history",
+        recentQuery: entry,
+      }));
   const results = [
+    ...recentResults,
     ...apiResults.filter((result) => result.expanded),
     ...localResults,
     ...apiResults.filter((result) => !result.expanded),
   ];
+  const runSearch = (value: string) => {
+    const parsed = parseSearchFilter(value);
+    setFilter(parsed?.filter ?? null);
+    setQuery(parsed ? parsed.text : value);
+    setHighlighted(0);
+    inputRef.current?.focus();
+  };
   const showMore = async (group: string) => {
     const page = (extra[group]?.page ?? 1) + 1;
     setLoadingMore(group);
@@ -627,6 +669,12 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
             id="global-search-results"
             role="listbox"
             aria-label="Search results"
+            // Using a result (a link, an action, Enter) saves the search.
+            onClickCapture={(event) => {
+              const target = (event.target as HTMLElement).closest("a, button");
+              if (target && !target.hasAttribute("data-no-history"))
+                rememberSearch(fullQuery);
+            }}
           >
             {groupNames.map((group) => {
               const picker = orderedResults.some(
@@ -635,12 +683,39 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
               );
               return (
                 <div key={group} role="group" aria-label={group}>
-                  <p
-                    className="text-secondary-text px-3 pt-3 pb-2 text-xs font-medium"
-                    aria-hidden="true"
-                  >
-                    {group}
-                  </p>
+                  <div className="flex items-center justify-between px-3 pt-3 pb-2">
+                    <p
+                      className="text-secondary-text text-xs font-medium"
+                      aria-hidden="true"
+                    >
+                      {group}
+                    </p>
+                    {group === "Recent" && (
+                      <span className="flex items-center gap-3">
+                        {history.length > 3 && (
+                          <button
+                            type="button"
+                            data-no-history
+                            onClick={() => setAllRecent((all) => !all)}
+                            className="text-secondary-text hover:text-primary-text focus-visible:ring-link cursor-pointer rounded text-xs focus-visible:ring-2 focus-visible:outline-none"
+                          >
+                            {allRecent ? "Show less" : "View all"}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          data-no-history
+                          onClick={() => {
+                            clearSearchHistory();
+                            setHistory([]);
+                          }}
+                          className="text-secondary-text hover:text-primary-text focus-visible:ring-link cursor-pointer rounded text-xs focus-visible:ring-2 focus-visible:outline-none"
+                        >
+                          Clear
+                        </button>
+                      </span>
+                    )}
+                  </div>
                   <div
                     className={
                       picker
@@ -651,7 +726,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                     {orderedResults.map((result, position) =>
                       result.group !== group ? null : picker ? (
                         <div
-                          key={`${result.group}:${result.title}`}
+                          key={searchResultKey(result)}
                           id={`global-search-result-${position}`}
                           role="option"
                           aria-selected={position === activeIndex}
@@ -677,11 +752,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                         </div>
                       ) : (
                         <div
-                          key={
-                            result.item
-                              ? `item-${result.item.id}`
-                              : `${result.group}:${result.href}:${result.title}`
-                          }
+                          key={searchResultKey(result)}
                           id={`global-search-result-${position}`}
                           role="option"
                           aria-selected={position === activeIndex}
@@ -691,21 +762,25 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                             result={result}
                             onClose={onClose}
                             onAction={
-                              result.theme
-                                ? () => void applyTheme(result.theme!)
-                                : result.setting
-                                  ? () => void toggleSetting(result)
-                                  : (() => {
-                                        const control = preferenceControl(
-                                          result.preference,
-                                        );
-                                        return !!control && "on" in control;
-                                      })()
-                                    ? () =>
-                                        changePreference(
-                                          preferenceControl(result.preference)!,
-                                        )
-                                    : undefined
+                              result.recentQuery
+                                ? () => runSearch(result.recentQuery!)
+                                : result.theme
+                                  ? () => void applyTheme(result.theme!)
+                                  : result.setting
+                                    ? () => void toggleSetting(result)
+                                    : (() => {
+                                          const control = preferenceControl(
+                                            result.preference,
+                                          );
+                                          return !!control && "on" in control;
+                                        })()
+                                      ? () =>
+                                          changePreference(
+                                            preferenceControl(
+                                              result.preference,
+                                            )!,
+                                          )
+                                      : undefined
                             }
                             plain={(() => {
                               const control = preferenceControl(
@@ -807,7 +882,9 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                                   </div>
                                 )}
                               </div>
-                              <span className="text-secondary-text block truncate text-xs">
+                              <span
+                                className={`text-secondary-text block truncate text-xs ${result.description || result.snippet ? "" : "hidden"}`}
+                              >
                                 {result.snippet
                                   ? splitQueryMatches(
                                       snippetLine(result.snippet, query),
@@ -848,12 +925,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                             )}
                             {result.setting && (
                               // The row is the control; this only shows its state.
-                              <Switch
-                                checked={settingValue(result)}
-                                tabIndex={-1}
-                                aria-hidden="true"
-                                className="pointer-events-none shrink-0"
-                              />
+                              <SwitchIndicator on={settingValue(result)} />
                             )}
                             {(() => {
                               const control = preferenceControl(
@@ -861,14 +933,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                               );
                               if (!control) return null;
                               if ("on" in control)
-                                return (
-                                  <Switch
-                                    checked={control.on}
-                                    tabIndex={-1}
-                                    aria-hidden="true"
-                                    className="pointer-events-none shrink-0"
-                                  />
-                                );
+                                return <SwitchIndicator on={control.on} />;
                               // A choice: a dropdown of its options. Enter on
                               // the row opens it (it's the row's only button).
                               return (
@@ -988,6 +1053,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                         key={item.group}
                         type="button"
                         disabled={loadingMore === item.group}
+                        data-no-history
                         onClick={() => void showMore(item.group)}
                         className="text-link focus-visible:ring-link mx-3 my-2 block w-fit cursor-pointer rounded text-xs underline focus-visible:ring-2 focus-visible:outline-none disabled:cursor-wait disabled:opacity-60"
                       >
