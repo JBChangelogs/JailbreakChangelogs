@@ -255,14 +255,14 @@ export default function DesktopNavigationSettings() {
       </div>
 
       {mode === "sidebar" && (
-        <fieldset disabled={!canSwitchNavigation} className="space-y-3">
+        <fieldset disabled={!canSwitchNavigation}>
           <legend className="text-primary-text font-medium">
             {FRONTEND_SETTINGS["sidebar-behavior"].title}
           </legend>
-          <p className="text-secondary-text text-sm">
+          <p className="text-secondary-text mt-1 text-sm">
             {FRONTEND_SETTINGS["sidebar-behavior"].description}
           </p>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
             {SIDEBAR_BEHAVIORS.map((option) => (
               <label
                 key={option.value}
