@@ -15,7 +15,7 @@ export const metadata: Metadata = withDiscordEmbed(
 export default function Page() {
   return (
     <main className="container mx-auto min-h-screen px-4 pb-6">
-      <Breadcrumb containerClassName="py-4" />
+      <Breadcrumb containerClassName="mx-auto max-w-5xl py-4" />
       <FriendsPage />
     </main>
   );

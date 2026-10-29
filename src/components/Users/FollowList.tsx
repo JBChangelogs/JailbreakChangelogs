@@ -172,7 +172,7 @@ export function FollowList({ userId, kind }: { userId: string; kind: Kind }) {
       <Breadcrumb
         userData={profile}
         loading={userQuery.isPending}
-        containerClassName="py-4"
+        containerClassName="mx-auto max-w-5xl py-4"
       />
       <div className="mx-auto max-w-5xl space-y-4">
         <Tabs
