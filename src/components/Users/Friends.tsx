@@ -69,9 +69,17 @@ function FriendRow({
             <p className="text-secondary-text truncate text-sm">
               @{user.username}
               {detail && (
-                <span className="text-tertiary-text"> · {detail}</span>
+                <span className="text-tertiary-text hidden sm:inline">
+                  {" "}
+                  · {detail}
+                </span>
               )}
             </p>
+            {detail && (
+              <p className="text-tertiary-text truncate text-xs sm:hidden">
+                {detail}
+              </p>
+            )}
           </div>
         </Link>
       </UserProfilePopover>
