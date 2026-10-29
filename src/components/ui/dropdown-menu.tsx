@@ -89,30 +89,36 @@ const DropdownMenuContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & {
     container?: HTMLElement | null;
   }
->(({ className, sideOffset = 8, container, ...props }, ref) => {
-  const setRef = React.useCallback(
-    (node: HTMLDivElement | null) => {
-      scrollToChecked(node);
-      if (typeof ref === "function") ref(node);
-      else if (ref) ref.current = node;
-    },
-    [ref],
-  );
-  return (
-    <DropdownMenuPrimitive.Portal container={container ?? undefined}>
-      <DropdownMenuPrimitive.Content
-        ref={setRef}
-        sideOffset={sideOffset}
-        className={cn(
-          "border-border-card bg-secondary-bg text-primary-text z-[10001] max-h-(--radix-dropdown-menu-content-available-height) min-w-32 overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md",
-          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
-          className,
-        )}
-        {...props}
-      />
-    </DropdownMenuPrimitive.Portal>
-  );
-});
+>(
+  (
+    { className, sideOffset = 8, collisionPadding = 16, container, ...props },
+    ref,
+  ) => {
+    const setRef = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        scrollToChecked(node);
+        if (typeof ref === "function") ref(node);
+        else if (ref) ref.current = node;
+      },
+      [ref],
+    );
+    return (
+      <DropdownMenuPrimitive.Portal container={container ?? undefined}>
+        <DropdownMenuPrimitive.Content
+          ref={setRef}
+          sideOffset={sideOffset}
+          collisionPadding={collisionPadding}
+          className={cn(
+            "border-border-card bg-secondary-bg text-primary-text z-[10001] max-h-(--radix-dropdown-menu-content-available-height) min-w-32 overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md",
+            "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
+            className,
+          )}
+          {...props}
+        />
+      </DropdownMenuPrimitive.Portal>
+    );
+  },
+);
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
 const DropdownMenuItem = React.forwardRef<
