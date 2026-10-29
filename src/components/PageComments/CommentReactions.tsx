@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import NumberFlow from "@number-flow/react";
 import { Icon } from "../ui/IconWrapper";
 import { CommentReaction } from "@/utils/api/api";
 import {
@@ -162,7 +163,11 @@ export function CommentReactions({
                 ) : (
                   <span>{r.emoji}</span>
                 )}
-                <span className="text-xs font-medium">{r.count}</span>
+                <NumberFlow
+                  translate="no"
+                  value={r.count}
+                  className="text-xs font-medium"
+                />
               </button>
             </TooltipTrigger>
             <TooltipContent>{formatReactionTooltip(r)}</TooltipContent>

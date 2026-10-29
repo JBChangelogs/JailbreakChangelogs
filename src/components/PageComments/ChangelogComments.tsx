@@ -1,5 +1,6 @@
 "use client";
 
+import NumberFlow from "@number-flow/react";
 import React, { useEffect, useRef } from "react";
 import { CommentsContext } from "./CommentsContext";
 import { useCommentState } from "./useCommentState";
@@ -63,6 +64,7 @@ function CommentsLayout() {
   } = useCommentsContext();
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const commentsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const target = loadMoreRef.current;
@@ -110,6 +112,7 @@ function CommentsLayout() {
   return (
     <div className="space-y-2 sm:space-y-3">
       <div
+        ref={commentsRef}
         className={`border-border-card ${containerBgClass} rounded-lg border p-2 sm:p-3`}
       >
         <div className="flex flex-col gap-4">
@@ -229,6 +232,7 @@ function CommentsLayout() {
 
       {newCommentCount > 0 && (
         <UpdatePill
+          centerOn={commentsRef}
           onClick={() =>
             document
               .querySelector("#comments-header")
@@ -240,9 +244,8 @@ function CommentsLayout() {
             className="h-4 w-4"
             inline
           />
-          {newCommentCount === 1
-            ? "1 new comment"
-            : `${newCommentCount} new comments`}
+          <NumberFlow translate="no" value={newCommentCount} />
+          {newCommentCount === 1 ? "new comment" : "new comments"}
         </UpdatePill>
       )}
 

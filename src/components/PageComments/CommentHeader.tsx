@@ -1,5 +1,6 @@
 "use client";
 
+import NumberFlow from "@number-flow/react";
 import { Icon } from "../ui/IconWrapper";
 import { Fragment } from "react";
 import {
@@ -33,9 +34,8 @@ export function CommentHeader() {
         className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl"
       >
         <span>
-          {totalComments === 1
-            ? "1 Comment for"
-            : `${totalComments} Comments for`}
+          <NumberFlow translate="no" value={totalComments} />{" "}
+          {totalComments === 1 ? "Comment for" : "Comments for"}
         </span>{" "}
         <span>
           {type === "changelog" ? (
