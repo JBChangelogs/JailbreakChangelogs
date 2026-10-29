@@ -14,7 +14,9 @@ test("converts Discord-style accent colors to hex", () => {
   expect(accentColorToHex(255)).toBe("#0000ff");
   expect(accentColorToHex("#FF8800")).toBe("#ff8800");
   expect(accentColorToHex("ff8800")).toBe("#ff8800");
-  for (const empty of [null, undefined, "", "None", "0", 0, "#fff"]) {
+  expect(accentColorToHex("0")).toBe("#000000");
+  expect(accentColorToHex(0)).toBe("#000000");
+  for (const empty of [null, undefined, "", "None", "#fff"]) {
     expect(accentColorToHex(empty)).toBeNull();
   }
 });
@@ -52,6 +54,13 @@ test("reads a user's card accent, defaulting missing fields", () => {
   ).toBe("solid");
   expect(userCardAccent({ accent_color: 255 })).toBeNull();
   expect(userCardAccent({ settings_v2: on, accent_color: null })).toBeNull();
+  expect(
+    userCardAccent({
+      settings_v2: on,
+      accent_color: "0",
+      accent_gradient: 0,
+    }),
+  ).toEqual({ color: "#000000", gradient: "#000000", style: "solid" });
 });
 
 test("themes cards for each accent style", () => {

@@ -9,7 +9,7 @@ export function accentColorToHex(
   color: number | string | null | undefined,
 ): string | null {
   if (color === null || color === undefined) return null;
-  if (color === "" || color === "None" || color === "0" || color === 0) {
+  if (color === "" || color === "None") {
     return null;
   }
   if (typeof color === "number" || /^\d+$/.test(color)) {
